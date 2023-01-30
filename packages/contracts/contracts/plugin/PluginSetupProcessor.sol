@@ -206,6 +206,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Emitted with a prepared plugin update to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin update.
     /// @param dao The address of the DAO to which the plugin belongs.
+    /// @param plugin The address of the plugin contract.
     /// @param preparedSetupId The prepared setup ID.
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin setup of the prepared update.
@@ -215,6 +216,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     event UpdatePrepared(
         address indexed sender,
         address indexed dao,
+        address plugin,
         bytes32 preparedSetupId,
         PluginRepo indexed pluginSetupRepo,
         PluginRepo.Tag versionTag,
@@ -238,6 +240,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Emitted with a prepared plugin uninstallation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin uninstallation.
     /// @param dao The address of the DAO to which the plugin belongs.
+    /// @param plugin The address of the plugin contract.
     /// @param preparedSetupId The prepared setup ID.
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin to used for install preparation.
@@ -246,6 +249,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     event UninstallationPrepared(
         address indexed sender,
         address indexed dao,
+        address plugin,
         bytes32 preparedSetupId,
         PluginRepo indexed pluginSetupRepo,
         PluginRepo.Tag versionTag,
@@ -591,6 +595,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         emit UninstallationPrepared({
             sender: msg.sender,
             dao: _dao,
+            plugin: _params.setupPayload.plugin,
             preparedSetupId: preparedSetupId,
             pluginSetupRepo: _params.pluginSetupRef.pluginSetupRepo,
             versionTag: _params.pluginSetupRef.versionTag,
@@ -721,6 +726,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         emit UpdatePrepared({
             sender: msg.sender,
             dao: _dao,
+            plugin: _params.setupPayload.plugin,
             preparedSetupId: _preparedSetupId,
             pluginSetupRepo: _params.pluginSetupRepo,
             versionTag: _params.newVersionTag,
