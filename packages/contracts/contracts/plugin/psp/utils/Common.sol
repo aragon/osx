@@ -34,6 +34,7 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
 /// @param _helperHash The hash of the helper contract addresses.
 /// @param _data Encoded initialize data for the upgrade that is returned by the `prepareUpdate`.
 /// @param _preparationType Tells which PreparationType the plugin is in currently. Without this, it's possible to call applyUpdate even after applyInstallation is called.
+/// @return bytes32 The prepared setup id.
 function _getPreparedSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionHash,
@@ -54,10 +55,13 @@ function _getPreparedSetupId(
         );
 }
 
-
+/// @notice Returns an identifier for applied installations.
+/// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
+/// @param _helperHash The hash of the helper contract addresses.
+/// @return bytes32 The applied setup id.
 function _getAppliedSetupId(
     PluginSetupRef memory _pluginSetupRef,
-    bytes32 _helperHash,
+    bytes32 _helperHash
 ) pure returns (bytes32) {
     return
         keccak256(
@@ -70,7 +74,6 @@ function _getAppliedSetupId(
         );
 }
 
-
 /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
 /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.
 function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
@@ -80,6 +83,8 @@ function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
 /// @notice Returns a hash of an array of multi-targeted permission operations.
 /// @param _permissions The array of of multi-targeted permission operations.
 /// @return bytes The hash of the array of permission operations.
-function hashPermissions(PermissionLib.MultiTargetPermission[] memory _permissions) pure returns (bytes32) {
+function hashPermissions(
+    PermissionLib.MultiTargetPermission[] memory _permissions
+) pure returns (bytes32) {
     return keccak256(abi.encode(_permissions));
 }

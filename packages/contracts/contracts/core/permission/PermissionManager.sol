@@ -175,7 +175,6 @@ contract PermissionManager is Initializable {
         for (uint256 i; i < items.length; ) {
             PermissionLib.MultiTargetPermission memory item = items[i];
 
-            // TODO: Optimize
             _auth(item.where, ROOT_PERMISSION_ID);
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -333,15 +332,16 @@ contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(address _where, bytes32 _permissionId) private view {
         if (
-            !(isGranted(_where, msg.sender, _permissionId, msg.data) ||
-                isGranted(address(this), msg.sender, _permissionId, msg.data))
-        )
+            !isGranted(address(this), msg.sender, _permissionId, msg.data) &&
+            !isGranted(_where, msg.sender, _permissionId, msg.data)
+        ) {
             revert Unauthorized({
                 here: address(this),
                 where: _where,
                 who: msg.sender,
                 permissionId: _permissionId
             });
+        }
     }
 
     /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
