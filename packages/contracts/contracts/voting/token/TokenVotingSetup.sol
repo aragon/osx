@@ -128,7 +128,7 @@ contract TokenVotingSetup is PluginSetup {
             if (
                 // If token supports none of them
                 // it's simply ERC20 which gets checked by _isERC20
-                // Currently, not a satisfiable check..
+                // Currently, not a satisfiable check.
                 (!supportedIds[0] && !supportedIds[1] && !supportedIds[2]) ||
                 // If token supports IERC20, but neither
                 // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
