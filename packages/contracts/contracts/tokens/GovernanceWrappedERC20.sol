@@ -50,7 +50,7 @@ contract GovernanceWrappedERC20 is
         IERC20Upgradeable _token,
         string memory _name,
         string memory _symbol
-    ) public initializer {
+    ) external initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);

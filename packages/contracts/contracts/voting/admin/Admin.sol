@@ -26,7 +26,7 @@ contract Admin is IMembershipContract, PluginCloneable, Proposal {
     /// @notice Initializes the contract.
     /// @param _dao The associated DAO.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
-    function initialize(IDAO _dao) public initializer {
+    function initialize(IDAO _dao) external initializer {
         __PluginCloneable_init(_dao);
 
         emit MembershipContractAnnounced({definingContract: address(_dao)});

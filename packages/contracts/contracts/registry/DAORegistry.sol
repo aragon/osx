@@ -37,7 +37,7 @@ contract DAORegistry is InterfaceBasedRegistry {
     function initialize(
         IDAO _managingDao,
         ENSSubdomainRegistrar _subdomainRegistrar
-    ) public initializer {
+    ) external initializer {
         __InterfaceBasedRegistry_init(_managingDao, type(IDAO).interfaceId);
         subdomainRegistrar = _subdomainRegistrar;
     }

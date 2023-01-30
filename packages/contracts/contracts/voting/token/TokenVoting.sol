@@ -42,7 +42,7 @@ contract TokenVoting is IMembershipContract, MajorityVotingBase {
         IDAO _dao,
         VotingSettings calldata _votingSettings,
         IVotesUpgradeable _token
-    ) public initializer {
+    ) external initializer {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         votingToken = _token;
