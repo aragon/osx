@@ -71,11 +71,14 @@ contract PluginRepoFactory {
         PermissionLib.SingleTargetPermission[]
             memory items = new PermissionLib.SingleTargetPermission[](5);
 
+        bytes32 rootPermissionID = pluginRepo.ROOT_PERMISSION_ID();
+        bytes32 maintainerPermissionID = pluginRepo.MAINTAINER_PERMISSION_ID();
+
         // Grant the plugin maintainer all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.MAINTAINER_PERMISSION_ID()
+            maintainerPermissionID
         );
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
@@ -85,19 +88,19 @@ contract PluginRepoFactory {
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.ROOT_PERMISSION_ID()
+            rootPermissionID
         );
 
         // Revoke permissions from the plugin repository factory (`address(this)`).
         items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
-            pluginRepo.ROOT_PERMISSION_ID()
+            rootPermissionID
         );
         items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
-            pluginRepo.MAINTAINER_PERMISSION_ID()
+            maintainerPermissionID
         );
 
         pluginRepo.applySingleTargetPermissions(address(pluginRepo), items);

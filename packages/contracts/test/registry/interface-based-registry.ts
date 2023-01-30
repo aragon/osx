@@ -53,7 +53,7 @@ describe('InterfaceBasedRegistry', function () {
       await expect(interfaceBasedRegistryMock.register(randomAddress))
         .to.be.revertedWithCustomError(
           interfaceBasedRegistryMock,
-          'ContractAddressInvalid'
+          'ContractInterfaceInvalid'
         )
         .withArgs(randomAddress);
     });
@@ -71,25 +71,6 @@ describe('InterfaceBasedRegistry', function () {
           'ContractInterfaceInvalid'
         )
         .withArgs(contractNotBeingADao.address);
-    });
-
-    it('fail to register if the contract does not support ERC165', async () => {
-      // Use the `CallbackHandlerMockHelper` contract for testing purposes here, because the interface doesn't support ERC-165.
-      const CallbackHandler = await ethers.getContractFactory(
-        'CallbackHandlerMockHelper'
-      );
-      let contractThatDoesNotSupportERC165 = await CallbackHandler.deploy();
-
-      await expect(
-        interfaceBasedRegistryMock.register(
-          contractThatDoesNotSupportERC165.address
-        )
-      )
-        .to.be.revertedWithCustomError(
-          interfaceBasedRegistryMock,
-          'ContractERC165SupportInvalid'
-        )
-        .withArgs(contractThatDoesNotSupportERC165.address);
     });
 
     it('fail to register if the sender lacks the required permissionId', async () => {

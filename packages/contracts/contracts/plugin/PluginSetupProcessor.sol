@@ -194,8 +194,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Emitted after a plugin installation was applied.
     /// @param dao The address of the DAO to which the plugin belongs.
     /// @param plugin The address of the plugin contract.
-    /// @param setupId The setup ID obtained from the prepared setup.
-    event InstallationApplied(address indexed dao, address indexed plugin, bytes32 setupId);
+    /// @param preparedSetupId The ID obtained from hash of the data required for the setup preparation.
+    /// @param installationSetupId TOD:GIORGI: The setup Id hash of the plugin's dependencies.
+    event InstallationApplied(
+        address indexed dao,
+        address indexed plugin,
+        bytes32 preparedSetupId,
+        bytes32 installationSetupId
+    );
 
     /// @notice Emitted with a prepared plugin update to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin update.
@@ -219,8 +225,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Emitted after a plugin update was applied.
     /// @param dao The address of the DAO to which the plugin belongs.
     /// @param plugin The address of the plugin contract.
-    /// @param setupId The setup ID obtained from the prepared setup.
-    event UpdateApplied(address indexed dao, address indexed plugin, bytes32 setupId);
+    /// @param preparedSetupId The ID obtained from hash of the data required for the setup preparation.
+    /// @param updateSetupId TOD:GIORGI: The setup Id hash of the plugin's dependencies.
+    event UpdateApplied(
+        address indexed dao,
+        address indexed plugin,
+        bytes32 preparedSetupId,
+        bytes32 updateSetupId
+    );
 
     /// @notice Emitted with a prepared plugin uninstallation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin uninstallation.
@@ -375,7 +387,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
-        emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: newSetupId});
+        emit InstallationApplied({
+            dao: _dao,
+            plugin: _params.plugin,
+            preparedSetupId: setupId,
+            installationSetupId: newSetupId
+        });
     }
 
     /// @notice Prepares the update of an UUPS upgradeable plugin.
@@ -533,7 +550,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
-        emit UpdateApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
+        emit UpdateApplied({
+            dao: _dao,
+            plugin: _params.plugin,
+            preparedSetupId: setupId,
+            updateSetupId: newSetupId
+        });
     }
 
     /// @notice Prepares the uninstallation of a plugin.

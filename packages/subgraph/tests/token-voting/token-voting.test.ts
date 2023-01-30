@@ -30,7 +30,11 @@ import {
   ADDRESS_TWO
 } from '../constants';
 
-import {createDummyActions, createGetProposalCall} from '../utils';
+import {
+  createDummyActions,
+  createGetProposalCall,
+  createTotalVotingPowerCall
+} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewProposalExecutedEvent,
@@ -68,10 +72,15 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     '0', // abstain
     '0', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -189,10 +198,15 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '1', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -273,10 +287,15 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '0', // yes
     '1', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -316,7 +335,6 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '2', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
@@ -372,7 +390,6 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
     '0', // abstain
     '0', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
@@ -425,7 +442,6 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     '0', // abstain
     '1', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP

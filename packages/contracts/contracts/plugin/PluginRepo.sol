@@ -6,6 +6,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {PluginSetup} from "./PluginSetup.sol";
@@ -23,6 +24,7 @@ contract PluginRepo is
     PermissionManager
 {
     using AddressUpgradeable for address;
+    using ERC165CheckerUpgradeable for address;
 
     /// @notice The struct describing the tag of a version obtained by a release and build ID as `RELEASE.BUILD`.
     /// @param release The release ID.
@@ -130,20 +132,7 @@ contract PluginRepo is
         bytes calldata _buildMetadata,
         bytes calldata _releaseMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
-        // If the passed address does not support [ERC-165](https://eips.ethereum.org/EIPS/eip-165)
-        // and has an empty fallback function, the following code will check if it is plugin setup
-        // and gracefully revert with an custom error if it is not.
-        bytes memory data = _pluginSetup.functionCall(
-            abi.encodeWithSelector(
-                ERC165Upgradeable.supportsInterface.selector,
-                type(IPluginSetup).interfaceId
-            )
-        );
-
-        // TODO GIORGI FIXES THIS
-        // NOTE: If `data` contains 32 bytes that can't be decoded with `uint256`
-        // it reverts with solidity's ambiguous error.
-        if (data.length != 32 || abi.decode(data, (uint256)) != 1) {
+        if (!_pluginSetup.supportsInterface(type(IPluginSetup).interfaceId)) {
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         }
 

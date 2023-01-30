@@ -530,7 +530,7 @@ describe('TokenVoting', function () {
       );
 
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
@@ -539,7 +539,9 @@ describe('TokenVoting', function () {
         proposal.parameters.startDate.add(votingSettings.minDuration)
       ).to.equal(proposal.parameters.endDate);
 
-      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(10);
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
@@ -597,13 +599,15 @@ describe('TokenVoting', function () {
         votingSettings.supportThreshold
       );
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
-      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(10);
       expect(proposal.tally.yes).to.equal(10);
       expect(proposal.tally.no).to.equal(0);
       expect(proposal.tally.abstain).to.equal(0);
@@ -1374,11 +1378,15 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
 
-        // 1 vote is still missing to meet >99.9999% worst-case support
-        const tally = (await voting.getProposal(id)).tally;
+        // 1 vote is still missing to meet >99.9999% worst case support
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
-        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
+          totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(totalVotingPower.div(RATIO_BASE));
 
         // vote with 1 more yes vote
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
@@ -1398,9 +1406,13 @@ describe('TokenVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
 
         // 1 vote is still missing to meet particpiation = 100%
-        const tally = (await voting.getProposal(id)).tally;
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+          totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
         ).to.eq(1);
         expect(await voting.isMinParticipationReached(id)).to.be.false;
 
@@ -1437,10 +1449,14 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
         // 1 vote is still missing to meet >99.9999%
-        const tally = (await voting.getProposal(id)).tally;
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
-        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
+          totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(totalVotingPower.div(RATIO_BASE));
 
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1458,9 +1474,13 @@ describe('TokenVoting', function () {
         expect(await voting.isMinParticipationReached(id)).to.be.false;
 
         // 1 vote is still missing to meet particpiation = 100%
-        const tally = (await voting.getProposal(id)).tally;
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+          totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
         ).to.eq(1);
         expect(await voting.isMinParticipationReached(id)).to.be.false;
 
@@ -1518,7 +1538,10 @@ describe('TokenVoting', function () {
           false
         );
 
-        expect((await voting.getProposal(id)).tally.totalVotingPower).to.eq(
+        const snapshotBlock = (await voting.getProposal(id)).parameters
+          .snapshotBlock;
+        const totalVotingPower = await voting.totalVotingPower(snapshotBlock);
+        expect(totalVotingPower).to.eq(
           balances[0].amount.add(balances[1].amount)
         );
 

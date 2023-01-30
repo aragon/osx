@@ -34,7 +34,11 @@ import {
   TOTAL_VOTING_POWER,
   ALLOW_FAILURE_MAP
 } from '../constants';
-import {createDummyActions, createGetProposalCall} from '../utils';
+import {
+  createDummyActions,
+  createGetProposalCall,
+  createTotalVotingPowerCall
+} from '../utils';
 import {
   createNewMembersAddedEvent,
   createNewVoteCastEvent,
@@ -76,10 +80,15 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     '0', // abstain
     '0', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -233,10 +242,15 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '1', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -305,7 +319,6 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '0', // yes
     '1', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
@@ -353,7 +366,6 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '2', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
@@ -415,7 +427,6 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
     '0', // abstain
     '0', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions,
     ALLOW_FAILURE_MAP
