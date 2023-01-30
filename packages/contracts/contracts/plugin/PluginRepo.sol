@@ -83,19 +83,19 @@ contract PluginRepo is
     /// @param newRelease The new release ID.
     error InvalidReleaseIncrement(uint8 latestRelease, uint8 newRelease);
 
-    /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param release The release number in which pluginSetup is found.
-    /// @param build The build ID of the release number in which pluginSetup is found.
-    /// @param pluginSetup the plugin setup address.
+    /// @notice Thrown if the same plugin setup contract exists already in a previous releases.
+    /// @param release The release ID of the already existing plugin setup.
+    /// @param build The build number of the already existing plugin setup.
+    /// @param pluginSetup The plugin setup contract address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
-    /// @notice Thrown if metadata is not set for release.
-    /// @param release the release number in which pluginSetup is found.
+    /// @notice Thrown if the metadata URI is not set for a release.
+    /// @param release the release ID for which the metadata URI is not set.
     /// @param metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
     error InvalidReleaseMetadata(uint8 release, bytes metadata);
 
     /// @notice Thrown if release does not exist.
-    /// @param release the release number in which pluginSetup is found.
+    /// @param release The release ID of the release that does not exist.
     error ReleaseDoesNotExist(uint8 release);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
@@ -106,7 +106,7 @@ contract PluginRepo is
     event VersionCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
 
     /// @notice Thrown when a release's metadata was updated.
-    /// @param release the release number.
+    /// @param release The release ID.
     /// @param metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
     event ReleaseMetadataUpdated(uint8 release, bytes metadata);
 
@@ -200,7 +200,7 @@ contract PluginRepo is
     }
 
     /// @notice The private helper function to replace new `_metadata` for the `_release`.
-    /// @param _release The release number.
+    /// @param _release The release ID.
     /// @param _metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
     function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) internal {
         metadataPerRelease[_release] = _metadata;

@@ -7,7 +7,7 @@ pragma solidity 0.8.17;
 /// @notice The interface required for a plugin repository.
 interface IPluginRepo {
     /// @notice Update the metadata for release with content `@fromHex(_releaseMetadata)`.
-    /// @param _release The release number.
+    /// @param _release The release ID.
     /// @param _metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
     function updateReleaseMetadata(uint8 _release, bytes calldata _metadata) external;
 
