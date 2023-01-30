@@ -119,7 +119,7 @@ describe('AddresslistVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await addresslistVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         defaultData

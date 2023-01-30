@@ -83,7 +83,7 @@ contract TokenVotingSetup is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
@@ -210,8 +210,8 @@ contract TokenVotingSetup is PluginSetup {
             );
         }
 
-        preparedDependency.helpers = helpers;
-        preparedDependency.permissions = permissions;
+        preparedSetupData.helpers = helpers;
+        preparedSetupData.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup

@@ -33,7 +33,7 @@ contract DAOFactory {
 
     struct PluginSettings {
         PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
-        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
+        bytes data; // The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -88,7 +88,7 @@ contract DAOFactory {
             // Prepare plugin.
             (
                 address plugin,
-                IPluginSetup.PreparedDependency memory preparedDependency
+                IPluginSetup.PreparedSetupData memory preparedSetupData
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
                     PluginSetupProcessor.PrepareInstallationParams(
@@ -103,8 +103,8 @@ contract DAOFactory {
                 PluginSetupProcessor.ApplyInstallationParams(
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
-                    preparedDependency.permissions,
-                    hashHelpers(preparedDependency.helpers)
+                    preparedSetupData.permissions,
+                    hashHelpers(preparedSetupData.helpers)
                 )
             );
         }

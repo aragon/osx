@@ -97,7 +97,7 @@ describe('AdminSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await adminSetup.callStatic.prepareInstallation(
         targetDao.address,
         minimum_data
