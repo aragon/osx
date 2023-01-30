@@ -102,4 +102,9 @@ contract GovernanceERC20 is
             _delegate(to, to);
         }
     }
+
+    /// @dev This empty reserved space is put in place to allow future versions to add new
+    /// variables without shifting down storage in the inheritance chain.
+    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    uint256[50] private __gap;
 }
