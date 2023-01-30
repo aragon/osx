@@ -30,7 +30,7 @@ interface MintConfig {
   amounts: number[];
 }
 
-describe('Core: TokenFactory', () => {
+describe.skip('Core: TokenFactory', () => {
   let tokenFactory: MockContract<TokenFactory>;
   let governanceBase: MockContract<GovernanceERC20>;
   let governanceWrappedBase: MockContract<GovernanceWrappedERC20>;

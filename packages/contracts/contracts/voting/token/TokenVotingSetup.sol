@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
@@ -16,7 +15,6 @@ import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
 import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol";
-import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
@@ -40,6 +38,10 @@ contract TokenVotingSetup is PluginSetup {
     /// @notice The address of the `GovernanceWrappedERC20` base contract.
     address public immutable governanceWrappedERC20Base;
 
+    /// @notice The token settings struct.
+    /// @param addr The token address. If this is `address(0)`, a new `GovernanceERC20` token is deployed. If not, the existing token is wrapped as an `GovernanceWrappedERC20`.
+    /// @param name The token name. This parameter is only relevant if the token address is `address(0)`.
+    /// @param name The token symbol. This parameter is only relevant if the token address is `address(0)`.
     struct TokenSettings {
         address addr;
         string name;
@@ -112,10 +114,6 @@ contract TokenVotingSetup is PluginSetup {
         address[] memory helpers = new address[](1);
 
         if (token != address(0)) {
-            // the following 2 calls(_getTokenInterfaceIds, isERC20) don't use
-            // OZ's function calls due to the fact that OZ reverts in case of an error
-            // which in this case not desirable as we still continue the execution.
-            // Try/catch more unpredictable + messy.
             if (!token.isContract()) {
                 revert TokenNotContract(token);
             }
@@ -130,9 +128,9 @@ contract TokenVotingSetup is PluginSetup {
             if (
                 // If token supports none of them
                 // it's simply ERC20 which gets checked by _isERC20
-                // Currently, not a satisfiable check..
+                // Currently, not a satisfiable check.
                 (!supportedIds[0] && !supportedIds[1] && !supportedIds[2]) ||
-                // If token supports IERC20Upgradeable, but neither
+                // If token supports IERC20, but neither
                 // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
                 (supportedIds[0] && !supportedIds[1] && !supportedIds[2])
             ) {
@@ -225,16 +223,12 @@ contract TokenVotingSetup is PluginSetup {
             revert WrongHelpersArrayLength({length: helperLength});
         }
 
-        // NOTE: No need to fully validate _helpers[0] as we're sure
-        // it's either GovernanceWrappedERC20 or GovernanceERC20
-        // which is ensured by PluginSetupProcessor that it can NOT pass helper
-        // that wasn't deployed by the prepareInstall in this plugin setup.
+        // token can be either GovernanceERC20, GovernanceWrappedERC20, or IVotesUpgradeable, which 
+        // does not follow the GovernanceERC20 and GovernanceWrappedERC20 standard.
         address token = _payload.currentHelpers[0];
 
         bool[] memory supportedIds = _getTokenInterfaceIds(token);
 
-        // If it's IERC20Upgradeable, IVotesUpgradeable and not IGovernanceWrappedERC20
-        // Then it's GovernanceERC20.
         bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
 
         permissions = new PermissionLib.MultiTargetPermission[](isGovernanceERC20 ? 4 : 3);
@@ -264,11 +258,9 @@ contract TokenVotingSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
-        // We only need to revoke permission if the token deployed was GovernanceERC20
-        // As GovernanceWrapped doesn't even have this permission on it.
-        // TODO: depending on the decision if we don't revert on revokes when plugin setup processor
-        // calls dao for the permissions, we might decide to include the below always as it will be
-        // more gas less than checking isGovernanceERC20..
+        // Revocation of permission is necessary only if the deployed token is GovernanceERC20, 
+        // as GovernanceWrapped does not possess this permission. Only return the following
+        // if it's type of GovernanceERC20, otherwise revoking this permission wouldn't have any effect.
         if (isGovernanceERC20) {
             permissions[3] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Revoke,
@@ -285,9 +277,9 @@ contract TokenVotingSetup is PluginSetup {
         return address(tokenVotingBase);
     }
 
-    /// @notice gets the information which interface ids token supports.
-    /// @dev it's important to check first whether token is a contract.
-    /// @param token address
+    /// @notice Retrieves the interface identifiers supported by the token contract.
+    /// @dev It is crucial to verify if the provided token address represents a valid contract before using the below.
+    /// @param token The token address
     function _getTokenInterfaceIds(address token) private view returns (bool[] memory) {
         bytes4[] memory interfaceIds = new bytes4[](3);
         interfaceIds[0] = type(IERC20Upgradeable).interfaceId;
@@ -296,13 +288,13 @@ contract TokenVotingSetup is PluginSetup {
         return token.getSupportedInterfaces(interfaceIds);
     }
 
-    /// @notice unsatisfiably determines if contract is ERC20..
-    /// @dev it's important to check first whether token is a contract.
-    /// @param token address
+    /// @notice Unsatisfiably determines if the contract is an ERC20 token.
+    /// @dev It's important to first check whether token is a contract prior to this call.
+    /// @param token The token address
     function _isERC20(address token) private view returns (bool) {
-        (bool success, ) = token.staticcall(
+        (bool success, bytes memory data) = token.staticcall(
             abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
         );
-        return success;
+        return success && data.length == 0x20;
     }
 }
