@@ -173,7 +173,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown when user's arguments for the apply function don't match the currently applied setupId.
     /// @param currentSetupId The current setup id to which user's preparation setup should match to.
     /// @param appliedSetupId The TODO:GIORGI
-    error InvalidSetupId(bytes32 currentSetupId, bytes32 appliedSetupId);
+    error InvalidAppliedSetupId(bytes32 currentSetupId, bytes32 appliedSetupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -432,7 +432,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // The following check implicitly confirms that plugin
         // is currently installed. Otherwise, currentSetupId wouldn't be set.
         if (pluginState.currentSetupId != appliedSetupId) {
-            revert InvalidSetupId({
+            revert InvalidAppliedSetupId({
                 currentSetupId: pluginState.currentSetupId,
                 appliedSetupId: appliedSetupId
             });
@@ -575,7 +575,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         if (pluginState.currentSetupId != appliedSetupId) {
-            revert InvalidSetupId({
+            revert InvalidAppliedSetupId({
                 currentSetupId: pluginState.currentSetupId,
                 appliedSetupId: appliedSetupId
             });
