@@ -641,7 +641,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Validates that a setup ID can be applied for `applyInstallation`, `applyUpdate`, or `applyUninstallation`.
     /// @param pluginInstallationId The plugin installation ID obtained from the hash of `abi.encode(daoAddress, pluginAddress)`.
     /// @param preparedSetupId The prepared setup ID to be validated.
-    /// @dev If the block number stored in `states[pluginInstallationId].blockNumber` exceeds the one stored in `pluginState.preparedSetupIdToBlockNumber[setupId]`, the prepared setup with `preparedSetupId` is outdated and not applicable anymore.
+    /// @dev If the block number stored in `states[pluginInstallationId].blockNumber` exceeds the one stored in `pluginState.preparedSetupIdToBlockNumber[preparedSetupId]`, the prepared setup with `preparedSetupId` is outdated and not applicable anymore.
     function validatePreparedSetupId(
         bytes32 pluginInstallationId,
         bytes32 preparedSetupId
