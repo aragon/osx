@@ -82,7 +82,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param currentVersionTag The tag of the current plugin version to update from.
     /// @param newVersionTag The tag of the new plugin version to update to.
     /// @param pluginSetupRepo The plugin setup repository address on which the plugin exists.
-    /// @param setupPayload The payload containing the existing contracts as well as optional data to be consumed by the plugin setup.
+    /// @param setupPayload The payload containing the plugin and helper contract addresses deployed in a preparation step as well as optional data to be consumed by the plugin setup.
     ///  This includes the bytes-encoded data containing the input parameters for the update preparation as specified in the corresponding ABI on the version's metadata.
     struct PrepareUpdateParams {
         PluginRepo.Tag currentVersionTag;
@@ -107,7 +107,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
     /// @param pluginSetupRef The reference to the plugin setup to be used for the uninstallation.
-    /// @param setupPayload The payload containing the existing contracts as well as optional data to be consumed by the plugin setup.
+    /// @param setupPayload The payload containing the plugin and helper contract addresses deployed in a preparation step as well as optional data to be consumed by the plugin setup.
     ///  This includes the bytes-encoded data containing the input parameters for the uninstallation preparation as specified in the corresponding ABI on the version's metadata.
     struct PrepareUninstallationParams {
         PluginSetupRef pluginSetupRef;
@@ -202,7 +202,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param dao The address of the DAO to which the plugin belongs.
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin setup of the prepared update.
-    /// @param setupPayload The payload containing the existing contracts as well as optional data to be consumed by the plugin setup.
+    /// @param setupPayload The payload containing the plugin and helper contract addresses deployed in a preparation step as well as optional data to be consumed by the plugin setup.
     /// @param preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     /// @param initData The initialization data to be passed to the upgradeable plugin contract.
     event UpdatePrepared(
@@ -228,7 +228,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param setupId The setup ID obtained from the prepared setup.
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin to used for install preparation.
-    /// @param setupPayload The payload containing the existing contracts as well as optional data to be consumed by the plugin setup.
+    /// @param setupPayload The payload containing the plugin and helper contract addresses deployed in a preparation step as well as optional data to be consumed by the plugin setup.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
     event UninstallationPrepared(
         address indexed sender,
