@@ -69,16 +69,10 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumTestnet: process.env.ARBISCAN_KEY || '',
     },
-    customChains: [],
+    customChains: []
   },
   namedAccounts: {
     deployer: 0,
-  },
-  paths: {
-    sources: './src',
-    tests: './test',
-    cache: './cache',
-    artifacts: './artifacts',
   },
   docgen: {
     outputDir: 'docs/core/03-reference-guide',
