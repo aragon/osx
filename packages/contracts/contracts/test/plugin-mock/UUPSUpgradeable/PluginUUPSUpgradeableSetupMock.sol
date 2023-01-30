@@ -23,7 +23,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         plugin = mockPluginProxy(pluginBase, _dao);
         preparedSetupData.helpers = mockHelpers(1);
-        preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
+        preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
@@ -42,6 +42,22 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
 }
 
 contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
+    // By default, this plugin setup always returns the 1 helper and 1 permission
+    // every time unless you call setHelpersAndPermissions.
+    uint160 public helpersMockAmount = 1;
+    uint160 public permissionsMockAmount = 1;
+
+    // Required to allow the feature where calling prepareInstallation 2 times would
+    // return different helpers/permissions !
+    // IMPORTANT: if your test calls this, note that it will be reflected on other tests
+    // once they call prepareInstallation as it will start returning the updated records, not the default one.
+    // As a general recommendation, it's recomended to call `setHelpersAndPermissions` with the default(1,1)
+    // once your test is finished.
+    function setHelpersAndPermissions(uint160 helpersAmount, uint160 permissionsAmount) public {
+        helpersMockAmount = helpersAmount;
+        permissionsMockAmount = permissionsAmount;
+    }
+
     function prepareInstallation(
         address _dao,
         bytes memory

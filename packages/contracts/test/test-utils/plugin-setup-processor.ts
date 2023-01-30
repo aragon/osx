@@ -1,9 +1,37 @@
 import {ethers} from 'hardhat';
 import {findEvent} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
+import {
+  DAO,
+  PluginSetupProcessor,
+  PluginRepoRegistry,
+  PluginUUPSUpgradeableSetupV1Mock,
+  PluginUUPSUpgradeableSetupV1MockBad,
+  PluginUUPSUpgradeableSetupV2Mock,
+  PluginUUPSUpgradeableSetupV3Mock,
+  PluginUUPSUpgradeableSetupV4Mock,
+  PluginCloneableSetupV1Mock,
+  PluginCloneableSetupV2Mock,
+} from '../../typechain';
+
+// TODO: put in common or something.
+const EMPTY_DATA = '0x';
+
 import {BytesLike, utils, constants} from 'ethers';
 import {Operation} from '../core/permission/permission-manager';
+import {PermissionOperation, PluginRepoPointer} from './psp/types';
+import {
+  InstallationAppliedEvent,
+  InstallationPreparedEvent,
+  UninstallationAppliedEvent,
+  UninstallationPreparedEvent,
+} from '../../typechain/PluginSetupProcessor';
+import {
+  createPrepareInstallationParams,
+  createApplyInstallationParams,
+  createPrepareUninstallationParams,
+  createApplyUninstallParams,
+} from './psp/create-params';
 
 export async function deployPluginSetupProcessor(
   managingDao: any,
@@ -32,73 +60,117 @@ export async function deployPluginSetupProcessor(
   return psp;
 }
 
-export type PermissionOperation = {
-  operation: Operation;
-  where: string;
-  who: string;
-  condition: string;
-  permissionId: BytesLike;
-};
-
 export async function prepareInstallation(
   psp: PluginSetupProcessor,
   daoAddress: string,
-  pluginSetup: string,
-  pluginRepo: string,
+  pluginRepoPointer: PluginRepoPointer,
   data: BytesLike
-): Promise<{
-  plugin: string;
-  helpers: string[];
-  permissions: PermissionOperation[];
-}> {
+): Promise<InstallationPreparedEvent['args']> {
   const tx = await psp.prepareInstallation(
     daoAddress,
-    pluginSetup,
-    pluginRepo,
-    data
+    createPrepareInstallationParams(pluginRepoPointer, data)
   );
   const event = await findEvent(tx, 'InstallationPrepared');
-  let {plugin, helpers, permissions} = event.args;
-  return {
-    plugin: plugin,
-    helpers: helpers,
-    permissions: permissions,
-  };
+  return event.args;
+}
+
+export async function applyInstallation(
+  psp: PluginSetupProcessor,
+  daoAddress: string,
+  plugin: string,
+  pluginRepoPointer: PluginRepoPointer,
+  permissions: PermissionOperation[],
+  helpers: string[]
+): Promise<InstallationAppliedEvent['args']> {
+  const tx = await psp.applyInstallation(
+    daoAddress,
+    createApplyInstallationParams(
+      plugin,
+      pluginRepoPointer,
+      permissions,
+      helpers
+    )
+  );
+
+  const event = await findEvent(tx, 'InstallationApplied');
+  return event.args;
 }
 
 export async function prepareUninstallation(
   psp: PluginSetupProcessor,
   daoAddress: string,
   plugin: string,
-  pluginSetup: string,
-  pluginRepo: string,
-  currentHelpers: string[],
+  pluginRepoPointer: PluginRepoPointer,
+  helpers: string[],
   data: BytesLike
-): Promise<{
-  returnedPluginAddress: string;
-  returnedHelpers: string[];
-  permissions: PermissionOperation[];
-}> {
+): Promise<UninstallationPreparedEvent['args']> {
   const tx = await psp.prepareUninstallation(
     daoAddress,
-    plugin,
-    pluginSetup,
-    pluginRepo,
-    currentHelpers,
-    data
+    createPrepareUninstallationParams(
+      plugin,
+      pluginRepoPointer,
+      helpers,
+      data
+    )
   );
-  const event = await findEvent(tx, 'UninstallationPrepared');
-  let {
-    plugin: returnedPluginAddress,
-    currentHelpers: returnedHelpers,
-    permissions,
-  } = event.args;
 
-  return {
-    returnedPluginAddress: returnedPluginAddress,
-    returnedHelpers: returnedHelpers,
-    permissions: permissions,
-  };
+  const event = await findEvent(tx, 'UninstallationPrepared');
+  return event.args;
+}
+
+export async function applyUninstallation(
+  psp: PluginSetupProcessor,
+  daoAddress: string,
+  plugin: string,
+  pluginRepoPointer: PluginRepoPointer,
+  permissions: PermissionOperation[]
+): Promise<UninstallationAppliedEvent['args']> {
+  const tx = await psp.applyUninstallation(
+    daoAddress,
+    createApplyUninstallParams(plugin, pluginRepoPointer, permissions)
+  );
+
+  const event = await findEvent(tx, 'UninstallationApplied');
+  return event.args;
+}
+
+export async function installPlugin(
+  psp: PluginSetupProcessor,
+  targetDao: DAO,
+  pluginRepoPointer: PluginRepoPointer,
+  data: BytesLike = EMPTY_DATA
+): Promise<{
+  plugin: string;
+  helpers: string[];
+  permissions: PermissionOperation[];
+  preparedSetupId: string;
+  appliedSetupId: string;
+}> {
+  let plugin: string;
+  let helpers: string[];
+  let permissions: PermissionOperation[];
+  let preparedSetupId: string;
+  ({
+    plugin: plugin,
+    preparedSetupData: {helpers, permissions},
+    preparedSetupId: preparedSetupId
+  } = await prepareInstallation(
+    psp,
+    targetDao.address,
+    pluginRepoPointer,
+    data
+  ));
+
+  const {appliedSetupId: appliedSetupId } = await applyInstallation(
+    psp,
+    targetDao.address,
+    plugin,
+    pluginRepoPointer,
+    permissions,
+    helpers
+  );
+
+  return {plugin, helpers, permissions, appliedSetupId, preparedSetupId};
 }
 
 export async function prepareUpdate(
@@ -150,8 +222,8 @@ export function mockPermissionsOperations(
   start: number,
   end: number,
   op: Operation
-): PermissionOperation[] {
-  let arr: PermissionOperation[] = [];
+) {
+  let arr = [];
 
   for (let i = start; i < end; i++) {
     arr.push({
@@ -163,7 +235,7 @@ export function mockPermissionsOperations(
     });
   }
 
-  return arr;
+  return arr.map(item => Object.values(item));
 }
 
 export function mockHelpers(amount: number): string[] {
