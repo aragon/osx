@@ -327,7 +327,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // NOTE that if plugin was uninstalled, the same setupId can still
         // be prepared as blockNumber would end up being higher than setupId's blockNumber.
         // This case applies to stateful plugins which means pluginSetup always returns the same plugin address.
-        // Though, the same setupId still would need to be prepared (see validateSetupId in `applyInstallation`) first
+        // Though, the same setupId still would need to be prepared (see validatePreparedSetupId in `applyInstallation`) first
         // to make sure prepare event is thrown again.
         if (pluginState.blockNumber < pluginState.setupIds[preparedSetupId]) {
             revert SetupAlreadyPrepared(preparedSetupId);
@@ -374,7 +374,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginAlreadyInstalled();
         }
 
-        validateSetupId(pluginInstallationId, preparedSetupId);
+        validatePreparedSetupId(pluginInstallationId, preparedSetupId);
 
         bytes32 appliedSetupId = _getAppliedSetupId(_params.pluginSetupRef, _params.helpersHash);
 
@@ -519,7 +519,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.Update
         );
 
-        validateSetupId(pluginInstallationId, preparedSetupId);
+        validatePreparedSetupId(pluginInstallationId, preparedSetupId);
 
         // Once the applyUpdate is called and arguments are confirmed(including initData)
         // we update the setupId with the new versionTag, the current helpers. All other
@@ -639,7 +639,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.Uninstall
         );
 
-        validateSetupId(pluginInstallationId, preparedSetupId);
+        validatePreparedSetupId(pluginInstallationId, preparedSetupId);
 
         pluginState.blockNumber = block.number;
         pluginState.currentSetupId = bytes32(0);
@@ -655,14 +655,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Checks if the setupId for the plugin is valid to be applied for `applyUpdate`, `applyInstallation` or `applyUninstallation`.
     /// @param pluginInstallationId the hash of `abi.encode(daoAddress, pluginAddress)`-
-    /// @param setupId The setupId to check for validity to be used in `applyType` functions.
-    function validateSetupId(bytes32 pluginInstallationId, bytes32 setupId) public view {
+    /// @param preparedSetupId The setupId to check for validity to be used in `applyType` functions.
+    function validatePreparedSetupId(
+        bytes32 pluginInstallationId,
+        bytes32 preparedSetupId
+    ) public view {
         PluginState storage pluginState = states[pluginInstallationId];
         // If the plugin block number exceeds the setupId preparation block number,
         // This means applyUpdate was already called on another setupId
-        // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotApplicable(setupId);
+        // and all the rest prepared setupIds should become idle or setupId is not prepared before.
+        if (pluginState.blockNumber >= pluginState.setupIds[preparedSetupId]) {
+            revert SetupNotApplicable(preparedSetupId);
         }
     }
 
