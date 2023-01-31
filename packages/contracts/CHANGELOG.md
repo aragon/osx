@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added checks for the `MultisigSetup` and fixed `build-metadata.json`.
 - Added support for release metadata.
 - Added `IMembership` and `IMembershipContract` and the `MembershipContractAnnounced` event.
 - Added a `metadata.json` file for all plugins.
