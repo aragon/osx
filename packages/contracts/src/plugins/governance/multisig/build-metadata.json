@@ -2,7 +2,10 @@
   "ui": "",
   "change": "",
   "pluginSetupABI": {
-    "prepareInstallation": "(address[] members, tuple(bool onlyListed, uint16 minApprovals))",
+    "prepareInstallation": [
+      "address[] members",
+      "tuple(bool onlyListed, uint16 minApprovals)"
+    ],
     "prepareUpdate": "",
     "prepareUninstallation": ""
   }
