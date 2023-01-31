@@ -30,7 +30,11 @@ export async function setupENS(deployer: any, domain: string): Promise<any> {
 
   for (let i = 0; i < domainNamesReversed.length - 1; i++) {
     // to support subdomains
-    const domain = domainNamesReversed.map((value, index) => (index <= i) ? value: '').filter(value => value !== '').reverse().join('.')
+    const domain = domainNamesReversed
+      .map((value, index) => (index <= i ? value : ''))
+      .filter(value => value !== '')
+      .reverse()
+      .join('.');
     await ens.setSubnodeRecord(
       ensDomainHash(domain),
       ensLabelHash(domainNamesReversed[i + 1]),

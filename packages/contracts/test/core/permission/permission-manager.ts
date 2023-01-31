@@ -2,7 +2,10 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {PermissionManagerTest, PermissionConditionMock} from '../../../typechain';
+import {
+  PermissionManagerTest,
+  PermissionConditionMock,
+} from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
 import {OZ_ERRORS} from '../../test-utils/error';
 
@@ -530,7 +533,9 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await expect(pm.connect(signers[2]).applyMultiTargetPermissions(bulkItems))
+      await expect(
+        pm.connect(signers[2]).applyMultiTargetPermissions(bulkItems)
+      )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
           pm.address,
@@ -688,7 +693,9 @@ describe('Core: PermissionManager', function () {
         },
       ];
       await expect(
-        pm.connect(otherSigner).applySingleTargetPermissions(pm.address, bulkItems)
+        pm
+          .connect(otherSigner)
+          .applySingleTargetPermissions(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
@@ -709,7 +716,9 @@ describe('Core: PermissionManager', function () {
         },
       ];
       await expect(
-        pm.connect(otherSigner).applySingleTargetPermissions(pm.address, bulkItems)
+        pm
+          .connect(otherSigner)
+          .applySingleTargetPermissions(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(

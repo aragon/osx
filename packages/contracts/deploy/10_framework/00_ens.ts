@@ -3,10 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
 
-import {
-  ENS_ADDRESSES,
-  getContractAddress,
-} from '../helpers';
+import {ENS_ADDRESSES, getContractAddress} from '../helpers';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -102,7 +99,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     for (let i = 0; i < domainNamesReversed.length - 1; i++) {
       // to support subdomains
-      const domain = domainNamesReversed.map((value, index) => (index <= i) ? value: '').filter(value => value !== '').reverse().join('.')
+      const domain = domainNamesReversed
+        .map((value, index) => (index <= i ? value : ''))
+        .filter(value => value !== '')
+        .reverse()
+        .join('.');
       await ensRegistryContract.setSubnodeRecord(
         ensDomainHash(domain),
         ensLabelHash(domainNamesReversed[i + 1]),
