@@ -12,7 +12,7 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 
 import {DaoAuthorizableUpgradeable} from "../../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
-import {IERC20MintableUpgradeable} from "./IERC20MintableUpgradeable.sol";
+import {IERC20MintableUpgradeable} from "../IERC20MintableUpgradeable.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association

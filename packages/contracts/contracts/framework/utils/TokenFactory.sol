@@ -7,12 +7,12 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import {GovernanceERC20} from "../../plugins/token/governance/GovernanceERC20.sol";
-import {GovernanceWrappedERC20} from "../../plugins/token/governance/GovernanceWrappedERC20.sol";
-import {IERC20MintableUpgradeable} from "../../plugins/token/governance/IERC20MintableUpgradeable.sol";
 import {MerkleMinter} from "../../plugins/token/distribution/MerkleMinter.sol";
 import {MerkleDistributor} from "../../plugins/token/distribution/MerkleDistributor.sol";
 import {IMerkleDistributor} from "../../plugins/token/distribution/IMerkleDistributor.sol";
+import {GovernanceERC20} from "../../token/ERC20/governance/GovernanceERC20.sol";
+import {GovernanceWrappedERC20} from "../../token/ERC20/governance/GovernanceWrappedERC20.sol";
+import {IERC20MintableUpgradeable} from "../../token/ERC20/IERC20MintableUpgradeable.sol";
 import {DAO} from "../../core/dao/DAO.sol";
 import {IDAO} from "../../core/dao/IDAO.sol";
 

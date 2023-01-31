@@ -12,9 +12,9 @@ import {IDAO} from "../../../../core/dao/IDAO.sol";
 import {DAO} from "../../../../core/dao/DAO.sol";
 import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../../framework/plugin/setup/PluginSetup.sol";
-import {GovernanceERC20} from "../../../token/governance/GovernanceERC20.sol";
-import {GovernanceWrappedERC20} from "../../../token/governance/GovernanceWrappedERC20.sol";
-import {IGovernanceWrappedERC20} from "../../../token/governance/IGovernanceWrappedERC20.sol";
+import {GovernanceERC20} from "../../../../token/ERC20/governance/GovernanceERC20.sol";
+import {GovernanceWrappedERC20} from "../../../../token/ERC20/governance/GovernanceWrappedERC20.sol";
+import {IGovernanceWrappedERC20} from "../../../../token/ERC20/governance/IGovernanceWrappedERC20.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 

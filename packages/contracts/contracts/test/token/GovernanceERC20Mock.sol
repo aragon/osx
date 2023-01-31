@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {GovernanceERC20} from "../../plugins/token/governance/GovernanceERC20.sol";
+import {GovernanceERC20} from "../../token/ERC20/governance/GovernanceERC20.sol";
 import {IDAO} from "../../core/dao/IDAO.sol";
 
 contract GovernanceERC20Mock is GovernanceERC20 {

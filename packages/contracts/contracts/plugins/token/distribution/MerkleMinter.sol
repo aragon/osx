@@ -8,8 +8,8 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {IERC20MintableUpgradeable} from "../../../token/ERC20/IERC20MintableUpgradeable.sol";
 import {createERC1967Proxy} from "../../../utils/Proxy.sol";
-import {IERC20MintableUpgradeable} from "../governance/IERC20MintableUpgradeable.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 import {MerkleDistributor} from "./MerkleDistributor.sol";
 import {IMerkleMinter} from "./IMerkleMinter.sol";
