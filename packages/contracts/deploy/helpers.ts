@@ -174,10 +174,17 @@ export async function checkPermission(
   permission: string,
   data = '0x'
 ) {
-  const permissionId = ethers.utils.id(permission)
-  const isGranted = await permissionManager.callStatic.isGranted(where, who, permissionId, data)
-  if(!isGranted) {
-    throw new Error(`${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`)
+  const permissionId = ethers.utils.id(permission);
+  const isGranted = await permissionManager.callStatic.isGranted(
+    where,
+    who,
+    permissionId,
+    data
+  );
+  if (!isGranted) {
+    throw new Error(
+      `${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`
+    );
   }
 }
 
