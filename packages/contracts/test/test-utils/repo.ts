@@ -5,7 +5,7 @@ import {
   PluginRepoFactory,
   PluginSetupV1Mock,
   PluginRepo,
-  PluginUUPSUpgradeableSetupV1Mock
+  PluginUUPSUpgradeableSetupV1Mock,
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {getMergedABI} from '../../utils/abi';
@@ -62,7 +62,9 @@ export async function deployPluginRepoRegistry(
     'PluginRepoRegistry'
   );
 
-  let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(PluginRepoRegistry);
+  let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
+    PluginRepoRegistry
+  );
 
   await pluginRepoRegistry.initialize(
     managingDao.address,
