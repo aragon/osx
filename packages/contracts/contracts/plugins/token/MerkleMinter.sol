@@ -6,10 +6,10 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import {IDAO} from "../../../core/dao/IDAO.sol";
-import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
-import {IERC20MintableUpgradeable} from "../../../token/ERC20/IERC20MintableUpgradeable.sol";
-import {createERC1967Proxy} from "../../../utils/Proxy.sol";
+import {IDAO} from "../../core/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {IERC20MintableUpgradeable} from "../../token/ERC20/IERC20MintableUpgradeable.sol";
+import {createERC1967Proxy} from "../../utils/Proxy.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 import {MerkleDistributor} from "./MerkleDistributor.sol";
 import {IMerkleMinter} from "./IMerkleMinter.sol";

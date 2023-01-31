@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {ERC20WrapperUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
 
-import {IDAO} from "../../../core/dao/IDAO.sol";
+import {IDAO} from "../../core/dao/IDAO.sol";
 
 interface IMerkleDistributor {
     /// @notice Emitted when tokens are claimed from the distributor.

@@ -4,8 +4,8 @@ pragma solidity 0.8.17;
 
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import {IERC20MintableUpgradeable} from "../../../token/ERC20/IERC20MintableUpgradeable.sol";
-import {IDAO} from "../../../core/dao/IDAO.sol";
+import {IERC20MintableUpgradeable} from "../../token/ERC20/IERC20MintableUpgradeable.sol";
+import {IDAO} from "../../core/dao/IDAO.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 interface IMerkleMinter {

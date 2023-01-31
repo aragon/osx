@@ -16,11 +16,11 @@ import * as DAORegistry from '../artifacts/contracts/framework/dao/DAORegistry.s
 // Plugin Contracts
 import * as TokenVoting from '../artifacts/contracts/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
 import * as AddresslistVoting from '../artifacts/contracts/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
-import * as MerkleMinter from '../artifacts/contracts/plugins/token/distribution/MerkleMinter.sol/MerkleMinter.json';
-import * as MerkleDistributor from '../artifacts/contracts/plugins/token/distribution/MerkleDistributor.sol/MerkleDistributor.json';
+import * as MerkleMinter from '../artifacts/contracts/plugins/token/MerkleMinter.sol/MerkleMinter.json';
+import * as MerkleDistributor from '../artifacts/contracts/plugins/token/MerkleDistributor.sol/MerkleDistributor.json';
 
-import * as GovernanceERC20 from '../artifacts/contracts/plugins/token/governance/GovernanceERC20.sol/GovernanceERC20.json';
-import * as GovernanceWrappedERC20 from '../artifacts/contracts/plugins/token/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
+import * as GovernanceERC20 from '../artifacts/contracts/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
+import * as GovernanceWrappedERC20 from '../artifacts/contracts/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 
 export default {
   PermissionManager,
