@@ -36,16 +36,6 @@ contract MultisigSetup is PluginSetup {
             (address[], Multisig.MultisigSettings)
         );
 
-        if (members.length == 0) {
-            revert Multisig.AddresslistLengthOutOfBounds({limit: 1, actual: 0});
-        }
-        if (multisigSettings.minApprovals > members.length) {
-            revert Multisig.MinApprovalsOutOfBounds({
-                limit: uint16(members.length),
-                actual: multisigSettings.minApprovals
-            });
-        }
-
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             address(multisigBase),

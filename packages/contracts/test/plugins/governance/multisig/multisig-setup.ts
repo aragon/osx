@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {DAO, MultisigSetup} from '../../../../typechain';
+import {DAO, MultisigSetup, Multisig__factory} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {Operation} from '../../../core/permission/permission-manager';
@@ -27,6 +27,7 @@ const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 describe('MultisigSetup', function () {
   let signers: SignerWithAddress[];
   let multisigSetup: MultisigSetup;
+  let MultisigFactory: Multisig__factory;
   let implementationAddress: string;
   let targetDao: DAO;
   let minimum_data: any;
@@ -47,6 +48,8 @@ describe('MultisigSetup', function () {
 
     const MultisigSetup = await ethers.getContractFactory('MultisigSetup');
     multisigSetup = await MultisigSetup.deploy();
+
+    MultisigFactory = await ethers.getContractFactory('Multisig');
 
     implementationAddress = await multisigSetup.getImplementationAddress();
   });
@@ -88,12 +91,22 @@ describe('MultisigSetup', function () {
     });
 
     it('reverts if zero members are provided in `_data`', async () => {
-      const members: string[] = [];
+      const noMembers: string[] = [];
 
       const wrongPrepareInstallationData = abiCoder.encode(
         metadata.pluginSetupABI.prepareInstallation,
-        [members, defaultMultisigSettings]
+        [noMembers, defaultMultisigSettings]
       );
+
+      const nonce = await ethers.provider.getTransactionCount(
+        multisigSetup.address
+      );
+      const anticipatedPluginAddress = ethers.utils.getContractAddress({
+        from: multisigSetup.address,
+        nonce,
+      });
+
+      const multisig = MultisigFactory.attach(anticipatedPluginAddress);
 
       await expect(
         multisigSetup.prepareInstallation(
@@ -101,10 +114,38 @@ describe('MultisigSetup', function () {
           wrongPrepareInstallationData
         )
       )
-        .to.be.revertedWithCustomError(
-          multisigSetup,
-          'AddresslistLengthOutOfBounds'
+        .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
+        .withArgs(0, 1);
+    });
+
+    it('reverts if the `minApprovals` value in `_data` is zero', async () => {
+      const multisigSettings: MultisigSettings = {
+        onlyListed: true,
+        minApprovals: 0,
+      };
+      const members = [signers[0].address];
+
+      const wrongPrepareInstallationData = abiCoder.encode(
+        metadata.pluginSetupABI.prepareInstallation,
+        [members, multisigSettings]
+      );
+
+      const nonce = await ethers.provider.getTransactionCount(
+        multisigSetup.address
+      );
+      const anticipatedPluginAddress = ethers.utils.getContractAddress({
+        from: multisigSetup.address,
+        nonce,
+      });
+      const multisig = MultisigFactory.attach(anticipatedPluginAddress);
+
+      await expect(
+        multisigSetup.prepareInstallation(
+          targetDao.address,
+          wrongPrepareInstallationData
         )
+      )
+        .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(1, 0);
     });
 
@@ -120,13 +161,22 @@ describe('MultisigSetup', function () {
         [members, multisigSettings]
       );
 
+      const nonce = await ethers.provider.getTransactionCount(
+        multisigSetup.address
+      );
+      const anticipatedPluginAddress = ethers.utils.getContractAddress({
+        from: multisigSetup.address,
+        nonce,
+      });
+      const multisig = MultisigFactory.attach(anticipatedPluginAddress);
+
       await expect(
         multisigSetup.prepareInstallation(
           targetDao.address,
           wrongPrepareInstallationData
         )
       )
-        .to.be.revertedWithCustomError(multisigSetup, 'MinApprovalsOutOfBounds')
+        .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(members.length, multisigSettings.minApprovals);
     });
 
