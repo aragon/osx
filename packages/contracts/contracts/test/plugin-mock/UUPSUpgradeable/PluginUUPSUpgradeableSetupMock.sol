@@ -61,11 +61,11 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public pure override returns (address plugin, PreparedSetupData memory preparedSetupData) {
+    ) public view override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         (_dao);
         plugin = address(0); // The bad behaviour is returning the same address over and over again
-        preparedSetupData.helpers = mockHelpers(1);
-        preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
+        preparedSetupData.helpers = mockHelpers(helpersMockAmount);
+        preparedSetupData.permissions = mockPermissions(0, permissionsMockAmount, PermissionLib.Operation.Grant);
     }
 }
 
