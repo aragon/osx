@@ -6,7 +6,7 @@ import {ERC20, TokenVotingSetup} from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {Operation} from '../../../../core/permission/permission-manager';
-import metadata from '../../../../../contracts/plugins/governance/majority-voting/token/build-metadata.json';
+import metadata from '../../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 
 import {
   VotingSettings,
