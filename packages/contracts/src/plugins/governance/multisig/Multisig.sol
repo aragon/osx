@@ -125,7 +125,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         IDAO _dao,
         address[] calldata _members,
         MultisigSettings calldata _multisigSettings
-    ) public initializer {
+    ) external initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
         _addAddresses(_members);

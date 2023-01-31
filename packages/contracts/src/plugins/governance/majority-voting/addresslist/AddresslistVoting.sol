@@ -44,7 +44,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         IDAO _dao,
         VotingSettings calldata _votingSettings,
         address[] calldata _members
-    ) public initializer {
+    ) external initializer {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         _addAddresses(_members);
