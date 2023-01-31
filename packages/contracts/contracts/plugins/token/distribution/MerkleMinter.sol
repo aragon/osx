@@ -10,8 +10,8 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
 import {createERC1967Proxy} from "../../../utils/Proxy.sol";
 import {IERC20MintableUpgradeable} from "../governance/IERC20MintableUpgradeable.sol";
-import {IMerkleDistributor} from "../distribution/IMerkleDistributor.sol";
-import {MerkleDistributor} from "../distribution/MerkleDistributor.sol";
+import {IMerkleDistributor} from "./IMerkleDistributor.sol";
+import {MerkleDistributor} from "./MerkleDistributor.sol";
 import {IMerkleMinter} from "./IMerkleMinter.sol";
 
 /// @title MerkleMinter

@@ -10,7 +10,7 @@ import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/E
 import {GovernanceERC20} from "../../plugins/token/governance/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../plugins/token/governance/GovernanceWrappedERC20.sol";
 import {IERC20MintableUpgradeable} from "../../plugins/token/governance/IERC20MintableUpgradeable.sol";
-import {MerkleMinter} from "../../plugins/token/creation/MerkleMinter.sol";
+import {MerkleMinter} from "../../plugins/token/distribution/MerkleMinter.sol";
 import {MerkleDistributor} from "../../plugins/token/distribution/MerkleDistributor.sol";
 import {IMerkleDistributor} from "../../plugins/token/distribution/IMerkleDistributor.sol";
 import {DAO} from "../../core/dao/DAO.sol";

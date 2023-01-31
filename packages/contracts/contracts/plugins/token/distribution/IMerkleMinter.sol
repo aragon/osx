@@ -6,7 +6,7 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {IERC20MintableUpgradeable} from "../governance/IERC20MintableUpgradeable.sol";
-import {IMerkleDistributor} from "../distribution/IMerkleDistributor.sol";
+import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 interface IMerkleMinter {
     /// @notice Emitted when a token is minted.
