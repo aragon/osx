@@ -36,7 +36,7 @@ export function shouldUpgradeCorrectly(
   ) {
     return [dao.address, contract.address, user.address, upgradePermissionId];
   }
-  
+
   describe('UUPS Upgradeability Test', async () => {
     before(async () => {
       const factory = await ethers.getContractFactory(
