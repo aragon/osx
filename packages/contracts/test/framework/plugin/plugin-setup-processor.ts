@@ -200,6 +200,9 @@ describe.only('Plugin Setup Processor', function () {
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
 
+    const releaseMetadata = '0x11';
+    const buildMetadata = '0x11';
+
     // Plugin Setup Processor
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
 
@@ -208,8 +211,8 @@ describe.only('Plugin Setup Processor', function () {
       `plugin-uups-upgradeable-mock`,
       setupUV1.address, // build 1
       ownerAddress,
-      '0x11', // release metadata
-      '0x11' // build metadata
+      releaseMetadata,
+      buildMetadata
     );
 
     let event = await findEvent(tx, EVENTS.PluginRepoRegistered);
@@ -226,8 +229,8 @@ describe.only('Plugin Setup Processor', function () {
       `plugin-clonable-mock`,
       setupCV1.address,
       ownerAddress,
-      '0x11',
-      '0x11'
+      releaseMetadata,
+      buildMetadata
     );
 
     event = await findEvent(tx, EVENTS.PluginRepoRegistered);
