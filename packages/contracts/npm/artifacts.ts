@@ -1,44 +1,58 @@
 // JSON artifacts of the contracts
 
-// Core contracts
-import * as PermissionManager from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionManager.json';
-import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionLib.sol/PermissionLib.json';
-import * as IPermissionCondition from '../artifacts/contracts/core/permission/IPermissionCondition.sol/IPermissionCondition.json';
-import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
-import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
-import * as DaoAuthorizable from '../artifacts/contracts/core/component/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
+// core
+//// dao
+import * as DAO from '../artifacts/src/core/dao/DAO.sol/DAO.json';
 
-// Factories
-import * as DAOFactory from '../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json';
-import * as TokenFactory from '../artifacts/contracts/factory/TokenFactory.sol/TokenFactory.json';
+//// Permission
+import * as PermissionManager from '../artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json';
+import * as PermissionLib from '../artifacts/src/core/permission/PermissionLib.sol/PermissionLib.json';
 
-// Registry
-import * as DAORegistry from '../artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json';
+// framework
+//// dao
+import * as DAOFactory from '../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
+import * as DAORegistry from '../artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json';
+import * as TokenFactory from '../artifacts/src/framework/utils/TokenFactory.sol/TokenFactory.json';
 
-// Tokens
-import * as GovernanceERC20 from '../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
-import * as GovernanceWrappedERC20 from '../artifacts/contracts/tokens/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
+//// plugin
+import * as PluginRepo from '../artifacts/src/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
+import * as PluginRepoFactory from '../artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
+import * as PluginRepoRegistry from '../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 
-// DAO Plugins
-import * as TokenVoting from '../artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json';
-import * as AddresslistVoting from '../artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
-import * as MerkleDistributor from '../artifacts/contracts/tokens/MerkleDistributor.sol/MerkleDistributor.json';
-import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json';
+// plugins
+import * as TokenVoting from '../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
+import * as AddresslistVoting from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
+import * as Admin from '../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
+import * as Multisig from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
+import * as MerkleMinter from '../artifacts/src/plugins/token/MerkleMinter.sol/MerkleMinter.json';
+import * as MerkleDistributor from '../artifacts/src/plugins/token/MerkleDistributor.sol/MerkleDistributor.json';
+
+// token
+//// governance
+import * as GovernanceERC20 from '../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
+import * as GovernanceWrappedERC20 from '../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 
 export default {
+  DAO,
   PermissionManager,
   PermissionLib,
-  IPermissionCondition,
-  DAO,
-  IDAO,
-  DaoAuthorizable,
+
   DAOFactory,
   TokenFactory,
   DAORegistry,
-  GovernanceERC20,
-  GovernanceWrappedERC20,
-  MerkleDistributor,
-  MerkleMinter,
+
+  PluginRepo,
+  PluginRepoFactory,
+  PluginRepoRegistry,
+
   TokenVoting,
   AddresslistVoting,
+  Admin,
+  Multisig,
+
+  MerkleMinter,
+  MerkleDistributor,
+
+  GovernanceERC20,
+  GovernanceWrappedERC20,
 };

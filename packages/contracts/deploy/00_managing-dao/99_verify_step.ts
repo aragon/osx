@@ -21,8 +21,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const isGranted = await managingDaoContract.callStatic.isGranted(
     managingDAOAddress,
     deployer,
-    ROOT_PERMISSION_ID, 
-    "0x"
+    ROOT_PERMISSION_ID,
+    '0x'
   );
   if (!isGranted) {
     throw new Error(
