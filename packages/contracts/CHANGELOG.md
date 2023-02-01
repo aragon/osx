@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## v0.7.0-alpha
+
 ### Added
 
 - Added support for release metadata.

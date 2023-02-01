@@ -104,12 +104,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [ethers.constants.AddressZero, '', ''],
   });
 
-  const merkleMinterBase = await TokenVotingSetupContract.merkleMinterBase();
-  verifyObjArray.push({address: merkleMinterBase, args: []});
-
-  const distributorBase = await TokenVotingSetupContract.distributorBase();
-  verifyObjArray.push({address: distributorBase, args: []});
-
   const PluginRepoFactoryContract = await ethers.getContractAt(
     'PluginRepoFactory',
     (
