@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+### Changed
+
+- Use OZ's upgradeable contracts for `PluginCloneable`.
+
+### Removed
+
+- Removed `DaoAuthorizableCloneable` and `DaoAuthorizableBase`.
+
 ## v0.7.0-alpha
 
 ### Added
