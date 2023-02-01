@@ -26,7 +26,7 @@ contract Admin is IMembershipContract, PluginCloneable, Proposal {
     /// @notice Initializes the contract.
     /// @param _dao The associated DAO.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
-    function initialize(IDAO _dao) public initializer {
+    function initialize(IDAO _dao) external initializer {
         __PluginCloneable_init(_dao);
 
         emit MembershipContractAnnounced({definingContract: address(_dao)});
@@ -71,4 +71,7 @@ contract Admin is IMembershipContract, PluginCloneable, Proposal {
         });
         _executeProposal(dao, proposalId, _actions, _allowFailureMap);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[50] private __gap;
 }

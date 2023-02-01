@@ -35,7 +35,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
     /// @param _dao The address of the managing DAO.
     /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
-    function initialize(IDAO _dao, ENSSubdomainRegistrar _subdomainRegistrar) public initializer {
+    function initialize(IDAO _dao, ENSSubdomainRegistrar _subdomainRegistrar) external initializer {
         bytes4 pluginRepoInterfaceId = type(IPluginRepo).interfaceId;
         __InterfaceBasedRegistry_init(_dao, pluginRepoInterfaceId);
 
