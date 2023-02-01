@@ -136,7 +136,7 @@ export async function applyUninstallation(
 
 export async function installPlugin(
   psp: PluginSetupProcessor,
-  targetDao: DAO,
+  targetDao: string,
   pluginRepoPointer: PluginRepoPointer,
   data: BytesLike = EMPTY_DATA
 ): Promise<{
@@ -156,14 +156,14 @@ export async function installPlugin(
     preparedSetupId: preparedSetupId
   } = await prepareInstallation(
     psp,
-    targetDao.address,
+    targetDao,
     pluginRepoPointer,
     data
   ));
 
   const {appliedSetupId: appliedSetupId } = await applyInstallation(
     psp,
-    targetDao.address,
+    targetDao,
     plugin,
     pluginRepoPointer,
     permissions,
@@ -172,6 +172,35 @@ export async function installPlugin(
 
   return {plugin, helpers, permissions, appliedSetupId, preparedSetupId};
 }
+
+export async function uninstallPlugin(
+  psp: PluginSetupProcessor,
+  targetDao: string,
+  plugin: string,
+  helpers: string[],
+  pluginRepoPointer: PluginRepoPointer,
+  data: BytesLike = EMPTY_DATA
+) {
+  
+  const { permissions } = await prepareUninstallation(
+    psp,
+    targetDao,
+    plugin,
+    pluginRepoPointer,
+    helpers,
+    data
+  )
+
+  await applyUninstallation(
+    psp,
+    targetDao,
+    plugin,
+    pluginRepoPointer,
+    permissions
+  )
+}
+
+
 
 export async function prepareUpdate(
   psp: PluginSetupProcessor,
