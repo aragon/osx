@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+### Changed
+
+- Moved the array length check for the `MintSettings` from `TokenVotingSetup` into `GovernanceERC20` contract.
+
+### Removed
+
 ## v0.7.0-alpha
 
 ### Added
