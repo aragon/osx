@@ -36,6 +36,11 @@ contract GovernanceERC20 is
         uint256[] amounts;
     }
 
+    /// @notice Thrown if the number of receivers and amounts specified in the mint settings do not match.
+    /// @param receiversArrayLength The length of the `receivers` array.
+    /// @param amountsArrayLength The length of the `amounts` array.
+    error MintSettingsArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
+
     /// @notice Calls the initialize function.
     /// @param _dao The managing DAO.
     /// @param _name The name of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
@@ -64,6 +69,14 @@ contract GovernanceERC20 is
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
+
+        // Check mint settings
+        if (_mintSettings.receivers.length != _mintSettings.amounts.length) {
+            revert MintSettingsArrayLengthMismatch({
+                receiversArrayLength: _mintSettings.receivers.length,
+                amountsArrayLength: _mintSettings.amounts.length
+            });
+        }
 
         for (uint256 i; i < _mintSettings.receivers.length; ) {
             _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);

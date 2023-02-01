@@ -111,18 +111,34 @@ describe('TokenVotingSetup', function () {
     });
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
+      const receivers: string[] = [AddressZero];
+      const amounts: number[] = [];
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
         Object.values(defaultTokenSettings),
-        [[AddressZero], []],
+        {receivers: receivers, amounts: amounts},
       ]);
+
+      const nonce = await ethers.provider.getTransactionCount(
+        tokenVotingSetup.address
+      );
+      const anticipatedPluginAddress = ethers.utils.getContractAddress({
+        from: tokenVotingSetup.address,
+        nonce,
+      });
+
+      const GovernanceERC20 = await ethers.getContractFactory(
+        'GovernanceERC20'
+      );
+
+      const govToken = GovernanceERC20.attach(anticipatedPluginAddress);
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
       )
         .to.be.revertedWithCustomError(
-          tokenVotingSetup,
-          'MintArrayLengthMismatch'
+          govToken,
+          'MintSettingsArrayLengthMismatch'
         )
         .withArgs(1, 0);
     });
