@@ -162,7 +162,7 @@ type PluginPreparation @entity(immutable: true) {
   installation: PluginInstallation!
   creator: Bytes!
   dao: Dao!
-  setupId: Bytes! # the psp setupId
+  preparedSetupId: Bytes! # the psp setupId
   pluginRepo: PluginRepo!
   pluginVersion: PluginVersion!
   data: Bytes

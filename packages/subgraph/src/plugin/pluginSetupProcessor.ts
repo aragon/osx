@@ -30,7 +30,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
     return;
   }
 
-  let preparationId = `${setupId}_${installationId.toHexString()}`;
+  let preparationId = `${installationId.toHexString()}_${setupId}`;
 
   let helpers: Bytes[] = [];
   for (let i = 0; i < event.params.preparedSetupData.helpers.length; i++) {
@@ -41,7 +41,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   preparationEntity.installation = installationId.toHexString();
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
-  preparationEntity.setupId = event.params.preparedSetupId;
+  preparationEntity.preparedSetupId = event.params.preparedSetupId;
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.data;
@@ -83,7 +83,7 @@ export function handleInstallationApplied(event: InstallationApplied): void {
     log.error('Failed to get installationId', [dao, plugin]);
     return;
   }
-  let preparationId = `${event.params.preparedSetupId.toHexString()}_${installationId.toHexString()}`;
+  let preparationId = `${installationId.toHexString()}_${event.params.preparedSetupId.toHexString()}`;
 
   let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
@@ -117,7 +117,7 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
     return;
   }
 
-  let preparationId = `${setupId}_${installationId.toHexString()}`;
+  let preparationId = `${installationId.toHexString()}_${setupId}`;
 
   let helpers: Bytes[] = [];
   for (let i = 0; i < event.params.preparedSetupData.helpers.length; i++) {
@@ -128,7 +128,7 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
   preparationEntity.installation = installationId.toHexString();
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
-  preparationEntity.setupId = event.params.preparedSetupId;
+  preparationEntity.preparedSetupId = event.params.preparedSetupId;
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.initData;
@@ -171,7 +171,7 @@ export function handleUpdateApplied(event: UpdateApplied): void {
     log.error('Failed to get installationId', [dao, plugin]);
     return;
   }
-  let preparationId = `${event.params.preparedSetupId.toHexString()}_${installationId.toHexString()}`;
+  let preparationId = `${installationId.toHexString()}_${event.params.preparedSetupId.toHexString()}`;
 
   let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
@@ -207,13 +207,13 @@ export function handleUninstallationPrepared(
     return;
   }
 
-  let preparationId = `${setupId}_${installationId.toHexString()}`;
+  let preparationId = `${installationId.toHexString()}_${setupId}`;
 
   let preparationEntity = new PluginPreparation(preparationId);
   preparationEntity.installation = installationId.toHexString();
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
-  preparationEntity.setupId = event.params.preparedSetupId;
+  preparationEntity.preparedSetupId = event.params.preparedSetupId;
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.pluginAddress = event.params.setupPayload.plugin;
@@ -256,7 +256,7 @@ export function handleUninstallationApplied(
     log.error('Failed to get installationId', [dao, plugin]);
     return;
   }
-  let preparationId = `${event.params.preparedSetupId.toHexString()}_${installationId.toHexString()}`;
+  let preparationId = `${installationId.toHexString()}_${event.params.preparedSetupId.toHexString()}`;
 
   let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {

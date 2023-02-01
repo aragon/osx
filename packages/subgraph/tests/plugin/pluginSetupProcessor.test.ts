@@ -55,7 +55,7 @@ test('InstallationPrepared event', function() {
   }
 
   let installationIdString = installationId.toHexString();
-  let preparationId = `${setupId}_${installationIdString}`;
+  let preparationId = `${installationIdString}_${setupId}`;
 
   let versionTuple = new ethereum.Tuple();
   versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('1')));
@@ -113,7 +113,12 @@ test('InstallationPrepared event', function() {
     'dao',
     dao.toLowerCase()
   );
-  assert.fieldEquals('PluginPreparation', preparationId, 'setupId', setupId);
+  assert.fieldEquals(
+    'PluginPreparation',
+    preparationId,
+    'preparedSetupId',
+    setupId
+  );
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
@@ -227,7 +232,7 @@ test('InstallationApplied event', function() {
     throw new Error('Failed to get installationId');
   }
   let installationIdString = installationId.toHexString();
-  let preparationId = `${setupId}_${installationIdString}`;
+  let preparationId = `${installationIdString}_${setupId}`;
 
   getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE, false);
   getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE, false);
@@ -294,7 +299,7 @@ test('UpdatePrepared event', function() {
     throw new Error('Failed to get installationId');
   }
   let installationIdString = installationId.toHexString();
-  let preparationId = `${setupId}_${installationIdString}`;
+  let preparationId = `${installationIdString}_${setupId}`;
 
   let versionTuple = new ethereum.Tuple();
   versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('1')));
@@ -353,7 +358,12 @@ test('UpdatePrepared event', function() {
     'dao',
     dao.toLowerCase()
   );
-  assert.fieldEquals('PluginPreparation', preparationId, 'setupId', setupId);
+  assert.fieldEquals(
+    'PluginPreparation',
+    preparationId,
+    'preparedSetupId',
+    setupId
+  );
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
@@ -457,7 +467,7 @@ test('UpdateApplied event', function() {
     throw new Error('Failed to get installationId');
   }
   let installationIdString = installationId.toHexString();
-  let preparationId = `${setupId}_${installationIdString}`;
+  let preparationId = `${installationIdString}_${setupId}`;
 
   getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE, false);
   getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE, false);
@@ -523,7 +533,7 @@ test('UninstallationPrepared event', function() {
     throw new Error('Failed to get installationId');
   }
   let installationIdString = installationId.toHexString();
-  let preparationId = `${setupId}_${installationIdString}`;
+  let preparationId = `${installationIdString}_${setupId}`;
 
   let pluginVersionId = `${pluginSetupRepo}_1_2`;
   let versionTuple = new ethereum.Tuple();
@@ -581,7 +591,12 @@ test('UninstallationPrepared event', function() {
     'dao',
     dao.toLowerCase()
   );
-  assert.fieldEquals('PluginPreparation', preparationId, 'setupId', setupId);
+  assert.fieldEquals(
+    'PluginPreparation',
+    preparationId,
+    'preparedSetupId',
+    setupId
+  );
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
@@ -684,7 +699,7 @@ test('UninstallationApplied event', function() {
     throw new Error('Failed to get installationId');
   }
   let installationIdString = installationId.toHexString();
-  let preparationId = `${setupId}_${installationIdString}`;
+  let preparationId = `${installationIdString}_${setupId}`;
 
   let event = createUninstallationAppliedEvent(dao, plugin, setupId);
   handleUninstallationApplied(event);

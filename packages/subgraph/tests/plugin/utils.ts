@@ -60,16 +60,16 @@ export function createInstallationPreparedEvent(
   versionTag: ethereum.Tuple,
   data: Bytes,
   helpers: string[],
-  givenPermissions: ethereum.Value[][]
+  requestedPermissions: ethereum.Value[][]
 ): InstallationPrepared {
   let newEvent = changetype<InstallationPrepared>(newMockEvent());
   newEvent.parameters = [];
 
   let permissions: ethereum.Tuple[] = [];
-  for (let i = 0; i < givenPermissions.length; i++) {
+  for (let i = 0; i < requestedPermissions.length; i++) {
     let permissionTuple = new ethereum.Tuple();
-    for (let a = 0; a < givenPermissions[i].length; a++) {
-      permissionTuple.push(givenPermissions[i][a]);
+    for (let a = 0; a < requestedPermissions[i].length; a++) {
+      permissionTuple.push(requestedPermissions[i][a]);
     }
     permissions.push(permissionTuple);
   }
@@ -169,7 +169,7 @@ export function createUpdatePreparedEvent(
   versionTag: ethereum.Tuple,
   currentHelpers: string[],
   helpers: string[],
-  givenPermissions: ethereum.Value[][],
+  requestedPermissions: ethereum.Value[][],
   data: Bytes,
   initData: Bytes
 ): UpdatePrepared {
@@ -177,10 +177,10 @@ export function createUpdatePreparedEvent(
   newEvent.parameters = [];
 
   let permissions: ethereum.Tuple[] = [];
-  for (let i = 0; i < givenPermissions.length; i++) {
+  for (let i = 0; i < requestedPermissions.length; i++) {
     let permissionTuple = new ethereum.Tuple();
-    for (let a = 0; a < givenPermissions[i].length; a++) {
-      permissionTuple.push(givenPermissions[i][a]);
+    for (let a = 0; a < requestedPermissions[i].length; a++) {
+      permissionTuple.push(requestedPermissions[i][a]);
     }
     permissions.push(permissionTuple);
   }
@@ -289,18 +289,18 @@ export function createUninstallationPreparedEvent(
   plugin: string,
   currentHelpers: string[],
   data: Bytes,
-  permissions: ethereum.Value[][]
+  requestedPermissions: ethereum.Value[][]
 ): UninstallationPrepared {
   let newEvent = changetype<UninstallationPrepared>(newMockEvent());
   newEvent.parameters = [];
 
-  let permissionsData: ethereum.Tuple[] = [];
-  for (let i = 0; i < permissions.length; i++) {
+  let permissions: ethereum.Tuple[] = [];
+  for (let i = 0; i < requestedPermissions.length; i++) {
     let permissionTuple = new ethereum.Tuple();
-    for (let a = 0; a < permissions[i].length; a++) {
-      permissionTuple.push(permissions[i][a]);
+    for (let a = 0; a < requestedPermissions[i].length; a++) {
+      permissionTuple.push(requestedPermissions[i][a]);
     }
-    permissionsData.push(permissionTuple);
+    permissions.push(permissionTuple);
   }
 
   let currentHelpersArray: Address[] = [];
@@ -338,7 +338,7 @@ export function createUninstallationPreparedEvent(
   );
   let permissionsParam = new ethereum.EventParam(
     'permissions',
-    ethereum.Value.fromTupleArray(permissionsData)
+    ethereum.Value.fromTupleArray(permissions)
   );
 
   newEvent.parameters.push(senderParam);
