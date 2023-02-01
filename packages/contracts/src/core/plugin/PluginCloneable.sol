@@ -2,20 +2,20 @@
 
 pragma solidity 0.8.17;
 
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
-import {DaoAuthorizableCloneable} from "./dao-authorizable/DaoAuthorizableCloneable.sol";
+import {DaoAuthorizableUpgradeable} from "./dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../dao/IDAO.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title PluginCloneable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
-abstract contract PluginCloneable is IPlugin, ERC165, DaoAuthorizableCloneable {
+abstract contract PluginCloneable is IPlugin, ERC165Upgradeable, DaoAuthorizableUpgradeable {
     /// @notice Initializes the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     function __PluginCloneable_init(IDAO _dao) internal virtual onlyInitializing {
-        __DaoAuthorizableCloneable_init(_dao);
+        __DaoAuthorizableUpgradeable_init(_dao);
     }
 
     /// @inheritdoc IPlugin

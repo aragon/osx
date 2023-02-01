@@ -9,7 +9,7 @@ import {_auth} from "../../utils/auth.sol";
 
 /// @title DaoAuthorizableUpgradeable
 /// @author Aragon Association - 2022-2023
-/// @notice An abstract contract providing a meta-transaction compatible modifier for upgradeable contracts to authorize function calls through an associated DAO.
+/// @notice An abstract contract providing a meta-transaction compatible modifier for upgradeable or cloneable contracts to authorize function calls through an associated DAO.
 /// @dev Make sure to call `__DaoAuthorizableUpgradeable_init` during initialization of the inheriting contract.
 abstract contract DaoAuthorizableUpgradeable is ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
