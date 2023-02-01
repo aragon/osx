@@ -98,6 +98,12 @@ test('InstallationPrepared event', function() {
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
+    'installation',
+    installationIdString
+  );
+  assert.fieldEquals(
+    'PluginPreparation',
+    preparationId,
     'creator',
     ADDRESS_THREE
   );
@@ -124,7 +130,7 @@ test('InstallationPrepared event', function() {
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
-    'plugin',
+    'pluginAddress',
     plugin.toLowerCase()
   );
   assert.fieldEquals(
@@ -252,6 +258,12 @@ test('InstallationApplied event', function() {
   assert.fieldEquals(
     'PluginInstallation',
     installationIdString,
+    'pluginAddress',
+    plugin.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
     'appliedPreparation',
     preparationId
   );
@@ -323,6 +335,12 @@ test('UpdatePrepared event', function() {
 
   assert.entityCount('PluginPreparation', 1);
   assert.fieldEquals('PluginPreparation', preparationId, 'id', preparationId);
+  assert.fieldEquals(
+    'PluginPreparation',
+    preparationId,
+    'installation',
+    installationIdString
+  );
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
@@ -470,6 +488,12 @@ test('UpdateApplied event', function() {
   assert.fieldEquals(
     'PluginInstallation',
     installationIdString,
+    'pluginAddress',
+    plugin.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
     'appliedPreparation',
     preparationId
   );
@@ -539,6 +563,12 @@ test('UninstallationPrepared event', function() {
 
   assert.entityCount('PluginPreparation', 1);
   assert.fieldEquals('PluginPreparation', preparationId, 'id', preparationId);
+  assert.fieldEquals(
+    'PluginPreparation',
+    preparationId,
+    'installation',
+    installationIdString
+  );
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,

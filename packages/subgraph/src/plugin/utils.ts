@@ -41,6 +41,8 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
   let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
     let contract = TokenVotingContract.bind(plugin);
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
@@ -70,6 +72,9 @@ function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
   let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
+
     let contract = AddresslistVotingContract.bind(plugin);
 
     let votingMode = contract.try_votingMode();
@@ -106,6 +111,8 @@ function createAdminPlugin(plugin: Address, daoId: string): void {
   let packageEntity = AdminPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new AdminPlugin(plugin.toHexString());
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
 
     // Create template
     let context = new DataSourceContext();
@@ -121,6 +128,8 @@ function createMultisigPlugin(plugin: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new MultisigPlugin(plugin.toHexString());
     packageEntity.onlyListed = false;
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
 
     // Create template
     let context = new DataSourceContext();
@@ -164,7 +173,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
 export function getPluginInstallationId(
   dao: string,
   plugin: string
-): Bytes | null {  
+): Bytes | null {
   let installationIdTupleArray = new ethereum.Tuple();
   installationIdTupleArray.push(
     ethereum.Value.fromAddress(Address.fromString(dao))
@@ -178,7 +187,7 @@ export function getPluginInstallationId(
     ethereum.Value.fromTuple(installationIdTuple)
   );
 
- if (installationIdTupleEncoded) {
+  if (installationIdTupleEncoded) {
     return Bytes.fromHexString(
       crypto
         .keccak256(

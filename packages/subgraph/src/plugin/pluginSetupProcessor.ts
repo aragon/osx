@@ -38,13 +38,14 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   }
 
   let preparationEntity = new PluginPreparation(preparationId);
+  preparationEntity.installation = installationId.toHexString();
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
   preparationEntity.setupId = event.params.preparedSetupId;
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.data;
-  preparationEntity.plugin = plugin;
+  preparationEntity.pluginAddress =  event.params.plugin;
   preparationEntity.helpers = helpers;
   preparationEntity.type = 'Installation';
   preparationEntity.save();
@@ -95,6 +96,7 @@ export function handleInstallationApplied(event: InstallationApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
+  pluginEntity.pluginAddress =  event.params.plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
@@ -123,13 +125,14 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
   }
 
   let preparationEntity = new PluginPreparation(preparationId);
+  preparationEntity.installation = installationId.toHexString();
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
   preparationEntity.setupId = event.params.preparedSetupId;
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.initData;
-  preparationEntity.plugin = plugin;
+  preparationEntity.pluginAddress = event.params.setupPayload.plugin;
   preparationEntity.helpers = helpers;
   preparationEntity.type = 'Update';
   preparationEntity.save();
@@ -181,6 +184,7 @@ export function handleUpdateApplied(event: UpdateApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
+  pluginEntity.pluginAddress = event.params.plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
@@ -206,12 +210,13 @@ export function handleUninstallationPrepared(
   let preparationId = `${setupId}_${installationId.toHexString()}`;
 
   let preparationEntity = new PluginPreparation(preparationId);
+  preparationEntity.installation = installationId.toHexString();
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
   preparationEntity.setupId = event.params.preparedSetupId;
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
-  preparationEntity.plugin = plugin;
+  preparationEntity.pluginAddress = event.params.setupPayload.plugin;
   preparationEntity.helpers = [];
   preparationEntity.type = 'Uninstallation';
   preparationEntity.save();

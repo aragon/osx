@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 import {
   handleVoteCast,
@@ -52,6 +52,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   let tokenVotingPlugin = new TokenVotingPlugin(
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
+  tokenVotingPlugin.dao = DAO_ADDRESS
+  tokenVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS)
   tokenVotingPlugin.save();
 
   // create calls
@@ -482,6 +484,8 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   // create state
   let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let tokenVotingPlugin = new TokenVotingPlugin(entityID);
+  tokenVotingPlugin.dao = DAO_ADDRESS
+  tokenVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS)
   tokenVotingPlugin.save();
 
   // create event
