@@ -11,7 +11,7 @@ import {
   DAO,
   GovernanceERC20,
 } from '../../../../typechain';
-import BalanceTree from '../distribution/src/balance-tree';
+import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
