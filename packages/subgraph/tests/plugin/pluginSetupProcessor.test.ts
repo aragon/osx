@@ -29,33 +29,15 @@ import {
   handleUpdatePrepared
 } from '../../src/plugin/pluginSetupProcessor';
 import {assert, clearStore, test} from 'matchstick-as';
-import {
-  Plugin,
-  PluginPermission,
-  PluginPreparation
-} from '../../generated/schema';
-import {
-  Address,
-  BigInt,
-  ByteArray,
-  Bytes,
-  ethereum
-} from '@graphprotocol/graph-ts';
-import {
-  getMinDuration,
-  getMinimalParticipation,
-  getSupportThreshold,
-  getSupportsInterface,
-  getProposalCount,
-  getVotingToken
-} from '../../tests/dao/utils';
+import {PluginPreparation} from '../../generated/schema';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {getSupportsInterface} from '../../tests/dao/utils';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
   MULTISIG_INTERFACE,
   TOKEN_VOTING_INTERFACE
 } from '../../src/utils/constants';
-import {createTokenCalls} from '../utils';
 import {
   getPluginInstallationId,
   PERMISSION_OPERATIONS
@@ -129,7 +111,7 @@ test('InstallationPrepared event', function() {
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
-    'pluginSetupRepository',
+    'pluginRepo',
     pluginSetupRepo
   );
   assert.fieldEquals(
@@ -213,10 +195,15 @@ test('InstallationPrepared event', function() {
     );
   }
 
-  assert.entityCount('Plugin', 1);
-  assert.fieldEquals('Plugin', installationIdString, 'dao', dao.toLowerCase());
+  assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
+    installationIdString,
+    'dao',
+    dao.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
     installationIdString,
     'state',
     'InstallationPrepared'
@@ -249,27 +236,37 @@ test('InstallationApplied event', function() {
   );
   handleInstallationApplied(event);
 
-  assert.entityCount('Plugin', 1);
+  assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
     installationIdString,
     'id',
     installationIdString
   );
-  assert.fieldEquals('Plugin', installationIdString, 'dao', dao.toLowerCase());
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
+    installationIdString,
+    'dao',
+    dao.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
     installationIdString,
     'appliedPreparation',
     preparationId
   );
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
     installationIdString,
     'appliedSetupId',
     APPLIED_PLUGIN_SETUP_ID
   );
-  assert.fieldEquals('Plugin', installationIdString, 'state', 'Installed');
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
+    'state',
+    'Installed'
+  );
 
   clearStore();
 });
@@ -342,7 +339,7 @@ test('UpdatePrepared event', function() {
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
-    'pluginSetupRepository',
+    'pluginRepo',
     pluginSetupRepo
   );
   assert.fieldEquals(
@@ -416,9 +413,19 @@ test('UpdatePrepared event', function() {
     );
   }
 
-  assert.entityCount('Plugin', 1);
-  assert.fieldEquals('Plugin', installationIdString, 'dao', dao.toLowerCase());
-  assert.fieldEquals('Plugin', installationIdString, 'state', 'UpdatePrepared');
+  assert.entityCount('PluginInstallation', 1);
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
+    'dao',
+    dao.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
+    'state',
+    'UpdatePrepared'
+  );
 
   clearStore();
 });
@@ -447,27 +454,37 @@ test('UpdateApplied event', function() {
   );
   handleUpdateApplied(event);
 
-  assert.entityCount('Plugin', 1);
+  assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
     installationIdString,
     'id',
     installationIdString
   );
-  assert.fieldEquals('Plugin', installationIdString, 'dao', dao.toLowerCase());
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
+    installationIdString,
+    'dao',
+    dao.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
     installationIdString,
     'appliedPreparation',
     preparationId
   );
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
     installationIdString,
     'appliedSetupId',
     APPLIED_PLUGIN_SETUP_ID
   );
-  assert.fieldEquals('Plugin', installationIdString, 'state', 'Installed');
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
+    'state',
+    'Installed'
+  );
 
   clearStore();
 });
@@ -538,7 +555,7 @@ test('UninstallationPrepared event', function() {
   assert.fieldEquals(
     'PluginPreparation',
     preparationId,
-    'pluginSetupRepository',
+    'pluginRepo',
     pluginSetupRepo
   );
   assert.fieldEquals(
@@ -611,10 +628,15 @@ test('UninstallationPrepared event', function() {
     );
   }
 
-  assert.entityCount('Plugin', 1);
-  assert.fieldEquals('Plugin', installationIdString, 'dao', dao.toLowerCase());
+  assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
+    installationIdString,
+    'dao',
+    dao.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
     installationIdString,
     'state',
     'UninstallPrepared'
@@ -637,13 +659,23 @@ test('UninstallationApplied event', function() {
   let event = createUninstallationAppliedEvent(dao, plugin, setupId);
   handleUninstallationApplied(event);
 
-  assert.entityCount('Plugin', 1);
-  assert.fieldEquals('Plugin', installationIdString, 'dao', dao.toLowerCase());
+  assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
-    'Plugin',
+    'PluginInstallation',
+    installationIdString,
+    'dao',
+    dao.toLowerCase()
+  );
+  assert.fieldEquals(
+    'PluginInstallation',
     installationIdString,
     'appliedPreparation',
     preparationId
   );
-  assert.fieldEquals('Plugin', installationIdString, 'state', 'Uninstalled');
+  assert.fieldEquals(
+    'PluginInstallation',
+    installationIdString,
+    'state',
+    'Uninstalled'
+  );
 });

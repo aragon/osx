@@ -1,6 +1,5 @@
 import {VersionCreated} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {PluginVersion, PluginSetup} from '../../generated/schema';
-import {BigInt} from '@graphprotocol/graph-ts';
 
 export function handleVersionCreated(event: VersionCreated): void {
   let id = `${event.address.toHexString()}_${event.params.release.toString()}_${event.params.build.toString()}`;
@@ -11,7 +10,6 @@ export function handleVersionCreated(event: VersionCreated): void {
   entity.build = event.params.build;
   entity.pluginSetup = pluginSetupId;
   entity.metadata = event.params.buildMetadata;
-
   entity.save();
 
   let pluginSetupEntity = PluginSetup.load(pluginSetupId);

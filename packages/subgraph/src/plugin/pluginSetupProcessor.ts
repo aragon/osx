@@ -8,7 +8,7 @@ import {
   UpdatePrepared
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 import {
-  Plugin,
+  PluginInstallation,
   PluginPermission,
   PluginPreparation
 } from '../../generated/schema';
@@ -41,7 +41,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
   preparationEntity.setupId = event.params.preparedSetupId;
-  preparationEntity.pluginSetupRepository = event.params.pluginSetupRepo.toHexString();
+  preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.data;
   preparationEntity.plugin = plugin;
@@ -65,9 +65,9 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
     permissionEntity.save();
   }
 
-  let pluginEntity = Plugin.load(installationId.toHexString());
+  let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
-    pluginEntity = new Plugin(installationId.toHexString());
+    pluginEntity = new PluginInstallation(installationId.toHexString());
   }
   pluginEntity.state = 'InstallationPrepared';
   pluginEntity.dao = dao;
@@ -84,10 +84,16 @@ export function handleInstallationApplied(event: InstallationApplied): void {
   }
   let preparationId = `${event.params.preparedSetupId.toHexString()}_${installationId.toHexString()}`;
 
-  let pluginEntity = Plugin.load(installationId.toHexString());
+  let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
-    pluginEntity = new Plugin(installationId.toHexString());
+    pluginEntity = new PluginInstallation(installationId.toHexString());
     pluginEntity.dao = dao;
+  }
+
+  let pluginPreparationEntity = PluginPreparation.load(preparationId);
+  if (pluginPreparationEntity) {
+    pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
+    pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
@@ -120,7 +126,7 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
   preparationEntity.setupId = event.params.preparedSetupId;
-  preparationEntity.pluginSetupRepository = event.params.pluginSetupRepo.toHexString();
+  preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.initData;
   preparationEntity.plugin = plugin;
@@ -144,11 +150,12 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
     permissionEntity.save();
   }
 
-  let pluginEntity = Plugin.load(installationId.toHexString());
+  let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
-    pluginEntity = new Plugin(installationId.toHexString());
+    pluginEntity = new PluginInstallation(installationId.toHexString());
     pluginEntity.dao = dao;
   }
+
   pluginEntity.state = 'UpdatePrepared';
   pluginEntity.save();
 }
@@ -163,10 +170,16 @@ export function handleUpdateApplied(event: UpdateApplied): void {
   }
   let preparationId = `${event.params.preparedSetupId.toHexString()}_${installationId.toHexString()}`;
 
-  let pluginEntity = Plugin.load(installationId.toHexString());
+  let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
-    pluginEntity = new Plugin(installationId.toHexString());
+    pluginEntity = new PluginInstallation(installationId.toHexString());
     pluginEntity.dao = dao;
+  }
+
+  let pluginPreparationEntity = PluginPreparation.load(preparationId);
+  if (pluginPreparationEntity) {
+    pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
+    pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
@@ -196,7 +209,7 @@ export function handleUninstallationPrepared(
   preparationEntity.creator = event.params.sender;
   preparationEntity.dao = dao;
   preparationEntity.setupId = event.params.preparedSetupId;
-  preparationEntity.pluginSetupRepository = event.params.pluginSetupRepo.toHexString();
+  preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.plugin = plugin;
   preparationEntity.helpers = [];
@@ -219,9 +232,9 @@ export function handleUninstallationPrepared(
     permissionEntity.save();
   }
 
-  let pluginEntity = Plugin.load(installationId.toHexString());
+  let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
-    pluginEntity = new Plugin(installationId.toHexString());
+    pluginEntity = new PluginInstallation(installationId.toHexString());
     pluginEntity.dao = dao;
   }
   pluginEntity.state = 'UninstallPrepared';
@@ -240,9 +253,9 @@ export function handleUninstallationApplied(
   }
   let preparationId = `${event.params.preparedSetupId.toHexString()}_${installationId.toHexString()}`;
 
-  let pluginEntity = Plugin.load(installationId.toHexString());
+  let pluginEntity = PluginInstallation.load(installationId.toHexString());
   if (!pluginEntity) {
-    pluginEntity = new Plugin(installationId.toHexString());
+    pluginEntity = new PluginInstallation(installationId.toHexString());
     pluginEntity.dao = dao;
   }
   pluginEntity.appliedPreparation = preparationId;

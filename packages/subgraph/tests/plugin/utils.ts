@@ -15,41 +15,38 @@ import {
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 
 export function createVersionCreated(
-  versionId: string,
-  semanticVersion: string[],
+  release: string,
+  build: string,
   pluginSetup: string,
-  contentURI: string
+  buildMetadata: Bytes
 ): VersionCreated {
   let newEvent = changetype<VersionCreated>(newMockEvent());
 
   newEvent.parameters = [];
 
-  let versionIdParam = new ethereum.EventParam(
-    'versionId',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(versionId))
+  let releaseParam = new ethereum.EventParam(
+    'release',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(release))
   );
 
-  let semanticVersionParam = new ethereum.EventParam(
-    'semanticVersion',
-    ethereum.Value.fromUnsignedBigIntArray(
-      semanticVersion.map<BigInt>(version => BigInt.fromString(version))
-    )
+  let buildParam = new ethereum.EventParam(
+    'build',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(build))
   );
-
   let pluginSetupParam = new ethereum.EventParam(
     'pluginSetup',
     ethereum.Value.fromAddress(Address.fromString(pluginSetup))
   );
 
-  let contentURIParam = new ethereum.EventParam(
-    'contentURI',
-    ethereum.Value.fromBytes(Bytes.fromHexString(contentURI))
+  let buildMetadataParam = new ethereum.EventParam(
+    'buildMetadata',
+    ethereum.Value.fromBytes(buildMetadata)
   );
 
-  newEvent.parameters.push(versionIdParam);
-  newEvent.parameters.push(semanticVersionParam);
+  newEvent.parameters.push(releaseParam);
+  newEvent.parameters.push(buildParam);
   newEvent.parameters.push(pluginSetupParam);
-  newEvent.parameters.push(contentURIParam);
+  newEvent.parameters.push(buildMetadataParam);
 
   return newEvent;
 }
