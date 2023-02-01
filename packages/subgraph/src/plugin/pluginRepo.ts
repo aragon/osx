@@ -10,7 +10,7 @@ export function handleVersionCreated(event: VersionCreated): void {
   entity.release = event.params.release;
   entity.build = event.params.build;
   entity.pluginSetup = pluginSetupId;
-  entity.metadata = event.params.contentURI;
+  entity.metadata = event.params.buildMetadata;
 
   entity.save();
 

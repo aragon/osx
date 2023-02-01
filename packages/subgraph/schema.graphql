@@ -107,10 +107,8 @@ type Dao @entity {
   balances: [Balance!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  plugins: [DaoPlugin!] @derivedFrom(field: "dao")
+  plugins: [Plugin!]! @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
-  "TODO: remove or rename to `plugins` once plugins are seperated from the core"
-  corePlugins: [Plugin!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
@@ -120,55 +118,75 @@ type Dao @entity {
 
 type PluginRepo @entity(immutable: true) {
   id: ID! # address
-  name: String!
+  subdomain: String!
   versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
 }
 
 type PluginSetup @entity(immutable: true) {
   id: ID! # contract address
   versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
-  installations: [Plugin!]! @derivedFrom(field: "pluginSetup")
 }
 
 type PluginVersion @entity(immutable: true) {
-  id: ID! # pluginRepo + version index
+  id: ID! # pluginRepo + release + build
   pluginRepo: PluginRepo!
   pluginSetup: PluginSetup
   release: Int!
   build: Int!
   metadata: Bytes!
+  preparations: [PluginPreparation!]! @derivedFrom(field: "pluginVersion")
 }
 
-type PluginHelper @entity(immutable: true) {
-  id: ID! # address
+type PluginPermission @entity(immutable: true) {
+  id: ID! # PluginPreparation + operation + where + who + permissionId
+  pluginPreparation: PluginPreparation!
+  operation: PermissionOperation!
+  where: Bytes!
+  who: Bytes!
+  condition: Bytes
+  permissionId: Bytes!
+}
+
+enum PermissionOperation {
+  Grant
+  Revoke
+  GrantWithCondition
+}
+
+type PluginPreparation @entity(immutable: true) {
+  id: ID! # psp setupId + installationId
+  creator: Bytes!
+  dao: Dao!
+  setupId: Bytes! # the psp setupId
+  pluginSetupRepository: PluginRepo!
+  pluginVersion: PluginVersion!
+  data: Bytes
   plugin: Plugin!
+  helpers: [Bytes!]!
+  permissions: [PluginPermission!]! @derivedFrom(field: "pluginPreparation")
+  type: PluginPreparationType!
 }
 
 type Plugin @entity {
-  "TODO: should do `implements IPlugin` once plugin is seperated from core"
-  id: ID! # address plugin
-  sender: String!
+  id: ID! # psp installationId
   dao: Dao!
-  setupId: Bytes!
-  pluginSetupRepo: PluginRepo!
-  pluginSetup: PluginSetup!
-  data: Bytes!
-  helpers: [PluginHelper!]! @derivedFrom(field: "plugin")
-  state: PluginState!
+  appliedPreparation: PluginPreparation
+  appliedSetupId: Bytes # The setupId of the application see PSP documentation for more info
+  preparations: [PluginPreparation!]! @derivedFrom(field: "plugin")
+  state: PluginPreparationState!
 }
 
-enum PluginState {
+enum PluginPreparationType {
+  Installation
+  Update
+}
+
+enum PluginPreparationState {
   InstallationPrepared
   Installed
   UpdatePrepared
   UninstallPrepared
   Uninstalled
-}
-
-type DaoPlugin @entity {
-  id: ID! # Dao + Plugin
-  plugin: IPlugin!
-  dao: Dao!
 }
 
 interface IPlugin {
@@ -213,7 +231,7 @@ enum VotingMode {
 type TokenVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugins once plugin is seperated from core"
   id: ID!
-  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  # daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
   supportThreshold: BigInt
@@ -284,7 +302,7 @@ type TokenVotingProposal implements Proposal @entity {
 type AddresslistVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
-  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  # daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
   supportThreshold: BigInt
@@ -353,7 +371,7 @@ type AddresslistVotingProposal implements Proposal @entity {
 type AdminPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
-  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  # daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
   adminstrators: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
 }
@@ -394,7 +412,7 @@ type AdminProposal implements Proposal @entity {
 type MultisigPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
-  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  # daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
   members: [MultisigApprover!]! @derivedFrom(field: "plugin")

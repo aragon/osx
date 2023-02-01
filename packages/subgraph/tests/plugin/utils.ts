@@ -4,10 +4,14 @@ import {VersionCreated} from '../../generated/templates/PluginRepoTemplate/Plugi
 import {
   InstallationApplied,
   InstallationPrepared,
+  InstallationPreparedPreparedSetupDataStruct,
+  PrepareInstallationCallPreparedSetupDataPermissionsStruct,
   UninstallationApplied,
   UninstallationPrepared,
   UpdateApplied,
-  UpdatePrepared
+  UpdatePrepared,
+  UpdatePreparedPreparedSetupDataStruct,
+  UpdatePreparedSetupPayloadStruct
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 
 export function createVersionCreated(
@@ -53,13 +57,34 @@ export function createVersionCreated(
 export function createInstallationPreparedEvent(
   sender: string,
   dao: string,
-  pluginSetup: string,
-  data: Bytes,
   plugin: string,
-  helpers: string[]
+  preparedSetupId: Bytes,
+  pluginSetupRepo: string,
+  versionTag: ethereum.Tuple,
+  data: Bytes,
+  helpers: string[],
+  givenPermissions: ethereum.Value[][]
 ): InstallationPrepared {
   let newEvent = changetype<InstallationPrepared>(newMockEvent());
   newEvent.parameters = [];
+
+  let permissions: ethereum.Tuple[] = [];
+  for (let i = 0; i < givenPermissions.length; i++) {
+    let permissionTuple = new ethereum.Tuple();
+    for (let a = 0; a < givenPermissions[i].length; a++) {
+      permissionTuple.push(givenPermissions[i][a]);
+    }
+    permissions.push(permissionTuple);
+  }
+
+  let helpersArray: Address[] = [];
+  for (let i = 0; i < helpers.length; i++) {
+    helpersArray.push(Address.fromString(helpers[i]));
+  }
+
+  let preparedSetupData = new InstallationPreparedPreparedSetupDataStruct();
+  preparedSetupData.push(ethereum.Value.fromAddressArray(helpersArray));
+  preparedSetupData.push(ethereum.Value.fromTupleArray(permissions));
 
   let senderParam = new ethereum.EventParam(
     'sender',
@@ -69,9 +94,17 @@ export function createInstallationPreparedEvent(
     'dao',
     ethereum.Value.fromAddress(Address.fromString(dao))
   );
-  let pluginSetupParam = new ethereum.EventParam(
-    'pluginSetup',
-    ethereum.Value.fromAddress(Address.fromString(pluginSetup))
+  let preparedSetupIdParam = new ethereum.EventParam(
+    'preparedSetupId',
+    ethereum.Value.fromBytes(preparedSetupId)
+  );
+  let pluginSetupRepoParam = new ethereum.EventParam(
+    'pluginSetupRepo',
+    ethereum.Value.fromAddress(Address.fromString(pluginSetupRepo))
+  );
+  let versionTagParam = new ethereum.EventParam(
+    'versionTag',
+    ethereum.Value.fromTuple(versionTag)
   );
   let dataParam = new ethereum.EventParam(
     'data',
@@ -81,30 +114,27 @@ export function createInstallationPreparedEvent(
     'plugin',
     ethereum.Value.fromAddress(Address.fromString(plugin))
   );
-  let helpersParam = new ethereum.EventParam(
-    'helpers',
-    ethereum.Value.fromAddressArray(
-      helpers.map<Address>(helper => Address.fromString(helper))
-    )
-  );
-  let permissionsParam = new ethereum.EventParam(
-    'permissions',
-    ethereum.Value.fromArray([])
+  let preparedSetupDataParam = new ethereum.EventParam(
+    'preparedSetupData',
+    ethereum.Value.fromTuple(preparedSetupData)
   );
 
   newEvent.parameters.push(senderParam);
   newEvent.parameters.push(daoParam);
-  newEvent.parameters.push(pluginSetupParam);
+  newEvent.parameters.push(preparedSetupIdParam);
+  newEvent.parameters.push(pluginSetupRepoParam);
+  newEvent.parameters.push(versionTagParam);
   newEvent.parameters.push(dataParam);
   newEvent.parameters.push(pluginParam);
-  newEvent.parameters.push(helpersParam);
-  newEvent.parameters.push(permissionsParam);
+  newEvent.parameters.push(preparedSetupDataParam);
   return newEvent;
 }
 
 export function createInstallationAppliedEvent(
   dao: string,
-  plugin: string
+  plugin: string,
+  preparedSetupId: Bytes,
+  appliedSetupId: Bytes
 ): InstallationApplied {
   let newEvent = changetype<InstallationApplied>(newMockEvent);
   newEvent.parameters = [];
@@ -117,23 +147,64 @@ export function createInstallationAppliedEvent(
     'plugin',
     ethereum.Value.fromAddress(Address.fromString(plugin))
   );
+  let preparedSetupIdParam = new ethereum.EventParam(
+    'preparedSetupId',
+    ethereum.Value.fromBytes(preparedSetupId)
+  );
+  let appliedSetupIdParam = new ethereum.EventParam(
+    'appliedSetupId',
+    ethereum.Value.fromBytes(appliedSetupId)
+  );
 
   newEvent.parameters.push(daoParam);
   newEvent.parameters.push(pluginParam);
+  newEvent.parameters.push(preparedSetupIdParam);
+  newEvent.parameters.push(appliedSetupIdParam);
   return newEvent;
 }
 
 export function createUpdatePreparedEvent(
   sender: string,
   dao: string,
-  pluginSetup: string,
-  data: Bytes,
   plugin: string,
-  updatedHelpers: string[],
-  initData: Bytes,
+  preparedSetupId: Bytes,
+  pluginSetupRepo: string,
+  versionTag: ethereum.Tuple,
+  currentHelpers: string[],
+  helpers: string[],
+  givenPermissions: ethereum.Value[][],
+  data: Bytes,
+  initData: Bytes
 ): UpdatePrepared {
   let newEvent = changetype<UpdatePrepared>(newMockEvent());
   newEvent.parameters = [];
+
+  let permissions: ethereum.Tuple[] = [];
+  for (let i = 0; i < givenPermissions.length; i++) {
+    let permissionTuple = new ethereum.Tuple();
+    for (let a = 0; a < givenPermissions[i].length; a++) {
+      permissionTuple.push(givenPermissions[i][a]);
+    }
+    permissions.push(permissionTuple);
+  }
+
+  let helpersArray: Address[] = [];
+  for (let i = 0; i < helpers.length; i++) {
+    helpersArray.push(Address.fromString(helpers[i]));
+  }
+
+  let preparedSetupData = new UpdatePreparedPreparedSetupDataStruct();
+  preparedSetupData.push(ethereum.Value.fromAddressArray(helpersArray));
+  preparedSetupData.push(ethereum.Value.fromTupleArray(permissions));
+
+  let currentHelpersArray: Address[] = [];
+  for (let i = 0; i < currentHelpers.length; i++) {
+    currentHelpersArray.push(Address.fromString(currentHelpers[i]));
+  }
+  let setupPayload = new UpdatePreparedSetupPayloadStruct();
+  setupPayload.push(ethereum.Value.fromAddress(Address.fromString(plugin)));
+  setupPayload.push(ethereum.Value.fromAddressArray(currentHelpersArray));
+  setupPayload.push(ethereum.Value.fromBytes(data));
 
   let senderParam = new ethereum.EventParam(
     'sender',
@@ -143,46 +214,47 @@ export function createUpdatePreparedEvent(
     'dao',
     ethereum.Value.fromAddress(Address.fromString(dao))
   );
-  let pluginSetupParam = new ethereum.EventParam(
-    'pluginSetup',
-    ethereum.Value.fromAddress(Address.fromString(pluginSetup))
+  let preparedSetupIdParam = new ethereum.EventParam(
+    'preparedSetupId',
+    ethereum.Value.fromBytes(preparedSetupId)
   );
-  let dataParam = new ethereum.EventParam(
-    'data',
-    ethereum.Value.fromBytes(data)
+  let pluginSetupRepoParam = new ethereum.EventParam(
+    'pluginSetupRepo',
+    ethereum.Value.fromAddress(Address.fromString(pluginSetupRepo))
   );
-  let pluginParam = new ethereum.EventParam(
-    'plugin',
-    ethereum.Value.fromAddress(Address.fromString(plugin))
-  );
-  let currentHelpers = new ethereum.EventParam(
-    'currentHelpers',
-    ethereum.Value.fromAddressArray(
-      updatedHelpers.map<Address>(helper => Address.fromString(helper))
-    )
-  );
-  let permissionsParam = new ethereum.EventParam(
-    'permissions',
-    ethereum.Value.fromArray([])
+  let versionTagParam = new ethereum.EventParam(
+    'versionTag',
+    ethereum.Value.fromTuple(versionTag)
   );
   let initDataParam = new ethereum.EventParam(
     'initData',
     ethereum.Value.fromBytes(initData)
   );
+  let setupPayloadParam = new ethereum.EventParam(
+    'setupPayload',
+    ethereum.Value.fromTuple(setupPayload)
+  );
+  let preparedSetupDataParam = new ethereum.EventParam(
+    'preparedSetupData',
+    ethereum.Value.fromTuple(preparedSetupData)
+  );
 
   newEvent.parameters.push(senderParam);
   newEvent.parameters.push(daoParam);
-  newEvent.parameters.push(pluginSetupParam);
-  newEvent.parameters.push(dataParam);
-  newEvent.parameters.push(pluginParam);
-  newEvent.parameters.push(currentHelpers);
-  newEvent.parameters.push(permissionsParam);
+  newEvent.parameters.push(preparedSetupIdParam);
+  newEvent.parameters.push(pluginSetupRepoParam);
+  newEvent.parameters.push(versionTagParam);
+  newEvent.parameters.push(setupPayloadParam);
+  newEvent.parameters.push(preparedSetupDataParam);
   newEvent.parameters.push(initDataParam);
   return newEvent;
 }
+
 export function createUpdateAppliedEvent(
   dao: string,
-  plugin: string
+  plugin: string,
+  preparedSetupId: Bytes,
+  appliedSetupId: Bytes
 ): UpdateApplied {
   let newEvent = changetype<UpdateApplied>(newMockEvent);
   newEvent.parameters = [];
@@ -195,22 +267,53 @@ export function createUpdateAppliedEvent(
     'plugin',
     ethereum.Value.fromAddress(Address.fromString(plugin))
   );
+  let preparedSetupIdParam = new ethereum.EventParam(
+    'preparedSetupId',
+    ethereum.Value.fromBytes(preparedSetupId)
+  );
+  let appliedSetupIdParam = new ethereum.EventParam(
+    'appliedSetupId',
+    ethereum.Value.fromBytes(appliedSetupId)
+  );
 
   newEvent.parameters.push(daoParam);
   newEvent.parameters.push(pluginParam);
+  newEvent.parameters.push(preparedSetupIdParam);
+  newEvent.parameters.push(appliedSetupIdParam);
   return newEvent;
 }
 
 export function createUninstallationPreparedEvent(
   sender: string,
   dao: string,
-  pluginSetup: string,
-  data: Bytes,
+  preparedSetupId: Bytes,
+  pluginSetupRepo: string,
+  versionTag: ethereum.Tuple,
   plugin: string,
-  updatedHelpers: string[],
+  currentHelpers: string[],
+  data: Bytes,
+  permissions: ethereum.Value[][]
 ): UninstallationPrepared {
   let newEvent = changetype<UninstallationPrepared>(newMockEvent());
   newEvent.parameters = [];
+
+  let permissionsData: ethereum.Tuple[] = [];
+  for (let i = 0; i < permissions.length; i++) {
+    let permissionTuple = new ethereum.Tuple();
+    for (let a = 0; a < permissions[i].length; a++) {
+      permissionTuple.push(permissions[i][a]);
+    }
+    permissionsData.push(permissionTuple);
+  }
+
+  let currentHelpersArray: Address[] = [];
+  for (let i = 0; i < currentHelpers.length; i++) {
+    currentHelpersArray.push(Address.fromString(currentHelpers[i]));
+  }
+  let setupPayload = new UpdatePreparedSetupPayloadStruct();
+  setupPayload.push(ethereum.Value.fromAddress(Address.fromString(plugin)));
+  setupPayload.push(ethereum.Value.fromAddressArray(currentHelpersArray));
+  setupPayload.push(ethereum.Value.fromBytes(data));
 
   let senderParam = new ethereum.EventParam(
     'sender',
@@ -220,42 +323,42 @@ export function createUninstallationPreparedEvent(
     'dao',
     ethereum.Value.fromAddress(Address.fromString(dao))
   );
-  let pluginSetupParam = new ethereum.EventParam(
-    'pluginSetup',
-    ethereum.Value.fromAddress(Address.fromString(pluginSetup))
+  let preparedSetupIdParam = new ethereum.EventParam(
+    'preparedSetupId',
+    ethereum.Value.fromBytes(preparedSetupId)
   );
-  let dataParam = new ethereum.EventParam(
-    'data',
-    ethereum.Value.fromBytes(data)
+  let pluginSetupRepoParam = new ethereum.EventParam(
+    'pluginSetupRepo',
+    ethereum.Value.fromAddress(Address.fromString(pluginSetupRepo))
   );
-  let pluginParam = new ethereum.EventParam(
-    'plugin',
-    ethereum.Value.fromAddress(Address.fromString(plugin))
+  let versionTagParam = new ethereum.EventParam(
+    'versionTag',
+    ethereum.Value.fromTuple(versionTag)
   );
-  let updatedHelpersParam = new ethereum.EventParam(
-    'updatedHelpers',
-    ethereum.Value.fromAddressArray(
-      updatedHelpers.map<Address>(helper => Address.fromString(helper))
-    )
+  let setupPayloadParam = new ethereum.EventParam(
+    'setupPayload',
+    ethereum.Value.fromTuple(setupPayload)
   );
   let permissionsParam = new ethereum.EventParam(
     'permissions',
-    ethereum.Value.fromArray([])
+    ethereum.Value.fromTupleArray(permissionsData)
   );
 
   newEvent.parameters.push(senderParam);
   newEvent.parameters.push(daoParam);
-  newEvent.parameters.push(pluginSetupParam);
-  newEvent.parameters.push(dataParam);
-  newEvent.parameters.push(pluginParam);
-  newEvent.parameters.push(updatedHelpersParam);
+  newEvent.parameters.push(preparedSetupIdParam);
+  newEvent.parameters.push(pluginSetupRepoParam);
+  newEvent.parameters.push(versionTagParam);
+  newEvent.parameters.push(setupPayloadParam);
   newEvent.parameters.push(permissionsParam);
+
   return newEvent;
 }
 
 export function createUninstallationAppliedEvent(
   dao: string,
-  plugin: string
+  plugin: string,
+  preparedSetupId: string
 ): UninstallationApplied {
   let newEvent = changetype<UninstallationApplied>(newMockEvent);
   newEvent.parameters = [];
@@ -268,8 +371,13 @@ export function createUninstallationAppliedEvent(
     'plugin',
     ethereum.Value.fromAddress(Address.fromString(plugin))
   );
+  let preparedSetupIdParam = new ethereum.EventParam(
+    'preparedSetupId',
+    ethereum.Value.fromBytes(Bytes.fromHexString(preparedSetupId))
+  );
 
   newEvent.parameters.push(daoParam);
   newEvent.parameters.push(pluginParam);
+  newEvent.parameters.push(preparedSetupIdParam);
   return newEvent;
 }
