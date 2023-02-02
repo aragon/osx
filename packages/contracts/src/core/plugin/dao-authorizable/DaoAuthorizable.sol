@@ -14,16 +14,16 @@ abstract contract DaoAuthorizable is Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
-    /// @notice Returns the DAO contract.
-    /// @return IDAO The DAO contract.
-    function getDAO() external view returns (IDAO) {
-        return dao;
-    }
-
     /// @notice Constructs the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
     constructor(IDAO _dao) {
         dao = _dao;
+    }
+
+    /// @notice Returns the DAO contract.
+    /// @return IDAO The DAO contract.
+    function getDAO() external view returns (IDAO) {
+        return dao;
     }
 
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
