@@ -59,9 +59,9 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - Plugin
-        - PluginContractPermissionId
-        - PluginGrantedPermission
+        - PluginInstallation
+        - PluginPreparation
+        - PluginPermission
       abis:        
         - name: PluginSetupProcessor
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json

@@ -1,4 +1,11 @@
-import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  Bytes,
+  DataSourceContext,
+  ethereum,
+  crypto,
+  ByteArray
+} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
 import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
@@ -10,7 +17,6 @@ import {
   Multisig
 } from '../../generated/templates';
 import {
-  DaoPlugin,
   TokenVotingPlugin,
   AddresslistVotingPlugin,
   AdminPlugin,
@@ -26,10 +32,17 @@ import {
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
+export const PERMISSION_OPERATIONS = new Map<number, string>()
+  .set(0, 'Grant')
+  .set(1, 'Revoke')
+  .set(2, 'GrantWithCondition');
+
 function createTokenVotingPlugin(plugin: Address, daoId: string): void {
   let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
     let contract = TokenVotingContract.bind(plugin);
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
@@ -59,6 +72,9 @@ function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
   let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
+
     let contract = AddresslistVotingContract.bind(plugin);
 
     let votingMode = contract.try_votingMode();
@@ -95,6 +111,8 @@ function createAdminPlugin(plugin: Address, daoId: string): void {
   let packageEntity = AdminPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new AdminPlugin(plugin.toHexString());
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
 
     // Create template
     let context = new DataSourceContext();
@@ -110,6 +128,8 @@ function createMultisigPlugin(plugin: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new MultisigPlugin(plugin.toHexString());
     packageEntity.onlyListed = false;
+    packageEntity.pluginAddress = plugin;
+    packageEntity.dao = daoId;
 
     // Create template
     let context = new DataSourceContext();
@@ -125,7 +145,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
   // TODO: rethink this once the market place is ready
   let contract = ERC165Contract.bind(plugin);
 
-  let TokenVotingInterfaceSupported = supportsInterface(
+  let tokenVotingInterfaceSupported = supportsInterface(
     contract,
     TOKEN_VOTING_INTERFACE
   );
@@ -139,7 +159,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
     MULTISIG_INTERFACE
   );
 
-  if (TokenVotingInterfaceSupported) {
+  if (tokenVotingInterfaceSupported) {
     createTokenVotingPlugin(plugin, daoId);
   } else if (addresslistInterfaceSupported) {
     createAddresslistVotingPlugin(plugin, daoId);
@@ -148,25 +168,33 @@ export function addPlugin(daoId: string, plugin: Address): void {
   } else if (multisigInterfaceSupported) {
     createMultisigPlugin(plugin, daoId);
   }
-
-  if (
-    TokenVotingInterfaceSupported ||
-    addresslistInterfaceSupported ||
-    adminInterfaceSupported ||
-    multisigInterfaceSupported
-  ) {
-    let daoPluginEntityId = daoId + '_' + plugin.toHexString();
-    let daoPluginEntity = new DaoPlugin(daoPluginEntityId);
-    daoPluginEntity.plugin = plugin.toHexString();
-    daoPluginEntity.dao = daoId;
-    daoPluginEntity.save();
-  }
 }
 
-export function removePlugin(daoId: string, plugin: string): void {
-  let daoPluginEntityId = daoId + '_' + plugin;
-  let daoPluginEntity = DaoPlugin.load(daoPluginEntityId);
-  if (daoPluginEntity) {
-    store.remove('DaoPlugin', daoPluginEntityId);
+export function getPluginInstallationId(
+  dao: string,
+  plugin: string
+): Bytes | null {
+  let installationIdTupleArray = new ethereum.Tuple();
+  installationIdTupleArray.push(
+    ethereum.Value.fromAddress(Address.fromString(dao))
+  );
+  installationIdTupleArray.push(
+    ethereum.Value.fromAddress(Address.fromString(plugin))
+  );
+
+  let installationIdTuple = installationIdTupleArray as ethereum.Tuple;
+  let installationIdTupleEncoded = ethereum.encode(
+    ethereum.Value.fromTuple(installationIdTuple)
+  );
+
+  if (installationIdTupleEncoded) {
+    return Bytes.fromHexString(
+      crypto
+        .keccak256(
+          ByteArray.fromHexString(installationIdTupleEncoded.toHexString())
+        )
+        .toHexString()
+    );
   }
+  return null;
 }

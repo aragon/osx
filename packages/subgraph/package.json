@@ -1,6 +1,6 @@
 {
   "name": "@aragon/core-subgraph",
-  "version": "0.6.2-alpha",
+  "version": "0.7.0-alpha",
   "description": "Aragon V2 Subgraph",
   "homepage": "https://github.com/aragon/core",
   "license": "MIT",

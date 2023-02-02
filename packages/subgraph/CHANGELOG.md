@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.7.0-alpha
+
 ### Added
 
 - Added the `MembershipContractAnnounced` event.
 - Added `executionTxHash` to `AddresslistVotingProposal`, `TokenVotingProposal`, `MultisigProposal` and `AdminProposal`.
 - Added `voteReplaced` and `updatedAt` to `TokenVotingVote` and `AddresslistVotingVote`.
+- Adds entities: `PluginPermission`, `PluginPreparation`.
+- Adds enums: `PermissionOperation`, `PluginPreparationType`.
 
 ### Changed
 
@@ -20,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
 - Changes `callId` in `Executed` event from `uint256` to `bytes32`.
 - Renames `name` in `PluginRepoRegistry` and `DAORegistry` to `subdomain`.
+- Removes `DaoPlugin` entity.
+- Removes `daos` field from Plugin entities.
+
+### Fixed
+
+- Applied changes made in the `PluginSetupProcessor`.
 
 ## 0.6.2-alpha
 

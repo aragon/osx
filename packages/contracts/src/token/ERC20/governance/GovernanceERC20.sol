@@ -27,15 +27,25 @@ contract GovernanceERC20 is
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 
+    /// @notice The settings for the initial mint of the token.
+    /// @param receivers The receivers of the tokens.
+    /// @param amounts The amounts of tokens to be minted for each receiver.
+    /// @dev The lengths of `receivers` and `amounts` must match.
     struct MintSettings {
         address[] receivers;
         uint256[] amounts;
     }
 
+    /// @notice Thrown if the number of receivers and amounts specified in the mint settings do not match.
+    /// @param receiversArrayLength The length of the `receivers` array.
+    /// @param amountsArrayLength The length of the `amounts` array.
+    error MintSettingsArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
+
+    /// @notice Calls the initialize function.
     /// @param _dao The managing DAO.
-    /// @param _name The name of the wrapped token.
-    /// @param _symbol The symbol fo the wrapped token.
-    /// @param _mintSettings The initial mint settings
+    /// @param _name The name of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
+    /// @param _symbol The symbol fo the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
+    /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
     constructor(
         IDAO _dao,
         string memory _name,
@@ -45,18 +55,25 @@ contract GovernanceERC20 is
         initialize(_dao, _name, _symbol, _mintSettings);
     }
 
-    /// @notice Initializes the GovernanceERC20.
+    /// @notice Initializes the contract and mints tokens to a list of receivers.
     /// @param _dao The managing DAO.
-    /// @param _name The name of the wrapped token.
-    /// @param _symbol The symbol fo the wrapped token.
+    /// @param _name The name of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
+    /// @param _symbol The symbol fo the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
     /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
-    /// @dev The lengths of `receivers` and `amounts` must match.
     function initialize(
         IDAO _dao,
         string memory _name,
         string memory _symbol,
         MintSettings memory _mintSettings
     ) public initializer {
+        // Check mint settings
+        if (_mintSettings.receivers.length != _mintSettings.amounts.length) {
+            revert MintSettingsArrayLengthMismatch({
+                receiversArrayLength: _mintSettings.receivers.length,
+                amountsArrayLength: _mintSettings.amounts.length
+            });
+        }
+
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
@@ -100,6 +117,6 @@ contract GovernanceERC20 is
         }
     }
 
-   /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[50] private __gap;
 }

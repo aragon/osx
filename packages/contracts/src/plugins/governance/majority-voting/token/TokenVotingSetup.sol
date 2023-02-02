@@ -48,11 +48,6 @@ contract TokenVotingSetup is PluginSetup {
         string symbol;
     }
 
-    /// @notice Thrown if `MintSettings`'s params are not of the same length.
-    /// @param receiversArrayLength The array length of `receivers`.
-    /// @param amountsArrayLength The array length of `amounts`.
-    error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
-
     /// @notice Thrown if token address is passed which is not a token.
     /// @param token The token address
     error TokenNotContract(address token);
@@ -99,14 +94,6 @@ contract TokenVotingSetup is PluginSetup {
                 _data,
                 (MajorityVotingBase.VotingSettings, TokenSettings, GovernanceERC20.MintSettings)
             );
-
-        // Check mint setting.
-        if (mintSettings.receivers.length != mintSettings.amounts.length) {
-            revert MintArrayLengthMismatch({
-                receiversArrayLength: mintSettings.receivers.length,
-                amountsArrayLength: mintSettings.amounts.length
-            });
-        }
 
         address token = tokenSettings.addr;
 

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed `DaoAuthorizableCloneable` and `DaoAuthorizableBase`.
+- Moved the array length check for the `MintSettings` from `TokenVotingSetup` into `GovernanceERC20` contract.
 
 ## v0.7.0-alpha
 
