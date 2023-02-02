@@ -159,27 +159,27 @@ contract DAOFactory {
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.WITHDRAW_PERMISSION_ID()
+            _dao.UPGRADE_DAO_PERMISSION_ID()
         );
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.UPGRADE_DAO_PERMISSION_ID()
+            _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
         );
         items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
+            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
         items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+            _dao.SET_METADATA_PERMISSION_ID()
         );
         items[5] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_METADATA_PERMISSION_ID()
+            _dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID()
         );
 
         _dao.applySingleTargetPermissions(address(_dao), items);

@@ -19,7 +19,6 @@ struct Action {
   uint256 value; // The value to be sent with the call (for example ETH if on mainnet)
   bytes data; // The `bytes4` function signature and arguments
 }
-
 ```
 
 Actions are typically scheduled in a proposal in a governance [plugin customizing your DAO](03-plugins.md) can be calls to external contracts, plugins, or the aragonOS DAO framework infrastructure, for example, to [setup a plugin](../02-the-dao-framework/02-plugin-repository/04-plugin-setup.md).
@@ -32,7 +31,10 @@ Multiple `Action` structs can be put into one `Action[]` array and executed in a
 /// @param callId The id of the call. The definition of the value of `callId` is up to the calling contract and can be used, e.g., as a nonce.
 /// @param _actions The array of actions.
 /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
-function execute(uint256 callId, Action[] memory _actions)
+function execute(
+  uint256 callId,
+  Action[] memory _actions
+)
   external
   override
   auth(address(this), EXECUTE_PERMISSION_ID)
@@ -52,7 +54,6 @@ function execute(uint256 callId, Action[] memory _actions)
 
   return execResults;
 }
-
 ```
 
 ### 2. Asset Management
@@ -92,7 +93,7 @@ Lastly, it is essential that only the right entities (e.g., the DAO itself or tr
 
 This is why aragonOS DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
 
-Although possible, the permissions to withdraw assets, execute arbitrary actions or upgrade the DAO should not be given to externally owned accounts (EOA) as this poses a security risk to the organization if the account is compromised or acts adverserial.
+Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to externally owned accounts (EOA) as this poses a security risk to the organization if the account is compromised or acts adverserial.
 
 Instead, the permissions for the above-mentioned functionalities are better restricted to the `DAO` contract itself and triggered through governance [plugins](03-plugins.md) that you can install on your DAO.
 
