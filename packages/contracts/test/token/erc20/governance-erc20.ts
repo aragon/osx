@@ -126,7 +126,7 @@ describe('GovernanceERC20', function () {
     });
 
     it('mints tokens if the caller has the `mintPermission`', async () => {
-      dao.grant(token.address, signers[0].address, MINT_PERMISSION_ID);
+      await dao.grant(token.address, signers[0].address, MINT_PERMISSION_ID);
 
       const receiverAddr = signers[9].address;
       const oldBalance = await token.balanceOf(receiverAddr);
