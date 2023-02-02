@@ -121,7 +121,9 @@ type PluginRepo @entity(immutable: true) {
   id: ID! # address
   subdomain: String!
   versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+  # Holds all preparations. Also applied ones.
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
+  # Holds all installed and uninstalled installations.
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
 }
 
@@ -137,7 +139,9 @@ type PluginVersion @entity(immutable: true) {
   release: Int!
   build: Int!
   metadata: Bytes!
+  # Holds all preparations. Also applied ones.
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginVersion")
+  # Holds all installed and uninstalled installations.
   installations: [PluginInstallation!] @derivedFrom(field: "appliedVersion")
 }
 
