@@ -31,6 +31,7 @@ contract GovernanceWrappedERC20 is
     ERC20VotesUpgradeable,
     ERC20WrapperUpgradeable
 {
+    /// @notice Calls the initialize function.
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
@@ -38,7 +39,7 @@ contract GovernanceWrappedERC20 is
         initialize(_token, _name, _symbol);
     }
 
-    /// @notice Initializes the GovernanceWrappedERC20.
+    /// @notice Initializes the contract.
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
