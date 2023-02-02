@@ -64,7 +64,7 @@ export function shouldUpgradeCorrectly(
           )
           .withArgs(...DaoUnauthorizedRevertArgs(contract, user, dao));
       } else {
-        await expect(tx2)
+        await expect(tx1)
           .to.be.revertedWithCustomError(
             contract,
             upgradeRevertPermissionMessage
