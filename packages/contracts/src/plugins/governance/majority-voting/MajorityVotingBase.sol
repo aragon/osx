@@ -443,7 +443,7 @@ abstract contract MajorityVotingBase is
         proposals[_proposalId].executed = true;
 
         _executeProposal(
-            dao,
+            dao(),
             _proposalId,
             proposals[_proposalId].actions,
             proposals[_proposalId].allowFailureMap

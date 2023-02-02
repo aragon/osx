@@ -27,7 +27,7 @@ contract TestSharedPlugin is PluginUUPSUpgradeable {
 
         if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
             revert DaoUnauthorized({
-                dao: address(dao),
+                dao: address(dao()),
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),

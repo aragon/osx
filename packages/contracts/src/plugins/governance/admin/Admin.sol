@@ -42,7 +42,7 @@ contract Admin is IMembershipContract, PluginCloneable, Proposal {
     /// @inheritdoc IMembershipContract
     function isMember(address _account) external view returns (bool) {
         return
-            dao.hasPermission({
+            dao().hasPermission({
                 _where: address(this),
                 _who: _account,
                 _permissionId: EXECUTE_PROPOSAL_PERMISSION_ID,
@@ -69,7 +69,7 @@ contract Admin is IMembershipContract, PluginCloneable, Proposal {
             _actions: _actions,
             _allowFailureMap: _allowFailureMap
         });
-        _executeProposal(dao, proposalId, _actions, _allowFailureMap);
+        _executeProposal(dao(), proposalId, _actions, _allowFailureMap);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

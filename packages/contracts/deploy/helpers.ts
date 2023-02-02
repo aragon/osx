@@ -159,7 +159,7 @@ export async function checkSetManagingDao(
   contract: Contract,
   expectedDaoAddress: string
 ) {
-  const setDAO = await contract.callStatic.getDAO();
+  const setDAO = await contract.callStatic.dao();
   if (setDAO !== expectedDaoAddress) {
     throw new Error(
       `${contract.address} has wrong DAO. Expected ${setDAO} to be ${expectedDaoAddress}`

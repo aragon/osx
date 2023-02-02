@@ -412,7 +412,7 @@ describe('TokenVotingSetup', function () {
       const PluginFactory = await ethers.getContractFactory('TokenVoting');
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
-      expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
+      expect(await tokenVoting.dao()).to.be.equal(daoAddress);
 
       expect(await tokenVoting.minParticipation()).to.be.equal(
         defaultVotingSettings.minParticipation
@@ -438,7 +438,7 @@ describe('TokenVotingSetup', function () {
         anticipatedTokenAddress
       );
 
-      expect(await governanceTokenContract.getDAO()).to.be.equal(daoAddress);
+      expect(await governanceTokenContract.dao()).to.be.equal(daoAddress);
       expect(await governanceTokenContract.name()).to.be.equal(tokenName);
       expect(await governanceTokenContract.symbol()).to.be.equal(tokenSymbol);
     });

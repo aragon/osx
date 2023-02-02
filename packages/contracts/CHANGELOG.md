@@ -11,9 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Moved the array length check for the `MintSettings` from `TokenVotingSetup` into `GovernanceERC20` contract.
+- Use OZ's upgradeable contracts for `PluginCloneable`.
+- Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
 
 ### Removed
+
+- Removed `DaoAuthorizableCloneable` and `DaoAuthorizableBase`.
+- Moved the array length check for the `MintSettings` from `TokenVotingSetup` into `GovernanceERC20` contract.
 
 ## v0.7.0-alpha
 

@@ -63,7 +63,7 @@ describe('GovernanceERC20', function () {
 
     it('sets the managing DAO ', async () => {
       token = await GovernanceERC20.deploy(...defaultInitData);
-      expect(await token.getDAO()).to.eq(dao.address);
+      expect(await token.dao()).to.eq(dao.address);
     });
 
     it('reverts if the `receivers` and `amounts` array lengths in the mint settings mismatch', async () => {
