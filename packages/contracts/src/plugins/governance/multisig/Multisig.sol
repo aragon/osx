@@ -350,7 +350,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         proposal_.executed = true;
 
         _executeProposal(
-            dao,
+            dao(),
             _proposalId,
             proposals[_proposalId].actions,
             proposals[_proposalId].allowFailureMap

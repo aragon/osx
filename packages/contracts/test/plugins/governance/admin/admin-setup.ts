@@ -140,7 +140,7 @@ describe('AdminSetup', function () {
       const factory = await ethers.getContractFactory('Admin');
       const adminAddressContract = factory.attach(anticipatedPluginAddress);
 
-      expect(await adminAddressContract.getDAO()).to.be.equal(daoAddress);
+      expect(await adminAddressContract.dao()).to.be.equal(daoAddress);
     });
   });
 

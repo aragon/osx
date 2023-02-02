@@ -241,7 +241,7 @@ describe('MultisigSetup', function () {
       const factory = await ethers.getContractFactory('Multisig');
       const multisigContract = factory.attach(anticipatedPluginAddress);
 
-      expect(await multisigContract.getDAO()).to.eq(daoAddress);
+      expect(await multisigContract.dao()).to.eq(daoAddress);
       expect(await multisigContract.addresslistLength()).to.be.eq(1);
       const settings = await multisigContract.multisigSettings();
       expect(settings.onlyListed).to.be.true;
