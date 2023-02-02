@@ -32,6 +32,8 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // create state
   let pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let adminPlugin = new AdminPlugin(pluginId);
+  adminPlugin.dao = DAO_ADDRESS;
+  adminPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   adminPlugin.save();
 
   // create event
@@ -100,6 +102,8 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   // create state
   let pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let adminPlugin = new AdminPlugin(pluginId);
+  adminPlugin.dao = DAO_ADDRESS;
+  adminPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   adminPlugin.save();
 
   let entityID =

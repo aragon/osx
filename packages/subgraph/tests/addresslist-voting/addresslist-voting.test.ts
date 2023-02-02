@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 import {
   handleMembersAdded,
@@ -58,6 +58,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   let addresslistVotingPlugin = new AddresslistVotingPlugin(
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
+  addresslistVotingPlugin.dao = DAO_ADDRESS
+  addresslistVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS)
   addresslistVotingPlugin.save();
 
   // create calls
@@ -496,6 +498,8 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
   // create state
   let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let addresslistVotingPlugin = new AddresslistVotingPlugin(entityID);
+  addresslistVotingPlugin.dao = DAO_ADDRESS
+  addresslistVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS)
   addresslistVotingPlugin.save();
 
   // create event

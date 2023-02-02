@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 import {
   handleMembersAdded,
@@ -48,6 +48,8 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   let multisigPlugin = new MultisigPlugin(
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
+  multisigPlugin.dao = DAO_ADDRESS;
+  multisigPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   multisigPlugin.minApprovals = BigInt.fromString(THREE);
   multisigPlugin.onlyListed = false;
   multisigPlugin.save();
@@ -383,6 +385,8 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   // create state
   let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let multisigPlugin = new MultisigPlugin(entityID);
+  multisigPlugin.dao = DAO_ADDRESS;
+  multisigPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   multisigPlugin.onlyListed = false;
   multisigPlugin.save();
 
