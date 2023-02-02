@@ -132,7 +132,7 @@ describe('GovernanceERC20', function () {
       const oldBalance = await token.balanceOf(receiverAddr);
 
       const mintAmount = 100;
-      token.mint(receiverAddr, mintAmount);
+      await token.mint(receiverAddr, mintAmount);
 
       expect(await token.balanceOf(receiverAddr)).to.eq(
         oldBalance.add(mintAmount)
