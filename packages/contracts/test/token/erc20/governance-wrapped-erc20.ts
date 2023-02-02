@@ -63,16 +63,14 @@ describe('GovernanceWrappedERC20', function () {
       governanceWrappedERC20Name,
       governanceWrappedERC20Symbol,
     ];
+
+    governanceToken = await GovernanceWrappedERC20.deploy(
+      ...defaultGovernanceWrappedERC20InitData
+    );
   });
 
   describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
-      erc20 = await TestERC20.deploy(...defaultExistingERC20InitData);
-
-      governanceToken = await GovernanceWrappedERC20.deploy(
-        ...defaultGovernanceWrappedERC20InitData
-      );
-
       await expect(
         governanceToken.initialize(...defaultGovernanceWrappedERC20InitData)
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
@@ -127,12 +125,6 @@ describe('GovernanceWrappedERC20', function () {
   });
 
   describe('depositFor', async () => {
-    beforeEach(async function () {
-      governanceToken = await GovernanceWrappedERC20.deploy(
-        ...defaultGovernanceWrappedERC20InitData
-      );
-    });
-
     it('reverts if the amount is not approved', async () => {
       const erc20Balance = await erc20.balanceOf(signers[0].address);
       await expect(
@@ -181,10 +173,6 @@ describe('GovernanceWrappedERC20', function () {
 
   describe('withdrawTo', async () => {
     beforeEach(async function () {
-      governanceToken = await GovernanceWrappedERC20.deploy(
-        ...defaultGovernanceWrappedERC20InitData
-      );
-
       const erc20Balance = await erc20.balanceOf(signers[0].address);
       await erc20.approve(governanceToken.address, erc20Balance);
       await governanceToken.depositFor(signers[0].address, erc20Balance);
@@ -233,10 +221,6 @@ describe('GovernanceWrappedERC20', function () {
 
   describe('delegate', async () => {
     beforeEach(async function () {
-      governanceToken = await GovernanceWrappedERC20.deploy(
-        ...defaultGovernanceWrappedERC20InitData
-      );
-
       // approve and deposit for all token holders
       let promises = defaultBalances.map(balance =>
         erc20.approve(balance.account, balance.amount)

@@ -45,20 +45,18 @@ describe('GovernanceERC20', function () {
       governanceERC20Symbol,
       mintSettings,
     ];
+
+    token = await GovernanceERC20.deploy(...defaultInitData);
   });
 
   describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
-      token = await GovernanceERC20.deploy(...defaultInitData);
-
       await expect(token.initialize(...defaultInitData)).to.be.revertedWith(
         OZ_ERRORS.ALREADY_INITIALIZED
       );
     });
 
     it('sets the token name and symbol', async () => {
-      token = await GovernanceERC20.deploy(...defaultInitData);
-
       expect(await token.name()).to.eq(governanceERC20Name);
       expect(await token.symbol()).to.eq(governanceERC20Symbol);
     });
@@ -86,8 +84,6 @@ describe('GovernanceERC20', function () {
 
   describe('supportsInterface:', async () => {
     it('it supports all inherited interfaces', async () => {
-      token = await GovernanceERC20.deploy(...defaultInitData);
-
       await Promise.all(
         [
           'IERC165Upgradeable',
@@ -117,10 +113,6 @@ describe('GovernanceERC20', function () {
   });
 
   describe('mint:', async () => {
-    beforeEach(async function () {
-      token = await GovernanceERC20.deploy(...defaultInitData);
-    });
-
     it('reverts if the `MINT_PERMISSION_ID` permission is missing', async () => {
       await expect(token.mint(signers[0].address, 123))
         .to.be.revertedWithCustomError(token, 'DaoUnauthorized')
@@ -149,10 +141,6 @@ describe('GovernanceERC20', function () {
   });
 
   describe('delegate', async () => {
-    beforeEach(async function () {
-      token = await GovernanceERC20.deploy(...defaultInitData);
-    });
-
     it('delegates voting power to another account', async () => {
       const balanceSigner0 = await token.balanceOf(signers[0].address);
       const balanceSigner1 = await token.balanceOf(signers[1].address);
