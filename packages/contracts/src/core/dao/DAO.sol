@@ -126,6 +126,7 @@ contract DAO is
             _permissionId == EXECUTE_PERMISSION_ID ||
             _permissionId == UPGRADE_DAO_PERMISSION_ID ||
             _permissionId == SET_METADATA_PERMISSION_ID ||
+            _permissionId == SET_TRUSTED_FORWARDER_PERMISSION_ID ||
             _permissionId == SET_SIGNATURE_VALIDATOR_PERMISSION_ID ||
             _permissionId == REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     }

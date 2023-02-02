@@ -148,7 +148,7 @@ contract DAOFactory {
     function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
         PermissionLib.SingleTargetPermission[]
-            memory items = new PermissionLib.SingleTargetPermission[](5);
+            memory items = new PermissionLib.SingleTargetPermission[](6);
 
         // Grant DAO all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
@@ -175,6 +175,11 @@ contract DAOFactory {
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_METADATA_PERMISSION_ID()
+        );
+        items[5] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Grant,
+            address(_dao),
+            _dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID()
         );
 
         _dao.applySingleTargetPermissions(address(_dao), items);
