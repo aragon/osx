@@ -120,7 +120,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
 
-describe.only('Plugin Setup Processor', function () {
+describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -1118,7 +1118,7 @@ describe.only('Plugin Setup Processor', function () {
             helpersUV1,
             EMPTY_DATA
           );
-        // TODO: had to write await outside expect.
+
         // Confirm that first preparation can be applied.
         await expect(
           psp.callStatic.applyUninstallation(
