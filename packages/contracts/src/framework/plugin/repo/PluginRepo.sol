@@ -60,9 +60,6 @@ contract PluginRepo is
     /// @notice The mapping between the plugin setup address and its corresponding version hash.
     mapping(address => bytes32) internal latestTagHashForPluginSetup;
 
-    /// @notice The mapping between release id and release's metadata URI.
-    mapping(uint8 => bytes) internal metadataPerRelease;
-
     /// @notice The ID of the latest release.
     /// @dev The maximum release number is 255.
     uint8 public latestRelease;
@@ -89,10 +86,9 @@ contract PluginRepo is
     /// @param pluginSetup The plugin setup contract address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
-    /// @notice Thrown if the metadata URI is not set for a release.
-    /// @param release the release number for which the metadata URI is not set.
-    /// @param releaseMetadata The release metadata URI.
-    error InvalidReleaseMetadata(uint8 release, bytes releaseMetadata);
+    /// @notice Thrown if the metadata URI is length of 0.
+    /// @param release the release number for which the metadata URI is being set.
+    error InvalidReleaseMetadata(uint8 release);
 
     /// @notice Thrown if release does not exist.
     /// @param release The release number of the release that does not exist.
@@ -154,10 +150,7 @@ contract PluginRepo is
             latestRelease = _release;
 
             if (_releaseMetadata.length == 0) {
-                revert InvalidReleaseMetadata({
-                    release: _release,
-                    releaseMetadata: _releaseMetadata
-                });
+                revert InvalidReleaseMetadata(_release);
             }
         }
 
@@ -188,7 +181,7 @@ contract PluginRepo is
         });
 
         if (_releaseMetadata.length > 0) {
-            _updateReleaseMetadata(_release, _releaseMetadata);
+            emit ReleaseMetadataUpdated(_release, _releaseMetadata);
         }
     }
 
@@ -202,29 +195,20 @@ contract PluginRepo is
         }
 
         if (_release > latestRelease) {
-            revert ReleaseDoesNotExist({release: _release});
+            revert ReleaseDoesNotExist(_release);
         }
 
         if (_releaseMetadata.length == 0) {
-            revert InvalidReleaseMetadata({release: _release, releaseMetadata: _releaseMetadata});
+            revert InvalidReleaseMetadata(_release);
         }
 
-        _updateReleaseMetadata(_release, _releaseMetadata);
-    }
-
-    /// @notice The private helper function to replace new `_metadata` for the `_release`.
-    /// @param _release The release number.
-    /// @param _metadata The release metadata URI.
-    function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) internal {
-        metadataPerRelease[_release] = _metadata;
-
-        emit ReleaseMetadataUpdated(_release, _metadata);
+        emit ReleaseMetadataUpdated(_release, _releaseMetadata);
     }
 
     /// @notice Returns the latest version for a given release number.
     /// @param _release The release number.
     /// @return Version The latest version of this release.
-    function getLatestVersion(uint8 _release) public view returns (Version memory) {
+    function getLatestVersion(uint8 _release) external view returns (Version memory) {
         uint16 latestBuild = uint16(buildsPerRelease[_release]);
         return getVersion(tagHash(Tag(_release, latestBuild)));
     }
@@ -232,7 +216,7 @@ contract PluginRepo is
     /// @notice Returns the latest version for a given plugin setup.
     /// @param _pluginSetup the plugin setup address
     /// @return Version latest version that is bound to the _pluginSetup
-    function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
+    function getLatestVersion(address _pluginSetup) external view returns (Version memory) {
         return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
 
