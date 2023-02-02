@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Use OZ's upgradeable contracts for `PluginCloneable`.
-- Renamed `getDAO` to `dao` and make `dao` variable as private.
+- Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
 
 ### Removed
 
