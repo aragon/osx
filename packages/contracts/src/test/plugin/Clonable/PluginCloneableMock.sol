@@ -14,7 +14,16 @@ contract PluginCloneableV1Mock is PluginCloneable {
     }
 }
 
-contract PluginCloneableV2Mock is PluginCloneable {
+// Doesn't support IPlugin Interface.
+contract PluginCloneableV2Mock {
+    uint256 public state1;
+
+    function initialize(IDAO _dao) external {
+        state1 = 1;
+    }
+}
+
+contract PluginCloneableV3Mock is PluginCloneable {
     uint256 public state1;
     uint256 public state2;
 

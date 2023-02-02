@@ -460,7 +460,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             if (IPlugin(_params.setupPayload.plugin).pluginType() != IPlugin.PluginType.UUPS) {
                 revert PluginNonupgradeable({plugin: _params.setupPayload.plugin});
             }
-
+        
             // Prepare the update.
             (initData, preparedSetupData) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
                 _dao,

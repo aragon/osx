@@ -45,6 +45,13 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     constructor() {
         pluginBase = address(new PluginCloneableV2Mock());
     }
+    
+}
+
+contract PluginCloneableSetupV3Mock is PluginCloneableSetupV1Mock {
+    constructor() {
+        pluginBase = address(new PluginCloneableV2Mock());
+    }
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
