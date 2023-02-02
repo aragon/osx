@@ -108,7 +108,7 @@ type Dao @entity {
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")
-  plugins: [IPluginInstallation!]! @derivedFrom(field: "dao")
+  plugins: [IPluginInstallation!]! @derivedFrom(field: "dao") # TODO: Delete or refactor after the plugins left the core subgraph
   proposals: [Proposal!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
