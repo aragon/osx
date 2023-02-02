@@ -399,27 +399,27 @@ type AdminPlugin implements IPluginInstallation @entity {
   pluginAddress: Bytes!
 
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
-  adminstrators: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
+  administrators: [AdministratorAdminPlugin!]! @derivedFrom(field: "plugin")
 }
 
-type Adminstrator @entity {
+type Administrator @entity(immutable: true) {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AdminProposal!]! @derivedFrom(field: "adminstrator")
-  plugins: [AdminstratorAdminPlugin!]! @derivedFrom(field: "administrator")
+  proposals: [AdminProposal!]! @derivedFrom(field: "administrator")
+  plugins: [AdministratorAdminPlugin!]! @derivedFrom(field: "administrator")
 }
 
-type AdminstratorAdminPlugin @entity {
+type AdministratorAdminPlugin @entity {
   "for Many-to-Many"
-  id: ID! # Adminstrator + plugin
-  administrator: Adminstrator!
+  id: ID! # Administrator + plugin
+  administrator: Administrator!
   plugin: AdminPlugin!
 }
 
 type AdminProposal implements Proposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
-  creator: Bytes! # Adminstrator address
+  creator: Bytes! # Administrator address
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
@@ -429,7 +429,7 @@ type AdminProposal implements Proposal @entity {
   endDate: BigInt!
   plugin: AdminPlugin!
   proposalId: BigInt!
-  adminstrator: Adminstrator!
+  administrator: Administrator!
   executionTxHash: Bytes
 }
 
