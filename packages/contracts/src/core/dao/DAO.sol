@@ -76,16 +76,13 @@ contract DAO is
     /// @param index Index of action in the array that failed.
     error ActionFailed(uint256 index);
 
-    /// @notice Thrown if the deposit or withdraw amount is zero.
+    /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
 
     /// @notice Thrown if there is a mismatch between the expected and actually deposited amount of native tokens.
     /// @param expected The expected native token amount.
     /// @param actual The actual native token amount deposited.
     error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
-
-    /// @notice Thrown if a native token withdraw fails.
-    error NativeTokenWithdrawFailed();
 
     /// @notice Emitted when a new DAO uri is set.
     /// @param daoURI The new uri.
