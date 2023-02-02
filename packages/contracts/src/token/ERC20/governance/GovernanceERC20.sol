@@ -66,10 +66,6 @@ contract GovernanceERC20 is
         string memory _symbol,
         MintSettings memory _mintSettings
     ) public initializer {
-        __ERC20_init(_name, _symbol);
-        __ERC20Permit_init(_name);
-        __DaoAuthorizableUpgradeable_init(_dao);
-
         // Check mint settings
         if (_mintSettings.receivers.length != _mintSettings.amounts.length) {
             revert MintSettingsArrayLengthMismatch({
@@ -77,6 +73,10 @@ contract GovernanceERC20 is
                 amountsArrayLength: _mintSettings.amounts.length
             });
         }
+
+        __ERC20_init(_name, _symbol);
+        __ERC20Permit_init(_name);
+        __DaoAuthorizableUpgradeable_init(_dao);
 
         for (uint256 i; i < _mintSettings.receivers.length; ) {
             _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
