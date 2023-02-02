@@ -208,7 +208,7 @@ contract PluginRepo is
     /// @notice Returns the latest version for a given release number.
     /// @param _release The release number.
     /// @return Version The latest version of this release.
-    function getLatestVersion(uint8 _release) external view returns (Version memory) {
+    function getLatestVersion(uint8 _release) public view returns (Version memory) {
         uint16 latestBuild = uint16(buildsPerRelease[_release]);
         return getVersion(tagHash(Tag(_release, latestBuild)));
     }
@@ -216,7 +216,7 @@ contract PluginRepo is
     /// @notice Returns the latest version for a given plugin setup.
     /// @param _pluginSetup the plugin setup address
     /// @return Version latest version that is bound to the _pluginSetup
-    function getLatestVersion(address _pluginSetup) external view returns (Version memory) {
+    function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
         return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
 
