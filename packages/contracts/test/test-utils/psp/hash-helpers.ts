@@ -1,6 +1,5 @@
 import {BytesLike} from 'ethers';
-import {defaultAbiCoder} from 'ethers/lib/utils';
-import {keccak256} from 'ethers/utils';
+import {defaultAbiCoder, keccak256} from 'ethers/lib/utils';
 
 import {PermissionOperation, PluginRepoPointer, PreparationType} from './types';
 
