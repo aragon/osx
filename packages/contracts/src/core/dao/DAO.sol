@@ -45,9 +45,6 @@ contract DAO is
     /// @notice The ID of the permission required to call the `setMetadata` function.
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `withdraw` function.
-    bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION");
-
     /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
@@ -132,7 +129,6 @@ contract DAO is
             _permissionId == EXECUTE_PERMISSION_ID ||
             _permissionId == UPGRADE_DAO_PERMISSION_ID ||
             _permissionId == SET_METADATA_PERMISSION_ID ||
-            _permissionId == WITHDRAW_PERMISSION_ID ||
             _permissionId == SET_SIGNATURE_VALIDATOR_PERMISSION_ID ||
             _permissionId == REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     }

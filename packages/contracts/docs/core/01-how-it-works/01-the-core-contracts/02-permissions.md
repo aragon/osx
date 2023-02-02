@@ -22,7 +22,7 @@ Identifiers, permissions, and modifiers link everything together.
 To differentiate between each permission, we give permissions **identifiers** that you will frequently find at the top of aragonOS contracts. They look something like this:
 
 ```solidity title="contracts/core/DAO.sol"
-bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION");
+bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
 ```
 
 ### Permissions
@@ -37,7 +37,6 @@ function permissionHash(
 ) internal pure returns (bytes32) {
   return keccak256(abi.encodePacked('PERMISSION', _who, _where, _permissionId));
 }
-
 ```
 
 This concatenated information is then stored as `keccak256` hashes inside a mapping like this one:
@@ -52,11 +51,18 @@ Here, the `bytes32` keys are the permission hashes and the `address` values are 
 
 Using **authorization modifiers** is how we make functions permissioned. Permissions are associated with functions by adding the `auth` modifier, which includes the permission identifier in the function’s definition header.
 
-For example, one can only withdraw funds from a DAO when the address making the call has been granted the `WITHDRAW_PERMISSION_ID` permission.
+For example, one can call the `execute` function in the DAO when the address making the call has been granted the `EXECUTE_PERMISSION_ID` permission.
 
 ```solidity title="contracts/core/DAO.sol"
-function withdraw(uint256 value) external auth(WITHDRAW_PERMISSION_ID);
-
+function execute(
+  bytes32 callId,
+  Action[] calldata _actions,
+  uint256 allowFailureMap
+)
+  external
+  override
+  auth(address(this), EXECUTE_PERMISSION_ID)
+  returns (bytes[] memory execResults, uint256 failureMap);
 ```
 
 ### Managing Permissions
@@ -74,7 +80,6 @@ function grant(
   address _who,
   bytes32 _permissionId
 ) external auth(_where, ROOT_PERMISSION_ID);
-
 ```
 
 To prevent these functions from being called by any address, they are themselves permissioned via the `auth` modifier and require the caller to have the `ROOT_PERMISSION_ID` permission in order to call them.
@@ -105,7 +110,6 @@ function grantWithCondition(
   bytes32 _permissionId,
   IPermissionCondition _condition
 ) external auth(_where, ROOT_PERMISSION_ID) {}
-
 ```
 
 and specifying the `_condition` address. This provides full flexibility to customize the conditions under which the function call is allowed.
@@ -140,7 +144,6 @@ Imagine, for example, you wrote a decentralized service
 contract Service {
   function use() external auth(USE_PERMISSION_ID);
 }
-
 ```
 
 Calling the `use()` function inside requires the caller to have the `USE_PERMISSION_ID` permission. Now, you want to make this service available to every user without uploading a new contract or requiring every user to ask for the permission.
@@ -155,15 +158,14 @@ However, some restrictions apply. For security reasons, aragonOS does not allow 
 
 The following functions in the DAO are permissioned:
 
-| Functions                                      | Permission Identifier                   | Description                                                                            |
-| ---------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------- |
-| `execute`                                      | `EXECUTE_PERMISSION_ID`                 | Required to execute arbitrary actions.                                                 |
-| `withdraw`                                     | `WITHDRAW_PERMISSION_ID`                | Required to withdraw assets from the DAO.                                              |
-| `_authorizeUpgrade`                            | `UPGRADE_DAO_PERMISSION_ID`             | Required to upgrade the DAO (via the [UUPS](https://eips.ethereum.org/EIPS/eip-1822)). |
-| `setMetadata`                                  | `SET_METADATA_PERMISSION_ID`            | Required to set the DAO’s metadata.                                                    |
-| `setTrustedForwarder`                          | `SET_TRUSTED_FORWARDER_PERMISSION_ID`   | Required to set the DAO’s trusted forwarder for meta transactions.                     |
-| `setSignatureValidator`                        | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` | Required to set the DAO’s signature validator contract (see ERC-1271).                 |
-| `grant`, `grantWithCondition`, `revoke`           | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
+| Functions                               | Permission Identifier                   | Description                                                                            |
+| --------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------- |
+| `execute`                               | `EXECUTE_PERMISSION_ID`                 | Required to execute arbitrary actions.                                                 |
+| `_authorizeUpgrade`                     | `UPGRADE_DAO_PERMISSION_ID`             | Required to upgrade the DAO (via the [UUPS](https://eips.ethereum.org/EIPS/eip-1822)). |
+| `setMetadata`                           | `SET_METADATA_PERMISSION_ID`            | Required to set the DAO’s metadata.                                                    |
+| `setTrustedForwarder`                   | `SET_TRUSTED_FORWARDER_PERMISSION_ID`   | Required to set the DAO’s trusted forwarder for meta transactions.                     |
+| `setSignatureValidator`                 | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` | Required to set the DAO’s signature validator contract (see ERC-1271).                 |
+| `grant`, `grantWithCondition`, `revoke` | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
 
 Plugins installed to the DAO might require their own and introduce new permission settings.
 
@@ -177,14 +179,13 @@ Let’s assume we have an `Example` contract managed by a DAO `_dao` containing 
 contract Example is Plugin {
   constructor(IDAO _dao) Plugin(_dao) {}
 
-  function sendCoins(address _to, uint256 _value)
-    external
-    auth(SEND_COINS_PERMISSION_ID)
-  {
+  function sendCoins(
+    address _to,
+    uint256 _value
+  ) external auth(SEND_COINS_PERMISSION_ID) {
     // logic to send coins safely to an address `_to`...
   }
 }
-
 ```
 
 Let's assume you own the private key to address `0x123456...` and the `Example` contract was deployed to address `0xabcdef...`.
@@ -247,7 +248,6 @@ contract TimeCondition is IPermissionCondition {
     return block.timestamp > date;
   }
 }
-
 ```
 
 Here, the permission condition will only allow the call the `_date` specified in the constructor has passed.
@@ -279,7 +279,6 @@ contract ProofOfHumanityCondition is IPermissionCondition {
     return registry.isRegistered(_who);
   }
 }
-
 ```
 
 Here, the permission condition will only allow the call if the PoH registry confirms that the `_who` address is registered and belongs to a real human.

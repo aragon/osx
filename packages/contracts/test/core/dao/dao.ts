@@ -53,7 +53,6 @@ const PERMISSION_IDS = {
   UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
-  WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION'),
   SET_SIGNATURE_VALIDATOR_PERMISSION_ID: ethers.utils.id(
     'SET_SIGNATURE_VALIDATOR_PERMISSION'
   ),
@@ -95,11 +94,6 @@ describe('DAO', function () {
         dao.address,
         ownerAddress,
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
-      ),
-      dao.grant(
-        dao.address,
-        ownerAddress,
-        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
