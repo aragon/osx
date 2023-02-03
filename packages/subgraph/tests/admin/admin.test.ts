@@ -7,7 +7,6 @@ import {
   ADDRESS_ONE,
   ADDRESS_TWO,
   DAO_ADDRESS,
-  ONE_ETH,
   STRING_DATA,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
@@ -124,7 +123,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.startDate = BigInt.fromString(START_DATE);
   adminProposal.endDate = BigInt.fromString(START_DATE);
   adminProposal.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
-  adminProposal.adminstrator = adminstratorAddress.toHexString();
+  adminProposal.administrator = adminstratorAddress.toHexString();
   adminProposal.save();
 
   const actionId = CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;
