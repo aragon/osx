@@ -39,7 +39,7 @@ contract PluginRepoFactory {
     }
 
     /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version.
-    /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the address `_maintainer`.
+    /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transferred to the address `_maintainer`.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _maintainer The plugin maintainer address.
@@ -61,7 +61,7 @@ contract PluginRepoFactory {
         _setPluginRepoPermissions(pluginRepo, _maintainer);
     }
 
-    /// @notice Set the final permissions for the published plugin repository maintainer. All permissions are revoked from the the plugin factory and granted to the specified plugin maintainer.
+    /// @notice Set the final permissions for the published plugin repository maintainer. All permissions are revoked from the plugin factory and granted to the specified plugin maintainer.
     /// @param pluginRepo The plugin repository instance just created.
     /// @param maintainer The plugin maintainer address.
     /// @dev The plugin maintainer is granted the `MAINTAINER_PERMISSION_ID`, `UPGRADE_REPO_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.

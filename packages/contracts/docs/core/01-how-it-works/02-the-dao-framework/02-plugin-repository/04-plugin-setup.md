@@ -5,12 +5,12 @@ title: Setup
 ## The Plugin Setup Process
 
 A DAO can be set up and customized by the **installation**, **update, and** **uninstallation** of plugins.
-In this section you will learn how the plugin setup process in aragonOS works.
+In this section you will learn how the plugin setup process in aragonOSx works.
 
 In order for a plugin to function, associated contracts need to be deployed and gathered, often requiring permissions from the DAO.  
 For example, a governance plugin will need permission to call the `execute` function in the DAO.
 
-The required setup logic is written and taken care off by the plugin developer in the `PluginSetup` contract they create and that is associated with each `Plugin` contract version release (see [Developing a Plugin](docs/core/02-how-to-guides/01-plugin-development/index.md)). The `PluginSetup` contract then interacts with the aragonOS framework so that installing, updating, and uninstalling a plugin to a DAO through the UI becomes very simple for the DAO end-user.
+The required setup logic is written and taken care off by the plugin developer in the `PluginSetup` contract they create and that is associated with each `Plugin` contract version release (see [Developing a Plugin](docs/core/02-how-to-guides/01-plugin-development/index.md)). The `PluginSetup` contract then interacts with the aragonOSx framework so that installing, updating, and uninstalling a plugin to a DAO through the UI becomes very simple for the DAO end-user.
 
 ### Security Considerations
 
@@ -22,7 +22,7 @@ This is why we split the **plugin setup in two steps**:
 1. a **preparation** step, and
 2. a **processing** step.
 
-Each plugin will then require both to run through the DAO's `PluginSetupProcessor` contract which is part of the aragonOS framework.
+Each plugin will then require both to run through the DAO's `PluginSetupProcessor` contract which is part of the aragonOSx framework.
 
 :::note
 Plugins can also be setup manually by calling `PluginSetup` contract and granting permissions directly through the `DAO` contract but won’t be displayed in the UI correctly.
@@ -64,7 +64,7 @@ Once the proposal has passed, the actions specified in the `Action[]` array get 
    Finally, the `PluginSetupProcessor` asks the DAO to revoke the `ROOT_PERMISSION_ID` permission from itself.
 
 :::info
-The two-step setup procedure in aragonOS is not limited to the setup of only one plugin — you can **setup multiple plugins at once** by first preparing them in a single proposal and then processing the entire setup sequence in one transaction. This is powerful and allows you to **transform your entire DAO in one proposal**, for example, to install a new governance plugin (e.g., a gasless ZK-vote) and finance plugin (e.g., to stream loans to your members), while uninstalling your old ERC20 token vote in one go.
+The two-step setup procedure in aragonOSx is not limited to the setup of only one plugin — you can **setup multiple plugins at once** by first preparing them in a single proposal and then processing the entire setup sequence in one transaction. This is powerful and allows you to **transform your entire DAO in one proposal**, for example, to install a new governance plugin (e.g., a gasless ZK-vote) and finance plugin (e.g., to stream loans to your members), while uninstalling your old ERC20 token vote in one go.
 :::
 
 In the next sections, you will learn about how plugins are curated on Aragon's repository.

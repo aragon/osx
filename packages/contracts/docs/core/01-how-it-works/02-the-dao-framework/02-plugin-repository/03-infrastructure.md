@@ -6,7 +6,7 @@ title: Infrastructure
 
 In this section, we take a close look on the contracts constituting the plugin ecosystem infrastructure.
 
-An aragonOS Plugin consist of:
+An aragonOSx Plugin consist of:
 
 - The `Plugin` implementation contract containing the plugin's logic
 - The `PluginSetup` contract referencing the `Plugin` implementation and containing the setup instruction to install, update, and uninstall it to a DAO

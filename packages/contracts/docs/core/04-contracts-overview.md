@@ -4,11 +4,6 @@ title: Contracts Overview
 
 ## A Categorization of the Core Contracts
 
-:::note
-Work in Progress:
-This page is intended for external auditors and will be reworked.
-:::
-
 ### Overview Diagrams
 
 <div class="center-column">
@@ -16,7 +11,7 @@ This page is intended for external auditors and will be reworked.
 ![](./01-how-it-works/02-the-dao-framework/aragon-os-framework-overview.drawio.svg)
 
 <p class="caption"> 
-  Overview of the aragonOS DAO Framework with its components; the governance layer, code layer with external dependencies; and their responsibilities.
+  Overview of the aragonOSx DAO Framework with its components; the governance layer, code layer with external dependencies; and their responsibilities.
 </p>
 
 </div>
@@ -30,7 +25,7 @@ To learn more about the architecture of the system, visit the section explaining
 ![](aragon-os-infrastructure-core-overview.drawio.svg)
 
 <p class="caption"> 
-  Overview of the aragonOS DAO framework infrastructure and core primitives.
+  Overview of the aragonOSx DAO framework infrastructure and core primitives.
 </p>
 
 </div>
@@ -47,11 +42,11 @@ To learn more about the architecture of the system, visit the section explaining
 
 #### Permission Related
 
-| Contract            | Description                                                                                          | Relationship                                         |
-| :------------------ | :--------------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
-| `PermissionManager` | A permission manager (an access control list (ACL)) that `DAO` and other contracts can inherit from. | owned by `DAO`                                       |
-| `PermissionLib`     | A library for data types needed for the processing of permission operations.                         | used by `DAO`, `PluginSetup`, `PluginSetupProcessor` |
-| `IPermissionCondition` | An interface for condition implementations.                                                             | implementations can be used by `PermissionManager`   |
+| Contract               | Description                                                                                          | Relationship                                         |
+| :--------------------- | :--------------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
+| `PermissionManager`    | A permission manager (an access control list (ACL)) that `DAO` and other contracts can inherit from. | owned by `DAO`                                       |
+| `PermissionLib`        | A library for data types needed for the processing of permission operations.                         | used by `DAO`, `PluginSetup`, `PluginSetupProcessor` |
+| `IPermissionCondition` | An interface for condition implementations.                                                          | implementations can be used by `PermissionManager`   |
 
 #### Plugin Related
 
@@ -108,8 +103,8 @@ To learn more about the architecture of the system, visit the section explaining
 #### Miscellaneous
 
 | Contract                  | Description                                                                | Relationship                                                    |
-| :------------------------ | :------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| `InterfaceBasedRegistry ` | An ERC165 interface based registry for contracts.                          | used by `DAORegistry`, `PluginRepoRegistry`                     |                                    |
+| :------------------------ | :------------------------------------------------------------------------- | :-------------------------------------------------------------- | --- |
+| `InterfaceBasedRegistry ` | An ERC165 interface based registry for contracts.                          | used by `DAORegistry`, `PluginRepoRegistry`                     |     |
 | `auth`                    | Provides a free function to be used in the `DaoAuthorizable` base classes. | used by `DaoAuthorizableBase`, `DaoAuthorizableBaseUpgradeable` |
 | `Proxy`                   | Provides a convenience function to create an UUPS proxy.                   | used by`DAOFactory`, `PluginRepoFactory`                        |
 | `UncheckedMath`           | Provides convenience functions for unchecked math operations.              | used by `PluginRepo`, `AddresslistVoting`                       |

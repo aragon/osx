@@ -49,7 +49,7 @@ You are now ready to deploy the subgraph using [the `graph deploy` command](http
 
 ### Test the subgraph
 
-Build the the contracts as explained above.
+Build the contracts as explained above.
 Build the subgraph as explained above
 
 run tests:

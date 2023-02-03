@@ -16,7 +16,7 @@ For this **creation process**, the `DAOFactory` executes multiple steps:
 
 The `DAOFactory` contract does the following steps:
 
-1. Call the `createProxy(address daoBase)` function, where `daoBase` is the current aragonOS (`UUPSUpgradeable`) `DAO` implementation contract
+1. Call the `createProxy(address daoBase)` function, where `daoBase` is the current aragonOSx (`UUPSUpgradeable`) `DAO` implementation contract
 
 2. Call the initialize function
 
@@ -26,7 +26,6 @@ The `DAOFactory` contract does the following steps:
      address _initialOwner,
      address _trustedForwarder
    ) external initializer {}
-
    ```
 
    function with `_initialOwner = address(this)`. As a result, the `DAOfactory` now has the `ROOT_PERMISSION_ID` permission on the newly created DAO.

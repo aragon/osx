@@ -7,19 +7,19 @@ title: Permissions
 At Aragon, we believe that **DAOs are permission management systems**.
 Permissions between contracts and wallets allow a DAO to manage and govern its actions.
 
-Here, you will learn how the permissions in aragonOS work how they can be granted and revoked from wallets and contracts, and managed through the DAO.
+Here, you will learn how the permissions in aragonOSx work, how they can be granted and revoked from wallets and contracts, and how they are managed through the DAO.
 
 As we mentioned earlier, it is essential that only the right person or contract can execute a certain action. As a developer, you might have seen or used [modifiers such as `onlyOwner`](https://docs.openzeppelin.com/contracts/2.x/api/ownership#Ownable) in contracts. This `onlyOwner` modifier provides basic access control to your DAO: only the `owner` address is permitted to execute the function to which the modifier is attached.
 
 In aragonOS, we follow the same approach but provide more advanced functionality:
 Each `DAO` contracts includes a `PermissionManager` contract allowing to flexibly, securely, and collectively manage permissions through the DAO and, thus, govern its actions.
-This `PermissionManager`, called `ACL` in previous aragonOS contract versions, was one big reason why aragonOS never got hacked.
+This `PermissionManager`, called `ACL` in previous aragonOSx contract versions, was one big reason why aragonOSx never got hacked.
 The code and configuration of a DAO specifies which wallets or contracts (`who`) are allowed to call which authorized functions on a target contract (`where`).
 Identifiers, permissions, and modifiers link everything together.
 
 ### Permission Identifiers
 
-To differentiate between each permission, we give permissions **identifiers** that you will frequently find at the top of aragonOS contracts. They look something like this:
+To differentiate between each permission, we give permissions **identifiers** that you will frequently find at the top of aragonOSx contracts. They look something like this:
 
 ```solidity title="contracts/core/DAO.sol"
 bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
@@ -85,23 +85,19 @@ function grant(
 To prevent these functions from being called by any address, they are themselves permissioned via the `auth` modifier and require the caller to have the `ROOT_PERMISSION_ID` permission in order to call them.
 
 :::note
-By default, the `ROOT_PERMISSION_ID` permission is granted only to the `DAO` contract itself. Contracts related to the Aragon infrastructure temporarily require it during the [DAO creation](../02-the-dao-framework/01-dao-creation-process.md) and [plugin setup ](../02-the-dao-framework/02-plugin-repository/04-plugin-setup.md) processes.
+By default, the `ROOT_PERMISSION_ID` permission is granted only to the `DAO` contract itself. Contracts related to the Aragon infrastructure temporarily require it during the [DAO creation](../../02-the-dao-framework/01-dao-creation-process.md) and [plugin setup ](../../02-the-dao-framework/02-plugin-repository/04-plugin-setup.md) processes.
 :::note
 
 This means, that these functions can only be called through the DAO’s `execute` function that, in turn, requires the calling address to have the `EXECUTE_PERMISSION_ID` permission.
 
 :::note
 By default, the `EXECUTE_PERMISSION_ID` permission is granted to governance contracts (such as a majority voting plugin owned by the DAO or a multi-sig). Accordingly, a proposal is often required to change permissions.
-Exceptions are, again, the [DAO creation](../02-the-dao-framework/01-dao-creation-process.md) and [plugin setup ](../02-the-dao-framework/02-plugin-repository/04-plugin-setup.md) processes.
+Exceptions are, again, the [DAO creation](../../02-the-dao-framework/01-dao-creation-process.md) and [plugin setup ](../../02-the-dao-framework/02-plugin-repository/04-plugin-setup.md) processes.
 :::
 
 #### Granting Permission with Conditions
 
-:::note
-This is and advanced topic that you might want to skip when learning about aragonOS permissions for the first time.
-:::
-
-AragonOS 6 supports relaying the authorization of a function call to a custom condition inheriting from the `IPermissionCondition` contract interface. This works by granting the permission with the `grantWithCondition` function
+AragonOSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
 
 ```solidity title="contracts/core/permission/PermissionManager.sol"
 function grantWithCondition(
@@ -112,27 +108,11 @@ function grantWithCondition(
 ) external auth(_where, ROOT_PERMISSION_ID) {}
 ```
 
-and specifying the `_condition` address. This provides full flexibility to customize the conditions under which the function call is allowed.
+and specifying the `_condition` contract address. This provides full flexibility to customize the conditions under which the function call is allowed.
 
-These conditions can be based on the calldata of the function such as
+Typically, conditions are written specifically for and installed together with [plugins](../../01-the-core-contracts/03-plugins/index.md).
 
-- parameter values
-- function signature
-
-on-chain data such as
-
-- timestamps
-- token ownership
-- entries in curated registries
-
-or off-chain data being made available through third-party oracle services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
-
-- market data
-- weather data
-- scientific data
-- sports data
-
-Typically, conditions are written specifically for and installed together with [plugins](../01-the-core-contracts/03-plugins.md).
+To learn more about this advanced topic and possible applications, visit the [permission conditions](./01-conditions.md) section.
 
 #### Granting Permission to `ANY_ADDR`
 
@@ -152,177 +132,22 @@ By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where:
 Granting a permission with `_where: ANY_ADDR` to a condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
 
-However, some restrictions apply. For security reasons, aragonOS does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
+However, some restrictions apply. For security reasons, aragonOSx does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
 
 ### Permissions Native to the `DAO` Contract
 
 The following functions in the DAO are permissioned:
 
-| Functions                               | Permission Identifier                   | Description                                                                            |
-| --------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------- |
-| `execute`                               | `EXECUTE_PERMISSION_ID`                 | Required to execute arbitrary actions.                                                 |
-| `_authorizeUpgrade`                     | `UPGRADE_DAO_PERMISSION_ID`             | Required to upgrade the DAO (via the [UUPS](https://eips.ethereum.org/EIPS/eip-1822)). |
-| `setMetadata`                           | `SET_METADATA_PERMISSION_ID`            | Required to set the DAO’s metadata.                                                    |
-| `setTrustedForwarder`                   | `SET_TRUSTED_FORWARDER_PERMISSION_ID`   | Required to set the DAO’s trusted forwarder for meta transactions.                     |
-| `setSignatureValidator`                 | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` | Required to set the DAO’s signature validator contract (see ERC-1271).                 |
-| `grant`, `grantWithCondition`, `revoke` | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
+| Functions                               | Permission Identifier                      | Description                                                                                                     |
+| --------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `grant`, `grantWithCondition`, `revoke` | `ROOT_PERMISSION_ID`                       | Required to manage permissions of the DAO and associated plugins.                                               |
+| `execute`                               | `EXECUTE_PERMISSION_ID`                    | Required to execute arbitrary actions.                                                                          |
+| `_authorizeUpgrade`                     | `UPGRADE_DAO_PERMISSION_ID`                | Required to upgrade the DAO (via the [UUPS](https://eips.ethereum.org/EIPS/eip-1822)).                          |
+| `setMetadata`                           | `SET_METADATA_PERMISSION_ID`               | Required to set the DAO’s metadata and [DAOstar.one DAO URI](https://eips.ethereum.org/EIPS/eip-4824).          |
+| `setTrustedForwarder`                   | `SET_TRUSTED_FORWARDER_PERMISSION_ID`      | Required to set the DAO’s trusted forwarder for meta transactions.                                              |
+| `setSignatureValidator`                 | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID`    | Required to set the DAO’s signature validator contract (see ERC-1271).                                          |
+| `registerStandardCallback`              | `REGISTER_STANDARD_CALLBACK_PERMISSION_ID` | Required to register a standard callback for an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID. |
 
-Plugins installed to the DAO might require their own and introduce new permission settings.
+Plugins installed on the DAO might introduce other permissions and associated permission identifiers.
 
 In the next section, you will learn how to customize your DAO by installing plugins.
-
-### Examples
-
-Let’s assume we have an `Example` contract managed by a DAO `_dao` containing a `sendCoins` function allowing you to send an `_amount` to an address `_to` and being permissioned through the `auth` modifier:
-
-```solidity title="Example.sol"
-contract Example is Plugin {
-  constructor(IDAO _dao) Plugin(_dao) {}
-
-  function sendCoins(
-    address _to,
-    uint256 _value
-  ) external auth(SEND_COINS_PERMISSION_ID) {
-    // logic to send coins safely to an address `_to`...
-  }
-}
-```
-
-Let's assume you own the private key to address `0x123456...` and the `Example` contract was deployed to address `0xabcdef...`.
-Now, to be able to call the `sendCoins` function, you need to `grant` the `SEND_COINS_PERMISSION_ID` permission to your wallet address (`_who=0x123456...`) for the `Example` contract (`_where=0xabcdef...`).
-If this is the case, the function call will succeed, otherwise it will revert.
-
-We can now add additional constraints to it by using the `grantWithCondition` function.
-Below, we show four exemplary conditions for different 4 different use cases that we could attach to the permission.
-
-#### Condition 1: Adding Parameter Constraints
-
-Let’s imagine that we want to make sure that `_value` is not more than `1 ETH` without changing the code of `Example` contract.
-
-We can realize this requirement by deploying a `ParameterConstraintCondition` condition.
-
-```solidity title="ParameterConstraintCondition.sol"
-contract ParameterConstraintCondition is IPermissionCondition {
-	uint256 internal maxValue;
-
-	constructor(uint256 _maxValue) {
-      	maxValue = _maxValue;
-    }
-
-	function isGranted(
-		address _where,
-		address _who,
-		bytes32 _permissionId,
-		bytes calldata _data
-	) external view returns (bool) {
-    (_where, _who, _permissionId); // Prevent compiler warnings resulting from unused arguments.
-
-    (address _to, uint256 _value) = abi.decode(_data, (address, uint256));
-
-		return _value <= _maxValue;
-}
-```
-
-Now, after granting the `SEND_COINS_PERMISSION_ID` permission to `_where` and `_who` via the `grantWithCondition` function and pointing to the `ParameterConstraintCondition` condition contract, the `_who` address can only call the `sendCoins` of the `Example` contract deployed at address `_where` successfully if `_value` is not larger than `_maxValue` stored in the condition contract.
-
-#### Condition 2: Delaying a Call With a Timestamp
-
-In another use-case, we might want to make sure that the `sendCoins` can only be called after a certain date. This would look as following:
-
-```solidity title="TimeCondition.sol"
-contract TimeCondition is IPermissionCondition {
-  uint256 internal date;
-
-  constructor(uint256 _date) {
-    date = _date;
-  }
-
-  function isGranted(
-    address _where,
-    address _who,
-    bytes32 _permissionId,
-    bytes calldata _data
-  ) external view returns (bool) {
-    (_where, _who, _permissionId, _data); // Prevent compiler warnings resulting from unused arguments
-
-    return block.timestamp > date;
-  }
-}
-```
-
-Here, the permission condition will only allow the call the `_date` specified in the constructor has passed.
-
-#### Condition 3: Using Curated Registries
-
-In another use-case, we might want to make sure that the `sendCoins` function can only be called by real humans to prevent sybil attacks. For this, let's say we use the [Proof of Humanity (PoH)](https://www.proofofhumanity.id/) registry providing a curated list of humans:
-
-```solidity title="IProofOfHumanity.sol"
-interface IProofOfHumanity {
-  function isRegistered(address _submissionID) external view returns (bool);
-}
-
-contract ProofOfHumanityCondition is IPermissionCondition {
-  IProofOfHumanity internal registry;
-
-  constructor(IProofOfHumanity _registry) {
-    registry = _registry;
-  }
-
-  function isGranted(
-    address _where,
-    address _who,
-    bytes32 _permissionId,
-    bytes calldata _data
-  ) external view returns (bool) {
-    (_where, _permissionId, _data); // Prevent compiler warnings resulting from unused arguments
-
-    return registry.isRegistered(_who);
-  }
-}
-```
-
-Here, the permission condition will only allow the call if the PoH registry confirms that the `_who` address is registered and belongs to a real human.
-
-#### Condition 4: Using Price Conditions
-
-In another use-case, we might want to make sure that the `sendCoins` function can only be called if the ETH price in USD is above a certain threshold:
-
-<!-- prettier-ignore -->
-```solidity title="PriceCondition.sol"
-import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
-
-contract PriceCondition is IPermissionCondition {
-  AggregatorV3Interface internal priceFeed;
-
-  // Network: Goerli
-  // Aggregator: ETH/USD
-  // Address: 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
-  constructor() {
-    priceFeed = AggregatorV3Interface(
-      0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
-    );
-  }
-
-  function isGranted(
-    address _where,
-    address _who,
-    bytes32 _permissionId,
-    bytes calldata _data
-  ) external view returns (bool) {
-    (_where, _who, _permissionId, _data); // Prevent compiler warnings resulting from unused arguments
-
-    (
-      /*uint80 roundID*/,
-      int256 price,
-      /*uint startedAt*/,
-      /*uint timeStamp*/,
-      /*uint80 answeredInRound*/
-    ) = priceFeed.latestRoundData();
-
-    return price > 9000 * 10**18; // It's over 9000!
-  }
-}
-
-Here, we use [a data feed from a Chainlink oracle](https://docs.chain.link/docs/data-feeds/) providing us with the latest ETH/USD price on the Goerli testnet and require that the call is only allowed if the ETH price is over $9000.
-
-````

@@ -4,7 +4,7 @@ title: Plugins
 
 ## Customizing your DAO
 
-To add features beyond the base functionality available, you can customize your aragonOS DAO by installing a wide variety of plugins.
+To add features beyond the base functionality available, you can customize your aragonOSx DAO by installing a wide variety of plugins.
 
 Plugins can be related to:
 
@@ -13,7 +13,7 @@ Plugins can be related to:
 
 - **Finance:** allows the DAO to manage its **treasury** or use it to invest (e.g., in lending, staking, or NFT mints).
 
-- **Membership:** determines **who** will be a part of the DAO and their roles within them. This can mean minting governance tokens like [ERC-20](https://eips.ethereum.org/EIPS/eip-20), NFTs, or any other token standard. Typically, membership related plugins grant permissions (e.g., based on token ownership) to other addresses.
+- **Membership:** determines **who** will be a part of the DAO and what role they have. This can mean minting governance tokens like [ERC-20](https://eips.ethereum.org/EIPS/eip-20), NFTs, or any other token standard. Typically, membership-related plugins grant permissions based on token ownership or maintenance of a curated list of addresses.
 
 - And **anything** else that comes to mind!
 
