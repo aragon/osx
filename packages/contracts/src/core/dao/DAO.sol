@@ -168,9 +168,9 @@ contract DAO is
 
     /// @inheritdoc IDAO
     function execute(
-        bytes32 _callId,
+        bytes32 callId,
         Action[] calldata _actions,
-        uint256 _allowFailureMap
+        uint256 allowFailureMap
     )
         external
         override
@@ -191,7 +191,7 @@ contract DAO is
 
             if (!success) {
                 // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if (!hasBit(_allowFailureMap, uint8(i))) {
+                if (!hasBit(allowFailureMap, uint8(i))) {
                     revert ActionFailed(i);
                 }
 
@@ -207,7 +207,7 @@ contract DAO is
             }
         }
 
-        emit Executed(msg.sender, _callId, _actions, failureMap, execResults);
+        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
     }
 
     /// @inheritdoc IDAO
