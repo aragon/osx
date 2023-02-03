@@ -29,6 +29,7 @@ Given a version tag `RELEASE.BUILD`, we can infer that:
         - external functions
 
       - addition, change, or removal of
+
         - internal functions
         - events
 
