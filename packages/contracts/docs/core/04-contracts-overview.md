@@ -8,7 +8,7 @@ title: Contracts Overview
 
 <div class="center-column">
 
-![](./01-how-it-works/02-the-dao-framework/aragon-os-framework-overview.drawio.svg)
+![](./01-how-it-works/02-framework/aragon-os-framework-overview.drawio.svg)
 
 <p class="caption"> 
   Overview of the aragonOSx DAO Framework with its components; the governance layer, code layer with external dependencies; and their responsibilities.
@@ -16,7 +16,7 @@ title: Contracts Overview
 
 </div>
 
-To learn more about the architecture of the system, visit the section explaining [The Infrastructure Behind the AraongOS DAO Framework](./01-how-it-works/02-the-dao-framework/index.md).
+To learn more about the architecture of the system, visit the section explaining [The Infrastructure Behind the AraongOS DAO Framework](./01-how-it-works/02-framework/index.md).
 
 ---
 
