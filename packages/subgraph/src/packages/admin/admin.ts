@@ -124,7 +124,7 @@ export function handleMembershipContractAnnounced(
   context.setString('pluginAddress', event.address.toHexString());
   context.setString(
     'permissionId',
-    '0xf281525e53675515a6ba7cc7bea8a81e649b3608423ee2d73be1752cea887889'
+    '0xf281525e53675515a6ba7cc7bea8a81e649b3608423ee2d73be1752cea887889' // keccack256 of EXECUTE_PROPOSAL_PERMISSION
   );
   AdminMembers.createWithContext(event.params.definingContract, context);
 }

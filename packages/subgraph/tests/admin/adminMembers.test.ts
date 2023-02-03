@@ -6,7 +6,6 @@ import {
   describe,
   beforeEach,
   afterEach,
-  logStore
 } from 'matchstick-as/assembly/index';
 
 import {ADDRESS_ONE, ADDRESS_TWO, DAO_ADDRESS} from '../constants';
@@ -19,6 +18,7 @@ import {DataSourceContext} from '@graphprotocol/graph-ts';
 import {Administrator, AdministratorAdminPlugin} from '../../generated/schema';
 
 describe('AdminMembers', function() {
+  // keccack256 of EXECUTE_PROPOSAL_PERMISSION
   const AdminPermission =
     '0xf281525e53675515a6ba7cc7bea8a81e649b3608423ee2d73be1752cea887889';
 
