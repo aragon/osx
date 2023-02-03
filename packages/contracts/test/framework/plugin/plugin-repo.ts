@@ -20,7 +20,7 @@ const BUILD_METADATA = '0x11';
 const RELEASE_METADATA = '0x1111';
 const MAINTAINER_PERMISSION_ID = ethers.utils.id('MAINTAINER_PERMISSION');
 
-describe.only('PluginRepo', function () {
+describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: SignerWithAddress[];
@@ -336,7 +336,7 @@ describe.only('PluginRepo', function () {
     });
   });
 
-  describe('different types of getVersions:', async () => {
+  describe('Different types of getVersions:', async () => {
     // R - release, B - build
     let pluginSetup_R1_B1: PluginUUPSUpgradeableSetupV1Mock;
     let pluginSetup_R1_B2: PluginUUPSUpgradeableSetupV1Mock;
@@ -380,13 +380,15 @@ describe.only('PluginRepo', function () {
       });
 
       it('correctly returns the Version per release', async () => {
-        expect(await pluginRepo['getLatestVersion(uint8)'](1)).to.deep.equal([
+        const func = pluginRepo['getLatestVersion(uint8)'];
+
+        expect(await func(1)).to.deep.equal([
           [1, 2],
           pluginSetup_R1_B2.address,
           BUILD_METADATA_R1_B2,
         ]);
 
-        expect(await pluginRepo['getLatestVersion(uint8)'](2)).to.deep.equal([
+        expect(await func(2)).to.deep.equal([
           [2, 1],
           pluginSetup_R2_B1.address,
           BUILD_METADATA_R2_B1,
@@ -402,31 +404,21 @@ describe.only('PluginRepo', function () {
       });
 
       it('correctly returns the Version per plugin setup', async () => {
-        expect(
-          await pluginRepo['getLatestVersion(address)'](
-            pluginSetup_R1_B1.address
-          )
-        ).to.deep.equal([
+        const func = pluginRepo['getLatestVersion(address)'];
+
+        expect(await func(pluginSetup_R1_B1.address)).to.deep.equal([
           [1, 1],
           pluginSetup_R1_B1.address,
           BUILD_METADATA_R1_B1,
         ]);
 
-        expect(
-          await pluginRepo['getLatestVersion(address)'](
-            pluginSetup_R1_B2.address
-          )
-        ).to.deep.equal([
+        expect(await func(pluginSetup_R1_B2.address)).to.deep.equal([
           [1, 2],
           pluginSetup_R1_B2.address,
           BUILD_METADATA_R1_B2,
         ]);
 
-        expect(
-          await pluginRepo['getLatestVersion(address)'](
-            pluginSetup_R2_B1.address
-          )
-        ).to.deep.equal([
+        expect(await func(pluginSetup_R2_B1.address)).to.deep.equal([
           [2, 1],
           pluginSetup_R2_B1.address,
           BUILD_METADATA_R2_B1,
@@ -437,36 +429,28 @@ describe.only('PluginRepo', function () {
     describe('getVersion', async () => {
       it('reverts if `Tag` does not exist', async () => {
         await expect(
-          // @ts-ignore
-          pluginRepo['getVersion((uint8,uint16))']([1, 3])
+          pluginRepo['getVersion((uint8,uint16))']({release: 1, build: 3})
         )
           .to.be.revertedWithCustomError(pluginRepo, 'VersionHashDoesNotExist')
           .withArgs(tagHash(1, 3));
       });
 
       it('correctly returns the version per `Tag`', async () => {
-        expect(
-          // @ts-ignore
-          await pluginRepo['getVersion((uint8,uint16))']([1, 1])
-        ).to.deep.equal([
+        const func = pluginRepo['getVersion((uint8,uint16))'];
+
+        expect(await func({release: 1, build: 1})).to.deep.equal([
           [1, 1],
           pluginSetup_R1_B1.address,
           BUILD_METADATA_R1_B1,
         ]);
 
-        expect(
-          // @ts-ignore
-          await pluginRepo['getVersion((uint8,uint16))']([1, 2])
-        ).to.deep.equal([
+        expect(await func({release: 1, build: 2})).to.deep.equal([
           [1, 2],
           pluginSetup_R1_B2.address,
           BUILD_METADATA_R1_B2,
         ]);
 
-        expect(
-          // @ts-ignore
-          await pluginRepo['getVersion((uint8,uint16))']([2, 1])
-        ).to.deep.equal([
+        expect(await func({release: 2, build: 1})).to.deep.equal([
           [2, 1],
           pluginSetup_R2_B1.address,
           BUILD_METADATA_R2_B1,
@@ -474,28 +458,21 @@ describe.only('PluginRepo', function () {
       });
 
       it('correctly returns the version per Tag hash', async () => {
-        expect(
-          // @ts-ignore
-          await pluginRepo['getVersion(bytes32)'](tagHash(1, 1))
-        ).to.deep.equal([
+        const func = pluginRepo['getVersion(bytes32)'];
+
+        expect(await func(tagHash(1, 1))).to.deep.equal([
           [1, 1],
           pluginSetup_R1_B1.address,
           BUILD_METADATA_R1_B1,
         ]);
 
-        expect(
-          // @ts-ignore
-          await pluginRepo['getVersion(bytes32)'](tagHash(1, 2))
-        ).to.deep.equal([
+        expect(await func(tagHash(1, 2))).to.deep.equal([
           [1, 2],
           pluginSetup_R1_B2.address,
           BUILD_METADATA_R1_B2,
         ]);
 
-        expect(
-          // @ts-ignore
-          await pluginRepo['getVersion(bytes32)'](tagHash(2, 1))
-        ).to.deep.equal([
+        expect(await func(tagHash(2, 1))).to.deep.equal([
           [2, 1],
           pluginSetup_R2_B1.address,
           BUILD_METADATA_R2_B1,
