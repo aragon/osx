@@ -38,13 +38,13 @@ interface IDAO {
     event MetadataSet(bytes metadata);
 
     /// @notice Executes a list of actions. If no failure map is provided, one failing action results in the entire excution to be reverted. If a non-zero failure map is provided, allowed actions can fail without the remaining actions being reverted.
-    /// @param callId The ID of the call. The definition of the value of `callId` is up to the calling contract and can be used, e.g., as a nonce.
+    /// @param _callId The ID of the call. The definition of the value of `callId` is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
     /// @param _allowFailureMap A bitmap allowing execution to succeed, even if individual actions might revert. If the bit at index `i` is 1, the execution succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
     /// @return uint256 The constructed failureMap which contains which actions have actually failed.
     function execute(
-        bytes32 callId,
+        bytes32 _callId,
         Action[] memory _actions,
         uint256 _allowFailureMap
     ) external returns (bytes[] memory, uint256);
