@@ -4,7 +4,7 @@ title: The Core Contracts
 
 ## The Contracts Constituting Your DAO
 
-In a nutshell, your aragonOSx DAO consists of three pieces:
+In a nutshell, your aragonOS DAO consists of three pieces:
 
 1. **The DAO contract:** The DAO contract is where the **core functionality** of the protocol lies. It is in charge of:
    - Representing the identity of the DAO carrying an ENS name, and pointing to a logo, a description, and other metadata,
@@ -23,7 +23,7 @@ In a nutshell, your aragonOSx DAO consists of three pieces:
 
 </div>
 
-The underlying smart contracts constitute **the core contracts** of the aragonOSx DAO framework.
+The underlying smart contracts constitute **the core contracts** of the aragonOS DAO framework.
 
 In the upcoming sections you will learn about each of them in more depth.
 

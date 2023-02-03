@@ -75,7 +75,7 @@ To switch from an older version of a non-upgradeable contract to a newer one, th
 ### Meta Transaction Compatibility
 
 :::info
-The meta-transaction compatibility of DAOs, plugins, and infrastructure in aragonOSx is currently worked on and not finally decided.
+The meta-transaction compatibility of DAOs, plugins, and infrastructure in aragonOS is currently worked on and not finally decided.
 :::
 
 Another useful trait of a contract is the possibility to allow users to send gasless transactions, also known as meta transactions.

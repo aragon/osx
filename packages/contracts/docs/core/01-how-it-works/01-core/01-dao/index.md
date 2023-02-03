@@ -4,7 +4,7 @@ title: The DAO Contract
 
 ## The Identity and Basis of Your Organization
 
-In this section, you will learn about the core functionality of every aragonOSx DAO.
+In this section, you will learn about the core functionality of every aragonOS DAO.
 
 The `DAO` contract is the identity and basis of your organization. It is the address carrying the DAO’s ENS name, metadata, and holding the funds. Furthermore, it has **six base functionalities** being commonly found in other DAO frameworks in the ecosystem.
 
@@ -25,7 +25,7 @@ struct Action {
 }
 ```
 
-Actions can be calls to external contracts, plugins, or the aragonOSx DAO framework infrastructure, for example, to [setup a plugin](../../02-framework/02-plugin-repository/04-plugin-setup.md).
+Actions can be calls to external contracts, plugins, or the aragonOS DAO framework infrastructure, for example, to [setup a plugin](../../02-framework/02-plugin-repository/04-plugin-setup.md).
 Actions are typically scheduled in a proposal in a governance [plugin customizing your DAO](../03-plugins/index.md).
 
 Multiple `Action` structs can be put into one `Action[]` array and executed in a single transaction via the `execute` function.
@@ -44,7 +44,7 @@ In the future, more advanced asset management and finance functionality can be a
 
 ### 3. Upgradeability
 
-Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/02-dao-upgrading/index.md)) if a new version of aragonOSx is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
+Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/02-dao-upgrading/index.md)) if a new version of aragonOS is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
 
 ### 4. Callback Handling
 
@@ -64,7 +64,7 @@ By supporting the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) standard, 
 
 Lastly, it is essential that only the right entities (e.g., the DAO itself or trusted addresses) have permission to use the above-mentioned functionalities.
 
-This is why aragonOSx DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
+This is why aragonOS DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
 
 Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to EOAs as this poses a security risk to the organization if the account is compromised or acts adversarial.
 

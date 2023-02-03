@@ -16,7 +16,7 @@ For this **creation process**, the `DAOFactory` executes multiple steps:
 
 The `DAOFactory` contract does the following steps:
 
-1. Call the `createProxy(address daoBase)` function, where `daoBase` is the current aragonOSx (`UUPSUpgradeable`) `DAO` implementation contract
+1. Call the `createProxy(address daoBase)` function, where `daoBase` is the current aragonOS (`UUPSUpgradeable`) `DAO` implementation contract
 
 2. Call the initialize function
 
