@@ -16,8 +16,8 @@ export enum PreparationType {
   Uninstallation,
 }
 
+// release, build
 export type VersionTag = [number, number];
 
 // PluginRepo, release, build
-// TODO: maybe find a way so it expects the address of specific plugin setups.
 export type PluginRepoPointer = [string, number, number];
