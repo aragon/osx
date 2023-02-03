@@ -205,7 +205,7 @@ describe('AddresslistVoting', function () {
         voting
           .connect(signers[0])
           .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
     });
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
@@ -229,7 +229,7 @@ describe('AddresslistVoting', function () {
         voting
           .connect(signers[0])
           .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
     });
 
     it('reverts if the start date is set smaller than the current date', async () => {
@@ -552,7 +552,7 @@ describe('AddresslistVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         // Check that voting is possible but don't vote using `callStatic`
-        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+        await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
           .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))
@@ -727,7 +727,7 @@ describe('AddresslistVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         // Check that voting is possible but don't vote using `callStatic`
-        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+        await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
           .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))
@@ -878,7 +878,7 @@ describe('AddresslistVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         // Check that voting is possible but don't vote using `callStatic`
-        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+        await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
           .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))

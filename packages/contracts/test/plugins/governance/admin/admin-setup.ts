@@ -70,7 +70,7 @@ describe('AdminSetup', function () {
 
       await expect(
         adminSetup.prepareInstallation(targetDao.address, minimum_data)
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
     });
 
     it('reverts if encoded address in `_data` is zero', async () => {
