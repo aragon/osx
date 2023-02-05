@@ -96,10 +96,8 @@ const EVENTS = {
   Revoked: 'Revoked',
 };
 
-// TODO: put in common or something.
 const EMPTY_DATA = '0x';
 
-const AddressZero = ethers.constants.AddressZero;
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
@@ -430,7 +428,7 @@ describe('Plugin Setup Processor', function () {
 
       it.skip("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
         // use smock to.have.been.calledWith
-      })
+      });
 
       it('successfully prepares a plugin installation with the correct event arguments', async () => {
         const data = '0x11';
@@ -633,9 +631,9 @@ describe('Plugin Setup Processor', function () {
           .withArgs(targetDao.address, plugin, preparedSetupId, appliedSetupId);
       });
 
-      it.skip("successfully calls daos multi bulk with correct permissions", async () => {
+      it.skip('successfully calls daos multi bulk with correct permissions', async () => {
         // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
-      })
+      });
 
       // 1. call prepareinstall 2 times for the same plugin version
       // to get 2 preparations with same plugin address, but different setup ids.
@@ -742,7 +740,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.reverted;
 
         await expect(
-          psp.callStatic.applyInstallation(
+          psp.applyInstallation(
             targetDao.address,
             createApplyInstallationParams(
               plugin,
@@ -751,9 +749,10 @@ describe('Plugin Setup Processor', function () {
               firstPreparedHelpers
             )
           )
-        ).to.be.reverted;
+        ).to.be.revertedWithCustomError(psp, 'PluginAlreadyInstalled');
+
         await expect(
-          psp.callStatic.applyInstallation(
+          psp.applyInstallation(
             targetDao.address,
             createApplyInstallationParams(
               plugin,
@@ -762,7 +761,7 @@ describe('Plugin Setup Processor', function () {
               secondPreparedHelpers
             )
           )
-        ).to.be.reverted;
+        ).to.be.revertedWithCustomError(psp, 'PluginAlreadyInstalled');
 
         // Clean up
         setupUV1Bad.prepareInstallation.reset();
@@ -940,7 +939,12 @@ describe('Plugin Setup Processor', function () {
               EMPTY_DATA
             )
           )
-        ).to.be.reverted;
+        )
+          .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+          .withArgs(
+            ZERO_BYTES32,
+            getAppliedSetupId(pluginRepoPointer, helpersUV1)
+          );
       });
 
       it('allows to prepare multiple uninstallation as long as setup is different', async () => {
@@ -975,7 +979,7 @@ describe('Plugin Setup Processor', function () {
 
       it.skip("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
         // use smock to.have.been.calledWith
-      })
+      });
 
       it('successfully prepares a plugin uninstallation with the correct event arguments', async () => {
         const data = '0x11';
@@ -1103,9 +1107,9 @@ describe('Plugin Setup Processor', function () {
           .withArgs(preparedSetupId);
       });
 
-      it.skip("successfully calls daos multi bulk with correct permissions", async () => {
+      it.skip('successfully calls daos multi bulk with correct permissions', async () => {
         // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
-      })
+      });
 
       it('EDGE-CASE: reverts for all uninstall preparations once one of them is applied', async () => {
         // First Preparation
@@ -1533,7 +1537,7 @@ describe('Plugin Setup Processor', function () {
 
       it.skip("successfully calls plugin setup's prepareUpdate with correct arguments", async () => {
         // use smock to.have.been.calledWith
-      })
+      });
 
       it('successfully prepares update and emits the correct arguments', async () => {
         // Helpers,permissions and initData are
@@ -1826,7 +1830,7 @@ describe('Plugin Setup Processor', function () {
         )
       ).not.to.be.reverted;
 
-      // // Apply one of the preparation
+      // Apply one of the preparation
       await applyUpdate(
         psp,
         targetDao.address,
@@ -1843,7 +1847,7 @@ describe('Plugin Setup Processor', function () {
 
       // confirm that now preparations can't be applied anymore
       await expect(
-        psp.callStatic.applyUpdate(
+        psp.applyUpdate(
           targetDao.address,
           createApplyUpdateParams(
             proxy,
@@ -1855,7 +1859,7 @@ describe('Plugin Setup Processor', function () {
         )
       ).to.be.reverted;
       await expect(
-        psp.callStatic.applyUpdate(
+        psp.applyUpdate(
           targetDao.address,
           createApplyUpdateParams(
             proxy,
@@ -1872,9 +1876,9 @@ describe('Plugin Setup Processor', function () {
       ).to.be.reverted;
     });
 
-    it.skip("successfully calls daos multi bulk with correct permissions", async () => {
+    it.skip('successfully calls daos multi bulk with correct permissions', async () => {
       // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
-    })
+    });
 
     it('successfuly updates and emits the correct event arguments', async () => {
       const {
@@ -2001,7 +2005,7 @@ describe('Plugin Setup Processor', function () {
         let helpersV2: string[];
         let permissionsUV1V2: PermissionOperation[];
         let initDataV1V2: BytesLike;
-        let currentVersion: VersionTag = [1,2]
+        let currentVersion: VersionTag = [1, 2];
 
         beforeEach(async () => {
           ({
@@ -2012,8 +2016,8 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             proxy,
-            [1,1],
-            [1,2],
+            [1, 1],
+            [1, 2],
             pluginRepoPointer[0],
             helpersUV1,
             EMPTY_DATA
@@ -2055,12 +2059,12 @@ describe('Plugin Setup Processor', function () {
             EMPTY_DATA
           );
         });
-      
+
         context(`and updated to V3`, function () {
           let helpersV3: string[];
           let permissionsV2V3: PermissionOperation[];
           let initDataV2V3: BytesLike;
-          
+
           beforeEach(async () => {
             ({
               updatedHelpers: helpersV3,
@@ -2070,8 +2074,8 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao.address,
               proxy,
-              [1,2],
-              [1,3],
+              [1, 2],
+              [1, 3],
               pluginRepoPointer[0],
               helpersV2,
               EMPTY_DATA
@@ -2080,7 +2084,9 @@ describe('Plugin Setup Processor', function () {
 
           it('points to the V3 implementation', async () => {
             expect(
-              await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
+              await PluginUV3.attach(
+                proxy
+              ).callStatic.getImplementationAddress()
             ).to.equal(await setupUV3.callStatic.getImplementationAddress());
           });
 
@@ -2162,7 +2168,12 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV2,
           permissions: permissionsV2,
-        } = await installPlugin(psp, targetDao.address, pluginRepoPointer, EMPTY_DATA));
+        } = await installPlugin(
+          psp,
+          targetDao.address,
+          pluginRepoPointer,
+          EMPTY_DATA
+        ));
 
         await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
       });
@@ -2263,7 +2274,12 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV3,
           permissions: permissionsV3,
-        } = await installPlugin(psp, targetDao.address, pluginRepoPointer, EMPTY_DATA));
+        } = await installPlugin(
+          psp,
+          targetDao.address,
+          pluginRepoPointer,
+          EMPTY_DATA
+        ));
 
         await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
       });
@@ -2304,7 +2320,7 @@ describe('Plugin Setup Processor', function () {
           helpersV3,
           EMPTY_DATA
         );
-      });    
+      });
     });
   });
 });
@@ -2381,14 +2397,11 @@ async function updateAndValidatePluginUpdate(
     // });
     // expect(fake.upgradeToAndCall).to.be.delegatedFrom(proxy);
 
-
     // ensure that the logic address was also correctly modified on the proxy.
     const proxyContract = await ethers.getContractAt(
       'PluginUUPSUpgradeable',
       proxy
     );
-    expect(await proxyContract.getImplementationAddress()).to.equal(
-      newImpl
-    );
+    expect(await proxyContract.getImplementationAddress()).to.equal(newImpl);
   }
 }
