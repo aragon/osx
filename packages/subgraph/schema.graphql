@@ -19,7 +19,7 @@ type ERC721Token implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
-  baseURI: String
+#  baseURI: String
 }
 
 type Balance @entity {
@@ -29,6 +29,49 @@ type Balance @entity {
   balance: BigInt!
   lastUpdated: BigInt!
 }
+
+type ERC721Balance @entity {
+  id: ID! # token address + dao address
+  token: ERC721Token! # address(0) corresponds to the native token
+  dao: Dao!
+  tokenIds: [BigInt!]!
+  lastUpdated: BigInt!
+}
+
+enum TransferType {
+  Withdraw
+  Deposit
+}
+
+interface TokenTransfer {
+  id: ID!
+  dao: Dao!
+  from: Bytes!
+  to: Bytes!
+  type: TransferType!
+}
+
+type ERC20Transfer implements TokenTransfer @entity {
+  id: ID!
+  dao: Dao!
+  token: ERC20Transfer!
+  amount: BigInt!
+  from: Bytes!
+  to: Bytes!
+  type: TransferType!
+}
+
+type ERC721Transfer implements TokenTransfer @entity {
+  id: ID!
+  dao: Dao!
+  token: ERC721Token!
+  tokenId: BigInt!
+  from: Bytes!
+  to: Bytes!
+  type: TransferType!
+}
+
+# Treasury
 
 # Dao
 
@@ -64,27 +107,6 @@ type Action @entity {
   execResult: Bytes
 }
 
-# Treasury
-
-enum TransferType {
-  Withdraw
-  Deposit
-}
-
-type VaultTransfer @entity(immutable: true) {
-  id: ID!
-  dao: Dao!
-  token: ERC20Token
-  sender: Bytes
-  to: Bytes
-  amount: BigInt!
-  reference: String!
-  transaction: String!
-  proposal: Proposal
-  createdAt: BigInt!
-  type: TransferType!
-}
-
 type StandardCallback @entity {
   id: ID!
   dao: Dao!
@@ -103,8 +125,10 @@ type Dao @entity {
   createdAt: BigInt!
   token: ERC20Token
   actions: [Action!]! @derivedFrom(field: "dao")
-  transfers: [VaultTransfer!]! @derivedFrom(field: "dao")
+  transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
+  erc721Balances: [ERC721Balance!] @derivedFrom(field: "dao")
+  erc721Transfers: [ERC721Transfer!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")

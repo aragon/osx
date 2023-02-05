@@ -105,6 +105,8 @@ templates:
       abis:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: ERC721
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC721/ERC721.sol/ERC721.json
         - name: ERC165
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: TokenVoting
@@ -113,9 +115,13 @@ templates:
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
+        - name: CallbackHandler
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
+        - event: CallbackReceived(address,indexed bytes4,bytes)
+          handler: handleCallbackReceived
         - event: Deposited(indexed address,indexed address,uint256,string)
           handler: handleDeposited
         - event: NativeTokenDeposited(address,uint256)

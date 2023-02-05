@@ -1,4 +1,4 @@
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt, log} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {Dao} from '../../generated/schema';
 
@@ -11,7 +11,8 @@ import {
   Executed,
   TrustedForwarderSet,
   SignatureValidatorSet,
-  StandardCallbackRegistered
+  StandardCallbackRegistered,
+  CallbackReceived
 } from '../../generated/templates/DaoTemplate/DAO';
 
 // events
@@ -33,6 +34,37 @@ export function createNewMetadataSetEvent(
   newMetadataSetEvent.parameters.push(metadataParam);
 
   return newMetadataSetEvent;
+}
+
+export function createCallbackReceivedEvent(
+  dao: string,
+  functionSig: Bytes,
+  sender: string,
+  data: Bytes
+): CallbackReceived {
+  let callBackEvent = changetype<CallbackReceived>(newMockEvent());
+
+  callBackEvent.address = Address.fromString(dao);
+  callBackEvent.parameters = [];
+
+  let senderParam = new ethereum.EventParam(
+    'sender',
+    ethereum.Value.fromAddress(Address.fromString(sender))
+  );
+  let sigParam = new ethereum.EventParam(
+    'sig',
+    ethereum.Value.fromBytes(functionSig)
+  );
+  let dataParam = new ethereum.EventParam(
+    'data',
+    ethereum.Value.fromBytes(data)
+  );
+  
+  callBackEvent.parameters.push(senderParam);
+  callBackEvent.parameters.push(sigParam);
+  callBackEvent.parameters.push(dataParam);
+  
+  return callBackEvent;
 }
 
 export function createTrustedForwarderSetEvent(

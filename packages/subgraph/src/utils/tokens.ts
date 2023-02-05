@@ -52,7 +52,7 @@ export function updateBalance(
   balanceId: string,
   daoAddress: Address,
   token: Address,
-  amount: BigInt,
+  amount: BigInt, // ERC721 tokenId // ERC1155 tokenId amount
   isDeposit: boolean,
   timestamp: BigInt
 ): void {
