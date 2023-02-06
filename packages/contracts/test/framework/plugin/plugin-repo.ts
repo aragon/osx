@@ -190,7 +190,7 @@ describe('PluginRepo', function () {
         .withArgs(2, 1, pluginSetup_2.address);
     });
 
-    it('successfully creates a version and emits correct events', async () => {
+    it('successfully creates a version and emits the correct events', async () => {
       await expect(
         pluginRepo.createVersion(
           1,
