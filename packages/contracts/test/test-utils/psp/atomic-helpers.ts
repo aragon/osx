@@ -9,11 +9,7 @@ import {
   prepareUninstallation,
   prepareUpdate,
 } from './wrappers';
-import {UPGRADE_PERMISSIONS} from '../permissions';
 
-const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
-
-// TODO: put in common or something.
 const EMPTY_DATA = '0x';
 
 // Requires a caller to have apply install permission on psp.
