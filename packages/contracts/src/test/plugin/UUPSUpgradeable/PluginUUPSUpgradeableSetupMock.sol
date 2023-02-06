@@ -23,7 +23,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         plugin = mockPluginProxy(pluginBase, _dao);
         preparedSetupData.helpers = mockHelpers(1);
-        preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
+        preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
@@ -42,6 +42,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
 }
 
 contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
+    
     function prepareInstallation(
         address _dao,
         bytes memory

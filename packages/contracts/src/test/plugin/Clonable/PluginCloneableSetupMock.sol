@@ -7,7 +7,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 import {PluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
 import {IPluginSetup} from "../../../framework/plugin/setup/IPluginSetup.sol";
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
-import {PluginCloneableV1Mock, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";
+import {PluginCloneableV1Mock, PluginCloneableV1MockBad, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";
 
 contract PluginCloneableSetupV1Mock is PluginSetup {
     address internal pluginBase;
@@ -38,6 +38,12 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view virtual override returns (address) {
         return address(pluginBase);
+    }
+}
+
+contract PluginCloneableSetupV1MockBad is PluginCloneableSetupV1Mock {
+    constructor() {
+        pluginBase = address(new PluginCloneableV1MockBad());
     }
 }
 
