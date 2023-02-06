@@ -136,7 +136,7 @@ describe('PluginRepo', function () {
           BUILD_METADATA,
           '0x'
         )
-      ).to.be.revertedWithCustomError(pluginRepo, 'InvalidReleaseMetadata');
+      ).to.be.revertedWithCustomError(pluginRepo, 'EmptyReleaseMetadata');
     });
 
     it('fails if the same plugin setup exists in another release', async () => {
@@ -320,7 +320,7 @@ describe('PluginRepo', function () {
       );
       await expect(
         pluginRepo.updateReleaseMetadata(1, '0x')
-      ).to.be.revertedWithCustomError(pluginRepo, 'InvalidReleaseMetadata');
+      ).to.be.revertedWithCustomError(pluginRepo, 'EmptyReleaseMetadata');
     });
 
     it('successfuly updates metadata for the release that already exists', async () => {
