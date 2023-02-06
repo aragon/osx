@@ -27,7 +27,6 @@ import {
   PluginCloneableSetupV1MockBad__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginCloneableSetupV1Mock__factory,
-  IPluginSetup__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -63,7 +62,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {BytesLike, Transaction} from 'ethers';
+import {BytesLike} from 'ethers';
 import {
   PluginRepoPointer,
   PreparationType,
@@ -2335,7 +2334,7 @@ async function updateAndValidatePluginUpdate(
   currentHelpers: string[],
   data: BytesLike = EMPTY_DATA
 ) {
-  const {initData} = await updatePlugin(
+  await updatePlugin(
     psp,
     targetDao,
     proxy,
@@ -2375,28 +2374,7 @@ async function updateAndValidatePluginUpdate(
   const currentImpl = await currentPluginSetup.getImplementationAddress();
   const newImpl = await newPluginSetup.getImplementationAddress();
 
-  // TODO: Giorgi Not working..
-  // const fake = await smock.fake('PluginUUPSUpgradeable', {
-  //   address: proxy,
-  // });
-
-  if (currentImpl == newImpl) {
-    // expect(fake.upgradeTo).to.have.callCount(0);
-    // expect(fake.upgradeToAndCall).to.have.callCount(0);
-  } else {
-    // Option 1: not works:
-    // if (initData == '0x') {
-    //   expect(fake.upgradeTo).to.have.been.calledWith(newImpl, initData);
-    // } else {
-    //   expect(fake.upgradeToAndCall).to.have.been.calledWith(newImpl, initData);
-    // }
-
-    // Option 2: not works:
-    // const fake = await smock.fake('PluginUUPSUpgradeableV1Mock', {
-    //   address: currentImpl
-    // });
-    // expect(fake.upgradeToAndCall).to.be.delegatedFrom(proxy);
-
+  if (currentImpl != newImpl) {
     // ensure that the logic address was also correctly modified on the proxy.
     const proxyContract = await ethers.getContractAt(
       'PluginUUPSUpgradeable',

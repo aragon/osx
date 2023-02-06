@@ -1,5 +1,4 @@
 import {ethers} from 'hardhat';
-import {utils, constants} from 'ethers';
 
 import {PluginRepoRegistry, PluginSetupProcessor} from '../../typechain';
 

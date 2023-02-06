@@ -1,5 +1,5 @@
 import {BytesLike} from 'ethers';
-import {PluginRepo, PluginSetupProcessor} from '../../../typechain';
+import {PluginSetupProcessor} from '../../../typechain';
 import {
   InstallationAppliedEvent,
   InstallationPreparedEvent,
