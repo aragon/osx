@@ -149,13 +149,13 @@ describe('DAORegistry', function () {
   });
 
   it('fails to register a DAO with the same name twice', async function () {
-    // Register the the DAO name under the top level domain
+    // Register the DAO name under the top level domain
     await daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain);
 
     const newTargetDao = await deployNewDAO(ownerAddress);
     const otherOwnerAddress = await (await ethers.getSigners())[1].getAddress();
 
-    // Try to register the the DAO name under the top level domain a second time
+    // Try to register the DAO name under the top level domain a second time
     await expect(
       daoRegistry.register(
         newTargetDao.address,

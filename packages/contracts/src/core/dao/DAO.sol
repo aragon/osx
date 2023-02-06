@@ -168,9 +168,9 @@ contract DAO is
 
     /// @inheritdoc IDAO
     function execute(
-        bytes32 callId,
+        bytes32 _callId,
         Action[] calldata _actions,
-        uint256 allowFailureMap
+        uint256 _allowFailureMap
     )
         external
         override
@@ -191,7 +191,7 @@ contract DAO is
 
             if (!success) {
                 // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if (!hasBit(allowFailureMap, uint8(i))) {
+                if (!hasBit(_allowFailureMap, uint8(i))) {
                     revert ActionFailed(i);
                 }
 
@@ -207,7 +207,7 @@ contract DAO is
             }
         }
 
-        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
+        emit Executed(msg.sender, _callId, _actions, failureMap, execResults);
     }
 
     /// @inheritdoc IDAO
@@ -245,8 +245,12 @@ contract DAO is
         bytes32 _hash,
         bytes memory _signature
     ) external view override(IDAO, IERC1271) returns (bytes4) {
-        if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
-        return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
+        if (address(signatureValidator) == address(0)) {
+            // Return the invalid magic number
+            return bytes4(0);
+        }
+        // Forward the call to the set signature validator contract
+        return signatureValidator.isValidSignature(_hash, _signature);
     }
 
     /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.
@@ -278,7 +282,7 @@ contract DAO is
         emit TrustedForwarderSet(_trustedForwarder);
     }
 
-    /// @notice Registers ERC721/ERC1155 Interfaces and Callbacks.
+    /// @notice Registers the ERC721/ERC1155 interfaces and callbacks.
     function _registerTokenInterfaces() private {
         _registerInterface(type(IERC721ReceiverUpgradeable).interfaceId);
         _registerInterface(type(IERC1155ReceiverUpgradeable).interfaceId);

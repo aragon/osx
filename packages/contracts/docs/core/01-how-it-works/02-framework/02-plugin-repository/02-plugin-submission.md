@@ -1,12 +1,14 @@
 ---
-title: Publication Process
+title: Submission
 ---
 
-## Publishing Your Plugin
+## The Plugin Submission Process
 
 :::note
-Work in Progress
+To do: This is a draft.
 :::
+
+To be displayed on Aragon's plugin repository, plugins have to be submitted.
 
 - call `createPluginRepoWithFirstVersion` in `PluginRepoFactory`
 - this creates the `PluginRepo` with a `1.0` version release and registers it in the `PluginRepoRegistry` with an ENS name

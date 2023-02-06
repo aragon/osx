@@ -1,29 +1,49 @@
 ---
-title: Version Numbers
+title: Versioning
 ---
 
-## Using Semantic Versioning for Your Plugin
+## Versioning Your Plugin
 
-:::note
-Work in Progress
-:::
+The aragonOS plugin ecosystem has an on-chain versioning system built-in.
 
-<!--TODO: This needs a core team discussion-->
+Given a version tag `RELEASE.BUILD`, we can infer that:
 
-Our plugin version numbering follows the common [semantic versioning](https://semver.org/) notation. Below, we define what a version bumps means in the context of the `Plugin` ecosystem.
+1.  We are doing a `RELEASE` version when we apply breaking changes affecting the interaction with other contracts on the blockchain to:
 
-Given a version number `MAJOR.MINOR.PATCH`, we can infer that:
+    - The `Plugin` implementation contract such as the
 
-1. We’re doing a `MAJOR` version when we make incompatible API changes.
-   - For smart contracts this could be
-     - a change of a function signature
-     - the repurposing of existing storage
-2. We’re doing a `MINOR` version when we add functionality in a backwards compatible manner.
-   - For smart contracts this could be
-     - the addition of functions
-     - the addition of new storage variables
-3. We’re doing a `PATCH` version when we make backwards compatible bug fixes.
-   - For smart contracts this could be a
-     - a bug fix in the contract logic
-     - a bug fix in the contract factory
-   - For the UI, a minor change is also included as a patch.
+      - change or removal of storage variables
+      - removal of external functions
+      - change of external function signature
+
+2.  We are doing a `BUILD` version when we apply backward compatible changes not affecting the interaction with other contracts on the blockchain to:
+
+    - The `Plugin` implementation contract such as the
+
+      - addition of
+
+        - storage variables
+
+      - addition or change of
+
+        - external functions
+
+      - addition, change, or removal of
+
+        - internal functions
+        - events
+
+    - The `PluginSetup` contract such as
+
+      - addition, change, or removal of
+
+        - input parameters
+        - helper contracts
+        - requested permissions
+
+    - The `metadata` URI such as the
+
+      - change of
+
+        - the plugin setup ABI
+        - the plugin UI

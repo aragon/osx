@@ -6,10 +6,14 @@ pragma solidity 0.8.17;
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
 interface IDAO {
+    /// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
+    /// @param to The address to call.
+    /// @param value The native token value to be sent with the call.
+    /// @param data The bytes-encoded function selector and calldata for the call.
     struct Action {
-        address to; // Address to call
-        uint256 value; // Value to be sent with the call (for example ETH if on mainnet)
-        bytes data; // Function selector + arguments
+        address to;
+        uint256 value;
+        bytes data;
     }
 
     /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
@@ -33,27 +37,25 @@ interface IDAO {
     /// @param metadata The IPFS hash of the new metadata object.
     event MetadataSet(bytes metadata);
 
-    /// @notice Executes a list of actions.
-    /// @dev Runs a loop through the array of actions and executes them one by one. If one action fails, all will be reverted.
-    /// @param callId The id of the call. The definition of the value of callId is up to the calling contract and can be used, e.g., as a nonce.
+    /// @notice Executes a list of actions. If no failure map is provided, one failing action results in the entire excution to be reverted. If a non-zero failure map is provided, allowed actions can fail without the remaining actions being reverted.
+    /// @param _callId The ID of the call. The definition of the value of `callId` is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
     /// @param _allowFailureMap A bitmap allowing execution to succeed, even if individual actions might revert. If the bit at index `i` is 1, the execution succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
     /// @return uint256 The constructed failureMap which contains which actions have actually failed.
     function execute(
-        bytes32 callId,
+        bytes32 _callId,
         Action[] memory _actions,
         uint256 _allowFailureMap
     ) external returns (bytes[] memory, uint256);
 
     /// @notice Emitted when a proposal is executed.
     /// @param actor The address of the caller.
-    /// @param callId The id of the call.
-    /// @dev The value of callId is defined by the component/contract calling the execute function.
-    ///      A `Plugin` implementation can use it, for example, as a nonce.
+    /// @param callId The ID of the call.
     /// @param actions Array of actions executed.
     /// @param failureMap Stores which actions have failed.
     /// @param execResults Array with the results of the executed actions.
+    /// @dev The value of `callId` is defined by the component/contract calling the execute function. A `Plugin` implementation can use it, for example, as a nonce.
     event Executed(
         address indexed actor,
         bytes32 callId,
@@ -116,9 +118,9 @@ interface IDAO {
     /// @param signatureValidator The address of the signature validator.
     event SignatureValidatorSet(address signatureValidator);
 
-    /// @notice Checks whether a signature is valid for the provided data.
-    /// @param _hash The keccak256 hash of arbitrary length data signed on the behalf of `address(this)`.
-    /// @param _signature Signature byte array associated with _data.
+    /// @notice Checks whether a signature is valid for the provided hash by forwarding the call to the set [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+    /// @param _hash The hash of the data to be signed.
+    /// @param _signature The signature byte array associated with `_hash`.
     /// @return magicValue Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
     function isValidSignature(bytes32 _hash, bytes memory _signature) external returns (bytes4);
 
