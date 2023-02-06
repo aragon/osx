@@ -51,7 +51,7 @@ describe('PluginRepo', function () {
   );
 
   describe('CreateVersion: ', async () => {
-    it('reverts if caller does not have permission', async () => {
+    it('reverts if the caller does not have permission', async () => {
       await expect(
         pluginRepo
           .connect(signers[2])
