@@ -14,8 +14,8 @@ import {
   PluginUUPSUpgradeableSetupV3Mock,
   PluginUUPSUpgradeableSetupV4Mock,
   PluginCloneableSetupV1Mock,
+  PluginCloneableSetupV1MockBad,
   PluginCloneableSetupV2Mock,
-  PluginCloneableSetupV3Mock,
   PluginRepoFactory,
   PluginRepoRegistry,
   PluginRepo,
@@ -24,7 +24,7 @@ import {
   PluginUUPSUpgradeableSetupV1MockBad__factory,
   PluginUUPSUpgradeableSetupV4Mock__factory,
   PluginCloneableSetupV2Mock__factory,
-  PluginCloneableSetupV3Mock__factory,
+  PluginCloneableSetupV1MockBad__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginCloneableSetupV1Mock__factory,
   IPluginSetup__factory,
@@ -132,8 +132,8 @@ describe('Plugin Setup Processor', function () {
   let setupUV1Bad: MockContract<PluginUUPSUpgradeableSetupV1MockBad>;
   let repoC: PluginRepo;
   let setupCV1: MockContract<PluginCloneableSetupV1Mock>;
+  let setupCV1Bad: MockContract<PluginCloneableSetupV1MockBad>;
   let setupCV2: MockContract<PluginCloneableSetupV2Mock>;
-  let setupCV3: MockContract<PluginCloneableSetupV3Mock>;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -182,15 +182,15 @@ describe('Plugin Setup Processor', function () {
     );
     setupCV1 = await SetupC1.deploy();
 
+    const SetupC1Bad = await smock.mock<PluginCloneableSetupV1MockBad__factory>(
+      'PluginCloneableSetupV1MockBad'
+    );
+    setupCV1Bad = await SetupC1Bad.deploy();
+
     const SetupC2 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
       'PluginCloneableSetupV2Mock'
     );
     setupCV2 = await SetupC2.deploy();
-
-    const SetupC3 = await smock.mock<PluginCloneableSetupV3Mock__factory>(
-      'PluginCloneableSetupV3Mock'
-    );
-    setupCV3 = await SetupC3.deploy();
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(ownerAddress);
@@ -264,8 +264,8 @@ describe('Plugin Setup Processor', function () {
 
     event = await findEvent(tx, EVENTS.PluginRepoRegistered);
     repoC = PluginRepo.attach(event.args.pluginRepo);
+    await repoC.createVersion(1, setupCV1Bad.address, EMPTY_DATA, EMPTY_DATA);
     await repoC.createVersion(1, setupCV2.address, EMPTY_DATA, EMPTY_DATA);
-    await repoC.createVersion(1, setupCV3.address, EMPTY_DATA, EMPTY_DATA);
   });
 
   beforeEach(async function () {
