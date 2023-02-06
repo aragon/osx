@@ -205,7 +205,7 @@ describe('PluginRepo', function () {
         .withArgs(1, RELEASE_METADATA);
     });
 
-    it('correctly increases and emits build number', async () => {
+    it('correctly increases and emits the build number', async () => {
       await expect(
         pluginRepo.createVersion(
           1,
