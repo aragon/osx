@@ -26,7 +26,7 @@ describe('Ratio', function () {
       await expect(ratio.applyRatioCeiled(123, tooLargeRatio))
         .to.revertedWithCustomError(ratio, 'RatioOutOfBounds')
         .withArgs(RATIO_BASE, tooLargeRatio);
-      await expect(ratio.applyRatioCeiled(123, RATIO_BASE)).to.not.be.reverted;
+      await expect(ratio.applyRatioCeiled(123, RATIO_BASE)).not.to.be.reverted;
     });
 
     it('reverts for too large values that would cause an overflow', async () => {
@@ -54,7 +54,7 @@ describe('Ratio', function () {
       await expect(ratio.applyRatioFloored(123, tooLargeRatio))
         .to.revertedWithCustomError(ratio, 'RatioOutOfBounds')
         .withArgs(RATIO_BASE, tooLargeRatio);
-      await expect(ratio.applyRatioFloored(123, RATIO_BASE)).to.not.be.reverted;
+      await expect(ratio.applyRatioFloored(123, RATIO_BASE)).not.to.be.reverted;
     });
 
     it('reverts for too large values that would cause an overflow', async () => {

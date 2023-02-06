@@ -266,7 +266,7 @@ describe('DAO', function () {
         actions[i] = data.succeedAction;
       }
 
-      await expect(dao.execute(ZERO_BYTES32, actions, 0)).to.not.be.reverted;
+      await expect(dao.execute(ZERO_BYTES32, actions, 0)).not.to.be.reverted;
 
       // add one more to make sure it fails
       actions[MAX_ACTIONS] = data.failAction;

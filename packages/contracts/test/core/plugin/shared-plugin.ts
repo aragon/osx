@@ -85,7 +85,7 @@ describe('SharedPlugin', function () {
       await ethers.provider.send('evm_mine', []);
 
       // Check that the ID gated action can be executed
-      await expect(testPlugin.callStatic.idGatedAction(allowedId)).to.not.be
+      await expect(testPlugin.callStatic.idGatedAction(allowedId)).not.to.be
         .reverted;
     });
 
@@ -123,7 +123,7 @@ describe('SharedPlugin', function () {
         .withArgs(nonExistingId);
 
       // The call executes for the allowed ID 0
-      await expect(testPlugin.callStatic.idGatedAction(allowedId)).to.not.be
+      await expect(testPlugin.callStatic.idGatedAction(allowedId)).not.to.be
         .reverted;
     });
 
@@ -160,7 +160,7 @@ describe('SharedPlugin', function () {
       await ethers.provider.send('evm_mine', []);
 
       // The call is allowed for the allowed ID
-      await expect(testPlugin.callStatic.idGatedAction(allowedId)).to.not.be
+      await expect(testPlugin.callStatic.idGatedAction(allowedId)).not.to.be
         .reverted;
 
       // The call fails if the ID differs
