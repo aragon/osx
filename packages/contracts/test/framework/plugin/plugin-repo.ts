@@ -65,7 +65,7 @@ describe('PluginRepo', function () {
           MAINTAINER_PERMISSION_ID
         );
     });
-    it('fails if plugin setup does not support the `IPluginSetup` interface', async function () {
+    it('fails if the plugin setup does not support the `IPluginSetup` interface', async function () {
       // If EOA Address is passed
       await expect(
         pluginRepo.createVersion(1, ownerAddress, emptyBytes, emptyBytes)
