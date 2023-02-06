@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.7.1-alpha
+
+### Added
+
+- Adds support for AdminPlugin members by listening on DAO permissions.
+
+### Changed
+
+- Changes all instances of `adminstrator` to `administrator` to fix typo.
+
 ## 0.7.0-alpha
 
 ### Added

@@ -268,7 +268,7 @@ describe('TokenVoting', function () {
           VoteOption.None,
           false
         )
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
     });
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
@@ -315,7 +315,7 @@ describe('TokenVoting', function () {
             VoteOption.None,
             false
           )
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
     });
 
     it('reverts if the total token supply is 0', async () => {
@@ -699,7 +699,7 @@ describe('TokenVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         // Check that voting is possible but don't vote using `callStatic`
-        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+        await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
           .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))
@@ -878,7 +878,7 @@ describe('TokenVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         // Check that voting is possible but don't vote using `callStatic`
-        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+        await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
           .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))
@@ -1049,7 +1049,7 @@ describe('TokenVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         // Check that voting is possible but don't vote using `callStatic`
-        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+        await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
           .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))

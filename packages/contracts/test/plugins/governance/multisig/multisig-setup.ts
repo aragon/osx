@@ -87,7 +87,7 @@ describe('MultisigSetup', function () {
 
       await expect(
         multisigSetup.prepareInstallation(targetDao.address, minimum_data)
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
     });
 
     it('reverts if zero members are provided in `_data`', async () => {

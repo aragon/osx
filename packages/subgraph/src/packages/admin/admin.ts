@@ -1,4 +1,4 @@
-import {dataSource} from '@graphprotocol/graph-ts';
+import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 import {
   MembershipContractAnnounced,
@@ -7,10 +7,11 @@ import {
 } from '../../../generated/templates/Admin/Admin';
 import {
   Action,
-  AdminstratorAdminPlugin,
+  AdministratorAdminPlugin,
   AdminProposal,
-  Adminstrator
+  Administrator
 } from '../../../generated/schema';
+import {AdminMembers} from '../../../generated/templates';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -42,21 +43,23 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
-  proposalEntity.adminstrator = adminstratorAddress.toHexString();
+  proposalEntity.administrator = adminstratorAddress.toHexString();
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   // Adminstrator
   let adminstratorId = adminstratorAddress.toHexString() + '_' + pluginId;
-  let adminMemberEntity = AdminstratorAdminPlugin.load(adminstratorId);
+  let adminMemberEntity = AdministratorAdminPlugin.load(adminstratorId);
   if (!adminMemberEntity) {
-    adminMemberEntity = new AdminstratorAdminPlugin(adminstratorId);
+    adminMemberEntity = new AdministratorAdminPlugin(adminstratorId);
     adminMemberEntity.administrator = adminstratorAddress.toHexString();
     adminMemberEntity.plugin = pluginId;
     adminMemberEntity.save();
   }
-  let adminstratorEntity = Adminstrator.load(adminstratorAddress.toHexString());
+  let adminstratorEntity = Administrator.load(
+    adminstratorAddress.toHexString()
+  );
   if (!adminstratorEntity) {
-    adminstratorEntity = new Adminstrator(adminstratorAddress.toHexString());
+    adminstratorEntity = new Administrator(adminstratorAddress.toHexString());
     adminstratorEntity.address = adminstratorAddress.toHexString();
     adminstratorEntity.save();
   }
@@ -117,12 +120,11 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleMembershipContractAnnounced(
   event: MembershipContractAnnounced
 ): void {
-  let dao = event.params.definingContract;
-  let packageEntity = AdminstratorAdminPlugin.load(event.address.toHexString());
-
-  if (packageEntity) {
-    // TODO: Query `dao` for addresses holding the `EXECUTE_PROPOSAL_PERMISSION` on `where = event.address` and store them as `administrators`
-    // <MISSING_IMPLEMENTATION>
-    // packageEntity.save();
-  }
+  let context = new DataSourceContext();
+  context.setString('pluginAddress', event.address.toHexString());
+  context.setString(
+    'permissionId',
+    '0xf281525e53675515a6ba7cc7bea8a81e649b3608423ee2d73be1752cea887889' // keccack256 of EXECUTE_PROPOSAL_PERMISSION
+  );
+  AdminMembers.createWithContext(event.params.definingContract, context);
 }

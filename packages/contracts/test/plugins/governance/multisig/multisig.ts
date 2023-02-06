@@ -305,7 +305,7 @@ describe('Multisig', function () {
         multisigSettings
       );
 
-      await expect(multisig.removeAddresses([signers[1].address])).to.not.be
+      await expect(multisig.removeAddresses([signers[1].address])).not.to.be
         .reverted;
 
       await expect(multisig.removeAddresses([signers[2].address]))
@@ -341,7 +341,7 @@ describe('Multisig', function () {
           0,
           await timestampIn(1000)
         )
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
 
       expect(await multisig.proposalCount()).to.equal(1);
     });
@@ -374,7 +374,7 @@ describe('Multisig', function () {
           0,
           await timestampIn(1000)
         )
-      ).to.not.be.reverted;
+      ).not.to.be.reverted;
 
       const proposalId1 = await multisig.callStatic.createProposal(
         dummyMetadata,
@@ -509,7 +509,7 @@ describe('Multisig', function () {
               0,
               await timestampIn(1000)
             )
-        ).to.not.be.reverted;
+        ).not.to.be.reverted;
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
@@ -799,7 +799,7 @@ describe('Multisig', function () {
 
         await advanceTime(7000);
 
-        await expect(multisig.approve(1, false)).to.not.be.reverted;
+        await expect(multisig.approve(1, false)).not.to.be.reverted;
       });
 
       it('reverts if the proposal has ended', async () => {
@@ -814,7 +814,7 @@ describe('Multisig', function () {
         );
         await advanceTime(2000);
 
-        await expect(multisig.connect(signers[1]).approve(1, false)).to.not.be
+        await expect(multisig.connect(signers[1]).approve(1, false)).not.to.be
           .reverted;
 
         await advanceTime(10000);
@@ -915,7 +915,7 @@ describe('Multisig', function () {
         expect(proposal.approvals).to.be.eq(multisigSettings.minApprovals);
 
         expect(await multisig.canExecute(id)).to.be.true;
-        await expect(multisig.execute(id)).to.not.be.reverted;
+        await expect(multisig.execute(id)).not.to.be.reverted;
       });
 
       it('executes if the minimum approval is met and can be called by an unlisted accounts', async () => {
@@ -930,7 +930,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(id)).to.be.true;
         expect(await multisig.isListed(signers[9].address)).to.be.false; // signers[9] is not listed
-        await expect(multisig.connect(signers[9]).execute(id)).to.not.be
+        await expect(multisig.connect(signers[9]).execute(id)).not.to.be
           .reverted;
       });
 
@@ -1018,7 +1018,7 @@ describe('Multisig', function () {
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
 
-        await expect(multisig.execute(1)).to.not.be.reverted;
+        await expect(multisig.execute(1)).not.to.be.reverted;
       });
 
       it('reverts if the proposal has ended', async () => {
