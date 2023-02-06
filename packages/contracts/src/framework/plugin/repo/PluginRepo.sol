@@ -85,7 +85,7 @@ contract PluginRepo is
     /// @param pluginSetup The plugin setup contract address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
-    /// @notice Thrown if the metadata URI is length of 0.
+    /// @notice Thrown if the metadata URI is empty.
     error EmptyReleaseMetadata();
 
     /// @notice Thrown if release does not exist.
