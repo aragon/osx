@@ -35,6 +35,7 @@ To learn more about actions and advanced features of the DAO executor, visit the
 
 The DAO provides basic **asset management** functionality to deposit, withdraw, and keep track of
 
+- native
 - [ERC-20 (Token Standard)](https://eips.ethereum.org/EIPS/eip-20),
 - [ERC-721 (NFT Standard)](https://eips.ethereum.org/EIPS/eip-721), and
 - [ERC-1155 (Multi Token Standard)](https://eips.ethereum.org/EIPS/eip-1155)

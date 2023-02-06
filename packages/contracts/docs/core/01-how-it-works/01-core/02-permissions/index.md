@@ -19,7 +19,7 @@ Identifiers, permissions, and modifiers link everything together.
 
 ### Permission Identifiers
 
-To differentiate between each permission, we give permissions **identifiers** that you will frequently find at the top of aragonOS contracts. They look something like this:
+To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of aragonOS contracts. They look something like this:
 
 ```solidity title="contracts/core/DAO.sol"
 bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
