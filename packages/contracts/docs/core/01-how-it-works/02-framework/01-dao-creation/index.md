@@ -2,9 +2,14 @@
 title: DAO Creation
 ---
 
-## The Process of Creating a DAO
+## The DAO Creation Process
 
-Two contracts manage the DAO creation process, the `DAOFactory` and the `DAORegistry`.
+Two framework contracts manage the `DAO` contract creation process:
+
+- the [`DAOFactory`](../../../03-reference-guide/framework/dao/DAOFactory.md)
+- the [`DAORegistry`](../../../03-reference-guide/framework/dao/DAORegistry.md).
+
+<!-- Add subgraphic from the framework overview main graphic-->
 
 ### `DAOFactory`
 
@@ -17,8 +22,6 @@ The `DAOFactory` creates and sets up a `DAO` for you in four steps with the `cre
 
 as well as an array of `PluginSettings` containing `PluginSetup` contract references and respective setup data for the initial set of plugins to be installed on the DAO.
 
-<!-- Add sub-graphic from framework overview -->
-
 The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegistry` and being also part of the aragonOS framework:
 
 1. Creates a new DAO by deploying an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pointing to the latest aragonOS `DAO` impelementation and becomes the initial owner.
@@ -29,7 +32,7 @@ The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegis
 
 4. Sets the [native permissions](../../01-core/02-permissions/index.md/#permissions-native-to-the-dao-contract) of the `DAO` and revokes its own ownership.
 
-For more details visit the [DAOFactory](../../../03-reference-guide/framework/dao/DAOFactory.md) reference guide.
+For more details visit the [`DAOFactory` reference guide entry](../../../03-reference-guide/framework/dao/DAOFactory.md).
 
 ### `DAORegistry`
 
@@ -45,7 +48,7 @@ function register(
 
 requiring the `REGISTER_DAO_PERMISSION_ID` permission currently held only by the `DAOFactory`.
 
-If the requested ENS `subdomain` name is not taken under the `dao.eth` domain, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
+If the requested ENS `subdomain` name [is valid](../03-ens-names.md) and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
 If the registration was successful, the DAO name, contract and creator addresses are emitted in an event.
 
-For more details visit the [DAORegistry](../../../03-reference-guide/framework/dao/DAORegistry.md) reference guide.
+For more details visit the [`DAORegistry` reference guide entry](../../../03-reference-guide/framework/dao/DAORegistry.md).

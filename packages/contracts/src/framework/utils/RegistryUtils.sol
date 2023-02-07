@@ -2,7 +2,10 @@
 
 pragma solidity 0.8.17;
 
-/// @notice Checks if the name is either 0-9, a-z or a dash (-).
+/// @notice Validates that a subdomain name is composed only from characters in the allowed character set:
+/// - the lowercase letters `a-z`
+/// - the digits `0-9`
+/// - the hyphen `-`
 /// @param subDomain The name of the DAO.
 /// @return `true` if the name is valid or `false` if at least one char is invalid.
 /// @dev Aborts on the first invalid char found.

@@ -4,7 +4,17 @@ title: The DAO Framework
 
 ## The Infrastructure Behind the AraongOS DAO Framework
 
-The aragonOS DAO Framework provides **infrastructure-related contracts** for the **creation of DAOs** and the **management of the AragonOS plugin repository**.
+The aragonOS DAO framework is composed by **infrastructure-related contracts** used for the
+
+- [creation of DAOs](01-dao-creation/index.md)
+- [management of plugins](02-plugin-management/index.md)s, which includes their
+
+  - setup in existing DAOs
+  - versioning of different implementations and respective setup contracts, UI, and related metadata.
+
+DAOs and Plugins in the aragonOS framework carry a unique ENS name.
+
+An overview of the involved contracts is shown below:
 
 <div class="center-column">
 
@@ -16,31 +26,5 @@ The aragonOS DAO Framework provides **infrastructure-related contracts** for the
 
 </div>
 
-### DAO Creation
-
-| Contract      | Description                                                                                         | Relationship    |
-| :------------ | :-------------------------------------------------------------------------------------------------- | :-------------- |
-| `DAOFactory`  | A global helper to deploy new DAO instances and bootstrap the initial plugins, using our framework. | creates `DAO`   |
-| `DAORegistry` | Registers DAOs and assigns an ENS subdomain                                                         | registers `DAO` |
-
-### Plugin Management
-
-#### Setup
-
-| Contract                      | Description                                                                                           | Relationship                                         |
-| :---------------------------- | :---------------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
-| `IPluginSetup`                |                                                                                                       |                                                      |
-| `PluginSetup`                 | A template so that plugin developers can bootstrap plugins and helpers for a DAO using our framework. | `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable` |
-| `PluginSetupProcessor`        |                                                                                                       |                                                      |
-| `PluginSetupProcessorHelpers` |                                                                                                       |                                                      |
-
-#### Repository
-
-| Contract             | Description                                                                                          | Relationship           |
-| :------------------- | :--------------------------------------------------------------------------------------------------- | :--------------------- |
-| `IPluginRepo`        |                                                                                                      |                        |
-| `PluginRepo`         | A repository of a plugin's versions. Each version contains the corresponding `PluginSetup` contract. | versions `PluginSetup` |
-| `PluginRepoFactory`  | Creates `PluginRepo` contracts                                                                       | creates `PluginRepo`   |
-| `PluginRepoRegistry` | Registers `PluginRepo` contracts                                                                     | registers `PluginRepo` |
-
-In the following sections, [The DAO Creation Process](01-dao-creation-process.md) and the [The Aragon Plugin Repository](02-plugin-repository/index.md) are explained in more detail.
+In the following sections, the [creation of DAOs](01-dao-creation/index.md) and the [management of plugins](02-plugin-management/index.md) by the aragonOS framework are explained in detail.
+Information on allowed DAO and plugin names and can be fund in the [ENS Names](./03-ens-names.md) section.
