@@ -64,15 +64,11 @@ export function getAppliedSetupId(
 ) {
   return keccak256(
     defaultAbiCoder.encode(
-      [
-        'tuple(uint8, uint16)',
-        'address',
-        'bytes32'
-      ],
+      ['tuple(uint8, uint16)', 'address', 'bytes32'],
       [
         [pluginRepoPointer[1], pluginRepoPointer[2]],
         pluginRepoPointer[0],
-        hashHelpers(helpers)
+        hashHelpers(helpers),
       ]
     )
   );
