@@ -10,12 +10,6 @@ This section is work in progress.
 
 In this section you will learn what plugin repositories and related aragonOS infrastructure works.
 
-<!--An aragonOS Plugin consist of:
-
-- The `Plugin` implementation contract containing the plugin's logic
-- The `PluginSetup` contract referencing the `Plugin` implementation and containing the setup instruction to install, update, and uninstall it to a DAO
-- the Aragon App frontend / UI-->
-
 ### What are Plugin Repos Needed For?
 
 Each plugin has its own, unique ENS name and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference.
