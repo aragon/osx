@@ -42,7 +42,6 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
 }
 
 contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
-    
     function prepareInstallation(
         address _dao,
         bytes memory
