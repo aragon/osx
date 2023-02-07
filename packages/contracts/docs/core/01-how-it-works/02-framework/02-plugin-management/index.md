@@ -1,5 +1,5 @@
 ---
-title: Plugin Repository
+title: Plugin Management
 ---
 
 ## Customizing Your DAO
