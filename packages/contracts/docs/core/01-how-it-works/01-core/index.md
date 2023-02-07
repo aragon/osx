@@ -7,26 +7,41 @@ title: The Core Contracts
 In a nutshell, your aragonOS DAO consists of three pieces:
 
 1. **The DAO contract:** The DAO contract is where the **core functionality** of the protocol lies. It is in charge of:
-   - Representing the identity of the DAO carrying an ENS name, and pointing to a logo, a description, and other metadata,
-   - Managing the DAOs assets, and
-   - Interacting with other contracts.
-2. **The Permission Manager:** The permission manager is part of the DAO contract and the center of our protocol architecture. It **manages and governs the interactions between the DAO and other addresses**. These addresses can be wallets (EOAs) or smart contracts, such as other (sub-)DAOs, multi-sig wallets or Aragon plugins.
-3. **Plugins:** Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. We can imagine these to be governance plugins for collective decision-making, such as token voting or one-person, one-vote, or asset management such as the streaming of tokens.
+
+   - Representing the identity of the DAO (ENS name, logo, description, other metadata)
+   - Keeping the treasury
+   - Executing arbitrary actions to
+     - transfer assets
+     - call its own functions
+     - call functions in external contracts
+   - Providing general technical utilities (signature validation, callback handling)
+
+2. **The Permission Manager:** The permission manager is part of the DAO contract and the center of our protocol architecture. It **manages permissions your DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO.
+
+3. **Plugins:** Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. These plugins can be related to
+
+   - Governance (e.g., token voting, one-person one-vote)
+   - Asset management (e.g., ERC-20 or NFT minting, token streaming, DeFi)
+   - Membership (governing budget allowances, gating access, curating a member list)
+
+The underlying smart contracts constitute **the core contracts** of the aragonOS DAO framework.
+The following graphic shows how an exemplary DAO setup, where the
 
 <div class="center-column">
 
 ![Schematic depiction of the interaction between the DAO, the PermissionManager, and a Plugin contract.](dao-plugin.drawio.svg)
 
 <p class="caption"> 
-  Overview of the three core contract pieces and their interactions: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as a `Plugin` contract in green conducting a function call (black arrow) on the DAO contract that require permission checks (red, dashed arrow).
+  An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. 
+  Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
 </p>
 
 </div>
 
-The underlying smart contracts constitute **the core contracts** of the aragonOS DAO framework.
-
 In the upcoming sections you will learn about each of them in more depth.
 
 - [The Identity and Basis of your Organization](./01-dao/index.md)
-- [Managing and Governing your DAO](./02-permissions/index.md)
+- [Managing Permissions of Your DAO](./02-permissions/index.md)
 - [Customizing your DAO](./03-plugins/index.md)
+
+The

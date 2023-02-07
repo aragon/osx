@@ -28,40 +28,49 @@ The `PluginSetupProcessor` contract taking care of installing, updating, and uni
 
 In the following section, we will introduce the contracts.
 
+### The `PuginRepoFactory` Contract
+
+```solidity title="contracts/framework/PluginRepoFactory.sol"
+/// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version.
+/// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transferred to the address `_maintainer`.
+/// @param _subdomain The plugin repository subdomain.
+/// @param _pluginSetup The plugin factory contract associated with the plugin version.
+/// @param _maintainer The plugin maintainer address.
+/// @param _releaseMetadata The release metadata URI.
+/// @param _buildMetadata The build metadata URI.
+function createPluginRepoWithFirstVersion(
+  string calldata _subdomain,
+  address _pluginSetup,
+  address _maintainer,
+  bytes memory _releaseMetadata,
+  bytes memory _buildMetadata
+) external returns (PluginRepo pluginRepo);
+```
+
 ### The `PuginRepo` Contract
 
 The `PluginRepo` contract versions the releases of a `Plugin`. Each plugin starts as version `1.0.0`. Subsequent versions follow the [semantic versioning convention](https://semver.org/). For major, minor, and patch releases, the respective [version numbers are incremented](docs/core/../../../../../02-how-to-guides/01-plugin-development/03-publication/02-versioning.md).
 
 Each semantic version released in the `PluginRepo` contract via the `createVersion` function
 
-```solidity
+```solidity title="contracts/framework/PluginRepo.sol"
+/// @notice Creates a new version with contract `_pluginSetupAddress` and content `@fromHex(_buildMetadata)`.
+/// @param _release The release number.
+/// @param _pluginSetupAddress The address of the plugin setup contract.
+/// @param _buildMetadata The build metadata URI.
+/// @param _releaseMetadata The release metadata URI.
 function createVersion(
-    uint16[3] memory _newSemanticVersion,
-    address _pluginManager,
-    bytes calldata _contentURI
-)
+  uint8 _release,
+  address _pluginSetup,
+  bytes calldata _buildMetadata,
+  bytes calldata _releaseMetadata
+) external auth(address(this), MAINTAINER_PERMISSION_ID);
 ```
 
 This function references two pieces of information:
 
 1. The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](04-plugin-setup.md) this specific version.
 2. A URI string pointing to the contents defining the UI so that users on the Aragon DAO frontend can interact with it.
-
-<!--TODO
-:::note
-To do: The following is a draft.
-:::
-Additionally, each released version has a
-
-- status
-  - submitted
-  - review pending
-  - accepted
-  - rejected
-  - vulnerable
-- description / release note
-- audit / review document summary
--->
 
 ### The `PluginRepoRegistry` Contract
 
