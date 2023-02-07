@@ -21,8 +21,8 @@ Safety was our top priority in the design and we wanted to make sure that the DA
 
 This is why we split the **plugin setup in two steps**:
 
-1. **Setup Preparation**
-2. **Setup Application**
+1. **Preparation**
+2. **Application**
 
 Each plugin will then require both to run through the DAO's `PluginSetupProcessor` contract, which is part of the aragonOS framework.
 
