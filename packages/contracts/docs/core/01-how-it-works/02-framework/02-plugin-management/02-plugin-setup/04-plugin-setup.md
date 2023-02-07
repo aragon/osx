@@ -19,8 +19,8 @@ Safety was our top priority in the design and we wanted to make sure that the DA
 
 This is why we split the **plugin setup in two steps**:
 
-1. a **preparation** step, and
-2. a **processing** step.
+1. **Setup Preparation**
+2. **Setup Application**
 
 Each plugin will then require both to run through the DAO's `PluginSetupProcessor` contract which is part of the aragonOS framework.
 
@@ -30,7 +30,7 @@ Plugins can also be setup manually by calling `PluginSetup` contract and grantin
 
 In the following, we describe the two steps in detail.
 
-### 1. Preparation
+### Setup Preparation
 
 The preparation of a plugin setup proceeds as follows:
 
@@ -52,7 +52,7 @@ The governance plugin can be a simple majority vote, an optimistic process or an
 
 This gives the DAO time to see and check which permissions the `PluginSetup` contract request before processing them. Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.
 
-### 2. Processing
+### Setup Application
 
 After this initial transaction, all contracts and addresses related to the plugin as well as their permissions are known and the DAO can decide if the proposal should be accepted or denied.
 Once the proposal has passed, the actions specified in the `Action[]` array get executed and the prepared plugin setup is processed as follows:
