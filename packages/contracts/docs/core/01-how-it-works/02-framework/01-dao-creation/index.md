@@ -28,7 +28,7 @@ The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegis
 
 2. Registers the new contract in the [`DAORegistry`](#daoregistry).
 
-3. Installs the plugins using the `PluginSetupProcessor` (see also the section about [the plugin setup process](../../02-framework/02-plugin-management/04-plugin-setup.md).
+3. Installs the plugins using the `PluginSetupProcessor` (see also the section about [the plugin setup process](../02-plugin-management/02-plugin-setup/index.md).
 
 4. Sets the [native permissions](../../01-core/02-permissions/index.md/#permissions-native-to-the-dao-contract) of the `DAO` and revokes its own ownership.
 

@@ -16,11 +16,11 @@ Each plugin has its own, unique ENS name and on-chain repository contract, the `
 
 <!--The names and address of the `PluginRepo` contracts are stored in the `PluginRepoRegistry`. Both contracts are described in the following. -->
 
-The `PluginSetupProcessor` contract taking care of installing, updating, and uninstalling is described in the context of [the plugin setup process](04-plugin-setup.md).
+The `PluginSetupProcessor` contract taking care of installing, updating, and uninstalling is described in the context of [the plugin setup process](../02-plugin-setup/index.md).
 
 <div class="center-column">
 
-![Schematic depiction of the versioning taking place in the PluginRepoRegistry.](plugin-repo-overview.drawio.svg)
+![Schematic depiction of the versioning taking place in the PluginRepoRegistry.](./plugin-repo-overview.drawio.svg)
 
 <p class="caption"> 
   Schema showing the `PluginRepoRegistry` maintaining a list the addresses of ENS named `PluginRepo` contracts shown on the left. Each `PluginRepo` contract maintains a list of semantic versions of the `PluginSetup` contract (internally referencing the `Plugin` logic) and the associated UI building blocks as a URI, examplarily shown on the right.
@@ -31,15 +31,13 @@ The `PluginSetupProcessor` contract taking care of installing, updating, and uni
 ### The `PuginRepo` Contract
 
 The `PluginRepo` contract versions the releases of a `Plugin`. Each plugin starts as version `1.0`.
-When you release the first version of a plugin, a new plugin repository is created for you by the aragonOS framework in which you are the maintainer. The creation process is described in the [plugin repo creation process](01-plugin-repo-creation.md) section.
+When you release the first version of a plugin, a new plugin repository is created for you by the aragonOS framework in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.
 
 The `PluginRepo` contract inherits from the `PermissionManager` <!-- add link --> and allows the maintainer of the repository to create new versions with the `createVersion` function:
 
 :::note
 This section is work in progress.
 :::
-
- <!--Subsequent versions follow the [semantic versioning convention](https://semver.org/). For major, minor, and patch releases, the respective [version numbers are incremented](docs/core/../../../../../02-how-to-guides/01-plugin-development/03-publication/02-versioning.md).Each semantic version released in the `PluginRepo` contract via the `createVersion` function-->
 
 ```solidity title="contracts/framework/PluginRepo.sol"
 /// @notice Creates a new version with contract `_pluginSetupAddress` and content `@fromHex(_buildMetadata)`.
@@ -58,7 +56,7 @@ function createVersion(
 This function requires four pieces of information
 
 - The release number to create the build for.
-- The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](04-plugin-setup.md) this specific version.
+- The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](../02-plugin-setup/index.md) this specific version.
 - the metadata URI, which point to JSON files containing UI, setup, and other information.
 
 <!-- explain how plugin setups are versioned-->

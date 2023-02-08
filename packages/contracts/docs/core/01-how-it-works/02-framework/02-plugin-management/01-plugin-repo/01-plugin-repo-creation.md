@@ -44,7 +44,7 @@ function createPluginRepoWithFirstVersion(
 ) external returns (PluginRepo pluginRepo);
 ```
 
-For more details visit the [`PuginRepoFactory` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PuginRepoFactory.md).
+For more details visit the [`PuginRepoFactory` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
 
 ### The `PluginRepoRegistry` Contract
 
@@ -64,4 +64,4 @@ address pluginRepo
 ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
 ```
 
-For more details visit the [`PluginRepoRegistry` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
+For more details visit the [`PluginRepoRegistry` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md).
