@@ -4,27 +4,26 @@ title: Framework
 
 ## The Infrastructure Behind the AraongOS DAO Framework
 
-The aragonOS DAO framework is composed by **infrastructure-related contracts** used for the
+The aragonOS protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
 
-- [creation of DAOs](01-dao-creation/index.md)
-- [management of plugins](02-plugin-management/index.md)s, which includes their
+- [creation of DAOs](01-dao-creation/index.md) and initial plugin configuration
+- [management of plugins](02-plugin-management/index.md), which includes the
 
-  - setup in existing DAOs
-  - versioning of different implementations and respective setup contracts, UI, and related metadata.
+  - the setup in existing DAOs
+  - the versioning of different implementations and respective setup contracts, UI, and related metadata
 
-DAOs and Plugins in the aragonOS framework carry a unique ENS name.
+- [assignment of ENS Names](./03-ens-names.md) to `Plugin` and `DAO` contracts created through the framework
 
-An overview of the involved contracts is shown below:
+An overview of the involved contracts and their iteractions is shown below:
 
 <div class="center-column">
 
 ![](aragon-os-infrastructure-core-overview.drawio.svg)
 
 <p class="caption"> 
-  Overview of the aragonOS DAO framework infrastructure and core primitives.
+  Overview of the framework and core contracts of the aragonOS protocol.
 </p>
 
 </div>
 
-In the following sections, the [creation of DAOs](01-dao-creation/index.md) and the [management of plugins](02-plugin-management/index.md) by the aragonOS framework are explained in detail.
-Information on allowed DAO and plugin names and can be fund in the [ENS Names](./03-ens-names.md) section.
+In the following sections, you will learn more about the framework-related contracts of the aragonOS protocol.
