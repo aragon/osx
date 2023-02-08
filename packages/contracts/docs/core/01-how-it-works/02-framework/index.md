@@ -2,7 +2,7 @@
 title: Framework
 ---
 
-## The Infrastructure Behind the AraongOS DAO Framework
+## The Infrastructure Behind the AraongOS Protocol
 
 The aragonOS protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
 

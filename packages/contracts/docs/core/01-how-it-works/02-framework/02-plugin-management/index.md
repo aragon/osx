@@ -6,7 +6,7 @@ title: Plugin Management
 
 As mentioned earlier, plugins built by Aragon and third-party developers can be added and removed from your DAO to adapt it to your needs.
 
-The management of these plugins is handled for you by the aragonOS framework infrastructure so that the process of
+The management of these plugins is handled for you by the aragonOS protocol so that the process of
 
 - releasing new plugins as well as
 - installing, updating, and uninstalling them to your DAO
@@ -49,4 +49,4 @@ An aragonOS Plugin consist of:
 The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the aragonOS framework, which is explained in the section [The Plugin Setup Process](./02-plugin-setup/index.md).
 
 Each plugin with its different builds and releases is versioned inside its own plugin repositories in a `PluginRepo` contract.
-These are created for you when you publish a `PluginSetup` contract new version to the aragonOS framework, which is explained in the section about [The Plugin Repo Creation](./02-plugin-setup/index.md)
+The `PluginRepo` is created for you when you publish the `PluginSetup` contract of your first version to the aragonOS protocol, which is explained in the section about [The Plugin Repo Creation](./02-plugin-setup/index.md)
