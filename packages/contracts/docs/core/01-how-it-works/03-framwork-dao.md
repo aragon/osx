@@ -1,5 +1,5 @@
 ---
-title: Framework DAO
+title: Protocol Governance
 ---
 
 ## Governing the aragonOS Framework

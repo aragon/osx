@@ -1,5 +1,5 @@
 ---
-title: The Core Contracts
+title: Core
 ---
 
 ## The Contracts Constituting Your DAO

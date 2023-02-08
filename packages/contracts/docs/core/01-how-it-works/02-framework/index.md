@@ -1,5 +1,5 @@
 ---
-title: The DAO Framework
+title: Framework
 ---
 
 ## The Infrastructure Behind the AraongOS DAO Framework

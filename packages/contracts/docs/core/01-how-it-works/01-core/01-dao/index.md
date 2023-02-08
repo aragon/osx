@@ -1,5 +1,5 @@
 ---
-title: The DAO Contract
+title: DAO
 ---
 
 ## The Identity and Basis of Your Organization
