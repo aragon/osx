@@ -18,9 +18,37 @@ function execute(
         returns (bytes[] memory execResults, uint256 failureMap)
 ```
 
-It offers two features that we will dive into in this article.
-First, it allows the execution of an array of arbitrary `Action` items.
-Second, it allows individual actions to fail selectively, without reverting the entire transaction.
+It offers two features that we will dive into in this article:
+
+1. Execution of an array of arbitrary `Action` items.
+2. Allowing failure of individual actions without reverting the entire transaction.
+
+### Actions
+
+In our framework, actions are represented by a solidity struct:
+
+```solidity title="contracts/core/IDAO.sol"
+/// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
+/// @param to The address to call.
+/// @param value The native token value to be sent with the call.
+/// @param data The bytes-encoded function selector and calldata for the call.
+struct Action {
+  address to;
+  uint256 value;
+  bytes data;
+}
+```
+
+Actions can be
+
+- function calls to the DAO itself (e.g., to upgrade the DAO contract to a newer version of aragonOS)
+- function calls to other contracts, such as
+
+  - external services (e.g. Uniswap, Compound, etc.)
+  - aragonOS plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
+  - aragonOS framework infrastructure (e.g., to [setup a plugin](../../02-framework/02-plugin-management/02-plugin-setup/index.md))
+
+- transfers of native tokens
 
 ### The Action Array
 

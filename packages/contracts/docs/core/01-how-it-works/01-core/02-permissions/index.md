@@ -2,7 +2,7 @@
 title: Permissions
 ---
 
-## Managing Permissions of Your DAO
+## Managing Your DAO
 
 At Aragon, we believe that **DAOs are permission management systems**.
 Permissions between contracts and wallets allow a DAO to manage and govern its actions.

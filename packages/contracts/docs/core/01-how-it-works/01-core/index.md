@@ -25,6 +25,7 @@ In a nutshell, your aragonOS DAO consists of three pieces:
    - Membership (governing budget allowances, gating access, curating a member list)
 
 The underlying smart contracts constitute **the core contracts** of the aragonOS DAO framework.
+
 The following graphic shows how an exemplary DAO setup, where the
 
 <div class="center-column">
@@ -38,10 +39,8 @@ The following graphic shows how an exemplary DAO setup, where the
 
 </div>
 
-In the upcoming sections you will learn about each of them in more depth.
+In the upcoming sections, you will learn about each of them in more depth.
 
-- [The Identity and Basis of your Organization](./01-dao/index.md)
-- [Managing Permissions of Your DAO](./02-permissions/index.md)
-- [Customizing your DAO](./03-plugins/index.md)
-
-The
+- [The DAO Contract: The Identity and Basis of Your Organization](./01-dao/index.md)
+- [Permissions: Managing Your DAO](./02-permissions/index.md)
+- [Plugins: Customizing your DAO](./03-plugins/index.md)
