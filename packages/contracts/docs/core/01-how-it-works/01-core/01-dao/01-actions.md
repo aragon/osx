@@ -50,6 +50,26 @@ Actions can be
 
 - transfers of native tokens
 
+#### Example: Calling the wETH Contract
+
+We have an Aragon DAO deployed on the Goerli testnet. Now, we want to wrap `0.1 ETH` from the DAO treasury into `wETH` by depositing it into the [Goerli WETH contract](https://goerli.etherscan.io/token/0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6#writeContract) deployed on the address `0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6`. The corresponding `Action` and `execute` function call look as follows:
+
+```solidity
+
+IDAO.Action[] memory actions = new IDAO.Action[](1);
+
+actions[0] = IDAO.Action({
+  to: address(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6), //         The address of the WETH contract on Goerli
+  value: 0.1 ether, //                                                The Goerli ETH value to be send with the function
+  data: abi.encodeWithSelector(bytes4(keccak256('deposit()', []))) // The calldata
+});
+
+dao().execute({_callId: '', _actions: actions, _allowFailureMap: 0});
+
+```
+
+For the `execute` call to work, the caller must have the required [permission](../02-permissions/index.md) on the DAO contract.
+
 ### The Action Array
 
 The `Action[] calldata _actions` input argument allows you to execute an array of up to 256 `Action` items in a single transaction within the gas limitations of the Ethereum virtual machine (EVM).
