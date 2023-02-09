@@ -30,9 +30,9 @@ Different versions might contain
 The `PluginRepo` contract versions the releases of a `Plugin`. The first version of a plugin is always published with the version tag `1.0`.
 When you publish the first plugin version, a new plugin repository is automatically created for you by the aragonOSx protocol in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.
 
-The `PluginRepo` contract inherits from the [`PermissionManager`](../../../01-core/02-permissions/index.md) and allows the maintainer of the repository to create new versions with the `createVersion` function:
+The `PluginRepo` contract is [UUPS upgradeable](https://eips.ethereum.org/EIPS/eip-1822), inherits from the [`PermissionManager`](../../../01-core/02-permissions/index.md) and allows the maintainer of the repository to create new versions with the `createVersion` function:
 
-```solidity title="contracts/framework/PluginRepo.sol"
+```solidity title="contracts/framework/repo/PluginRepo.sol"
 /// @notice Creates a new plugin version as the latest build for an existing release number or the first build for a new release number for the provided `PluginSetup` contract address and metadata.
 /// @param _release The release number.
 /// @param _pluginSetupAddress The address of the plugin setup contract.
@@ -46,7 +46,7 @@ function createVersion(
 ) external auth(address(this), MAINTAINER_PERMISSION_ID);
 ```
 
-This function requires four pieces of information:
+The function receives four input arguments:
 
 - The `_release` number to create the build for. If the release number exists already (e.g., release `1`), it is registered as the latest build (e.g., `1.3` if the previous build was `1.2`). If it is a new release number, the build number is `0` (e.g., `2.0`).
 - The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](../02-plugin-setup/index.md) this specific version.

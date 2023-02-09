@@ -6,8 +6,8 @@ title: Repo Creation
 
 To be available for setup in the aragonOSx framework, a `PluginRepo` must be created. Two framework contracts manage the `PluginRepo` creation process:
 
-- the [`PluginRepoFactory`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md)
-- the [`PluginRepoRegistry`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md)
+- The [`PluginRepoFactory`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md)
+- The [`PluginRepoRegistry`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md)
 
 and are introduced in the following.
 
@@ -20,21 +20,17 @@ For all subsequent builds and releases, `createVersion` inside the registered `P
 
 ### The `PuginRepoFactory` Contract
 
-:::note
-This section is work in progress.
-:::
+The `PluginRepoFactory` is a contract of the aragonOSx protocol framework infrastructure being called when the first version if a plugin is published.
+It contains the `createPluginRepoWithFirstVersion`,
 
-- calls `createPluginRepoWithFirstVersion` in `PluginRepoFactory`
-- creates the `PluginRepo` with a `1.0` version release and registers it in the `PluginRepoRegistry` with an ENS
-
-```solidity title="contracts/framework/PluginRepoFactory.sol"
-/// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version.
-/// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transferred to the address `_maintainer`.
+```solidity title="contracts/framework/repo/PluginRepoFactory.sol"
+/// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.0`.
 /// @param _subdomain The plugin repository subdomain.
 /// @param _pluginSetup The plugin factory contract associated with the plugin version.
 /// @param _maintainer The plugin maintainer address.
 /// @param _releaseMetadata The release metadata URI.
 /// @param _buildMetadata The build metadata URI.
+/// @dev After the creation of the `PluginRepo` and release of the first version by the factory, ownership is transferred to the `_maintainer` address.
 function createPluginRepoWithFirstVersion(
   string calldata _subdomain,
   address _pluginSetup,
@@ -43,6 +39,13 @@ function createPluginRepoWithFirstVersion(
   bytes memory _buildMetadata
 ) external returns (PluginRepo pluginRepo);
 ```
+
+which creates a `PluginRepo` with the first version `1.0` inside and registers it in the aragonOSx `PluginRepoRegistry` contract with an [ENS subdomain](../../03-ens-names.md) under the `dao-plugin.eth` domain managed by Aragon.
+
+Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-puginrepo-contract), it receives
+
+- A valid ENS `_subdomain` name under that isn't already taken
+- The address of the plugin repo maintainer who ends up having the `ROOT_PERMISSION_ID`, `MAINTAINER_PERMISSION_ID`, and `UPGRADE_REPO_PERMISSION_ID` permission allowing to call the internal `PermissionManager`, the `createVersion` and `updateReleaseMetadata` functions as well as upgrading the contract.
 
 For more details visit the [`PuginRepoFactory` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
 
