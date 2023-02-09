@@ -127,7 +127,7 @@ contract Service {
 ```
 
 Calling the `use()` function inside requires the caller to have the `USE_PERMISSION_ID` permission. Now, you want to make this service available to every user without uploading a new contract or requiring every user to ask for the permission.
-By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to a condition, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
+By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` you allow everyone to call the `use()` function and you can add more conditions to it. If you later on decide that you want to be more selective about who is allowed to call it, you can revoke the permission to `ANY_ADDR`.
 
 Granting a permission with `_where: ANY_ADDR` to a condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.

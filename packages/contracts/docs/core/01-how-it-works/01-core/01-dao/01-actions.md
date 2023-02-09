@@ -68,7 +68,7 @@ dao().execute({_callId: '', _actions: actions, _allowFailureMap: 0});
 
 ```
 
-For the `execute` call to work, the caller must have the required [permission](../02-permissions/index.md) on the DAO contract.
+For the `execute` call to work, the caller must have the required [`EXECUTE_PERMISSION_ID` permission](../02-permissions/index.md) on the DAO contract.
 
 ### The Action Array
 
