@@ -46,7 +46,7 @@ export function updateERC20Balance(
   type: TransferType
 ): void {
   let daoId = dao.toHexString();
-  let balanceId = daoId + '_' + token.toHexString();
+  let balanceId = daoId.concat('_').concat(token.toHexString());
 
   let erc20Balance = ERC20Balance.load(balanceId);
 

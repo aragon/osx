@@ -57,7 +57,7 @@ export function updateERC721Balance(
   timestamp: BigInt,
   type: TransferType
 ): void {
-  let balanceId = daoId.concat('-').concat(token);
+  let balanceId = daoId.concat('_').concat(token);
   let erc721Balance = ERC721Balance.load(balanceId);
 
   if (!erc721Balance) {

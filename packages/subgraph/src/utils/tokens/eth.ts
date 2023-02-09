@@ -9,8 +9,9 @@ export function updateNativeBalance(
   timestamp: BigInt,
   type: TransferType
 ): void {
-  let balanceId = daoId + '_' + ADDRESS_ZERO;
+  let balanceId = daoId.concat('_').concat(ADDRESS_ZERO);
   let nativeBalance = NativeBalance.load(balanceId);
+
   if (!nativeBalance) {
     nativeBalance = new NativeBalance(balanceId);
     nativeBalance.dao = daoId;
