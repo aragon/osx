@@ -23,37 +23,38 @@ type ERC721Contract implements Token @entity(immutable: true) {
 
 # Token Balances
 interface TokenBalance {
-  id: ID! # token address + dao address
+  id: ID! # dao address + token address
   dao: Dao!
   lastUpdated: BigInt!
 }
 
 type ERC20Balance implements TokenBalance @entity {
-  id: ID! # token address + dao address
-  token: ERC20Contract! # address(0) corresponds to the native token
+  id: ID!
+  token: ERC20Contract!
   dao: Dao!
   balance: BigInt!
   lastUpdated: BigInt!
 }
 
 type NativeBalance implements TokenBalance @entity {
-  id: ID! # token address + dao address
+  id: ID!
   dao: Dao!
   balance: BigInt!
   lastUpdated: BigInt!
 }
 
 type ERC721Balance implements TokenBalance @entity {
-  id: ID! # token address + dao address
-  token: ERC721Contract! # address(0) corresponds to the native token
+  id: ID!
+  token: ERC721Contract!
   dao: Dao!
   tokenIds: [BigInt!]!
   lastUpdated: BigInt!
 }
 
 # Token Transfers
+
 enum TransferType {
-  None # Special case where from and to both are not equal to dao address.
+  None # Special case where from and to both are NOT equal to dao address.
   Withdraw
   Deposit
 }
