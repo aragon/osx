@@ -81,7 +81,7 @@ If you forget calling `__PluginCloneable_init(_dao)`, your plugin won't be assoc
 
 ### Implementing the logic
 
-Now, that the plugin is initalized, we can focus on writing the actual plugin logic.
+Now, that the plugin is initialized, we can focus on writing the actual plugin logic.
 
 :::note
 To do:
