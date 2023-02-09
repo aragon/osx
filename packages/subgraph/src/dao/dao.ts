@@ -1,11 +1,4 @@
-import {
-  Address,
-  Bytes,
-  store,
-  ethereum,
-  log,
-  BigInt
-} from '@graphprotocol/graph-ts';
+import {Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -30,7 +23,7 @@ import {ADDRESS_ZERO} from '../utils/constants';
 
 import {handleERC721Action, handleERC721Received} from '../utils/tokens/erc721';
 import {handleERC20Action, handleERC20Deposit} from '../utils/tokens/erc20';
-import {handleETHAction, handleETHDeposit} from '../utils/tokens/eth';
+import {handleNativeAction, handleNativeDeposit} from '../utils/tokens/eth';
 import {
   ERC20_transfer,
   ERC20_transferFrom,
@@ -80,7 +73,7 @@ export function handleExecuted(event: Executed): void {
       .concat(event.params.callId.toHexString());
 
     if (action.data.toHexString() == '0x') {
-      handleETHAction(
+      handleNativeAction(
         event.address,
         event.address,
         action.to,
@@ -141,7 +134,7 @@ export function handleDeposited(event: Deposited): void {
     return;
   }
 
-  handleETHDeposit(
+  handleNativeDeposit(
     event.address,
     event.params.sender,
     event.address,
@@ -153,7 +146,7 @@ export function handleDeposited(event: Deposited): void {
 }
 
 export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
-  handleETHDeposit(
+  handleNativeDeposit(
     event.address,
     event.params.sender,
     event.address,

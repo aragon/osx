@@ -1,14 +1,9 @@
-import {Address, BigInt, Bytes, ethereum, log} from '@graphprotocol/graph-ts';
-import {ETHBalance, ETHTransfer} from '../../../generated/schema';
-import {ERC20} from '../../../generated/templates/DaoTemplate/ERC20';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
+import {TransferType} from './common';
 
-enum TypeHere {
-  Withdraw,
-  Deposit
-}
-
-export function createETHTransfer(
+export function createNativeTransfer(
   dao: Address,
   from: Address,
   to: Address,
@@ -16,7 +11,7 @@ export function createETHTransfer(
   reference: string,
   txHash: Bytes,
   timestamp: BigInt
-): ETHTransfer {
+): NativeTransfer {
   let id = dao
     .toHexString()
     .concat('-')
@@ -27,40 +22,40 @@ export function createETHTransfer(
     .concat(amount.toString())
     .concat('-')
     .concat(txHash.toHexString());
-  let ethTransfer = new ETHTransfer(id);
-  ethTransfer.from = from;
-  ethTransfer.to = dao;
-  ethTransfer.dao = dao.toHexString();
-  ethTransfer.amount = amount;
-  ethTransfer.reference = reference;
-  ethTransfer.txHash = txHash;
-  ethTransfer.createdAt = timestamp;
-  return ethTransfer;
+  let transfer = new NativeTransfer(id);
+  transfer.from = from;
+  transfer.to = dao;
+  transfer.dao = dao.toHexString();
+  transfer.amount = amount;
+  transfer.reference = reference;
+  transfer.txHash = txHash;
+  transfer.createdAt = timestamp;
+  return transfer;
 }
 
-export function updateETHBalance(
+export function updateNativeBalance(
   dao: string,
   amount: BigInt,
   timestamp: BigInt,
-  type: TypeHere
+  type: TransferType
 ): void {
   let balanceId = dao + '_' + ADDRESS_ZERO;
-  let ethBalance = ETHBalance.load(balanceId);
-  if (!ethBalance) {
-    ethBalance = new ETHBalance(balanceId);
-    ethBalance.dao = dao;
-    ethBalance.balance = BigInt.zero();
+  let nativeBalance = NativeBalance.load(balanceId);
+  if (!nativeBalance) {
+    nativeBalance = new NativeBalance(balanceId);
+    nativeBalance.dao = dao;
+    nativeBalance.balance = BigInt.zero();
   }
 
-  ethBalance.balance =
-    type == TypeHere.Deposit
-      ? ethBalance.balance.plus(amount)
-      : ethBalance.balance.minus(amount);
-  ethBalance.lastUpdated = timestamp;
-  ethBalance.save();
+  nativeBalance.balance =
+    type == TransferType.Deposit
+      ? nativeBalance.balance.plus(amount)
+      : nativeBalance.balance.minus(amount);
+  nativeBalance.lastUpdated = timestamp;
+  nativeBalance.save();
 }
 
-export function handleETHDeposit(
+export function handleNativeDeposit(
   dao: Address,
   from: Address,
   to: Address,
@@ -69,7 +64,7 @@ export function handleETHDeposit(
   timestamp: BigInt,
   txHash: Bytes
 ): void {
-  let ethTransfer = createETHTransfer(
+  let transfer = createNativeTransfer(
     dao,
     from,
     to,
@@ -78,13 +73,18 @@ export function handleETHDeposit(
     txHash,
     timestamp
   );
-  ethTransfer.type = 'Deposit';
-  ethTransfer.save();
+  transfer.type = 'Deposit';
+  transfer.save();
 
-  updateETHBalance(dao.toHexString(), amount, timestamp, TypeHere.Deposit);
+  updateNativeBalance(
+    dao.toHexString(),
+    amount,
+    timestamp,
+    TransferType.Deposit
+  );
 }
 
-export function handleETHAction(
+export function handleNativeAction(
   dao: Address,
   from: Address,
   to: Address,
@@ -94,7 +94,7 @@ export function handleETHAction(
   timestamp: BigInt,
   txHash: Bytes
 ): void {
-  let ethTransfer = createETHTransfer(
+  let transfer = createNativeTransfer(
     dao,
     from,
     to,
@@ -103,9 +103,14 @@ export function handleETHAction(
     txHash,
     timestamp
   );
-  ethTransfer.type = 'Withdraw';
-  ethTransfer.proposal = proposal;
-  ethTransfer.save();
+  transfer.type = 'Withdraw';
+  transfer.proposal = proposal;
+  transfer.save();
 
-  updateETHBalance(dao.toHexString(), amount, timestamp, TypeHere.Withdraw);
+  updateNativeBalance(
+    dao.toHexString(),
+    amount,
+    timestamp,
+    TransferType.Withdraw
+  );
 }

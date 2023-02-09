@@ -36,7 +36,7 @@ type ERC20Balance implements TokenBalance @entity {
   lastUpdated: BigInt!
 }
 
-type ETHBalance implements TokenBalance @entity {
+type NativeBalance implements TokenBalance @entity {
   id: ID! # token address + dao address
   dao: Dao!
   balance: BigInt!
@@ -95,7 +95,7 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   createdAt: BigInt!
 }
 
-type ETHTransfer implements TokenTransfer @entity(immutable: true) {
+type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
   amount: BigInt!
