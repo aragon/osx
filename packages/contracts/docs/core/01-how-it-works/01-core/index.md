@@ -16,7 +16,7 @@ In a nutshell, your aragonOSx DAO consists of three pieces:
      - call functions in external contracts
    - Providing general technical utilities (signature validation, callback handling)
 
-2. **The Permission Manager:** The permission manager is part of the DAO contract and the center of our protocol architecture. It **manages permissions your DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO.
+2. **The Permission Manager:** The permission manager is part of the DAO contract and the center of our protocol architecture. It **manages permissions for your DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO.
 
 3. **Plugins:** Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. These plugins can be related to
 
@@ -34,7 +34,7 @@ The following graphic shows how an exemplary DAO setup, where the
 
 <p class="caption"> 
   An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. 
-  Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
+  Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if a DeFi-related plugin is allowed to invest in a certain, external contract.
 </p>
 
 </div>
