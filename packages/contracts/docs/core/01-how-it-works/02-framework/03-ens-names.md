@@ -2,24 +2,17 @@
 title: ENS Names
 ---
 
-## Providing Unique DAO and Plugin Repository Names
+## Unique DAO and Plugin Repo Names
 
-To make DAOs and plugin repositories unmistakably identifiable in the aragonOSx ecosystem, we assign unique ENS names to them upon registration in the
-
-`DAO` contracts that have been created through our [DAO creation process](./01-dao-creation/index.md/)
-
-`PluginRepo` contracts that have been created through our [plugin repo creation process](./02-plugin-management/01-plugin-repo/01-plugin-repo-creation.md)
-
-Accordingly,
-
-`DAO` names are registered as subdomains under the `dao.eth` domain.
-
-`PluginRepos` are registered under the
+To make DAOs and plugin repositories easily identifiable in the aragonOSx ecosystem, we assign unique ENS names to them upon registration during the [DAO creation](./01-dao-creation/index.md/) and [plugin repo creation](./02-plugin-management/01-plugin-repo/01-plugin-repo-creation.md) processes.
+`DAO` and `PluginRepo` contracts created through the aragonOSx protocol infrastructure are registered as subdomains under the `dao.eth` and `dao-plugin.eth` domain, respectively.
 
 ### Allowed Character Set
 
-We allow the following characters
+We allow the following characters for the subdomain names:
 
-- lowercase letters `a-z`
-- digits `0-9`
-- the hyphen `-`
+- Lowercase letters `a-z`
+- Digits `0-9`
+- The hyphen `-`
+
+This way, you can name and share the DAO or plugin repo you have created as `my-cool.dao.eth` or `my-handy.dao-plugin.eth` to make their addresses easily shareable and discoverable on ENS-supporting chains.
