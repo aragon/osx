@@ -78,7 +78,7 @@ export function handleExecuted(event: Executed): void {
         event.address,
         action.to,
         action.value,
-        'Eth Withdraw',
+        'Native Token Withdraw',
         proposalId,
         event.block.timestamp,
         event.transaction.hash
@@ -118,7 +118,7 @@ export function handleExecuted(event: Executed): void {
   }
 }
 
-// ERC20 + ETH
+// ERC20 + Native
 export function handleDeposited(event: Deposited): void {
   if (event.params.token.toHexString() != ADDRESS_ZERO) {
     handleERC20Deposit(
@@ -151,7 +151,7 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
     event.params.sender,
     event.address,
     event.params.amount,
-    'Eth Deposit',
+    'Native Token Deposit',
     event.block.timestamp,
     event.transaction.hash
   );
