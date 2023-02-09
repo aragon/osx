@@ -135,7 +135,7 @@ templates:
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
         - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
-          handler: handleStandardCallbackRegistered(address)
+          handler: handleStandardCallbackRegistered
         - event: SignatureValidatorSet(address)
           handler: handleSignatureValidatorSet
   # TokenVoting (package)

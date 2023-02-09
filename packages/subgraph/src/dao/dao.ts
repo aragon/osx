@@ -1,4 +1,11 @@
-import {Address, Bytes, store, ethereum, log} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  Bytes,
+  store,
+  ethereum,
+  log,
+  BigInt
+} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -16,19 +23,24 @@ import {
   Dao,
   ContractPermissionId,
   Permission,
-  // VaultTransfer,
-  StandardCallback,
-  ERC20Transfer,
-  ERC721Transfer,
-  ERC721Token,
-  ERC721Balance
+  StandardCallback
 } from '../../generated/schema';
-import {ERC721} from '../../generated/templates/DaoTemplate/ERC721';
 
 import {ADDRESS_ZERO} from '../utils/constants';
-import {handleERC20Token, updateBalance} from '../utils/tokens';
-import {decodeWithdrawParams} from './utils';
-import { supportsInterface } from '../utils/erc165';
+
+import {
+  handleERC721Deposit,
+  handleERC721Withdraw
+} from '../utils/tokens/erc721';
+import {handleERC20Deposit, handleERC20Withdraw} from '../utils/tokens/erc20';
+import {handleETHDeposit, handleETHWithdraw} from '../utils/tokens/eth';
+import {
+  ERC20_transfer,
+  ERC721_safeTransferFromNoData,
+  ERC721_safeTransferFromWithData,
+  ERC721_transferFrom,
+  onERC721Received
+} from '../utils/tokens/selectors';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -46,233 +58,124 @@ export function _handleMetadataSet(daoId: string, metadata: string): void {
 
 export function handleCallbackReceived(event: CallbackReceived): void {
   let functionSig = event.params.sig;
-  let data = event.params.data;
-  let sender = event.params.sender.toHexString();
 
-  let erc721ReceivedSelector = '0x150b7a02'
-  let erc1155ReceivedSelector = '0xf23a6e61'
-  
+  let erc721ReceivedSelector = '0x150b7a02';
+  let erc1155ReceivedSelector = '0xf23a6e61';
+
+  log.warning('callback here {} ', [functionSig.toHexString()]);
+
   // Selector is onERC721Received
-  if(functionSig.equals(Bytes.fromHexString(erc721ReceivedSelector))) {
-    // Double check that it's ERC721 by calling supportsInterface checks.
-    const erc721 = ERC721.bind(event.params.sender);
-    let introspection_01ffc9a7 = supportsInterface(erc721, '01ffc9a7') // ERC165
-		let introspection_80ac58cd = supportsInterface(erc721, '80ac58cd') // ERC721
-		let introspection_00000000 = supportsInterface(erc721, '00000000', false)
-		let isERC721 = introspection_01ffc9a7 && introspection_80ac58cd && introspection_00000000
-    if(!isERC721) {
+  if (functionSig.equals(Bytes.fromHexString(onERC721Received))) {
+    log.warning('here into it {} ', [functionSig.toHexString()]);
+    handleERC721Deposit(
+      event.params.sender,
+      event.address,
+      event.params.data,
+      event.block.timestamp,
+      event.transaction.hash
+    );
+  }
+}
+
+export function handleExecuted(event: Executed): void {
+  let daoId = event.address.toHexString();
+  let actions = event.params.actions;
+
+  for (let index = 0; index < actions.length; index++) {
+    const action = actions[index];
+
+    let proposalId = event.params.actor
+      .toHexString()
+      .concat('-')
+      .concat(event.params.callId.toHexString());
+
+    if (action.data.toHexString() == '0x') {
+      handleETHWithdraw(
+        event.address,
+        event.address,
+        action.to,
+        action.value,
+        'Eth Withdraw',
+        proposalId,
+        event.block.timestamp,
+        event.transaction.hash
+      );
       return;
     }
 
-    // encoded needs to start with `'0x0000000000000000000000000000000000000000000000000000000000000020'` 
-    // when emitted realtime, but not from tests as it includes that already
-    const encoded = "0x0000000000000000000000000000000000000000000000000000000000000020" + data.toHexString().slice(10);
-    const decoded = ethereum.decode('(address,address,uint256,bytes)', Bytes.fromHexString(encoded));
+    let methodSig = action.data.toHexString().slice(0, 10);
 
-    if(decoded) {
-      log.debug("DECODED CORRECTLY {}", ["12345"])
-      const from = decoded.toTuple()[0].toAddress();
-      const tokenId = decoded.toTuple()[2].toBigInt();
-      
-      let transferId = event.address.toHexString() +
-              '_' + event.transaction.hash.toHexString()
-              '_' + event.transactionLogIndex.toHexString();
+    if (
+      methodSig == ERC721_transferFrom ||
+      methodSig == ERC721_safeTransferFromNoData ||
+      methodSig == ERC721_safeTransferFromWithData
+    ) {
+      log.warning('finally inside {}', [methodSig.toString()]);
+      handleERC721Withdraw(
+        action.to,
+        event.address,
+        action.data,
+        proposalId,
+        event.block.timestamp,
+        event.transaction.hash
+      );
+      return;
+    }
 
-      let erc721TokenEntity = ERC721Token.load(sender)
-      
-      if(!erc721TokenEntity) {
-        erc721TokenEntity = new ERC721Token(sender);
-        {
-          const token = ERC721.bind(event.params.sender);
-
-          const name = token.try_name()
-          const symbol = token.try_symbol()
-          erc721TokenEntity.name = name.reverted ? '' : name.value
-          erc721TokenEntity.symbol = symbol.reverted ? '' : symbol.value
-          erc721TokenEntity.save()
-        }
-      }
-
-      let entity = new ERC721Transfer(transferId);
-      entity.from = from;
-      entity.dao = event.address.toHexString()
-      entity.to = event.address;
-      entity.tokenId = tokenId;
-      entity.type = 'Deposit'
-      entity.token = sender;
-      entity.save()
-
-      let balanceId = event.address.toHexString() + "_" + sender
-      let balanceEntity = ERC721Balance.load(balanceId)
-      if(!balanceEntity) {
-        balanceEntity = new ERC721Balance(balanceId)
-        balanceEntity.dao = event.address.toHexString()
-        balanceEntity.token = sender;
-        let tokenIds = [tokenId];
-        balanceEntity.tokenIds = tokenIds;
-      } else {
-        let tokenIds = balanceEntity.tokenIds
-        tokenIds.push(tokenId)
-        balanceEntity.tokenIds = tokenIds
-      }
-      balanceEntity.lastUpdated = event.block.timestamp;
-      balanceEntity.save()
-      // sender is the token TODO: call supportsInterface to make sure.
-    } else {
-      log.warning("gio {}222", ["ooo"]);
+    // ERC20(transfer)
+    log.warning('here right? {}', [methodSig.toString()]);
+    if (methodSig == ERC20_transfer) {
+      log.warning('niceoo? {}', [methodSig.toString()]);
+      handleERC20Withdraw(
+        action.to,
+        event.address,
+        proposalId,
+        action.data,
+        event.block.timestamp,
+        event.transaction.hash
+      );
+      return;
     }
   }
 }
 
 // ERC20 + ETH
 export function handleDeposited(event: Deposited): void {
-  let daoId = event.address.toHexString();
-  let depositId =
-    event.address.toHexString() +
-    '_' +
-    event.transaction.hash.toHexString() +
-    '_' +
-    event.transactionLogIndex.toHexString();
-  let token = event.params.token;
-  let balanceId = daoId + '_' + token.toHexString();
+  if (event.params.token.toHexString() != ADDRESS_ZERO) {
+    handleERC20Deposit(
+      event.address,
+      event.params.token,
+      event.params.sender,
+      event.address,
+      // event.params._reference, TODO: pass it
+      event.params.amount,
+      event.transaction.hash,
+      event.block.timestamp
+    );
+    return;
+  }
 
-  // handle token
-  let tokenId = handleERC20Token(token);
-  // update balance
-  updateBalance(
-    balanceId,
+  handleETHDeposit(
     event.address,
-    token,
+    event.params.sender,
+    event.address,
     event.params.amount,
-    true,
-    event.block.timestamp
+    event.params._reference,
+    event.block.timestamp,
+    event.transaction.hash
   );
-
-  let entity = new ERC20Transfer(depositId);
-  entity.dao = daoId;
-  entity.token = tokenId;
-  entity.from = event.params.sender;
-  entity.to = event.address;
-  entity.amount = event.params.amount;
-  // entity.reference = event.params._reference;
-  // entity.transaction = event.transaction.hash.toHexString();
-  // entity.createdAt = event.block.timestamp;
-  entity.type = 'Deposit';
-  entity.save();
 }
 
 export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
-  // let daoId = event.address.toHexString();
-  // let id =
-  //   event.address.toHexString() +
-  //   '_' +
-  //   event.transaction.hash.toHexString() +
-  //   '_' +
-  //   event.transactionLogIndex.toHexString();
-
-  // let entity = new VaultTransfer(id);
-  // let balanceId = daoId + '_' + ADDRESS_ZERO;
-
-  // // handle token
-  // let tokenId = handleERC20Token(Address.fromString(ADDRESS_ZERO));
-  // // update Eth balance
-  // updateBalance(
-  //   balanceId,
-  //   event.address,
-  //   Address.fromString(ADDRESS_ZERO),
-  //   event.params.amount,
-  //   true,
-  //   event.block.timestamp
-  // );
-
-  // entity.dao = daoId;
-  // entity.token = tokenId;
-  // entity.sender = event.params.sender;
-  // entity.amount = event.params.amount;
-  // entity.reference = 'Eth deposit';
-  // entity.transaction = event.transaction.hash.toHexString();
-  // entity.createdAt = event.block.timestamp;
-  // entity.type = 'Deposit';
-  // entity.save();
-}
-
-export function handleExecuted(event: Executed): void {
-  // let daoId = event.address.toHexString();
-  // let actions = event.params.actions;
-  // for (let index = 0; index < actions.length; index++) {
-  //   const action = actions[index];
-
-  //   // check for withdraw
-  //   let methodSig = action.data.toHexString().slice(0, 10);
-
-  //   if (methodSig == '0x4f065632') {
-  //     // then decode params
-  //     let callParams = action.data.toHexString().slice(10);
-  //     let withdrawParams = decodeWithdrawParams(
-  //       Bytes.fromHexString('0x' + callParams)
-  //     );
-
-  //     // handle token
-  //     let tokenId = handleERC20Token(withdrawParams.token);
-  //     // update balance
-  //     if (withdrawParams.token.toHexString() == ADDRESS_ZERO) {
-  //       // update Eth balance
-  //       let balanceId = daoId + '_' + ADDRESS_ZERO;
-  //       updateBalance(
-  //         balanceId,
-  //         event.address,
-  //         Address.fromString(ADDRESS_ZERO),
-  //         withdrawParams.amount,
-  //         false,
-  //         event.block.timestamp
-  //       );
-  //     } else {
-  //       // update token balance
-  //       let balanceId = daoId + '_' + tokenId;
-  //       updateBalance(
-  //         balanceId,
-  //         event.address,
-  //         withdrawParams.token,
-  //         withdrawParams.amount,
-  //         false,
-  //         event.block.timestamp
-  //       );
-  //     }
-
-  //     let proposalId =
-  //       event.params.actor.toHexString() +
-  //       '_' +
-  //       event.params.callId.toHexString();
-
-  //     // create a withdraw entity
-  //     let withdrawId =
-  //       daoId +
-  //       '_' +
-  //       event.transaction.hash.toHexString() +
-  //       '_' +
-  //       event.transactionLogIndex.toHexString() +
-  //       '_' +
-  //       withdrawParams.to.toHexString() +
-  //       '_' +
-  //       withdrawParams.amount.toString() +
-  //       '_' +
-  //       tokenId +
-  //       '_' +
-  //       withdrawParams.reference;
-
-  //     let vaultWithdrawEntity = new VaultTransfer(withdrawId);
-  //     vaultWithdrawEntity.dao = daoId;
-  //     vaultWithdrawEntity.token = tokenId;
-  //     vaultWithdrawEntity.to = withdrawParams.to;
-  //     vaultWithdrawEntity.amount = withdrawParams.amount;
-  //     vaultWithdrawEntity.reference = withdrawParams.reference;
-  //     vaultWithdrawEntity.proposal = proposalId;
-  //     vaultWithdrawEntity.transaction = event.transaction.hash.toHexString();
-  //     vaultWithdrawEntity.createdAt = event.block.timestamp;
-  //     vaultWithdrawEntity.type = 'Withdraw';
-  //     vaultWithdrawEntity.save();
-  //   }
-  // }
+  handleETHDeposit(
+    event.address,
+    event.params.sender,
+    event.address,
+    event.params.amount,
+    'Eth Deposit',
+    event.block.timestamp,
+    event.transaction.hash
+  );
 }
 
 export function handleGranted(event: Granted): void {
