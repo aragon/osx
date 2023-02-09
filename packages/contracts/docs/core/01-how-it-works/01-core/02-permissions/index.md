@@ -2,24 +2,24 @@
 title: Permissions
 ---
 
-## Managing and Governing Your DAO
+## Managing Your DAO
 
 At Aragon, we believe that **DAOs are permission management systems**.
 Permissions between contracts and wallets allow a DAO to manage and govern its actions.
 
-Here, you will learn how the permissions in aragonOS work, how they can be granted and revoked from wallets and contracts, and how they are managed through the DAO.
+Here, you will learn how the permissions in aragonOSx work, how they can be granted and revoked from wallets and contracts, and how they are managed through the DAO.
 
 As we mentioned earlier, it is essential that only the right person or contract can execute a certain action. As a developer, you might have seen or used [modifiers such as `onlyOwner`](https://docs.openzeppelin.com/contracts/2.x/api/ownership#Ownable) in contracts. This `onlyOwner` modifier provides basic access control to your DAO: only the `owner` address is permitted to execute the function to which the modifier is attached.
 
-In aragonOS, we follow the same approach but provide more advanced functionality:
+In aragonOSx, we follow the same approach but provide more advanced functionality:
 Each `DAO` contracts includes a `PermissionManager` contract allowing to flexibly, securely, and collectively manage permissions through the DAO and, thus, govern its actions.
-This `PermissionManager`, called `ACL` in previous aragonOS contract versions, was one big reason why aragonOS never got hacked.
+This `PermissionManager`, called `ACL` in previous aragonOSx contract versions, was one big reason why aragonOSx never got hacked.
 The code and configuration of a DAO specifies which wallets or contracts (`who`) are allowed to call which authorized functions on a target contract (`where`).
 Identifiers, permissions, and modifiers link everything together.
 
 ### Permission Identifiers
 
-To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of aragonOS contracts. They look something like this:
+To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of aragonOSx contracts. They look something like this:
 
 ```solidity title="contracts/core/DAO.sol"
 bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
@@ -85,19 +85,19 @@ function grant(
 To prevent these functions from being called by any address, they are themselves permissioned via the `auth` modifier and require the caller to have the `ROOT_PERMISSION_ID` permission in order to call them.
 
 :::note
-Typically, the `ROOT_PERMISSION_ID` permission is granted only to the `DAO` contract itself. Contracts related to the Aragon infrastructure temporarily require it during the [DAO creation](../../02-framework/01-dao-creation-process.md) and [plugin setup ](../../02-framework/02-plugin-repository/04-plugin-setup.md) processes.
+Typically, the `ROOT_PERMISSION_ID` permission is granted only to the `DAO` contract itself. Contracts related to the Aragon infrastructure temporarily require it during the [DAO creation](../../02-framework/01-dao-creation/index.md) and [plugin setup ](../../02-framework/02-plugin-management/02-plugin-setup/index.md) processes.
 :::note
 
 This means, that these functions can only be called through the DAO’s `execute` function that, in turn, requires the calling address to have the `EXECUTE_PERMISSION_ID` permission.
 
 :::note
 Typically, the `EXECUTE_PERMISSION_ID` permission is granted to governance contracts (such as a majority voting plugin owned by the DAO or a multi-sig). Accordingly, a proposal is often required to change permissions.
-Exceptions are, again, the [DAO creation](../../02-framework/01-dao-creation-process.md) and [plugin setup ](../../02-framework/02-plugin-repository/04-plugin-setup.md) processes.
+Exceptions are, again, the [DAO creation](../../02-framework/01-dao-creation/index.md) and [plugin setup ](../../02-framework/02-plugin-management/02-plugin-setup/index.md) processes.
 :::
 
 #### Granting Permission with Conditions
 
-AragonOS supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
+AragonOSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
 
 ```solidity title="contracts/core/permission/PermissionManager.sol"
 function grantWithCondition(
@@ -127,12 +127,12 @@ contract Service {
 ```
 
 Calling the `use()` function inside requires the caller to have the `USE_PERMISSION_ID` permission. Now, you want to make this service available to every user without uploading a new contract or requiring every user to ask for the permission.
-By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to a condition, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
+By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` you allow everyone to call the `use()` function and you can add more conditions to it. If you later on decide that you want to be more selective about who is allowed to call it, you can revoke the permission to `ANY_ADDR`.
 
 Granting a permission with `_where: ANY_ADDR` to a condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
 
-However, some restrictions apply. For security reasons, aragonOS does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
+However, some restrictions apply. For security reasons, aragonOSx does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
 
 ### Permissions Native to the `DAO` Contract
 

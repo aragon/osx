@@ -1,35 +1,22 @@
 ---
-title: The DAO Contract
+title: DAO
 ---
 
-## The Identity and Basis of Your Organization
+## The DAO Contract: The Identity and Basis of Your Organization
 
-In this section, you will learn about the core functionality of every aragonOS DAO.
+In this section, you will learn about the core functionality of every aragonOSx DAO.
 
 The `DAO` contract is the identity and basis of your organization. It is the address carrying the DAO’s ENS name, metadata, and holding the funds. Furthermore, it has **six base functionalities** being commonly found in other DAO frameworks in the ecosystem.
 
 ### 1. Execution of Arbitrary Actions
 
-The most important and basic functionality of your DAO is the **execution of arbitrary actions**, which allows you to interact with the rest of the world, i.e., calling methods in other contracts services sending assets to other addresses.
-In our framework, actions are represented by a solidity struct:
+The most important and basic functionality of your DAO is the **execution of arbitrary actions**, which allows you to execute the DAO's own functions as well as interacting with the rest of the world, i.e., calling methods in other contracts and sending assets to other addresses.
 
-```solidity title="contracts/core/IDAO.sol"
-/// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
-/// @param to The address to call.
-/// @param value The native token value to be sent with the call.
-/// @param data The bytes-encoded function selector and calldata for the call.
-struct Action {
-  address to;
-  uint256 value;
-  bytes data;
-}
-```
+:::note
+Typically, actions are scheduled in a proposal in a governance [plugin installed to your DAO](../03-plugins/index.md).
+:::
 
-Actions can be calls to external contracts, plugins, or the aragonOS DAO framework infrastructure, for example, to [setup a plugin](../../02-framework/02-plugin-repository/04-plugin-setup.md).
-Actions are typically scheduled in a proposal in a governance [plugin customizing your DAO](../03-plugins/index.md).
-
-Multiple `Action` structs can be put into one `Action[]` array and executed in a single transaction via the `execute` function.
-To learn more about actions and advanced features of the DAO executor, visit the [A Deep Dive Into Actions](./01-actions.md) section.
+Multiple `Action` structs can be put into one `Action[]` array and executed in a single transaction via the `execute` function. To learn more about actions and advanced features of the DAO executor, visit the [A Deep Dive Into Actions](./01-actions.md) section.
 
 ### 2. Asset Management
 
@@ -45,13 +32,17 @@ In the future, more advanced asset management and finance functionality can be a
 
 ### 3. Upgradeability
 
-Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/02-dao-upgrading/index.md)) if a new version of aragonOS is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
+Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/02-dao-upgrading/index.md)) if a new version of aragonOSx is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
+
+<!-- Add a subsection explaining how to upgrade your dao -->
 
 ### 4. Callback Handling
 
 To interact with the DAO, external contracts might require certain callback functions to be present.
 Examples are the `onERC721Received` and `onERC1155Received` / `onERC1155BatchReceived` functions required by the [ERC-721 (NFT Standard)](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155 (Multi Token Standard)](https://eips.ethereum.org/EIPS/eip-1155) tokens.
 Our `CallbackHandler` allows to register the required callback responses dynamically so that the DAO contract does not need to be upgraded.
+
+<!-- Add a subsection explaining how to register callbacks -->
 
 ### 5. Signature Validation
 
@@ -61,14 +52,11 @@ To accept such a request, both, the external service provider and caller need to
 
 By supporting the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) standard, your DAO can validate signatures via its `isValidSignature` function that forwards the call to a signature validator contract. The signature validator can be set with `setSignatureValidator` function.
 
+<!-- Add a subsection explaining how signature validation works -->
+
 ### 6. Permission Management
 
-Lastly, it is essential that only the right entities (e.g., the DAO itself or trusted addresses) have permission to use the above-mentioned functionalities.
+Lastly, it is essential that only the right entities (e.g., the DAO itself or trusted addresses) have permission to use the above-mentioned functionalities. This is why aragonOSx DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
+Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to EOAs as this poses a security risk to the organization if the account is compromised or acts adversarial. Instead, the permissions for the above-mentioned functionalities are better restricted to the `DAO` contract itself and triggered through governance [plugins](../03-plugins/index.md) that you can install on your DAO.
 
-This is why aragonOS DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
-
-Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to EOAs as this poses a security risk to the organization if the account is compromised or acts adversarial.
-
-Instead, the permissions for the above-mentioned functionalities are better restricted to the `DAO` contract itself and triggered through governance [plugins](../03-plugins/index.md) that you can install on your DAO.
-
-In the next section, we will dive deeper into the DAOs permission manager.
+To learn more, visit the [permission manager](../02-permissions/index.md) section.

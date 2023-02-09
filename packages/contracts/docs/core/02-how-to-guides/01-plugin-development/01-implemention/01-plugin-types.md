@@ -44,7 +44,7 @@ With upgradeable smart contracts, you can modify their code while keep using or 
 To enable upgradeable smart contracts (as well as cheap contract clones), the proxy pattern is used.
 
 Depending on your upgradeability requirements and the deployment method you choose, you can also greatly reduce the gas costs to distribute your plugin.
-However, the upgradeability and deployment method can introduce caveats during [the plugin setup](../../../../core/01-how-it-works/02-framework/02-plugin-repository/04-plugin-setup.md), especially when updating from an older version to a new one.
+However, the upgradeability and deployment method can introduce caveats during [the plugin setup](../../../../core/01-how-it-works/02-framework/02-plugin-management/02-plugin-setup/index.md), especially when updating from an older version to a new one.
 
 The following table presents an overview of the different deployment methods with each of their benefits and drawbacks:
 
@@ -68,14 +68,14 @@ To help you with developing and deploying your plugin within the Aragon infrastr
 
 Aragon plugins using non-upgradeable smart contracts can be cheap to deploy (i.e., using clones) but are **limited when it comes to updating**.
 
-Updating, in distinction from upgrading, will call aragonOS' internal process for switching from an older plugin version to a newer one.
+Updating, in distinction from upgrading, will call aragonOSx' internal process for switching from an older plugin version to a newer one.
 
 To switch from an older version of a non-upgradeable contract to a newer one, the underlying contract has to be replaced. In consequence, the state of the older version is not available in the new version anymore, unless it is migrated or has been made publicly accessible in the old version through getter functions.
 
 ### Meta Transaction Compatibility
 
 :::info
-The meta-transaction compatibility of DAOs, plugins, and infrastructure in aragonOS is currently worked on and not finally decided.
+The meta-transaction compatibility of DAOs, plugins, and infrastructure in aragonOSx is currently worked on and not finally decided.
 :::
 
 Another useful trait of a contract is the possibility to allow users to send gasless transactions, also known as meta transactions.

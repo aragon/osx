@@ -4,7 +4,7 @@ title: Versioning
 
 ## Versioning Your Plugin
 
-The aragonOS plugin ecosystem has an on-chain versioning system built-in.
+The aragonOSx protocol has an on-chain versioning system built-in.
 
 Given a version tag `RELEASE.BUILD`, we can infer that:
 

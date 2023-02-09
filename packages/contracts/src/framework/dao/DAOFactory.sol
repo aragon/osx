@@ -24,16 +24,24 @@ contract DAOFactory {
     /// @notice The plugin setup processor for installing plugins on the newly created `DAO`s.
     PluginSetupProcessor public immutable pluginSetupProcessor;
 
+    /// @notice The container for the DAO settings to be set during the DAO initialization.
+    /// @param trustedForwarder The address of the trusted forwarder required for meta transactions.
+    /// @param daoURI The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
+    /// @param name The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
+    /// @param metadata The metadata of the DAO.
     struct DAOSettings {
-        address trustedForwarder; // The address of the trusted forwarder required for meta transactions.
-        string daoURI; // The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
-        string name; // The name of the DAO.
-        bytes metadata; // Meta data of the DAO.
+        address trustedForwarder;
+        string daoURI;
+        string name;
+        bytes metadata;
     }
 
+    /// @notice The container with the information required to install a plugin on the DAO.
+    /// @param pluginSetupRef The `PluginSetupRepo` address of the plugin and the version tag.
+    /// @param data The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata JSON file.
     struct PluginSettings {
-        PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
-        bytes data; // The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
+        PluginSetupRef pluginSetupRef;
+        bytes data;
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -49,9 +57,9 @@ contract DAOFactory {
         daoBase = address(new DAO());
     }
 
-    /// @notice Creates a new DAO and setup a number of plugins.
-    /// @param _daoSettings The DAO settings containing `trustedForwarder`, `name` and `metadata`.
-    /// @param _pluginSettings The list of plugin settings that will be installed after the DAO creation, containing `pluginSetup`, `pluginSetupRepo`, and `data`.
+    /// @notice Creates a new DAO, registers it on the  DAO registry, and installs a list of plugins via the plugin setup processor.
+    /// @param _daoSettings The DAO settings to be set during the DAO initialization.
+    /// @param _pluginSettings The array containing references to plugins and their settings to be installed after the DAO has been created.
     function createDao(
         DAOSettings calldata _daoSettings,
         PluginSettings[] calldata _pluginSettings
@@ -128,13 +136,13 @@ contract DAOFactory {
         createdDao.revoke(address(createdDao), address(this), rootPermissionID);
     }
 
-    /// @notice Creates a new DAO, and initialize it with this contract as intial owner.
+    /// @notice Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the intial owner.
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // create dao
         dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
 
-        // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
+        // initialize the DAO and give the `ROOT_PERMISSION_ID` permission to this contract.
         dao.initialize(
             _daoSettings.metadata,
             address(this),

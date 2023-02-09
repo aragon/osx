@@ -38,13 +38,13 @@ contract PluginRepoFactory {
         return _createPluginRepo(_subdomain, _initialOwner);
     }
 
-    /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version.
-    /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transferred to the address `_maintainer`.
+    /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.0`.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _maintainer The plugin maintainer address.
     /// @param _releaseMetadata The release metadata URI.
     /// @param _buildMetadata The build metadata URI.
+    /// @dev After the creation of the `PluginRepo` and release of the first version by the factory, ownership is transferred to the `_maintainer` address.
     function createPluginRepoWithFirstVersion(
         string calldata _subdomain,
         address _pluginSetup,

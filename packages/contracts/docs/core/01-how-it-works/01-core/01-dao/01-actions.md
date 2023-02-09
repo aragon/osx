@@ -18,9 +18,57 @@ function execute(
         returns (bytes[] memory execResults, uint256 failureMap)
 ```
 
-It offers two features that we will dive into in this article.
-First, it allows the execution of an array of arbitrary `Action` items.
-Second, it allows individual actions to fail selectively, without reverting the entire transaction.
+It offers two features that we will dive into in this article:
+
+1. Execution of an array of arbitrary `Action` items.
+2. Allowing failure of individual actions without reverting the entire transaction.
+
+### Actions
+
+In our framework, actions are represented by a solidity struct:
+
+```solidity title="contracts/core/IDAO.sol"
+/// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
+/// @param to The address to call.
+/// @param value The native token value to be sent with the call.
+/// @param data The bytes-encoded function selector and calldata for the call.
+struct Action {
+  address to;
+  uint256 value;
+  bytes data;
+}
+```
+
+Actions can be
+
+- function calls to the DAO itself (e.g., to upgrade the DAO contract to a newer version of aragonOSx)
+- function calls to other contracts, such as
+
+  - external services (e.g. Uniswap, Compound, etc.)
+  - aragonOSx plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
+  - aragonOSx protocol infrastructure (e.g., to [setup a plugin](../../02-framework/02-plugin-management/02-plugin-setup/index.md))
+
+- transfers of native tokens
+
+#### Example: Calling the wETH Contract
+
+We have an Aragon DAO deployed on the Goerli testnet. Now, we want to wrap `0.1 ETH` from the DAO treasury into `wETH` by depositing it into the [Goerli WETH contract](https://goerli.etherscan.io/token/0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6#writeContract) deployed on the address `0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6`. The corresponding `Action` and `execute` function call look as follows:
+
+```solidity
+
+IDAO.Action[] memory actions = new IDAO.Action[](1);
+
+actions[0] = IDAO.Action({
+  to: address(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6), //         The address of the WETH contract on Goerli
+  value: 0.1 ether, //                                                The Goerli ETH value to be send with the function
+  data: abi.encodeWithSelector(bytes4(keccak256('deposit()', []))) // The calldata
+});
+
+dao().execute({_callId: '', _actions: actions, _allowFailureMap: 0});
+
+```
+
+For the `execute` call to work, the caller must have the required [`EXECUTE_PERMISSION_ID` permission](../02-permissions/index.md) on the DAO contract.
 
 ### The Action Array
 

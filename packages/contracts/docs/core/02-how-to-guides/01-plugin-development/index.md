@@ -4,7 +4,7 @@ title: Plugin Development
 
 # Developing your Plugin
 
-AragonOS makes it easy for you to write, maintain, and distribute your own plugin.
+AragonOSx makes it easy for you to write, maintain, and distribute your own plugin.
 
 In the following, you find guides explaining how to develop and publish plugin on Aragon's repository.
 
