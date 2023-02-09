@@ -15,7 +15,7 @@ import {
 
 function supportsERC721(token: Address): bool {
   // Double check that it's ERC721 by calling supportsInterface checks.
-  const erc721 = ERC721.bind(token);
+  let erc721 = ERC721.bind(token);
   let introspection_01ffc9a7 = supportsInterface(erc721, '01ffc9a7'); // ERC165
   let introspection_80ac58cd = supportsInterface(erc721, '80ac58cd'); // ERC721
   let introspection_00000000 = supportsInterface(erc721, '00000000', false);
@@ -127,7 +127,7 @@ export function handleERC721Received(
   let calldata = DECODE_OFFSET + data.toHexString().slice(10);
   let decodeABI = '(address,address,uint256,bytes)';
 
-  const decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
+  let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
 
   if (!decoded) {
     return;
@@ -135,8 +135,8 @@ export function handleERC721Received(
 
   let tuple = decoded.toTuple();
 
-  const from = tuple[1].toAddress();
-  const tokenId = tuple[2].toBigInt();
+  let from = tuple[1].toAddress();
+  let tokenId = tuple[2].toBigInt();
 
   let daoId = dao.toHexString();
 
@@ -176,7 +176,7 @@ export function handleERC721Action(
     return;
   }
 
-  const functionSelector = data.toHexString().substring(0, 10);
+  let functionSelector = data.toHexString().substring(0, 10);
   let calldata = data.toHexString().slice(10);
 
   let decodeABI = '';
@@ -193,7 +193,7 @@ export function handleERC721Action(
     calldata = DECODE_OFFSET + calldata;
   }
 
-  const decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
+  let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
 
   if (!decoded) {
     return;
@@ -201,9 +201,9 @@ export function handleERC721Action(
 
   let tuple = decoded.toTuple();
 
-  const from = tuple[0].toAddress();
-  const to = tuple[1].toAddress();
-  const tokenId = tuple[2].toBigInt();
+  let from = tuple[0].toAddress();
+  let to = tuple[1].toAddress();
+  let tokenId = tuple[2].toBigInt();
 
   let daoId = dao.toHexString();
 

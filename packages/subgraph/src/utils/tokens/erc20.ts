@@ -105,7 +105,8 @@ export function handleERC20Action(
 
   let decodeABI = '';
 
-  const functionSelector = data.toHexString().substring(0, 10);
+  let functionSelector = data.toHexString().substring(0, 10);
+  let calldata = data.toHexString().slice(10);
 
   if (functionSelector == ERC20_transfer) {
     decodeABI = '(address,uint256)';
@@ -115,10 +116,7 @@ export function handleERC20Action(
     decodeABI = '(address,address,uint256)';
   }
 
-  let decoded = ethereum.decode(
-    decodeABI,
-    Bytes.fromHexString(data.toHexString().slice(10))
-  );
+  let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
 
   if (!decoded) {
     return;
