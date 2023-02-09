@@ -13,17 +13,17 @@ Different versions might contain
 - new features
 - breaking changes
 
+`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the aragonOSx [`PluginRepoRegistry`](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) and carry their own [ENS name](../../03-ens-names.md) that the creator chooses. The [`PluginRepoRegistry` contract](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) is described in the upcoming subsection.
+
 <div class="center-column">
 
 ![Schematic depiction of the versioning taking place in the PluginRepoRegistry.](./plugin-repo-overview.drawio.svg)
 
 <p class="caption"> 
-  Schema showing the `PluginRepoRegistry` maintaining a list the addresses of ENS named `PluginRepo` contracts shown on the left. Each `PluginRepo` contract maintains a list of semantic versions of the `PluginSetup` contract (internally referencing the `Plugin` logic) and the associated UI building blocks as a URI, examplarily shown on the right.
+  A schematic representation of the `PluginRepoRegistry` maintaining a list of ENS named `PluginRepo` contracts shown on the left. Each `PluginRepo` contract maintains a list of semantic versions of the `PluginSetup` contract (internally referencing the `Plugin` logic) and the associated UI building blocks as a URI, examplarily shown on the right.
 </p>
 
 </div>
-
-`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the aragonOSx [`PluginRepoRegistry`](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) and carry their own [ENS name](../../03-ens-names.md) that the creator chooses. The [`PluginRepoRegistry` contract](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) is described in the upcoming subsection.
 
 ### The `PuginRepo` Contract
 
