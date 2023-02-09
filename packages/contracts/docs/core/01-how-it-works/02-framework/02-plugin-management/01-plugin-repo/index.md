@@ -2,21 +2,16 @@
 title: Repositories
 ---
 
-## The Plugin Repo Contract
+## Plugin Repositories
 
-:::note
-This section is work in progress.
-:::
+In this section you will learn how plugin repositories and the related aragonOSx infrastructure works.
 
-In this section you will learn what plugin repositories and related aragonOSx infrastructure works.
+Each plugin has its own, unique ENS name and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference using verstion tags constituted by a **release** and **build** number.
+Different versions might contain
 
-### What are Plugin Repos Needed For?
-
-Each plugin has its own, unique ENS name and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference.
-
-<!--The names and address of the `PluginRepo` contracts are stored in the `PluginRepoRegistry`. Both contracts are described in the following. -->
-
-The `PluginSetupProcessor` contract taking care of installing, updating, and uninstalling is described in the context of [the plugin setup process](../02-plugin-setup/index.md).
+- bug fixes
+- new features
+- breaking changes
 
 <div class="center-column">
 
@@ -28,19 +23,17 @@ The `PluginSetupProcessor` contract taking care of installing, updating, and uni
 
 </div>
 
+`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the aragonOSx [`PluginRepoRegistry`](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) and carry their own [ENS name](../../03-ens-names.md) that the creator chooses. The [`PluginRepoRegistry` contract](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) is described in the upcoming subsection.
+
 ### The `PuginRepo` Contract
 
-The `PluginRepo` contract versions the releases of a `Plugin`. Each plugin starts as version `1.0`.
-When you release the first version of a plugin, a new plugin repository is created for you by the aragonOSx framework in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.
+The `PluginRepo` contract versions the releases of a `Plugin`. The first version of a plugin is always published with the version tag `1.0`.
+When you publish the first plugin version, a new plugin repository is automatically created for you by the aragonOSx protocol in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.
 
-The `PluginRepo` contract inherits from the `PermissionManager` <!-- add link --> and allows the maintainer of the repository to create new versions with the `createVersion` function:
-
-:::note
-This section is work in progress.
-:::
+The `PluginRepo` contract inherits from the [`PermissionManager`](../../../01-core/02-permissions/index.md) and allows the maintainer of the repository to create new versions with the `createVersion` function:
 
 ```solidity title="contracts/framework/PluginRepo.sol"
-/// @notice Creates a new version with contract `_pluginSetupAddress` and content `@fromHex(_buildMetadata)`.
+/// @notice Creates a new plugin version as the latest build for an existing release number or the first build for a new release number for the provided `PluginSetup` contract address and metadata.
 /// @param _release The release number.
 /// @param _pluginSetupAddress The address of the plugin setup contract.
 /// @param _buildMetadata The build metadata URI.
@@ -53,16 +46,13 @@ function createVersion(
 ) external auth(address(this), MAINTAINER_PERMISSION_ID);
 ```
 
-This function requires four pieces of information
+This function requires four pieces of information:
 
-- The release number to create the build for.
+- The `_release` number to create the build for. If the release number exists already (e.g., release `1`), it is registered as the latest build (e.g., `1.3` if the previous build was `1.2`). If it is a new release number, the build number is `0` (e.g., `2.0`).
 - The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](../02-plugin-setup/index.md) this specific version.
-- the metadata URI, which point to JSON files containing UI, setup, and other information.
+- The `_buildMetadata` URI pointing to a JSON file containing the UI data, setup data, and change description for this specific version.
+- The `_releaseMetadata` URI pointing to a JSON file containing the plugin name, description, as well as optional data such as images to be shown in the aragonApp frontend.
 
-<!-- explain how plugin setups are versioned-->
+Other functions present in the contract allow you to query previous versions and to update the release metadata. For more details visit the [`PluginRepo` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepo.md).
 
-Other functions allow you to query previous versions and to update the metadata of a release.
-
-For more details visit the [`PluginRepo` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepo.md).
-
-The [plugin repo creation process](01-plugin-repo-creation.md) is described in the following section.
+The `PluginRepo` is created for you when you publish the `PluginSetup` contract of your first version to the aragonOSx protocol, which is explained in the next section: [The Plugin Repo Creation Process](01-plugin-repo-creation.md).

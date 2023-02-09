@@ -26,15 +26,17 @@ An aragonOSx Plugin consist of:
   - referencing the `Plugin` implementation internally and
   - containing the setup instruction to install, update, and uninstall it to an existing DAO
 
-- a metadata URI pointing to a `JSON` file containing the
+- A metadata URI pointing to a `JSON` file containing the
 
   - aragonApp frontend information
   - ABI information needed for the setup ABI
 
-- a version tag consisting of a
+- A version tag consisting of a
 
   - release number
   - build number
+
+A detailed explanation of the [build and release versioning](../../../02-how-to-guides/01-plugin-development/03-publication/02-versioning.md) is found in the How-to sections in our developer portal.
 
 <div class="center-column">
 
@@ -48,5 +50,4 @@ An aragonOSx Plugin consist of:
 
 The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the aragonOSx framework, which is explained in the section [The Plugin Setup Process](./02-plugin-setup/index.md).
 
-Each plugin with its different builds and releases is versioned inside its own plugin repositories in a `PluginRepo` contract.
-The `PluginRepo` is created for you when you publish the `PluginSetup` contract of your first version to the aragonOSx protocol, which is explained in the section about [The Plugin Repo Creation](./02-plugin-setup/index.md)
+Each plugin with its different builds and releases is versioned inside its own plugin repositories in a `PluginRepo` contract, which is explained in the next section.

@@ -11,7 +11,7 @@ interface IPluginRepo {
     /// @param _releaseMetadata The release metadata URI.
     function updateReleaseMetadata(uint8 _release, bytes calldata _releaseMetadata) external;
 
-    /// @notice Creates a new version with contract `_pluginSetupAddress` and content `@fromHex(_buildMetadata)`.
+    /// @notice Creates a new plugin version as the latest build for an existing release number or the first build for a new release number for the provided `PluginSetup` contract address and metadata.
     /// @param _release The release number.
     /// @param _pluginSetupAddress The address of the plugin setup contract.
     /// @param _buildMetadata The build metadata URI.

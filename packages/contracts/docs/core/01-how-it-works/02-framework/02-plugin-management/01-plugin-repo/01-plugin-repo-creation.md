@@ -2,7 +2,7 @@
 title: Repo Creation
 ---
 
-## The Plugin Repository Creation Process
+## The Plugin Repo Creation Process
 
 To be available for setup in the aragonOSx framework, a `PluginRepo` must be created. Two framework contracts manage the `PluginRepo` creation process:
 
