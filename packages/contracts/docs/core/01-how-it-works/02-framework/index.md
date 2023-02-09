@@ -14,7 +14,7 @@ The aragonOSx protocol is composed of **framework-related contracts** creating a
 
 - [assignment of ENS Names](./03-ens-names.md) to `Plugin` and `DAO` contracts created through the framework
 
-An overview of the involved contracts and their iteractions is shown below:
+An overview of the involved contracts and their interactions is shown below:
 
 <div class="center-column">
 
