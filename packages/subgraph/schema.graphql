@@ -69,7 +69,7 @@ interface TokenTransfer {
   createdAt: BigInt!
 }
 
-type ERC20Transfer implements TokenTransfer @entity {
+type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
   token: ERC20Contract!
@@ -82,7 +82,7 @@ type ERC20Transfer implements TokenTransfer @entity {
   createdAt: BigInt!
 }
 
-type ERC721Transfer implements TokenTransfer @entity {
+type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
   token: ERC721Contract!
@@ -95,7 +95,7 @@ type ERC721Transfer implements TokenTransfer @entity {
   createdAt: BigInt!
 }
 
-type ETHTransfer implements TokenTransfer @entity {
+type ETHTransfer implements TokenTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
   amount: BigInt!
@@ -107,10 +107,6 @@ type ETHTransfer implements TokenTransfer @entity {
   txHash: Bytes!
   createdAt: BigInt!
 }
-
-# Treasury
-
-# Dao
 
 # ACL
 
