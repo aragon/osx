@@ -53,6 +53,7 @@ type ERC721Balance implements TokenBalance @entity {
 
 # Token Transfers
 enum TransferType {
+  None # Special case where from and to both are not equal to dao address.
   Withdraw
   Deposit
 }

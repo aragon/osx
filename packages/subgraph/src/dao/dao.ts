@@ -28,19 +28,17 @@ import {
 
 import {ADDRESS_ZERO} from '../utils/constants';
 
-import {
-  handleERC721Deposit,
-  handleERC721Withdraw
-} from '../utils/tokens/erc721';
-import {handleERC20Deposit, handleERC20Withdraw} from '../utils/tokens/erc20';
-import {handleETHDeposit, handleETHWithdraw} from '../utils/tokens/eth';
+import {handleERC721Action, handleERC721Received} from '../utils/tokens/erc721';
+import {handleERC20Action, handleERC20Deposit} from '../utils/tokens/erc20';
+import {handleETHAction, handleETHDeposit} from '../utils/tokens/eth';
 import {
   ERC20_transfer,
+  ERC20_transferFrom,
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
   ERC721_transferFrom,
   onERC721Received
-} from '../utils/tokens/selectors';
+} from '../utils/tokens/common';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -59,15 +57,8 @@ export function _handleMetadataSet(daoId: string, metadata: string): void {
 export function handleCallbackReceived(event: CallbackReceived): void {
   let functionSig = event.params.sig;
 
-  let erc721ReceivedSelector = '0x150b7a02';
-  let erc1155ReceivedSelector = '0xf23a6e61';
-
-  log.warning('callback here {} ', [functionSig.toHexString()]);
-
-  // Selector is onERC721Received
   if (functionSig.equals(Bytes.fromHexString(onERC721Received))) {
-    log.warning('here into it {} ', [functionSig.toHexString()]);
-    handleERC721Deposit(
+    handleERC721Received(
       event.params.sender,
       event.address,
       event.params.data,
@@ -78,7 +69,6 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
-  let daoId = event.address.toHexString();
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
@@ -86,11 +76,11 @@ export function handleExecuted(event: Executed): void {
 
     let proposalId = event.params.actor
       .toHexString()
-      .concat('-')
+      .concat('_')
       .concat(event.params.callId.toHexString());
 
     if (action.data.toHexString() == '0x') {
-      handleETHWithdraw(
+      handleETHAction(
         event.address,
         event.address,
         action.to,
@@ -110,8 +100,7 @@ export function handleExecuted(event: Executed): void {
       methodSig == ERC721_safeTransferFromNoData ||
       methodSig == ERC721_safeTransferFromWithData
     ) {
-      log.warning('finally inside {}', [methodSig.toString()]);
-      handleERC721Withdraw(
+      handleERC721Action(
         action.to,
         event.address,
         action.data,
@@ -122,11 +111,8 @@ export function handleExecuted(event: Executed): void {
       return;
     }
 
-    // ERC20(transfer)
-    log.warning('here right? {}', [methodSig.toString()]);
-    if (methodSig == ERC20_transfer) {
-      log.warning('niceoo? {}', [methodSig.toString()]);
-      handleERC20Withdraw(
+    if (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) {
+      handleERC20Action(
         action.to,
         event.address,
         proposalId,

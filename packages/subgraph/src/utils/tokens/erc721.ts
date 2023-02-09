@@ -6,19 +6,12 @@ import {
 } from '../../../generated/schema';
 import {ERC721} from '../../../generated/templates/DaoTemplate/ERC721';
 import {supportsInterface} from '../erc165';
+import {DECODE_OFFSET, TransferType} from './common';
 import {
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
   ERC721_transferFrom
-} from './selectors';
-
-enum TransferType {
-  Withdraw,
-  Deposit
-}
-
-const DECODE_OFFSET =
-  '0x0000000000000000000000000000000000000000000000000000000000000020';
+} from './common';
 
 function supportsERC721(token: Address): bool {
   // Double check that it's ERC721 by calling supportsInterface checks.
@@ -58,18 +51,18 @@ export function fetchERC721(address: Address): ERC721Contract | null {
 }
 
 export function updateERC721Balance(
-  dao: string,
+  daoId: string,
   token: string,
   tokenId: BigInt,
   timestamp: BigInt,
   type: TransferType
 ): void {
-  let balanceId = dao + '_' + token;
+  let balanceId = daoId.concat('-').concat(token);
   let erc721Balance = ERC721Balance.load(balanceId);
 
   if (!erc721Balance) {
     erc721Balance = new ERC721Balance(balanceId);
-    erc721Balance.dao = dao;
+    erc721Balance.dao = daoId;
     erc721Balance.token = token;
     erc721Balance.tokenIds = [];
   }
@@ -87,7 +80,7 @@ export function updateERC721Balance(
 }
 
 export function createERC721Transfer(
-  dao: Address,
+  daoId: string,
   from: Address,
   to: Address,
   token: Address,
@@ -95,31 +88,31 @@ export function createERC721Transfer(
   txHash: Bytes,
   timestamp: BigInt
 ): ERC721Transfer {
-  let transferId = dao
-    .toHexString()
-    .concat('-')
+  let transferId = daoId
+    .concat('_')
     .concat(token.toHexString())
-    .concat('-')
+    .concat('_')
     .concat(tokenId.toHexString())
-    .concat('-')
+    .concat('_')
     .concat(from.toHexString())
-    .concat('-')
+    .concat('_')
     .concat(to.toHexString())
-    .concat('-')
+    .concat('_')
     .concat(txHash.toHexString());
 
   let erc721Transfer = new ERC721Transfer(transferId);
 
   erc721Transfer.from = from;
   erc721Transfer.to = to;
-  erc721Transfer.dao = dao.toHexString();
+  erc721Transfer.dao = daoId;
   erc721Transfer.tokenId = tokenId;
   erc721Transfer.txHash = txHash;
   erc721Transfer.createdAt = timestamp;
+
   return erc721Transfer;
 }
 
-export function handleERC721Deposit(
+export function handleERC721Received(
   token: Address,
   dao: Address,
   data: Bytes,
@@ -131,33 +124,24 @@ export function handleERC721Deposit(
     return;
   }
 
-  log.warning('fetch happened {} ', [token.toHexString()]);
-
   let calldata = DECODE_OFFSET + data.toHexString().slice(10);
-
   let decodeABI = '(address,address,uint256,bytes)';
 
-  const decoded = ethereum.decode(
-    decodeABI, // from, tokenId,
-    Bytes.fromHexString(calldata)
-  );
-
-  log.warning('here we go again {} ', [token.toHexString()]);
+  const decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
 
   if (!decoded) {
     return;
   }
 
-  log.warning('oo vnaxot {} ', [token.toHexString()]);
-
   let tuple = decoded.toTuple();
 
-  log.debug('DECODED CORRECTLY {}', ['12345']);
   const from = tuple[1].toAddress();
   const tokenId = tuple[2].toBigInt();
 
+  let daoId = dao.toHexString();
+
   updateERC721Balance(
-    dao.toHexString(),
+    daoId,
     token.toHexString(),
     tokenId,
     timestamp,
@@ -165,7 +149,7 @@ export function handleERC721Deposit(
   );
 
   let erc721Transfer = createERC721Transfer(
-    dao,
+    daoId,
     from,
     dao,
     token,
@@ -179,7 +163,7 @@ export function handleERC721Deposit(
   erc721Transfer.save();
 }
 
-export function handleERC721Withdraw(
+export function handleERC721Action(
   token: Address,
   dao: Address,
   data: Bytes,
@@ -209,10 +193,7 @@ export function handleERC721Withdraw(
     calldata = DECODE_OFFSET + calldata;
   }
 
-  const decoded = ethereum.decode(
-    decodeABI, // from, tokenId,
-    Bytes.fromHexString(calldata)
-  );
+  const decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
 
   if (!decoded) {
     return;
@@ -220,13 +201,19 @@ export function handleERC721Withdraw(
 
   let tuple = decoded.toTuple();
 
-  log.debug('DECODED CORRECTLY {}', ['12345']);
   const from = tuple[0].toAddress();
   const to = tuple[1].toAddress();
   const tokenId = tuple[2].toBigInt();
 
+  let daoId = dao.toHexString();
+
+  // Ambiguity ! No need to store transfer such as this.
+  if (from == to) {
+    return;
+  }
+
   let erc721Transfer = createERC721Transfer(
-    dao,
+    daoId,
     from,
     to,
     token,
@@ -237,14 +224,39 @@ export function handleERC721Withdraw(
 
   erc721Transfer.proposal = proposalId;
   erc721Transfer.token = contract.id;
-  erc721Transfer.type = 'Withdraw';
-  erc721Transfer.save();
 
-  updateERC721Balance(
-    dao.toHexString(),
-    token.toHexString(),
-    tokenId,
-    timestamp,
-    TransferType.Withdraw
-  );
+  // If from/to both aren't equal to dao, it means
+  // dao must have been approved for the `tokenId`
+  // and played the role of transfering between 2 parties.
+  if (from != dao && to != dao) {
+    erc721Transfer.type = 'None'; // No idea
+    erc721Transfer.save();
+    return;
+  }
+
+  if (from != dao && to == dao) {
+    // 1. some party `y` approved `x` tokenId to the dao.
+    // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
+    erc721Transfer.type = 'Deposit';
+
+    updateERC721Balance(
+      daoId,
+      token.toHexString(),
+      tokenId,
+      timestamp,
+      TransferType.Deposit
+    );
+  } else {
+    erc721Transfer.type = 'Withdraw';
+
+    updateERC721Balance(
+      daoId,
+      token.toHexString(),
+      tokenId,
+      timestamp,
+      TransferType.Withdraw
+    );
+  }
+
+  erc721Transfer.save();
 }

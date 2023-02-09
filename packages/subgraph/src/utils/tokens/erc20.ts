@@ -5,11 +5,7 @@ import {
   ERC20Transfer
 } from '../../../generated/schema';
 import {ERC20} from '../../../generated/templates/DaoTemplate/ERC20';
-
-enum TypeHere {
-  Withdraw,
-  Deposit
-}
+import {ERC20_transfer, ERC20_transferFrom, TransferType} from './common';
 
 export function fetchERC20(address: Address): ERC20Contract | null {
   let erc20 = ERC20.bind(address);
@@ -37,7 +33,7 @@ export function fetchERC20(address: Address): ERC20Contract | null {
 }
 
 export function createERC20Transfer(
-  dao: Address,
+  daoId: string,
   token: Address,
   from: Address,
   to: Address,
@@ -45,8 +41,7 @@ export function createERC20Transfer(
   txHash: Bytes,
   timestamp: BigInt
 ): ERC20Transfer {
-  let id = dao
-    .toHexString()
+  let id = daoId
     .concat('-')
     .concat(token.toHexString())
     .concat('-')
@@ -59,11 +54,12 @@ export function createERC20Transfer(
     .concat(txHash.toHexString());
   let erc20Transfer = new ERC20Transfer(id);
   erc20Transfer.from = from;
-  erc20Transfer.to = dao;
-  erc20Transfer.dao = dao.toHexString();
+  erc20Transfer.to = to;
+  erc20Transfer.dao = daoId;
   erc20Transfer.amount = amount;
   erc20Transfer.txHash = txHash;
   erc20Transfer.createdAt = timestamp;
+
   return erc20Transfer;
 }
 
@@ -72,7 +68,7 @@ export function updateERC20Balance(
   dao: string,
   amount: BigInt,
   timestamp: BigInt,
-  type: TypeHere
+  type: TransferType
 ): void {
   let balanceId = dao + '_' + token.toHexString();
   let erc20Balance = ERC20Balance.load(balanceId);
@@ -94,7 +90,7 @@ export function updateERC20Balance(
   erc20Balance.save();
 }
 
-export function handleERC20Withdraw(
+export function handleERC20Action(
   token: Address,
   dao: Address,
   proposalId: string,
@@ -102,15 +98,22 @@ export function handleERC20Withdraw(
   timestamp: BigInt,
   txHash: Bytes
 ): void {
-  log.warning('whatthefuck? {}', ['fofo']);
   let contract = fetchERC20(token);
   if (!contract) {
     return;
   }
 
-  log.warning('whatuuuk? {}', ['fofo']);
+  let decodeABI = '';
 
-  let decodeABI = '(address,uint256)';
+  const functionSelector = data.toHexString().substring(0, 10);
+
+  if (functionSelector == ERC20_transfer) {
+    decodeABI = '(address,uint256)';
+  }
+
+  if (functionSelector == ERC20_transferFrom) {
+    decodeABI = '(address,address,uint256)';
+  }
 
   let decoded = ethereum.decode(
     decodeABI,
@@ -123,13 +126,31 @@ export function handleERC20Withdraw(
 
   let tuple = decoded.toTuple();
 
-  log.debug('DECODED CORRECTLY {}', ['12345']);
-  const from = dao;
-  const to = tuple[0].toAddress();
-  const amount = tuple[1].toBigInt();
+  let from = new Address(0);
+  let to = new Address(0);
+  let amount = BigInt.zero();
+
+  if (functionSelector == ERC20_transfer) {
+    from = dao;
+    to = tuple[0].toAddress();
+    amount = tuple[1].toBigInt();
+  }
+
+  if (functionSelector == ERC20_transferFrom) {
+    from = tuple[0].toAddress();
+    to = tuple[1].toAddress();
+    amount = tuple[2].toBigInt();
+  }
+
+  // Ambiguity ! No need to store transfer such as this.s
+  if (from == to) {
+    return;
+  }
+
+  let daoId = dao.toHexString();
 
   let erc20Transfer = createERC20Transfer(
-    dao,
+    daoId,
     token,
     from,
     to,
@@ -139,17 +160,30 @@ export function handleERC20Withdraw(
   );
   erc20Transfer.token = contract.id;
   erc20Transfer.proposal = proposalId;
-  erc20Transfer.type = 'Withdraw';
+
+  // If from/to both aren't equal to dao, it means
+  // dao must have been approved for the `amount`
+  // and played the role of transfering between 2 parties.
+  if (from != dao && to != dao) {
+    erc20Transfer.type = 'None'; // No idea
+    erc20Transfer.save();
+    return;
+  }
+
+  if (from != dao && to == dao) {
+    // 1. some party `y` approved `x` tokenId to the dao.
+    // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
+    erc20Transfer.type = 'Deposit';
+
+    updateERC20Balance(token, daoId, amount, timestamp, TransferType.Deposit);
+  } else {
+    // from is dao address, to is some other address
+    erc20Transfer.type = 'Withdraw';
+
+    updateERC20Balance(token, daoId, amount, timestamp, TransferType.Withdraw);
+  }
 
   erc20Transfer.save();
-
-  updateERC20Balance(
-    token,
-    dao.toHexString(),
-    amount,
-    timestamp,
-    TypeHere.Deposit
-  );
 }
 
 export function handleERC20Deposit(
@@ -166,8 +200,10 @@ export function handleERC20Deposit(
     return;
   }
 
+  let daoId = dao.toHexString();
+
   let erc20Transfer = createERC20Transfer(
-    dao,
+    daoId,
     token,
     from,
     to,
@@ -180,11 +216,5 @@ export function handleERC20Deposit(
 
   erc20Transfer.save();
 
-  updateERC20Balance(
-    token,
-    dao.toHexString(),
-    amount,
-    timestamp,
-    TypeHere.Deposit
-  );
+  updateERC20Balance(token, daoId, amount, timestamp, TransferType.Deposit);
 }

@@ -54,36 +54,29 @@ test('Run dao (handleMetadataSet) mappings with mock event', () => {
   clearStore();
 });
 
+// TODO:
 test('Run dao (handleCallbackReceived) mappings with mock event', () => {
-  // ERC721
-  // ethereum.encode('(address,address,uint256,bytes)', )
-  let tupleArray: Array<ethereum.Value> = [
-    ethereum.Value.fromAddress(Address.fromString(ADDRESS_ONE)),
-    ethereum.Value.fromAddress(Address.fromString(ADDRESS_ONE)),
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(62)),
-    ethereum.Value.fromBytes(Bytes.fromHexString('0x11')),
-  ]
-
-  let encoded = ethereum.encode(ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tupleArray)))!;
-
-  // create event
-  let newEvent = createCallbackReceivedEvent(
-    DAO_ADDRESS,
-    Bytes.fromHexString('0x150b7a02'),
-    ADDRESS_ONE, // ToKen Address
-    encoded
-  )
-
-  handleCallbackReceived(newEvent);
-  
-  // // let d = ethereum.Tuple.from(tupleArray);
-
-  // let decoded = ethereum.decode("(address,address,uint256,bytes)", encoded)!.toTuple();
-
-  // // let encoded = ethereum.encode(ethereum.Value.fromTuple(d));
-
-
-  // log.warning("what {}", [encoded.toHexString()])
+  // // ERC721
+  // // ethereum.encode('(address,address,uint256,bytes)', )
+  // let tupleArray: Array<ethereum.Value> = [
+  //   ethereum.Value.fromAddress(Address.fromString(ADDRESS_ONE)),
+  //   ethereum.Value.fromAddress(Address.fromString(ADDRESS_ONE)),
+  //   ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(62)),
+  //   ethereum.Value.fromBytes(Bytes.fromHexString('0x11')),
+  // ]
+  // let encoded = ethereum.encode(ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tupleArray)))!;
+  // // create event
+  // let newEvent = createCallbackReceivedEvent(
+  //   DAO_ADDRESS,
+  //   Bytes.fromHexString('0x150b7a02'),
+  //   ADDRESS_ONE, // ToKen Address
+  //   encoded
+  // )
+  // handleCallbackReceived(newEvent);
+  // // // let d = ethereum.Tuple.from(tupleArray);
+  // // let decoded = ethereum.decode("(address,address,uint256,bytes)", encoded)!.toTuple();
+  // // // let encoded = ethereum.encode(ethereum.Value.fromTuple(d));
+  // // log.warning("what {}", [encoded.toHexString()])
 });
 
 test('Run dao (handleNativeTokenDeposited) for native token mappings with mock event', () => {

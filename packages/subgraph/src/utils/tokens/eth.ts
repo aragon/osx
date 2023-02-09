@@ -84,7 +84,7 @@ export function handleETHDeposit(
   updateETHBalance(dao.toHexString(), amount, timestamp, TypeHere.Deposit);
 }
 
-export function handleETHWithdraw(
+export function handleETHAction(
   dao: Address,
   from: Address,
   to: Address,

@@ -1,4 +1,4 @@
-import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
+import {dataSource, DataSourceContext, log} from '@graphprotocol/graph-ts';
 
 import {
   MembershipContractAnnounced,
