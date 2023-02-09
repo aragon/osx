@@ -55,8 +55,7 @@ export function handleCallbackReceived(event: CallbackReceived): void {
       event.params.sender,
       event.address,
       event.params.data,
-      event.block.timestamp,
-      event.transaction.hash
+      event
     );
   }
 }
@@ -66,28 +65,23 @@ export function handleExecuted(event: Executed): void {
 
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
-
     let proposalId = event.params.actor
       .toHexString()
       .concat('_')
       .concat(event.params.callId.toHexString());
-
     if (action.data.toHexString() == '0x') {
       handleNativeAction(
-        event.address,
         event.address,
         action.to,
         action.value,
         'Native Token Withdraw',
         proposalId,
-        event.block.timestamp,
-        event.transaction.hash
+        index,
+        event
       );
       return;
     }
-
     let methodSig = action.data.toHexString().slice(0, 10);
-
     if (
       methodSig == ERC721_transferFrom ||
       methodSig == ERC721_safeTransferFromNoData ||
@@ -98,20 +92,19 @@ export function handleExecuted(event: Executed): void {
         event.address,
         action.data,
         proposalId,
-        event.block.timestamp,
-        event.transaction.hash
+        index,
+        event
       );
       return;
     }
-
     if (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) {
       handleERC20Action(
         action.to,
         event.address,
         proposalId,
         action.data,
-        event.block.timestamp,
-        event.transaction.hash
+        index,
+        event
       );
       return;
     }
@@ -125,23 +118,18 @@ export function handleDeposited(event: Deposited): void {
       event.address,
       event.params.token,
       event.params.sender,
-      event.address,
       // event.params._reference, TODO: pass it
       event.params.amount,
-      event.transaction.hash,
-      event.block.timestamp
+      event
     );
     return;
   }
-
   handleNativeDeposit(
     event.address,
     event.params.sender,
-    event.address,
     event.params.amount,
     event.params._reference,
-    event.block.timestamp,
-    event.transaction.hash
+    event
   );
 }
 
@@ -149,11 +137,9 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
   handleNativeDeposit(
     event.address,
     event.params.sender,
-    event.address,
     event.params.amount,
-    'Native Token Deposit',
-    event.block.timestamp,
-    event.transaction.hash
+    'Native Deposit',
+    event
   );
 }
 

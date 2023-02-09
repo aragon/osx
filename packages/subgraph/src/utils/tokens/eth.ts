@@ -1,49 +1,19 @@
-import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
-import {TransferType} from './common';
-
-export function createNativeTransfer(
-  dao: Address,
-  from: Address,
-  to: Address,
-  amount: BigInt,
-  reference: string,
-  txHash: Bytes,
-  timestamp: BigInt
-): NativeTransfer {
-  let id = dao
-    .toHexString()
-    .concat('-')
-    .concat(from.toHexString())
-    .concat('-')
-    .concat(to.toHexString())
-    .concat('-')
-    .concat(amount.toString())
-    .concat('-')
-    .concat(txHash.toHexString());
-  let transfer = new NativeTransfer(id);
-  transfer.from = from;
-  transfer.to = dao;
-  transfer.dao = dao.toHexString();
-  transfer.amount = amount;
-  transfer.reference = reference;
-  transfer.txHash = txHash;
-  transfer.createdAt = timestamp;
-  return transfer;
-}
+import {getTransferId, TransferType} from './common';
 
 export function updateNativeBalance(
-  dao: string,
+  daoId: string,
   amount: BigInt,
   timestamp: BigInt,
   type: TransferType
 ): void {
-  let balanceId = dao + '_' + ADDRESS_ZERO;
+  let balanceId = daoId + '_' + ADDRESS_ZERO;
   let nativeBalance = NativeBalance.load(balanceId);
   if (!nativeBalance) {
     nativeBalance = new NativeBalance(balanceId);
-    nativeBalance.dao = dao;
+    nativeBalance.dao = daoId;
     nativeBalance.balance = BigInt.zero();
   }
 
@@ -58,59 +28,71 @@ export function updateNativeBalance(
 export function handleNativeDeposit(
   dao: Address,
   from: Address,
-  to: Address,
   amount: BigInt,
   reference: string,
-  timestamp: BigInt,
-  txHash: Bytes
+  event: ethereum.Event
 ): void {
-  let transfer = createNativeTransfer(
-    dao,
-    from,
-    to,
-    amount,
-    reference,
-    txHash,
-    timestamp
-  );
+  let daoId = dao.toHexString();
+
+  let id = getTransferId(event.transaction.hash, event.transactionLogIndex, 0);
+
+  let transfer = new NativeTransfer(id);
+  transfer.from = from;
+  transfer.to = dao;
+  transfer.dao = daoId;
+  transfer.amount = amount;
+  transfer.reference = reference;
+  transfer.txHash = event.transaction.hash;
+  transfer.createdAt = event.block.timestamp;
+
   transfer.type = 'Deposit';
   transfer.save();
 
   updateNativeBalance(
-    dao.toHexString(),
+    daoId,
     amount,
-    timestamp,
+    event.block.timestamp,
     TransferType.Deposit
   );
 }
 
 export function handleNativeAction(
   dao: Address,
-  from: Address,
   to: Address,
   amount: BigInt,
   reference: string,
-  proposal: string,
-  timestamp: BigInt,
-  txHash: Bytes
+  proposalId: string,
+  actionIndex: number,
+  event: ethereum.Event
 ): void {
-  let transfer = createNativeTransfer(
-    dao,
-    from,
-    to,
-    amount,
-    reference,
-    txHash,
-    timestamp
+  if (dao == to) {
+    return;
+  }
+
+  let daoId = dao.toHexString();
+
+  let id = getTransferId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    actionIndex
   );
+
+  let transfer = new NativeTransfer(id);
+  transfer.from = dao;
+  transfer.to = to;
+  transfer.dao = daoId;
+  transfer.amount = amount;
+  transfer.reference = reference;
+  transfer.txHash = event.transaction.hash;
+  transfer.createdAt = event.block.timestamp;
+  transfer.proposal = proposalId;
   transfer.type = 'Withdraw';
-  transfer.proposal = proposal;
   transfer.save();
 
   updateNativeBalance(
-    dao.toHexString(),
+    daoId,
     amount,
-    timestamp,
+    event.block.timestamp,
     TransferType.Withdraw
   );
 }

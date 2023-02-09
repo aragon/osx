@@ -6,7 +6,7 @@ import {
 } from '../../../generated/schema';
 import {ERC721} from '../../../generated/templates/DaoTemplate/ERC721';
 import {supportsInterface} from '../erc165';
-import {DECODE_OFFSET, TransferType} from './common';
+import {DECODE_OFFSET, getTransferId, TransferType} from './common';
 import {
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
@@ -79,45 +79,11 @@ export function updateERC721Balance(
   erc721Balance.save();
 }
 
-export function createERC721Transfer(
-  daoId: string,
-  from: Address,
-  to: Address,
-  token: Address,
-  tokenId: BigInt,
-  txHash: Bytes,
-  timestamp: BigInt
-): ERC721Transfer {
-  let transferId = daoId
-    .concat('_')
-    .concat(token.toHexString())
-    .concat('_')
-    .concat(tokenId.toHexString())
-    .concat('_')
-    .concat(from.toHexString())
-    .concat('_')
-    .concat(to.toHexString())
-    .concat('_')
-    .concat(txHash.toHexString());
-
-  let erc721Transfer = new ERC721Transfer(transferId);
-
-  erc721Transfer.from = from;
-  erc721Transfer.to = to;
-  erc721Transfer.dao = daoId;
-  erc721Transfer.tokenId = tokenId;
-  erc721Transfer.txHash = txHash;
-  erc721Transfer.createdAt = timestamp;
-
-  return erc721Transfer;
-}
-
 export function handleERC721Received(
   token: Address,
   dao: Address,
   data: Bytes,
-  timestamp: BigInt,
-  txHash: Bytes
+  event: ethereum.Event
 ): void {
   let contract = fetchERC721(token);
   if (!contract) {
@@ -134,7 +100,6 @@ export function handleERC721Received(
   }
 
   let tuple = decoded.toTuple();
-
   let from = tuple[1].toAddress();
   let tokenId = tuple[2].toBigInt();
 
@@ -144,23 +109,26 @@ export function handleERC721Received(
     daoId,
     token.toHexString(),
     tokenId,
-    timestamp,
+    event.block.timestamp,
     TransferType.Deposit
   );
 
-  let erc721Transfer = createERC721Transfer(
-    daoId,
-    from,
-    dao,
-    token,
-    tokenId,
-    txHash,
-    timestamp
+  let transferId = getTransferId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    0
   );
 
-  erc721Transfer.type = 'Deposit';
-  erc721Transfer.token = contract.id;
-  erc721Transfer.save();
+  let transfer = new ERC721Transfer(transferId);
+  transfer.from = from;
+  transfer.to = dao;
+  transfer.dao = daoId;
+  transfer.token = contract.id;
+  transfer.tokenId = tokenId;
+  transfer.txHash = event.transaction.hash;
+  transfer.createdAt = event.block.timestamp;
+  transfer.type = 'Deposit';
+  transfer.save();
 }
 
 export function handleERC721Action(
@@ -168,8 +136,8 @@ export function handleERC721Action(
   dao: Address,
   data: Bytes,
   proposalId: string,
-  timestamp: BigInt,
-  txHash: Bytes
+  actionIndex: number,
+  event: ethereum.Event
 ): void {
   let contract = fetchERC721(token);
   if (!contract) {
@@ -212,51 +180,55 @@ export function handleERC721Action(
     return;
   }
 
-  let erc721Transfer = createERC721Transfer(
-    daoId,
-    from,
-    to,
-    token,
-    tokenId,
-    txHash,
-    timestamp
+  let transferId = getTransferId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    actionIndex
   );
 
-  erc721Transfer.proposal = proposalId;
-  erc721Transfer.token = contract.id;
+  let transfer = new ERC721Transfer(transferId);
+  transfer.from = from;
+  transfer.to = dao;
+  transfer.dao = daoId;
+  transfer.token = contract.id;
+  transfer.tokenId = tokenId;
+  transfer.proposal = proposalId;
+  transfer.txHash = event.transaction.hash;
+  transfer.createdAt = event.block.timestamp;
+  transfer.save();
 
   // If from/to both aren't equal to dao, it means
   // dao must have been approved for the `tokenId`
   // and played the role of transfering between 2 parties.
   if (from != dao && to != dao) {
-    erc721Transfer.type = 'None'; // No idea
-    erc721Transfer.save();
+    transfer.type = 'None'; // No idea
+    transfer.save();
     return;
   }
 
   if (from != dao && to == dao) {
     // 1. some party `y` approved `x` tokenId to the dao.
     // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
-    erc721Transfer.type = 'Deposit';
+    transfer.type = 'Deposit';
 
     updateERC721Balance(
       daoId,
       token.toHexString(),
       tokenId,
-      timestamp,
+      event.block.timestamp,
       TransferType.Deposit
     );
   } else {
-    erc721Transfer.type = 'Withdraw';
+    transfer.type = 'Withdraw';
 
     updateERC721Balance(
       daoId,
       token.toHexString(),
       tokenId,
-      timestamp,
+      event.block.timestamp,
       TransferType.Withdraw
     );
   }
 
-  erc721Transfer.save();
+  transfer.save();
 }
