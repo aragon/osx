@@ -60,7 +60,7 @@ IDAO.Action[] memory actions = new IDAO.Action[](1);
 
 actions[0] = IDAO.Action({
   to: address(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6), //         The address of the WETH contract on Goerli
-  value: 0.1 ether, //                                                The Goerli ETH value to be send with the function
+  value: 0.1 ether, //                                                The Goerli ETH value to be sent with the function call
   data: abi.encodeWithSelector(bytes4(keccak256('deposit()', []))) // The calldata
 });
 
@@ -95,7 +95,7 @@ Imagine a DAO wants to buy two NFTs A and B with DAI tokens. A proposal is sched
 
 1. set the DAI allowance to `125`
 2. try to buy NFT A for `100` DAI
-3. try to but NFT B for `125` DAI
+3. try to buy NFT B for `125` DAI
 4. set the DAI allowance to `0`
 
 Once the proposal has passed, it might be that the NFT A or B was already bought by someone else so that action 2 or 3 would revert.
@@ -126,7 +126,7 @@ If we want that every atomic succeeds, we specify a `allowFailureMap` value of `
 
 #### The `failureMap` Output Argument
 
-In analogy and after an action array with a provided allow-failure map was executed successfully in the DAO, the `execute` function returns a corresponding `uint256 failureMap` containing the actual failures that have happend.
+In analogy and after an action array with a provided allow-failure map was executed successfully in the DAO, the `execute` function returns a corresponding `uint256 failureMap` containing the actual failures that have happened.
 If all actions succeeded, the value `uint256(0)` will be returned.
 If the third action failed, for example, because the NFT was already sold or the DAO had not enough DAI, a failure map value `uint256(4)` is returned
 
