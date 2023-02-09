@@ -60,7 +60,7 @@ IDAO.Action[] memory actions = new IDAO.Action[](1);
 
 actions[0] = IDAO.Action({
   to: address(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6), //         The address of the WETH contract on Goerli
-  value: 0.1 ether, //                                                The Goerli ETH value to be sent with the function
+  value: 0.1 ether, //                                                The Goerli ETH value to be sent with the function call
   data: abi.encodeWithSelector(bytes4(keccak256('deposit()', []))) // The calldata
 });
 
