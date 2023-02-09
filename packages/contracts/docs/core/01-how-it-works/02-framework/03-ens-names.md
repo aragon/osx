@@ -4,7 +4,7 @@ title: ENS Names
 
 ## Providing Unique DAO and Plugin Repository Names
 
-To make DAOs and plugin repositories unmistakably identifiable in the aragonOS ecosystem, we assign unique ENS names to them upon registration in the
+To make DAOs and plugin repositories unmistakably identifiable in the aragonOSx ecosystem, we assign unique ENS names to them upon registration in the
 
 `DAO` contracts that have been created through our [DAO creation process](./01-dao-creation/index.md/)
 

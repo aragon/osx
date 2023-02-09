@@ -41,12 +41,12 @@ struct Action {
 
 Actions can be
 
-- function calls to the DAO itself (e.g., to upgrade the DAO contract to a newer version of aragonOS)
+- function calls to the DAO itself (e.g., to upgrade the DAO contract to a newer version of aragonOSx)
 - function calls to other contracts, such as
 
   - external services (e.g. Uniswap, Compound, etc.)
-  - aragonOS plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
-  - aragonOS framework infrastructure (e.g., to [setup a plugin](../../02-framework/02-plugin-management/02-plugin-setup/index.md))
+  - aragonOSx plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
+  - aragonOSx protocol infrastructure (e.g., to [setup a plugin](../../02-framework/02-plugin-management/02-plugin-setup/index.md))
 
 - transfers of native tokens
 

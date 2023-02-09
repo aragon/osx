@@ -8,7 +8,7 @@ title: Repositories
 This section is work in progress.
 :::
 
-In this section you will learn what plugin repositories and related aragonOS infrastructure works.
+In this section you will learn what plugin repositories and related aragonOSx infrastructure works.
 
 ### What are Plugin Repos Needed For?
 
@@ -31,7 +31,7 @@ The `PluginSetupProcessor` contract taking care of installing, updating, and uni
 ### The `PuginRepo` Contract
 
 The `PluginRepo` contract versions the releases of a `Plugin`. Each plugin starts as version `1.0`.
-When you release the first version of a plugin, a new plugin repository is created for you by the aragonOS framework in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.
+When you release the first version of a plugin, a new plugin repository is created for you by the aragonOSx framework in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.
 
 The `PluginRepo` contract inherits from the `PermissionManager` <!-- add link --> and allows the maintainer of the repository to create new versions with the `createVersion` function:
 

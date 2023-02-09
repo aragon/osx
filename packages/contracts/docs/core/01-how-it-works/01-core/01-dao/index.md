@@ -4,7 +4,7 @@ title: DAO
 
 ## The DAO Contract: The Identity and Basis of Your Organization
 
-In this section, you will learn about the core functionality of every aragonOS DAO.
+In this section, you will learn about the core functionality of every aragonOSx DAO.
 
 The `DAO` contract is the identity and basis of your organization. It is the address carrying the DAO’s ENS name, metadata, and holding the funds. Furthermore, it has **six base functionalities** being commonly found in other DAO frameworks in the ecosystem.
 
@@ -32,7 +32,7 @@ In the future, more advanced asset management and finance functionality can be a
 
 ### 3. Upgradeability
 
-Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/02-dao-upgrading/index.md)) if a new version of aragonOS is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
+Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/02-dao-upgrading/index.md)) if a new version of aragonOSx is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
 
 <!-- Add a subsection explaining how to upgrade your dao -->
 
@@ -56,7 +56,7 @@ By supporting the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) standard, 
 
 ### 6. Permission Management
 
-Lastly, it is essential that only the right entities (e.g., the DAO itself or trusted addresses) have permission to use the above-mentioned functionalities. This is why aragonOS DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
+Lastly, it is essential that only the right entities (e.g., the DAO itself or trusted addresses) have permission to use the above-mentioned functionalities. This is why aragonOSx DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
 Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to EOAs as this poses a security risk to the organization if the account is compromised or acts adversarial. Instead, the permissions for the above-mentioned functionalities are better restricted to the `DAO` contract itself and triggered through governance [plugins](../03-plugins/index.md) that you can install on your DAO.
 
 To learn more, visit the [permission manager](../02-permissions/index.md) section.
