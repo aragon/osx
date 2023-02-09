@@ -18,7 +18,7 @@ Upgradeable plugin contracts (such as `PluginUpgradeable`, `PluginUUPSUpgradeabl
 
 ### Upgradeability & Deployment
 
-Upgradebility and the deployment method of a plugin contract go hand in hand.
+Upgradeability and the deployment method of a plugin contract go hand in hand.
 
 The motivation behind upgrading smart contracts is nicely summarized by OpenZepplin:
 
