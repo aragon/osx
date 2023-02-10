@@ -36,6 +36,7 @@ import {
 } from './utils';
 import {createTokenVotingProposalEntityState} from '../token-voting/utils';
 import {decodeWithdrawParams} from '../../src/dao/utils';
+import {getTransferId} from '../../src/utils/tokens/common';
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // create state
@@ -87,47 +88,41 @@ test('Run dao (handleNativeTokenDeposited) for native token mappings with mock e
     DAO_ADDRESS
   );
 
-  let entityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    newEvent.transaction.hash.toHexString() +
-    '_' +
-    newEvent.transactionLogIndex.toHexString();
+  let transferId = getTransferId(
+    newEvent.transaction.hash,
+    newEvent.transactionLogIndex,
+    0
+  );
+  let daoId = Address.fromString(DAO_ADDRESS).toHexString();
 
-  createTokenCalls(ADDRESS_ZERO, 'Ethereum', 'ETH', '18');
   // handle event
   handleNativeTokenDeposited(newEvent);
 
   // checks
-  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
+  assert.fieldEquals('NativeTransfer', transferId, 'id', transferId);
+  assert.fieldEquals('NativeTransfer', transferId, 'dao', daoId);
+  assert.fieldEquals('NativeTransfer', transferId, 'from', ADDRESS_ONE);
+  assert.fieldEquals('NativeTransfer', transferId, 'to', DAO_ADDRESS);
+  assert.fieldEquals('NativeTransfer', transferId, 'amount', ONE_ETH);
   assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
+    'NativeTransfer',
+    transferId,
+    'reference',
+    'Native Deposit'
   );
   assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'token',
-    Address.fromString(ADDRESS_ZERO).toHexString()
-  );
-  assert.fieldEquals('VaultTransfer', entityID, 'sender', ADDRESS_ONE);
-  assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
-  assert.fieldEquals('VaultTransfer', entityID, 'reference', 'Eth deposit');
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'transaction',
+    'NativeTransfer',
+    transferId,
+    'txHash',
     newEvent.transaction.hash.toHexString()
   );
   assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
+    'NativeTransfer',
+    transferId,
     'createdAt',
     newEvent.block.timestamp.toString()
   );
-  assert.fieldEquals('VaultTransfer', entityID, 'type', 'Deposit');
+  assert.fieldEquals('NativeTransfer', transferId, 'type', 'Deposit');
 
   clearStore();
 });
@@ -333,101 +328,101 @@ test('Run dao (handleNativeTokenDeposited) for native token mappings with mock e
 //   clearStore();
 // });
 
-// test('Run dao (handleTrustedForwarderSet) mappings with mock event', () => {
-//   // create state
-//   let entityID = Address.fromString(DAO_ADDRESS).toHexString();
-//   createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
+test('Run dao (handleTrustedForwarderSet) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
-//   let trustedForwarder = ADDRESS_ONE;
+  let trustedForwarder = ADDRESS_ONE;
 
-//   let newEvent = createTrustedForwarderSetEvent(trustedForwarder, DAO_ADDRESS);
-//   // handle event
-//   handleTrustedForwarderSet(newEvent);
+  let newEvent = createTrustedForwarderSetEvent(trustedForwarder, DAO_ADDRESS);
+  // handle event
+  handleTrustedForwarderSet(newEvent);
 
-//   // checks
-//   assert.fieldEquals('Dao', entityID, 'id', entityID);
-//   assert.fieldEquals(
-//     'Dao',
-//     entityID,
-//     'trustedForwarder',
-//     Address.fromString(ADDRESS_ONE).toHexString()
-//   );
+  // checks
+  assert.fieldEquals('Dao', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'Dao',
+    entityID,
+    'trustedForwarder',
+    Address.fromString(ADDRESS_ONE).toHexString()
+  );
 
-//   clearStore();
-// });
+  clearStore();
+});
 
-// test('Run dao (handleSignatureValidatorSet) mappings with mock event', () => {
-//   // create state
-//   let entityID = Address.fromString(DAO_ADDRESS).toHexString();
-//   createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
+test('Run dao (handleSignatureValidatorSet) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
-//   let signatureValidator = ADDRESS_ONE;
+  let signatureValidator = ADDRESS_ONE;
 
-//   let newEvent = createSignatureValidatorSetEvent(
-//     signatureValidator,
-//     DAO_ADDRESS
-//   );
-//   // handle event
-//   handleSignatureValidatorSet(newEvent);
+  let newEvent = createSignatureValidatorSetEvent(
+    signatureValidator,
+    DAO_ADDRESS
+  );
+  // handle event
+  handleSignatureValidatorSet(newEvent);
 
-//   // checks
-//   assert.fieldEquals('Dao', entityID, 'id', entityID);
-//   assert.fieldEquals(
-//     'Dao',
-//     entityID,
-//     'signatureValidator',
-//     Address.fromString(ADDRESS_ONE).toHexString()
-//   );
+  // checks
+  assert.fieldEquals('Dao', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'Dao',
+    entityID,
+    'signatureValidator',
+    Address.fromString(ADDRESS_ONE).toHexString()
+  );
 
-//   clearStore();
-// });
+  clearStore();
+});
 
-// test('Run dao (handleStandardCallbackRegistered) mappings with mock event', () => {
-//   // create state
-//   let daoAddress = Address.fromString(DAO_ADDRESS).toHexString();
-//   createDaoEntityState(daoAddress, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
+test('Run dao (handleStandardCallbackRegistered) mappings with mock event', () => {
+  // create state
+  let daoAddress = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(daoAddress, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
-//   let newEvent = createStandardCallbackRegisteredEvent(
-//     '0xaaaaaaaa',
-//     '0xaaaaaaab',
-//     '0xaaaaaaac',
-//     DAO_ADDRESS
-//   );
-//   // handle event
-//   handleStandardCallbackRegistered(newEvent);
+  let newEvent = createStandardCallbackRegisteredEvent(
+    '0xaaaaaaaa',
+    '0xaaaaaaab',
+    '0xaaaaaaac',
+    DAO_ADDRESS
+  );
+  // handle event
+  handleStandardCallbackRegistered(newEvent);
 
-//   newEvent = createStandardCallbackRegisteredEvent(
-//     '0xbbaaaaaa',
-//     '0xbbaaaaab',
-//     '0xbbaaaaac',
-//     DAO_ADDRESS
-//   );
+  newEvent = createStandardCallbackRegisteredEvent(
+    '0xbbaaaaaa',
+    '0xbbaaaaab',
+    '0xbbaaaaac',
+    DAO_ADDRESS
+  );
 
-//   // handle event
-//   handleStandardCallbackRegistered(newEvent);
+  // handle event
+  handleStandardCallbackRegistered(newEvent);
 
-//   // checks
-//   let entityID = `${daoAddress}_0xaaaaaaaa`;
-//   assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
-//   assert.fieldEquals('StandardCallback', entityID, 'interfaceId', '0xaaaaaaaa');
-//   assert.fieldEquals(
-//     'StandardCallback',
-//     entityID,
-//     'callbackSelector',
-//     '0xaaaaaaab'
-//   );
-//   assert.fieldEquals('StandardCallback', entityID, 'magicNumber', '0xaaaaaaac');
+  // checks
+  let entityID = `${daoAddress}_0xaaaaaaaa`;
+  assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
+  assert.fieldEquals('StandardCallback', entityID, 'interfaceId', '0xaaaaaaaa');
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'callbackSelector',
+    '0xaaaaaaab'
+  );
+  assert.fieldEquals('StandardCallback', entityID, 'magicNumber', '0xaaaaaaac');
 
-//   entityID = `${daoAddress}_0xbbaaaaaa`;
-//   assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
-//   assert.fieldEquals('StandardCallback', entityID, 'interfaceId', '0xbbaaaaaa');
-//   assert.fieldEquals(
-//     'StandardCallback',
-//     entityID,
-//     'callbackSelector',
-//     '0xbbaaaaab'
-//   );
-//   assert.fieldEquals('StandardCallback', entityID, 'magicNumber', '0xbbaaaaac');
+  entityID = `${daoAddress}_0xbbaaaaaa`;
+  assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
+  assert.fieldEquals('StandardCallback', entityID, 'interfaceId', '0xbbaaaaaa');
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'callbackSelector',
+    '0xbbaaaaab'
+  );
+  assert.fieldEquals('StandardCallback', entityID, 'magicNumber', '0xbbaaaaac');
 
-//   clearStore();
-// });
+  clearStore();
+});
