@@ -172,11 +172,9 @@ contract PermissionManager is Initializable {
     /// @param items The array of bulk items to process.
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata items
-    ) external {
+    ) external auth(address(this), ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.MultiTargetPermission memory item = items[i];
-
-            _auth(address(this), ROOT_PERMISSION_ID);
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(item.where, item.who, item.permissionId);
