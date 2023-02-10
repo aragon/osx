@@ -64,10 +64,7 @@ Let’s assume we have an `Example` contract managed by a DAO `_dao` containing 
 contract Example is Plugin {
   constructor(IDAO _dao) Plugin(_dao) {}
 
-  function sendCoins(
-    address _to,
-    uint256 _amount
-  ) external auth(SEND_COINS_PERMISSION_ID) {
+  function sendCoins(address _to, uint256 _amount) external auth(SEND_COINS_PERMISSION_ID) {
     // logic to send `_amount` coins to the address `_to`...
   }
 }
