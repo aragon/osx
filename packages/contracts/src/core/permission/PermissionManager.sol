@@ -112,7 +112,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(address(this), ROOT_PERMISSION_ID) {
         _grant(_where, _who, _permissionId);
     }
 
@@ -127,7 +127,7 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(address(this), ROOT_PERMISSION_ID) {
         _grantWithCondition(_where, _who, _permissionId, _condition);
     }
 
@@ -140,7 +140,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(address(this), ROOT_PERMISSION_ID) {
         _revoke(_where, _who, _permissionId);
     }
 
@@ -151,7 +151,7 @@ contract PermissionManager is Initializable {
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(address(this), ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
 
@@ -176,7 +176,7 @@ contract PermissionManager is Initializable {
         for (uint256 i; i < items.length; ) {
             PermissionLib.MultiTargetPermission memory item = items[i];
 
-            _auth(item.where, ROOT_PERMISSION_ID);
+            _auth(address(this), ROOT_PERMISSION_ID);
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(item.where, item.who, item.permissionId);
@@ -332,10 +332,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which the permission is required.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(address _where, bytes32 _permissionId) private view {
-        if (
-            !isGranted(address(this), msg.sender, _permissionId, msg.data) &&
-            !isGranted(_where, msg.sender, _permissionId, msg.data)
-        ) {
+        if (!isGranted(_where, msg.sender, _permissionId, msg.data)) {
             revert Unauthorized({
                 here: address(this),
                 where: _where,

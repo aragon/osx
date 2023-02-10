@@ -531,7 +531,7 @@ describe('Plugin Setup Processor', function () {
           .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
           .withArgs(
             targetDao.address,
-            permissions[0]['where'],
+            targetDao.address,
             psp.address,
             ROOT_PERMISSION_ID
           );
@@ -1078,7 +1078,7 @@ describe('Plugin Setup Processor', function () {
           .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
           .withArgs(
             targetDao.address,
-            permissions[0]['where'],
+            targetDao.address,
             psp.address,
             ROOT_PERMISSION_ID
           );
@@ -1689,7 +1689,7 @@ describe('Plugin Setup Processor', function () {
         .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
         .withArgs(
           targetDao.address,
-          permissions[0]['where'],
+          targetDao.address,
           psp.address,
           ROOT_PERMISSION_ID
         );

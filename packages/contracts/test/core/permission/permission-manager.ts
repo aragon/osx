@@ -539,7 +539,7 @@ describe('Core: PermissionManager', function () {
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
           pm.address,
-          signers[1].address,
+          pm.address,
           signers[2].address,
           ROOT_PERMISSION_ID
         );
