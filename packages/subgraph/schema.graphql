@@ -157,7 +157,7 @@ type Dao @entity {
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
-  token: ERC20Contract # TODO
+  token: ERC20Contract
   actions: [Action!]! @derivedFrom(field: "dao")
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
   balances: [TokenBalance!]! @derivedFrom(field: "dao")

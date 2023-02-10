@@ -118,7 +118,6 @@ export function handleDeposited(event: Deposited): void {
       event.address,
       event.params.token,
       event.params.sender,
-      // event.params._reference, TODO: pass it
       event.params.amount,
       event
     );
