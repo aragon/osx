@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {Proposal} from "../../../core/plugin/proposal/Proposal.sol";
+import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
 import {IMembershipContract} from "../../../core/plugin/membership/IMembershipContract.sol";
 import {PluginCloneable} from "../../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
@@ -12,7 +12,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @title Admin
 /// @author Aragon Association - 2022-2023
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
-contract Admin is IMembershipContract, PluginCloneable, Proposal {
+contract Admin is IMembershipContract, PluginCloneable, ProposalUpgradeable {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
