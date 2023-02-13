@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Moved `_disableInitializers` inside the constructors of `PluginCloneable` and `PluginUUPSUpgradeable`.
 - Renamed `DAOSettings.name` to `DAOSettings.subdomain`.
 - Fixed the ERC165 interface ID and `supportsInterface` computations.
 - Replaced non-upgradeable contract dependencies by upgradeable ones for the cloneable `Admin` plugin.
