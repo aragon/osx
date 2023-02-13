@@ -90,7 +90,7 @@ export function handleERC721Received(
     return;
   }
 
-  let calldata = DECODE_OFFSET + data.toHexString().slice(10); // TODO: Giorgi insted aof 0x, append DECODE_OFFSET
+  let calldata = DECODE_OFFSET + data.toHexString().slice(10);
   let decodeABI = '(address,address,uint256,bytes)';
 
   let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
