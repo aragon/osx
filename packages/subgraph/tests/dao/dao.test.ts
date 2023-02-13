@@ -601,7 +601,7 @@ describe('handleExecuted', () => {
         eq('ERC20Balance', balanceId, 'lastUpdated', timestamp.toString());
         assert.entityCount('ERC20Balance', 1);
 
-        // Check ERC721Transfer
+        // Check ERC20Transfer
         eq('ERC20Transfer', transferId, 'id', transferId);
         eq('ERC20Transfer', transferId, 'dao', daoId);
         eq('ERC20Transfer', transferId, 'amount', '10'); // TODO: fix it 10
