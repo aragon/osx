@@ -155,24 +155,12 @@ export function handleERC20Action(
     // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
     transfer.type = 'Deposit';
 
-    updateERC20Balance(
-      token,
-      dao,
-      amount,
-      event.block.timestamp,
-      TransferType.Deposit
-    );
+    updateERC20Balance(token, dao, amount);
   } else {
     // from is dao address, to is some other address
     transfer.type = 'Withdraw';
 
-    updateERC20Balance(
-      token,
-      dao,
-      amount,
-      event.block.timestamp,
-      TransferType.Withdraw
-    );
+    updateERC20Balance(token, dao, amount);
   }
 
   transfer.save();
@@ -207,11 +195,5 @@ export function handleERC20Deposit(
 
   erc20Transfer.save();
 
-  updateERC20Balance(
-    token,
-    dao,
-    amount,
-    event.block.timestamp,
-    TransferType.Deposit
-  );
+  updateERC20Balance(token, dao, amount);
 }
