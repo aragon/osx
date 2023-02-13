@@ -8,7 +8,7 @@ import "./IProposal.sol";
 
 /// @title Proposal
 /// @author Aragon Association - 2022-2023
-/// @notice An abstract contract to be inherited by non-upgradeable DAO plugins containing the traits and internal functionality to create and execute proposals.
+/// @notice An abstract contract containing the traits and internal functionality to create and execute proposals that can be inherited by non-upgradeable DAO plugins.
 abstract contract Proposal is IProposal {
     using Counters for Counters.Counter;
 
