@@ -589,7 +589,7 @@ describe('handleExecuted', () => {
 
         let transferId = getTransferId(txHash, logIndex, 0);
 
-        // check ERC720Contract entity
+        // check ERC20Contract entity
         eq('ERC20Contract', tokenId, 'id', tokenId);
         eq('ERC20Contract', tokenId, 'name', 'name');
         eq('ERC20Contract', tokenId, 'symbol', 'symbol');
