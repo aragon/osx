@@ -8,10 +8,6 @@ export const ERC721_transferFrom = '0x23b872dd';
 export const ERC20_transfer = '0xa9059cbb';
 export const ERC20_transferFrom = '0x23b872dd';
 
-// For our own `deposit` and plain eth transfer, the following is used
-// as using `deposit` signature could be misleading in a case where it gets changed.
-export const ZERO_FUNCTION = '0x00000000';
-
 export enum TransferType {
   Withdraw,
   Deposit
