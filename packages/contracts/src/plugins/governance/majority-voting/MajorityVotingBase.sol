@@ -6,7 +6,7 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {ProposalUpgradeable, ProposalBase} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
+import {ProposalUpgradeable, IProposal} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {RATIO_BASE, RatioOutOfBounds} from "../../utils/Ratio.sol";

@@ -4,18 +4,18 @@ pragma solidity 0.8.17;
 
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import "./ProposalBase.sol";
+import "./IProposal.sol";
 
 /// @title ProposalUgradeable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract to be inherited by upgradeable DAO plugins containing the traits and internal functionality to create and execute proposals.
-abstract contract ProposalUpgradeable is ProposalBase {
+abstract contract ProposalUpgradeable is IProposal {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// @notice The incremental ID for proposals and executions.
     CountersUpgradeable.Counter private proposalCounter;
 
-    /// @inheritdoc ProposalBase
+    /// @inheritdoc IProposal
     function proposalCount() public view override returns (uint256) {
         return proposalCounter.current();
     }

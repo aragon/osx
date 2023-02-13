@@ -4,10 +4,10 @@ pragma solidity 0.8.17;
 
 import {IDAO} from "../../dao/IDAO.sol";
 
-/// @title ProposalBase
+/// @title IProposal
 /// @author Aragon Association - 2022-2023
 /// @notice An interface to be implemented by DAO plugins that create and execute proposals.
-interface ProposalBase {
+interface IProposal {
     /// @notice Emitted when a proposal is created.
     /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the proposal.
