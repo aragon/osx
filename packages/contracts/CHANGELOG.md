@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Replaced non-upgradeable contract dependencies by upgradeable ones for the cloneable `Admin` plugin.
+- Refactored `ProposalBase` into `IProposal`.
 - Use OZ's upgradeable contracts for `PluginCloneable`.
 - Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
 
