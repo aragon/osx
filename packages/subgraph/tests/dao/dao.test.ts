@@ -305,7 +305,7 @@ describe('handleDeposited: ', () => {
     eq('NativeBalance', balanceId, 'balance', ONE_ETH);
     eq('NativeBalance', balanceId, 'lastUpdated', timestamp.toString());
 
-    // Check ERC20Transfer
+    // Check NativeTransfer
     eq('NativeTransfer', transferId, 'id', transferId);
     eq('NativeTransfer', transferId, 'dao', daoId);
     eq('NativeTransfer', transferId, 'amount', ONE_ETH);
