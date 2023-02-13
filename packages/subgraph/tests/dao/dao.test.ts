@@ -492,9 +492,10 @@ describe('handleExecuted', () => {
 
     describe('ERC20 transfer action', () => {
       test('creates entities with correct values', () => {
+        let transferToken = BigInt.fromU32(10);
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
+          ethereum.Value.fromUnsignedBigInt(transferToken)
         ];
 
         let event = createExecutedEvent([tupleArray], [ERC20_transfer]);
@@ -524,7 +525,7 @@ describe('handleExecuted', () => {
         // Check ERC20Transfer
         eq('ERC20Transfer', transferId, 'id', transferId);
         eq('ERC20Transfer', transferId, 'dao', daoId);
-        eq('ERC20Transfer', transferId, 'amount', '10'); // TODO: fix it 10
+        eq('ERC20Transfer', transferId, 'amount', transferToken.toString());
         eq('ERC20Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC20Transfer', transferId, 'to', ADDRESS_THREE);
         // eq('ERC20Transfer', transferId, 'proposal', '');  TODO:
@@ -571,10 +572,11 @@ describe('handleExecuted', () => {
 
     describe('ERC20(transferFrom) action', () => {
       test('creates entities with correct values', () => {
+        let transferToken = BigInt.fromU32(10);
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
+          ethereum.Value.fromUnsignedBigInt(transferToken)
         ];
 
         let event = createExecutedEvent([tupleArray], [ERC20_transferFrom]);
@@ -604,7 +606,7 @@ describe('handleExecuted', () => {
         // Check ERC20Transfer
         eq('ERC20Transfer', transferId, 'id', transferId);
         eq('ERC20Transfer', transferId, 'dao', daoId);
-        eq('ERC20Transfer', transferId, 'amount', '10'); // TODO: fix it 10
+        eq('ERC20Transfer', transferId, 'amount', transferToken.toString());
         eq('ERC20Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC20Transfer', transferId, 'to', ADDRESS_THREE);
         // eq('ERC20Transfer', transferId, 'proposal', '');  TODO:
