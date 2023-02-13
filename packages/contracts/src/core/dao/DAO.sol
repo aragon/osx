@@ -207,7 +207,13 @@ contract DAO is
             }
         }
 
-        emit Executed(msg.sender, _callId, _actions, failureMap, execResults);
+        emit Executed({
+            actor: msg.sender,
+            callId: _callId,
+            actions: _actions,
+            failureMap: failureMap,
+            execResults: execResults
+        });
     }
 
     /// @inheritdoc IDAO

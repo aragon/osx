@@ -52,9 +52,9 @@ interface IDAO {
     /// @notice Emitted when a proposal is executed.
     /// @param actor The address of the caller.
     /// @param callId The ID of the call.
-    /// @param actions Array of actions executed.
-    /// @param failureMap Stores which actions have failed.
-    /// @param execResults Array with the results of the executed actions.
+    /// @param actions The array of actions executed.
+    /// @param failureMap The failure map encoding which actions have failed.
+    /// @param execResults The sArray with the results of the executed actions.
     /// @dev The value of `callId` is defined by the component/contract calling the execute function. A `Plugin` implementation can use it, for example, as a nonce.
     event Executed(
         address indexed actor,

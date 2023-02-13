@@ -65,11 +65,15 @@ abstract contract Proposal is IProposal {
         IDAO.Action[] memory _actions,
         uint256 _allowFailureMap
     ) internal virtual {
-        (bytes[] memory execResults, ) = _dao.execute(
+        (bytes[] memory execResults, uint256 failureMap) = _dao.execute(
             bytes32(_proposalId),
             _actions,
             _allowFailureMap
         );
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+        emit ProposalExecuted({
+            proposalId: _proposalId,
+            execResults: execResults,
+            failureMap: failureMap
+        });
     }
 }
