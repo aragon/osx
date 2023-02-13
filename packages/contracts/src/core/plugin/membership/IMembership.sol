@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 
 import {IDAO} from "../../dao/IDAO.sol";
 
-/// @notice An interface to be used by DAO plugins that define membership by adding and removing individual addresses.
+/// @notice An interface to be implemented by DAO plugins that define membership by adding and removing individual addresses.
 interface IMembership {
     /// @notice Emitted when members are added to the DAO plugin.
     /// @param members The list of new members being added.
