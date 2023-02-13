@@ -30,7 +30,7 @@ then
 fi
 
 # Prepare subgraph name
-FULLNAME=$SUBGRAPH_NAME-$NETWORK_NAME
+FULLNAME=novaknole/core-test-1
 if [ "$STAGING" ]; then
   FULLNAME=$FULLNAME-staging
 fi
@@ -45,8 +45,8 @@ then
         --node http://localhost:8020
 else
     graph deploy $FULLNAME \
-        --version-label $SUBGRAPH_VERSION \
-        --node https://app.satsuma.xyz/api/subgraphs/deploy \
+        --ipfs https://api.thegraph.com/ipfs/ \
+        --node https://api.thegraph.com/deploy/ \
         --deploy-key $GRAPH_KEY > deploy-output.txt
 
     SUBGRAPH_ID=$(grep "Build completed:" deploy-output.txt | grep -oE "Qm[a-zA-Z0-9]{44}")

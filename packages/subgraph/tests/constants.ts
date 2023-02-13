@@ -25,6 +25,9 @@ export const STRING_DATA = 'Some String Data ...';
 export const ONE_ETH = '1000000000000000000';
 export const HALF_ETH = '500000000000000000';
 
+export const ERC20_AMOUNT_HALF = '10000';
+export const ERC20_AMOUNT_FULL = '20000';
+
 export const ONE_HOUR = '3600';
 
 export const VOTING_MODE: string = ONE; // EarlyExecution

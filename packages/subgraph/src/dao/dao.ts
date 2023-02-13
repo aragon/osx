@@ -1,4 +1,4 @@
-import {Bytes, store} from '@graphprotocol/graph-ts';
+import {Bytes, log, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -69,6 +69,7 @@ export function handleExecuted(event: Executed): void {
       .toHexString()
       .concat('_')
       .concat(event.params.callId.toHexString());
+
     if (action.data.toHexString() == '0x') {
       handleNativeAction(
         event.address,
@@ -79,9 +80,15 @@ export function handleExecuted(event: Executed): void {
         index,
         event
       );
-      return;
+      continue;
     }
+
     let methodSig = action.data.toHexString().slice(0, 10);
+
+    // Since ERC721 transferFrom and ERC20 transferFrom have the same signature,
+    // The below first checks if it's ERC721 by calling `supportsInterface` and then
+    // moves to ERC20 check. Currently, if `action` is transferFrom, it will still check
+    // both `handleERC721Action`, `handleERC20Action`.
     if (
       methodSig == ERC721_transferFrom ||
       methodSig == ERC721_safeTransferFromNoData ||
@@ -95,8 +102,8 @@ export function handleExecuted(event: Executed): void {
         index,
         event
       );
-      return;
     }
+
     if (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) {
       handleERC20Action(
         action.to,
@@ -106,7 +113,6 @@ export function handleExecuted(event: Executed): void {
         index,
         event
       );
-      return;
     }
   }
 }

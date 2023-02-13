@@ -59,11 +59,11 @@ export function createCallbackReceivedEvent(
     'data',
     ethereum.Value.fromBytes(data)
   );
-  
+
   callBackEvent.parameters.push(senderParam);
   callBackEvent.parameters.push(sigParam);
   callBackEvent.parameters.push(dataParam);
-  
+
   return callBackEvent;
 }
 

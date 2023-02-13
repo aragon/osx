@@ -20,7 +20,8 @@ export function createTokenCalls(
   contractAddress: string,
   name: string,
   symbol: string,
-  decimals: string
+  decimals: string | null,
+  totalSupply: string | null
 ): void {
   createMockGetter(contractAddress, 'name', 'name():(string)', [
     ethereum.Value.fromString(name)
@@ -30,9 +31,20 @@ export function createTokenCalls(
     ethereum.Value.fromString(symbol)
   ]);
 
-  createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
-  ]);
+  if (decimals) {
+    createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
+    ]);
+  }
+
+  if (totalSupply) {
+    createMockGetter(
+      contractAddress,
+      'totalSupply',
+      'totalSupply():(uint256)',
+      [ethereum.Value.fromUnsignedBigInt(BigInt.fromString(totalSupply))]
+    );
+  }
 }
 
 export function createDummyActions(

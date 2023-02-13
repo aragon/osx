@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum, log} from '@graphprotocol/graph-ts';
 import {
   ERC721Balance,
   ERC721Contract,
@@ -90,7 +90,7 @@ export function handleERC721Received(
     return;
   }
 
-  let calldata = DECODE_OFFSET + data.toHexString().slice(10);
+  let calldata = DECODE_OFFSET + data.toHexString().slice(10); // TODO: Giorgi insted aof 0x, append DECODE_OFFSET
   let decodeABI = '(address,address,uint256,bytes)';
 
   let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
@@ -175,11 +175,6 @@ export function handleERC721Action(
 
   let daoId = dao.toHexString();
 
-  // Ambiguity ! No need to store transfer such as this.
-  if (from == to) {
-    return;
-  }
-
   let transferId = getTransferId(
     event.transaction.hash,
     event.transactionLogIndex,
@@ -188,20 +183,25 @@ export function handleERC721Action(
 
   let transfer = new ERC721Transfer(transferId);
   transfer.from = from;
-  transfer.to = dao;
+  transfer.to = to;
   transfer.dao = daoId;
   transfer.token = contract.id;
   transfer.tokenId = tokenId;
   transfer.proposal = proposalId;
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
-  transfer.save();
+
+  if (from == dao && to == dao) {
+    transfer.type = 'Withdraw';
+    transfer.save();
+    return;
+  }
 
   // If from/to both aren't equal to dao, it means
   // dao must have been approved for the `tokenId`
   // and played the role of transfering between 2 parties.
   if (from != dao && to != dao) {
-    transfer.type = 'None'; // No idea
+    transfer.type = 'ExternalTransfer';
     transfer.save();
     return;
   }

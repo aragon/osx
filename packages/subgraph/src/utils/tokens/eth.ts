@@ -45,9 +45,12 @@ export function handleNativeDeposit(
   transfer.reference = reference;
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
-
   transfer.type = 'Deposit';
   transfer.save();
+
+  if (from == dao) {
+    return;
+  }
 
   updateNativeBalance(
     daoId,
@@ -66,10 +69,6 @@ export function handleNativeAction(
   actionIndex: number,
   event: ethereum.Event
 ): void {
-  if (dao == to) {
-    return;
-  }
-
   let daoId = dao.toHexString();
 
   let id = getTransferId(
@@ -89,6 +88,10 @@ export function handleNativeAction(
   transfer.proposal = proposalId;
   transfer.type = 'Withdraw';
   transfer.save();
+
+  if (dao == to) {
+    return;
+  }
 
   updateNativeBalance(
     daoId,

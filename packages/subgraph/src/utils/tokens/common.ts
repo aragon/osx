@@ -33,3 +33,10 @@ export function getTransferId(
     .concat('_')
     .concat(actionIndex.toString());
 }
+
+// export function getBalanceId(dao: Address, token: Address): string {
+//   let daoId = dao.toHexString();
+//   let tokenId = token.toHexString();
+
+//   return daoId.concat('_').concat(tokenId);
+// }

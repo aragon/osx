@@ -12,7 +12,7 @@ type ERC20Contract implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
-  decimals: BigInt
+  decimals: Int!
 }
 
 type ERC721Contract implements Token @entity(immutable: true) {
@@ -54,7 +54,7 @@ type ERC721Balance implements TokenBalance @entity {
 # Token Transfers
 
 enum TransferType {
-  None # Special case where from and to both are NOT equal to dao address.
+  ExternalTransfer # when from/to are both NOT equal to dao.
   Withdraw
   Deposit
 }

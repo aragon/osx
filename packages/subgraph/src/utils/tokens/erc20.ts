@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum, log} from '@graphprotocol/graph-ts';
 import {
   ERC20Balance,
   ERC20Contract,
@@ -25,14 +25,18 @@ export function fetchERC20(address: Address): ERC20Contract | null {
 
   let try_name = erc20.try_name();
   let try_symbol = erc20.try_symbol();
-  let totalSupply = erc20.try_totalSupply();
+  let try_decimals = erc20.try_decimals();
 
-  if (totalSupply.reverted) {
+  // Extra check to make sure contract is ERC20.
+  let totalSupply = erc20.try_totalSupply();
+  let balanceOf = erc20.try_balanceOf(address);
+  if (totalSupply.reverted || balanceOf.reverted) {
     return null;
   }
+
   contract.name = try_name.reverted ? '' : try_name.value;
   contract.symbol = try_symbol.reverted ? '' : try_symbol.value;
-
+  contract.decimals = try_decimals.reverted ? 18 : try_decimals.value;
   contract.save();
 
   return contract;
@@ -45,6 +49,14 @@ export function updateERC20Balance(
   timestamp: BigInt,
   type: TransferType
 ): void {
+  let erc20 = ERC20.bind(token);
+  let balance = erc20.try_balanceOf(dao);
+
+  // if reverted, means it's not ERC20.
+  if (balance.reverted) {
+    return;
+  }
+
   let daoId = dao.toHexString();
   let balanceId = daoId.concat('_').concat(token.toHexString());
 
@@ -57,12 +69,7 @@ export function updateERC20Balance(
     erc20Balance.balance = BigInt.zero();
   }
 
-  let erc20 = ERC20.bind(token);
-  let balance = erc20.try_balanceOf(dao);
-  if (!balance.reverted) {
-    erc20Balance.balance = balance.value;
-  }
-
+  erc20Balance.balance = balance.value;
   erc20Balance.lastUpdated = timestamp;
   erc20Balance.save();
 }
@@ -117,11 +124,6 @@ export function handleERC20Action(
     amount = tuple[2].toBigInt();
   }
 
-  // Ambiguity ! No need to store transfer such as this.s
-  if (from == to) {
-    return;
-  }
-
   let daoId = dao.toHexString();
 
   let id = getTransferId(
@@ -130,30 +132,30 @@ export function handleERC20Action(
     actionIndex
   );
 
-  let erc20Transfer = new ERC20Transfer(id);
+  let transfer = new ERC20Transfer(id);
 
-  erc20Transfer.from = from;
-  erc20Transfer.to = to;
-  erc20Transfer.dao = daoId;
-  erc20Transfer.amount = amount;
-  erc20Transfer.txHash = event.transaction.hash;
-  erc20Transfer.createdAt = event.block.timestamp;
-  erc20Transfer.token = contract.id;
-  erc20Transfer.proposal = proposalId;
+  transfer.from = from;
+  transfer.to = to;
+  transfer.dao = daoId;
+  transfer.amount = amount;
+  transfer.txHash = event.transaction.hash;
+  transfer.createdAt = event.block.timestamp;
+  transfer.token = contract.id;
+  transfer.proposal = proposalId;
 
   // If from/to both aren't equal to dao, it means
-  // dao must have been approved for the `amount`
+  // dao must have been approved for the `tokenId`
   // and played the role of transfering between 2 parties.
   if (from != dao && to != dao) {
-    erc20Transfer.type = 'None'; // No idea
-    erc20Transfer.save();
+    transfer.type = 'ExternalTransfer';
+    transfer.save();
     return;
   }
 
   if (from != dao && to == dao) {
     // 1. some party `y` approved `x` tokenId to the dao.
     // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
-    erc20Transfer.type = 'Deposit';
+    transfer.type = 'Deposit';
 
     updateERC20Balance(
       token,
@@ -164,7 +166,7 @@ export function handleERC20Action(
     );
   } else {
     // from is dao address, to is some other address
-    erc20Transfer.type = 'Withdraw';
+    transfer.type = 'Withdraw';
 
     updateERC20Balance(
       token,
@@ -175,7 +177,7 @@ export function handleERC20Action(
     );
   }
 
-  erc20Transfer.save();
+  transfer.save();
 }
 
 export function handleERC20Deposit(
