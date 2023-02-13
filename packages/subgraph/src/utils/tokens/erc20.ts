@@ -45,9 +45,7 @@ export function fetchERC20(address: Address): ERC20Contract | null {
 export function updateERC20Balance(
   token: Address,
   dao: Address,
-  amount: BigInt,
-  timestamp: BigInt,
-  type: TransferType
+  timestamp: BigInt
 ): void {
   let erc20 = ERC20.bind(token);
   let balance = erc20.try_balanceOf(dao);
