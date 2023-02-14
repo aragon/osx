@@ -70,11 +70,7 @@ abstract contract ProposalUpgradeable is IProposal {
             _actions,
             _allowFailureMap
         );
-        emit ProposalExecuted({
-            proposalId: _proposalId,
-            execResults: execResults,
-            failureMap: failureMap
-        });
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

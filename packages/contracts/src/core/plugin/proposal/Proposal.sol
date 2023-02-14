@@ -70,10 +70,6 @@ abstract contract Proposal is IProposal {
             _actions,
             _allowFailureMap
         );
-        emit ProposalExecuted({
-            proposalId: _proposalId,
-            execResults: execResults,
-            failureMap: failureMap
-        });
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 }

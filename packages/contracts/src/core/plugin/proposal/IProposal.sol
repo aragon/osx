@@ -28,9 +28,8 @@ interface IProposal {
 
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId The ID of the proposal.
-    /// @param failureMap The failure map encoding which actions have failed.
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, uint256 failureMap, bytes[] execResults);
+    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Returns the proposal count determining the next proposal ID.
     /// @return The proposal count.
