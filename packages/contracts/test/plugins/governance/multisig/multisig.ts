@@ -24,6 +24,7 @@ import {
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -189,6 +190,74 @@ describe('Multisig', function () {
       )
         .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
+    });
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await multisig.supportsInterface('0x00000000')).to.be.eq(false);
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      // @ts-ignore
+      const IERC165Upgradeable = await hre.artifacts.readArtifact(
+        'IERC165Upgradeable'
+      );
+      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      // @ts-ignore
+      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
+      const iface = new ethers.utils.Interface(IPlugin.abi);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      // @ts-ignore
+      const IProposal = await hre.artifacts.readArtifact('IProposal');
+      const iface = new ethers.utils.Interface(IProposal.abi);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IMembership` interface', async () => {
+      // @ts-ignore
+      const IMembership = await hre.artifacts.readArtifact('IMembership');
+      const iface = new ethers.utils.Interface(IMembership.abi);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `Addresslist` interface', async () => {
+      // @ts-ignore
+      const Addresslist = await hre.artifacts.readArtifact('Addresslist');
+      const iface = new ethers.utils.Interface(Addresslist.abi);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IMultisig` interface', async () => {
+      // @ts-ignore
+      const IMultisig = await hre.artifacts.readArtifact('IMultisig');
+      const iface = new ethers.utils.Interface(IMultisig.abi);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
     });
   });
 

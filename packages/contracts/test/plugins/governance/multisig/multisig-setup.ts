@@ -58,15 +58,9 @@ describe('MultisigSetup', function () {
     const factory = await ethers.getContractFactory('Multisig');
     const multisigContract = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function addAddresses(address[])',
-      'function removeAddresses(address[])',
-      'function isListed(address)',
-      'function isListedAtBlock(address,uint256)',
-      'function addresslistLength()',
-      'function addresslistLengthAtBlock(uint256)',
-      'function initialize(address,address[],tuple(bool,uint16))',
-    ]);
+    // @ts-ignore
+    const IMultisig = await hre.artifacts.readArtifact('IMultisig');
+    const iface = new ethers.utils.Interface(IMultisig.abi);
 
     expect(await multisigContract.supportsInterface(getInterfaceID(iface))).to
       .be.true;

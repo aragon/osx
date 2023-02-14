@@ -3,13 +3,14 @@
 pragma solidity 0.8.17;
 
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import "./IProposal.sol";
 
 /// @title ProposalUgradeable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract containing the traits and internal functionality to create and execute proposals that can be inherited by upgradeable DAO plugins.
-abstract contract ProposalUpgradeable is IProposal {
+abstract contract ProposalUpgradeable is IProposal, ERC165Upgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// @notice The incremental ID for proposals and executions.
@@ -18,6 +19,13 @@ abstract contract ProposalUpgradeable is IProposal {
     /// @inheritdoc IProposal
     function proposalCount() public view override returns (uint256) {
         return proposalCounter.current();
+    }
+
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return _interfaceId == type(IProposal).interfaceId || super.supportsInterface(_interfaceId);
     }
 
     /// @notice Creates a proposal ID.
@@ -65,7 +73,7 @@ abstract contract ProposalUpgradeable is IProposal {
         IDAO.Action[] memory _actions,
         uint256 _allowFailureMap
     ) internal virtual {
-        (bytes[] memory execResults, uint256 failureMap) = _dao.execute(
+        (bytes[] memory execResults, ) = _dao.execute(
             bytes32(_proposalId),
             _actions,
             _allowFailureMap

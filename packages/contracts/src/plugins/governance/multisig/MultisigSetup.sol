@@ -6,6 +6,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 import {DAO} from "../../../core/dao/DAO.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
+import {IMultisig} from "./IMultisig.sol";
 import {Multisig} from "./Multisig.sol";
 
 /// @title MultisigSetup
@@ -31,9 +32,9 @@ contract MultisigSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
-        (address[] memory members, Multisig.MultisigSettings memory multisigSettings) = abi.decode(
+        (address[] memory members, IMultisig.MultisigSettings memory multisigSettings) = abi.decode(
             _data,
-            (address[], Multisig.MultisigSettings)
+            (address[], IMultisig.MultisigSettings)
         );
 
         // Prepare and Deploy the plugin proxy.

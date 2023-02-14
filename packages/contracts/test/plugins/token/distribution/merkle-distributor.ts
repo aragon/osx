@@ -9,6 +9,7 @@ import {MerkleDistributor, DAO, TestERC20} from '../../../../typechain';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
@@ -38,6 +39,46 @@ describe('MerkleDistributor', function () {
       'MerkleDistributor'
     );
     distributor = await deployWithProxy(MerkleDistributor);
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await distributor.supportsInterface('0x00000000')).to.be.eq(false);
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      // @ts-ignore
+      const IERC165Upgradeable = await hre.artifacts.readArtifact(
+        'IERC165Upgradeable'
+      );
+      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
+
+      expect(
+        await distributor.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      // @ts-ignore
+      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
+      const iface = new ethers.utils.Interface(IPlugin.abi);
+
+      expect(
+        await distributor.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
+    });
+
+    it('supports the `IMerkleDistributor` interface', async () => {
+      // @ts-ignore
+      const IMerkleDistributor = await hre.artifacts.readArtifact(
+        'IMerkleDistributor'
+      );
+      const iface = new ethers.utils.Interface(IMerkleDistributor.abi);
+
+      expect(
+        await distributor.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
+    });
   });
 
   describe('Upgrade', () => {

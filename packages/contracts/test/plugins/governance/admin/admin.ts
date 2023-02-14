@@ -20,7 +20,7 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('Admin plugin', function () {
+describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: any;
@@ -96,10 +96,25 @@ describe('Admin plugin', function () {
   });
 
   describe('plugin interface: ', async () => {
-    it('supports plugin cloneable interface', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await plugin.supportsInterface('0x00000000')).to.be.eq(false);
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      // @ts-ignore
+      const IERC165Upgradeable = await hre.artifacts.readArtifact(
+        'IERC165Upgradeable'
+      );
+      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
+
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IPlugin` interface', async () => {
       // @ts-ignore
       const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-
       const iface = new ethers.utils.Interface(IPlugin.abi);
 
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -107,7 +122,27 @@ describe('Admin plugin', function () {
       );
     });
 
-    it('supports admin address plugin interface', async () => {
+    it('supports the `IProposal` interface', async () => {
+      // @ts-ignore
+      const IProposal = await hre.artifacts.readArtifact('IProposal');
+      const iface = new ethers.utils.Interface(IProposal.abi);
+
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IMembershipContract` interface', async () => {
+      // @ts-ignore
+      const IMembership = await hre.artifacts.readArtifact('IMembership');
+      const iface = new ethers.utils.Interface(IMembership.abi);
+
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `Admin` interface', async () => {
       const iface = new ethers.utils.Interface([
         'function initialize(address  _dao)',
         'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',

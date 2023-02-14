@@ -14,6 +14,7 @@ import {
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {deployWithProxy} from '../../../test-utils/proxy';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
@@ -86,6 +87,44 @@ describe('MerkleMinter', function () {
     UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
     'DaoUnauthorized'
   );
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await minter.supportsInterface('0x00000000')).to.be.eq(false);
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      // @ts-ignore
+      const IERC165Upgradeable = await hre.artifacts.readArtifact(
+        'IERC165Upgradeable'
+      );
+      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
+
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      // @ts-ignore
+      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
+      const iface = new ethers.utils.Interface(IPlugin.abi);
+
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `IMerkleMinter` interface', async () => {
+      // @ts-ignore
+      const IMerkleMinter = await hre.artifacts.readArtifact('IMerkleMinter');
+      const iface = new ethers.utils.Interface(IMerkleMinter.abi);
+
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+  });
 
   describe('merkleMint:', () => {
     const dummyMerkleTreeStorageLink: string = '0x';

@@ -6,6 +6,7 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
+import {IProposal} from "../../../core/plugin/proposal/IProposal.sol";
 import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
@@ -236,14 +237,19 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
+    /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, PluginUUPSUpgradeable) returns (bool) {
+        bytes4 _interfaceId
+    )
+        public
+        view
+        virtual
+        override(ERC165Upgradeable, PluginUUPSUpgradeable, ProposalUpgradeable)
+        returns (bool)
+    {
         return
-            interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
-            PluginUUPSUpgradeable.supportsInterface(interfaceId);
+            _interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
     /// @inheritdoc IMajorityVoting

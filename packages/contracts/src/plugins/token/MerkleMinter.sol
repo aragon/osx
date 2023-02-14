@@ -38,12 +38,16 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
         _disableInitializers();
     }
 
-    /// @inheritdoc IMerkleMinter
+    /// @notice Initializes the MerkleMinter.
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @param _distributorBase A `MerkleDistributor` to be cloned.
     function initialize(
         IDAO _dao,
         IERC20MintableUpgradeable _token,
         IMerkleDistributor _distributorBase
-    ) external override initializer {
+    ) external initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
         token = _token;
@@ -58,11 +62,12 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
+    /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == type(IMerkleMinter).interfaceId || super.supportsInterface(interfaceId);
+            _interfaceId == type(IMerkleMinter).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributes them using a `MerkleDistributor`.
@@ -80,7 +85,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
         address distributorAddr = createERC1967Proxy(
             address(distributorBase),
             abi.encodeWithSelector(
-                distributorBase.initialize.selector,
+                MerkleDistributor.initialize.selector,
                 dao(),
                 IERC20Upgradeable(address(token)),
                 _merkleRoot

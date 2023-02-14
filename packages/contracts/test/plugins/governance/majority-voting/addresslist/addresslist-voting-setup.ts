@@ -69,15 +69,11 @@ describe('AddresslistVotingSetup', function () {
     const factory = await ethers.getContractFactory('AddresslistVoting');
     const addresslistVotingContract = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function addAddresses(address[])',
-      'function removeAddresses(address[])',
-      'function isListed(address) returns (bool)',
-      'function isListedAtBlock(address,uint256) returns (bool)',
-      'function addresslistLength() returns (uint256)',
-      'function addresslistLengthAtBlock(uint256) returns (uint256)',
-      'function initialize(address,(uint8,uint32,uint32,uint64,uint256),address[])',
-    ]);
+    // @ts-ignore
+    const AddresslistVoting = await hre.artifacts.readArtifact(
+      'AddresslistVoting'
+    );
+    const iface = new ethers.utils.Interface(AddresslistVoting.abi);
 
     expect(
       await addresslistVotingContract.supportsInterface(getInterfaceID(iface))

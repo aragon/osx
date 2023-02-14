@@ -14,6 +14,7 @@ import {
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {daoExampleURI} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -63,6 +64,56 @@ describe('MajorityVotingMock', function () {
       await expect(
         votingBase.initializeMock(dao.address, votingSettings)
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await votingBase.supportsInterface('0x00000000')).to.be.eq(false);
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      // @ts-ignore
+      const IERC165Upgradeable = await hre.artifacts.readArtifact(
+        'IERC165Upgradeable'
+      );
+      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
+
+      expect(
+        await votingBase.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      // @ts-ignore
+      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
+      const iface = new ethers.utils.Interface(IPlugin.abi);
+
+      expect(
+        await votingBase.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      // @ts-ignore
+      const IProposal = await hre.artifacts.readArtifact('IProposal');
+      const iface = new ethers.utils.Interface(IProposal.abi);
+
+      expect(
+        await votingBase.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
+    });
+
+    it('supports the `IMajorityVoting` interface', async () => {
+      // @ts-ignore
+      const IMajorityVoting = await hre.artifacts.readArtifact(
+        'IMajorityVoting'
+      );
+      const iface = new ethers.utils.Interface(IMajorityVoting.abi);
+
+      expect(
+        await votingBase.supportsInterface(getInterfaceID(iface))
+      ).to.be.eq(true);
     });
   });
 
