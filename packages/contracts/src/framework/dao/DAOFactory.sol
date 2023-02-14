@@ -27,12 +27,12 @@ contract DAOFactory {
     /// @notice The container for the DAO settings to be set during the DAO initialization.
     /// @param trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param daoURI The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
-    /// @param name The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
+    /// @param subdomain The ENS subdomain to be registered for the DAO contract.
     /// @param metadata The metadata of the DAO.
     struct DAOSettings {
         address trustedForwarder;
         string daoURI;
-        string name;
+        string subdomain;
         bytes metadata;
     }
 
@@ -73,7 +73,7 @@ contract DAOFactory {
         createdDao = _createDAO(_daoSettings);
 
         // Register DAO.
-        daoRegistry.register(createdDao, msg.sender, _daoSettings.name);
+        daoRegistry.register(createdDao, msg.sender, _daoSettings.subdomain);
 
         // Get Permission IDs
         bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
