@@ -22,7 +22,7 @@ abstract contract Proposal is IProposal {
 
     /// @notice Creates a proposal ID.
     /// @return proposalId The proposal ID.
-    function _createProposalId() internal virtual returns (uint256 proposalId) {
+    function _createProposalId() internal returns (uint256 proposalId) {
         proposalId = proposalCount();
         proposalCounter.increment();
     }
