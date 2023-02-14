@@ -15,9 +15,9 @@ import {
   TokenVotingVoter,
   TokenVotingVote
 } from '../../../generated/schema';
-import {handleERC20Token} from '../../utils/tokens';
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
+import {fetchERC20} from '../../utils/tokens/erc20';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -252,8 +252,11 @@ export function handleMembershipContractAnnounced(
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
 
   if (packageEntity) {
-    packageEntity.token = handleERC20Token(token);
+    let contract = fetchERC20(token);
+    if (contract) {
+      packageEntity.token = contract.id;
 
-    packageEntity.save();
+      packageEntity.save();
+    }
   }
 }

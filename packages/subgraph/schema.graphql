@@ -8,29 +8,106 @@ interface Token {
   symbol: String
 }
 
-type ERC20Token implements Token @entity(immutable: true) {
+type ERC20Contract implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
-  decimals: BigInt
+  decimals: Int!
 }
 
-type ERC721Token implements Token @entity(immutable: true) {
+type ERC721Contract implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
-  baseURI: String
 }
 
-type Balance @entity {
-  id: ID! # token address + dao address
-  token: ERC20Token! # address(0) corresponds to the native token
+# Token Balances
+interface TokenBalance {
+  id: ID! # dao address + token address
+  dao: Dao!
+  lastUpdated: BigInt!
+}
+
+type ERC20Balance implements TokenBalance @entity {
+  id: ID!
+  token: ERC20Contract!
   dao: Dao!
   balance: BigInt!
   lastUpdated: BigInt!
 }
 
-# Dao
+type NativeBalance implements TokenBalance @entity {
+  id: ID!
+  dao: Dao!
+  balance: BigInt!
+  lastUpdated: BigInt!
+}
+
+type ERC721Balance implements TokenBalance @entity {
+  id: ID!
+  token: ERC721Contract!
+  dao: Dao!
+  tokenIds: [BigInt!]!
+  lastUpdated: BigInt!
+}
+
+# Token Transfers
+
+enum TransferType {
+  ExternalTransfer # when from/to are both NOT equal to dao.
+  Withdraw
+  Deposit
+}
+
+interface TokenTransfer {
+  id: ID!
+  dao: Dao!
+  from: Bytes!
+  to: Bytes!
+  type: TransferType!
+  proposal: Proposal
+  txHash: Bytes!
+  createdAt: BigInt!
+}
+
+type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
+  id: ID!
+  dao: Dao!
+  token: ERC20Contract!
+  amount: BigInt!
+  from: Bytes!
+  to: Bytes!
+  proposal: Proposal
+  type: TransferType!
+  txHash: Bytes!
+  createdAt: BigInt!
+}
+
+type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
+  id: ID!
+  dao: Dao!
+  token: ERC721Contract!
+  tokenId: BigInt!
+  from: Bytes!
+  to: Bytes!
+  proposal: Proposal
+  type: TransferType!
+  txHash: Bytes!
+  createdAt: BigInt!
+}
+
+type NativeTransfer implements TokenTransfer @entity(immutable: true) {
+  id: ID!
+  dao: Dao!
+  amount: BigInt!
+  from: Bytes!
+  to: Bytes!
+  reference: String!
+  proposal: Proposal
+  type: TransferType!
+  txHash: Bytes!
+  createdAt: BigInt!
+}
 
 # ACL
 
@@ -64,27 +141,6 @@ type Action @entity {
   execResult: Bytes
 }
 
-# Treasury
-
-enum TransferType {
-  Withdraw
-  Deposit
-}
-
-type VaultTransfer @entity(immutable: true) {
-  id: ID!
-  dao: Dao!
-  token: ERC20Token
-  sender: Bytes
-  to: Bytes
-  amount: BigInt!
-  reference: String!
-  transaction: String!
-  proposal: Proposal
-  createdAt: BigInt!
-  type: TransferType!
-}
-
 type StandardCallback @entity {
   id: ID!
   dao: Dao!
@@ -101,10 +157,10 @@ type Dao @entity {
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
-  token: ERC20Token
+  token: ERC20Contract
   actions: [Action!]! @derivedFrom(field: "dao")
-  transfers: [VaultTransfer!]! @derivedFrom(field: "dao")
-  balances: [Balance!] @derivedFrom(field: "dao")
+  transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
+  balances: [TokenBalance!]! @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")

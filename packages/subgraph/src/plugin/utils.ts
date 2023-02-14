@@ -22,7 +22,6 @@ import {
   AdminPlugin,
   MultisigPlugin
 } from '../../generated/schema';
-import {handleERC20Token} from '../utils/tokens';
 import {
   TOKEN_VOTING_INTERFACE,
   ADDRESSLIST_VOTING_INTERFACE,
@@ -31,6 +30,7 @@ import {
   MULTISIG_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
+import {fetchERC20} from '../utils/tokens/erc20';
 
 export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(0, 'Grant')
@@ -57,7 +57,10 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
       : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
-    packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
+    if (!token.reverted) {
+      let contract = fetchERC20(token.value);
+      if (contract) packageEntity.token = contract.id;
+    }
 
     // Create template
     let context = new DataSourceContext();
