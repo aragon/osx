@@ -260,10 +260,7 @@ describe('TokenVoting', function () {
     });
 
     it('supports the `TokenVoting` interface', async () => {
-      const iface = new ethers.utils.Interface([
-        'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
-        'function getVotingToken()',
-      ]);
+      const iface = new ethers.utils.Interface(['function getVotingToken()']);
 
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
         true

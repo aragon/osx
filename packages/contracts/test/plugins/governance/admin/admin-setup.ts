@@ -46,8 +46,7 @@ describe('AdminSetup', function () {
     const adminAddressContract = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
-      'function initialize(address  _dao)',
-      'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions,uint256 _allowFailureMap)',
+      'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
     ]);
 
     expect(

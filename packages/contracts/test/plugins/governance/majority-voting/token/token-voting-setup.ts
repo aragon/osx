@@ -82,10 +82,7 @@ describe('TokenVotingSetup', function () {
     const factory = await ethers.getContractFactory('TokenVoting');
     const tokenVoting = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function getVotingToken() returns (address)',
-      'function initialize(address,(uint8,uint32,uint32,uint64,uint256), address)',
-    ]);
+    const iface = new ethers.utils.Interface(['function getVotingToken()']);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
       true

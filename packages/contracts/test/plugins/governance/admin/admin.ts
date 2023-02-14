@@ -132,7 +132,7 @@ describe('Admin', function () {
       );
     });
 
-    it('supports the `IMembershipContract` interface', async () => {
+    it('supports the `IMembership` interface', async () => {
       // @ts-ignore
       const IMembership = await hre.artifacts.readArtifact('IMembership');
       const iface = new ethers.utils.Interface(IMembership.abi);
@@ -144,7 +144,6 @@ describe('Admin', function () {
 
     it('supports the `Admin` interface', async () => {
       const iface = new ethers.utils.Interface([
-        'function initialize(address  _dao)',
         'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
       ]);
 
