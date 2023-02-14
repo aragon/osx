@@ -9,8 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Created the `IMultisig` interface.
+
 ### Changed
 
+- Renamed `DAOSettings.name` to `DAOSettings.subdomain`.
+- Fixed the ERC165 interface ID and `supportsInterface` computations.
 - Replaced non-upgradeable contract dependencies by upgradeable ones for the cloneable `Admin` plugin.
 - Refactored `ProposalBase` into `IProposal`.
 - Use OZ's upgradeable contracts for `PluginCloneable`.
@@ -18,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Merged `IMembershipContract` into `IMembership`.
 - Removed the `WITHDRAW_PERMISSION_ID`.
 - Removed `DaoAuthorizableCloneable` and `DaoAuthorizableBase`.
 - Moved the array length check for the `MintSettings` from `TokenVotingSetup` into `GovernanceERC20` contract.
