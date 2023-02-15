@@ -290,11 +290,11 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
+    /// @notice Checks if a caller is granted permissions on a target contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _data The optional data passed to the `PermissionCondition` registered..
+    /// @param _data The optional data passed to the `PermissionCondition` registered.
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionId identifier.
     function _isGranted(
         address _where,

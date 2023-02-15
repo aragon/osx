@@ -11,20 +11,23 @@ import {IDAO} from "../dao/IDAO.sol";
 /// @param permissionId The permission identifier.
 error DaoUnauthorized(address dao, address where, address who, bytes32 permissionId);
 
-/// @notice Free function to to be used by the auth modifier to check permissions on a target contract via the associated DAO.
+/// @notice A free function checking if a caller is granted permissions on a target contract via a permission identifier that redirects the approval to a `PermissionCondition` if this was specified in the setup.
+/// @param _where The address of the target contract for which `who` recieves permission.
+/// @param _who The address (EOA or contract) owning the permission.
 /// @param _permissionId The permission identifier.
+/// @param _data The optional data passed to the `PermissionCondition` registered.
 function _auth(
     IDAO _dao,
-    address _addressThis,
-    address _msgSender,
+    address _where,
+    address _who,
     bytes32 _permissionId,
-    bytes calldata _msgData
+    bytes calldata _data
 ) view {
-    if (!_dao.hasPermission(_addressThis, _msgSender, _permissionId, _msgData))
+    if (!_dao.hasPermission(_where, _who, _permissionId, _data))
         revert DaoUnauthorized({
             dao: address(_dao),
-            where: _addressThis,
-            who: _msgSender,
+            where: _where,
+            who: _who,
             permissionId: _permissionId
         });
 }
