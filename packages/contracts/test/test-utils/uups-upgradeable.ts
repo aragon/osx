@@ -23,11 +23,11 @@ export function shouldUpgradeCorrectly(
     return [dao.address, contract.address, user.address, upgradePermissionId];
   }
 
-  function UnauthorizedRevertArgs(contract: Contract, user: SignerWithAddress) {
-    return [contract.address, user.address, upgradePermissionId];
+  function UnauthorizedRevertArgs(dao: Contract, user: SignerWithAddress) {
+    return [dao.address, user.address, upgradePermissionId];
   }
 
-  describe('UUPS Upgradeability Test', async () => {
+  describe.only('UUPS Upgradeability Test', async () => {
     before(async () => {
       const factory = await ethers.getContractFactory(
         'PluginUUPSUpgradeableV1Mock'
@@ -59,13 +59,13 @@ export function shouldUpgradeCorrectly(
             contract,
             upgradeRevertPermissionMessage
           )
-          .withArgs(...UnauthorizedRevertArgs(contract, user));
+          .withArgs(...UnauthorizedRevertArgs(dao, user));
         await expect(tx2)
           .to.be.revertedWithCustomError(
             contract,
             upgradeRevertPermissionMessage
           )
-          .withArgs(...UnauthorizedRevertArgs(contract, user));
+          .withArgs(...UnauthorizedRevertArgs(dao, user));
       }
     });
 
