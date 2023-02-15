@@ -6,7 +6,6 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 import {DAO} from "../../../core/dao/DAO.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
-import {IMultisig} from "./IMultisig.sol";
 import {Multisig} from "./Multisig.sol";
 
 /// @title MultisigSetup
