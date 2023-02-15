@@ -194,7 +194,6 @@ describe('DAO', function () {
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
-          dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
         );
@@ -224,7 +223,6 @@ describe('DAO', function () {
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
-          dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_METADATA_PERMISSION_ID
         );
@@ -253,7 +251,6 @@ describe('DAO', function () {
       await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
-          dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.EXECUTE_PERMISSION_ID
@@ -770,7 +767,6 @@ describe('DAO', function () {
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
-          dao.address,
           ownerAddress,
           PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
         );
@@ -854,7 +850,6 @@ describe('DAO', function () {
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
-          dao.address,
           signers[2].address,
           PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
         );
@@ -915,7 +910,6 @@ describe('DAO', function () {
         await expect(dao.setDaoURI('https://new.example.com'))
           .to.be.revertedWithCustomError(dao, 'Unauthorized')
           .withArgs(
-            dao.address,
             dao.address,
             ownerAddress,
             PERMISSION_IDS.SET_METADATA_PERMISSION_ID

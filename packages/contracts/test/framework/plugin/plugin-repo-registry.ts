@@ -141,7 +141,6 @@ describe('PluginRepoRegistry', function () {
       .withArgs(
         managingDAO.address,
         pluginRepoRegistry.address,
-        pluginRepoRegistry.address,
         ownerAddress,
         REGISTER_PLUGIN_REPO_PERMISSION_ID
       );

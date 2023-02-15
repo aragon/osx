@@ -27,11 +27,10 @@ contract PermissionManager is Initializable {
     mapping(bytes32 => address) internal permissionsHashed;
 
     /// @notice Thrown if a call is unauthorized.
-    /// @param here The context in which the authorization reverted.
-    /// @param where The contract requiring the permission.
+    /// @param where The context in which the authorization reverted.
     /// @param who The address (EOA or contract) missing the permission.
     /// @param permissionId The permission identifier.
-    error Unauthorized(address here, address where, address who, bytes32 permissionId);
+    error Unauthorized(address where, address who, bytes32 permissionId);
 
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
@@ -89,10 +88,9 @@ contract PermissionManager is Initializable {
     );
 
     /// @notice A modifier to be used to check permissions on a target contract.
-    /// @param _where The address of the target contract for which the permission is required.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    modifier auth(address _where, bytes32 _permissionId) {
-        _auth(_where, _permissionId);
+    modifier auth(bytes32 _permissionId) {
+        _auth(_permissionId);
         _;
     }
 
@@ -112,7 +110,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(address(this), ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         _grant(_where, _who, _permissionId);
     }
 
@@ -127,7 +125,7 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external auth(address(this), ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         _grantWithCondition(_where, _who, _permissionId, _condition);
     }
 
@@ -140,7 +138,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(address(this), ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         _revoke(_where, _who, _permissionId);
     }
 
@@ -151,7 +149,7 @@ contract PermissionManager is Initializable {
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external auth(address(this), ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
 
@@ -172,7 +170,7 @@ contract PermissionManager is Initializable {
     /// @param items The array of bulk items to process.
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata items
-    ) external auth(address(this), ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.MultiTargetPermission memory item = items[i];
 
@@ -327,13 +325,11 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice A private function to be used to check permissions on a target contract.
-    /// @param _where The address of the target contract for which the permission is required.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    function _auth(address _where, bytes32 _permissionId) private view {
-        if (!isGranted(_where, msg.sender, _permissionId, msg.data)) {
+    function _auth(bytes32 _permissionId) private view {
+        if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
             revert Unauthorized({
-                here: address(this),
-                where: _where,
+                where: address(this),
                 who: msg.sender,
                 permissionId: _permissionId
             });

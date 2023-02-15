@@ -529,12 +529,7 @@ describe('Plugin Setup Processor', function () {
           )
         )
           .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
-          .withArgs(
-            targetDao.address,
-            targetDao.address,
-            psp.address,
-            ROOT_PERMISSION_ID
-          );
+          .withArgs(targetDao.address, psp.address, ROOT_PERMISSION_ID);
       });
 
       it("reverts if setupId wasn't prepared by `prepareInstallation` first", async () => {
@@ -1076,12 +1071,7 @@ describe('Plugin Setup Processor', function () {
           )
         )
           .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
-          .withArgs(
-            targetDao.address,
-            targetDao.address,
-            psp.address,
-            ROOT_PERMISSION_ID
-          );
+          .withArgs(targetDao.address, psp.address, ROOT_PERMISSION_ID);
       });
 
       it('reverts if uninstallation is not prepared first', async () => {
@@ -1687,12 +1677,7 @@ describe('Plugin Setup Processor', function () {
         )
       )
         .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
-        .withArgs(
-          targetDao.address,
-          targetDao.address,
-          psp.address,
-          ROOT_PERMISSION_ID
-        );
+        .withArgs(targetDao.address, psp.address, ROOT_PERMISSION_ID);
     });
 
     it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
