@@ -4,7 +4,8 @@ import {
   DataSourceContext,
   ethereum,
   crypto,
-  ByteArray
+  ByteArray,
+  log
 } from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
@@ -14,7 +15,8 @@ import {
   TokenVoting,
   AddresslistVoting,
   Admin,
-  Multisig
+  Multisig,
+  GovernanceERC20
 } from '../../generated/templates';
 import {
   TokenVotingPlugin,
@@ -59,7 +61,16 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
 
     if (!token.reverted) {
       let contract = fetchERC20(token.value);
-      if (contract) packageEntity.token = contract.id;
+      if (contract) {
+        packageEntity.token = contract.id;
+      }
+
+      // If token is GovernanceERC20, create `GovernanceERC20` context and listen to Transfer events.
+      // If token is GovernanceWrapped, create `GovernanceWrappedERC20` context and listen to withdrawTo and `depositFor` events.
+
+      let context = new DataSourceContext();
+      context.setString('pluginAddress', plugin.toHexString());
+      GovernanceERC20.createWithContext(token.value, context);
     }
 
     // Create template

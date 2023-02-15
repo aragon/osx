@@ -319,6 +319,15 @@ type TokenVotingPlugin implements IPluginInstallation @entity {
   proposalCount: BigInt
   token: Token
   members: [TokenVotingVoter!]! @derivedFrom(field: "plugin")
+  members2: [TokenVotingMember!]! @derivedFrom(field: "plugin")
+}
+
+## TODO:GIORGI name ?
+type TokenVotingMember @entity {
+  id: ID! # plugin address + user address
+  address: Bytes!
+  balance: BigInt!
+  plugin: TokenVotingPlugin!
 }
 
 type TokenVotingVoter @entity {
