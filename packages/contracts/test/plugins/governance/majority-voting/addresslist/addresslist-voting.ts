@@ -173,6 +173,26 @@ describe('AddresslistVoting', function () {
       );
     });
 
+    it('supports the `IMembership` interface', async () => {
+      // @ts-ignore
+      const IMembership = await hre.artifacts.readArtifact('IMembership');
+      const iface = new ethers.utils.Interface(IMembership.abi);
+
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports the `Addresslist` interface', async () => {
+      // @ts-ignore
+      const Addresslist = await hre.artifacts.readArtifact('Addresslist');
+      const iface = new ethers.utils.Interface(Addresslist.abi);
+
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
     it('supports the `IMajorityVoting` interface', async () => {
       // @ts-ignore
       const IMajorityVoting = await hre.artifacts.readArtifact(

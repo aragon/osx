@@ -54,6 +54,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         return
             _interfaceId == ADDRESSLIST_VOTING_INTERFACE_ID ||
             _interfaceId == type(Addresslist).interfaceId ||
+            _interfaceId == type(IMembership).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
