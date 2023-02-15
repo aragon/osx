@@ -21,7 +21,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
-        this.addAddresses.selector ^ this.removeAddresses.selector;
+        this.initialize.selector ^ this.addAddresses.selector ^ this.removeAddresses.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_ADDRESSES_PERMISSION_ID =

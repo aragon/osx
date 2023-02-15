@@ -16,23 +16,6 @@ interface IMultisig {
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members) external;
 
-    /// @notice Creates a new majority voting proposal.
-    /// @param _metadata The metadata of the proposal.
-    /// @param _actions The actions that will be executed after the proposal passes.
-    /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    /// @param _approveProposal If `true`, the sender will approve the proposal.
-    /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    /// @return proposalId The ID of the proposal.
-    function createProposal(
-        bytes calldata _metadata,
-        IDAO.Action[] calldata _actions,
-        uint256 _allowFailureMap,
-        bool _approveProposal,
-        bool _tryExecution,
-        uint64 _startDate,
-        uint64 _endDate
-    ) external returns (uint256 proposalId);
-
     /// @notice Approves and, optionally, executes the proposal.
     /// @param _proposalId The ID of the proposal.
     /// @param _tryExecution If `true`, execution is tried after the approval cast. The call does not revert if execution is not possible.

@@ -136,7 +136,8 @@ describe('Admin', function () {
 
     it('supports the `Admin` interface', async () => {
       const iface = new ethers.utils.Interface([
-        'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
+        'function initialize(address)',
+        'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
       ]);
 
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;

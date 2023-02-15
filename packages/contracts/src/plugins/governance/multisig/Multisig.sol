@@ -60,6 +60,13 @@ contract Multisig is
         uint16 minApprovals;
     }
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant MULTISIG_INTERFACE_ID =
+        this.initialize.selector ^
+            this.updateMultisigSettings.selector ^
+            this.createProposal.selector ^
+            this.getProposal.selector;
+
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
@@ -140,6 +147,7 @@ contract Multisig is
         bytes4 _interfaceId
     ) public view virtual override(PluginUUPSUpgradeable, ProposalUpgradeable) returns (bool) {
         return
+            _interfaceId == MULTISIG_INTERFACE_ID ||
             _interfaceId == type(IMultisig).interfaceId ||
             _interfaceId == type(Addresslist).interfaceId ||
             _interfaceId == type(IMembership).interfaceId ||
@@ -192,7 +200,13 @@ contract Multisig is
         _updateMultisigSettings(_multisigSettings);
     }
 
-    /// @inheritdoc IMultisig
+    /// @notice Creates a new majority voting proposal.
+    /// @param _metadata The metadata of the proposal.
+    /// @param _actions The actions that will be executed after the proposal passes.
+    /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
+    /// @param _approveProposal If `true`, the sender will approve the proposal.
+    /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
+    /// @return proposalId The ID of the proposal.
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,

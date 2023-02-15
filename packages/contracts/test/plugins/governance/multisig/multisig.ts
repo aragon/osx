@@ -253,6 +253,18 @@ describe('Multisig', function () {
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
+
+    it('supports the `Multisig` interface', async () => {
+      const iface = new ethers.utils.Interface([
+        'function initialize(address,address[],tuple(bool,uint16))',
+        'function updateMultisigSettings(tuple(bool,uint16))',
+        'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,bool,bool,uint64,uint64) ',
+        'function getProposal(uint256)',
+      ]);
+
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
   });
 
   describe('updateMultisigSettings:', async () => {

@@ -169,6 +169,16 @@ abstract contract MajorityVotingBase is
         uint256 no;
     }
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant MAJORITY_VOTING_BASE_INTERFACE_ID =
+        this.minDuration.selector ^
+            this.minProposerVotingPower.selector ^
+            this.votingMode.selector ^
+            this.totalVotingPower.selector ^
+            this.getProposal.selector ^
+            this.updateVotingSettings.selector ^
+            this.createProposal.selector;
+
     /// @notice The ID of the permission required to call the `updateVotingSettings` function.
     bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
@@ -246,6 +256,7 @@ abstract contract MajorityVotingBase is
         returns (bool)
     {
         return
+            _interfaceId == MAJORITY_VOTING_BASE_INTERFACE_ID ||
             _interfaceId == type(IMajorityVoting).interfaceId ||
             super.supportsInterface(_interfaceId);
     }

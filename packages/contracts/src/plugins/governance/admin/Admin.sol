@@ -16,7 +16,8 @@ contract Admin is IMembership, PluginCloneable, ProposalUpgradeable {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ADMIN_INTERFACE_ID = this.executeProposal.selector;
+    bytes4 internal constant ADMIN_INTERFACE_ID =
+        this.initialize.selector ^ this.executeProposal.selector;
 
     /// @notice The ID of the permission required to call the `executeProposal` function.
     bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID =

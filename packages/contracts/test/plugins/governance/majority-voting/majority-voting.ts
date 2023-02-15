@@ -115,6 +115,21 @@ describe('MajorityVotingMock', function () {
         await votingBase.supportsInterface(getInterfaceID(iface))
       ).to.be.eq(true);
     });
+
+    it('supports the `MajorityVotingBase` interface', async () => {
+      const iface = new ethers.utils.Interface([
+        'function minDuration()',
+        'function minProposerVotingPower()',
+        'function votingMode()',
+        'function totalVotingPower(uint256)',
+        'function getProposal(uint256)',
+        'function updateVotingSettings(tuple(uint8,uint32,uint32,uint64,uint256))',
+        'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
+      ]);
+
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
   });
 
   describe('validateAndSetSettings: ', async () => {
