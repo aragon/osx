@@ -97,7 +97,7 @@ describe('Admin', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await plugin.supportsInterface('0x00000000')).to.be.eq(false);
+      expect(await plugin.supportsInterface('0x00000000')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
@@ -107,9 +107,7 @@ describe('Admin', function () {
       );
       const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
 
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
@@ -117,9 +115,7 @@ describe('Admin', function () {
       const IPlugin = await hre.artifacts.readArtifact('IPlugin');
       const iface = new ethers.utils.Interface(IPlugin.abi);
 
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
@@ -127,9 +123,7 @@ describe('Admin', function () {
       const IProposal = await hre.artifacts.readArtifact('IProposal');
       const iface = new ethers.utils.Interface(IProposal.abi);
 
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMembership` interface', async () => {
@@ -137,9 +131,7 @@ describe('Admin', function () {
       const IMembership = await hre.artifacts.readArtifact('IMembership');
       const iface = new ethers.utils.Interface(IMembership.abi);
 
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `Admin` interface', async () => {
@@ -147,9 +139,7 @@ describe('Admin', function () {
         'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
       ]);
 
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
   });
 

@@ -212,7 +212,7 @@ describe('TokenVoting', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await voting.supportsInterface('0x00000000')).to.be.eq(false);
+      expect(await voting.supportsInterface('0x00000000')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
@@ -222,9 +222,7 @@ describe('TokenVoting', function () {
       );
       const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
@@ -232,9 +230,7 @@ describe('TokenVoting', function () {
       const IPlugin = await hre.artifacts.readArtifact('IPlugin');
       const iface = new ethers.utils.Interface(IPlugin.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
@@ -242,9 +238,7 @@ describe('TokenVoting', function () {
       const IProposal = await hre.artifacts.readArtifact('IProposal');
       const iface = new ethers.utils.Interface(IProposal.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
@@ -254,17 +248,13 @@ describe('TokenVoting', function () {
       );
       const iface = new ethers.utils.Interface(IMajorityVoting.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `TokenVoting` interface', async () => {
       const iface = new ethers.utils.Interface(['function getVotingToken()']);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
   });
 

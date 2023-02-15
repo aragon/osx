@@ -90,7 +90,7 @@ describe('MerkleMinter', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await minter.supportsInterface('0x00000000')).to.be.eq(false);
+      expect(await minter.supportsInterface('0x00000000')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
@@ -100,9 +100,7 @@ describe('MerkleMinter', function () {
       );
       const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
 
-      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
@@ -110,9 +108,7 @@ describe('MerkleMinter', function () {
       const IPlugin = await hre.artifacts.readArtifact('IPlugin');
       const iface = new ethers.utils.Interface(IPlugin.abi);
 
-      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMerkleMinter` interface', async () => {
@@ -120,9 +116,7 @@ describe('MerkleMinter', function () {
       const IMerkleMinter = await hre.artifacts.readArtifact('IMerkleMinter');
       const iface = new ethers.utils.Interface(IMerkleMinter.abi);
 
-      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
   });
 

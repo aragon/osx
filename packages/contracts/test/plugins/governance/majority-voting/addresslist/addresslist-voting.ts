@@ -138,7 +138,7 @@ describe('AddresslistVoting', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await voting.supportsInterface('0x00000000')).to.be.eq(false);
+      expect(await voting.supportsInterface('0x00000000')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
@@ -148,9 +148,7 @@ describe('AddresslistVoting', function () {
       );
       const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
@@ -158,9 +156,7 @@ describe('AddresslistVoting', function () {
       const IPlugin = await hre.artifacts.readArtifact('IPlugin');
       const iface = new ethers.utils.Interface(IPlugin.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
@@ -168,9 +164,7 @@ describe('AddresslistVoting', function () {
       const IProposal = await hre.artifacts.readArtifact('IProposal');
       const iface = new ethers.utils.Interface(IProposal.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMembership` interface', async () => {
@@ -178,9 +172,7 @@ describe('AddresslistVoting', function () {
       const IMembership = await hre.artifacts.readArtifact('IMembership');
       const iface = new ethers.utils.Interface(IMembership.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `Addresslist` interface', async () => {
@@ -188,9 +180,7 @@ describe('AddresslistVoting', function () {
       const Addresslist = await hre.artifacts.readArtifact('Addresslist');
       const iface = new ethers.utils.Interface(Addresslist.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
@@ -200,9 +190,7 @@ describe('AddresslistVoting', function () {
       );
       const iface = new ethers.utils.Interface(IMajorityVoting.abi);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `AddresslistVoting` interface', async () => {
@@ -211,9 +199,7 @@ describe('AddresslistVoting', function () {
         'function removeAddresses(address[])',
       ]);
 
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
   });
 
