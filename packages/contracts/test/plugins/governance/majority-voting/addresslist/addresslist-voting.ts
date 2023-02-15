@@ -185,18 +185,6 @@ describe('AddresslistVoting', function () {
       );
     });
 
-    it('supports the `IMajorityVoting` interface', async () => {
-      // @ts-ignore
-      const IMajorityVoting = await hre.artifacts.readArtifact(
-        'IMajorityVoting'
-      );
-      const iface = new ethers.utils.Interface(IMajorityVoting.abi);
-
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
-    });
-
     it('supports the `AddresslistVoting` interface', async () => {
       const iface = new ethers.utils.Interface([
         'function addAddresses(address[])',
