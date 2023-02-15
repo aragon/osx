@@ -1,18 +1,18 @@
-import {Address, BigInt, dataSource, log, store} from '@graphprotocol/graph-ts';
+import {Address, BigInt, dataSource} from '@graphprotocol/graph-ts';
 
 import {TokenVotingMember} from '../../../generated/schema';
-import {ERC20, Transfer} from '../../../generated/templates/DaoTemplate/ERC20';
+import {Transfer} from '../../../generated/templates/DaoTemplate/ERC20';
 
-function getOrCreateMember(user: Address, plugin: Address): TokenVotingMember {
+function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
   let id = user
     .toHexString()
     .concat('_')
-    .concat(plugin.toHexString());
+    .concat(pluginId);
   let member = TokenVotingMember.load(id);
   if (!member) {
     member = new TokenVotingMember(id);
     member.address = user;
-    member.plugin = plugin.toHexString(); // TODO: why hexString()
+    member.plugin = pluginId;
     member.balance = BigInt.zero();
   }
 
@@ -21,21 +21,17 @@ function getOrCreateMember(user: Address, plugin: Address): TokenVotingMember {
 
 export function handleTransfer(event: Transfer): void {
   let context = dataSource.context();
-  let pluginAddress = Address.fromString(context.getString('pluginAddress'));
-
-  log.warning('giorgi {}', [context.getString('pluginAddress')]);
-  let fromMember = getOrCreateMember(event.params.from, pluginAddress);
-  let toMember = getOrCreateMember(event.params.to, pluginAddress);
+  let pluginId = context.getString('pluginId');
 
   if (event.params.from != Address.zero()) {
+    let fromMember = getOrCreateMember(event.params.from, pluginId);
     fromMember.balance = fromMember.balance.minus(event.params.value);
+    fromMember.save();
   }
 
-  // TODO: if `to` is `dao`, then `dao` would become member. should we avoid it ?
   if (event.params.to != Address.zero()) {
+    let toMember = getOrCreateMember(event.params.to, pluginId);
     toMember.balance = toMember.balance.plus(event.params.value);
+    toMember.save();
   }
-
-  fromMember.save();
-  toMember.save();
 }

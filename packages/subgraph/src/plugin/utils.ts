@@ -40,9 +40,10 @@ export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(2, 'GrantWithCondition');
 
 function createTokenVotingPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
+  let pluginId = plugin.toHexString();
+  let packageEntity = TokenVotingPlugin.load(pluginId);
   if (!packageEntity) {
-    packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    packageEntity = new TokenVotingPlugin(pluginId);
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
     let contract = TokenVotingContract.bind(plugin);
@@ -64,13 +65,6 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
       if (contract) {
         packageEntity.token = contract.id;
       }
-
-      // If token is GovernanceERC20, create `GovernanceERC20` context and listen to Transfer events.
-      // If token is GovernanceWrapped, create `GovernanceWrappedERC20` context and listen to withdrawTo and `depositFor` events.
-
-      let context = new DataSourceContext();
-      context.setString('pluginAddress', plugin.toHexString());
-      GovernanceERC20.createWithContext(token.value, context);
     }
 
     // Create template
