@@ -87,7 +87,7 @@ contract PermissionManager is Initializable {
         address indexed who
     );
 
-    /// @notice A modifier to be used to check permissions on a target contract.
+    /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
         _auth(_permissionId);
