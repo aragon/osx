@@ -8,42 +8,6 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @author Aragon Association - 2023
 /// @notice An interface for an on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 interface IMultisig {
-    /// @notice A container for proposal-related information.
-    /// @param executed Whether the proposal is executed or not.
-    /// @param approvals The number of approvals casted.
-    /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
-    /// @param approvers The approves casted by the approvers.
-    /// @param actions The actions to be executed when the proposal passes.
-    /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    struct Proposal {
-        bool executed;
-        uint16 approvals;
-        ProposalParameters parameters;
-        mapping(address => bool) approvers;
-        IDAO.Action[] actions;
-        uint256 allowFailureMap;
-    }
-
-    /// @notice A container for the proposal parameters.
-    /// @param minApprovals The number of approvals required.
-    /// @param snapshotBlock The number of the block prior to the proposal creation.
-    /// @param startDate The timestamp when the proposal starts.
-    /// @param endDate The timestamp when the proposal expires.
-    struct ProposalParameters {
-        uint16 minApprovals;
-        uint64 snapshotBlock;
-        uint64 startDate;
-        uint64 endDate;
-    }
-
-    /// @notice A container for the plugin settings.
-    /// @param onlyListed Whether only listed addresses can create a proposal.
-    /// @param minApprovals The minimum approvals parameter.
-    struct MultisigSettings {
-        bool onlyListed;
-        uint16 minApprovals;
-    }
-
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
     function addAddresses(address[] calldata _members) external;
@@ -51,10 +15,6 @@ interface IMultisig {
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members) external;
-
-    /// @notice Updates the plugin settings.
-    /// @param _multisigSettings The new settings.
-    function updateMultisigSettings(MultisigSettings calldata _multisigSettings) external;
 
     /// @notice Creates a new majority voting proposal.
     /// @param _metadata The metadata of the proposal.
@@ -91,26 +51,6 @@ interface IMultisig {
     /// @param _proposalId The ID of the proposal to be checked.
     /// @return True if the proposal can be executed, false otherwise.
     function canExecute(uint256 _proposalId) external view returns (bool);
-
-    /// @notice Returns all information for a proposal vote by its ID.
-    /// @param _proposalId The ID of the proposal.
-    /// @return executed Whether the proposal is executed or not.
-    /// @return approvals The number of approvals casted.
-    /// @return parameters The parameters of the proposal vote.
-    /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    function getProposal(
-        uint256 _proposalId
-    )
-        external
-        view
-        returns (
-            bool executed,
-            uint16 approvals,
-            ProposalParameters memory parameters,
-            IDAO.Action[] memory actions,
-            uint256 allowFailureMap
-        );
 
     /// @notice Returns whether the account has approved the proposal. Note, that this does not check if the account is listed.
     /// @param _proposalId The ID of the proposal.

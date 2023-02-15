@@ -15,6 +15,6 @@ export const VOTING_MODES = new Map<number, string>()
 export const TOKEN_VOTING_INTERFACE = '0xe28c3b19';
 export const ADDRESSLIST_VOTING_INTERFACE = '0x9e66ca85';
 export const ADMIN_INTERFACE = '0x61af5ebe';
-export const MULTISIG_INTERFACE = '0xde1d83fc';
+export const MULTISIG_INTERFACE = '0x29d59862';
 
 export const RATIO_BASE = '1000000'; // 10**6

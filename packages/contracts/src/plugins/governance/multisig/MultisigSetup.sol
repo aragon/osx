@@ -32,9 +32,9 @@ contract MultisigSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
-        (address[] memory members, IMultisig.MultisigSettings memory multisigSettings) = abi.decode(
+        (address[] memory members, Multisig.MultisigSettings memory multisigSettings) = abi.decode(
             _data,
-            (address[], IMultisig.MultisigSettings)
+            (address[], Multisig.MultisigSettings)
         );
 
         // Prepare and Deploy the plugin proxy.
