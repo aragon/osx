@@ -27,7 +27,7 @@ export function shouldUpgradeCorrectly(
     return [dao.address, user.address, upgradePermissionId];
   }
 
-  describe.only('UUPS Upgradeability Test', async () => {
+  describe('UUPS Upgradeability Test', async () => {
     before(async () => {
       const factory = await ethers.getContractFactory(
         'PluginUUPSUpgradeableV1Mock'
