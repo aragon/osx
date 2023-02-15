@@ -142,10 +142,9 @@ contract PermissionManager is Initializable {
         _revoke(_where, _who, _permissionId);
     }
 
-    /// @notice Processes bulk items on the permission manager.
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _where The address of the contract.
-    /// @param items The array of bulk items to process.
+    /// @notice Applies an array of permission operations on a single target contracts `_where`.
+    /// @param _where The address of the single target contract.
+    /// @param items The array of single-targeted permission operations to apply.
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
@@ -165,14 +164,13 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Processes bulk items on the permission manager.
-    /// @dev Requires that msg.sender has each permissionId on the where.
-    /// @param items The array of bulk items to process.
+    /// @notice Applies an array of permission operations on multiple target contracts `items[i].where`.
+    /// @param _items The array of multi-targeted permission operations to apply.
     function applyMultiTargetPermissions(
-        PermissionLib.MultiTargetPermission[] calldata items
+        PermissionLib.MultiTargetPermission[] calldata _items
     ) external auth(ROOT_PERMISSION_ID) {
-        for (uint256 i; i < items.length; ) {
-            PermissionLib.MultiTargetPermission memory item = items[i];
+        for (uint256 i; i < _items.length; ) {
+            PermissionLib.MultiTargetPermission memory item = _items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(item.where, item.who, item.permissionId);
