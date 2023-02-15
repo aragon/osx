@@ -59,8 +59,6 @@ contract PermissionManager is Initializable {
     /// @notice thrown when WHO and WHERE are both ANY_ADDR
     error AnyAddressDisallowedForWhoAndWhere();
 
-    // Events
-
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is granted.
