@@ -20,6 +20,11 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
+export const adminInterface = new ethers.utils.Interface([
+  'function initialize(address)',
+  'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
+]);
+
 describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
@@ -135,12 +140,8 @@ describe('Admin', function () {
     });
 
     it('supports the `Admin` interface', async () => {
-      const iface = new ethers.utils.Interface([
-        'function initialize(address)',
-        'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
-      ]);
-
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceID(adminInterface))).to
+        .be.true;
     });
   });
 

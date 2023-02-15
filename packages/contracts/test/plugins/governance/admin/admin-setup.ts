@@ -5,6 +5,7 @@ import {AdminSetup} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {Operation} from '../../../core/permission/permission-manager';
+import {adminInterface} from './admin';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
@@ -45,12 +46,10 @@ describe('AdminSetup', function () {
     const factory = await ethers.getContractFactory('Admin');
     const adminAddressContract = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
-    ]);
-
     expect(
-      await adminAddressContract.supportsInterface(getInterfaceID(iface))
+      await adminAddressContract.supportsInterface(
+        getInterfaceID(adminInterface)
+      )
     ).to.be.eq(true);
   });
 

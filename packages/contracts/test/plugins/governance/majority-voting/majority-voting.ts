@@ -16,6 +16,16 @@ import {OZ_ERRORS} from '../../../test-utils/error';
 import {daoExampleURI} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 
+export const majorityVotingBaseInterface = new ethers.utils.Interface([
+  'function minDuration()',
+  'function minProposerVotingPower()',
+  'function votingMode()',
+  'function totalVotingPower(uint256)',
+  'function getProposal(uint256)',
+  'function updateVotingSettings(tuple(uint8,uint32,uint32,uint64,uint256))',
+  'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
+]);
+
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
   let votingBase: MajorityVotingMock;
@@ -117,18 +127,11 @@ describe('MajorityVotingMock', function () {
     });
 
     it('supports the `MajorityVotingBase` interface', async () => {
-      const iface = new ethers.utils.Interface([
-        'function minDuration()',
-        'function minProposerVotingPower()',
-        'function votingMode()',
-        'function totalVotingPower(uint256)',
-        'function getProposal(uint256)',
-        'function updateVotingSettings(tuple(uint8,uint32,uint32,uint64,uint256))',
-        'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
-      ]);
-
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
-        .true;
+      expect(
+        await votingBase.supportsInterface(
+          getInterfaceID(majorityVotingBaseInterface)
+        )
+      ).to.be.true;
     });
   });
 
