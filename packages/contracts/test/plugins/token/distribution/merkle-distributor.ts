@@ -5,7 +5,14 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MerkleDistributor, DAO, TestERC20} from '../../../../typechain';
+import {
+  MerkleDistributor,
+  DAO,
+  TestERC20,
+  IERC165Upgradeable__factory,
+  IPlugin__factory,
+  IMerkleDistributor__factory,
+} from '../../../../typechain';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
@@ -47,37 +54,21 @@ describe('MerkleDistributor', function () {
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
-      // @ts-ignore
-      const IERC165Upgradeable = await hre.artifacts.readArtifact(
-        'IERC165Upgradeable'
-      );
-      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
-
-      expect(
-        await distributor.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `IPlugin` interface', async () => {
-      // @ts-ignore
-      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-      const iface = new ethers.utils.Interface(IPlugin.abi);
-
-      expect(
-        await distributor.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IPlugin__factory.createInterface();
+      expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `IMerkleDistributor` interface', async () => {
-      // @ts-ignore
-      const IMerkleDistributor = await hre.artifacts.readArtifact(
-        'IMerkleDistributor'
-      );
-      const iface = new ethers.utils.Interface(IMerkleDistributor.abi);
-
-      expect(
-        await distributor.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IMerkleDistributor__factory.createInterface();
+      expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
   });
 

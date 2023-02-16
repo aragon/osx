@@ -2,7 +2,14 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MajorityVotingMock, DAO} from '../../../../typechain';
+import {
+  MajorityVotingMock,
+  DAO,
+  IERC165Upgradeable__factory,
+  IPlugin__factory,
+  IProposal__factory,
+  IMajorityVoting__factory,
+} from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
 import {
   VotingSettings,
@@ -83,47 +90,27 @@ describe('MajorityVotingMock', function () {
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
-      // @ts-ignore
-      const IERC165Upgradeable = await hre.artifacts.readArtifact(
-        'IERC165Upgradeable'
-      );
-      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
-
-      expect(
-        await votingBase.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `IPlugin` interface', async () => {
-      // @ts-ignore
-      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-      const iface = new ethers.utils.Interface(IPlugin.abi);
-
-      expect(
-        await votingBase.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IPlugin__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `IProposal` interface', async () => {
-      // @ts-ignore
-      const IProposal = await hre.artifacts.readArtifact('IProposal');
-      const iface = new ethers.utils.Interface(IProposal.abi);
-
-      expect(
-        await votingBase.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IProposal__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
-      // @ts-ignore
-      const IMajorityVoting = await hre.artifacts.readArtifact(
-        'IMajorityVoting'
-      );
-      const iface = new ethers.utils.Interface(IMajorityVoting.abi);
-
-      expect(
-        await votingBase.supportsInterface(getInterfaceID(iface))
-      ).to.be.eq(true);
+      const iface = IMajorityVoting__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `MajorityVotingBase` interface', async () => {

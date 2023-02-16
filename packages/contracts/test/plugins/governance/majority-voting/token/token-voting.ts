@@ -7,6 +7,11 @@ import {
   DAO,
   GovernanceERC20Mock,
   GovernanceERC20Mock__factory,
+  IERC165Upgradeable__factory,
+  IMajorityVoting__factory,
+  IMembership__factory,
+  IPlugin__factory,
+  IProposal__factory,
   TokenVoting,
 } from '../../../../../typechain';
 import {
@@ -222,38 +227,27 @@ describe('TokenVoting', function () {
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
-      // @ts-ignore
-      const IERC165Upgradeable = await hre.artifacts.readArtifact(
-        'IERC165Upgradeable'
-      );
-      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
-
+      const iface = IERC165Upgradeable__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
-      // @ts-ignore
-      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-      const iface = new ethers.utils.Interface(IPlugin.abi);
-
+      const iface = IPlugin__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
-      // @ts-ignore
-      const IProposal = await hre.artifacts.readArtifact('IProposal');
-      const iface = new ethers.utils.Interface(IProposal.abi);
+      const iface = IProposal__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
 
+    it('supports the `IMembership` interface', async () => {
+      const iface = IMembership__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
-      // @ts-ignore
-      const IMajorityVoting = await hre.artifacts.readArtifact(
-        'IMajorityVoting'
-      );
-      const iface = new ethers.utils.Interface(IMajorityVoting.abi);
-
+      const iface = IMajorityVoting__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 

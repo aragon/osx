@@ -3,7 +3,15 @@ import {ethers} from 'hardhat';
 import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO} from '../../../../typechain';
+import {
+  Addresslist__factory,
+  DAO,
+  IERC165Upgradeable__factory,
+  IMembership__factory,
+  IMultisig__factory,
+  IPlugin__factory,
+  IProposal__factory,
+} from '../../../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
@@ -206,57 +214,37 @@ describe('Multisig', function () {
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
-      // @ts-ignore
-      const IERC165Upgradeable = await hre.artifacts.readArtifact(
-        'IERC165Upgradeable'
-      );
-      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
-
+      const iface = IERC165Upgradeable__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
 
     it('supports the `IPlugin` interface', async () => {
-      // @ts-ignore
-      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-      const iface = new ethers.utils.Interface(IPlugin.abi);
-
+      const iface = IPlugin__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
 
     it('supports the `IProposal` interface', async () => {
-      // @ts-ignore
-      const IProposal = await hre.artifacts.readArtifact('IProposal');
-      const iface = new ethers.utils.Interface(IProposal.abi);
-
+      const iface = IProposal__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
 
     it('supports the `IMembership` interface', async () => {
-      // @ts-ignore
-      const IMembership = await hre.artifacts.readArtifact('IMembership');
-      const iface = new ethers.utils.Interface(IMembership.abi);
-
+      const iface = IMembership__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
 
     it('supports the `Addresslist` interface', async () => {
-      // @ts-ignore
-      const Addresslist = await hre.artifacts.readArtifact('Addresslist');
-      const iface = new ethers.utils.Interface(Addresslist.abi);
-
+      const iface = Addresslist__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
 
     it('supports the `IMultisig` interface', async () => {
-      // @ts-ignore
-      const IMultisig = await hre.artifacts.readArtifact('IMultisig');
-      const iface = new ethers.utils.Interface(IMultisig.abi);
-
+      const iface = IMultisig__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });

@@ -10,6 +10,9 @@ import {
   MerkleDistributor,
   DAO,
   GovernanceERC20,
+  IERC165Upgradeable__factory,
+  IPlugin__factory,
+  IMerkleMinter__factory,
 } from '../../../../typechain';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
@@ -94,28 +97,17 @@ describe('MerkleMinter', function () {
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {
-      // @ts-ignore
-      const IERC165Upgradeable = await hre.artifacts.readArtifact(
-        'IERC165Upgradeable'
-      );
-      const iface = new ethers.utils.Interface(IERC165Upgradeable.abi);
-
+      const iface = IERC165Upgradeable__factory.createInterface();
       expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
-      // @ts-ignore
-      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-      const iface = new ethers.utils.Interface(IPlugin.abi);
-
+      const iface = IPlugin__factory.createInterface();
       expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IMerkleMinter` interface', async () => {
-      // @ts-ignore
-      const IMerkleMinter = await hre.artifacts.readArtifact('IMerkleMinter');
-      const iface = new ethers.utils.Interface(IMerkleMinter.abi);
-
+      const iface = IMerkleMinter__factory.createInterface();
       expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
   });
