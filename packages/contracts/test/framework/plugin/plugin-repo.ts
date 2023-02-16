@@ -60,7 +60,6 @@ describe('PluginRepo', function () {
         .to.be.revertedWithCustomError(pluginRepo, 'Unauthorized')
         .withArgs(
           pluginRepo.address,
-          pluginRepo.address,
           signers[2].address,
           MAINTAINER_PERMISSION_ID
         );
@@ -293,7 +292,6 @@ describe('PluginRepo', function () {
       )
         .to.be.revertedWithCustomError(pluginRepo, 'Unauthorized')
         .withArgs(
-          pluginRepo.address,
           pluginRepo.address,
           signers[2].address,
           MAINTAINER_PERMISSION_ID

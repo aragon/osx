@@ -129,12 +129,7 @@ describe('Admin plugin', function () {
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          dao.address,
-          dao.address,
-          plugin.address,
-          EXECUTE_PERMISSION_ID
-        );
+        .withArgs(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
     });
 
     it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {
@@ -148,7 +143,6 @@ describe('Admin plugin', function () {
         .to.be.revertedWithCustomError(plugin, 'DaoUnauthorized')
         .withArgs(
           dao.address,
-          plugin.address,
           plugin.address,
           ownerAddress,
           EXECUTE_PROPOSAL_PERMISSION_ID

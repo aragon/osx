@@ -128,7 +128,6 @@ describe('DAORegistry', function () {
       .withArgs(
         managingDao.address,
         daoRegistry.address,
-        daoRegistry.address,
         ownerAddress,
         REGISTER_DAO_PERMISSION_ID
       );

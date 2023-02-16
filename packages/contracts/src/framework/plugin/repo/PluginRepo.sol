@@ -129,7 +129,7 @@ contract PluginRepo is
         address _pluginSetup,
         bytes calldata _buildMetadata,
         bytes calldata _releaseMetadata
-    ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
+    ) external auth(MAINTAINER_PERMISSION_ID) {
         if (!_pluginSetup.supportsInterface(type(IPluginSetup).interfaceId)) {
             revert InvalidPluginSetupInterface();
         }
@@ -186,7 +186,7 @@ contract PluginRepo is
     function updateReleaseMetadata(
         uint8 _release,
         bytes calldata _releaseMetadata
-    ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
+    ) external auth(MAINTAINER_PERMISSION_ID) {
         if (_release == 0) {
             revert ReleaseZeroNotAllowed();
         }
@@ -255,7 +255,7 @@ contract PluginRepo is
     /// @dev The caller must have the `UPGRADE_REPO_PERMISSION_ID` permission.
     function _authorizeUpgrade(
         address
-    ) internal virtual override auth(address(this), UPGRADE_REPO_PERMISSION_ID) {}
+    ) internal virtual override auth(UPGRADE_REPO_PERMISSION_ID) {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.

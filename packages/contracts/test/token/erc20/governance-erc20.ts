@@ -119,7 +119,6 @@ describe('GovernanceERC20', function () {
         .withArgs(
           dao.address,
           token.address,
-          token.address,
           signers[0].address,
           MINT_PERMISSION_ID
         );

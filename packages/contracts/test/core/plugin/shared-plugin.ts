@@ -38,7 +38,6 @@ describe('SharedPlugin', function () {
     expectedUnauthorizedErrorArguments = [
       managingDao.address,
       testPlugin.address,
-      testPlugin.address,
       ownerAddress,
       ID_GATED_ACTION_PERMISSION_ID,
     ];

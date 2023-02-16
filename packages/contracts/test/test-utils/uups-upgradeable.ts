@@ -1,6 +1,6 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {Contract, Signer} from 'ethers';
+import {Contract} from 'ethers';
 import {ethers} from 'hardhat';
 
 /// Used as a common test suite to test upgradeability of the contracts.
@@ -20,21 +20,11 @@ export function shouldUpgradeCorrectly(
     user: SignerWithAddress,
     dao: Contract
   ) {
-    return [
-      dao.address,
-      contract.address,
-      contract.address,
-      user.address,
-      upgradePermissionId,
-    ];
+    return [dao.address, contract.address, user.address, upgradePermissionId];
   }
 
-  function UnauthorizedRevertArgs(
-    contract: Contract,
-    user: SignerWithAddress,
-    dao: Contract
-  ) {
-    return [dao.address, contract.address, user.address, upgradePermissionId];
+  function UnauthorizedRevertArgs(dao: Contract, user: SignerWithAddress) {
+    return [dao.address, user.address, upgradePermissionId];
   }
 
   describe('UUPS Upgradeability Test', async () => {
@@ -69,13 +59,13 @@ export function shouldUpgradeCorrectly(
             contract,
             upgradeRevertPermissionMessage
           )
-          .withArgs(...UnauthorizedRevertArgs(contract, user, dao));
+          .withArgs(...UnauthorizedRevertArgs(dao, user));
         await expect(tx2)
           .to.be.revertedWithCustomError(
             contract,
             upgradeRevertPermissionMessage
           )
-          .withArgs(...UnauthorizedRevertArgs(contract, user, dao));
+          .withArgs(...UnauthorizedRevertArgs(dao, user));
       }
     });
 

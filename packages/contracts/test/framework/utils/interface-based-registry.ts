@@ -88,7 +88,6 @@ describe('InterfaceBasedRegistry', function () {
         .withArgs(
           dao.address,
           interfaceBasedRegistryMock.address,
-          interfaceBasedRegistryMock.address,
           ownerAddress,
           REGISTER_PERMISSION_ID
         );

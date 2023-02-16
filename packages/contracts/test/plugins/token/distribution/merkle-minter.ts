@@ -138,7 +138,6 @@ describe('MerkleMinter', function () {
         .withArgs(
           managingDao.address,
           minter.address,
-          minter.address,
           ownerAddress,
           MERKLE_MINT_PERMISSION_ID
         );
@@ -162,7 +161,6 @@ describe('MerkleMinter', function () {
         .to.be.revertedWithCustomError(minter, 'DaoUnauthorized')
         .withArgs(
           managingDao.address,
-          token.address,
           token.address,
           minter.address,
           MINT_PERMISSION_ID
