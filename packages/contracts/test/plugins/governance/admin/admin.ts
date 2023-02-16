@@ -13,6 +13,12 @@ import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {toBytes32} from '../../../test-utils/voting';
+import {
+  IERC165Upgradeable__factory,
+  IMembership__factory,
+  IPlugin__factory,
+  IProposal__factory,
+} from '../../../../typechain';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -20,7 +26,12 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('Admin plugin', function () {
+export const adminInterface = new ethers.utils.Interface([
+  'function initialize(address)',
+  'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
+]);
+
+describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: any;
@@ -96,26 +107,33 @@ describe('Admin plugin', function () {
   });
 
   describe('plugin interface: ', async () => {
-    it('supports plugin cloneable interface', async () => {
-      // @ts-ignore
-      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
-
-      const iface = new ethers.utils.Interface(IPlugin.abi);
-
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+    it('does not support the empty interface', async () => {
+      expect(await plugin.supportsInterface('0x00000000')).to.be.false;
     });
 
-    it('supports admin address plugin interface', async () => {
-      const iface = new ethers.utils.Interface([
-        'function initialize(address  _dao)',
-        'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
-      ]);
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
 
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
-        true
-      );
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      const iface = IProposal__factory.createInterface();
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IMembership` interface', async () => {
+      const iface = IMembership__factory.createInterface();
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `Admin` interface', async () => {
+      expect(await plugin.supportsInterface(getInterfaceID(adminInterface))).to
+        .be.true;
     });
   });
 

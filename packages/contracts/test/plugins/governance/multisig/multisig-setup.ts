@@ -7,7 +7,7 @@ import {getInterfaceID} from '../../../test-utils/interfaces';
 import {Operation} from '../../../core/permission/permission-manager';
 import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {MultisigSettings} from './multisig';
+import {MultisigSettings, multisigInterface} from './multisig';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -58,18 +58,11 @@ describe('MultisigSetup', function () {
     const factory = await ethers.getContractFactory('Multisig');
     const multisigContract = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function addAddresses(address[])',
-      'function removeAddresses(address[])',
-      'function isListed(address)',
-      'function isListedAtBlock(address,uint256)',
-      'function addresslistLength()',
-      'function addresslistLengthAtBlock(uint256)',
-      'function initialize(address,address[],tuple(bool,uint16))',
-    ]);
-
-    expect(await multisigContract.supportsInterface(getInterfaceID(iface))).to
-      .be.true;
+    expect(
+      await multisigContract.supportsInterface(
+        getInterfaceID(multisigInterface)
+      )
+    ).to.be.true;
   });
 
   describe('prepareInstallation', async () => {

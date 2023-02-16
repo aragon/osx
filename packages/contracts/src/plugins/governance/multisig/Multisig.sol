@@ -5,14 +5,23 @@ pragma solidity 0.8.17;
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../../core/dao/IDAO.sol";
+import {IMembership} from "../../../core/plugin/membership/IMembership.sol";
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+
 import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
 import {Addresslist} from "../../utils/Addresslist.sol";
+import {IMultisig} from "./IMultisig.sol";
 
 /// @title Multisig
 /// @author Aragon Association - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
-contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
+contract Multisig is
+    IMultisig,
+    IMembership,
+    PluginUUPSUpgradeable,
+    ProposalUpgradeable,
+    Addresslist
+{
     using SafeCastUpgradeable for uint256;
 
     /// @notice A container for proposal-related information.
@@ -53,13 +62,10 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MULTISIG_INTERFACE_ID =
-        this.addAddresses.selector ^
-            this.removeAddresses.selector ^
-            this.isListed.selector ^
-            this.isListedAtBlock.selector ^
-            this.addresslistLength.selector ^
-            this.addresslistLengthAtBlock.selector ^
-            this.initialize.selector;
+        this.initialize.selector ^
+            this.updateMultisigSettings.selector ^
+            this.createProposal.selector ^
+            this.getProposal.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
@@ -129,20 +135,26 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         __PluginUUPSUpgradeable_init(_dao);
 
         _addAddresses(_members);
+        emit MembersAdded({members: _members});
+
         _updateMultisigSettings(_multisigSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public view virtual override(PluginUUPSUpgradeable, ProposalUpgradeable) returns (bool) {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
-            PluginUUPSUpgradeable.supportsInterface(_interfaceId);
+            _interfaceId == type(IMultisig).interfaceId ||
+            _interfaceId == type(Addresslist).interfaceId ||
+            _interfaceId == type(IMembership).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
-    /// @notice Adds new members to the address list and updates the minimum approval parameter.
-    /// @param _members The addresses of the members to be added.
+    /// @inheritdoc IMultisig
     function addAddresses(
         address[] calldata _members
     ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
@@ -157,10 +169,11 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         _addAddresses(_members);
+
+        emit MembersAdded({members: _members});
     }
 
-    /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
-    /// @param _members The addresses of the members to be removed.
+    /// @inheritdoc IMultisig
     function removeAddresses(
         address[] calldata _members
     ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
@@ -175,6 +188,8 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         _removeAddresses(_members);
+
+        emit MembersRemoved({members: _members});
     }
 
     /// @notice Updates the plugin settings.
@@ -251,9 +266,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
     }
 
-    /// @notice Approves and, optionally, executes the proposal.
-    /// @param _proposalId The ID of the proposal.
-    /// @param _tryExecution If `true`, execution is tried after the approval cast. The call does not revert if execution is not possible.
+    /// @inheritdoc IMultisig
     function approve(uint256 _proposalId, bool _tryExecution) public {
         address approver = _msgSender();
         if (!_canApprove(_proposalId, approver)) {
@@ -277,20 +290,12 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
     }
 
-    /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
-    /// - was executed, or
-    /// - the voter is not listed.
-    /// @param _proposalId The proposal Id.
-    /// @param _account The address of the user to check.
-    /// @return bool Returns true if the account is allowed to vote.
-    /// @dev The function assumes the queried proposal exists.
+    /// @inheritdoc IMultisig
     function canApprove(uint256 _proposalId, address _account) external view returns (bool) {
         return _canApprove(_proposalId, _account);
     }
 
-    /// @notice Checks if a proposal can be executed.
-    /// @param _proposalId The ID of the proposal to be checked.
-    /// @return True if the proposal can be executed, false otherwise.
+    /// @inheritdoc IMultisig
     function canExecute(uint256 _proposalId) external view returns (bool) {
         return _canExecute(_proposalId);
     }
@@ -324,22 +329,23 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         allowFailureMap = proposal_.allowFailureMap;
     }
 
-    /// @notice Returns whether the account has approved the proposal. Note, that this does not check if the account is listed.
-    /// @param _proposalId The ID of the proposal.
-    /// @param _account The account address to be checked.
-    /// @return The vote option cast by a voter for a certain proposal.
+    /// @inheritdoc IMultisig
     function hasApproved(uint256 _proposalId, address _account) public view returns (bool) {
         return proposals[_proposalId].approvers[_account];
     }
 
-    /// @notice Executes a proposal.
-    /// @param _proposalId The ID of the proposal to be executed.
+    /// @inheritdoc IMultisig
     function execute(uint256 _proposalId) public {
         if (!_canExecute(_proposalId)) {
             revert ProposalExecutionForbidden(_proposalId);
         }
 
         _execute(_proposalId);
+    }
+
+    /// @inheritdoc IMembership
+    function isMember(address _account) external view returns (bool) {
+        return isListed(_account);
     }
 
     /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
@@ -408,6 +414,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     }
 
     /// @notice Internal function to update the plugin settings.
+    /// @param _multisigSettings The new settings.
     function _updateMultisigSettings(MultisigSettings calldata _multisigSettings) internal {
         uint16 addresslistLength_ = uint16(addresslistLength());
 

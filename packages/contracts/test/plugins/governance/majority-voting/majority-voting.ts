@@ -2,7 +2,14 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MajorityVotingMock, DAO} from '../../../../typechain';
+import {
+  MajorityVotingMock,
+  DAO,
+  IERC165Upgradeable__factory,
+  IPlugin__factory,
+  IProposal__factory,
+  IMajorityVoting__factory,
+} from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
 import {
   VotingSettings,
@@ -14,6 +21,17 @@ import {
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {daoExampleURI} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
+
+export const majorityVotingBaseInterface = new ethers.utils.Interface([
+  'function minDuration()',
+  'function minProposerVotingPower()',
+  'function votingMode()',
+  'function totalVotingPower(uint256)',
+  'function getProposal(uint256)',
+  'function updateVotingSettings(tuple(uint8,uint32,uint32,uint64,uint256))',
+  'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
+]);
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -63,6 +81,44 @@ describe('MajorityVotingMock', function () {
       await expect(
         votingBase.initializeMock(dao.address, votingSettings)
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await votingBase.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      const iface = IProposal__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IMajorityVoting` interface', async () => {
+      const iface = IMajorityVoting__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `MajorityVotingBase` interface', async () => {
+      expect(
+        await votingBase.supportsInterface(
+          getInterfaceID(majorityVotingBaseInterface)
+        )
+      ).to.be.true;
     });
   });
 

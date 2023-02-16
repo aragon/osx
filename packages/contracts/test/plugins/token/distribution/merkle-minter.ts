@@ -10,10 +10,14 @@ import {
   MerkleDistributor,
   DAO,
   GovernanceERC20,
+  IERC165Upgradeable__factory,
+  IPlugin__factory,
+  IMerkleMinter__factory,
 } from '../../../../typechain';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {deployWithProxy} from '../../../test-utils/proxy';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
@@ -86,6 +90,27 @@ describe('MerkleMinter', function () {
     UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
     'DaoUnauthorized'
   );
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await minter.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IMerkleMinter` interface', async () => {
+      const iface = IMerkleMinter__factory.createInterface();
+      expect(await minter.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+  });
 
   describe('merkleMint:', () => {
     const dummyMerkleTreeStorageLink: string = '0x';

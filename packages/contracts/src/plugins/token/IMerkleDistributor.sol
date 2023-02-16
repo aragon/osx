@@ -20,13 +20,6 @@ interface IMerkleDistributor {
     /// @notice The merkle root of the balance tree storing the claims.
     function merkleRoot() external returns (bytes32);
 
-    /// @notice Initializes the plugin.
-    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
-    /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
-    /// @param _merkleRoot The merkle root of the balance tree.
-    function initialize(IDAO _dao, IERC20Upgradeable _token, bytes32 _merkleRoot) external;
-
     /// @notice Claims tokens from the balance tree and sends it to an address.
     /// @param _index The index in the balance tree to be claimed.
     /// @param _to The receiving address.
