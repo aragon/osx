@@ -136,11 +136,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   action.save();
 
   // create event
-  let event = createProposalExecutedEvent(
-    PROPOSAL_ID,
-    ['0x'],
-    CONTRACT_ADDRESS
-  );
+  let event = createProposalExecutedEvent(PROPOSAL_ID, CONTRACT_ADDRESS);
 
   // handle event
   handleProposalExecuted(event);

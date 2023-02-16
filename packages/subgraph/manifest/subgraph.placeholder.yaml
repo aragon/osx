@@ -159,7 +159,7 @@ templates:
           handler: handleMembershipContractAnnounced
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
@@ -184,7 +184,7 @@ templates:
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
@@ -219,7 +219,7 @@ templates:
           handler: handleApproved
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
         - event: MultisigSettingsUpdated(bool,indexed uint16)
           handler: handleMultisigSettingsUpdated
@@ -242,7 +242,7 @@ templates:
       eventHandlers:
         - event: MembershipContractAnnounced(indexed address)
           handler: handleMembershipContractAnnounced
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated

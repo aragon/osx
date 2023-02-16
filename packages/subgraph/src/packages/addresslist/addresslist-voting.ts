@@ -194,27 +194,6 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
   }
-
-  // update actions
-  let contract = AddresslistVoting.bind(event.address);
-  let proposal = contract.try_getProposal(event.params.proposalId);
-  if (!proposal.reverted) {
-    let actions = proposal.value.value4;
-    for (let index = 0; index < actions.length; index++) {
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
-
-      let actionEntity = Action.load(actionId);
-      if (actionEntity) {
-        actionEntity.execResult = event.params.execResults[index];
-        actionEntity.save();
-      }
-    }
-  }
 }
 
 export function handleVotingSettingsUpdated(

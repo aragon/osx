@@ -121,13 +121,8 @@ export function createNewProposalExecutedEvent(
     'proposalId',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
-  let execResultsParam = new ethereum.EventParam(
-    'execResults',
-    ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
-  );
 
   createProposalExecutedEvent.parameters.push(proposalIdParam);
-  createProposalExecutedEvent.parameters.push(execResultsParam);
 
   return createProposalExecutedEvent;
 }
@@ -224,7 +219,7 @@ export function createGetProposalCall(
   snapshotBlock: string,
 
   approvals: string,
-  
+
   actions: ethereum.Tuple[],
   allowFailureMap: string
 ): void {

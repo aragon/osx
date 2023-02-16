@@ -65,7 +65,7 @@ export function createNewProposalCreatedEvent(
   let actionsParam = new ethereum.EventParam(
     'actions',
     ethereum.Value.fromTupleArray(actions)
-  )
+  );
   let allowFailureMapParam = new ethereum.EventParam(
     'allowFailureMap',
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
@@ -134,13 +134,8 @@ export function createNewProposalExecutedEvent(
     'proposalId',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
-  let execResultsParam = new ethereum.EventParam(
-    'execResults',
-    ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
-  );
 
   createProposalExecutedEvent.parameters.push(proposalIdParam);
-  createProposalExecutedEvent.parameters.push(execResultsParam);
 
   return createProposalExecutedEvent;
 }
