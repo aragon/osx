@@ -194,11 +194,10 @@ describe('Admin', function () {
 
     it('correctly emits the `ProposalExecuted` event', async () => {
       const currentExpectedProposalId = 0;
-      const expectedDummyResults = ['0x'];
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
-        .withArgs(currentExpectedProposalId, expectedDummyResults);
+        .withArgs(currentExpectedProposalId);
     });
 
     it('correctly increments the proposal ID', async () => {

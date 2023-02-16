@@ -67,17 +67,15 @@ abstract contract Proposal is IProposal, ERC165 {
     /// @param _proposalId The ID of the proposal to be executed.
     /// @param _actions The array of actions to be executed.
     /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
+    /// @return execResults The array of results obtained from the executed actions in `bytes`.
+    /// @return failureMap The constructed failureMap which contains which actions have actually failed.
     function _executeProposal(
         IDAO _dao,
         uint256 _proposalId,
         IDAO.Action[] memory _actions,
         uint256 _allowFailureMap
-    ) internal virtual {
-        (bytes[] memory execResults, ) = _dao.execute(
-            bytes32(_proposalId),
-            _actions,
-            _allowFailureMap
-        );
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+    ) internal virtual returns (bytes[] memory execResults, uint256 failureMap) {
+        (execResults, failureMap) = _dao.execute(bytes32(_proposalId), _actions, _allowFailureMap);
+        emit ProposalExecuted({proposalId: _proposalId});
     }
 }
