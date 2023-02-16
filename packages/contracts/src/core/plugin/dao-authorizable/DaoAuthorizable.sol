@@ -26,7 +26,7 @@ abstract contract DaoAuthorizable is Context {
         return dao_;
     }
 
-    /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
+    /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through the associated DAO's permission manager.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
         _auth(dao_, address(this), _msgSender(), _permissionId, _msgData());

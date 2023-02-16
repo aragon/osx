@@ -39,7 +39,6 @@ The constructor in `Plugin` calls another parent class
 
 ```solidity title="contracts/contracts/core/plugin/Plugin.sol"
 constructor(IDAO _dao) DaoAuthorizable(_dao) {}
-
 ```
 
 This sets the `DAO` in the plugin's storage.
@@ -70,7 +69,6 @@ You protect it from being used multiple times by using [OpenZepplin's `initializ
 function __PluginCloneable_init(IDAO _dao) internal virtual onlyInitializing {
   __DaoAuthorizableCloneable_init(_dao);
 }
-
 ```
 
 This function comes from the `PluginCloneable` base contract and takes care of storing the associated DAO in the plugin's storage.

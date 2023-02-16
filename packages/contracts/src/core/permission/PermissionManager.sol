@@ -23,22 +23,21 @@ contract PermissionManager is Initializable {
     /// @notice A special address encoding if a permission is allowed.
     address internal constant ALLOW_FLAG = address(2);
 
-    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionCondition`).
+    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
     mapping(bytes32 => address) internal permissionsHashed;
 
     /// @notice Thrown if a call is unauthorized.
-    /// @param here The context in which the authorization reverted.
-    /// @param where The contract requiring the permission.
+    /// @param where The context in which the authorization reverted.
     /// @param who The address (EOA or contract) missing the permission.
     /// @param permissionId The permission identifier.
-    error Unauthorized(address here, address where, address who, bytes32 permissionId);
+    error Unauthorized(address where, address who, bytes32 permissionId);
 
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
 
     /// @notice Thrown if a permission has been already granted with a different condition.
     /// @dev This makes sure that condition on the same permission can not be overwriten by a different condition.
-    /// @param where The address of the target contract to grant `who` permission to.
+    /// @param where The address of the target contract to grant `_who` permission to.
     /// @param who The address (EOA or contract) to which the permission has already been granted.
     /// @param permissionId The permission identifier.
     /// @param currentCondition The current condition set for permissionId
@@ -62,10 +61,10 @@ contract PermissionManager is Initializable {
 
     // Events
 
-    /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `who` for the contract `where`.
+    /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is granted.
-    /// @param where The address of the target contract for which `who` receives permission.
+    /// @param where The address of the target contract for which `_who` receives permission.
     /// @param who The address (EOA or contract) receiving the permission.
     /// @param condition The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionCondition` to be used.
     event Granted(
@@ -76,10 +75,10 @@ contract PermissionManager is Initializable {
         IPermissionCondition condition
     );
 
-    /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `who` for the contract `where`.
+    /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is revoked.
-    /// @param where The address of the target contract for which `who` loses permission
+    /// @param where The address of the target contract for which `_who` loses permission.
     /// @param who The address (EOA or contract) losing the permission.
     event Revoked(
         bytes32 indexed permissionId,
@@ -88,11 +87,10 @@ contract PermissionManager is Initializable {
         address indexed who
     );
 
-    /// @notice A modifier to be used to check permissions on a target contract.
-    /// @param _where The address of the target contract for which the permission is required.
+    /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    modifier auth(address _where, bytes32 _permissionId) {
-        _auth(_where, _permissionId);
+    modifier auth(bytes32 _permissionId) {
+        _auth(_permissionId);
         _;
     }
 
@@ -105,20 +103,20 @@ contract PermissionManager is Initializable {
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
     function grant(
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         _grant(_where, _who, _permissionId);
     }
 
     /// @notice Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier if the referenced condition permits it.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
     /// @param _condition The `PermissionCondition` that will be asked for authorization on calls connected to the specified permission identifier.
@@ -127,31 +125,30 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         _grantWithCondition(_where, _who, _permissionId, _condition);
     }
 
     /// @notice Revokes permission from an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _where The address of the target contract for which `who` loses permission.
+    /// @param _where The address of the target contract for which `_who` loses permission.
     /// @param _who The address (EOA or contract) losing the permission.
     /// @param _permissionId The permission identifier.
     function revoke(
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         _revoke(_where, _who, _permissionId);
     }
 
-    /// @notice Processes bulk items on the permission manager.
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _where The address of the contract.
-    /// @param items The array of bulk items to process.
+    /// @notice Applies an array of permission operations on a single target contracts `_where`.
+    /// @param _where The address of the single target contract.
+    /// @param items The array of single-targeted permission operations to apply.
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    ) external auth(ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
 
@@ -167,16 +164,13 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Processes bulk items on the permission manager.
-    /// @dev Requires that msg.sender has each permissionId on the where.
-    /// @param items The array of bulk items to process.
+    /// @notice Applies an array of permission operations on multiple target contracts `items[i].where`.
+    /// @param _items The array of multi-targeted permission operations to apply.
     function applyMultiTargetPermissions(
-        PermissionLib.MultiTargetPermission[] calldata items
-    ) external {
-        for (uint256 i; i < items.length; ) {
-            PermissionLib.MultiTargetPermission memory item = items[i];
-
-            _auth(item.where, ROOT_PERMISSION_ID);
+        PermissionLib.MultiTargetPermission[] calldata _items
+    ) external auth(ROOT_PERMISSION_ID) {
+        for (uint256 i; i < _items.length; ) {
+            PermissionLib.MultiTargetPermission memory item = _items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(item.where, item.who, item.permissionId);
@@ -198,11 +192,11 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return bool Returns true if `who` has the permissions on the target contract via the specified permission identifier.
+    /// @return bool Returns true if `_who` has the permissions on the target contract via the specified permission identifier.
     function isGranted(
         address _where,
         address _who,
@@ -210,9 +204,9 @@ contract PermissionManager is Initializable {
         bytes memory _data
     ) public view returns (bool) {
         return
-            _isGranted(_where, _who, _permissionId, _data) || // check if _who has permission for _permissionId on _where
-            _isGranted(_where, ANY_ADDR, _permissionId, _data) || // check if anyone has permission for _permissionId on _where
-            _isGranted(ANY_ADDR, _who, _permissionId, _data); // check if _who has permission for _permissionId on any contract
+            _isGranted(_where, _who, _permissionId, _data) || // check if `_who` has permission for `_permissionId` on `_where`
+            _isGranted(_where, ANY_ADDR, _permissionId, _data) || // check if anyone has permission for `_permissionId` on `_where`
+            _isGranted(ANY_ADDR, _who, _permissionId, _data); // check if `_who` has permission for `_permissionI` on any contract
     }
 
     /// @notice Grants the `ROOT_PERMISSION_ID` permission to the initial owner during initialization of the permission manager.
@@ -222,7 +216,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `grant` method of the permission manager.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     function _grant(address _where, address _who, bytes32 _permissionId) internal {
@@ -230,10 +224,10 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the internal `_grant` method of the permission manager.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _condition The PermissionCondition to be used or it is just the ALLOW_FLAG.
+    /// @param _condition An address either resolving to a `PermissionCondition` contract address or being the `ALLOW_FLAG` address (`address(2)`).
     function _grantWithCondition(
         address _where,
         address _who,
@@ -266,7 +260,7 @@ contract PermissionManager is Initializable {
 
             emit Granted(_permissionId, msg.sender, _where, _who, _condition);
         } else if (currentCondition != newCondition) {
-            // Revert if the permHash is already granted, but uses a different condition.
+            // Revert if `permHash` is already granted, but uses a different condition.
             // If we don't revert, we either should:
             //   - allow overriding the condition on the same permission
             //     which could be confusing whoever granted the same permission first
@@ -282,7 +276,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     function _revoke(address _where, address _who, bytes32 _permissionId) internal {
@@ -294,12 +288,12 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @notice Checks if a caller is granted permissions on a target contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _data The optional data passed to the `PermissionCondition` registered..
-    /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionId identifier.
+    /// @param _data The optional data passed to the `PermissionCondition` registered.
+    /// @return bool Returns true if `_who` has the permissions on the contract via the specified permissionId identifier.
     function _isGranted(
         address _where,
         address _who,
@@ -328,17 +322,12 @@ contract PermissionManager is Initializable {
         return false;
     }
 
-    /// @notice A private function to be used to check permissions on a target contract.
-    /// @param _where The address of the target contract for which the permission is required.
+    /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    function _auth(address _where, bytes32 _permissionId) private view {
-        if (
-            !isGranted(address(this), msg.sender, _permissionId, msg.data) &&
-            !isGranted(_where, msg.sender, _permissionId, msg.data)
-        ) {
+    function _auth(bytes32 _permissionId) private view {
+        if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
             revert Unauthorized({
-                here: address(this),
-                where: _where,
+                where: address(this),
                 who: msg.sender,
                 permissionId: _permissionId
             });
@@ -346,7 +335,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
-    /// @param _where The address of the target contract for which `who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @return bytes32 The permission hash.

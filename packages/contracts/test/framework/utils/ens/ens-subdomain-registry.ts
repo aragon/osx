@@ -362,7 +362,6 @@ describe('ENSSubdomainRegistrar', function () {
           .withArgs(
             managingDao.address,
             registrar.address,
-            registrar.address,
             signers[1].address,
             REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
@@ -378,7 +377,6 @@ describe('ENSSubdomainRegistrar', function () {
           .to.be.revertedWithCustomError(registrar, 'DaoUnauthorized')
           .withArgs(
             managingDao.address,
-            registrar.address,
             registrar.address,
             signers[1].address,
             REGISTER_ENS_SUBDOMAIN_PERMISSION_ID

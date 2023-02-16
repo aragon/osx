@@ -48,7 +48,6 @@ describe('TestParameterScopingCondition', function () {
     expectedUnauthorizedErrorArguments = [
       managingDao.address,
       testPlugin.address,
-      testPlugin.address,
       ownerAddress,
       DO_SOMETHING_PERMISSION_ID,
     ];

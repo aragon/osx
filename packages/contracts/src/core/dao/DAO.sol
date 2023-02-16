@@ -133,14 +133,12 @@ contract DAO is
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
-    function _authorizeUpgrade(
-        address
-    ) internal virtual override auth(address(this), UPGRADE_DAO_PERMISSION_ID) {}
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_DAO_PERMISSION_ID) {}
 
     /// @inheritdoc IDAO
     function setTrustedForwarder(
         address _newTrustedForwarder
-    ) external override auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID) {
+    ) external override auth(SET_TRUSTED_FORWARDER_PERMISSION_ID) {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
@@ -162,7 +160,7 @@ contract DAO is
     /// @inheritdoc IDAO
     function setMetadata(
         bytes calldata _metadata
-    ) external override auth(address(this), SET_METADATA_PERMISSION_ID) {
+    ) external override auth(SET_METADATA_PERMISSION_ID) {
         _setMetadata(_metadata);
     }
 
@@ -174,7 +172,7 @@ contract DAO is
     )
         external
         override
-        auth(address(this), EXECUTE_PERMISSION_ID)
+        auth(EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
         if (_actions.length > MAX_ACTIONS) {
@@ -240,7 +238,7 @@ contract DAO is
     /// @inheritdoc IDAO
     function setSignatureValidator(
         address _signatureValidator
-    ) external override auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
+    ) external override auth(SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
         signatureValidator = IERC1271(_signatureValidator);
 
         emit SignatureValidatorSet({signatureValidator: _signatureValidator});
@@ -312,7 +310,7 @@ contract DAO is
         bytes4 _interfaceId,
         bytes4 _callbackSelector,
         bytes4 _magicNumber
-    ) external override auth(address(this), REGISTER_STANDARD_CALLBACK_PERMISSION_ID) {
+    ) external override auth(REGISTER_STANDARD_CALLBACK_PERMISSION_ID) {
         _registerInterface(_interfaceId);
         _registerCallback(_callbackSelector, _magicNumber);
         emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
@@ -325,9 +323,7 @@ contract DAO is
 
     /// @notice Updates the set DAO uri to a new value.
     /// @param newDaoURI The new DAO uri to be set.
-    function setDaoURI(
-        string calldata newDaoURI
-    ) external auth(address(this), SET_METADATA_PERMISSION_ID) {
+    function setDaoURI(string calldata newDaoURI) external auth(SET_METADATA_PERMISSION_ID) {
         _setDaoURI(newDaoURI);
     }
 

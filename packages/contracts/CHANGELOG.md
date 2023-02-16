@@ -17,12 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the ERC165 interface ID and `supportsInterface` computations.
 - Replaced non-upgradeable contract dependencies by upgradeable ones for the cloneable `Admin` plugin.
 - Refactored `ProposalBase` into `IProposal`.
+- Refactored the `auth` modifier to always use `where = address(this)` and adapted errors.
 - Use OZ's upgradeable contracts for `PluginCloneable`.
 - Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
 
 ### Removed
 
 - Merged `IMembershipContract` into `IMembership`.
+- Removed the `_auth` in `PermissionManager` that allowed for having the `ROOT_PERMISSION_ID` permission for a specific `where` target contract.
 - Removed the `WITHDRAW_PERMISSION_ID`.
 - Removed `DaoAuthorizableCloneable` and `DaoAuthorizableBase`.
 - Moved the array length check for the `MintSettings` from `TokenVotingSetup` into `GovernanceERC20` contract.

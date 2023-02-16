@@ -120,7 +120,6 @@ describe('PluginRepoFactory: ', function () {
       .withArgs(
         managingDao.address,
         pluginRepoRegistry.address,
-        pluginRepoRegistry.address,
         pluginRepoFactory.address,
         REGISTER_PLUGIN_REPO_PERMISSION_ID
       );
