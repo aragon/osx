@@ -12,7 +12,6 @@ import * as PermissionLib from '../artifacts/src/core/permission/PermissionLib.s
 //// dao
 import * as DAOFactory from '../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 import * as DAORegistry from '../artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json';
-import * as TokenFactory from '../artifacts/src/framework/utils/TokenFactory.sol/TokenFactory.json';
 
 //// plugin
 import * as PluginRepo from '../artifacts/src/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
@@ -24,8 +23,6 @@ import * as TokenVoting from '../artifacts/src/plugins/governance/majority-votin
 import * as AddresslistVoting from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
 import * as Admin from '../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
 import * as Multisig from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
-import * as MerkleMinter from '../artifacts/src/plugins/token/MerkleMinter.sol/MerkleMinter.json';
-import * as MerkleDistributor from '../artifacts/src/plugins/token/MerkleDistributor.sol/MerkleDistributor.json';
 
 // token
 //// governance
@@ -38,7 +35,6 @@ export default {
   PermissionLib,
 
   DAOFactory,
-  TokenFactory,
   DAORegistry,
 
   PluginRepo,
@@ -49,9 +45,6 @@ export default {
   AddresslistVoting,
   Admin,
   Multisig,
-
-  MerkleMinter,
-  MerkleDistributor,
 
   GovernanceERC20,
   GovernanceWrappedERC20,
