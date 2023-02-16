@@ -146,7 +146,7 @@ describe.skip('DAOFactory: ', function () {
     );
 
     // Plugin Setup Processor
-    psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
+    psp = await deployPluginSetupProcessor(pluginRepoRegistry);
 
     // Plugin Repo Factory
     pluginRepoFactory = await deployPluginRepoFactory(

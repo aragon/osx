@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed unused `DaoAuthorizable` dependency from `PluginSetupProcessor`.
 - Merged `IMembershipContract` into `IMembership`.
 - Removed the `_auth` in `PermissionManager` that allowed for having the `ROOT_PERMISSION_ID` permission for a specific `where` target contract.
 - Removed the `WITHDRAW_PERMISSION_ID`.
