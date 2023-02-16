@@ -165,6 +165,24 @@ templates:
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
+  - name: GovernanceERC20
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: GovernanceERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/token/governance-erc20.ts
+      entities:
+        - Dao
+      abis:
+        - name: GovernanceERC20
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
   # AddresslistVoting (package)
   - name: AddresslistVoting
     kind: ethereum/contract
