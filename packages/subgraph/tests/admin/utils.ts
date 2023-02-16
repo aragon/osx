@@ -66,7 +66,6 @@ export function createNewProposalCreatedEvent(
 
 export function createProposalExecutedEvent(
   proposalId: string,
-  execResults: string[],
   contractAddress: string
 ): ProposalExecuted {
   let createProposalExecutedEvent = changetype<ProposalExecuted>(
@@ -81,19 +80,7 @@ export function createProposalExecutedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
 
-  let execResultsBytesArray = new Array<Bytes>();
-  for (let index = 0; index < execResults.length; index++) {
-    const result = execResults[index];
-    execResultsBytesArray.push(Bytes.fromUTF8(result));
-  }
-
-  let execResultsParam = new ethereum.EventParam(
-    'execResults',
-    ethereum.Value.fromBytesArray(execResultsBytesArray)
-  );
-
   createProposalExecutedEvent.parameters.push(proposalIdParam);
-  createProposalExecutedEvent.parameters.push(execResultsParam);
 
   return createProposalExecutedEvent;
 }
