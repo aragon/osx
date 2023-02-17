@@ -117,7 +117,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
 
-describe('Plugin Setup Processor', function () {
+describe.only('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -425,7 +425,7 @@ describe('Plugin Setup Processor', function () {
         ).not.to.be.reverted;
       });
 
-      it.only("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
+      it("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
         // Uses setupUV1
         const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
 
@@ -642,37 +642,6 @@ describe('Plugin Setup Processor', function () {
         )
           .to.emit(psp, 'InstallationApplied')
           .withArgs(targetDao.address, plugin, preparedSetupId, appliedSetupId);
-      });
-
-      it.skip('TODO:successfully calls daos multi bulk with correct permissions', async () => {
-        const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
-
-        const {
-          plugin,
-          preparedSetupData: {permissions, helpers},
-        } = await prepareInstallation(
-          psp,
-          targetDao.address,
-          pluginRepoPointer,
-          EMPTY_DATA
-        );
-
-        await psp.applyInstallation(
-          targetDao.address,
-          createApplyInstallationParams(
-            plugin,
-            pluginRepoPointer,
-            permissions,
-            helpers
-          )
-        );
-
-        // Reset the cache so previus tests don't trick this test that
-        // the function was really called, even though it mightn't have been.
-        // This is needed because smock contracts are not deployed in beforeEach,
-        // but in before, so there's only one instance of them for all tests.
-        setupUV1.prepareInstallation.reset();
-        // PRoblem with dao smock.
       });
 
       // 1. call prepareinstall 2 times for the same plugin version
@@ -1017,7 +986,7 @@ describe('Plugin Setup Processor', function () {
         setupUV1.prepareUninstallation.reset();
       });
 
-      it.only("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
+      it("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
         const data = '0x11';
 
         // Reset the cache so previus tests don't trick this test that
@@ -1160,10 +1129,6 @@ describe('Plugin Setup Processor', function () {
         )
           .to.be.revertedWithCustomError(psp, 'SetupNotApplicable')
           .withArgs(preparedSetupId);
-      });
-
-      it.skip('successfully calls daos multi bulk with correct permissions', async () => {
-        // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
       });
 
       it('EDGE-CASE: reverts for all uninstall preparations once one of them is applied', async () => {
@@ -1590,7 +1555,7 @@ describe('Plugin Setup Processor', function () {
         expect(setupUV4.prepareUpdate).to.have.callCount(0);
       });
 
-      it.only("successfully calls plugin setup's prepareUpdate with correct arguments", async () => {
+      it("successfully calls plugin setup's prepareUpdate with correct arguments", async () => {
         const data = '0x11';
 
         // Reset the cache so previus tests don't trick this test that
@@ -1949,8 +1914,97 @@ describe('Plugin Setup Processor', function () {
       ).to.be.reverted;
     });
 
-    it.skip('successfully calls daos multi bulk with correct permissions', async () => {
-      // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
+    describe('Whether upgrade functions of proxy get called the right way', async () => {
+      let fake: any;
+
+      beforeEach(async () => {
+        // create a fake on the same plugin(proxy) address.
+        fake = await smock.fake('PluginUUPSUpgradeable', {
+          address: proxy,
+        });
+
+        // Since smock fake will end up having functions that always returns
+        // Solidity default values, the below overrides them with the correct data
+        // So when PSP calls it, it can expect the same information as if it would call
+        // the normal/original `proxy/plugin`.
+        fake.supportsInterface.whenCalledWith('0x00000000').returns(false);
+        fake.supportsInterface.whenCalledWith('0x01ffc9a7').returns(true);
+        fake.supportsInterface.whenCalledWith('0x41de6830').returns(true);
+      });
+
+      it('correctly applies updates when plugin setups are same, but UI different', async () => {
+        // plugin setup addresses are the same, so it treats it as UIs are different.
+        const currentV: VersionTag = [1, 5];
+        const newV: VersionTag = [1, 6];
+        const currentPluginRepoPointer: PluginRepoPointer = [
+          repoU.address,
+          1,
+          5,
+        ];
+
+        const {plugin, helpers} = await installPlugin(
+          psp,
+          targetDao.address,
+          currentPluginRepoPointer
+        );
+
+        updatePlugin(
+          psp,
+          targetDao.address,
+          plugin,
+          currentV,
+          newV,
+          repoU.address,
+          helpers,
+          EMPTY_DATA
+        );
+
+        expect(fake.upgradeTo).to.have.callCount(0);
+        expect(fake.upgradeToAndCall).to.have.callCount(0);
+      });
+
+      it('successfully calls `upgradeToAndCall` on plugin if initData was provided by pluginSetup', async () => {
+        const {initData} = await updatePlugin(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          newVersion, // uses setupUV2
+          repoU.address,
+          helpersUV1,
+          EMPTY_DATA
+        );
+
+        const newImpl = await setupUV2.getImplementationAddress();
+        expect(fake.upgradeToAndCall).to.have.been.calledWith(
+          newImpl,
+          initData
+        );
+      });
+
+      it('successfully calls `upgradeTo` on plugin if no initData was provided', async () => {
+        setupUV2.prepareUpdate.returns([
+          EMPTY_DATA,
+          [mockHelpers(1), mockPermissionsOperations(0, 1, Operation.Grant)],
+        ]);
+
+        const {initData} = await updatePlugin(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          newVersion, // uses setupUV2
+          repoU.address,
+          helpersUV1,
+          EMPTY_DATA
+        );
+
+        // Reset so other tests continue using the default/original data
+        setupUV2.prepareUpdate.reset();
+
+        const newImpl = await setupUV2.getImplementationAddress();
+        expect(fake.upgradeTo).to.have.been.calledWith(newImpl);
+      });
     });
 
     it('successfuly updates and emits the correct event arguments', async () => {
@@ -2048,7 +2102,20 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it.only('updates to V2', async () => {
+      it('updates to V2: Contract was actually updated', async () => {
+        await updateAndValidatePluginUpdate(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          [1, 2],
+          pluginRepoPointer[0],
+          helpersUV1,
+          EMPTY_DATA
+        );
+      });
+
+      it('updates to V2: fake (was it called)', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2382,7 +2449,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       // Special case where implementations from old and new setups don't change.
-      it.only('updates to v5', async () => {
+      it('updates to v5', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2408,11 +2475,7 @@ async function updateAndValidatePluginUpdate(
   currentHelpers: string[],
   data: BytesLike = EMPTY_DATA
 ) {
-  const fake = await smock.fake('PluginUUPSUpgradeable', {
-    address: proxy,
-  });
-
-  const {initData} = await updatePlugin(
+  await updatePlugin(
     psp,
     targetDao,
     proxy,
@@ -2444,8 +2507,6 @@ async function updateAndValidatePluginUpdate(
   );
   const newPluginSetup = PluginSetupFactory.attach(newVersion.pluginSetup);
 
-  // TODO: Giorgi Not working..
-
   // If the base contracts don't change from current and new plugin setups,
   // PluginSetupProcessor shouldn't call `upgradeTo` or `upgradeToAndCall`
   // on the plugin. The below check for this still is not 100% ensuring,
@@ -2454,31 +2515,11 @@ async function updateAndValidatePluginUpdate(
   const currentImpl = await currentPluginSetup.getImplementationAddress();
   const newImpl = await newPluginSetup.getImplementationAddress();
 
-  if (currentImpl == newImpl) {
-    console.log('oho123123123');
-    expect(fake.upgradeTo).to.have.callCount(0);
-    expect(fake.upgradeToAndCall).to.have.callCount(0);
-  } else {
-    console.log('hahahahah_');
-    console.log(initData, ' good');
-    // if (initData == '0x') {
-    //   expect(fake.upgradeTo).to.have.been.calledWith(newImpl, initData);
-    // } else {
-    expect(fake.upgradeToAndCall).to.have.been.called;
-    // }
-    // Option 2: not works:
-    // const fake = await smock.fake('PluginUUPSUpgradeableV1Mock', {
-    //   address: currentImpl
-    // });
-    // expect(fake.upgradeToAndCall).to.be.delegatedFrom(proxy);
+  if (currentImpl != newImpl) {
+    const proxyContract = await ethers.getContractAt(
+      'PluginUUPSUpgradeable',
+      proxy
+    );
+    expect(await proxyContract.getImplementationAddress()).to.equal(newImpl);
   }
-
-  // if (currentImpl != newImpl) {
-  //   // ensure that the logic address was also correctly modified on the proxy.
-  //   const proxyContract = await ethers.getContractAt(
-  //     'PluginUUPSUpgradeable',
-  //     proxy
-  //   );
-  //   expect(await proxyContract.getImplementationAddress()).to.equal(newImpl);
-  // }
 }
