@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 
 import {
   DAORegistry,
@@ -22,9 +23,9 @@ import {findEvent} from '../../../utils/event';
 import {getMergedABI} from '../../../utils/abi';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
-import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
 import {PluginRepoPointer} from '../../test-utils/psp/types';
+import {createPrepareInstallationParams} from '../../test-utils/psp/create-params';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -239,16 +240,15 @@ describe('DAOFactory: ', function () {
       daoURI: daoExampleURI,
     };
 
-    votingPluginInstallationData = {
-      pluginSetupRef: {
-        versionTag: {
-          release: 1,
-          build: 1,
-        },
-        pluginSetupRepo: pluginSetupMockRepoAddress,
-      },
-      data: EMPTY_DATA,
-    };
+    const pluginRepoPointer: PluginRepoPointer = [
+      pluginSetupMockRepoAddress,
+      1,
+      1,
+    ];
+    votingPluginInstallationData = createPrepareInstallationParams(
+      pluginRepoPointer,
+      EMPTY_DATA
+    );
   });
 
   it('reverts if no plugin is provided', async () => {
