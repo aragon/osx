@@ -10,18 +10,14 @@ import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.s
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
 
 contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
-    address internal pluginBase;
-
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV1Mock());
-    }
+    constructor() PluginSetup(address(new PluginUUPSUpgradeableV1Mock())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+    ) public override returns (address plugin, PreparedSetupData memory preparedSetupData) {
+        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
@@ -30,50 +26,63 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
-    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    )
+        external
+        pure
+        virtual
+        override
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
         (_dao, _payload);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
-
-    /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
-        return address(pluginBase);
-    }
 }
 
-contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
+contract PluginUUPSUpgradeableSetupV1MockBad is PluginSetup {
+    constructor() PluginSetup(address(0)) {}
+
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public pure override returns (address plugin, PreparedSetupData memory preparedSetupData) {
+    ) public view override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         (_dao);
-        plugin = address(0); // The bad behaviour is returning the same address over and over again
+        plugin = this.getImplementationAddress(); // The bad behaviour is returning the same address over and over again
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
     }
+
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external pure override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+        (_dao, _payload);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
+    }
 }
 
-contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV2Mock());
-    }
+contract PluginUUPSUpgradeableSetupV2Mock is PluginSetup {
+    constructor() PluginSetup(address(new PluginUUPSUpgradeableV2Mock())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
         preparedSetupData.helpers = mockHelpers(2);
         preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         uint16 _currentBuild,
         SetupPayload calldata _payload
     )
         public
+        pure
         virtual
         override
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
@@ -89,29 +98,44 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
             preparedSetupData.permissions = mockPermissions(1, 2, PermissionLib.Operation.Grant);
         }
     }
+
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    )
+        external
+        pure
+        virtual
+        override
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
+        (_dao, _payload);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
+    }
 }
 
-contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV3Mock());
-    }
+contract PluginUUPSUpgradeableSetupV3Mock is PluginSetup {
+    constructor() PluginSetup(address(new PluginUUPSUpgradeableV3Mock())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
         preparedSetupData.helpers = mockHelpers(3);
         preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         uint16 _currentBuild,
         SetupPayload calldata _payload
     )
         public
+        pure
         virtual
         override
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
@@ -136,16 +160,34 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
             preparedSetupData.permissions = mockPermissions(2, 3, PermissionLib.Operation.Grant);
         }
     }
+
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    )
+        external
+        pure
+        virtual
+        override
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
+        (_dao, _payload);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
+    }
 }
 
 /// @dev With this plugin setup, the plugin base implementation doesn't change.
 /// This setup is a good example when you want to design a new plugin setup
 /// which uses the same base implementation(doesn't update the logic contract)
 /// but applies new/modifier permissions on it.
+contract PluginUUPSUpgradeableSetupV4Mock is PluginSetup {
+    PluginUUPSUpgradeableSetupV3Mock internal setupV3;
 
-contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
-    constructor(address _pluginUUPSUpgradeableV3) {
-        pluginBase = _pluginUUPSUpgradeableV3;
+    constructor(
+        PluginUUPSUpgradeableSetupV3Mock _setupV3
+    ) PluginSetup(address(new PluginUUPSUpgradeableV3Mock())) {
+        setupV3 = _setupV3;
     }
 
     /// @inheritdoc IPluginSetup
@@ -153,17 +195,19 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
         preparedSetupData.helpers = mockHelpers(3);
         preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         uint16 _currentBuild,
         SetupPayload calldata _payload
     )
         public
+        view
         virtual
         override
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
@@ -181,9 +225,24 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         // returning the `initData` that will be called upon `upradeToAndCall` by plugin setup processor.
         // NOTE that dev is free to do what he wishes.
         else if (_currentBuild == 1 || _currentBuild == 2) {
-            (initData, preparedSetupData) = super.prepareUpdate(_dao, _currentBuild, _payload);
+            (initData, preparedSetupData) = setupV3.prepareUpdate(_dao, _currentBuild, _payload);
             // Even for this case, dev might decide to modify the permissions..
             preparedSetupData.permissions = mockPermissions(4, 5, PermissionLib.Operation.Grant);
         }
+    }
+
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    )
+        external
+        pure
+        virtual
+        override
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
+        (_dao, _payload);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
 }

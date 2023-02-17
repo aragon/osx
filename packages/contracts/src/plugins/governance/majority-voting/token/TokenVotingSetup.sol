@@ -26,9 +26,6 @@ contract TokenVotingSetup is PluginSetup {
     using Clones for address;
     using ERC165Checker for address;
 
-    /// @notice The address of the `TokenVoting` base contract.
-    TokenVoting private immutable tokenVotingBase;
-
     /// @notice The address zero to be used as condition address for permissions.
     address private constant NO_CONDITION = address(0);
 
@@ -61,7 +58,7 @@ contract TokenVotingSetup is PluginSetup {
     error WrongHelpersArrayLength(uint256 length);
 
     /// @notice The contract constructor, that deployes the bases.
-    constructor() {
+    constructor() PluginSetup(address(new TokenVoting())) {
         governanceERC20Base = address(
             new GovernanceERC20(
                 IDAO(address(0)),
@@ -73,7 +70,6 @@ contract TokenVotingSetup is PluginSetup {
         governanceWrappedERC20Base = address(
             new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
         );
-        tokenVotingBase = new TokenVoting();
     }
 
     /// @inheritdoc IPluginSetup
@@ -146,11 +142,13 @@ contract TokenVotingSetup is PluginSetup {
 
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
-            address(tokenVotingBase),
+            this.getImplementationAddress(),
             abi.encodeWithSelector(TokenVoting.initialize.selector, dao, votingSettings, token)
         );
 
         // Prepare permissions
+        TokenVoting tokenVotingBase = TokenVoting(this.getImplementationAddress());
+
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](
                 tokenSettings.addr != address(0) ? 3 : 4
@@ -218,6 +216,8 @@ contract TokenVotingSetup is PluginSetup {
 
         bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
 
+        TokenVoting tokenVotingBase = TokenVoting(this.getImplementationAddress());
+
         permissions = new PermissionLib.MultiTargetPermission[](isGovernanceERC20 ? 4 : 3);
 
         // Set permissions to be Revoked.
@@ -257,11 +257,6 @@ contract TokenVotingSetup is PluginSetup {
                 GovernanceERC20(token).MINT_PERMISSION_ID()
             );
         }
-    }
-
-    /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view override returns (address) {
-        return address(tokenVotingBase);
     }
 
     /// @notice Retrieves the interface identifiers supported by the token contract.

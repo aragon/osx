@@ -12,16 +12,11 @@ import {Multisig} from "./Multisig.sol";
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Multisig` plugin.
 contract MultisigSetup is PluginSetup {
-    /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
-    Multisig private immutable multisigBase;
-
     /// @notice The address zero to be used as condition address for permissions.
     address private constant NO_CONDITION = address(0);
 
     /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
-    constructor() {
-        multisigBase = new Multisig();
-    }
+    constructor() PluginSetup(address(new Multisig())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -38,7 +33,7 @@ contract MultisigSetup is PluginSetup {
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
-            address(multisigBase),
+            this.getImplementationAddress(),
             abi.encodeWithSelector(Multisig.initialize.selector, dao, members, multisigSettings)
         );
 
@@ -53,7 +48,7 @@ contract MultisigSetup is PluginSetup {
             plugin,
             _dao,
             NO_CONDITION,
-            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+            Multisig(plugin).UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.MultiTargetPermission(
@@ -61,7 +56,7 @@ contract MultisigSetup is PluginSetup {
             plugin,
             _dao,
             NO_CONDITION,
-            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            Multisig(plugin).UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -84,13 +79,15 @@ contract MultisigSetup is PluginSetup {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](3);
 
+        Multisig multisigImplementation = Multisig(this.getImplementationAddress());
+
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
             NO_CONDITION,
-            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+            multisigImplementation.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.MultiTargetPermission(
@@ -98,7 +95,7 @@ contract MultisigSetup is PluginSetup {
             _payload.plugin,
             _dao,
             NO_CONDITION,
-            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            multisigImplementation.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.MultiTargetPermission(
@@ -108,10 +105,5 @@ contract MultisigSetup is PluginSetup {
             NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
-    }
-
-    /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view override returns (address) {
-        return address(multisigBase);
     }
 }

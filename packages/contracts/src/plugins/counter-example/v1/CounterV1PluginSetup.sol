@@ -18,13 +18,11 @@ contract CounterV1PluginSetup is PluginSetup {
 
     // For testing purposes, the below are public...
     MultiplyHelper public multiplyHelperBase;
-    CounterV1 public counterBase;
 
     address private constant NO_CONDITION = address(0);
 
-    constructor() {
-        multiplyHelperBase = new MultiplyHelper();
-        counterBase = new CounterV1();
+    constructor(MultiplyHelper _helper) PluginSetup(address(new CounterV1())) {
+        multiplyHelperBase = _helper;
     }
 
     /// @inheritdoc IPluginSetup
@@ -52,6 +50,8 @@ contract CounterV1PluginSetup is PluginSetup {
             multiplyHelper,
             _num
         );
+
+        CounterV1 counterBase = CounterV1(this.getImplementationAddress());
 
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](
@@ -108,6 +108,8 @@ contract CounterV1PluginSetup is PluginSetup {
         );
 
         // set permissions
+        CounterV1 counterBase = CounterV1(this.getImplementationAddress());
+
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
@@ -133,10 +135,5 @@ contract CounterV1PluginSetup is PluginSetup {
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
-    }
-
-    /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
-        return address(counterBase);
     }
 }

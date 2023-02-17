@@ -16,9 +16,6 @@ import {Admin} from "./Admin.sol";
 contract AdminSetup is PluginSetup {
     using Clones for address;
 
-    /// @notice The address of `Admin` plugin logic contract to be cloned.
-    address private immutable implementation;
-
     /// @notice The address zero to be used as condition address for permissions.
     address private constant NO_CONDITION = address(0);
 
@@ -27,9 +24,7 @@ contract AdminSetup is PluginSetup {
     error AdminAddressInvalid(address admin);
 
     /// @notice The contract constructor, that deployes the `Admin` plugin logic contract.
-    constructor() {
-        implementation = address(new Admin());
-    }
+    constructor() PluginSetup(address(new Admin())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -46,7 +41,7 @@ contract AdminSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = implementation.clone();
+        plugin = this.getImplementationAddress().clone();
 
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(dao);

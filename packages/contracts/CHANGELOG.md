@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Set the implementation address in the constructor of `PluginSetup`.
 - Renamed `DAOSettings.name` to `DAOSettings.subdomain`.
 - Fixed the ERC165 interface ID and `supportsInterface` computations.
 - Replaced non-upgradeable contract dependencies by upgradeable ones for the cloneable `Admin` plugin.
