@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress} from '../helpers';
+import {getContractAddress, managePermission} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);
@@ -34,17 +34,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Grant `REGISTER_DAO_PERMISSION` to deployer.
-  const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
-
-  const grantTx = await managingDaoContract.grant(
-    daoRegistryAddress,
-    deployer,
-    REGISTER_DAO_PERMISSION_ID
-  );
-  await grantTx.wait();
-  console.log(
-    `Granted the REGISTER_DAO_PERMISSION of (DAORegistry: ${daoRegistryAddress}) to (Deployer: ${deployer}), see (tx: ${grantTx.hash})`
-  );
+  await managePermission({
+    isGrant: true,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'DAORegistry', address: daoRegistryAddress},
+    who: {name: 'Deployer', address: deployer},
+    permission: 'REGISTER_DAO_PERMISSION',
+  });
 
   // Register `managingDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
@@ -58,15 +54,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Revoke `REGISTER_DAO_PERMISSION` from deployer.
-  const revokeTx = await managingDaoContract.revoke(
-    daoRegistryAddress,
-    deployer,
-    REGISTER_DAO_PERMISSION_ID
-  );
-  await revokeTx.wait();
-  console.log(
-    `Revoked the REGISTER_DAO_PERMISSION of (DAORegistry: ${daoRegistryAddress}) from (Deployer: ${deployer}), see (tx: ${revokeTx.hash})`
-  );
+  await managePermission({
+    isGrant: false,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'DAORegistry', address: daoRegistryAddress},
+    who: {name: 'Deployer', address: deployer},
+    permission: 'REGISTER_DAO_PERMISSION',
+  });
 };
 export default func;
 func.tags = ['RegisterManagingDAO'];

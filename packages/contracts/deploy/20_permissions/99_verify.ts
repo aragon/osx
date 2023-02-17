@@ -47,35 +47,39 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // ENS PERMISSIONS
-  await checkPermission(
-    managingDaoContract,
-    daoEnsSubdomainRegistrarAddress,
-    daoRegistryAddress,
-    'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-  );
+  await checkPermission({
+    isGrant: true,
+    permissionManager: managingDaoContract,
+    where: daoEnsSubdomainRegistrarAddress,
+    who: daoRegistryAddress,
+    permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
+  });
 
-  await checkPermission(
-    managingDaoContract,
-    pluginEnsSubdomainRegistrarAddress,
-    pluginRepoRegistryAddress,
-    'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-  );
+  await checkPermission({
+    isGrant: true,
+    permissionManager: managingDaoContract,
+    where: pluginEnsSubdomainRegistrarAddress,
+    who: pluginRepoRegistryAddress,
+    permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
+  });
 
   // DAO REGISTRY PERMISSIONS
-  await checkPermission(
-    managingDaoContract,
-    daoRegistryAddress,
-    daoFactoryAddress,
-    'REGISTER_DAO_PERMISSION'
-  );
+  await checkPermission({
+    isGrant: true,
+    permissionManager: managingDaoContract,
+    where: daoRegistryAddress,
+    who: daoFactoryAddress,
+    permission: 'REGISTER_DAO_PERMISSION',
+  });
 
   // PLUGIN REPO REGISTRY PERMISSIONS
-  await checkPermission(
-    managingDaoContract,
-    pluginRepoRegistryAddress,
-    pluginRepoFactoryAddress,
-    'REGISTER_PLUGIN_REPO_PERMISSION'
-  );
+  await checkPermission({
+    isGrant: true,
+    permissionManager: managingDaoContract,
+    where: pluginRepoRegistryAddress,
+    who: pluginRepoFactoryAddress,
+    permission: 'REGISTER_PLUGIN_REPO_PERMISSION',
+  });
 
   console.log('Permissions verified');
 };

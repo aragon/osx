@@ -5,7 +5,7 @@ import buildMetadataJson from '../../src/plugins/governance/multisig/build-metad
 import {findEvent} from '../../utils/event';
 import {hashHelpers} from '../../test/test-utils/psp/hash-helpers';
 
-import {getContractAddress} from '../helpers';
+import {getContractAddress, managePermission} from '../helpers';
 
 interface Ehre extends HardhatRuntimeEnvironment {
   aragonPluginRepos: {multisig: string};
@@ -70,33 +70,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const event = await findEvent(prepareTx, 'InstallationPrepared');
   const installationPreparedEvent = event.args;
 
-  // Grant permissions
-  const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
-    'APPLY_INSTALLATION_PERMISSION'
-  );
-  const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
-
   // Grant `ROOT_PERMISSION` to `PluginSetupProcessor`.
-  const grantRootTx = await managingDaoContract.grant(
-    managingDAOAddress,
-    pspAddress,
-    ROOT_PERMISSION_ID
-  );
-  await grantRootTx.wait();
-  console.log(
-    `Granted the ROOT_PERMISSION_ID of (DAO: ${managingDAOAddress}) to (PluginSetupProcessor: ${pspAddress}), see (tx: ${grantRootTx.hash})`
-  );
+  await managePermission({
+    isGrant: true,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'DAO', address: managingDAOAddress},
+    who: {name: 'PluginSetupProcessor', address: pspAddress},
+    permission: 'ROOT_PERMISSION',
+  });
 
   // Grant `APPLY_INSTALLATION_PERMISSION` to `Deployer`.
-  const grantTx = await managingDaoContract.grant(
-    pspAddress,
-    deployer,
-    APPLY_INSTALLATION_PERMISSION_ID
-  );
-  await grantTx.wait();
-  console.log(
-    `Granted the APPLY_INSTALLATION_PERMISSION of (PluginSetupProcessor: ${pspAddress}) to (Deployer: ${deployer}), see (tx: ${grantTx.hash})`
-  );
+  await managePermission({
+    isGrant: true,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'PluginSetupProcessor', address: pspAddress},
+    who: {name: 'Deployer', address: deployer},
+    permission: 'APPLY_INSTALLATION_PERMISSION',
+  });
 
   // Apply multisig plugin to the managingDAO
   const applyParams = [
@@ -112,26 +102,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   applyTx.wait();
 
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
-  const revokeRootTx = await managingDaoContract.revoke(
-    managingDAOAddress,
-    pspAddress,
-    ROOT_PERMISSION_ID
-  );
-  await revokeRootTx.wait();
-  console.log(
-    `Revoked the ROOT_PERMISSION of (DAO: ${managingDAOAddress}) to (PluginSetupProcessor: ${pspAddress}), see (tx: ${grantRootTx.hash})`
-  );
+  await managePermission({
+    isGrant: false,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'DAO', address: managingDAOAddress},
+    who: {name: 'PluginSetupProcessor', address: pspAddress},
+    permission: 'ROOT_PERMISSION',
+  });
 
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
-  const revokeTx = await managingDaoContract.revoke(
-    pspAddress,
-    deployer,
-    APPLY_INSTALLATION_PERMISSION_ID
-  );
-  await revokeTx.wait();
-  console.log(
-    `Revoked the APPLY_INSTALLATION_PERMISSION of (PluginSetupProcessor: ${pspAddress}) from (Deployer: ${deployer}), see (tx: ${revokeTx.hash})`
-  );
+  await managePermission({
+    isGrant: false,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'PluginSetupProcessor', address: pspAddress},
+    who: {name: 'Deployer', address: deployer},
+    permission: 'APPLY_INSTALLATION_PERMISSION',
+  });
 };
 export default func;
 func.tags = ['InstallMultisigOnManagingDAO'];

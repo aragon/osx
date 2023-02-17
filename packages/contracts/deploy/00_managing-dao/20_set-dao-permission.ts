@@ -1,32 +1,22 @@
-import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
 
-import {checkPermission, getContractAddress} from '../helpers';
+import {getContractAddress, managePermission} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nVerifying managing DAO deployment.');
-
   const {getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
+
   // Get `DAO` contract.
   const managingDaoContract = await ethers.getContractAt(
     'DAO',
     managingDAOAddress
   );
 
-  // Check that deployer has root permission.
-  await checkPermission({
-    isGrant: true,
-    permissionManager: managingDaoContract,
-    where: managingDAOAddress,
-    who: deployer,
-    permission: 'ROOT_PERMISSION',
-  });
-
-  // check that the DAO have all permissions set correctly
+  // Set all the permission needed for a DAO to operate normally as if it was created via DAOFactory.
   const permissions = [
     'ROOT_PERMISSION',
     'UPGRADE_DAO_PERMISSION',
@@ -39,16 +29,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   for (let index = 0; index < permissions.length; index++) {
     const permission = permissions[index];
 
-    await checkPermission({
+    await managePermission({
       isGrant: true,
-      permissionManager: managingDaoContract,
-      where: managingDAOAddress,
-      who: managingDAOAddress,
+      permissionManagerContract: managingDaoContract,
+      where: {name: 'managingDAO', address: managingDAOAddress},
+      who: {name: 'managingDAO', address: managingDAOAddress},
       permission: permission,
     });
   }
-
-  console.log('Managing DAO deployment verified');
 };
 export default func;
-func.tags = ['ManagingDao'];
+func.tags = ['SetDAOPermissions'];

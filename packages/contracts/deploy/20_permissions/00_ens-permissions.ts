@@ -43,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'REGISTER_ENS_SUBDOMAIN_PERMISSION'
   );
 
-  // Gransting Permissions
+  // Granting Permissions
   grantTx = await managingDaoContract.grant(
     daoEnsSubdomainRegistrarAddress,
     daoRegistryAddress,

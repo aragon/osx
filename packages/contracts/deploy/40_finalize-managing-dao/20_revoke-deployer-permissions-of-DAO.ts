@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress} from '../helpers';
+import {getContractAddress, managePermission} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {getNamedAccounts, ethers} = hre;
@@ -16,18 +16,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress
   );
 
-  const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
-
-  // Revoke
-  const revokeTx = await managingDaoContract.revoke(
-    managingDAOAddress,
-    deployer,
-    ROOT_PERMISSION_ID
-  );
-  await revokeTx.wait();
-  console.log(
-    `Revoked the ROOT_PERMISSION_ID of (managingDAO: ${managingDAOAddress}) from Deployer (Deployer: ${deployer}) (tx: ${revokeTx.hash})`
-  );
+  // Revoke `ROOT_PERMISSION` from `Deployer`.
+  await managePermission({
+    isGrant: false,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'managingDAO', address: managingDAOAddress},
+    who: {name: 'Deployer', address: deployer},
+    permission: 'ROOT_PERMISSION',
+  });
 
   console.log(
     `\nManagingDao is no longer owned by the (Deployer: ${deployer}),` +

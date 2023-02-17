@@ -167,13 +167,23 @@ export async function checkSetManagingDao(
   }
 }
 
-export async function checkPermission(
-  permissionManager: Contract,
-  where: string,
-  who: string,
-  permission: string,
-  data = '0x'
-) {
+export interface CheckPermission {
+  isGrant: boolean;
+  permissionManager: ethers.Contract;
+  where: string;
+  who: string;
+  permission: string;
+  data?: string;
+}
+
+export async function checkPermission({
+  isGrant,
+  permissionManager,
+  where,
+  who,
+  permission,
+  data = '0x',
+}: CheckPermission) {
   const permissionId = ethers.utils.id(permission);
   const isGranted = await permissionManager.callStatic.isGranted(
     where,
@@ -181,11 +191,46 @@ export async function checkPermission(
     permissionId,
     data
   );
-  if (!isGranted) {
+  if (!isGranted && isGrant) {
     throw new Error(
       `${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`
     );
+  } else if (isGranted && !isGrant) {
+    throw new Error(
+      `${who} have ${permission} on ${where} in ${permissionManager.address}`
+    );
   }
+}
+
+export interface ManagePermission {
+  isGrant: boolean;
+  permissionManagerContract: ethers.Contract;
+  where: {name: string; address: string};
+  who: {name: string; address: string};
+  permission: string;
+}
+
+export async function managePermission({
+  isGrant,
+  permissionManagerContract,
+  where,
+  who,
+  permission,
+}: ManagePermission): Promise<void> {
+  const operation = isGrant
+    ? permissionManagerContract.grant
+    : permissionManagerContract.revoke;
+
+  const permissionId = ethers.utils.id(permission);
+
+  const tx = await operation(where.address, who.address, permissionId);
+  await tx.wait();
+
+  console.log(
+    `${isGrant ? 'Granted' : 'Revoked'} the ${permission} of (${where.name}: ${
+      where.address
+    }) for (${who.name}: ${who.address}), see (tx: ${tx.hash})`
+  );
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
