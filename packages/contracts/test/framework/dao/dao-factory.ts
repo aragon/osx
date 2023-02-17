@@ -7,6 +7,9 @@ import {
   PluginSetupProcessor,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginRepoRegistry,
+  DAOFactory,
+  DAOFactory__factory,
+  PluginRepoFactory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -19,12 +22,18 @@ import {findEvent} from '../../../utils/event';
 import {getMergedABI} from '../../../utils/abi';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
+import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
+import {PluginRepoPointer} from '../../test-utils/psp/types';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
   DAORegistered: 'DAORegistered',
   InstallationPrepared: 'InstallationPrepared',
   InstallationApplied: 'InstallationApplied',
+  MetadataSet: 'MetadataSet',
+  TrustedForwarderSet: 'TrustedForwarderSet',
+  NewURI: 'NewURI',
   Revoked: 'Revoked',
   Granted: 'Granted',
 };
@@ -48,10 +57,13 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
+const REGISTER_STANDARD_CALLBACK_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_STANDARD_CALLBACK_PERMISSION'
+);
+
 const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
-const PermissionManagerAllowFlagAddress =
-  '0x0000000000000000000000000000000000000002';
+const ALLOW_FLAG_CONDITION = '0x0000000000000000000000000000000000000002';
 const daoDummySubdomain = 'dao1';
 const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
@@ -72,7 +84,10 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
     ({event}: {event: any}) => event === EVENTS.DAORegistered
   ).args;
 
-  const {plugin, helpers, permissions} = events.find(
+  const {
+    plugin,
+    preparedSetupData: {permissions, helpers},
+  } = events.find(
     ({event}: {event: any}) => event === EVENTS.InstallationPrepared
   ).args;
 
@@ -86,18 +101,27 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   };
 }
 
-describe.skip('DAOFactory: ', function () {
-  let daoFactory: any;
+async function getAnticipatedAddress(from: string) {
+  let nonce = await ethers.provider.getTransactionCount(from);
+  const anticipatedAddress = ethers.utils.getContractAddress({
+    from: from,
+    nonce,
+  });
+  return anticipatedAddress;
+}
+
+describe('DAOFactory: ', function () {
+  let daoFactory: DAOFactory;
   let managingDao: any;
 
   let psp: PluginSetupProcessor;
   let pluginRepoRegistry: PluginRepoRegistry;
   let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
-  let pluginRepoFactory: any;
+  let pluginRepoFactory: PluginRepoFactory;
   let pluginSetupMockRepoAddress: any;
   let daoRegistry: DAORegistry;
   let daoSettings: any;
-  let votingSettings: any;
+  let votingPluginInstallationData: any;
 
   let signers: SignerWithAddress[];
   let ownerAddress: string;
@@ -159,7 +183,7 @@ describe.skip('DAOFactory: ', function () {
       mergedABI,
       daoFactoryBytecode,
       signers[0]
-    );
+    ) as DAOFactory__factory;
     daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
 
     // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
@@ -196,11 +220,13 @@ describe.skip('DAOFactory: ', function () {
       'PluginUUPSUpgradeableSetupV1Mock'
     );
     pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
+
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       'plugin-uupsupgradeable-setup-v1-mock',
       pluginSetupV1Mock.address,
+      ownerAddress,
       '0x00',
-      ownerAddress
+      '0x00'
     );
     const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
     pluginSetupMockRepoAddress = event.args.pluginRepo;
@@ -213,9 +239,14 @@ describe.skip('DAOFactory: ', function () {
       daoURI: daoExampleURI,
     };
 
-    votingSettings = {
-      pluginSetup: pluginSetupV1Mock.address,
-      pluginSetupRepo: pluginSetupMockRepoAddress,
+    votingPluginInstallationData = {
+      pluginSetupRef: {
+        versionTag: {
+          release: 1,
+          build: 1,
+        },
+        pluginSetupRepo: pluginSetupMockRepoAddress,
+      },
       data: EMPTY_DATA,
     };
   });
@@ -226,28 +257,79 @@ describe.skip('DAOFactory: ', function () {
     ).to.be.revertedWithCustomError(daoFactory, 'NoPluginProvided');
   });
 
-  it('correctly creates a DAO with one plugin', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
-    const {dao, plugin, helpers, permissions} =
-      await extractInfoFromCreateDaoTx(tx);
+  it('creates a dao and initializes with correct args', async () => {
+    const dao = await getAnticipatedAddress(daoFactory.address);
+
+    const factory = await ethers.getContractFactory('DAO');
+    const daoContract = factory.attach(dao);
+
+    expect(
+      await daoFactory.createDao(daoSettings, [votingPluginInstallationData])
+    )
+      .to.emit(daoContract, EVENTS.MetadataSet)
+      .withArgs(daoSettings.metadata)
+      .to.emit(daoContract, EVENTS.TrustedForwarderSet)
+      .withArgs(daoSettings.trustedForwarder)
+      .to.emit(daoContract, EVENTS.NewURI)
+      .withArgs(daoSettings.daoURI);
+  });
+
+  it('creates a dao with a plugin and emits correct events', async () => {
+    const expectedDao = await getAnticipatedAddress(daoFactory.address);
+    const expectedPlugin = await getAnticipatedAddress(
+      pluginSetupV1Mock.address
+    );
+
+    const {
+      plugin,
+      preparedSetupData: {permissions, helpers},
+    } = await pluginSetupV1Mock.callStatic.prepareInstallation(
+      expectedDao,
+      votingPluginInstallationData.data
+    );
+
+    const tx = await daoFactory.createDao(daoSettings, [
+      votingPluginInstallationData,
+    ]);
+    const {dao} = await extractInfoFromCreateDaoTx(tx);
+
+    const pluginRepoPointer: PluginRepoPointer = [
+      pluginSetupMockRepoAddress,
+      1,
+      1,
+    ];
+
+    expect(dao).to.equal(expectedDao);
+    expect(plugin).to.equal(expectedPlugin);
 
     await expect(tx)
       .to.emit(daoRegistry, EVENTS.DAORegistered)
-      .withArgs(dao, ownerAddress, daoSettings.subdomain);
-
-    const event = await findEvent(tx, EVENTS.InstallationPrepared);
-
-    expect(event.args.sender).to.equal(daoFactory.address);
-    expect(event.args.dao).to.equal(dao);
-    expect(event.args.plugin).to.equal(plugin);
-    expect(event.args.pluginSetup).to.equal(pluginSetupV1Mock.address);
-    expect(event.args.helpers).to.deep.equal(helpers);
-    expect(event.args.permissions).to.deep.equal(permissions);
-    expect(event.args.data).to.equal(EMPTY_DATA);
-
-    await expect(tx)
+      .withArgs(dao, ownerAddress, daoSettings.subdomain)
+      .to.emit(psp, EVENTS.InstallationPrepared)
+      .withArgs(
+        daoFactory.address,
+        dao,
+        anyValue,
+        pluginSetupMockRepoAddress,
+        (val: any) => expect(val).to.deep.equal([1, 1]),
+        EMPTY_DATA,
+        expectedPlugin,
+        (val: any) => expect(val).to.deep.equal([helpers, permissions])
+      )
       .to.emit(psp, EVENTS.InstallationApplied)
-      .withArgs(dao, plugin);
+      .withArgs(
+        dao,
+        expectedPlugin,
+        anyValue,
+        getAppliedSetupId(pluginRepoPointer, helpers)
+      );
+  });
+
+  it('creates a dao with a plugin and sets plugin permissions on dao correctly', async () => {
+    const tx = await daoFactory.createDao(daoSettings, [
+      votingPluginInstallationData,
+    ]);
+    const {dao, permissions} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = await ethers.getContractFactory('DAO');
     const daoContract = factory.attach(dao);
@@ -265,13 +347,76 @@ describe.skip('DAOFactory: ', function () {
     }
   });
 
-  it('revokes all temporarly granted permissions', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
+  it('creates a dao and sets its own permissions correctly on itself', async () => {
+    const tx = await daoFactory.createDao(daoSettings, [
+      votingPluginInstallationData,
+    ]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = await ethers.getContractFactory('DAO');
     const daoContract = factory.attach(dao);
 
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        ROOT_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG_CONDITION
+      )
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        UPGRADE_DAO_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG_CONDITION
+      )
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        SET_SIGNATURE_VALIDATOR_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG_CONDITION
+      )
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        SET_TRUSTED_FORWARDER_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG_CONDITION
+      )
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        SET_METADATA_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG_CONDITION
+      )
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        REGISTER_STANDARD_CALLBACK_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG_CONDITION
+      );
+  });
+
+  it('revokes all temporarly granted permissions', async () => {
+    const tx = await daoFactory.createDao(daoSettings, [
+      votingPluginInstallationData,
+    ]);
+    const {dao} = await extractInfoFromCreateDaoTx(tx);
+
+    const factory = await ethers.getContractFactory('DAO');
+    const daoContract = factory.attach(dao);
+
+    // Check that events were emitted.
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(ROOT_PERMISSION_ID, daoFactory.address, dao, psp.address);
@@ -293,59 +438,68 @@ describe.skip('DAOFactory: ', function () {
         dao,
         daoFactory.address
       );
+
+    // Direct check to ensure since these permissions are extra dangerous to stay on.
+    expect(
+      await daoContract.hasPermission(
+        dao,
+        daoFactory.address,
+        ROOT_PERMISSION_ID,
+        '0x'
+      )
+    ).to.be.false;
+    expect(
+      await daoContract.hasPermission(
+        dao,
+        psp.address,
+        ROOT_PERMISSION_ID,
+        '0x'
+      )
+    ).to.be.false;
+
+    expect(
+      await daoContract.hasPermission(
+        psp.address,
+        daoFactory.address,
+        APPLY_INSTALLATION_PERMISSION_ID,
+        '0x'
+      )
+    ).to.be.false;
   });
 
-  it('emits events containing all the correct permissions to be set in the created DAO', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
-    const {dao} = await extractInfoFromCreateDaoTx(tx);
+  it('creates a dao with multiple plugins installed', async () => {
+    // add new plugin setup to the repo ! it will become build 2.
+    const factory = await ethers.getContractFactory('PluginRepo');
+    const pluginRepo = factory.attach(pluginSetupMockRepoAddress);
+    await pluginRepo.createVersion(
+      1,
+      // We can use the same plugin setup as each time,
+      // it returns the different plugin address, hence
+      // wil generate unique/different plugin installation id.
+      pluginSetupV1Mock.address,
+      '0x11',
+      '0x11'
+    );
 
-    const factory = await ethers.getContractFactory('DAO');
-    const daoContract = factory.attach(dao);
+    const plugin1 = {...votingPluginInstallationData};
 
-    await expect(tx)
-      .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
-        ROOT_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        PermissionManagerAllowFlagAddress
-      );
-    await expect(tx)
-      .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
-        UPGRADE_DAO_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        PermissionManagerAllowFlagAddress
-      );
-    await expect(tx)
-      .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
-        SET_SIGNATURE_VALIDATOR_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        PermissionManagerAllowFlagAddress
-      );
-    await expect(tx)
-      .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
-        SET_TRUSTED_FORWARDER_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        PermissionManagerAllowFlagAddress
-      );
-    await expect(tx)
-      .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
-        SET_METADATA_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        PermissionManagerAllowFlagAddress
-      );
+    const plugin2 = {...votingPluginInstallationData};
+    plugin2.pluginSetupRef.versionTag = {
+      release: 1,
+      build: 2,
+    };
+
+    const plugins = [plugin1, plugin2];
+    const tx = await daoFactory.createDao(daoSettings, plugins);
+    const {events} = await tx.wait();
+
+    let installEventCount = 0;
+
+    // @ts-ignore
+    events.forEach(event => {
+      if (event.event == EVENTS.InstallationApplied) installEventCount++;
+    });
+
+    expect(installEventCount).to.equal(2);
   });
 });
