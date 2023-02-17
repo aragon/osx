@@ -96,9 +96,4 @@ contract AdminSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
-
-    /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
-        return implementation;
-    }
 }

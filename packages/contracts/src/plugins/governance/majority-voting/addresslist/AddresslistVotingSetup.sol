@@ -131,7 +131,7 @@ contract AddresslistVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
+    function getImplementationAddress() external view override returns (address) {
         return address(addresslistVotingBase);
     }
 }

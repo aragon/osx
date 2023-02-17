@@ -260,7 +260,7 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function getImplementationAddress() external view override returns (address) {
         return address(tokenVotingBase);
     }
 

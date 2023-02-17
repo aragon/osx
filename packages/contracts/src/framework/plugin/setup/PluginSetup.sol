@@ -44,4 +44,7 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
         return
             _interfaceId == type(IPluginSetup).interfaceId || super.supportsInterface(_interfaceId);
     }
+
+    /// @inheritdoc IPluginSetup
+    function getImplementationAddress() external view virtual returns (address) {}
 }
