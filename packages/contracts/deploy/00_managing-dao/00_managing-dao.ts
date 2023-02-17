@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   console.log(
-    `ManagingDao will be owned by the (Deployer: ${deployer}) temporarly, while the entire framework is deployed.`
+    `ManagingDao will be owned by the (Deployer: ${deployer}) temporarily, while the entire framework is getting deployed.`
   );
 
   const initializeParams = {

@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import buildMetdataJson from '../../src/plugins/governance/multisig/build-metadata.json';
+import buildMetadataJson from '../../src/plugins/governance/multisig/build-metadata.json';
 import {findEvent} from '../../utils/event';
 import {hashHelpers} from '../../test/test-utils/psp/hash-helpers';
 
@@ -56,7 +56,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Prepare multisig plugin for managingDAO
   const data = ethers.utils.defaultAbiCoder.encode(
-    buildMetdataJson.pluginSetupABI.prepareInstallation,
+    buildMetadataJson.pluginSetupABI.prepareInstallation,
     [approvers, [listedOnly, minApprovals]]
   );
   const prepareParams = [pluginSetupRef, data];
@@ -134,4 +134,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = ['InstallaMultisigOnManagingDAO'];
+func.tags = ['InstallMultisigOnManagingDAO'];
