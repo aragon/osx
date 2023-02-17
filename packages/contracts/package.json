@@ -14,7 +14,7 @@
   "scripts": {
     "test": "hardhat test",
     "build": "hardhat compile",
-    "build:npm": "rollup --config rollup.config.ts",
+    "build:npm": "rollup --config rollup.config.ts && cp -a ./src/* ./dist",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",

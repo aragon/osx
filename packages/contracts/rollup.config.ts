@@ -5,7 +5,7 @@ import json from '@rollup/plugin-json';
 export default [
   {
     input: 'npm/index.ts',
-    plugins: [json(), typescript()],
+    plugins: [json(), typescript({paths: [process.cwd() + '/dist']})],
     output: [
       {
         file: 'dist/bundle-cjs.js',
