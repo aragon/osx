@@ -47,7 +47,7 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginSetup {
         bytes memory
     ) public view override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         (_dao);
-        plugin = this.getImplementationAddress(); // The bad behaviour is returning the same address over and over again
+        plugin = address(0); // The bad behaviour is returning the same address over and over again
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
     }

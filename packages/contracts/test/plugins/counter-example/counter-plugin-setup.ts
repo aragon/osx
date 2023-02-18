@@ -48,10 +48,13 @@ describe('CounterPluginSetup(Example)', function () {
     const DAOMock = await ethers.getContractFactory('DAOMock');
     daoMock = await DAOMock.deploy(ownerAddress);
 
+    const MultiplyHelper = await ethers.getContractFactory('MultiplyHelper');
+    multiplyHelper = await MultiplyHelper.deploy();
+
     const CounterV1Setup = await ethers.getContractFactory(
       'CounterV1PluginSetup'
     );
-    counterV1Setup = await CounterV1Setup.deploy();
+    counterV1Setup = await CounterV1Setup.deploy(multiplyHelper.address);
 
     const COUNTER_V1 = await ethers.getContractFactory('CounterV1');
     const counterV1 = COUNTER_V1.attach(
@@ -60,9 +63,6 @@ describe('CounterPluginSetup(Example)', function () {
     multiplyPermissionId = await counterV1.MULTIPLY_PERMISSION_ID();
 
     implementationAddress = await counterV1Setup.getImplementationAddress();
-
-    const MultiplyHelper = await ethers.getContractFactory('MultiplyHelper');
-    multiplyHelper = await MultiplyHelper.deploy();
 
     const CounterV2Setup = await ethers.getContractFactory(
       'CounterV2PluginSetup'
