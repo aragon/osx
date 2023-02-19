@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {checkPermission, getContractAddress} from '../helpers';
+import {checkPermission, DAO_PERMISSION, getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');
@@ -27,17 +27,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   // check that the DAO have all permissions set correctly
-  const permissions = [
-    'ROOT_PERMISSION',
-    'UPGRADE_DAO_PERMISSION',
-    'SET_SIGNATURE_VALIDATOR_PERMISSION',
-    'SET_TRUSTED_FORWARDER_PERMISSION',
-    'SET_METADATA_PERMISSION',
-    'REGISTER_STANDARD_CALLBACK_PERMISSION',
-  ];
-
-  for (let index = 0; index < permissions.length; index++) {
-    const permission = permissions[index];
+  for (let index = 0; index < DAO_PERMISSION.length; index++) {
+    const permission = DAO_PERMISSION[index];
 
     await checkPermission({
       isGrant: true,

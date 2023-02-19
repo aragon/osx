@@ -16,6 +16,15 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
 
+export const DAO_PERMISSION = [
+  'ROOT_PERMISSION',
+  'UPGRADE_DAO_PERMISSION',
+  'SET_SIGNATURE_VALIDATOR_PERMISSION',
+  'SET_TRUSTED_FORWARDER_PERMISSION',
+  'SET_METADATA_PERMISSION',
+  'REGISTER_STANDARD_CALLBACK_PERMISSION',
+];
+
 export async function uploadToIPFS(
   metadata: string,
   networkName: string

@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress, managePermission} from '../helpers';
+import {DAO_PERMISSION, getContractAddress, managePermission} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {getNamedAccounts, ethers} = hre;
@@ -17,17 +17,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Set all the permission needed for a DAO to operate normally as if it was created via DAOFactory.
-  const permissions = [
-    'ROOT_PERMISSION',
-    'UPGRADE_DAO_PERMISSION',
-    'SET_SIGNATURE_VALIDATOR_PERMISSION',
-    'SET_TRUSTED_FORWARDER_PERMISSION',
-    'SET_METADATA_PERMISSION',
-    'REGISTER_STANDARD_CALLBACK_PERMISSION',
-  ];
-
-  for (let index = 0; index < permissions.length; index++) {
-    const permission = permissions[index];
+  for (let index = 0; index < DAO_PERMISSION.length; index++) {
+    const permission = DAO_PERMISSION[index];
 
     await managePermission({
       isGrant: true,
