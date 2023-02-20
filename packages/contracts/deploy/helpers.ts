@@ -176,28 +176,25 @@ export async function checkSetManagingDao(
   }
 }
 
-export enum PermissionOp {
-  Revoke = 0,
-  Grant = 1,
+export enum Operation {
+  Grant,
+  Revoke,
+  GrantWithCondition,
 }
 
-export interface Permission {
-  permissionOp: PermissionOp;
-  permissionManagerContract: ethers.Contract;
+export type Permission = {
+  operation: Operation;
   where: {name: string; address: string};
   who: {name: string; address: string};
   permission: string;
+  condition?: string;
   data?: string;
-}
+};
 
-export async function checkPermission({
-  permissionOp,
-  permissionManagerContract,
-  where,
-  who,
-  permission,
-  data = '0x',
-}: Permission) {
+export async function checkPermission(
+  permissionManagerContract: ethers.Contract,
+  {operation, where, who, permission, data = '0x'}: Permission
+) {
   const permissionId = ethers.utils.id(permission);
   const isGranted = await permissionManagerContract.isGranted(
     where.address,
@@ -205,43 +202,45 @@ export async function checkPermission({
     permissionId,
     data
   );
-  if (!isGranted && permissionOp === PermissionOp.Grant) {
+  if (!isGranted && operation === Operation.Grant) {
     throw new Error(
       `(${who.name}: ${who.address}) doesn't have ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
     );
   }
 
-  if (isGranted && permissionOp === PermissionOp.Revoke) {
+  if (isGranted && operation === Operation.Revoke) {
     throw new Error(
       `(${who.name}: ${who.address}) has ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
     );
   }
 }
 
-export async function managePermission({
-  permissionOp,
-  permissionManagerContract,
-  where,
-  who,
-  permission,
-}: Permission): Promise<void> {
-  const operation =
-    permissionOp === PermissionOp.Grant
-      ? permissionManagerContract.grant
-      : permissionManagerContract.revoke;
+export async function managePermission(
+  permissionManagerContract: ethers.Contract,
+  permissions: Permission[]
+): Promise<void> {
+  const items = permissions.map(permission => [
+    permission.operation,
+    permission.where.address,
+    permission.who.address,
+    permission.condition || ethers.constants.AddressZero,
+    ethers.utils.id(permission.permission),
+  ]);
 
-  const permissionId = ethers.utils.id(permission);
-
-  const tx = await operation(where.address, who.address, permissionId);
+  const tx = await permissionManagerContract.applyMultiTargetPermissions(items);
   await tx.wait();
 
-  console.log(
-    `${
-      permissionOp === PermissionOp.Grant ? 'Granted' : 'Revoked'
-    } the ${permission} of (${where.name}: ${where.address}) for (${
-      who.name
-    }: ${who.address}), see (tx: ${tx.hash})`
-  );
+  permissions.forEach(permission => {
+    console.log(
+      `${
+        permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
+      } the ${permission.permission} of (${permission.where.name}: ${
+        permission.where.address
+      }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
+        tx.hash
+      })`
+    );
+  });
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {checkPermission, getContractAddress, PermissionOp} from '../helpers';
+import {checkPermission, getContractAddress, Operation} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');
@@ -22,33 +22,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
 
   // Check revoked permission.
-  await checkPermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Revoke,
     where: {name: 'DAORegistry', address: daoRegistryAddress},
     who: {name: 'Deployer', address: deployer},
     permission: 'REGISTER_DAO_PERMISSION',
   });
 
-  await checkPermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Revoke,
     where: {name: 'PluginSetupProcessor', address: pspAddress},
     who: {name: 'Deployer', address: deployer},
     permission: 'APPLY_INSTALLATION_PERMISSION',
   });
 
-  await checkPermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Revoke,
     where: {name: 'ManagingDAO', address: managingDAOAddress},
     who: {name: 'PluginSetupProcessor', address: pspAddress},
     permission: 'ROOT_PERMISSION',
   });
 
-  await checkPermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Revoke,
     where: {name: 'ManagingDAO', address: managingDAOAddress},
     who: {name: 'Deployer', address: deployer},
     permission: 'ROOT_PERMISSION',
@@ -57,8 +53,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Finalizing Managing DAO verified');
 };
 export default func;
-func.tags = [
-  'RegisterManagingDAO',
-  'InstallMultisigOnManagingDAO',
-  'RevokeDeployerPermissions',
-];
+func.tags = ['RegisterManagingDAO', 'InstallMultisigOnManagingDAO'];

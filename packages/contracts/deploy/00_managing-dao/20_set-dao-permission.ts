@@ -5,6 +5,7 @@ import {
   DAO_PERMISSIONS,
   getContractAddress,
   managePermission,
+  Operation,
   PermissionOp,
 } from '../helpers';
 
@@ -22,17 +23,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Set all the permission needed for a DAO to operate normally as if it was created via DAOFactory.
-  for (let index = 0; index < DAO_PERMISSIONS.length; index++) {
-    const permission = DAO_PERMISSIONS[index];
-
-    await managePermission({
-      permissionOp: PermissionOp.Grant,
-      permissionManagerContract: managingDaoContract,
+  const permissions = DAO_PERMISSIONS.map(permission => {
+    return {
+      operation: Operation.Grant,
       where: {name: 'managingDAO', address: managingDAOAddress},
       who: {name: 'managingDAO', address: managingDAOAddress},
       permission: permission,
-    });
-  }
+    };
+  });
+
+  await managePermission(managingDaoContract, permissions);
 };
 export default func;
 func.tags = ['SetDAOPermissions'];

@@ -1,11 +1,9 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress, managePermission, PermissionOp} from '../helpers';
+import {getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(`\nFinalizing ManagingDao.`);
-
   const {getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
 
@@ -18,12 +16,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  // Get `DAO` contract.
-  const managingDaoContract = await ethers.getContractAt(
-    'DAO',
-    managingDAOAddress
-  );
-
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
@@ -32,15 +24,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'DAORegistry',
     daoRegistryAddress
   );
-
-  // Grant `REGISTER_DAO_PERMISSION` to deployer.
-  await managePermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
-    where: {name: 'DAORegistry', address: daoRegistryAddress},
-    who: {name: 'Deployer', address: deployer},
-    permission: 'REGISTER_DAO_PERMISSION',
-  });
 
   // Register `managingDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
@@ -52,15 +35,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
     `Registered the (managingDAO: ${managingDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
   );
-
-  // Revoke `REGISTER_DAO_PERMISSION` from deployer.
-  await managePermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
-    where: {name: 'DAORegistry', address: daoRegistryAddress},
-    who: {name: 'Deployer', address: deployer},
-    permission: 'REGISTER_DAO_PERMISSION',
-  });
 };
 export default func;
 func.tags = ['RegisterManagingDAO'];

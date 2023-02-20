@@ -5,15 +5,14 @@ import buildMetadataJson from '../../src/plugins/governance/multisig/build-metad
 import {findEvent} from '../../utils/event';
 import {hashHelpers} from '../../test/test-utils/psp/hash-helpers';
 
-import {getContractAddress, managePermission, PermissionOp} from '../helpers';
+import {checkPermission, getContractAddress, Operation} from '../helpers';
 
 interface Ehre extends HardhatRuntimeEnvironment {
   aragonPluginRepos: {multisig: string};
 }
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers} = hre;
 
   const ehre = hre as Ehre;
 
@@ -70,23 +69,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const event = await findEvent(prepareTx, 'InstallationPrepared');
   const installationPreparedEvent = event.args;
 
-  // Grant `ROOT_PERMISSION` to `PluginSetupProcessor`.
-  await managePermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
-    where: {name: 'DAO', address: managingDAOAddress},
-    who: {name: 'PluginSetupProcessor', address: pspAddress},
-    permission: 'ROOT_PERMISSION',
-  });
-
-  // Grant `APPLY_INSTALLATION_PERMISSION` to `Deployer`.
-  await managePermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
-    where: {name: 'PluginSetupProcessor', address: pspAddress},
-    who: {name: 'Deployer', address: deployer},
-    permission: 'APPLY_INSTALLATION_PERMISSION',
-  });
+  console.log(
+    `Prepared (Multisig: ${installationPreparedEvent.plugin}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
+  );
 
   // Apply multisig plugin to the managingDAO
   const applyParams = [
@@ -101,23 +86,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   await applyTx.wait();
 
-  // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
-  await managePermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
-    where: {name: 'DAO', address: managingDAOAddress},
-    who: {name: 'PluginSetupProcessor', address: pspAddress},
-    permission: 'ROOT_PERMISSION',
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
+    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    who: {name: 'Multisig plugin', address: installationPreparedEvent.plugin},
+    permission: 'EXECUTE_PERMISSION',
   });
 
-  // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
-  await managePermission({
-    permissionOp: PermissionOp.Revoke,
-    permissionManagerContract: managingDaoContract,
-    where: {name: 'PluginSetupProcessor', address: pspAddress},
-    who: {name: 'Deployer', address: deployer},
-    permission: 'APPLY_INSTALLATION_PERMISSION',
-  });
+  console.log(
+    `Applied (Multisig: ${installationPreparedEvent.plugin}) on (ManagingDAO: ${managingDAOAddress}), see (tx: ${applyTx.hash})`
+  );
 };
 export default func;
 func.tags = ['InstallMultisigOnManagingDAO'];

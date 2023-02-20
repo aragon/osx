@@ -1,6 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {checkPermission, getContractAddress, PermissionOp} from '../helpers';
+import {checkPermission, getContractAddress, Operation} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying permissions');
@@ -47,9 +47,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // ENS PERMISSIONS
-  await checkPermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
     where: {
       name: 'DAOSubdomainRegistrar',
       address: daoEnsSubdomainRegistrarAddress,
@@ -58,9 +57,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
   });
 
-  await checkPermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
     where: {
       name: 'PluginSubdomainRegistrar',
       address: pluginEnsSubdomainRegistrarAddress,
@@ -70,18 +68,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   // DAO REGISTRY PERMISSIONS
-  await checkPermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
     where: {name: 'DAORegistry', address: daoRegistryAddress},
     who: {name: 'DAOFactory', address: daoFactoryAddress},
     permission: 'REGISTER_DAO_PERMISSION',
   });
 
   // PLUGIN REPO REGISTRY PERMISSIONS
-  await checkPermission({
-    permissionOp: PermissionOp.Grant,
-    permissionManagerContract: managingDaoContract,
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
     where: {name: 'RepoRegistry', address: pluginRepoRegistryAddress},
     who: {name: 'RepoFactory', address: pluginRepoFactoryAddress},
     permission: 'REGISTER_PLUGIN_REPO_PERMISSION',
