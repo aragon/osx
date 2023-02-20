@@ -9,7 +9,7 @@ import "./PermissionLib.sol";
 
 /// @title PermissionManager
 /// @author Aragon Association - 2021-2023
-/// @notice The permission manager used in a DAO and its associated components.
+/// @notice The abstract permission manager used in a DAO, its associated plugins, and other framework-related components.
 abstract contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
