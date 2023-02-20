@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {Admin} from "../../plugins/governance//admin/Admin.sol";
+import {Admin} from "../../plugins/governance/admin/Admin.sol";
 
 contract AdminCloneFactory {
     using Clones for address;
