@@ -3,7 +3,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 import {
   checkPermission,
-  DAO_PERMISSION,
+  DAO_PERMISSIONS,
   getContractAddress,
   PermissionOp,
 } from '../helpers';
@@ -25,21 +25,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Check that deployer has root permission.
   await checkPermission({
     permissionOp: PermissionOp.Grant,
-    permissionManager: managingDaoContract,
-    where: managingDAOAddress,
-    who: deployer,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    who: {name: 'Deployer', address: deployer},
     permission: 'ROOT_PERMISSION',
   });
 
   // check that the DAO have all permissions set correctly
-  for (let index = 0; index < DAO_PERMISSION.length; index++) {
-    const permission = DAO_PERMISSION[index];
+  for (let index = 0; index < DAO_PERMISSIONS.length; index++) {
+    const permission = DAO_PERMISSIONS[index];
 
     await checkPermission({
       permissionOp: PermissionOp.Grant,
-      permissionManager: managingDaoContract,
-      where: managingDAOAddress,
-      who: managingDAOAddress,
+      permissionManagerContract: managingDaoContract,
+      where: {name: 'ManagingDAO', address: managingDAOAddress},
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: permission,
     });
   }

@@ -2,7 +2,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {
-  DAO_PERMISSION,
+  DAO_PERMISSIONS,
   getContractAddress,
   managePermission,
   PermissionOp,
@@ -22,8 +22,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Set all the permission needed for a DAO to operate normally as if it was created via DAOFactory.
-  for (let index = 0; index < DAO_PERMISSION.length; index++) {
-    const permission = DAO_PERMISSION[index];
+  for (let index = 0; index < DAO_PERMISSIONS.length; index++) {
+    const permission = DAO_PERMISSIONS[index];
 
     await managePermission({
       permissionOp: PermissionOp.Grant,

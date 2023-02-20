@@ -64,7 +64,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress,
     prepareParams
   );
-  prepareTx.wait();
+  await prepareTx.wait();
 
   // extract info from prepare event
   const event = await findEvent(prepareTx, 'InstallationPrepared');
@@ -99,7 +99,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress,
     applyParams
   );
-  applyTx.wait();
+  await applyTx.wait();
 
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   await managePermission({

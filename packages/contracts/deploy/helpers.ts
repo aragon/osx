@@ -16,7 +16,7 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
 
-export const DAO_PERMISSION = [
+export const DAO_PERMISSIONS = [
   'ROOT_PERMISSION',
   'UPGRADE_DAO_PERMISSION',
   'SET_SIGNATURE_VALIDATOR_PERMISSION',
@@ -181,47 +181,41 @@ export enum PermissionOp {
   Grant = 1,
 }
 
-export interface CheckPermission {
+export interface Permission {
   permissionOp: PermissionOp;
-  permissionManager: ethers.Contract;
-  where: string;
-  who: string;
+  permissionManagerContract: ethers.Contract;
+  where: {name: string; address: string};
+  who: {name: string; address: string};
   permission: string;
   data?: string;
 }
 
 export async function checkPermission({
   permissionOp,
-  permissionManager,
+  permissionManagerContract,
   where,
   who,
   permission,
   data = '0x',
-}: CheckPermission) {
+}: Permission) {
   const permissionId = ethers.utils.id(permission);
-  const isGranted = await permissionManager.callStatic.isGranted(
-    where,
-    who,
+  const isGranted = await permissionManagerContract.isGranted(
+    where.address,
+    who.address,
     permissionId,
     data
   );
   if (!isGranted && permissionOp === PermissionOp.Grant) {
     throw new Error(
-      `${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`
-    );
-  } else if (isGranted && permissionOp === PermissionOp.Revoke) {
-    throw new Error(
-      `${who} have ${permission} on ${where} in ${permissionManager.address}`
+      `(${who.name}: ${who.address}) doesn't have ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
     );
   }
-}
 
-export interface ManagePermission {
-  permissionOp: PermissionOp;
-  permissionManagerContract: ethers.Contract;
-  where: {name: string; address: string};
-  who: {name: string; address: string};
-  permission: string;
+  if (isGranted && permissionOp === PermissionOp.Revoke) {
+    throw new Error(
+      `(${who.name}: ${who.address}) has ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
+    );
+  }
 }
 
 export async function managePermission({
@@ -230,7 +224,7 @@ export async function managePermission({
   where,
   who,
   permission,
-}: ManagePermission): Promise<void> {
+}: Permission): Promise<void> {
   const operation =
     permissionOp === PermissionOp.Grant
       ? permissionManagerContract.grant

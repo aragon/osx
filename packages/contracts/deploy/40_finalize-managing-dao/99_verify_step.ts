@@ -24,33 +24,33 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Check revoked permission.
   await checkPermission({
     permissionOp: PermissionOp.Revoke,
-    permissionManager: managingDaoContract,
-    where: daoRegistryAddress,
-    who: deployer,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'DAORegistry', address: daoRegistryAddress},
+    who: {name: 'Deployer', address: deployer},
     permission: 'REGISTER_DAO_PERMISSION',
   });
 
   await checkPermission({
     permissionOp: PermissionOp.Revoke,
-    permissionManager: managingDaoContract,
-    where: pspAddress,
-    who: deployer,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'PluginSetupProcessor', address: pspAddress},
+    who: {name: 'Deployer', address: deployer},
     permission: 'APPLY_INSTALLATION_PERMISSION',
   });
 
   await checkPermission({
     permissionOp: PermissionOp.Revoke,
-    permissionManager: managingDaoContract,
-    where: managingDAOAddress,
-    who: pspAddress,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    who: {name: 'PluginSetupProcessor', address: pspAddress},
     permission: 'ROOT_PERMISSION',
   });
 
   await checkPermission({
     permissionOp: PermissionOp.Revoke,
-    permissionManager: managingDaoContract,
-    where: managingDAOAddress,
-    who: deployer,
+    permissionManagerContract: managingDaoContract,
+    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    who: {name: 'Deployer', address: deployer},
     permission: 'ROOT_PERMISSION',
   });
 
