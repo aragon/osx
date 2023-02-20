@@ -36,7 +36,7 @@ export async function uploadToIPFS(
     },
   });
 
-  if (networkName == 'hardhat' || networkName == 'localhost') {
+  if (networkName === 'hardhat' || networkName === 'localhost') {
     // return a dummy path
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }
@@ -176,8 +176,13 @@ export async function checkSetManagingDao(
   }
 }
 
+export enum PermissionOp {
+  Revoke = 0,
+  Grant = 1,
+}
+
 export interface CheckPermission {
-  isGrant: boolean;
+  permissionOp: PermissionOp;
   permissionManager: ethers.Contract;
   where: string;
   who: string;
@@ -186,7 +191,7 @@ export interface CheckPermission {
 }
 
 export async function checkPermission({
-  isGrant,
+  permissionOp,
   permissionManager,
   where,
   who,
@@ -200,11 +205,11 @@ export async function checkPermission({
     permissionId,
     data
   );
-  if (!isGranted && isGrant) {
+  if (!isGranted && permissionOp === PermissionOp.Grant) {
     throw new Error(
       `${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`
     );
-  } else if (isGranted && !isGrant) {
+  } else if (isGranted && permissionOp === PermissionOp.Revoke) {
     throw new Error(
       `${who} have ${permission} on ${where} in ${permissionManager.address}`
     );
@@ -212,7 +217,7 @@ export async function checkPermission({
 }
 
 export interface ManagePermission {
-  isGrant: boolean;
+  permissionOp: PermissionOp;
   permissionManagerContract: ethers.Contract;
   where: {name: string; address: string};
   who: {name: string; address: string};
@@ -220,15 +225,16 @@ export interface ManagePermission {
 }
 
 export async function managePermission({
-  isGrant,
+  permissionOp,
   permissionManagerContract,
   where,
   who,
   permission,
 }: ManagePermission): Promise<void> {
-  const operation = isGrant
-    ? permissionManagerContract.grant
-    : permissionManagerContract.revoke;
+  const operation =
+    permissionOp === PermissionOp.Grant
+      ? permissionManagerContract.grant
+      : permissionManagerContract.revoke;
 
   const permissionId = ethers.utils.id(permission);
 
@@ -236,9 +242,11 @@ export async function managePermission({
   await tx.wait();
 
   console.log(
-    `${isGrant ? 'Granted' : 'Revoked'} the ${permission} of (${where.name}: ${
-      where.address
-    }) for (${who.name}: ${who.address}), see (tx: ${tx.hash})`
+    `${
+      permissionOp === PermissionOp.Grant ? 'Granted' : 'Revoked'
+    } the ${permission} of (${where.name}: ${where.address}) for (${
+      who.name
+    }: ${who.address}), see (tx: ${tx.hash})`
   );
 }
 

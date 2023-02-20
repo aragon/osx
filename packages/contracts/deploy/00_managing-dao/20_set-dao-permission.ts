@@ -1,7 +1,12 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {DAO_PERMISSION, getContractAddress, managePermission} from '../helpers';
+import {
+  DAO_PERMISSION,
+  getContractAddress,
+  managePermission,
+  PermissionOp,
+} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {getNamedAccounts, ethers} = hre;
@@ -21,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const permission = DAO_PERMISSION[index];
 
     await managePermission({
-      isGrant: true,
+      permissionOp: PermissionOp.Grant,
       permissionManagerContract: managingDaoContract,
       where: {name: 'managingDAO', address: managingDAOAddress},
       who: {name: 'managingDAO', address: managingDAOAddress},

@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress, managePermission} from '../helpers';
+import {getContractAddress, managePermission, PermissionOp} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);
@@ -35,7 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Grant `REGISTER_DAO_PERMISSION` to deployer.
   await managePermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManagerContract: managingDaoContract,
     where: {name: 'DAORegistry', address: daoRegistryAddress},
     who: {name: 'Deployer', address: deployer},
@@ -55,7 +55,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Revoke `REGISTER_DAO_PERMISSION` from deployer.
   await managePermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManagerContract: managingDaoContract,
     where: {name: 'DAORegistry', address: daoRegistryAddress},
     who: {name: 'Deployer', address: deployer},

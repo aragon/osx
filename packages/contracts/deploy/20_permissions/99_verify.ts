@@ -1,6 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {checkPermission, getContractAddress} from '../helpers';
+import {checkPermission, getContractAddress, PermissionOp} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying permissions');
@@ -48,7 +48,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // ENS PERMISSIONS
   await checkPermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManager: managingDaoContract,
     where: daoEnsSubdomainRegistrarAddress,
     who: daoRegistryAddress,
@@ -56,7 +56,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   await checkPermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManager: managingDaoContract,
     where: pluginEnsSubdomainRegistrarAddress,
     who: pluginRepoRegistryAddress,
@@ -65,7 +65,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // DAO REGISTRY PERMISSIONS
   await checkPermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManager: managingDaoContract,
     where: daoRegistryAddress,
     who: daoFactoryAddress,
@@ -74,7 +74,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // PLUGIN REPO REGISTRY PERMISSIONS
   await checkPermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManager: managingDaoContract,
     where: pluginRepoRegistryAddress,
     who: pluginRepoFactoryAddress,

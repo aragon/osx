@@ -5,7 +5,7 @@ import buildMetadataJson from '../../src/plugins/governance/multisig/build-metad
 import {findEvent} from '../../utils/event';
 import {hashHelpers} from '../../test/test-utils/psp/hash-helpers';
 
-import {getContractAddress, managePermission} from '../helpers';
+import {getContractAddress, managePermission, PermissionOp} from '../helpers';
 
 interface Ehre extends HardhatRuntimeEnvironment {
   aragonPluginRepos: {multisig: string};
@@ -72,7 +72,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Grant `ROOT_PERMISSION` to `PluginSetupProcessor`.
   await managePermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManagerContract: managingDaoContract,
     where: {name: 'DAO', address: managingDAOAddress},
     who: {name: 'PluginSetupProcessor', address: pspAddress},
@@ -81,7 +81,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Grant `APPLY_INSTALLATION_PERMISSION` to `Deployer`.
   await managePermission({
-    isGrant: true,
+    permissionOp: PermissionOp.Grant,
     permissionManagerContract: managingDaoContract,
     where: {name: 'PluginSetupProcessor', address: pspAddress},
     who: {name: 'Deployer', address: deployer},
@@ -103,7 +103,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   await managePermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManagerContract: managingDaoContract,
     where: {name: 'DAO', address: managingDAOAddress},
     who: {name: 'PluginSetupProcessor', address: pspAddress},
@@ -112,7 +112,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   await managePermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManagerContract: managingDaoContract,
     where: {name: 'PluginSetupProcessor', address: pspAddress},
     who: {name: 'Deployer', address: deployer},

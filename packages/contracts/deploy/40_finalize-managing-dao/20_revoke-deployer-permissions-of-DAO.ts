@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress, managePermission} from '../helpers';
+import {getContractAddress, managePermission, PermissionOp} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {getNamedAccounts, ethers} = hre;
@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Revoke `ROOT_PERMISSION` from `Deployer`.
   await managePermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManagerContract: managingDaoContract,
     where: {name: 'managingDAO', address: managingDAOAddress},
     who: {name: 'Deployer', address: deployer},

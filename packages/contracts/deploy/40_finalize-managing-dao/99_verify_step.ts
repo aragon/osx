@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {checkPermission, getContractAddress} from '../helpers';
+import {checkPermission, getContractAddress, PermissionOp} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');
@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Check revoked permission.
   await checkPermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManager: managingDaoContract,
     where: daoRegistryAddress,
     who: deployer,
@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   await checkPermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManager: managingDaoContract,
     where: pspAddress,
     who: deployer,
@@ -39,7 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   await checkPermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManager: managingDaoContract,
     where: managingDAOAddress,
     who: pspAddress,
@@ -47,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   await checkPermission({
-    isGrant: false,
+    permissionOp: PermissionOp.Revoke,
     permissionManager: managingDaoContract,
     where: managingDAOAddress,
     who: deployer,
