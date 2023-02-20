@@ -10,12 +10,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
 
-  // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
-
-  if (!daoSubdomain)
-    throw new Error('ManagingDAO subdomain has not been set in .env');
-
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
