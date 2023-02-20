@@ -14,6 +14,7 @@ import {getInterfaceID} from '../../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {toBytes32} from '../../../test-utils/voting';
 import {
+  AdminCloneFactory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IPlugin__factory,
@@ -34,6 +35,7 @@ export const adminInterface = new ethers.utils.Interface([
 describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
+  let adminCloneFactory: AdminCloneFactory;
   let dao: any;
   let ownerAddress: string;
   let dummyActions: any;
@@ -65,6 +67,11 @@ describe('Admin', function () {
     );
 
     dao = await deployNewDAO(ownerAddress);
+
+    const AdminCloneFactory = await ethers.getContractFactory(
+      'AdminCloneFactory'
+    );
+    adminCloneFactory = await AdminCloneFactory.deploy();
   });
 
   beforeEach(async () => {
@@ -73,7 +80,17 @@ describe('Admin', function () {
       adminFactoryBytecode,
       signers[0]
     );
-    plugin = await deployWithProxy(AdminFactory);
+
+    const nonce = await ethers.provider.getTransactionCount(
+      adminCloneFactory.address
+    );
+    const anticipatedPluginAddress = ethers.utils.getContractAddress({
+      from: adminCloneFactory.address,
+      nonce,
+    });
+
+    await adminCloneFactory.deployClone();
+    plugin = AdminFactory.attach(anticipatedPluginAddress);
 
     await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
     await dao.grant(
