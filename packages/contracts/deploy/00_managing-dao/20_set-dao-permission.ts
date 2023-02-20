@@ -6,12 +6,10 @@ import {
   getContractAddress,
   managePermission,
   Operation,
-  PermissionOp,
 } from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers} = hre;
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);

@@ -3,18 +3,13 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import buildMetadataJson from '../../src/plugins/governance/multisig/build-metadata.json';
 import {findEvent} from '../../utils/event';
-import {hashHelpers} from '../../test/test-utils/psp/hash-helpers';
 
 import {checkPermission, getContractAddress, Operation} from '../helpers';
+import {EHRE} from '../../utils/types';
+import {hashHelpers} from '../../utils/psp';
 
-interface Ehre extends HardhatRuntimeEnvironment {
-  aragonPluginRepos: {multisig: string};
-}
-
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (hre: EHRE) {
   const {ethers} = hre;
-
-  const ehre = hre as Ehre;
 
   // Get info from .env
   const approvers =
@@ -49,7 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Installing multisig
-  const multisigRepoAddress = ehre.aragonPluginRepos.multisig;
+  const multisigRepoAddress = hre.aragonPluginRepos.multisig;
   const versionTag = [1, 1];
   const pluginSetupRef = [versionTag, multisigRepoAddress];
 

@@ -6,7 +6,6 @@ import {
   DAO_PERMISSIONS,
   getContractAddress,
   Operation,
-  PermissionOp,
 } from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

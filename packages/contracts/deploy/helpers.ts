@@ -6,6 +6,7 @@ import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
+import {EHRE} from '../utils/types';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -105,7 +106,7 @@ export async function detemineDeployerNextAddress(
 }
 
 export async function createPluginRepo(
-  hre: HardhatRuntimeEnvironment,
+  hre: EHRE,
   pluginContractName: string,
   pluginSetupContractName: string,
   releaseMetadata: string,
@@ -150,10 +151,6 @@ export async function createPluginRepo(
 
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
-
-  if (!hre.aragonPluginRepos) {
-    hre.aragonPluginRepos = {};
-  }
 
   hre.aragonPluginRepos[pluginContractName] = repoAddress;
 

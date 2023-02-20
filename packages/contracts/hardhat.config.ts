@@ -2,7 +2,8 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-import {HardhatUserConfig} from 'hardhat/config';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomiclabs/hardhat-etherscan';
 import '@typechain/hardhat';
@@ -11,6 +12,8 @@ import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
+
+import {AragonPluginRepos} from './utils/types';
 
 dotenv.config();
 
@@ -26,9 +29,19 @@ for (const network of Object.keys(networks)) {
   networks[network].accounts = accounts;
 }
 
+// Extend HardhatRuntimeEnvironment
+extendEnvironment((hre: HardhatRuntimeEnvironment) => {
+  const aragonPluginRepos: AragonPluginRepos = {
+    'address-list-voting': '',
+    'token-voting': '',
+    admin: '',
+    multisig: '',
+  };
+  hre.aragonPluginRepos = aragonPluginRepos;
+});
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
-
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.17',
