@@ -4,8 +4,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import buildMetadataJson from '../../src/plugins/governance/multisig/build-metadata.json';
 import {findEvent} from '../../utils/event';
 
-import {checkPermission, getContractAddress, Operation} from '../helpers';
-import {EHRE} from '../../utils/types';
+import {checkPermission, getContractAddress} from '../helpers';
+import {EHRE, Operation} from '../../utils/types';
 import {hashHelpers} from '../../utils/psp';
 
 const func: DeployFunction = async function (hre: EHRE) {

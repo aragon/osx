@@ -1,12 +1,8 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {
-  checkPermission,
-  DAO_PERMISSIONS,
-  getContractAddress,
-  Operation,
-} from '../helpers';
+import {Operation} from '../../utils/types';
+import {checkPermission, DAO_PERMISSIONS, getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');

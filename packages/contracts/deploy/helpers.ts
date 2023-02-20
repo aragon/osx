@@ -6,7 +6,7 @@ import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
-import {EHRE} from '../utils/types';
+import {EHRE, Operation} from '../utils/types';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -171,12 +171,6 @@ export async function checkSetManagingDao(
       `${contract.address} has wrong DAO. Expected ${setDAO} to be ${expectedDaoAddress}`
     );
   }
-}
-
-export enum Operation {
-  Grant,
-  Revoke,
-  GrantWithCondition,
 }
 
 export type Permission = {

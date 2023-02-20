@@ -1,7 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress, managePermission, Operation} from '../helpers';
+import {Operation} from '../../utils/types';
+import {getContractAddress, managePermission} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);

@@ -1,6 +1,8 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {checkPermission, getContractAddress, Operation} from '../helpers';
+
+import {Operation} from '../../utils/types';
+import {checkPermission, getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying permissions');

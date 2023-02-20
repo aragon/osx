@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {AdminSetup} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../core/permission/permission-manager';
+import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 
 const abiCoder = ethers.utils.defaultAbiCoder;

@@ -10,3 +10,9 @@ export type AragonPluginRepos = {
 export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;
 };
+
+export enum Operation {
+  Grant,
+  Revoke,
+  GrantWithCondition,
+}

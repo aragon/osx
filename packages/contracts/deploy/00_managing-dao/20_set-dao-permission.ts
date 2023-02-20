@@ -1,11 +1,11 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+import {Operation} from '../../utils/types';
 import {
   DAO_PERMISSIONS,
   getContractAddress,
   managePermission,
-  Operation,
 } from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
