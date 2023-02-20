@@ -73,7 +73,7 @@ describe('Admin', function () {
       adminFactoryBytecode,
       signers[0]
     );
-    plugin = await AdminFactory.deploy();
+    plugin = await deployWithProxy(AdminFactory);
 
     await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
     await dao.grant(

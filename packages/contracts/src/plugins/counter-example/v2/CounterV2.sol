@@ -23,11 +23,6 @@ contract CounterV2 is PluginUUPSUpgradeable {
     /// @dev By appending a new variable, the existing storage gets modified.
     uint256 public newVariable;
 
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Initializes the plugin.
     /// @param _dao The contract of the associated DAO.
     /// @param _multiplyHelper The helper contract associated with the plugin to multiply numbers.

@@ -33,11 +33,6 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     /// @inheritdoc IMerkleMinter
     IMerkleDistributor public override distributorBase;
 
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Initializes the MerkleMinter.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.

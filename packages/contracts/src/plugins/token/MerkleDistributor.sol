@@ -38,11 +38,6 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     /// @param amount The amount to be claimed.
     error TokenClaimInvalid(uint256 index, address to, uint256 amount);
 
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Initializes the plugin.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
