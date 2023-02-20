@@ -47,8 +47,6 @@ import {
   createStandardCallbackRegisteredEvent,
   getSupportsInterface
 } from './utils';
-import {createTokenVotingProposalEntityState} from '../token-voting/utils';
-import {decodeWithdrawParams} from '../../src/dao/utils';
 import {
   ERC20_transfer,
   ERC20_transferFrom,
@@ -57,7 +55,6 @@ import {
   getTransferId,
   onERC721Received
 } from '../../src/utils/tokens/common';
-import {DECODE_OFFSET} from '../../src/utils/tokens/common';
 import {ERC721Balance} from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplate/DAO';
 
