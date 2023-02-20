@@ -31,7 +31,7 @@ contract AddresslistVotingSetup is PluginSetup {
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
-            this.implementation(),
+            implementation,
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
                 dao,
@@ -41,7 +41,7 @@ contract AddresslistVotingSetup is PluginSetup {
         );
 
         // Prepare permissions
-        AddresslistVoting addresslistVotingBase = AddresslistVoting(this.implementation());
+        AddresslistVoting addresslistVotingBase = AddresslistVoting(implementation);
 
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](4);
@@ -89,7 +89,7 @@ contract AddresslistVotingSetup is PluginSetup {
         address _dao,
         SetupPayload calldata _payload
     ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        AddresslistVoting addresslistVotingBase = AddresslistVoting(this.implementation());
+        AddresslistVoting addresslistVotingBase = AddresslistVoting(implementation);
 
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](4);

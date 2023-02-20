@@ -33,7 +33,7 @@ contract MultisigSetup is PluginSetup {
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
-            this.implementation(),
+            implementation,
             abi.encodeWithSelector(Multisig.initialize.selector, dao, members, multisigSettings)
         );
 
@@ -79,7 +79,7 @@ contract MultisigSetup is PluginSetup {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](3);
 
-        Multisig multisigImplementation = Multisig(this.implementation());
+        Multisig multisigImplementation = Multisig(implementation);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.MultiTargetPermission(

@@ -142,12 +142,12 @@ contract TokenVotingSetup is PluginSetup {
 
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
-            this.implementation(),
+            implementation,
             abi.encodeWithSelector(TokenVoting.initialize.selector, dao, votingSettings, token)
         );
 
         // Prepare permissions
-        TokenVoting tokenVotingBase = TokenVoting(this.implementation());
+        TokenVoting tokenVotingBase = TokenVoting(implementation);
 
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](
@@ -216,7 +216,7 @@ contract TokenVotingSetup is PluginSetup {
 
         bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
 
-        TokenVoting tokenVotingBase = TokenVoting(this.implementation());
+        TokenVoting tokenVotingBase = TokenVoting(implementation);
 
         permissions = new PermissionLib.MultiTargetPermission[](isGovernanceERC20 ? 4 : 3);
 
