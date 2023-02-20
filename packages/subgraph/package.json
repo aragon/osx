@@ -3,7 +3,7 @@
   "version": "0.9.0-alpha",
   "description": "Aragon V2 Subgraph",
   "homepage": "https://github.com/aragon/core",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts",
     "build:contracts": "cd ../contracts && yarn build",
