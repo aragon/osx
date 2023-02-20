@@ -51,7 +51,7 @@ contract CounterV1PluginSetup is PluginSetup {
             _num
         );
 
-        CounterV1 counterBase = CounterV1(this.getImplementationAddress());
+        CounterV1 counterBase = CounterV1(this.implementation());
 
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](
@@ -108,7 +108,7 @@ contract CounterV1PluginSetup is PluginSetup {
         );
 
         // set permissions
-        CounterV1 counterBase = CounterV1(this.getImplementationAddress());
+        CounterV1 counterBase = CounterV1(this.implementation());
 
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,

@@ -17,7 +17,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         address _dao,
         bytes memory
     ) public override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
@@ -70,7 +70,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginSetup {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(2);
         preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
@@ -123,7 +123,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginSetup {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(3);
         preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }
@@ -195,7 +195,7 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginSetup {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(3);
         preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }

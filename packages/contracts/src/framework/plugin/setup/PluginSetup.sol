@@ -14,7 +14,8 @@ import {IPluginSetup} from "./IPluginSetup.sol";
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 abstract contract PluginSetup is ERC165, IPluginSetup {
-    address private immutable implementation;
+    /// @notice The implementation contract.
+    address public immutable implementation;
 
     constructor(address _implementation) {
         implementation = _implementation;
@@ -49,10 +50,5 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPluginSetup).interfaceId || super.supportsInterface(_interfaceId);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
-        return implementation;
     }
 }

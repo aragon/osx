@@ -41,7 +41,7 @@ contract AdminSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = this.getImplementationAddress().clone();
+        plugin = this.implementation().clone();
 
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(dao);

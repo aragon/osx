@@ -17,7 +17,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
     }
@@ -40,7 +40,7 @@ contract PluginCloneableSetupV1MockBad is PluginSetup {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
     }
@@ -63,7 +63,7 @@ contract PluginCloneableSetupV2Mock is PluginSetup {
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(this.getImplementationAddress(), _dao);
+        plugin = mockPluginProxy(this.implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(1);
         preparedSetupData.permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
     }

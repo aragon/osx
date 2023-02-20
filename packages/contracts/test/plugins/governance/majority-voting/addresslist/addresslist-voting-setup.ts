@@ -57,8 +57,7 @@ describe('AddresslistVotingSetup', function () {
     );
     addresslistVotingSetup = await AddresslistVotingSetup.deploy();
 
-    implementationAddress =
-      await addresslistVotingSetup.getImplementationAddress();
+    implementationAddress = await addresslistVotingSetup.implementation();
 
     defaultData = abiCoder.encode(metadata.pluginSetupABI.prepareInstallation, [
       Object.values(defaultVotingSettings),
