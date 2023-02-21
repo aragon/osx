@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -58,8 +58,6 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice thrown when WHO and WHERE are both ANY_ADDR
     error AnyAddressDisallowedForWhoAndWhere();
-
-    // Events
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.

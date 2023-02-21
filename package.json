@@ -4,7 +4,7 @@
   "description": "Aragon DAO Framework",
   "repository": "https://github.com/aragon/core",
   "author": "Aragon Association",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "workspaces": {
     "packages": [
