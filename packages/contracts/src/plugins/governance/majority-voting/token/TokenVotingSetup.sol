@@ -153,41 +153,41 @@ contract TokenVotingSetup is PluginSetup {
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            PermissionLib.NO_CONDITION,
-            tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
-        );
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: plugin,
+            who: _dao,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+        });
 
-        permissions[1] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            PermissionLib.NO_CONDITION,
-            tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
-        );
+        permissions[1] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: plugin,
+            who: _dao,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+        });
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[2] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            _dao,
-            plugin,
-            PermissionLib.NO_CONDITION,
-            DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        );
+        permissions[2] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: _dao,
+            who: plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
+        });
 
         if (tokenSettings.addr == address(0)) {
             bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
 
-            permissions[3] = PermissionLib.MultiTargetPermission(
-                PermissionLib.Operation.Grant,
-                token,
-                _dao,
-                PermissionLib.NO_CONDITION,
-                tokenMintPermission
-            );
+            permissions[3] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Grant,
+                where: token,
+                who: _dao,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: tokenMintPermission
+            });
         }
 
         preparedSetupData.helpers = helpers;
@@ -216,41 +216,41 @@ contract TokenVotingSetup is PluginSetup {
         permissions = new PermissionLib.MultiTargetPermission[](isGovernanceERC20 ? 4 : 3);
 
         // Set permissions to be Revoked.
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _payload.plugin,
-            _dao,
-            PermissionLib.NO_CONDITION,
-            tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
-        );
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _payload.plugin,
+            who: _dao,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+        });
 
-        permissions[1] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _payload.plugin,
-            _dao,
-            PermissionLib.NO_CONDITION,
-            tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
-        );
+        permissions[1] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _payload.plugin,
+            who: _dao,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+        });
 
-        permissions[2] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _dao,
-            _payload.plugin,
-            PermissionLib.NO_CONDITION,
-            DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        );
+        permissions[2] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _dao,
+            who: _payload.plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
+        });
 
         // Revocation of permission is necessary only if the deployed token is GovernanceERC20,
         // as GovernanceWrapped does not possess this permission. Only return the following
         // if it's type of GovernanceERC20, otherwise revoking this permission wouldn't have any effect.
         if (isGovernanceERC20) {
-            permissions[3] = PermissionLib.MultiTargetPermission(
-                PermissionLib.Operation.Revoke,
-                token,
-                _dao,
-                PermissionLib.NO_CONDITION,
-                GovernanceERC20(token).MINT_PERMISSION_ID()
-            );
+            permissions[3] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Revoke,
+                where: token,
+                who: _dao,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: GovernanceERC20(token).MINT_PERMISSION_ID()
+            });
         }
     }
 
