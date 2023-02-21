@@ -271,6 +271,7 @@ export function createMultisigProposalEntityState(
   minApprovals: string = TWO,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
+  executable: boolean = false,
   executed: boolean = false,
   allowFailureMap: string = ALLOW_FAILURE_MAP,
 
@@ -286,6 +287,7 @@ export function createMultisigProposalEntityState(
   multisigProposal.creator = Address.fromString(creator);
   multisigProposal.startDate = BigInt.fromString(startDate);
   multisigProposal.endDate = BigInt.fromString(endDate);
+  multisigProposal.executable = executable;
   multisigProposal.executed = executed;
   multisigProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   multisigProposal.minApprovals = BigInt.fromString(minApprovals);

@@ -18,3 +18,5 @@ export const ADMIN_INTERFACE = '0xa5793356';
 export const MULTISIG_INTERFACE = '0x8f852786';
 
 export const RATIO_BASE = '1000000'; // 10**6
+
+export const ONE = '1';

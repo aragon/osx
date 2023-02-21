@@ -57,6 +57,13 @@ export function _handleProposalCreated(
     proposalEntity.minApprovals = BigInt.fromU32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
+    // if minApproval is 1, the proposal is always executable
+    if (parameters.minApprovals == 1) {
+      proposalEntity.executable = true;
+    } else {
+      proposalEntity.executable = false;
+    }
+
     // Actions
     let actions = vote.value.value3;
     for (let index = 0; index < actions.length; index++) {
@@ -117,7 +124,18 @@ export function handleApproved(event: Approved): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
-      proposalEntity.approvals = BigInt.fromU32(proposal.value.value1);
+      let approvals = proposal.value.value1;
+      proposalEntity.approvals = BigInt.fromU32(approvals);
+
+      // calculate if proposal is executable
+      let minApprovalsStruct = proposal.value.value2;
+
+      if (
+        approvals >= minApprovalsStruct.minApprovals &&
+        !proposalEntity.executable
+      ) {
+        proposalEntity.executable = true;
+      }
 
       proposalEntity.save();
     }
@@ -129,6 +147,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
+    proposalEntity.executable = false;
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;

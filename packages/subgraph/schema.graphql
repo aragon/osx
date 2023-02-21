@@ -544,6 +544,7 @@ type MultisigProposal implements Proposal @entity {
   snapshotBlock: BigInt!
   minApprovals: BigInt!
   approvals: BigInt
+  executable: Boolean!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
