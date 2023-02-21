@@ -50,23 +50,23 @@ contract AdminSetup is PluginSetup {
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
-        // Grant `ADMIN_EXECUTE_PERMISSION` of the plugin to the admin.
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            plugin,
-            admin,
-            PermissionLib.NO_CONDITION,
-            Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
-        );
+        // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: plugin,
+            who: admin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+        });
 
         // Grant `EXECUTE_PERMISSION` on the DAO to the plugin.
-        permissions[1] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            _dao,
-            plugin,
-            PermissionLib.NO_CONDITION,
-            DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        );
+        permissions[1] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: _dao,
+            who: plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
+        });
 
         preparedSetupData.permissions = permissions;
     }
@@ -80,13 +80,13 @@ contract AdminSetup is PluginSetup {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](1);
 
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _dao,
-            _payload.plugin,
-            PermissionLib.NO_CONDITION,
-            DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        );
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _dao,
+            who: _payload.plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
+        });
     }
 
     /// @inheritdoc IPluginSetup
