@@ -34,7 +34,7 @@ interface IPluginSetup {
     /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData);
 
     /// @notice Prepares the update of a plugin.
