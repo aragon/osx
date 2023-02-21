@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -36,8 +36,6 @@ contract AdminSetup is PluginSetup {
         address _dao,
         bytes memory _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
         address admin = abi.decode(_data, (address));
 
@@ -49,7 +47,7 @@ contract AdminSetup is PluginSetup {
         plugin = implementation.clone();
 
         // Initialize cloned plugin contract.
-        Admin(plugin).initialize(dao);
+        Admin(plugin).initialize(IDAO(_dao));
 
         // Prepare permissions
         PermissionLib.MultiTargetPermission[]

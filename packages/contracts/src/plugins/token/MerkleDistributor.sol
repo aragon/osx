@@ -14,7 +14,7 @@ import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 /// @title MerkleDistributor
-/// @author Uniswap 2020
+/// @author Uniswap 2020, Modified by Aragon Association 2021-2023
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
