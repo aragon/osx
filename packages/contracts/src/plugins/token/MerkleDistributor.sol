@@ -14,7 +14,7 @@ import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 /// @title MerkleDistributor
-/// @author Uniswap 2020
+/// @author Uniswap 2020, Modified by Aragon Association 2021-2023
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -43,24 +43,28 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
         _disableInitializers();
     }
 
-    /// @inheritdoc IMerkleDistributor
+    /// @notice Initializes the plugin.
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @param _merkleRoot The merkle root of the balance tree.
     function initialize(
         IDAO _dao,
         IERC20Upgradeable _token,
         bytes32 _merkleRoot
-    ) external override initializer {
+    ) external initializer {
         __PluginUUPSUpgradeable_init(_dao);
         token = _token;
         merkleRoot = _merkleRoot;
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
+    /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == type(IMerkleDistributor).interfaceId ||
-            super.supportsInterface(interfaceId);
+            _interfaceId == type(IMerkleDistributor).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @inheritdoc IMerkleDistributor

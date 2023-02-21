@@ -2,7 +2,16 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AddresslistVoting, DAO} from '../../../../../typechain';
+import {
+  AddresslistVoting,
+  Addresslist__factory,
+  DAO,
+  IERC165Upgradeable__factory,
+  IMajorityVoting__factory,
+  IMembership__factory,
+  IPlugin__factory,
+  IProposal__factory,
+} from '../../../../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
@@ -29,6 +38,14 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {shouldUpgradeCorrectly} from '../../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
+import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {majorityVotingBaseInterface} from '../majority-voting';
+
+export const addresslistVotingInterface = new ethers.utils.Interface([
+  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
+  'function addAddresses(address[])',
+  'function removeAddresses(address[])',
+]);
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -132,6 +149,58 @@ describe('AddresslistVoting', function () {
       await expect(
         voting.initialize(dao.address, votingSettings, [])
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await voting.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      const iface = IProposal__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IMembership` interface', async () => {
+      const iface = IMembership__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `Addresslist` interface', async () => {
+      const iface = Addresslist__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IMajorityVoting` interface', async () => {
+      const iface = IMajorityVoting__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `MajorityVotingBase` interface', async () => {
+      expect(
+        await voting.supportsInterface(
+          getInterfaceID(majorityVotingBaseInterface)
+        )
+      ).to.be.true;
+    });
+
+    it('supports the `AddresslistVoting` interface', async () => {
+      expect(
+        await voting.supportsInterface(
+          getInterfaceID(addresslistVotingInterface)
+        )
+      ).to.be.true;
     });
   });
 

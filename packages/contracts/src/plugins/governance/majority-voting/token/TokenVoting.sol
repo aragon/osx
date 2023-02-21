@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IMembershipContract} from "../../../../core/plugin/membership/IMembershipContract.sol";
+import {IMembership} from "../../../../core/plugin/membership/IMembership.sol";
 import {IDAO} from "../../../../core/dao/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
@@ -15,12 +15,12 @@ import {IMajorityVoting} from "../IMajorityVoting.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract TokenVoting is IMembershipContract, MajorityVotingBase {
+contract TokenVoting is IMembership, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
-        this.getVotingToken.selector ^ this.initialize.selector;
+        this.initialize.selector ^ this.getVotingToken.selector;
 
     /// @notice An [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible contract referencing the token being used for voting.
     IVotesUpgradeable private votingToken;
@@ -54,7 +54,10 @@ contract TokenVoting is IMembershipContract, MajorityVotingBase {
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == TOKEN_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
+        return
+            _interfaceId == TOKEN_VOTING_INTERFACE_ID ||
+            _interfaceId == type(IMembership).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @notice getter function for the voting token.
@@ -135,7 +138,7 @@ contract TokenVoting is IMembershipContract, MajorityVotingBase {
         }
     }
 
-    /// @inheritdoc IMembershipContract
+    /// @inheritdoc IMembership
     function isMember(address _account) external view returns (bool) {
         /// whatever condition
         return votingToken.getVotes(_account) > 0;

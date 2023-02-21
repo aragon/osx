@@ -13,6 +13,7 @@ import {
   ONE_HOUR,
 } from '../../../../test-utils/voting';
 import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
+import {addresslistVotingInterface} from './addresslist-voting';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -69,18 +70,10 @@ describe('AddresslistVotingSetup', function () {
     const factory = await ethers.getContractFactory('AddresslistVoting');
     const addresslistVotingContract = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function addAddresses(address[])',
-      'function removeAddresses(address[])',
-      'function isListed(address) returns (bool)',
-      'function isListedAtBlock(address,uint256) returns (bool)',
-      'function addresslistLength() returns (uint256)',
-      'function addresslistLengthAtBlock(uint256) returns (uint256)',
-      'function initialize(address,(uint8,uint32,uint32,uint64,uint256),address[])',
-    ]);
-
     expect(
-      await addresslistVotingContract.supportsInterface(getInterfaceID(iface))
+      await addresslistVotingContract.supportsInterface(
+        getInterfaceID(addresslistVotingInterface)
+      )
     ).to.be.eq(true);
   });
 

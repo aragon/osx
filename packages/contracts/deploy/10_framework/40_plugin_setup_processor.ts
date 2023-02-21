@@ -8,9 +8,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
-
   // Get `PluginRepoRegistry` address.
   const pluginRepoRegistryAddress = await getContractAddress(
     'PluginRepoRegistry',
@@ -19,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('PluginSetupProcessor', {
     from: deployer,
-    args: [managingDAOAddress, pluginRepoRegistryAddress],
+    args: [pluginRepoRegistryAddress],
     log: true,
   });
 };

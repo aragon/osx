@@ -151,8 +151,9 @@ export function handleVoteCast(event: VoteCast): void {
         let abstain = tally.abstain;
         let yes = tally.yes;
         let no = tally.no;
-        let castedVotingPower = yes.plus(no.plus(abstain));
+        let castedVotingPower = yes.plus(no).plus(abstain);
         let totalVotingPower = totalVotingPowerCall.value;
+        let noVotesWorstCase = totalVotingPower.minus(yes).minus(abstain);
 
         let supportThreshold = parameters.supportThreshold;
         let minVotingPower = parameters.minVotingPower;
@@ -165,13 +166,13 @@ export function handleVoteCast(event: VoteCast): void {
         proposalEntity.castedVotingPower = castedVotingPower;
 
         // check if the current vote results meet the conditions for the proposal to pass:
-        // - worst-case support :  N_yes / (N_total - N_abstain) > support threshold
-        // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
+        // `(1 - supportThreshold) * N_yes > supportThreshold *  N_no,worst-case`
         let supportThresholdReachedEarly = BASE.minus(supportThreshold)
           .times(yes)
-          .ge(totalVotingPower.minus(yes).minus(abstain));
+          .gt(supportThreshold.times(noVotesWorstCase));
 
+        // `N_yes + N_no + N_abstain >= minVotingPower = minParticipation * N_total`
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // set the executable param
@@ -193,27 +194,6 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
-  }
-
-  // update actions
-  let contract = AddresslistVoting.bind(event.address);
-  let proposal = contract.try_getProposal(event.params.proposalId);
-  if (!proposal.reverted) {
-    let actions = proposal.value.value4;
-    for (let index = 0; index < actions.length; index++) {
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
-
-      let actionEntity = Action.load(actionId);
-      if (actionEntity) {
-        actionEntity.execResult = event.params.execResults[index];
-        actionEntity.save();
-      }
-    }
   }
 }
 

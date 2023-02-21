@@ -1,4 +1,4 @@
-import {BigInt, dataSource} from '@graphprotocol/graph-ts';
+import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -8,6 +8,9 @@ import {
   MembershipContractAnnounced,
   TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
+
+import {GovernanceERC20} from '../../../generated/templates';
+
 import {
   Action,
   TokenVotingPlugin,
@@ -109,10 +112,10 @@ export function _handleProposalCreated(
 
 export function handleVoteCast(event: VoteCast): void {
   let pluginId = event.address.toHexString();
-  let member = event.params.voter.toHexString();
-  let memberId = pluginId + '_' + member;
+  let voter = event.params.voter.toHexString();
+  let voterId = pluginId + '_' + voter;
   let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
-  let voterVoteId = member + '_' + proposalId;
+  let voterVoteId = voter + '_' + proposalId;
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
   if (voteOption === 'None') {
@@ -125,7 +128,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalVoteEntity.updatedAt = event.block.timestamp;
   } else {
     voterProposalVoteEntity = new TokenVotingVote(voterVoteId);
-    voterProposalVoteEntity.voter = memberId;
+    voterProposalVoteEntity.voter = voterId;
     voterProposalVoteEntity.proposal = proposalId;
     voterProposalVoteEntity.createdAt = event.block.timestamp;
     voterProposalVoteEntity.voteReplaced = false;
@@ -136,10 +139,10 @@ export function handleVoteCast(event: VoteCast): void {
   voterProposalVoteEntity.save();
 
   // voter
-  let voterEntity = TokenVotingVoter.load(memberId);
+  let voterEntity = TokenVotingVoter.load(voterId);
   if (!voterEntity) {
-    voterEntity = new TokenVotingVoter(memberId);
-    voterEntity.address = member;
+    voterEntity = new TokenVotingVoter(voterId);
+    voterEntity.address = voter;
     voterEntity.plugin = pluginId;
     voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
@@ -165,8 +168,9 @@ export function handleVoteCast(event: VoteCast): void {
         let abstain = tally.abstain;
         let yes = tally.yes;
         let no = tally.no;
-        let castedVotingPower = yes.plus(no.plus(abstain));
+        let castedVotingPower = yes.plus(no).plus(abstain);
         let totalVotingPower = totalVotingPowerCall.value;
+        let noVotesWorstCase = totalVotingPower.minus(yes).minus(abstain);
 
         let supportThreshold = parameters.supportThreshold;
         let minVotingPower = parameters.minVotingPower;
@@ -179,13 +183,13 @@ export function handleVoteCast(event: VoteCast): void {
         proposalEntity.castedVotingPower = castedVotingPower;
 
         // check if the current vote results meet the conditions for the proposal to pass:
-        // - worst-case support :  N_yes / (N_total - N_abstain) > support threshold
-        // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
+        // `(1 - supportThreshold) * N_yes > supportThreshold *  N_no,worst-case`
         let supportThresholdReachedEarly = BASE.minus(supportThreshold)
           .times(yes)
-          .ge(totalVotingPower.minus(yes).minus(abstain));
+          .gt(supportThreshold.times(noVotesWorstCase));
 
+        // `N_yes + N_no + N_abstain >= minVotingPower = minParticipation * N_total`
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // set the executable param
@@ -207,27 +211,6 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
-  }
-
-  // update actions
-  let contract = TokenVoting.bind(event.address);
-  let proposal = contract.try_getProposal(event.params.proposalId);
-  if (!proposal.reverted) {
-    let actions = proposal.value.value4;
-    for (let index = 0; index < actions.length; index++) {
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
-
-      let actionEntity = Action.load(actionId);
-      if (actionEntity) {
-        actionEntity.execResult = event.params.execResults[index];
-        actionEntity.save();
-      }
-    }
   }
 }
 
@@ -257,6 +240,12 @@ export function handleMembershipContractAnnounced(
       packageEntity.token = contract.id;
 
       packageEntity.save();
+
+      // Both GovernanceWrappedERC20/GovernanceERC20 use the `Transfer` event, so
+      // It's safe to create the same type of template for them.
+      let context = new DataSourceContext();
+      context.setString('pluginId', event.address.toHexString());
+      GovernanceERC20.createWithContext(event.params.definingContract, context);
     }
   }
 }

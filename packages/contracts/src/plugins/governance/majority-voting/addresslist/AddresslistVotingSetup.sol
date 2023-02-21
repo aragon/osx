@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -29,8 +29,6 @@ contract AddresslistVotingSetup is PluginSetup {
         address _dao,
         bytes memory _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
         (MajorityVotingBase.VotingSettings memory votingSettings, address[] memory members) = abi
             .decode(_data, (MajorityVotingBase.VotingSettings, address[]));
@@ -40,7 +38,7 @@ contract AddresslistVotingSetup is PluginSetup {
             address(addresslistVotingBase),
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
-                dao,
+                _dao,
                 votingSettings,
                 members
             )

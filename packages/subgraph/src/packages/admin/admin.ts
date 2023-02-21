@@ -96,24 +96,6 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executed = true;
     proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
-
-    // update actions
-    let actionsResultArray = event.params.execResults;
-    for (let index = 0; index < actionsResultArray.length; index++) {
-      // re-create action id
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
-
-      let actionEntity = Action.load(actionId);
-      if (actionEntity) {
-        actionEntity.execResult = event.params.execResults[index];
-        actionEntity.save();
-      }
-    }
   }
 }
 

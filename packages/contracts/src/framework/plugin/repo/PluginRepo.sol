@@ -1,4 +1,4 @@
-// SPDX-License-Identifier:    MIT
+// SPDX-License-Identifier:    AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -258,12 +258,12 @@ contract PluginRepo is
     ) internal virtual override auth(UPGRADE_REPO_PERMISSION_ID) {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
+    /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == type(IPluginRepo).interfaceId ||
-            interfaceId == type(UUPSUpgradeable).interfaceId ||
-            super.supportsInterface(interfaceId);
+            _interfaceId == type(IPluginRepo).interfaceId ||
+            _interfaceId == type(UUPSUpgradeable).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 }

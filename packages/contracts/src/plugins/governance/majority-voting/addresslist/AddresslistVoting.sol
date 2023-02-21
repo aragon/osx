@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -6,6 +6,8 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 
 import {IDAO} from "../../../../core/dao/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
+
+import {IMembership} from "../../../../core/plugin/membership/IMembership.sol";
 import {Addresslist} from "../../../utils/Addresslist.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
@@ -14,18 +16,12 @@ import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 /// @author Aragon Association - 2021-2023.
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract AddresslistVoting is Addresslist, MajorityVotingBase {
+contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
-        this.addAddresses.selector ^
-            this.removeAddresses.selector ^
-            this.isListed.selector ^
-            this.isListedAtBlock.selector ^
-            this.addresslistLength.selector ^
-            this.addresslistLengthAtBlock.selector ^
-            this.initialize.selector;
+        this.initialize.selector ^ this.addAddresses.selector ^ this.removeAddresses.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_ADDRESSES_PERMISSION_ID =
@@ -48,6 +44,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         _addAddresses(_members);
+        emit MembersAdded({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -56,6 +53,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == ADDRESSLIST_VOTING_INTERFACE_ID ||
+            _interfaceId == type(Addresslist).interfaceId ||
+            _interfaceId == type(IMembership).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
@@ -66,6 +65,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         address[] calldata _members
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _addAddresses(_members);
+
+        emit MembersAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
@@ -74,6 +75,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         address[] calldata _members
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _removeAddresses(_members);
+
+        emit MembersRemoved({members: _members});
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -139,6 +142,11 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
+    }
+
+    /// @inheritdoc IMembership
+    function isMember(address _account) external view returns (bool) {
+        return isListed(_account);
     }
 
     /// @inheritdoc MajorityVotingBase

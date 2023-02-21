@@ -138,7 +138,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginSetupProcessor',
     PluginSetupProcessorAddress
   );
-  await checkSetManagingDao(PluginSetupProcessor, managingDAOAddress);
   // scope to reuse same const again
   {
     const SetPluginRepoRegistryAddress =

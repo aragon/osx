@@ -5,7 +5,6 @@ import {PluginRepoRegistry, PluginSetupProcessor} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
 
 export async function deployPluginSetupProcessor(
-  managingDao: any,
   pluginRepoRegistry: PluginRepoRegistry
 ): Promise<PluginSetupProcessor> {
   let psp: PluginSetupProcessor;
@@ -24,7 +23,6 @@ export async function deployPluginSetupProcessor(
   );
 
   psp = (await PluginSetupProcessor.deploy(
-    managingDao.address,
     pluginRepoRegistry.address
   )) as PluginSetupProcessor;
 

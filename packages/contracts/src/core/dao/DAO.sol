@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -205,7 +205,13 @@ contract DAO is
             }
         }
 
-        emit Executed(msg.sender, _callId, _actions, failureMap, execResults);
+        emit Executed({
+            actor: msg.sender,
+            callId: _callId,
+            actions: _actions,
+            failureMap: failureMap,
+            execResults: execResults
+        });
     }
 
     /// @inheritdoc IDAO

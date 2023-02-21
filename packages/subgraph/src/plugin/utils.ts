@@ -4,7 +4,8 @@ import {
   DataSourceContext,
   ethereum,
   crypto,
-  ByteArray
+  ByteArray,
+  log
 } from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
@@ -14,7 +15,8 @@ import {
   TokenVoting,
   AddresslistVoting,
   Admin,
-  Multisig
+  Multisig,
+  GovernanceERC20
 } from '../../generated/templates';
 import {
   TokenVotingPlugin,
@@ -38,9 +40,10 @@ export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(2, 'GrantWithCondition');
 
 function createTokenVotingPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
+  let pluginId = plugin.toHexString();
+  let packageEntity = TokenVotingPlugin.load(pluginId);
   if (!packageEntity) {
-    packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    packageEntity = new TokenVotingPlugin(pluginId);
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
     let contract = TokenVotingContract.bind(plugin);
@@ -59,7 +62,9 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
 
     if (!token.reverted) {
       let contract = fetchERC20(token.value);
-      if (contract) packageEntity.token = contract.id;
+      if (contract) {
+        packageEntity.token = contract.id;
+      }
     }
 
     // Create template

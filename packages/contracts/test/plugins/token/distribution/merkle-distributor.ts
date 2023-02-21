@@ -5,10 +5,18 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MerkleDistributor, DAO, TestERC20} from '../../../../typechain';
+import {
+  MerkleDistributor,
+  DAO,
+  TestERC20,
+  IERC165Upgradeable__factory,
+  IPlugin__factory,
+  IMerkleDistributor__factory,
+} from '../../../../typechain';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
@@ -38,6 +46,30 @@ describe('MerkleDistributor', function () {
       'MerkleDistributor'
     );
     distributor = await deployWithProxy(MerkleDistributor);
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await distributor.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IMerkleDistributor` interface', async () => {
+      const iface = IMerkleDistributor__factory.createInterface();
+      expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
   });
 
   describe('Upgrade', () => {

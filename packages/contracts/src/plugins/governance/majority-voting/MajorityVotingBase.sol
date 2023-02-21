@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -6,7 +6,8 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {ProposalUpgradeable, ProposalBase} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
+import {IProposal} from "../../../core/plugin/proposal/IProposal.sol";
+import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {RATIO_BASE, RatioOutOfBounds} from "../../utils/Ratio.sol";
@@ -169,7 +170,14 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
+    bytes4 internal constant MAJORITY_VOTING_BASE_INTERFACE_ID =
+        this.minDuration.selector ^
+            this.minProposerVotingPower.selector ^
+            this.votingMode.selector ^
+            this.totalVotingPower.selector ^
+            this.getProposal.selector ^
+            this.updateVotingSettings.selector ^
+            this.createProposal.selector;
 
     /// @notice The ID of the permission required to call the `updateVotingSettings` function.
     bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
@@ -236,14 +244,21 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
+    /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, PluginUUPSUpgradeable) returns (bool) {
+        bytes4 _interfaceId
+    )
+        public
+        view
+        virtual
+        override(ERC165Upgradeable, PluginUUPSUpgradeable, ProposalUpgradeable)
+        returns (bool)
+    {
         return
-            interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
-            PluginUUPSUpgradeable.supportsInterface(interfaceId);
+            _interfaceId == MAJORITY_VOTING_BASE_INTERFACE_ID ||
+            _interfaceId == type(IMajorityVoting).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @inheritdoc IMajorityVoting

@@ -13,8 +13,8 @@ export const VOTING_MODES = new Map<number, string>()
   .set(2, 'VoteReplacement');
 
 export const TOKEN_VOTING_INTERFACE = '0x50eb001e';
-export const ADDRESSLIST_VOTING_INTERFACE = '0x54942d88';
+export const ADDRESSLIST_VOTING_INTERFACE = '0x5f21eb8b';
 export const ADMIN_INTERFACE = '0xa5793356';
-export const MULTISIG_INTERFACE = '0x164b5edf';
+export const MULTISIG_INTERFACE = '0x8f852786';
 
 export const RATIO_BASE = '1000000'; // 10**6

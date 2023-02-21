@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -9,8 +9,8 @@ import "./PermissionLib.sol";
 
 /// @title PermissionManager
 /// @author Aragon Association - 2021-2023
-/// @notice The permission manager used in a DAO and its associated components.
-contract PermissionManager is Initializable {
+/// @notice The abstract permission manager used in a DAO, its associated plugins, and other framework-related components.
+abstract contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
@@ -58,8 +58,6 @@ contract PermissionManager is Initializable {
 
     /// @notice thrown when WHO and WHERE are both ANY_ADDR
     error AnyAddressDisallowedForWhoAndWhere();
-
-    // Events
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
@@ -110,7 +108,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(ROOT_PERMISSION_ID) {
+    ) external virtual auth(ROOT_PERMISSION_ID) {
         _grant(_where, _who, _permissionId);
     }
 
@@ -125,7 +123,7 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external auth(ROOT_PERMISSION_ID) {
+    ) external virtual auth(ROOT_PERMISSION_ID) {
         _grantWithCondition(_where, _who, _permissionId, _condition);
     }
 
@@ -138,7 +136,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external auth(ROOT_PERMISSION_ID) {
+    ) external virtual auth(ROOT_PERMISSION_ID) {
         _revoke(_where, _who, _permissionId);
     }
 
@@ -148,7 +146,7 @@ contract PermissionManager is Initializable {
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external auth(ROOT_PERMISSION_ID) {
+    ) external virtual auth(ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
 
@@ -168,7 +166,7 @@ contract PermissionManager is Initializable {
     /// @param _items The array of multi-targeted permission operations to apply.
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
-    ) external auth(ROOT_PERMISSION_ID) {
+    ) external virtual auth(ROOT_PERMISSION_ID) {
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
 
@@ -202,7 +200,7 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) public view returns (bool) {
+    ) public view virtual returns (bool) {
         return
             _isGranted(_where, _who, _permissionId, _data) || // check if `_who` has permission for `_permissionId` on `_where`
             _isGranted(_where, ANY_ADDR, _permissionId, _data) || // check if anyone has permission for `_permissionId` on `_where`
@@ -219,7 +217,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    function _grant(address _where, address _who, bytes32 _permissionId) internal {
+    function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
         _grantWithCondition(_where, _who, _permissionId, IPermissionCondition(ALLOW_FLAG));
     }
 
@@ -233,7 +231,7 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) internal {
+    ) internal virtual {
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
             revert AnyAddressDisallowedForWhoAndWhere();
         }
@@ -279,7 +277,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    function _revoke(address _where, address _who, bytes32 _permissionId) internal {
+    function _revoke(address _where, address _who, bytes32 _permissionId) internal virtual {
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
         if (permissionsHashed[permHash] != UNSET_FLAG) {
             permissionsHashed[permHash] = UNSET_FLAG;
@@ -299,7 +297,7 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) internal view returns (bool) {
+    ) internal view virtual returns (bool) {
         address accessFlagOrCondition = permissionsHashed[
             permissionHash(_where, _who, _permissionId)
         ];
@@ -324,7 +322,7 @@ contract PermissionManager is Initializable {
 
     /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    function _auth(bytes32 _permissionId) private view {
+    function _auth(bytes32 _permissionId) internal view virtual {
         if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
             revert Unauthorized({
                 where: address(this),
@@ -343,7 +341,7 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) internal pure returns (bytes32) {
+    ) internal pure virtual returns (bytes32) {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _permissionId));
     }
 

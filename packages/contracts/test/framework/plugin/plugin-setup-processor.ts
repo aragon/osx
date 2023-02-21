@@ -230,7 +230,7 @@ describe('Plugin Setup Processor', function () {
     const buildMetadata = '0x11';
 
     // Plugin Setup Processor
-    psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
+    psp = await deployPluginSetupProcessor(pluginRepoRegistry);
 
     // Create and register a plugin on the PluginRepoRegistry
     let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(

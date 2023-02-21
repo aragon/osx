@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -28,17 +28,6 @@ interface IMerkleMinter {
 
     /// @notice The address of the `MerkleDistributor` to clone from.
     function distributorBase() external returns (IMerkleDistributor);
-
-    /// @notice Initializes the MerkleMinter.
-    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
-    /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
-    /// @param _distributorBase A `MerkleDistributor` to be cloned.
-    function initialize(
-        IDAO _dao,
-        IERC20MintableUpgradeable _token,
-        IMerkleDistributor _distributorBase
-    ) external;
 
     /// @notice changes the base distributor address
     /// @param _distributorBase the address of base distributor

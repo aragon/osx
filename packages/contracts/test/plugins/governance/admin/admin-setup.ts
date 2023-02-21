@@ -1,11 +1,12 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
+import {Operation} from '../../../../utils/types';
 import {AdminSetup} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
+import {adminInterface} from './admin';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -45,13 +46,10 @@ describe('AdminSetup', function () {
     const factory = await ethers.getContractFactory('Admin');
     const adminAddressContract = factory.attach(implementationAddress);
 
-    const iface = new ethers.utils.Interface([
-      'function initialize(address  _dao)',
-      'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions,uint256 _allowFailureMap)',
-    ]);
-
     expect(
-      await adminAddressContract.supportsInterface(getInterfaceID(iface))
+      await adminAddressContract.supportsInterface(
+        getInterfaceID(adminInterface)
+      )
     ).to.be.eq(true);
   });
 

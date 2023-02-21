@@ -7,6 +7,11 @@ import {
   DAO,
   GovernanceERC20Mock,
   GovernanceERC20Mock__factory,
+  IERC165Upgradeable__factory,
+  IMajorityVoting__factory,
+  IMembership__factory,
+  IPlugin__factory,
+  IProposal__factory,
   TokenVoting,
 } from '../../../../../typechain';
 import {
@@ -36,6 +41,13 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {shouldUpgradeCorrectly} from '../../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
+import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {majorityVotingBaseInterface} from '../majority-voting';
+
+export const tokenVotingInterface = new ethers.utils.Interface([
+  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
+  'function getVotingToken()',
+]);
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -206,6 +218,51 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await voting.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      const iface = IProposal__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IMembership` interface', async () => {
+      const iface = IMembership__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IMajorityVoting` interface', async () => {
+      const iface = IMajorityVoting__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `MajorityVotingBase` interface', async () => {
+      expect(
+        await voting.supportsInterface(
+          getInterfaceID(majorityVotingBaseInterface)
+        )
+      ).to.be.true;
+    });
+
+    it('supports the `TokenVoting` interface', async () => {
+      expect(
+        await voting.supportsInterface(getInterfaceID(tokenVotingInterface))
+      ).to.be.true;
     });
   });
 

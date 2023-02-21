@@ -103,7 +103,7 @@ jobs:
       - name: Deploy Subgraph
         run: |
           cd ./packages/subgraph/
-          SUBGRAPH_VERSION=$(cat package.json | jq -r .version)
+          export SUBGRAPH_VERSION=$(cat package.json | jq -r .version)
           yarn run deploy
         env:
           NETWORK_NAME: ${{ matrix.network }}

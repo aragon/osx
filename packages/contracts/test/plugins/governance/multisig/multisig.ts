@@ -3,7 +3,15 @@ import {ethers} from 'hardhat';
 import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO} from '../../../../typechain';
+import {
+  Addresslist__factory,
+  DAO,
+  IERC165Upgradeable__factory,
+  IMembership__factory,
+  IMultisig__factory,
+  IPlugin__factory,
+  IProposal__factory,
+} from '../../../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
@@ -24,6 +32,14 @@ import {
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
+import {getInterfaceID} from '../../../test-utils/interfaces';
+
+export const multisigInterface = new ethers.utils.Interface([
+  'function initialize(address,address[],tuple(bool,uint16))',
+  'function updateMultisigSettings(tuple(bool,uint16))',
+  'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,bool,bool,uint64,uint64) ',
+  'function getProposal(uint256)',
+]);
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -189,6 +205,54 @@ describe('Multisig', function () {
       )
         .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
+    });
+  });
+
+  describe('plugin interface: ', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await multisig.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IPlugin` interface', async () => {
+      const iface = IPlugin__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IProposal` interface', async () => {
+      const iface = IProposal__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IMembership` interface', async () => {
+      const iface = IMembership__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `Addresslist` interface', async () => {
+      const iface = Addresslist__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IMultisig` interface', async () => {
+      const iface = IMultisig__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `Multisig` interface', async () => {
+      expect(
+        await multisig.supportsInterface(getInterfaceID(multisigInterface))
+      ).to.be.true;
     });
   });
 

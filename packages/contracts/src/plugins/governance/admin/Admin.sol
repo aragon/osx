@@ -1,19 +1,19 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {Proposal} from "../../../core/plugin/proposal/Proposal.sol";
-import {IMembershipContract} from "../../../core/plugin/membership/IMembershipContract.sol";
+import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
+import {IMembership} from "../../../core/plugin/membership/IMembership.sol";
 import {PluginCloneable} from "../../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022-2023
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
-contract Admin is IMembershipContract, PluginCloneable, Proposal {
-    using SafeCast for uint256;
+contract Admin is IMembership, PluginCloneable, ProposalUpgradeable {
+    using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADMIN_INTERFACE_ID =
@@ -33,13 +33,18 @@ contract Admin is IMembershipContract, PluginCloneable, Proposal {
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
+    /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return interfaceId == ADMIN_INTERFACE_ID || PluginCloneable.supportsInterface(interfaceId);
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public view override(PluginCloneable, ProposalUpgradeable) returns (bool) {
+        return
+            _interfaceId == ADMIN_INTERFACE_ID ||
+            _interfaceId == type(IMembership).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
-    /// @inheritdoc IMembershipContract
+    /// @inheritdoc IMembership
     function isMember(address _account) external view returns (bool) {
         return
             dao().hasPermission({
