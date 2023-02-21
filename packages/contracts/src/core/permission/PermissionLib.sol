@@ -6,7 +6,7 @@ pragma solidity 0.8.17;
 /// @author Aragon Association - 2021-2023
 /// @notice A library containing objects for permission processing.
 library PermissionLib {
-    /// @notice A constant expressing that not condition is applied to a permission.
+    /// @notice A constant expressing that no condition is applied to a permission.
     address constant NO_CONDITION = address(0);
 
     /// @notice The types of permission operations available in the `PermissionManager`.
@@ -19,7 +19,7 @@ library PermissionLib {
         GrantWithCondition
     }
 
-    /// @notice A struct containing the information for a permission to be applied on a single target contract without a condation.
+    /// @notice A struct containing the information for a permission to be applied on a single target contract without a condition.
     /// @param operation The permission operation type.
     /// @param who The address (EOA or contract) receiving the permission.
     /// @param permissionId The permission identifier.
