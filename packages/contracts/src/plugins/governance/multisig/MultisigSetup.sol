@@ -43,30 +43,30 @@ contract MultisigSetup is PluginSetup {
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
-        });
+        permissions[0] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Grant,
+            plugin,
+            _dao,
+            PermissionLib.NO_CONDITION,
+            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+        );
 
-        permissions[1] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
-        });
+        permissions[1] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Grant,
+            plugin,
+            _dao,
+            PermissionLib.NO_CONDITION,
+            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
+        );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[2] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: _dao,
-            who: plugin,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        });
+        permissions[2] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Grant,
+            _dao,
+            plugin,
+            PermissionLib.NO_CONDITION,
+            DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
+        );
 
         preparedSetupData.permissions = permissions;
     }
@@ -80,29 +80,29 @@ contract MultisigSetup is PluginSetup {
         permissions = new PermissionLib.MultiTargetPermission[](3);
 
         // Set permissions to be Revoked.
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _payload.plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
-        });
+        permissions[0] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Revoke,
+            _payload.plugin,
+            _dao,
+            PermissionLib.NO_CONDITION,
+            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+        );
 
-        permissions[1] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _payload.plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
-        });
+        permissions[1] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Revoke,
+            _payload.plugin,
+            _dao,
+            PermissionLib.NO_CONDITION,
+            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
+        );
 
-        permissions[2] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _dao,
-            who: _payload.plugin,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        });
+        permissions[2] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Revoke,
+            _dao,
+            _payload.plugin,
+            PermissionLib.NO_CONDITION,
+            DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
+        );
     }
 
     /// @inheritdoc IPluginSetup
