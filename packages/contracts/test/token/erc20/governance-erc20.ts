@@ -6,6 +6,7 @@ import {
   DAO,
   GovernanceERC20,
   GovernanceERC20__factory,
+  IERC165Upgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -20,7 +21,7 @@ const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 const governanceERC20Name = 'GovernanceToken';
 const governanceERC20Symbol = 'GOV';
 
-describe('GovernanceERC20', function () {
+describe.only('GovernanceERC20', function () {
   let signers: SignerWithAddress[];
   let dao: DAO;
   let token: GovernanceERC20;
@@ -83,10 +84,18 @@ describe('GovernanceERC20', function () {
   });
 
   describe('supportsInterface:', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await token.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await token.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
     it('it supports all inherited interfaces', async () => {
       await Promise.all(
         [
-          'IERC165Upgradeable',
           'IERC20Upgradeable',
           'IERC20PermitUpgradeable',
           'IVotesUpgradeable',

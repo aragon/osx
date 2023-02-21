@@ -7,6 +7,7 @@ import {
   TestERC20__factory,
   GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
+  IERC165Upgradeable__factory,
 } from '../../../typechain';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
@@ -24,7 +25,7 @@ const existingErc20Symbol = 'TOK';
 const governanceWrappedERC20Name = 'GovernanceWrappedToken';
 const governanceWrappedERC20Symbol = 'gwTOK';
 
-describe('GovernanceWrappedERC20', function () {
+describe.only('GovernanceWrappedERC20', function () {
   let signers: SignerWithAddress[];
   let governanceToken: GovernanceWrappedERC20;
   let erc20: TestERC20;
@@ -89,15 +90,20 @@ describe('GovernanceWrappedERC20', function () {
   });
 
   describe('supportsInterface:', async () => {
-    it('it supports all inherited interfaces', async () => {
-      governanceToken = await GovernanceWrappedERC20.deploy(
-        ...defaultGovernanceWrappedERC20InitData
-      );
+    it('does not support the empty interface', async () => {
+      expect(await governanceToken.supportsInterface('0x00000000')).to.be.false;
+    });
 
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+        .be.true;
+    });
+
+    it('it supports all inherited interfaces', async () => {
       await Promise.all(
         [
           'IGovernanceWrappedERC20',
-          'IERC165Upgradeable',
           'IERC20Upgradeable',
           'IERC20PermitUpgradeable',
           'IVotesUpgradeable',
