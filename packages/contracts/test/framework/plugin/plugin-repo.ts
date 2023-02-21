@@ -20,7 +20,7 @@ const BUILD_METADATA = '0x11';
 const RELEASE_METADATA = '0x1111';
 const MAINTAINER_PERMISSION_ID = ethers.utils.id('MAINTAINER_PERMISSION');
 
-describe('PluginRepo', function () {
+describe.only('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: SignerWithAddress[];

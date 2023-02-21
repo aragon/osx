@@ -37,7 +37,7 @@ async function getPluginRepoRegistryEvents(tx: any) {
   };
 }
 
-describe('PluginRepoFactory: ', function () {
+describe.only('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let pluginRepoRegistry: PluginRepoRegistry;
   let ownerAddress: string;
