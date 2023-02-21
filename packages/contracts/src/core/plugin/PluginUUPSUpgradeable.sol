@@ -21,6 +21,11 @@ abstract contract PluginUUPSUpgradeable is
 {
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
+    /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @inheritdoc IPlugin
     function pluginType() public pure override returns (PluginType) {
         return PluginType.UUPS;
