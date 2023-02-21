@@ -29,9 +29,6 @@ contract TokenVotingSetup is PluginSetup {
     /// @notice The address of the `TokenVoting` base contract.
     TokenVoting private immutable tokenVotingBase;
 
-    /// @notice The address zero to be used as condition address for permissions.
-    address private constant NO_CONDITION = address(0);
-
     /// @notice The address of the `GovernanceERC20` base contract.
     address public immutable governanceERC20Base;
 
@@ -160,7 +157,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -168,7 +165,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -177,7 +174,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -188,7 +185,7 @@ contract TokenVotingSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 token,
                 _dao,
-                NO_CONDITION,
+                PermissionLib.NO_CONDITION,
                 tokenMintPermission
             );
         }
@@ -223,7 +220,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -231,7 +228,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -239,7 +236,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -251,7 +248,7 @@ contract TokenVotingSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 token,
                 _dao,
-                NO_CONDITION,
+                PermissionLib.NO_CONDITION,
                 GovernanceERC20(token).MINT_PERMISSION_ID()
             );
         }

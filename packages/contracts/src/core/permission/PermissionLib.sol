@@ -6,12 +6,16 @@ pragma solidity 0.8.17;
 /// @author Aragon Association - 2021-2023
 /// @notice A library containing objects for permission processing.
 library PermissionLib {
+    /// @notice The address zero to be used as condition address for permissions.
+    address constant NO_CONDITION = address(0);
+
     enum Operation {
         Grant,
         Revoke,
         GrantWithCondition
     }
 
+    ///
     struct SingleTargetPermission {
         Operation operation;
         address who;
