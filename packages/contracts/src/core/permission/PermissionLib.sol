@@ -7,7 +7,7 @@ pragma solidity 0.8.17;
 /// @notice A library containing objects for permission processing.
 library PermissionLib {
     /// @notice A constant expressing that no condition is applied to a permission.
-    address constant NO_CONDITION = address(0);
+    address public constant NO_CONDITION = address(0);
 
     /// @notice The types of permission operations available in the `PermissionManager`.
     /// @param Grant The grant operation setting a permission without a condition.
