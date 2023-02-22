@@ -66,7 +66,8 @@ describe('MajorityVotingMock', function () {
     const MajorityVotingBase = await ethers.getContractFactory(
       'MajorityVotingMock'
     );
-    votingBase = await MajorityVotingBase.deploy();
+
+    votingBase = await deployWithProxy(MajorityVotingBase);
     await dao.grant(
       votingBase.address,
       ownerAddress,
