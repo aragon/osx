@@ -204,15 +204,15 @@ contract PluginRepo is
 
     /// @notice Returns the latest version for a given release number.
     /// @param _release The release number.
-    /// @return Version The latest version of this release.
+    /// @return The latest version of this release.
     function getLatestVersion(uint8 _release) public view returns (Version memory) {
         uint16 latestBuild = uint16(buildsPerRelease[_release]);
         return getVersion(tagHash(Tag(_release, latestBuild)));
     }
 
     /// @notice Returns the latest version for a given plugin setup.
-    /// @param _pluginSetup the plugin setup address
-    /// @return Version latest version that is bound to the _pluginSetup
+    /// @param _pluginSetup The plugin setup address
+    /// @return The latest version associated with the plugin Setup.
     function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
         return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
@@ -259,7 +259,7 @@ contract PluginRepo is
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPluginRepo).interfaceId ||

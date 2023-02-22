@@ -42,7 +42,7 @@ abstract contract PluginUUPSUpgradeable is
 
     /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPlugin).interfaceId ||

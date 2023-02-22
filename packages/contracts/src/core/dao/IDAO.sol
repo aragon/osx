@@ -21,7 +21,7 @@ interface IDAO {
     /// @param _who The address of a EOA or contract to give the permissions.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return bool Returns true if the address has permission, false if not.
+    /// @return Returns true if the address has permission, false if not.
     function hasPermission(
         address _where,
         address _who,
@@ -42,7 +42,7 @@ interface IDAO {
     /// @param _actions The array of actions.
     /// @param _allowFailureMap A bitmap allowing execution to succeed, even if individual actions might revert. If the bit at index `i` is 1, the execution succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
-    /// @return uint256 The constructed failureMap which contains which actions have actually failed.
+    /// @return The constructed failureMap which contains which actions have actually failed.
     function execute(
         bytes32 _callId,
         Action[] memory _actions,
