@@ -19,7 +19,7 @@ contract AdminSetup is PluginSetup {
     /// @notice The address of `Admin` plugin logic contract to be cloned.
     address private immutable implementation;
 
-    /// @notice Thrown if admin address is zero
+    /// @notice Thrown if the admin address is zero.
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
 
