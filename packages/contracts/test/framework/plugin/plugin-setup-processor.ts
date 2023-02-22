@@ -30,11 +30,10 @@ import {
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
-import {findEvent} from '../../../utils/event';
-import {Operation} from '../../core/permission/permission-manager';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {findEvent} from '../../../utils/event';
+import {Operation} from '../../../utils/types';
 
 import {
   mockPermissionsOperations,
@@ -173,7 +172,7 @@ describe('Plugin Setup Processor', function () {
     const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
       'PluginUUPSUpgradeableSetupV4Mock'
     );
-    setupUV4 = await SetupV4.deploy(await setupUV3.getImplementationAddress());
+    setupUV4 = await SetupV4.deploy(await setupUV3.implementation());
 
     // Deploy PluginCloneableSetupMock
     const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
@@ -304,9 +303,9 @@ describe('Plugin Setup Processor', function () {
 
       const proxy = await pluginFactory
         .attach(plugin)
-        .callStatic.getImplementationAddress();
+        .callStatic.implementation();
 
-      expect(proxy).to.equal(await setup.callStatic.getImplementationAddress());
+      expect(proxy).to.equal(await setup.callStatic.implementation());
     }
   });
 
@@ -1813,11 +1812,7 @@ describe('Plugin Setup Processor', function () {
         )
       )
         .to.be.revertedWithCustomError(psp, 'PluginProxyUpgradeFailed')
-        .withArgs(
-          proxy,
-          await setupUV2.callStatic.getImplementationAddress(),
-          initData
-        );
+        .withArgs(proxy, await setupUV2.callStatic.implementation(), initData);
     });
 
     it('reverts if preparation has not happened yet for update', async () => {
@@ -2024,7 +2019,7 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         );
 
-        const newImpl = await setupUV2.getImplementationAddress();
+        const newImpl = await setupUV2.implementation();
         expect(fake.upgradeToAndCall).to.have.been.calledWith(
           newImpl,
           initData
@@ -2051,7 +2046,7 @@ describe('Plugin Setup Processor', function () {
         // Reset so other tests continue using the default/original data
         setupUV2.prepareUpdate.reset();
 
-        const newImpl = await setupUV2.getImplementationAddress();
+        const newImpl = await setupUV2.implementation();
         expect(fake.upgradeTo).to.have.been.calledWith(newImpl);
       });
     });
@@ -2133,8 +2128,8 @@ describe('Plugin Setup Processor', function () {
 
       it('points to the V1 implementation', async () => {
         expect(
-          await PluginUV1.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupUV1.callStatic.getImplementationAddress());
+          await PluginUV1.attach(proxy).callStatic.implementation()
+        ).to.equal(await setupUV1.callStatic.implementation());
       });
 
       it('initializes the members', async () => {
@@ -2215,8 +2210,8 @@ describe('Plugin Setup Processor', function () {
 
         it('points to the V2 implementation', async () => {
           expect(
-            await PluginUV2.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupUV2.callStatic.getImplementationAddress());
+            await PluginUV2.attach(proxy).callStatic.implementation()
+          ).to.equal(await setupUV2.callStatic.implementation());
         });
 
         it('initializes the members', async () => {
@@ -2273,10 +2268,8 @@ describe('Plugin Setup Processor', function () {
 
           it('points to the V3 implementation', async () => {
             expect(
-              await PluginUV3.attach(
-                proxy
-              ).callStatic.getImplementationAddress()
-            ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+              await PluginUV3.attach(proxy).callStatic.implementation()
+            ).to.equal(await setupUV3.callStatic.implementation());
           });
 
           it('initializes the members', async () => {
@@ -2322,8 +2315,8 @@ describe('Plugin Setup Processor', function () {
 
         it('points to the V3 implementation', async () => {
           expect(
-            await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+            await PluginUV3.attach(proxy).callStatic.implementation()
+          ).to.equal(await setupUV3.callStatic.implementation());
         });
 
         it('initializes the members', async () => {
@@ -2369,8 +2362,8 @@ describe('Plugin Setup Processor', function () {
 
       it('points to the V2 implementation', async () => {
         expect(
-          await PluginUV2.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupUV2.callStatic.getImplementationAddress());
+          await PluginUV2.attach(proxy).callStatic.implementation()
+        ).to.equal(await setupUV2.callStatic.implementation());
       });
 
       it('initializes the members', async () => {
@@ -2427,8 +2420,8 @@ describe('Plugin Setup Processor', function () {
 
         it('points to the V3 implementation', async () => {
           expect(
-            await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+            await PluginUV3.attach(proxy).callStatic.implementation()
+          ).to.equal(await setupUV3.callStatic.implementation());
         });
 
         it('initializes the members', async () => {
@@ -2475,8 +2468,8 @@ describe('Plugin Setup Processor', function () {
 
       it('points to the V3 implementation', async () => {
         expect(
-          await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+          await PluginUV3.attach(proxy).callStatic.implementation()
+        ).to.equal(await setupUV3.callStatic.implementation());
       });
 
       it('initializes the members', async () => {
@@ -2561,14 +2554,14 @@ async function updateAndValidatePluginUpdate(
   // on the plugin. The below check for this still is not 100% ensuring,
   // As function `upgradeTo` might be called but event `Upgraded`
   // not thrown(OZ changed the logic or name) which will trick the test to pass..
-  const currentImpl = await currentPluginSetup.getImplementationAddress();
-  const newImpl = await newPluginSetup.getImplementationAddress();
+  const currentImpl = await currentPluginSetup.implementation();
+  const newImpl = await newPluginSetup.implementation();
 
   if (currentImpl != newImpl) {
     const proxyContract = await ethers.getContractAt(
       'PluginUUPSUpgradeable',
       proxy
     );
-    expect(await proxyContract.getImplementationAddress()).to.equal(newImpl);
+    expect(await proxyContract.implementation()).to.equal(newImpl);
   }
 }

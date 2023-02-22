@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -20,8 +20,6 @@ contract CounterV2PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
-    address private constant NO_CONDITION = address(0);
-
     // MultiplyHelper doesn't change. so dev decides to pass the old one.
     constructor(MultiplyHelper _helper) {
         multiplyHelperBase = _helper;
@@ -31,7 +29,7 @@ contract CounterV2PluginSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     )
         external
         virtual
@@ -68,7 +66,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -76,7 +74,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -85,7 +83,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
-                NO_CONDITION,
+                PermissionLib.NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -126,7 +124,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -152,7 +150,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -160,7 +158,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -169,14 +167,14 @@ contract CounterV2PluginSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 _payload.currentHelpers[0],
                 _payload.plugin,
-                NO_CONDITION,
+                PermissionLib.NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(counterBase);
     }
 }

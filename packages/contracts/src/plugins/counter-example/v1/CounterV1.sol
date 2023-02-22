@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -18,11 +18,6 @@ contract CounterV1 is PluginUUPSUpgradeable {
 
     /// @notice A helper contract associated with the plugin.
     MultiplyHelper public multiplyHelper;
-
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
 
     /// @notice Initializes the plugin.
     /// @param _dao The contract of the associated DAO.

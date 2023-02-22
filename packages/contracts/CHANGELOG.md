@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the function `getImplementationAddress` to `implementation` in `IPluginSetup`.
+- Moved `NO_CONDITION` constant to `PermissionLib`.
+- Use the `calldata` instead of `memory` keyword in `PluginSetup.prepareInstallation`.
+- Moved `_disableInitializers` inside the constructors of `PluginCloneable` and `PluginUUPSUpgradeable`.
+- Changed license from `MIT` to `AGPL-3.0-or-later`.
 - Renamed `DAOSettings.name` to `DAOSettings.subdomain`.
 - Fixed the ERC165 interface ID and `supportsInterface` computations.
 - Replaced non-upgradeable contract dependencies by upgradeable ones for the cloneable `Admin` plugin.

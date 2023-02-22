@@ -1,6 +1,7 @@
-import {hashHelpers} from './hash-helpers';
-import {PermissionOperation, PluginRepoPointer, VersionTag} from './types';
 import {BytesLike} from 'ethers';
+
+import {hashHelpers} from '../../../utils/psp';
+import {PermissionOperation, PluginRepoPointer, VersionTag} from './types';
 
 export function createPrepareInstallationParams(
   pluginRepoPointer: PluginRepoPointer,

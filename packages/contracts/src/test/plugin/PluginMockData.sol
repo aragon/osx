@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -20,7 +20,7 @@ function mockPermissions(
             op,
             address(i),
             address(i),
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             keccak256("MOCK_PERMISSION")
         );
     }

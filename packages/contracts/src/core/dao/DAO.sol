@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -88,7 +88,7 @@ contract DAO is
     /// @param daoURI The new uri.
     event NewURI(string daoURI);
 
-    /// @dev Used to disallow initializing implementation contract by attacker for extra safety.
+    /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
     constructor() {
         _disableInitializers();
     }

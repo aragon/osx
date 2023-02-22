@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -17,27 +17,22 @@ contract AdminSetup is PluginSetup {
     using Clones for address;
 
     /// @notice The address of `Admin` plugin logic contract to be cloned.
-    address private immutable implementation;
+    address private immutable implementation_;
 
-    /// @notice The address zero to be used as condition address for permissions.
-    address private constant NO_CONDITION = address(0);
-
-    /// @notice Thrown if admin address is zero.
+    /// @notice Thrown if the admin address is zero.
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
 
-    /// @notice The contract constructor, that deployes the `Admin` plugin logic contract.
+    /// @notice The constructor setting the `Admin` implementation contract to clone from.
     constructor() {
-        implementation = address(new Admin());
+        implementation_ = address(new Admin());
     }
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
         address admin = abi.decode(_data, (address));
 
@@ -46,10 +41,10 @@ contract AdminSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = implementation.clone();
+        plugin = implementation_.clone();
 
         // Initialize cloned plugin contract.
-        Admin(plugin).initialize(dao);
+        Admin(plugin).initialize(IDAO(_dao));
 
         // Prepare permissions
         PermissionLib.MultiTargetPermission[]
@@ -60,7 +55,7 @@ contract AdminSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             admin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
         );
 
@@ -69,7 +64,7 @@ contract AdminSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -77,10 +72,7 @@ contract AdminSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    /// @dev Currently there is not a relaiable mean to revoke plugin's permissions such as `ADMIN_EXECUTE_PERMISSION_ID`
-    /// that have been granted to addresses during the life cycle of the plugin.
-    /// or the ones that have been granted are not revoked already,
-    /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
+    /// @dev Currently, there is no reliable way to revoke the `ADMIN_EXECUTE_PERMISSION_ID` from all addresses it has been granted to. Accordingly, only the `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
@@ -92,13 +84,13 @@ contract AdminSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
-        return implementation;
+    function implementation() external view returns (address) {
+        return implementation_;
     }
 }

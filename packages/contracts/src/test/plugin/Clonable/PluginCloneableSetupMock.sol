@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -36,7 +36,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(pluginBase);
     }
 }
@@ -72,7 +72,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(pluginBase);
     }
 }

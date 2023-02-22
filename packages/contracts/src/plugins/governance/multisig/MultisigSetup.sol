@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -15,9 +15,6 @@ contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
     Multisig private immutable multisigBase;
 
-    /// @notice The address zero to be used as condition address for permissions.
-    address private constant NO_CONDITION = address(0);
-
     /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
     constructor() {
         multisigBase = new Multisig();
@@ -26,10 +23,8 @@ contract MultisigSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
         (address[] memory members, Multisig.MultisigSettings memory multisigSettings) = abi.decode(
             _data,
@@ -39,7 +34,7 @@ contract MultisigSetup is PluginSetup {
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             address(multisigBase),
-            abi.encodeWithSelector(Multisig.initialize.selector, dao, members, multisigSettings)
+            abi.encodeWithSelector(Multisig.initialize.selector, _dao, members, multisigSettings)
         );
 
         // Prepare permissions
@@ -52,7 +47,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
@@ -60,7 +55,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -69,7 +64,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -89,7 +84,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
@@ -97,7 +92,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -105,13 +100,13 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
+    function implementation() external view returns (address) {
         return address(multisigBase);
     }
 }

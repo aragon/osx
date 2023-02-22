@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -10,11 +10,6 @@ import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol
 contract MultiplyHelper is PluginUUPSUpgradeable {
     /// @notice The ID of the permission required to call the `multiply` function.
     bytes32 public constant MULTIPLY_PERMISSION_ID = keccak256("MULTIPLY_PERMISSION");
-
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
 
     /// @notice Multiplies the count with a number.
     /// @param _a The number to multiply the coun with.

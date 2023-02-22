@@ -12,6 +12,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
+  console.log(
+    `ManagingDAO will be owned by the (Deployer: ${deployer}) temporarily, while the entire framework is getting deployed.` +
+      ` At the final step when Multisig is available, it will be installed on managingDAO and all roles for the Deployer will be revoked.`
+  );
+
   const initializeParams = {
     metadata: '0x',
     initialOwner: deployer,

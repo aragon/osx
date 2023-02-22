@@ -29,7 +29,7 @@
     "url": "git+https://github.com/aragon/core.git"
   },
   "author": "",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/aragon/core/issues"
   },

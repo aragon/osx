@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
 
-  // Get managing DAO address.
+  // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // VERIFYING DAO ENS SUBDOMAIN REGISTRAR
