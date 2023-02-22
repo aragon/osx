@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Add `executable` attribute to `MultisigProposal`.
+
 ### Changed
 
 - Fixed the `supportThresholdReachedEarly` check in `handleVoteCast` of `TokenVoting` and `AddresslistVoting`.

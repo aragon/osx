@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ERC20, TokenVotingSetup} from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {Operation} from '../../../../core/permission/permission-manager';
+import {Operation} from '../../../../../utils/types';
 import metadata from '../../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 
 import {
@@ -67,7 +67,7 @@ describe('TokenVotingSetup', function () {
     );
     tokenVotingSetup = await TokenVotingSetup.deploy();
 
-    implementationAddress = await tokenVotingSetup.getImplementationAddress();
+    implementationAddress = await tokenVotingSetup.implementation();
 
     const ERC20Token = await ethers.getContractFactory('ERC20');
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);

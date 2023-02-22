@@ -36,7 +36,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(pluginBase);
     }
 }
@@ -72,7 +72,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(pluginBase);
     }
 }

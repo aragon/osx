@@ -4,8 +4,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {BytesLike} from 'ethers';
-import {defaultAbiCoder, keccak256, solidityPack} from 'ethers/lib/utils';
+import {keccak256, solidityPack} from 'ethers/lib/utils';
 
 import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../../typechain';
 import {
@@ -49,6 +48,25 @@ describe('PluginRepo', function () {
     UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
     'Unauthorized'
   );
+
+  it('initializes correctly', async () => {
+    const permissions = [
+      ethers.utils.id('MAINTAINER_PERMISSION'),
+      ethers.utils.id('UPGRADE_REPO_PERMISSION'),
+      ethers.utils.id('ROOT_PERMISSION'),
+    ];
+
+    for (let i = 0; i < permissions.length; i++) {
+      expect(
+        await pluginRepo.isGranted(
+          pluginRepo.address,
+          ownerAddress,
+          permissions[i],
+          '0x'
+        )
+      ).to.be.true;
+    }
+  });
 
   describe('CreateVersion: ', async () => {
     it('reverts if the caller does not have permission', async () => {

@@ -9,7 +9,7 @@ import {
   CounterV2PluginSetup,
   MultiplyHelper,
 } from '../../../typechain';
-import {Operation} from '../../core/permission/permission-manager';
+import {Operation} from '../../../utils/types';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -59,7 +59,7 @@ describe('CounterPluginSetup(Example)', function () {
     );
     multiplyPermissionId = await counterV1.MULTIPLY_PERMISSION_ID();
 
-    implementationAddress = await counterV1Setup.getImplementationAddress();
+    implementationAddress = await counterV1Setup.implementation();
 
     const MultiplyHelper = await ethers.getContractFactory('MultiplyHelper');
     multiplyHelper = await MultiplyHelper.deploy();

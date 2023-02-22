@@ -77,7 +77,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ).address
   );
   const addresslistVotingBase =
-    await AddresslistVotingSetupContract.getImplementationAddress();
+    await AddresslistVotingSetupContract.implementation();
   verifyObjArray.push({address: addresslistVotingBase, args: []});
 
   const TokenVotingSetupContract = await ethers.getContractAt(
@@ -86,8 +86,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       await deployments.get('TokenVotingSetup')
     ).address
   );
-  const tokenVotingBase =
-    await TokenVotingSetupContract.getImplementationAddress();
+  const tokenVotingBase = await TokenVotingSetupContract.implementation();
   verifyObjArray.push({address: tokenVotingBase, args: []});
 
   const governanceERC20Base =

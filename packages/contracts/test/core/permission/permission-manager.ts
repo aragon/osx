@@ -8,6 +8,7 @@ import {
 } from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
 import {OZ_ERRORS} from '../../test-utils/error';
+import {Operation} from '../../../utils/types';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
@@ -26,12 +27,6 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 
 const addressZero = ethers.constants.AddressZero;
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
-
-export enum Operation {
-  Grant,
-  Revoke,
-  GrantWithCondition,
-}
 
 interface SingleTargetPermission {
   operation: Operation;

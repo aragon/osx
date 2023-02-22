@@ -20,7 +20,7 @@ function mockPermissions(
             op,
             address(i),
             address(i),
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             keccak256("MOCK_PERMISSION")
         );
     }
