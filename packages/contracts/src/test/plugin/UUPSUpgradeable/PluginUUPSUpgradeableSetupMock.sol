@@ -170,7 +170,7 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
     {
         // If one tries to upgrade from v3 to this(v4), developer of this v4
         // knows that logic contract doesn't change as he specified the same address
-        // in getImplementationAddress. This means this update should only include returning
+        // in `implementation()`. This means this update should only include returning
         // the desired updated permissions. PluginSetupProcessor will take care of
         // not calling `upgradeTo` on the plugin in such cases.
         if (_currentBuild == 3) {
