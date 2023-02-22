@@ -64,7 +64,7 @@ const REGISTER_STANDARD_CALLBACK_PERMISSION_ID = ethers.utils.id(
 
 const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
-const ALLOW_FLAG_CONDITION = '0x0000000000000000000000000000000000000002';
+const ALLOW_FLAG = '0x0000000000000000000000000000000000000002';
 const daoDummySubdomain = 'dao1';
 const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
@@ -358,20 +358,14 @@ describe('DAOFactory: ', function () {
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
-        ROOT_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        ALLOW_FLAG_CONDITION
-      )
+      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, dao, dao, ALLOW_FLAG)
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
         UPGRADE_DAO_PERMISSION_ID,
         daoFactory.address,
         dao,
         dao,
-        ALLOW_FLAG_CONDITION
+        ALLOW_FLAG
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
@@ -379,7 +373,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao,
         dao,
-        ALLOW_FLAG_CONDITION
+        ALLOW_FLAG
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
@@ -387,7 +381,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao,
         dao,
-        ALLOW_FLAG_CONDITION
+        ALLOW_FLAG
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
@@ -395,7 +389,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao,
         dao,
-        ALLOW_FLAG_CONDITION
+        ALLOW_FLAG
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
@@ -403,7 +397,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao,
         dao,
-        ALLOW_FLAG_CONDITION
+        ALLOW_FLAG
       );
   });
 
