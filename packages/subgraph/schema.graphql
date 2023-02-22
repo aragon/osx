@@ -456,7 +456,7 @@ type AddresslistVotingProposal implements Proposal @entity {
 # Admin (plugin)
 
 type AdminPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  "TODO: attributes should be appended to Plugin once plugin is separated from core"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
@@ -542,8 +542,8 @@ type MultisigProposal implements Proposal @entity {
   endDate: BigInt!
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
-  minApprovals: BigInt!
-  approvals: BigInt
+  minApprovals: Int!
+  approvals: Int
   executable: Boolean!
   executed: Boolean!
   executionDate: BigInt

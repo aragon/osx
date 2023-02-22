@@ -50,11 +50,11 @@ export function _handleProposalCreated(
 
   if (!vote.reverted) {
     proposalEntity.executed = vote.value.value0;
-    proposalEntity.approvals = BigInt.fromU32(vote.value.value1);
+    proposalEntity.approvals = vote.value.value1;
 
     // ProposalParameters
     let parameters = vote.value.value2;
-    proposalEntity.minApprovals = BigInt.fromU32(parameters.minApprovals);
+    proposalEntity.minApprovals = parameters.minApprovals;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // if minApproval is 1, the proposal is always executable
@@ -125,7 +125,7 @@ export function handleApproved(event: Approved): void {
 
     if (!proposal.reverted) {
       let approvals = proposal.value.value1;
-      proposalEntity.approvals = BigInt.fromU32(approvals);
+      proposalEntity.approvals = approvals;
 
       // calculate if proposal is executable
       let minApprovalsStruct = proposal.value.value2;
