@@ -106,7 +106,7 @@ contract MultisigSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
+    function implementation() external view returns (address) {
         return address(multisigBase);
     }
 }

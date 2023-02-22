@@ -58,8 +58,8 @@ interface IPluginSetup {
         SetupPayload calldata _payload
     ) external returns (PermissionLib.MultiTargetPermission[] memory permissions);
 
-    /// @notice Returns the plugin's base implementation.
-    /// @return address The address of the plugin implementation contract.
+    /// @notice Returns the plugin implementation address.
+    /// @return The address of the plugin implementation contract.
     /// @dev The implementation can be instantiated via the `new` keyword, cloned via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)), or proxied via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    function getImplementationAddress() external view returns (address);
+    function implementation() external view returns (address);
 }

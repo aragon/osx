@@ -51,7 +51,7 @@ describe('MultisigSetup', function () {
 
     MultisigFactory = await ethers.getContractFactory('Multisig');
 
-    implementationAddress = await multisigSetup.getImplementationAddress();
+    implementationAddress = await multisigSetup.implementation();
   });
 
   it('creates multisig base with the correct interface', async () => {

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the function `getImplementationAddress` to `implementation` in `IPluginSetup`.
 - Moved `NO_CONDITION` constant to `PermissionLib`.
 - Use the `calldata` instead of `memory` keyword in `PluginSetup.prepareInstallation`.
 - Moved `_disableInitializers` inside the constructors of `PluginCloneable` and `PluginUUPSUpgradeable`.

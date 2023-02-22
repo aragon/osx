@@ -67,7 +67,7 @@ describe('TokenVotingSetup', function () {
     );
     tokenVotingSetup = await TokenVotingSetup.deploy();
 
-    implementationAddress = await tokenVotingSetup.getImplementationAddress();
+    implementationAddress = await tokenVotingSetup.implementation();
 
     const ERC20Token = await ethers.getContractFactory('ERC20');
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
