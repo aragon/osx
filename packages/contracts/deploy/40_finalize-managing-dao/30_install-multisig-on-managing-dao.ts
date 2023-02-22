@@ -64,6 +64,8 @@ const func: DeployFunction = async function (hre: EHRE) {
   const event = await findEvent(prepareTx, 'InstallationPrepared');
   const installationPreparedEvent = event.args;
 
+  hre.managingDAOMultisigPluginAddress = installationPreparedEvent.plugin;
+
   console.log(
     `Prepared (Multisig: ${installationPreparedEvent.plugin}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
   );
