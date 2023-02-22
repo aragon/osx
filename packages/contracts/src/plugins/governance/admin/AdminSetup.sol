@@ -19,9 +19,6 @@ contract AdminSetup is PluginSetup {
     /// @notice The address of `Admin` plugin logic contract to be cloned.
     address private immutable implementation;
 
-    /// @notice An address flag encoding that no conditions are added to a requested permission.
-    address private constant NO_CONDITION = address(0);
-
     /// @notice Thrown if the admin address is zero.
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
@@ -58,7 +55,7 @@ contract AdminSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             admin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
         );
 
@@ -67,7 +64,7 @@ contract AdminSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -87,7 +84,7 @@ contract AdminSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }

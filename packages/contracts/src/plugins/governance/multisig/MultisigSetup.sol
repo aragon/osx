@@ -15,9 +15,6 @@ contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
     Multisig private immutable multisigBase;
 
-    /// @notice The address zero to be used as condition address for permissions.
-    address private constant NO_CONDITION = address(0);
-
     /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
     constructor() {
         multisigBase = new Multisig();
@@ -50,7 +47,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
@@ -58,7 +55,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -67,7 +64,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -87,7 +84,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
@@ -95,7 +92,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -103,7 +100,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
