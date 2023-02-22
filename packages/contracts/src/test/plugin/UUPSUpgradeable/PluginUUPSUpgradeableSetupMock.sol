@@ -36,7 +36,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(pluginBase);
     }
 }

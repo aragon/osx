@@ -17,7 +17,7 @@ contract AdminSetup is PluginSetup {
     using Clones for address;
 
     /// @notice The address of `Admin` plugin logic contract to be cloned.
-    address private immutable implementation;
+    address private immutable implementation_;
 
     /// @notice An address flag encoding that no conditions are added to a requested permission.
     address private constant NO_CONDITION = address(0);
@@ -28,7 +28,7 @@ contract AdminSetup is PluginSetup {
 
     /// @notice The constructor setting the `Admin` implementation contract to clone from.
     constructor() {
-        implementation = address(new Admin());
+        implementation_ = address(new Admin());
     }
 
     /// @inheritdoc IPluginSetup
@@ -44,7 +44,7 @@ contract AdminSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = implementation.clone();
+        plugin = implementation_.clone();
 
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(IDAO(_dao));
@@ -93,7 +93,7 @@ contract AdminSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
-        return implementation;
+    function implementation() external view returns (address) {
+        return implementation_;
     }
 }

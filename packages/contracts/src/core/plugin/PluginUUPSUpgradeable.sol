@@ -52,7 +52,7 @@ abstract contract PluginUUPSUpgradeable is
 
     /// @notice Returns the address of the implementation contract in the [proxy storage slot](https://eips.ethereum.org/EIPS/eip-1967) slot the [UUPS proxy](https://eips.ethereum.org/EIPS/eip-1822) is pointing to.
     /// @return implementation The address of the implementation contract.
-    function getImplementationAddress() public view returns (address implementation) {
+    function implementation() public view returns (address implementation) {
         implementation = _getImplementation();
     }
 

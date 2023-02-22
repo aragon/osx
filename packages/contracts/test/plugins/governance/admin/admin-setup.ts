@@ -39,7 +39,7 @@ describe('AdminSetup', function () {
     const AdminSetup = await ethers.getContractFactory('AdminSetup');
     adminSetup = await AdminSetup.deploy();
 
-    implementationAddress = await adminSetup.getImplementationAddress();
+    implementationAddress = await adminSetup.implementation();
   });
 
   it('creates admin address base with the correct interface', async () => {
