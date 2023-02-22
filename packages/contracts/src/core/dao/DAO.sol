@@ -57,7 +57,7 @@ contract DAO is
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
-    /// @notice Only allows 256 actions to execute per tx.
+    /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
@@ -69,11 +69,11 @@ contract DAO is
     /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO uri.
     string private _daoURI;
 
-    /// @notice Thrown if action length is more than MAX_ACTIONS.
+    /// @notice Thrown if the action array length is larger than `MAX_ACTIONS`.
     error TooManyActions();
 
     /// @notice Thrown if action execution has failed.
-    /// @param index Index of action in the array that failed.
+    /// @param index The index of the action in the action array that failed.
     error ActionFailed(uint256 index);
 
     /// @notice Thrown if the deposit amount is zero.
