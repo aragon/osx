@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -26,11 +26,6 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_ADDRESSES_PERMISSION_ID =
         keccak256("UPDATE_ADDRESSES_PERMISSION");
-
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

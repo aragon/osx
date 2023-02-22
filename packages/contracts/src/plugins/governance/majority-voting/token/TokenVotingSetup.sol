@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -77,8 +77,6 @@ contract TokenVotingSetup is PluginSetup {
         address _dao,
         bytes memory _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
@@ -131,7 +129,7 @@ contract TokenVotingSetup is PluginSetup {
             // Clone a `GovernanceERC20`.
             token = governanceERC20Base.clone();
             GovernanceERC20(token).initialize(
-                dao,
+                IDAO(_dao),
                 tokenSettings.name,
                 tokenSettings.symbol,
                 mintSettings
@@ -143,7 +141,7 @@ contract TokenVotingSetup is PluginSetup {
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
             implementation,
-            abi.encodeWithSelector(TokenVoting.initialize.selector, dao, votingSettings, token)
+            abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, token)
         );
 
         // Prepare permissions

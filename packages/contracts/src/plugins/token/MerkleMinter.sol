@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -32,11 +32,6 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
 
     /// @inheritdoc IMerkleMinter
     IMerkleDistributor public override distributorBase;
-
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
 
     /// @notice Initializes the MerkleMinter.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

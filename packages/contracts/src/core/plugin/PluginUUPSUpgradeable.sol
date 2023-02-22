@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -20,6 +20,11 @@ abstract contract PluginUUPSUpgradeable is
     DaoAuthorizableUpgradeable
 {
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
+
+    /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @inheritdoc IPlugin
     function pluginType() public pure override returns (PluginType) {

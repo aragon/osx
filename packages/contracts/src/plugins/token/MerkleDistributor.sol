@@ -14,7 +14,7 @@ import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 /// @title MerkleDistributor
-/// @author Uniswap 2020
+/// @author Uniswap 2020, Modified by Aragon Association 2021-2023
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -37,11 +37,6 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     /// @param to The address to which the tokens should be sent.
     /// @param amount The amount to be claimed.
     error TokenClaimInvalid(uint256 index, address to, uint256 amount);
-
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
 
     /// @notice Initializes the plugin.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -23,8 +23,6 @@ contract MultisigSetup is PluginSetup {
         address _dao,
         bytes memory _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
         (address[] memory members, Multisig.MultisigSettings memory multisigSettings) = abi.decode(
             _data,
@@ -34,7 +32,7 @@ contract MultisigSetup is PluginSetup {
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             implementation,
-            abi.encodeWithSelector(Multisig.initialize.selector, dao, members, multisigSettings)
+            abi.encodeWithSelector(Multisig.initialize.selector, _dao, members, multisigSettings)
         );
 
         // Prepare permissions
