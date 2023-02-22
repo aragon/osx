@@ -344,7 +344,10 @@ describe('GovernanceWrappedERC20', function () {
     it('turns on delegation after mint', async () => {
       expect(await token.delegates(signers[0].address)).to.equal(addressZero);
 
-      await token.depositFor(signers[0].address, 1);
+      await expect(token.depositFor(signers[0].address, 1)).to.emit(
+        token,
+        'DelegateChanged'
+      );
 
       expect(await token.delegates(signers[0].address)).to.equal(
         signers[0].address
@@ -360,7 +363,10 @@ describe('GovernanceWrappedERC20', function () {
       // but the transfer should turn it on.
       expect(await token.delegates(signers[1].address)).to.equal(addressZero);
 
-      await token.transfer(signers[1].address, 50);
+      await expect(token.transfer(signers[1].address, 50)).to.emit(
+        token,
+        'DelegateChanged'
+      );
 
       expect(await token.getVotes(signers[1].address)).to.equal(50);
       expect(await token.delegates(signers[1].address)).to.equal(
@@ -378,9 +384,13 @@ describe('GovernanceWrappedERC20', function () {
       await token.connect(signers[1]).delegate(addressZero);
 
       // shouldn't turn on delegation.
-      await token.transfer(signers[1].address, 50);
+      await expect(token.transfer(signers[1].address, 50)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
 
       expect(await token.delegates(signers[1].address)).to.equal(addressZero);
+      expect(await token.getVotes(signers[1].address)).to.equal(0);
     });
 
     it('should not turn on delegation on `mint` if `to` manually turned it off', async () => {
@@ -389,9 +399,36 @@ describe('GovernanceWrappedERC20', function () {
       // turn off delegation
       await token.delegate(addressZero);
 
-      await token.depositFor(signers[0].address, 50);
+      await expect(token.depositFor(signers[0].address, 50)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
 
       expect(await token.delegates(signers[0].address)).to.equal(addressZero);
+      expect(await token.getVotes(signers[1].address)).to.equal(0);
+    });
+
+    it('should not turn on delegation on `mint` if it was turned on at least once in the past', async () => {
+      await token.depositFor(signers[0].address, 100);
+
+      await expect(token.depositFor(signers[0].address, 100)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.getVotes(signers[0].address)).to.equal(200);
+    });
+
+    it('should not turn on delegation on `transfer` if it was turned on at least once in the past', async () => {
+      await token.depositFor(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 50);
+
+      await expect(token.transfer(signers[1].address, 30)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+      expect(await token.getVotes(signers[1].address)).to.equal(80);
     });
 
     it('updates voting power after transfer for `from` if delegation turned on', async () => {
