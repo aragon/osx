@@ -1,8 +1,8 @@
 {
-  "name": "@aragon/core-subgraph",
+  "name": "@aragon/osx-subgraph",
   "version": "0.9.0-alpha",
   "description": "Aragon V2 Subgraph",
-  "homepage": "https://github.com/aragon/core",
+  "homepage": "https://github.com/aragon/osx",
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts",

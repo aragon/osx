@@ -1,5 +1,5 @@
 {
-  "name": "@aragon/core-contracts",
+  "name": "@aragon/osx-contracts",
   "version": "0.7.1-alpha",
   "description": "Aragon V2 DAO Framework",
   "main": "dist/bundle-cjs.js",
@@ -26,14 +26,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aragon/core.git"
+    "url": "git+https://github.com/aragon/osx.git"
   },
   "author": "",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/aragon/core/issues"
+    "url": "https://github.com/aragon/osx/issues"
   },
-  "homepage": "https://github.com/aragon/core#readme",
+  "homepage": "https://github.com/aragon/osx#readme",
   "devDependencies": {
     "@defi-wonderland/smock": "^2.3.4",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",

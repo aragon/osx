@@ -61,8 +61,8 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Packages
 
-- [ ] Publish a new version of `@aragon/core-contracts` (`./packages/contracts`) to NPM
-- [ ] Publish a new version of `@aragon/core-contracts-ethers` (`./packages/contracts`) to NPM
+- [ ] Publish a new version of `@aragon/osx-contracts` (`./packages/contracts`) to NPM
+- [ ] Publish a new version of `@aragon/osx-contracts-ethers` (`./packages/contracts`) to NPM
 
 ### Subgraph
 

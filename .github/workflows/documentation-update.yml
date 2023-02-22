@@ -15,7 +15,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: "yarn"
+          cache: 'yarn'
           node-version: 14
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -29,10 +29,10 @@ jobs:
           ref: staging
           path: builders-portal
           token: ${{ secrets.ARABOT_PAT }}
-      - name: Remove the docs/core folder in the builders-portal
-        run: rm -rf $GITHUB_WORKSPACE/builders-portal/docs/core
-      - name: Copy the docs/core folder to the builders-portal
-        run: cp -R packages/contracts/docs/core $GITHUB_WORKSPACE/builders-portal/docs/core
+      - name: Remove the docs/aragon-osx folder in the builders-portal
+        run: rm -rf $GITHUB_WORKSPACE/builders-portal/docs/aragon-osx
+      - name: Copy the docs/aragon-osx folder to the builders-portal
+        run: cp -R packages/contracts/docs/aragon-osx $GITHUB_WORKSPACE/builders-portal/docs/aragon-osx
       - name: Get short commit hash
         id: hash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -41,11 +41,11 @@ jobs:
         with:
           token: ${{ secrets.ARABOT_PAT }}
           path: builders-portal
-          commit-message: 'Update core docs by commit ${{ steps.hash.outputs.sha_short }}'
+          commit-message: 'Update aragonOSx docs by commit ${{ steps.hash.outputs.sha_short }}'
           committer: 'Arabot <arabot-1@users.noreply.github.com>'
-          branch: patch/core-docs
+          branch: patch/aragon-osx-docs
           delete-branch: true
-          title: Updates docs for smart contracts
-          body: 'Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))'
+          title: Updates the aragonOSx docs
+          body: 'Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/osx/actions/runs/${{ github.run_id }}))'
           reviewers: ${{ github.actor }}
           team-reviewers: devrel
