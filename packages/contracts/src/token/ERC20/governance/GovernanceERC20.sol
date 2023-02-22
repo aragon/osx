@@ -111,8 +111,9 @@ contract GovernanceERC20 is
     /// @inheritdoc ERC20VotesUpgradeable
     function _afterTokenTransfer(address from, address to, uint256 amount) internal override {
         super._afterTokenTransfer(from, to, amount);
-        // reduce _delegate calls only when minting
-        if (from == address(0) && to != address(0) && delegates(to) == address(0)) {
+
+        // Automatically turn on delegation on mint/transfer but only for the first time.
+        if (to != address(0) && numCheckpoints(to) == 0) {
             _delegate(to, to);
         }
     }

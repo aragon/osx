@@ -25,7 +25,9 @@ const existingErc20Symbol = 'TOK';
 const governanceWrappedERC20Name = 'GovernanceWrappedToken';
 const governanceWrappedERC20Symbol = 'gwTOK';
 
-describe.only('GovernanceWrappedERC20', function () {
+const addressZero = ethers.constants.AddressZero;
+
+describe('GovernanceWrappedERC20', function () {
   let signers: SignerWithAddress[];
   let governanceToken: GovernanceWrappedERC20;
   let erc20: TestERC20;
@@ -320,6 +322,92 @@ describe.only('GovernanceWrappedERC20', function () {
       expect(
         await governanceToken.getPastVotes(signers[2].address, tx1.blockNumber)
       ).to.eq(balanceSigner2);
+    });
+  });
+
+  describe('afterTokenTransfer', async () => {
+    let token: GovernanceWrappedERC20;
+
+    beforeEach(async () => {
+      token = await GovernanceWrappedERC20.deploy(
+        erc20.address,
+        'name',
+        'symbol'
+      );
+
+      await erc20.setBalance(signers[0].address, 200);
+      await erc20.setBalance(signers[1].address, 200);
+      await erc20.connect(signers[0]).approve(token.address, 200);
+      await erc20.connect(signers[1]).approve(token.address, 200);
+    });
+
+    it('turns on delegation after mint', async () => {
+      expect(await token.delegates(signers[0].address)).to.equal(addressZero);
+
+      await token.depositFor(signers[0].address, 1);
+
+      expect(await token.delegates(signers[0].address)).to.equal(
+        signers[0].address
+      );
+      expect(await token.getVotes(signers[0].address)).to.equal(1);
+    });
+
+    it('turns on delegation for the `to` address after transfer', async () => {
+      // delegation turned on for signers[0]
+      await token.depositFor(signers[0].address, 100);
+
+      // At this time, signers[1] doesn't have delegation turned on,
+      // but the transfer should turn it on.
+      expect(await token.delegates(signers[1].address)).to.equal(addressZero);
+
+      await token.transfer(signers[1].address, 50);
+
+      expect(await token.getVotes(signers[1].address)).to.equal(50);
+      expect(await token.delegates(signers[1].address)).to.equal(
+        signers[1].address
+      );
+    });
+
+    it('should not turn on delegation on `transfer` if `to` manually turned it off', async () => {
+      await token.depositFor(signers[0].address, 100);
+
+      // turns on delegation for signers[1]
+      await token.transfer(signers[1].address, 50);
+
+      // turns off delegation for signers[1]
+      await token.connect(signers[1]).delegate(addressZero);
+
+      // shouldn't turn on delegation.
+      await token.transfer(signers[1].address, 50);
+
+      expect(await token.delegates(signers[1].address)).to.equal(addressZero);
+    });
+
+    it('should not turn on delegation on `mint` if `to` manually turned it off', async () => {
+      await token.depositFor(signers[0].address, 100);
+
+      // turn off delegation
+      await token.delegate(addressZero);
+
+      await token.depositFor(signers[0].address, 50);
+
+      expect(await token.delegates(signers[0].address)).to.equal(addressZero);
+    });
+
+    it('updates voting power after transfer for `from` if delegation turned on', async () => {
+      await token.depositFor(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 30);
+
+      expect(await token.getVotes(signers[0].address)).to.equal(70);
+    });
+
+    it('updates voting power after transfer for `to` if delegation turned on', async () => {
+      await token.depositFor(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 30);
+
+      expect(await token.getVotes(signers[1].address)).to.equal(30);
     });
   });
 });
