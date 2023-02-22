@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
   let grantTx;
 
-  // Get managing DAO address.
+  // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
@@ -43,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'REGISTER_ENS_SUBDOMAIN_PERMISSION'
   );
 
-  // Gransting Permissions
+  // Granting Permissions
   grantTx = await managingDaoContract.grant(
     daoEnsSubdomainRegistrarAddress,
     daoRegistryAddress,

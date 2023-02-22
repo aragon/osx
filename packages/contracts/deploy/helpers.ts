@@ -6,6 +6,7 @@ import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
+import {EHRE, Operation} from '../utils/types';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -15,6 +16,15 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
   rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // dao.eth
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
+
+export const DAO_PERMISSIONS = [
+  'ROOT_PERMISSION',
+  'UPGRADE_DAO_PERMISSION',
+  'SET_SIGNATURE_VALIDATOR_PERMISSION',
+  'SET_TRUSTED_FORWARDER_PERMISSION',
+  'SET_METADATA_PERMISSION',
+  'REGISTER_STANDARD_CALLBACK_PERMISSION',
+];
 
 export async function uploadToIPFS(
   metadata: string,
@@ -27,7 +37,7 @@ export async function uploadToIPFS(
     },
   });
 
-  if (networkName == 'hardhat' || networkName == 'localhost') {
+  if (networkName === 'hardhat' || networkName === 'localhost') {
     // return a dummy path
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }
@@ -96,7 +106,7 @@ export async function detemineDeployerNextAddress(
 }
 
 export async function createPluginRepo(
-  hre: HardhatRuntimeEnvironment,
+  hre: EHRE,
   pluginContractName: string,
   pluginSetupContractName: string,
   releaseMetadata: string,
@@ -142,10 +152,6 @@ export async function createPluginRepo(
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
 
-  if (!hre.aragonPluginRepos) {
-    hre.aragonPluginRepos = {};
-  }
-
   hre.aragonPluginRepos[pluginContractName] = repoAddress;
 
   console.log(
@@ -167,25 +173,65 @@ export async function checkSetManagingDao(
   }
 }
 
+export type Permission = {
+  operation: Operation;
+  where: {name: string; address: string};
+  who: {name: string; address: string};
+  permission: string;
+  condition?: string;
+  data?: string;
+};
+
 export async function checkPermission(
-  permissionManager: Contract,
-  where: string,
-  who: string,
-  permission: string,
-  data = '0x'
+  permissionManagerContract: ethers.Contract,
+  {operation, where, who, permission, data = '0x'}: Permission
 ) {
   const permissionId = ethers.utils.id(permission);
-  const isGranted = await permissionManager.callStatic.isGranted(
-    where,
-    who,
+  const isGranted = await permissionManagerContract.isGranted(
+    where.address,
+    who.address,
     permissionId,
     data
   );
-  if (!isGranted) {
+  if (!isGranted && operation === Operation.Grant) {
     throw new Error(
-      `${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`
+      `(${who.name}: ${who.address}) doesn't have ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
     );
   }
+
+  if (isGranted && operation === Operation.Revoke) {
+    throw new Error(
+      `(${who.name}: ${who.address}) has ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
+    );
+  }
+}
+
+export async function managePermission(
+  permissionManagerContract: ethers.Contract,
+  permissions: Permission[]
+): Promise<void> {
+  const items = permissions.map(permission => [
+    permission.operation,
+    permission.where.address,
+    permission.who.address,
+    permission.condition || ethers.constants.AddressZero,
+    ethers.utils.id(permission.permission),
+  ]);
+
+  const tx = await permissionManagerContract.applyMultiTargetPermissions(items);
+  await tx.wait();
+
+  permissions.forEach(permission => {
+    console.log(
+      `${
+        permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
+      } the ${permission.permission} of (${permission.where.name}: ${
+        permission.where.address
+      }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
+        tx.hash
+      })`
+    );
+  });
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

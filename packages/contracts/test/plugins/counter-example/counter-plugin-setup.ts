@@ -9,7 +9,7 @@ import {
   CounterV2PluginSetup,
   MultiplyHelper,
 } from '../../../typechain';
-import {Operation} from '../../core/permission/permission-manager';
+import {Operation} from '../../../utils/types';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
