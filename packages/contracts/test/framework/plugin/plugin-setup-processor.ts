@@ -2,7 +2,6 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import {defaultAbiCoder, keccak256} from 'ethers/lib/utils';
 
 import {
   PluginSetupProcessor,

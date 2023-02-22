@@ -1,6 +1,6 @@
-import {hashHelpers, hashPermissions} from './hash-helpers';
+import {hashHelpers} from './hash-helpers';
 import {PermissionOperation, PluginRepoPointer, VersionTag} from './types';
-import {BytesLike, utils, constants} from 'ethers';
+import {BytesLike} from 'ethers';
 
 export function createPrepareInstallationParams(
   pluginRepoPointer: PluginRepoPointer,
