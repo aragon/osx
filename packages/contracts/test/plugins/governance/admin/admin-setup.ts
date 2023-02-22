@@ -1,12 +1,12 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
+import {Operation} from '../../../../utils/types';
 import {AdminSetup} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../core/permission/permission-manager';
-import {adminInterface} from './admin';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
+import {adminInterface} from './admin';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;

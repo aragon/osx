@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {DAO, MultisigSetup, Multisig__factory} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../core/permission/permission-manager';
+import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {MultisigSettings, multisigInterface} from './multisig';

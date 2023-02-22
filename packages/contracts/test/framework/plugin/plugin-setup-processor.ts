@@ -30,11 +30,10 @@ import {
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
-import {findEvent} from '../../../utils/event';
-import {Operation} from '../../core/permission/permission-manager';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {findEvent} from '../../../utils/event';
+import {Operation} from '../../../utils/types';
 
 import {
   mockPermissionsOperations,

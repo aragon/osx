@@ -29,7 +29,7 @@ contract CounterV2PluginSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     )
         external
         virtual
