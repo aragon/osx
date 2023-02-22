@@ -1948,7 +1948,7 @@ describe('Plugin Setup Processor', function () {
           currentPluginRepoPointer
         );
 
-        updatePlugin(
+        await updatePlugin(
           psp,
           targetDao.address,
           plugin,
