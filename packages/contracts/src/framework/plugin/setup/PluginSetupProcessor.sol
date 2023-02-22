@@ -441,7 +441,7 @@ contract PluginSetupProcessor {
         bytes32 preparedSetupId;
 
         // If the current and new plugin setup are identical, this is an UI update.
-        // In this case, the permission hash is set to the empt array hash and the `prepareUpdate` call is skipped to avoid side effects.
+        // In this case, the permission hash is set to the empty array hash and the `prepareUpdate` call is skipped to avoid side effects.
         if (currentVersion.pluginSetup == newVersion.pluginSetup) {
             preparedSetupId = _getPreparedSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
@@ -450,6 +450,9 @@ contract PluginSetupProcessor {
                 bytes(""),
                 PreparationType.Update
             );
+
+            // return the same helpers from the previous's update's deployment.
+            preparedSetupData.helpers = _params.setupPayload.currentHelpers;
         } else {
             // Check that plugin is `PluginUUPSUpgradable`.
             if (!_params.setupPayload.plugin.supportsInterface(type(IPlugin).interfaceId)) {

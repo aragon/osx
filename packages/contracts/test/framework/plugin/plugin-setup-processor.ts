@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import {defaultAbiCoder, keccak256} from 'ethers/lib/utils';
 
 import {
   PluginSetupProcessor,
@@ -117,7 +118,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
 
-describe('Plugin Setup Processor', function () {
+describe.only('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -455,7 +456,7 @@ describe('Plugin Setup Processor', function () {
           2,
           Operation.Grant
         );
-        const expectedHelpers = mockHelpers(1);
+        const expectedHelpers = mockHelpers(2);
         const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
 
         const preparedSetupId = getPreparedSetupId(
@@ -839,9 +840,9 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if prepare uninstallation params do not match the current `appliedSetupId`', async () => {
-        // helpersUV1 contains one helper address. Let's remove
-        // to make sure modified helpers will cause test to fail.
         {
+          // helpersUV1 contains two helper addresses. Let's remove one
+          // to make sure modified helpers will cause test to fail.
           const modifiedHelpers = [...helpersUV1].slice(0, -1);
 
           const appliedSetupId = getAppliedSetupId(
@@ -862,6 +863,30 @@ describe('Plugin Setup Processor', function () {
             .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
             .withArgs(currentAppliedSetupId, appliedSetupId);
         }
+
+        {
+          // Reverse order/sequence which still should cause to revert.
+          const modifiedHelpers = [...helpersUV1].reverse();
+
+          const appliedSetupId = getAppliedSetupId(
+            pluginRepoPointer,
+            modifiedHelpers
+          );
+
+          await expect(
+            prepareUninstallation(
+              psp,
+              targetDao.address,
+              proxy,
+              pluginRepoPointer,
+              modifiedHelpers,
+              EMPTY_DATA
+            )
+          )
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(currentAppliedSetupId, appliedSetupId);
+        }
+
         {
           const modifiedPluginRepoPointer = [
             pluginRepoPointer[0],
@@ -1397,53 +1422,78 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if prepare update params do not match the current `appliedSetupId`', async () => {
-        const modifiedHelpers = [...helpersUV1].slice(0, -1);
-
-        // Run the prepare update with modified helpers.
-        await expect(
-          psp.prepareUpdate(
-            targetDao.address,
-            createPrepareUpdateParams(
-              proxy,
-              currentVersion, // current installed version
-              newVersion, // new version
-              pluginRepoPointer[0],
-              modifiedHelpers,
-              EMPTY_DATA
+        {
+          // Run the prepare update with modified helpers.
+          const modifiedHelpers = [...helpersUV1].slice(0, -1);
+          await expect(
+            psp.prepareUpdate(
+              targetDao.address,
+              createPrepareUpdateParams(
+                proxy,
+                currentVersion, // current installed version
+                newVersion, // new version
+                pluginRepoPointer[0],
+                modifiedHelpers,
+                EMPTY_DATA
+              )
             )
           )
-        )
-          .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
-          .withArgs(
-            currentAppliedSetupId,
-            getAppliedSetupId(pluginRepoPointer, modifiedHelpers)
-          );
-
-        // Modify it so it believes the current version is newVersion
-        // which should cause revert.
-        const modifiedPluginRepoPointer: PluginRepoPointer = [
-          pluginRepoPointer[0],
-          ...newVersion,
-        ];
-
-        await expect(
-          psp.prepareUpdate(
-            targetDao.address,
-            createPrepareUpdateParams(
-              proxy,
-              newVersion,
-              [newVersion[0], newVersion[1] + 1], // increase version so it doesn't fail with invalid version update.
-              pluginRepoPointer[0],
-              helpersUV1,
-              EMPTY_DATA
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(
+              currentAppliedSetupId,
+              getAppliedSetupId(pluginRepoPointer, modifiedHelpers)
+            );
+        }
+        {
+          // Change helpers's sequence which still should still cause revert.
+          const modifiedHelpers = [...helpersUV1].reverse();
+          await expect(
+            psp.prepareUpdate(
+              targetDao.address,
+              createPrepareUpdateParams(
+                proxy,
+                currentVersion, // current installed version
+                newVersion, // new version
+                pluginRepoPointer[0],
+                modifiedHelpers,
+                EMPTY_DATA
+              )
             )
           )
-        )
-          .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
-          .withArgs(
-            currentAppliedSetupId,
-            getAppliedSetupId(modifiedPluginRepoPointer, helpersUV1)
-          );
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(
+              currentAppliedSetupId,
+              getAppliedSetupId(pluginRepoPointer, modifiedHelpers)
+            );
+        }
+
+        {
+          // Modify it so it believes the current version is newVersion
+          // which should cause revert.
+          const modifiedPluginRepoPointer: PluginRepoPointer = [
+            pluginRepoPointer[0],
+            ...newVersion,
+          ];
+
+          await expect(
+            psp.prepareUpdate(
+              targetDao.address,
+              createPrepareUpdateParams(
+                proxy,
+                newVersion,
+                [newVersion[0], newVersion[1] + 1], // increase version so it doesn't fail with invalid version update.
+                pluginRepoPointer[0],
+                helpersUV1,
+                EMPTY_DATA
+              )
+            )
+          )
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(
+              currentAppliedSetupId,
+              getAppliedSetupId(modifiedPluginRepoPointer, helpersUV1)
+            );
+        }
       });
 
       it('reverts if same setup is already prepared', async () => {
@@ -2093,7 +2143,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('sets the V1 helpers', async () => {
-        expect(helpersUV1).to.deep.equal(mockHelpers(1));
+        expect(helpersUV1).to.deep.equal(mockHelpers(2));
       });
 
       it('sets the V1 permissions', async () => {
