@@ -1,7 +1,7 @@
 {
   "name": "@aragon/osx-contracts",
   "version": "0.7.1-alpha",
-  "description": "Aragon V2 DAO Framework",
+  "description": "The Aragon OSx Solidity contracts",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",

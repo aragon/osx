@@ -1,7 +1,7 @@
 {
   "name": "@aragon/osx-contracts-ethers",
   "version": "0.7.1-alpha",
-  "description": "Aragon V2 DAO Framework. Contract definition for Ethers.js",
+  "description": "The Aragon OSx contract definitions for Ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",

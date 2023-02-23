@@ -22,9 +22,9 @@ The `DAOFactory` creates and sets up a `DAO` for you in four steps with the `cre
 
 as well as an array of `PluginSettings` containing `PluginSetup` contract references and respective setup data for the initial set of plugins to be installed on the DAO.
 
-The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegistry` and being also part of the aragonOSx framework:
+The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegistry` and being also part of the Aragon OSx framework:
 
-1. Creates a new DAO by deploying an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pointing to the latest aragonOSx `DAO` impelementation and becomes the initial owner.
+1. Creates a new DAO by deploying an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pointing to the latest Aragon OSx `DAO` impelementation and becomes the initial owner.
 
 2. Registers the new contract in the [`DAORegistry`](#daoregistry).
 

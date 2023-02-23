@@ -7,19 +7,19 @@ title: Permissions
 At Aragon, we believe that **DAOs are permission management systems**.
 Permissions between contracts and wallets allow a DAO to manage and govern its actions.
 
-Here, you will learn how the permissions in aragonOSx work, how they can be granted and revoked from wallets and contracts, and how they are managed through the DAO.
+Here, you will learn how the permissions in Aragon OSx work, how they can be granted and revoked from wallets and contracts, and how they are managed through the DAO.
 
 As we mentioned earlier, it is essential that only the right person or contract can execute a certain action. As a developer, you might have seen or used [modifiers such as `onlyOwner`](https://docs.openzeppelin.com/contracts/2.x/api/ownership#Ownable) in contracts. This `onlyOwner` modifier provides basic access control to your DAO: only the `owner` address is permitted to execute the function to which the modifier is attached.
 
 In aragonOSx, we follow the same approach but provide more advanced functionality:
 Each `DAO` contracts includes a `PermissionManager` contract allowing to flexibly, securely, and collectively manage permissions through the DAO and, thus, govern its actions.
-This `PermissionManager`, called `ACL` in previous aragonOSx contract versions, was one big reason why aragonOSx never got hacked.
+This `PermissionManager`, called `ACL` in previous Aragon OS versions, was one big reason why our protocol never got hacked.
 The code and configuration of a DAO specifies which wallets or contracts (`who`) are allowed to call which authorized functions on a target contract (`where`).
 Identifiers, permissions, and modifiers link everything together.
 
 ### Permission Identifiers
 
-To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of aragonOSx contracts. They look something like this:
+To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of Aragon OSx contracts. They look something like this:
 
 ```solidity title="contracts/core/DAO.sol"
 bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
@@ -97,7 +97,7 @@ Exceptions are, again, the [DAO creation](../../02-framework/01-dao-creation/ind
 
 #### Granting Permission with Conditions
 
-AragonOSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
+Aragon OSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
 
 ```solidity title="contracts/core/permission/PermissionManager.sol"
 function grantWithCondition(
@@ -132,7 +132,7 @@ By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where:
 Granting a permission with `_where: ANY_ADDR` to a condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
 
-However, some restrictions apply. For security reasons, aragonOSx does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
+However, some restrictions apply. For security reasons, Aragon OSx does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
 
 ### Permissions Native to the `DAO` Contract
 

@@ -41,11 +41,11 @@ jobs:
         with:
           token: ${{ secrets.ARABOT_PAT }}
           path: builders-portal
-          commit-message: 'Update aragonOSx docs by commit ${{ steps.hash.outputs.sha_short }}'
+          commit-message: 'Update Aragon OSx docs by commit ${{ steps.hash.outputs.sha_short }}'
           committer: 'Arabot <arabot-1@users.noreply.github.com>'
           branch: patch/aragon-osx-docs
           delete-branch: true
-          title: Updates the aragonOSx docs
+          title: Updates the Aragon OSx docs
           body: 'Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/osx/actions/runs/${{ github.run_id }}))'
           reviewers: ${{ github.actor }}
           team-reviewers: devrel

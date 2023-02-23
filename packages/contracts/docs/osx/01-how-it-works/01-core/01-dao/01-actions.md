@@ -45,8 +45,8 @@ Actions can be
 - function calls to other contracts, such as
 
   - external services (e.g. Uniswap, Compound, etc.)
-  - aragonOSx plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
-  - aragonOSx protocol infrastructure (e.g., to [setup a plugin](../../02-framework/02-plugin-management/02-plugin-setup/index.md))
+  - Aragon OSx plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
+  - Aragon OSx protocol infrastructure (e.g., to [setup a plugin](../../02-framework/02-plugin-management/02-plugin-setup/index.md))
 
 - transfers of native tokens
 

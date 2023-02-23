@@ -1,4 +1,4 @@
-# Aragon Core Contracts
+# Aragon OSx Contracts
 
 All notable changes to this project will be documented in this file.
 

@@ -6,7 +6,7 @@ title: Plugin Management
 
 As mentioned earlier, plugins built by Aragon and third-party developers can be added and removed from your DAO to adapt it to your needs.
 
-The management of these plugins is handled for you by the aragonOSx protocol so that the process of
+The management of these plugins is handled for you by the Aragon OSx protocol so that the process of
 
 - releasing new plugins as well as
 - installing, updating, and uninstalling them to your DAO
@@ -19,7 +19,7 @@ In the following, we learn what a plugin consists of.
 
 ### What Does a Plugin Consist Of?
 
-An aragonOSx Plugin consist of:
+An Aragon OSx Plugin consist of:
 
 - The `PluginSetup` contract
 
@@ -48,6 +48,6 @@ A detailed explanation of the [build and release versioning](../../../02-how-to-
 
 </div>
 
-The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the aragonOSx framework, which is explained in the section [The Plugin Setup Process](./02-plugin-setup/index.md).
+The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the Aragon OSx framework, which is explained in the section [The Plugin Setup Process](./02-plugin-setup/index.md).
 
 Each plugin with its different builds and releases is versioned inside its own plugin repositories in a `PluginRepo` contract, which is explained in the next section.

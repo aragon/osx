@@ -4,7 +4,7 @@ title: Framework
 
 ## The Infrastructure Running the AraongOS Protocol
 
-The aragonOSx protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
+The Aragon OSx protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
 
 - [creation of DAOs](01-dao-creation/index.md) and initial plugin configuration
 - [management of plugins](02-plugin-management/index.md), which includes the
@@ -21,9 +21,9 @@ An overview of the involved contracts and their interactions is shown below:
 ![](aragon-os-infrastructure-core-overview.drawio.svg)
 
 <p class="caption"> 
-  Overview of the framework and core contracts of the aragonOSx protocol.
+  Overview of the framework and core contracts of the Aragon OSx protocol.
 </p>
 
 </div>
 
-In the following sections, you will learn more about the framework-related contracts of the aragonOSx protocol.
+In the following sections, you will learn more about the framework-related contracts of the Aragon OSx protocol.
