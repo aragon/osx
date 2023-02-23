@@ -21,13 +21,6 @@ const func: DeployFunction = async function (hre: EHRE) {
       args: publicResolver.args,
     });
   }
-  const pluginPublicResolver = await deployments.get('Plugin_PublicResolver');
-  if (pluginPublicResolver) {
-    hre.aragonToVerifyContracts.push({
-      address: pluginPublicResolver.address,
-      args: pluginPublicResolver.args,
-    });
-  }
 
   hre.aragonToVerifyContracts.push(
     await deployments.get('DAO_ENSSubdomainRegistrar')

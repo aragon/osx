@@ -15,7 +15,7 @@ export async function deployENSSubdomainRegistrar(
   managingDao: DAO,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
-  const ens = await setupENS(domain, {ethers, deployments});
+  const ens = await setupENS([domain], {ethers, deployments});
 
   const ENSSubdomainRegistrar = await ethers.getContractFactory(
     'ENSSubdomainRegistrar'
