@@ -15,7 +15,7 @@ We'd love to hear what you think! If you want to build this with us, please find
 
 ## Setup
 
-Start by running `yarn install` in the root in your terminal.
+Start by running `yarn install` in the project root in your terminal.
 
 ### Dependencies
 
@@ -38,10 +38,10 @@ The Aragon OSx protocol architecture is composed of two key sections:
 
 Additionally to those two sections, we have developed several plugins DAOs can easily install upon creation. These are:
 
-- __Token Voting plugin__: enabling voting through token majority as a governance mechanism for DAOs
-- __Multisig plugin__: enabling assets to be transacted based on approval from members.
-- __Admin plugin__: enabling one account to have god-like access to the DAO.
-- __Addresslist Voting plugin__: a set of pre-selected addresses are able to vote within a DAO.
+- __Token Voting plugin__: enabling token holders to vote yes, no or abstain on incoming DAO proposals
+- __Multisig plugin__: enabling DAO governance based on approval from a pre-defined members list.
+- __Addresslist Voting plugin__: enabling a pre-defined set of addresses to vote yes, no or abstain in a "one person, one vote" mode
+- __Admin plugin__: enabling full access to an account needing to perform initial maintenance tasks without unnecessary overhead
 
 Let's dive into more detail on each of these sections.
 
