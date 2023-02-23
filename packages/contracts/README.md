@@ -1,4 +1,10 @@
-# Aragon Core contracts
+# Aragon OSx Protocol contracts
+
+Welcome to the contracts powering the Aragon OSx Protocol!
+
+## Get Started
+
+To get started running your repository locally, run these commans in the root folder in your terminal:
 
 ```shell
 npx hardhat accounts
@@ -19,7 +25,15 @@ npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
 ```
 
-# Etherscan verification
+## Documentation
+
+You can find all documentation regarding how to use this protocol in [Aragon's Developer Portal here](https://devs.aragon.org).
+
+## Contributing
+
+If you like what we're doing and would love to support, please review our `CONTRIBUTING_GUIDE.md` [here](https://github.com/aragon/osx/blob/develop/CONTRIBUTION_GUIDE.md). We'd love to build with you.
+
+## Etherscan verification
 
 To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
 
