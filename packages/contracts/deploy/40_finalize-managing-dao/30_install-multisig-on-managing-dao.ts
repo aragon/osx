@@ -63,8 +63,6 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   listedOnly = MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
 
-  console.log('\n\napprovers\n', approvers, '\n\n ', minApprovals, listedOnly);
-
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
