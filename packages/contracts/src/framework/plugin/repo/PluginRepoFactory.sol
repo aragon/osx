@@ -68,10 +68,11 @@ contract PluginRepoFactory {
     function _setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
         PermissionLib.SingleTargetPermission[]
-            memory items = new PermissionLib.SingleTargetPermission[](5);
+            memory items = new PermissionLib.SingleTargetPermission[](6);
 
         bytes32 rootPermissionID = pluginRepo.ROOT_PERMISSION_ID();
         bytes32 maintainerPermissionID = pluginRepo.MAINTAINER_PERMISSION_ID();
+        bytes32 upgradePermissionID = pluginRepo.UPGRADE_REPO_PERMISSION_ID();
 
         // Grant the plugin maintainer all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
@@ -82,7 +83,7 @@ contract PluginRepoFactory {
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.UPGRADE_REPO_PERMISSION_ID()
+            upgradePermissionID
         );
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
@@ -100,6 +101,11 @@ contract PluginRepoFactory {
             PermissionLib.Operation.Revoke,
             address(this),
             maintainerPermissionID
+        );
+        items[5] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Revoke,
+            address(this),
+            upgradePermissionID
         );
 
         pluginRepo.applySingleTargetPermissions(address(pluginRepo), items);

@@ -121,6 +121,7 @@ contract PluginRepo is
         __PermissionManager_init(initialOwner);
 
         _grant(address(this), initialOwner, MAINTAINER_PERMISSION_ID);
+        _grant(address(this), initialOwner, UPGRADE_REPO_PERMISSION_ID);
     }
 
     /// @inheritdoc IPluginRepo

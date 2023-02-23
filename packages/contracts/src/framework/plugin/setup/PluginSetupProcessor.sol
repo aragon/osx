@@ -518,9 +518,8 @@ contract PluginSetupProcessor {
             _params.pluginSetupRef.versionTag
         );
 
-        address currentImplementation = PluginUUPSUpgradeable(_params.plugin)
-            .getImplementationAddress();
-        address newImplementation = PluginSetup(version.pluginSetup).getImplementationAddress();
+        address currentImplementation = PluginUUPSUpgradeable(_params.plugin).implementation();
+        address newImplementation = PluginSetup(version.pluginSetup).implementation();
 
         if (currentImplementation != newImplementation) {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);

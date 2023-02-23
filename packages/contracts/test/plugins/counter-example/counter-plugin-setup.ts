@@ -59,7 +59,7 @@ describe('CounterPluginSetup(Example)', function () {
     );
     multiplyPermissionId = await counterV1.MULTIPLY_PERMISSION_ID();
 
-    implementationAddress = await counterV1Setup.getImplementationAddress();
+    implementationAddress = await counterV1Setup.implementation();
 
     const MultiplyHelper = await ethers.getContractFactory('MultiplyHelper');
     multiplyHelper = await MultiplyHelper.deploy();
