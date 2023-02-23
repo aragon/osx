@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import { AdminSetup__factory } from '../../../typechain';
+import {AdminSetup__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   hre.aragonToVerfiyContracts.push(AdminSetupDeployment);
   hre.aragonToVerfiyContracts.push({
     address: await adminSetup.implementation(),
-    args: []
+    args: [],
   });
 };
 

@@ -8,9 +8,9 @@ export type AragonPluginRepos = {
 };
 
 export type AragonVerifyEntry = {
-  address: string,
-  args: Array<string | string[]>
-}
+  address: string;
+  args: Array<string | string[]>;
+};
 
 export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;

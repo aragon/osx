@@ -223,7 +223,7 @@ export async function managePermission(
   ]);
 
   const tx = await permissionManagerContract.applyMultiTargetPermissions(items);
-  console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`)
+  console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
   await tx.wait();
 
   permissions.forEach(permission => {

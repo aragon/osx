@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import { MultisigSetup__factory } from '../../../typechain';
+import {MultisigSetup__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   hre.aragonToVerfiyContracts.push(MultisigSetupDeployment);
   hre.aragonToVerfiyContracts.push({
     address: await multisigSetup.implementation(),
-    args: []
+    args: [],
   });
 };
 

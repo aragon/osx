@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
+import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
-import { TokenVotingSetup__factory } from '../../../typechain';
+import {TokenVotingSetup__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
@@ -18,15 +18,20 @@ const func: DeployFunction = async function (hre: EHRE) {
   hre.aragonToVerfiyContracts.push(TokenVotingSetupDeployment);
   hre.aragonToVerfiyContracts.push({
     address: await tokenVotingSetup.implementation(),
-    args: []
+    args: [],
   });
   hre.aragonToVerfiyContracts.push({
     address: await tokenVotingSetup.governanceERC20Base(),
-    args: [ethers.constants.AddressZero, "", "", [ethers.constants.AddressZero, ethers.constants.AddressZero]]
+    args: [
+      ethers.constants.AddressZero,
+      '',
+      '',
+      [ethers.constants.AddressZero, ethers.constants.AddressZero],
+    ],
   });
   hre.aragonToVerfiyContracts.push({
     address: await tokenVotingSetup.governanceWrappedERC20Base(),
-    args: [ethers.constants.AddressZero, "", ""]
+    args: [ethers.constants.AddressZero, '', ''],
   });
 };
 

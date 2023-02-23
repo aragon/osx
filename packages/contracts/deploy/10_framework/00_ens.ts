@@ -89,13 +89,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await deploy('Plugin_PublicResolver', {
       contract: 'PublicResolver',
       from: deployer,
-      args: [
-        ensRegistryContract.address,
-        ethers.constants.AddressZero
-      ],
-      log: true
-    })
-    const resolver = await getContractAddress('Plugin_PublicResolver', hre)
+      args: [ensRegistryContract.address, ethers.constants.AddressZero],
+      log: true,
+    });
+    const resolver = await getContractAddress('Plugin_PublicResolver', hre);
 
     // Register subdomains in the reverse order
     let domainNamesReversed = pluginDomain.split('.');

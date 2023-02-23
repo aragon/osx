@@ -6,9 +6,11 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const {deployments} = hre;
 
-  console.log(await deployments.get('PluginRepoRegistry_Proxy'))
-  console.log(await deployments.get('PluginRepoRegistry'))
-  hre.aragonToVerfiyContracts.push(await deployments.get('PluginRepoRegistry_Proxy'));
+  console.log(await deployments.get('PluginRepoRegistry_Proxy'));
+  console.log(await deployments.get('PluginRepoRegistry'));
+  hre.aragonToVerfiyContracts.push(
+    await deployments.get('PluginRepoRegistry_Proxy')
+  );
   hre.aragonToVerfiyContracts.push(
     await deployments.get('PluginRepoRegistry_Implementation')
   );

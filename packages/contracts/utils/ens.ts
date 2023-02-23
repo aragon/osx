@@ -10,10 +10,7 @@ export function ensDomainHash(name: string): string {
   return ethers.utils.namehash(name);
 }
 
-export async function setupENS(
-  domain: string,
-  hre: EHRE
-): Promise<any> {
+export async function setupENS(domain: string, hre: EHRE): Promise<any> {
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();

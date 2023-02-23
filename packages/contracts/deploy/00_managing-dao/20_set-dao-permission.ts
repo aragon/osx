@@ -9,7 +9,7 @@ import {
 } from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nSetting ManagingDao permissions.')
+  console.log('\nSetting ManagingDao permissions.');
   const {ethers} = hre;
 
   // Get `managingDAO` address.

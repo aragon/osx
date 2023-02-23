@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import { AddresslistVotingSetup__factory } from '../../../typechain';
+import {AddresslistVotingSetup__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
@@ -8,7 +8,9 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const {deployments} = hre;
 
-  const AddresslistVotingSetupDeployment = await deployments.get('AddresslistVotingSetup');
+  const AddresslistVotingSetupDeployment = await deployments.get(
+    'AddresslistVotingSetup'
+  );
   const addresslistVotingSetup = await AddresslistVotingSetup__factory.connect(
     AddresslistVotingSetupDeployment.address,
     deployer
@@ -17,7 +19,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   hre.aragonToVerfiyContracts.push(AddresslistVotingSetupDeployment);
   hre.aragonToVerfiyContracts.push({
     address: await addresslistVotingSetup.implementation(),
-    args: []
+    args: [],
   });
 };
 

@@ -6,9 +6,7 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const {deployments} = hre;
 
-  hre.aragonToVerfiyContracts.push(
-    await deployments.get('DAORegistry_Proxy')
-  );
+  hre.aragonToVerfiyContracts.push(await deployments.get('DAORegistry_Proxy'));
   hre.aragonToVerfiyContracts.push(
     await deployments.get('DAORegistry_Implementation')
   );

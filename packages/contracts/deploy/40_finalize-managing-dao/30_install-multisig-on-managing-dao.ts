@@ -81,10 +81,14 @@ const func: DeployFunction = async function (hre: EHRE) {
       await multisigSetup.implementation(),
       await Multisig__factory.createInterface().encodeFunctionData(
         'initialize',
-        [managingDAOAddress, approvers, {
-          onlyListed: listedOnly,
-          minApprovals: minApprovals
-        }]
+        [
+          managingDAOAddress,
+          approvers,
+          {
+            onlyListed: listedOnly,
+            minApprovals: minApprovals,
+          },
+        ]
       ),
     ],
   });
