@@ -451,14 +451,10 @@ contract PluginSetupProcessor {
                 PreparationType.Update
             );
 
-<<<<<<< HEAD
-            // return the same helpers from the previous's update's deployment.
-=======
             // Because UI updates do not change the plugin functionality, the array of helpers
             // associated with this plugin version `preparedSetupData.helpers` and being returned must
             // equal `_params.setupPayload.currentHelpers` returned by the previous setup step (installation or update )
             // that this update is transitioning from.
->>>>>>> develop
             preparedSetupData.helpers = _params.setupPayload.currentHelpers;
         } else {
             // Check that plugin is `PluginUUPSUpgradable`.
