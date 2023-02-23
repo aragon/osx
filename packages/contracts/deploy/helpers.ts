@@ -63,6 +63,7 @@ export async function getContractAddress(
   try {
     return activeContracts[hre.network.name][contractName];
   } catch (e) {
+    console.error(e);
     return '';
   }
 }
