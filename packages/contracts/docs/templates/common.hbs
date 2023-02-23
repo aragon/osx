@@ -15,8 +15,8 @@
 | {{name}} | {{type}} | {{{joinLines natspec}}} |
 {{/each}}
 {{#if natspec.returns}}
-{{#each returns}}
 | **Output** | |
+{{#each returns}}
 | {{#if name}}{{name}}{{else}}[{{@index}}]{{/if}} | {{type}} | {{{joinLines natspec}}} |
 {{/each}}
 {{/if}}
