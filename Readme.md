@@ -1,4 +1,4 @@
-# Aragon OSx Protool
+# Aragon OSx Protocol
 
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
 
