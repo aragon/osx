@@ -37,17 +37,6 @@ jobs:
           HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
           HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.dao.eth'
           MANAGINGDAO_SUBDOMAIN: 'aragon-management'
-          MANAGINGDAO_MULTISIG_APPROVERS: '0xc8541aAE19C5069482239735AD64FAC3dCc52Ca2,0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
           MANAGINGDAO_MULTISIG_MINAPPROVALS: 1
           MANAGINGDAO_MULTISIG_LISTEDONLY: true
         run: yarn run test
-      - name: Test deployment (hardhat)
-        run: yarn deploy --network hardhat --reset
-        env:
-          ETH_KEY: ''
-          HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
-          HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.dao.eth'
-          MANAGINGDAO_SUBDOMAIN: 'aragon-management'
-          MANAGINGDAO_MULTISIG_APPROVERS: '0xc8541aAE19C5069482239735AD64FAC3dCc52Ca2,0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-          MANAGINGDAO_MULTISIG_MINAPPROVALS: 1
-          MANAGINGDAO_MULTISIG_LISTEDONLY: true

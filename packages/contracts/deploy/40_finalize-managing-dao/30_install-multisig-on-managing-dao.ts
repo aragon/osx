@@ -9,15 +9,21 @@ import {EHRE, Operation} from '../../utils/types';
 import {hashHelpers} from '../../utils/psp';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  const {ethers} = hre;
+  const {ethers, network, getNamedAccounts} = hre;
+  const {deployer} = await getNamedAccounts();
 
   // Get info from .env
   const approvers =
-    process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') || [];
-  const minApprovals = process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || 0;
-  const listedOnly = process.env.MANAGINGDAO_MULTISIG_LISTEDONLY || false;
+    process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') ||
+    (network.name !== 'mainnet' ? [deployer] : []);
+  const minApprovals = parseInt(
+    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '1'
+  );
+  const listedOnly = process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
 
-  if (!approvers.length || !minApprovals || !listedOnly)
+  console.log('\n\napprovers\n', approvers, '\n\n');
+
+  if (!approvers.length || !minApprovals)
     throw new Error(
       `Some .env settings for managingDAO multisig are not set correctly, see:\n` +
         `(MANAGINGDAO_MULTISIG_APPROVERS no. of addresses: ${approvers.length})\n` +

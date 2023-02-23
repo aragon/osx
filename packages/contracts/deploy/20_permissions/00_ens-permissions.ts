@@ -43,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` of `Plugin_ENSSubdomainRegistrar` to `PluginRepoRegistry`.
   // Grant `UPGRADE_REGISTRAR_PERMISSION` of `DAO_ENSSubdomainRegistrar` to `ManagingDAO`.
   // Grant `UPGRADE_REGISTRAR_PERMISSION` of `Plugin_ENSSubdomainRegistrar` to `ManagingDAO`.
-  const revokePermissions = [
+  const grantPermissions = [
     {
       operation: Operation.Grant,
       where: {
@@ -81,7 +81,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'UPGRADE_REGISTRAR_PERMISSION',
     },
   ];
-  await managePermission(managingDaoContract, revokePermissions);
+  await managePermission(managingDaoContract, grantPermissions);
 };
 export default func;
 func.tags = ['ENS_Permissions'];
