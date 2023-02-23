@@ -15,7 +15,9 @@ const func: DeployFunction = async function (hre: EHRE) {
   // Get info from .env
   const approvers =
     process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') ||
-    (network.name !== 'mainnet' ? [deployer] : []);
+    (network.name === 'localhost' || network.name === 'hardhat'
+      ? [deployer]
+      : []);
   const minApprovals = parseInt(
     process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '1'
   );
