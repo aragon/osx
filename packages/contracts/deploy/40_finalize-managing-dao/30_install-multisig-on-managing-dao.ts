@@ -43,13 +43,13 @@ const func: DeployFunction = async function (hre: EHRE) {
     }
   }
 
-  if (typeof MANAGINGDAO_MULTISIG_APPROVERS === 'string') {
-    approvers = MANAGINGDAO_MULTISIG_APPROVERS?.split(',');
-  } else {
+  if (typeof MANAGINGDAO_MULTISIG_APPROVERS !== 'string') {
     throw new Error(
       `Some .env settings for managingDAO multisig are not set correctly, see:\n` +
         `(MANAGINGDAO_MULTISIG_APPROVERS: ${MANAGINGDAO_MULTISIG_APPROVERS})\n`
     );
+  } else {
+    approvers = MANAGINGDAO_MULTISIG_APPROVERS?.split(',');
   }
 
   if (isNaN(parseInt(MANAGINGDAO_MULTISIG_MINAPPROVALS))) {
