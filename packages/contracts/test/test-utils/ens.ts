@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import {ethers, deployments} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from './proxy';
 
@@ -15,8 +15,7 @@ export async function deployENSSubdomainRegistrar(
   managingDao: DAO,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
-  const deployer = await owner.getAddress();
-  const ens = await setupENS(deployer, domain);
+  const ens = await setupENS(domain, {ethers, deployments});
 
   const ENSSubdomainRegistrar = await ethers.getContractFactory(
     'ENSSubdomainRegistrar'
