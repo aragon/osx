@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: EHRE) {
       ? [deployer]
       : []);
   const minApprovals = parseInt(
-    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '1'
+    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '0'
   );
   const listedOnly = process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
 
