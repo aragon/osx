@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {BigNumberish} from 'ethers';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 
-import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
+import hre, {ethers, deployments, getNamedAccounts, artifacts} from 'hardhat';
 import {Deployment} from 'hardhat-deploy/dist/types';
 import {
   DAO,
@@ -31,10 +31,8 @@ describe('Managing DAO', function () {
   let daoRegistry: DAORegistry;
   let pluginRepoRegistryDeployment: Deployment;
   let pluginRepoRegistry: PluginRepoRegistry;
-  let ensSubdomainRegistrarDeployment: Deployment[];
-  let ensSubdomainRegistrar: ENSSubdomainRegistrar[];
-  let pspDeployment: Deployment;
-  let psp: PluginSetupProcessor;
+  let ensSubdomainRegistrarDeployments: Deployment[];
+  let ensSubdomainRegistrars: ENSSubdomainRegistrar[];
 
   before(async () => {
     // deployment should be empty
@@ -42,6 +40,9 @@ describe('Managing DAO', function () {
 
     // deploy framework
     await deployAll();
+
+    // prepare ehre
+    ehre = hre as EHRE;
 
     // ManagingDAO
     managingDaoDeployment = await deployments.get('DAO');
@@ -65,32 +66,23 @@ describe('Managing DAO', function () {
     );
 
     // ENSSubdomainRegistrar
-    ensSubdomainRegistrarDeployment = [
+    ensSubdomainRegistrarDeployments = [
       await deployments.get('DAO_ENSSubdomainRegistrar'),
       await deployments.get('Plugin_ENSSubdomainRegistrar'),
     ];
-    ensSubdomainRegistrar = [
+    ensSubdomainRegistrars = [
       await ethers.getContractAt(
         'ENSSubdomainRegistrar',
-        ensSubdomainRegistrarDeployment[0].address
+        ensSubdomainRegistrarDeployments[0].address
       ),
       await ethers.getContractAt(
         'ENSSubdomainRegistrar',
-        ensSubdomainRegistrarDeployment[1].address
+        ensSubdomainRegistrarDeployments[1].address
       ),
     ];
 
-    // PluginSetupProcessor
-    pspDeployment = await deployments.get('PluginSetupProcessor');
-    psp = await ethers.getContractAt(
-      'PluginSetupProcessor',
-      pspDeployment.address
-    );
-
     const {deployer} = await getNamedAccounts();
     ownerAddress = deployer;
-
-    ehre = hre as EHRE;
 
     multisig = await ethers.getContractAt(
       'Multisig',
@@ -316,11 +308,11 @@ describe('Managing DAO', function () {
     // read from slot
     let implementationSlot = [
       await ethers.provider.getStorageAt(
-        ensSubdomainRegistrar[0].address,
+        ensSubdomainRegistrars[0].address,
         IMPLEMENTATION_SLOT
       ),
       await ethers.provider.getStorageAt(
-        ensSubdomainRegistrar[1].address,
+        ensSubdomainRegistrars[1].address,
         IMPLEMENTATION_SLOT
       ),
     ];
@@ -330,24 +322,22 @@ describe('Managing DAO', function () {
       defaultAbiCoder.decode(['address'], implementationSlot[1])[0],
     ];
 
-    expect(ensSubdomainRegistrarV2Deployment.address).not.equal(
-      implementationValueAtSlot[0]
-    );
-    expect(ensSubdomainRegistrarV2Deployment.address).not.equal(
-      implementationValueAtSlot[1]
-    );
+    for (let index = 0; index < implementationValueAtSlot.length; index++) {
+      const value = implementationValueAtSlot[index];
+      expect(ensSubdomainRegistrarV2Deployment.address).not.equal(value);
+    }
 
     // create proposal to upgrade to new implementation
     const iface = new ethers.utils.Interface(
-      ensSubdomainRegistrarDeployment[0].abi
+      ensSubdomainRegistrarDeployments[0].abi
     );
     const data = iface.encodeFunctionData('upgradeTo', [
       ensSubdomainRegistrarV2Deployment.address,
     ]);
     // upgrade both `DAO_ENSSubdomainRegistrar` & `Plugin_ENSSubdomainRegistrar`.
     const actions = [
-      {to: ensSubdomainRegistrar[0].address, value: 0, data: data},
-      {to: ensSubdomainRegistrar[1].address, value: 0, data: data},
+      {to: ensSubdomainRegistrars[0].address, value: 0, data: data},
+      {to: ensSubdomainRegistrars[1].address, value: 0, data: data},
     ];
     await multisig.createProposal(
       '0x', // metadata
@@ -362,11 +352,11 @@ describe('Managing DAO', function () {
     // re-read from slot
     implementationSlot = [
       await ethers.provider.getStorageAt(
-        ensSubdomainRegistrar[0].address,
+        ensSubdomainRegistrars[0].address,
         IMPLEMENTATION_SLOT
       ),
       await ethers.provider.getStorageAt(
-        ensSubdomainRegistrar[1].address,
+        ensSubdomainRegistrars[1].address,
         IMPLEMENTATION_SLOT
       ),
     ];
@@ -376,76 +366,117 @@ describe('Managing DAO', function () {
       defaultAbiCoder.decode(['address'], implementationSlot[1])[0],
     ];
 
-    expect(implementationValueAtSlot[0]).to.be.equal(
-      ensSubdomainRegistrarV2Deployment.address
-    );
-    expect(implementationValueAtSlot[1]).to.be.equal(
-      ensSubdomainRegistrarV2Deployment.address
-    );
+    for (let index = 0; index < implementationValueAtSlot.length; index++) {
+      const value = implementationValueAtSlot[index];
+      expect(value).to.be.equal(ensSubdomainRegistrarV2Deployment.address);
+    }
   });
 
-  // it('Should be able to upgrade `Multisig` plugin of `ManagingDAO`', async function () {
-  //   // deploy MultisigSetupV2
-  //   await deployments.deploy('MultisigSetupV2', {
-  //     contract: 'MultisigSetup',
-  //     from: ownerAddress,
-  //     args: [],
-  //     log: true,
-  //   });
+  it('Should be able to upgrade `PluginRepo`s', async function () {
+    // deploy a new implementation.
+    await deployments.deploy('PluginRepoV2', {
+      contract: 'PluginRepo',
+      from: ownerAddress,
+      args: [],
+      log: true,
+    });
 
-  //   const multisigSetupV2V2Deployment: Deployment = await deployments.get(
-  //     'MultisigSetupV2'
-  //   );
+    const pluginRepoV2Deployment: Deployment = await deployments.get(
+      'PluginRepoV2'
+    );
 
-  //   // make sure new `MultisigSetupV2` deployment is just an implementation and not a proxy
-  //   expect(multisigSetupV2V2Deployment.implementation).to.be.equal(undefined);
+    // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
+    expect(pluginRepoV2Deployment.implementation).to.be.equal(undefined);
 
-  //   // create version on repo
-  //   const multisigRepo = await ethers.getContractAt(
-  //     'PluginRepo',
-  //     ehre.aragonPluginRepos.multisig
-  //   );
+    // check new implementation is deferent from the one on the `DaoRegistry`.
+    // read from slot
+    let implementationSlot = [
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos['token-voting'],
+        IMPLEMENTATION_SLOT
+      ),
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos['address-list-voting'],
+        IMPLEMENTATION_SLOT
+      ),
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos.admin,
+        IMPLEMENTATION_SLOT
+      ),
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos.multisig,
+        IMPLEMENTATION_SLOT
+      ),
+    ];
 
-  //   await multisigRepo.createVersion(
-  //     1,
-  //     multisigSetupV2V2Deployment.address,
-  //     '0x',
-  //     '0x'
-  //   );
+    let implementationValueAtSlot = [
+      defaultAbiCoder.decode(['address'], implementationSlot[0])[0],
+      defaultAbiCoder.decode(['address'], implementationSlot[1])[0],
+      defaultAbiCoder.decode(['address'], implementationSlot[2])[0],
+      defaultAbiCoder.decode(['address'], implementationSlot[3])[0],
+    ];
 
-  //   // create proposal to upgrade multisig of managingDAO via psp
-  //   // prepare update
-  //   const prepareUpdateParams: {
-  //     currentVersionTag: {release: BigNumberish; build: BigNumberish};
-  //     newVersionTag: {release: BigNumberish; build: BigNumberish};
-  //     pluginSetupRepo: string;
-  //     setupPayload: {plugin: string; currentHelpers: string[]; data: any};
-  //   } = {
-  //     currentVersionTag: {release: 1, build: 1},
-  //     newVersionTag: {release: 1, build: 2},
-  //     pluginSetupRepo: ehre.aragonPluginRepos.multisig,
-  //     setupPayload: {
-  //       plugin: ehre.managingDAOMultisigPluginAddress,
-  //       currentHelpers: [],
-  //       data: '0x',
-  //     },
-  //   };
-  //   await psp.prepareUpdate(managingDao.address, prepareUpdateParams);
+    for (let index = 0; index < implementationValueAtSlot.length; index++) {
+      const value = implementationValueAtSlot[index];
+      expect(pluginRepoV2Deployment.address).to.not.equal(value);
+    }
 
-  //   // apply update
-  //   const iface = new ethers.utils.Interface(pspDeployment.abi);
-  //   const data = iface.encodeFunctionData('upgradeTo', [
-  //     pluginRepoRegistryV2Deployment.address,
-  //   ]);
-  //   const actions = [{to: pluginRepoRegistry.address, value: 0, data: data}];
-  //   await multisig.createProposal(
-  //     '0x', // metadata
-  //     actions,
-  //     0, // allowFailureMap
-  //     true, // approve proposal
-  //     true, // execute proposal
-  //     0, // start date: now
-  //     Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
-  //   );
-  // });
+    // create proposal to upgrade to new implementation
+    const iface = new ethers.utils.Interface(
+      artifacts.readArtifactSync('PluginRepo').abi
+    );
+    const data = iface.encodeFunctionData('upgradeTo', [
+      pluginRepoV2Deployment.address,
+    ]);
+    // upgrade all `PluginRepo`s.
+    const actions = [
+      {to: ehre.aragonPluginRepos['token-voting'], value: 0, data: data},
+      {to: ehre.aragonPluginRepos['address-list-voting'], value: 0, data: data},
+      {to: ehre.aragonPluginRepos.admin, value: 0, data: data},
+      {to: ehre.aragonPluginRepos.multisig, value: 0, data: data},
+    ];
+    await multisig.createProposal(
+      '0x', // metadata
+      actions,
+      0, // allowFailureMap
+      true, // approve proposal
+      true, // execute proposal
+      0, // start date: now
+      Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
+    );
+
+    // re-read from slot
+    implementationSlot = [
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos['token-voting'],
+        IMPLEMENTATION_SLOT
+      ),
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos['address-list-voting'],
+        IMPLEMENTATION_SLOT
+      ),
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos.admin,
+        IMPLEMENTATION_SLOT
+      ),
+      await ethers.provider.getStorageAt(
+        ehre.aragonPluginRepos.multisig,
+        IMPLEMENTATION_SLOT
+      ),
+    ];
+
+    implementationValueAtSlot = [
+      defaultAbiCoder.decode(['address'], implementationSlot[0])[0],
+      defaultAbiCoder.decode(['address'], implementationSlot[1])[0],
+      defaultAbiCoder.decode(['address'], implementationSlot[2])[0],
+      defaultAbiCoder.decode(['address'], implementationSlot[3])[0],
+    ];
+
+    for (let index = 0; index < implementationValueAtSlot.length; index++) {
+      const value = implementationValueAtSlot[index];
+      expect(value).to.be.equal(pluginRepoV2Deployment.address);
+    }
+  });
+
+  // TODO: should we also test if we can upgrade the multisig of the Managing dao?
 });
