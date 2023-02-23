@@ -246,7 +246,7 @@ contract PluginRepo is
 
     /// @notice The hash of the version tag obtained from the packed, bytes-encoded release and build number.
     /// @param _tag The version tag.
-    /// @return bytes32 The version tag hash.
+    /// @return The version tag hash.
     function tagHash(Tag memory _tag) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_tag.release, _tag.build));
     }

@@ -336,7 +336,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @return bytes32 The permission hash.
+    /// @return The permission hash.
     function permissionHash(
         address _where,
         address _who,
