@@ -1,4 +1,4 @@
-# Aragon Core contracts
+# Aragon OSx contracts
 
 ```shell
 npx hardhat accounts

@@ -1,6 +1,6 @@
-# Aragon Core
+# Aragon OSx
 
-This workspace contains the Core foundation of the Aragon ecosystem - the human centered approach to DAO's.
+This workspace contains the foundation of the Aragon OSx ecosystem - the human centered approach to DAO's.
 
 For more information on the individual packages, please read the respective `Readme.md`.
 
