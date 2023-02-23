@@ -20,9 +20,9 @@ dataSources:
         - Dao
       abis:
         - name: ERC20
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: DAORegistry
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
@@ -42,7 +42,7 @@ dataSources:
         - PluginRepo
       abis:        
         - name: PluginRepoRegistry
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json
       eventHandlers:
         - event: PluginRepoRegistered(string,address)
           handler: handlePluginRepoRegistered
@@ -64,15 +64,15 @@ dataSources:
         - PluginPermission
       abis:        
         - name: PluginSetupProcessor
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json
         - name: ERC20
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC165
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: TokenVoting
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
         - name: AddresslistVoting
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
@@ -104,19 +104,19 @@ templates:
         - Dao
       abis:
         - name: ERC20
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC721
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC721/ERC721.sol/ERC721.json
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC721/ERC721.sol/ERC721.json
         - name: ERC165
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: TokenVoting
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
         - name: AddresslistVoting
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
         - name: CallbackHandler
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
@@ -153,7 +153,7 @@ templates:
         - Dao
       abis:
         - name: TokenVoting
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
         - event: MembershipContractAnnounced(indexed address)
           handler: handleMembershipContractAnnounced
@@ -179,7 +179,7 @@ templates:
         - Dao
       abis:
         - name: GovernanceERC20
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
@@ -198,7 +198,7 @@ templates:
         - Dao
       abis:
         - name: AddresslistVoting
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
@@ -227,7 +227,7 @@ templates:
         - Dao
       abis:
         - name: Multisig
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/multisig/Multisig.sol/Multisig.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/multisig/Multisig.sol/Multisig.json
       eventHandlers:
         - event: MembersAdded(address[])
           handler: handleMembersAdded
@@ -256,7 +256,7 @@ templates:
         - Dao
       abis:
         - name: Admin
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/plugins/governance/admin/Admin.sol/Admin.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/admin/Admin.sol/Admin.json
       eventHandlers:
         - event: MembershipContractAnnounced(indexed address)
           handler: handleMembershipContractAnnounced
@@ -279,7 +279,7 @@ templates:
         - Adminstrator
       abis:
         - name: PermissionManager
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json
       eventHandlers:
         - event: Granted(indexed bytes32,indexed address,address,indexed address,address)
           handler: handleGranted
@@ -300,7 +300,7 @@ templates:
         - PluginRepo
       abis:
         - name: PluginRepo
-          file: $ARAGON_OSX_CONTRACTS_MODULE/artifacts/src/framework/plugin/repo/PluginRepo.sol/PluginRepo.json
+          file: $ARAGON_OSX_MODULE/artifacts/src/framework/plugin/repo/PluginRepo.sol/PluginRepo.json
       eventHandlers:
         - event: VersionCreated(uint8,uint16,indexed address,bytes)
           handler: handleVersionCreated
