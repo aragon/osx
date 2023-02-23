@@ -3,7 +3,7 @@
 NPM package that provides ethers.js wrappers to use the Aragon DAO framework smart contracts.
 
 ```sh
-yarn add @aragon/osx-contracts-ethers
+yarn add @aragon/osx-ethers
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ yarn add @aragon/osx-contracts-ethers
 ```ts
 import {
   DAOFactory__factory
-} from "@aragon/osx-contracts-ethers";
+} from "@aragon/osx-ethers";
 
 // Use it
 const daoFactoryInstance = DAOFactory__factory.connect(...);
@@ -22,7 +22,7 @@ const daoFactoryInstance = DAOFactory__factory.connect(...);
 ### Getting the list of global contract addresses
 
 ```ts
-import {activeContractsList} from '@aragon/osx-contracts-ethers';
+import {activeContractsList} from '@aragon/osx-ethers';
 
 console.log(activeContractsList.rinkeby.DAOFactory);
 // '0x2290E6dF695C5272cE942015c90aAe24bFB94960'

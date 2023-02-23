@@ -1,5 +1,5 @@
 {
-  "name": "@aragon/osx-contracts",
+  "name": "@aragon/osx",
   "version": "0.7.1-alpha",
   "description": "The Aragon OSx Solidity contracts",
   "main": "dist/bundle-cjs.js",
