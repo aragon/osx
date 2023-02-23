@@ -14,8 +14,8 @@ const func: DeployFunction = async function (hre: EHRE) {
     deployer
   );
 
-  hre.aragonToVerfiyContracts.push(MultisigSetupDeployment);
-  hre.aragonToVerfiyContracts.push({
+  hre.aragonToVerifyContracts.push(MultisigSetupDeployment);
+  hre.aragonToVerifyContracts.push({
     address: await multisigSetup.implementation(),
     args: [],
   });

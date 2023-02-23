@@ -14,8 +14,8 @@ const func: DeployFunction = async function (hre: EHRE) {
     deployer
   );
 
-  hre.aragonToVerfiyContracts.push(DAOFactoryDeployment);
-  hre.aragonToVerfiyContracts.push({
+  hre.aragonToVerifyContracts.push(DAOFactoryDeployment);
+  hre.aragonToVerifyContracts.push({
     address: await pluginRepoFactory.daoBase(),
     args: [],
   });

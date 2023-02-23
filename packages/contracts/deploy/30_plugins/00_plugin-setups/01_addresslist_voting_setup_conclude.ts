@@ -16,8 +16,8 @@ const func: DeployFunction = async function (hre: EHRE) {
     deployer
   );
 
-  hre.aragonToVerfiyContracts.push(AddresslistVotingSetupDeployment);
-  hre.aragonToVerfiyContracts.push({
+  hre.aragonToVerifyContracts.push(AddresslistVotingSetupDeployment);
+  hre.aragonToVerifyContracts.push({
     address: await addresslistVotingSetup.implementation(),
     args: [],
   });

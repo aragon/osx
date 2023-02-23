@@ -6,8 +6,8 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const {deployments} = hre;
 
-  hre.aragonToVerfiyContracts.push(await deployments.get('DAO_Implementation'));
-  hre.aragonToVerfiyContracts.push(await deployments.get('DAO_Proxy'));
+  hre.aragonToVerifyContracts.push(await deployments.get('DAO_Implementation'));
+  hre.aragonToVerifyContracts.push(await deployments.get('DAO_Proxy'));
 };
 
 export default func;

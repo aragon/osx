@@ -14,7 +14,7 @@ export type AragonVerifyEntry = {
 
 export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;
-  aragonToVerfiyContracts: AragonVerifyEntry[];
+  aragonToVerifyContracts: AragonVerifyEntry[];
   managingDAOMultisigPluginAddress: string;
 };
 

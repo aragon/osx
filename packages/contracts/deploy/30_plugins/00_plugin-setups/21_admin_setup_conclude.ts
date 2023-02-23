@@ -14,8 +14,8 @@ const func: DeployFunction = async function (hre: EHRE) {
     deployer
   );
 
-  hre.aragonToVerfiyContracts.push(AdminSetupDeployment);
-  hre.aragonToVerfiyContracts.push({
+  hre.aragonToVerifyContracts.push(AdminSetupDeployment);
+  hre.aragonToVerifyContracts.push({
     address: await adminSetup.implementation(),
     args: [],
   });

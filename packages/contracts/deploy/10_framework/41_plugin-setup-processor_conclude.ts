@@ -5,7 +5,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   console.log(`\nConcluding Plugin Setup Processor deployment.`);
 
   const {deployments} = hre;
-  hre.aragonToVerfiyContracts.push(
+  hre.aragonToVerifyContracts.push(
     await deployments.get('PluginSetupProcessor')
   );
 };

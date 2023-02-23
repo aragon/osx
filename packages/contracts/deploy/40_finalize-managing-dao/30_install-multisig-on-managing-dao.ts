@@ -9,8 +9,8 @@ import {hashHelpers} from '../../utils/psp';
 import {MultisigSetup__factory, Multisig__factory} from '../../typechain';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  const {ethers, network, getNamedAccounts} = hre;
-  const [deployer] = await getNamedAccounts();
+  const {ethers, network} = hre;
+  const [deployer] = await ethers.getSigners();
 
   if (network.name !== 'localhost' && network.name !== 'hardhat') {
     if (
@@ -86,7 +86,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     multisigSetupAddress,
     deployer
   );
-  hre.aragonToVerfiyContracts.push({
+  hre.aragonToVerifyContracts.push({
     address: installationPreparedEvent.plugin,
     args: [
       await multisigSetup.implementation(),
