@@ -1,4 +1,4 @@
-import {ethers, deployments} from 'hardhat';
+import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from './proxy';
 
@@ -15,7 +15,37 @@ export async function deployENSSubdomainRegistrar(
   managingDao: DAO,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
-  const ens = await setupENS([domain], {ethers, deployments});
+  const ENSRegistryFactory = await ethers.getContractFactory('ENSRegistry');
+  const ensRegistry = await ENSRegistryFactory.connect(owner).deploy();
+
+  const PublicResolverFactory = await ethers.getContractFactory(
+    'PublicResolver'
+  );
+  const publicResolver = await PublicResolverFactory.connect(owner).deploy(
+    ensRegistry.address,
+    owner.address
+  );
+
+  // Register subdomains in the reverse order
+  let domainNamesReversed = domain.split('.');
+  domainNamesReversed.push(''); //add the root domain
+  domainNamesReversed = domainNamesReversed.reverse();
+
+  for (let i = 0; i < domainNamesReversed.length - 1; i++) {
+    // to support subdomains
+    const domain = domainNamesReversed
+      .map((value, index) => (index <= i ? value : ''))
+      .filter(value => value !== '')
+      .reverse()
+      .join('.');
+    await ensRegistry.setSubnodeRecord(
+      ensDomainHash(domain),
+      ensLabelHash(domainNamesReversed[i + 1]),
+      owner.address,
+      publicResolver.address,
+      0
+    );
+  }
 
   const ENSSubdomainRegistrar = await ethers.getContractFactory(
     'ENSSubdomainRegistrar'
@@ -25,13 +55,13 @@ export async function deployENSSubdomainRegistrar(
   const ensSubdomainRegistrar = await deployWithProxy<ENSSubdomainRegistrar>(
     ENSSubdomainRegistrar
   );
-  await ens
+  await ensRegistry
     .connect(owner)
     .setApprovalForAll(ensSubdomainRegistrar.address, true);
 
   // Initialize it with the domain
   const node = ethers.utils.namehash(domain);
-  ensSubdomainRegistrar.initialize(managingDao.address, ens.address, node);
+  ensSubdomainRegistrar.initialize(managingDao.address, ensRegistry.address, node);
 
   return ensSubdomainRegistrar;
 }
