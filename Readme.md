@@ -4,8 +4,8 @@ The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allo
 
 Within this monorepo, you will be able to find 3 individual packages:
 - [Contracts](https://github.com/aragon/osx/tree/develop/packages/contracts): the Aragon OSx protocol contracts.
-- [Subgraph](https://github.com/aragon/osx/tree/develop/packages/subgraph): containing all code generating our subgraph and event indexing.
-- [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): containing the connection between the ethers package and our contracts.
+- [Subgraph](https://github.com/aragon/osx/tree/develop/packages/subgraph): contains all code generating our subgraph and event indexing.
+- [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): contains the connection between the ethers package and our contracts.
 
 For more information on the individual packages, please read the respective `README.md`.
 
@@ -27,10 +27,10 @@ To review the contracts powering the Aragon OSx protocol, feel free to head to `
 
 The Aragon OSx protocol architecture is composed of two key sections:
 
-- __Core contracts__: details the functionalities all DAOs will have. It is composed of mostly 3 sections:
-    - **DAO treasury:** the DAO’s main contract and vault.
-    - **Permission manager**: manages permissions within the DAO to execute actions.
-    - **Plugin manager**: manages installed plugins within the DAO.
+- __Core contracts__: the primitives the end user will interact with. It is composed of mostly 3 sections:
+    - **DAO contract:** the main contract of our core. It holds a DAO's assets and possible actions.
+    - **Permissions**: govern interactions between the plugins, DAOs, and any other address - allowing them (or not) to execute actions on behalf of and within the DAO.
+    - **Plugins**: base templates of plugins to build upon.
 - __Framework contracts__: in charge of creating and registering each deployed DAO or plugin. It contains:
     - **DAO and Plugin Factories**: creates DAOs or plugins.
     - **DAO and Plugin Registries**: registers into our protocol those DAOs or plugins.
@@ -51,16 +51,16 @@ The *Core Contracts* describe how every DAO generated in the Aragon OSx protocol
 
 In a nutshell, each DAO is composed of 3 interconnecting components:
 
-1. **The DAO treasury:** The DAO contract is where the **core functionality** of the DAO lies. It is the contract in charge of:
+1. **The DAO contract:** The DAO contract is where the **core functionality** of the DAO lies. It is the contract in charge of:
     - Representing the identity of the DAO (ENS name, logo, description, other metadata)
-    - Holding and managing the treasury
+    - Holding and managing the treasury assets
     - Executing arbitrary actions to:
         - transfer assets
         - call its own functions
         - call functions in external contracts
-    - Providing general technical utilities (signature validation, callback handling)
-2. **The Permission Manager:** The permission manager is an integral part of any DAO and the center of our protocol architecture. It **manages permissions for the DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO.
-3. **Plugin Manager**: Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. Some examples of plugins DAOs could install are:
+    - Providing general technical utilities like callback handling and others
+2. **Permissions:** Permissions are an integral part of any DAO and the center of our protocol architecture. The Permissions manager **manages permissions for the DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO. This Permissions manager lives inside the DAO contract.
+3. **Plugins**: Any custom functionality can be aded or removed through plugins, allowing you to **fully customize your DAO**. You'll find some base templates of plugins within the `plugins` folder of the *Core Contracts*. Some examples of plugins that DAOs could install are:
     - Governance (e.g., token voting, one-person one-vote)
     - Asset management (e.g., ERC-20 or NFT minting, token streaming, DeFi)
     - Membership (governing budget allowances, gating access, curating a member list)
@@ -69,18 +69,18 @@ The following graphic shows how an exemplary DAO setup, where the
 
 ![An examplary DAO setup](https://devs.aragon.org/assets/images/dao-plugin.drawio-7086d0911d25218097dae94665b1a7b1.svg)
 
-An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
+An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
 
 ### Framework Contracts
 
-In contrast, the *Framework Contracts* are in charge of creating and registering DAOs and plugins. Additionally, it’s what holds the plugin installer to install or uninstall plugins into DAOs.
+In contrast, the *Framework Contracts* are in charge of creating and registering DAOs and plugins. Additionally, these contracts contain the `PluginSetupProcessor` which installs, uninstalls, and updates plugins into DAOs upon request.
 
 - __Factories and Registries__
     - **The DAO Factory**: In charge of deploying instances of a new DAO based on the parameters given, including which plugins to install and additional metadata the DAO has (like a name, description, etc).
-    - **The DAO Registry**: In charge of registering DAOs into our protocol so we can easily access all DAO instances within our protocol. It is also in charge of giving DAOs subdomains for easier access.
-    - **The Plugin Repo Factory**: A `PluginRepo` is the repository of versions for a given plugin. The Plugin Repo Factory contract creates `PluginRepo` instances so that plugins can update their contract versioning without complexity in a semantic way similar to the App Store.
-    - **The Plugin Repo Registry**: In charge of registering the `PluginRepo` instances so that we easily access all protocol plugins.
-- __Plugin Processor__: installs and uninstalls plugins into DAOs based on the instructions provided by the plugin setup.
+    - **The DAO Registry**: In charge of registering DAOs into our protocol so plugins can easily access all DAO instances within our protocol. It is also in charge of giving DAOs subdomains for easier access.
+    - **The Plugin Factory**: A `PluginRepo` is the repository of versions for a given plugin. The `PluginRepoFactory` contract creates a `PluginRepo` instance for each plugin, so that plugins can update their versioning without complexity in a semantic way similar to the App Store.
+    - **The Plugin Registry**: In charge of registering the `PluginRepo` addresses into our protocol so that DAOs can access all plugins published in the protocol.
+- __Plugin Setup Processor__: The processor is the manager for plugins. It installs, uninstalls, and upgrades plugins for DAOs based on the instructions provided by the plugin setup.
 
 For a more detailed description of each of these components, please visit our [Developer Portal](https://devs.aragon.org).
 
@@ -97,7 +97,7 @@ You can find all plugins built by the Aragon team [here](https://github.com/arag
 
 The [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts) emits events that get indexed within our `subgraph`. This `subgraph`, whose [source code can be found here](https://github.com/aragon/osx/tree/develop/packages/subgraph), is what then fuels the [Aragon SDK](https://github.com/aragon/sdk).
 
-The [contract-ethers] package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
+The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
 
 ## Tests
 
