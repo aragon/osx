@@ -12,26 +12,58 @@ const func: DeployFunction = async function (hre: EHRE) {
   const {ethers, network, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
 
+  let approvers: string[];
+  let minApprovals: number;
+  let listedOnly: boolean;
+
   // Get info from .env
-  const approvers =
-    process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') ||
-    (network.name === 'localhost' || network.name === 'hardhat'
-      ? [deployer]
-      : []);
-  const minApprovals = parseInt(
-    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '0'
-  );
-  const listedOnly = process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
+  let MANAGINGDAO_MULTISIG_APPROVERS: string | undefined =
+    process.env.MANAGINGDAO_MULTISIG_APPROVERS;
+  let MANAGINGDAO_MULTISIG_MINAPPROVALS: string | undefined =
+    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS;
+  let MANAGINGDAO_MULTISIG_LISTEDONLY: string | undefined =
+    process.env.MANAGINGDAO_MULTISIG_LISTEDONLY;
 
-  console.log('\n\napprovers\n', approvers, '\n\n');
+  if (
+    !MANAGINGDAO_MULTISIG_APPROVERS ||
+    !MANAGINGDAO_MULTISIG_MINAPPROVALS ||
+    !MANAGINGDAO_MULTISIG_LISTEDONLY
+  ) {
+    if (network.name === 'localhost' || network.name === 'hardhat') {
+      MANAGINGDAO_MULTISIG_APPROVERS = deployer;
+      MANAGINGDAO_MULTISIG_MINAPPROVALS = '1';
+      MANAGINGDAO_MULTISIG_LISTEDONLY = 'false';
+    } else {
+      throw new Error(
+        `Some .env settings for managingDAO multisig are not set correctly, see:\n` +
+          `(MANAGINGDAO_MULTISIG_APPROVERS: ${MANAGINGDAO_MULTISIG_APPROVERS})\n` +
+          `(MANAGINGDAO_MULTISIG_MINAPPROVALS: ${MANAGINGDAO_MULTISIG_MINAPPROVALS})\n` +
+          `(MANAGINGDAO_MULTISIG_LISTEDONLY: ${MANAGINGDAO_MULTISIG_LISTEDONLY})\n`
+      );
+    }
+  }
 
-  if (!approvers.length || !minApprovals)
+  if (typeof MANAGINGDAO_MULTISIG_APPROVERS === 'string') {
+    approvers = MANAGINGDAO_MULTISIG_APPROVERS?.split(',');
+  } else {
     throw new Error(
       `Some .env settings for managingDAO multisig are not set correctly, see:\n` +
-        `(MANAGINGDAO_MULTISIG_APPROVERS no. of addresses: ${approvers.length})\n` +
-        `(MANAGINGDAO_MULTISIG_MINAPPROVALS: ${minApprovals})\n` +
-        `(MANAGINGDAO_MULTISIG_LISTEDONLY: ${listedOnly})\n`
+        `(MANAGINGDAO_MULTISIG_APPROVERS: ${MANAGINGDAO_MULTISIG_APPROVERS})\n`
     );
+  }
+
+  if (isNaN(parseInt(MANAGINGDAO_MULTISIG_MINAPPROVALS))) {
+    throw new Error(
+      `Some .env settings for managingDAO multisig are not set correctly, see:\n` +
+        `(MANAGINGDAO_MULTISIG_MINAPPROVALS: ${MANAGINGDAO_MULTISIG_MINAPPROVALS})\n`
+    );
+  } else {
+    minApprovals = parseInt(MANAGINGDAO_MULTISIG_MINAPPROVALS);
+  }
+
+  listedOnly = MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
+
+  console.log('\n\napprovers\n', approvers, '\n\n ', minApprovals, listedOnly);
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);

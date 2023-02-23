@@ -37,6 +37,4 @@ jobs:
           HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
           HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.dao.eth'
           MANAGINGDAO_SUBDOMAIN: 'aragon-management'
-          MANAGINGDAO_MULTISIG_MINAPPROVALS: 1
-          MANAGINGDAO_MULTISIG_LISTEDONLY: true
         run: yarn run test
