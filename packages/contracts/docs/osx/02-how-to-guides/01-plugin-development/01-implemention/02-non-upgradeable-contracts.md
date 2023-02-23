@@ -37,7 +37,7 @@ constructor(
 
 The constructor in `Plugin` calls another parent class
 
-```solidity title="contracts/contracts/core/plugin/Plugin.sol"
+```solidity title="@aragon/osx/core/plugin/Plugin.sol"
 constructor(IDAO _dao) DaoAuthorizable(_dao) {}
 ```
 
@@ -65,7 +65,7 @@ function initialize(
 
 You protect it from being used multiple times by using [OpenZepplin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable) and call the internal function
 
-```solidity title="contracts/contracts/core/plugin/PluginCloneable.sol"
+```solidity title="@aragon/osx/core/plugin/PluginCloneable.sol"
 function __PluginCloneable_init(IDAO _dao) internal virtual onlyInitializing {
   __DaoAuthorizableCloneable_init(_dao);
 }

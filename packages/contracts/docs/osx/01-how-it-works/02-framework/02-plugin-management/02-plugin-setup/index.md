@@ -10,7 +10,7 @@ In this section you will learn how the plugin setup process and related infrastr
 In order for a plugin to function, associated contracts need to be deployed and gathered, often requiring permissions from the DAO.  
 For example, a governance plugin will need permission to call the `execute` function in the DAO.
 
-The required setup logic is written and taken care off by the plugin developer in the `PluginSetup` contract they create and that is associated with each `Plugin` contract version release (see [Developing a Plugin](docs/core/02-how-to-guides/01-plugin-development/index.md)). The `PluginSetup` contract then interacts with the Aragon OSx framework so that installing, updating, and uninstalling a plugin to a DAO through the UI becomes very simple for the DAO end-user.
+The required setup logic is written and taken care off by the plugin developer in the `PluginSetup` contract they create and that is associated with each `Plugin` contract version release (see [Developing a Plugin](../index.md)). The `PluginSetup` contract then interacts with the Aragon OSx framework so that installing, updating, and uninstalling a plugin to a DAO through the UI becomes very simple for the DAO end-user.
 
 Except for the gas costs required, the installation, update, and uninstallation of plugins is completely free.
 
