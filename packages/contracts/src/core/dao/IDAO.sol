@@ -21,7 +21,7 @@ interface IDAO {
     /// @param _who The address of a EOA or contract to give the permissions.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return bool Returns true if the address has permission, false if not.
+    /// @return Returns true if the address has permission, false if not.
     function hasPermission(
         address _where,
         address _who,
@@ -41,8 +41,8 @@ interface IDAO {
     /// @param _callId The ID of the call. The definition of the value of `callId` is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
     /// @param _allowFailureMap A bitmap allowing execution to succeed, even if individual actions might revert. If the bit at index `i` is 1, the execution succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
-    /// @return uint256 The constructed failureMap which contains which actions have actually failed.
+    /// @return The array of results obtained from the executed actions in `bytes`.
+    /// @return The constructed failureMap which contains which actions have actually failed.
     function execute(
         bytes32 _callId,
         Action[] memory _actions,
@@ -121,7 +121,7 @@ interface IDAO {
     /// @notice Checks whether a signature is valid for the provided hash by forwarding the call to the set [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     /// @param _hash The hash of the data to be signed.
     /// @param _signature The signature byte array associated with `_hash`.
-    /// @return magicValue Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
+    /// @return Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
     function isValidSignature(bytes32 _hash, bytes memory _signature) external returns (bytes4);
 
     /// @notice Registers an ERC standard having a callback by registering its [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.

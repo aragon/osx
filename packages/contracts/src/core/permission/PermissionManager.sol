@@ -194,7 +194,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return bool Returns true if `_who` has the permissions on the target contract via the specified permission identifier.
+    /// @return Returns true if `_who` has the permissions on the target contract via the specified permission identifier.
     function isGranted(
         address _where,
         address _who,
@@ -291,7 +291,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return bool Returns true if `_who` has the permissions on the contract via the specified permissionId identifier.
+    /// @return Returns true if `_who` has the permissions on the contract via the specified permissionId identifier.
     function _isGranted(
         address _where,
         address _who,
@@ -336,7 +336,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @return bytes32 The permission hash.
+    /// @return The permission hash.
     function permissionHash(
         address _where,
         address _who,
@@ -346,9 +346,9 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who = ANY_ADDR` or `_where = ANY_ADDR`.
-    /// @dev by default, every permission is unrestricted and it's the derived contract's responsibility to override it. NOTE: ROOT_PERMISSION_ID is included and not required to set it again.
     /// @param _permissionId The permission identifier.
-    /// @return bool Whether ot not permissionId is restricted.
+    /// @return Whether or not the permission is restricted.
+    /// @dev By default, every permission is unrestricted and it is the derived contract's responsibility to override it. Note, that the `ROOT_PERMISSION_ID` is included not required to be set it again.
     function isPermissionRestrictedForAnyAddr(
         bytes32 _permissionId
     ) internal view virtual returns (bool) {
