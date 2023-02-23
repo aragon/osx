@@ -61,7 +61,11 @@ export async function deployENSSubdomainRegistrar(
 
   // Initialize it with the domain
   const node = ethers.utils.namehash(domain);
-  ensSubdomainRegistrar.initialize(managingDao.address, ensRegistry.address, node);
+  ensSubdomainRegistrar.initialize(
+    managingDao.address,
+    ensRegistry.address,
+    node
+  );
 
   return ensSubdomainRegistrar;
 }
