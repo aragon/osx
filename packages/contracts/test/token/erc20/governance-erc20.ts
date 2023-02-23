@@ -261,6 +261,22 @@ describe('GovernanceERC20', function () {
       );
     });
 
+    it('turns on delegation for all users in the chain of transfer A => B => C', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await expect(token.transfer(signers[1].address, 40)).to.emit(
+        token,
+        'DelegateChanged'
+      );
+      await expect(
+        token.connect(signers[1]).transfer(signers[2].address, 20)
+      ).to.emit(token, 'DelegateChanged');
+
+      expect(await token.getVotes(signers[0].address)).to.equal(60);
+      expect(await token.getVotes(signers[1].address)).to.equal(20);
+      expect(await token.getVotes(signers[2].address)).to.equal(20);
+    });
+
     it('should not turn on delegation on `transfer` if `to` manually turned it off', async () => {
       await token.mint(signers[0].address, 100);
 
