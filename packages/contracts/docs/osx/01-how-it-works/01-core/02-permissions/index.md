@@ -11,7 +11,7 @@ Here, you will learn how the permissions in Aragon OSx work, how they can be gra
 
 As we mentioned earlier, it is essential that only the right person or contract can execute a certain action. As a developer, you might have seen or used [modifiers such as `onlyOwner`](https://docs.openzeppelin.com/contracts/2.x/api/ownership#Ownable) in contracts. This `onlyOwner` modifier provides basic access control to your DAO: only the `owner` address is permitted to execute the function to which the modifier is attached.
 
-In aragonOSx, we follow the same approach but provide more advanced functionality:
+In Aragon OSx, we follow the same approach but provide more advanced functionality:
 Each `DAO` contracts includes a `PermissionManager` contract allowing to flexibly, securely, and collectively manage permissions through the DAO and, thus, govern its actions.
 This `PermissionManager`, called `ACL` in previous Aragon OS versions, was one big reason why our protocol never got hacked.
 The code and configuration of a DAO specifies which wallets or contracts (`who`) are allowed to call which authorized functions on a target contract (`where`).

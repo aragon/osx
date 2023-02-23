@@ -1,8 +1,8 @@
 ---
-title: aragonOSx
+title: Aragon OSx
 ---
 
-## The Contracts behind aragonOSx
+## The Contracts behind Aragon OSx
 
 This section introduces the Aragon OSx contracts and related infrastructure.
 

@@ -68,7 +68,7 @@ To help you with developing and deploying your plugin within the Aragon infrastr
 
 Aragon plugins using non-upgradeable smart contracts can be cheap to deploy (i.e., using clones) but are **limited when it comes to updating**.
 
-Updating, in distinction from upgrading, will call aragonOSx' internal process for switching from an older plugin version to a newer one.
+Updating, in distinction from upgrading, will call Aragon OSx's internal process for switching from an older plugin version to a newer one.
 
 To switch from an older version of a non-upgradeable contract to a newer one, the underlying contract has to be replaced. In consequence, the state of the older version is not available in the new version anymore, unless it is migrated or has been made publicly accessible in the old version through getter functions.
 

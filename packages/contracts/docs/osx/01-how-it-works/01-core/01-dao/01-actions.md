@@ -41,7 +41,7 @@ struct Action {
 
 Actions can be
 
-- function calls to the DAO itself (e.g., to upgrade the DAO contract to a newer version of aragonOSx)
+- function calls to the DAO itself (e.g., to upgrade the DAO contract to a newer version of Aragon OSx)
 - function calls to other contracts, such as
 
   - external services (e.g. Uniswap, Compound, etc.)
