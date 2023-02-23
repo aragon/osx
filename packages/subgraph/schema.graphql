@@ -305,7 +305,7 @@ enum VotingMode {
 # TokenVoting
 
 type TokenVotingPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugins once plugin is seperated from the Aragon OSx"
+  "TODO: attributes should be appended to Plugins once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
@@ -385,7 +385,7 @@ type TokenVotingProposal implements Proposal @entity {
 # AddresslistVoting
 
 type AddresslistVotingPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from the Aragon OSx"
+  "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
@@ -499,7 +499,7 @@ type AdminProposal implements Proposal @entity {
 # Multisig
 
 type MultisigPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from the Aragon OSx"
+  "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
