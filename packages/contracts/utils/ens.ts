@@ -1,4 +1,6 @@
 import {ethers} from 'hardhat';
+import {ENSRegistry__factory} from '../typechain';
+import {EHRE} from './types';
 
 export function ensLabelHash(label: string): string {
   return ethers.utils.id(label);
@@ -8,20 +10,32 @@ export function ensDomainHash(name: string): string {
   return ethers.utils.namehash(name);
 }
 
-export async function setupENS(deployer: any, domain: string): Promise<any> {
-  const ENSRegistry = await ethers.getContractFactory('ENSRegistry');
-  const PublicResolver = await ethers.getContractFactory('PublicResolver');
+export async function setupENS(
+  domain: string,
+  hre: EHRE
+): Promise<any> {
+  const {deployments, ethers} = hre;
+  const {deploy} = deployments;
+  const [deployer] = await ethers.getSigners();
 
   // Deploy the ENSRegistry
-  const ens = await ENSRegistry.deploy();
-  await ens.deployed();
+  await deploy('ENSRegistry', {
+    from: deployer.address,
+    args: [],
+    log: true,
+  });
+  const ensDeployment = await deployments.get('ENSRegistry');
+  const ens = await ENSRegistry__factory.connect(
+    ensDeployment.address,
+    deployer
+  );
 
   // Deploy the Resolver
-  const resolver = await PublicResolver.deploy(
-    ens.address,
-    ethers.constants.AddressZero
-  );
-  await resolver.deployed();
+  await deploy('PublicResolver', {
+    from: deployer.address,
+    args: [ensDeployment.address, ethers.constants.AddressZero],
+  });
+  const resolver = await deployments.get('PublicResolver');
 
   // Register subdomains in the reverse order
   let domainNamesReversed = domain.split('.');
@@ -38,7 +52,7 @@ export async function setupENS(deployer: any, domain: string): Promise<any> {
     await ens.setSubnodeRecord(
       ensDomainHash(domain),
       ensLabelHash(domainNamesReversed[i + 1]),
-      deployer,
+      deployer.address,
       resolver.address,
       0
     );

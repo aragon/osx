@@ -7,8 +7,14 @@ export type AragonPluginRepos = {
   multisig: string;
 };
 
+export type AragonVerifyEntry = {
+  address: string,
+  args: Array<string | string[]>
+}
+
 export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;
+  aragonToVerfiyContracts: AragonVerifyEntry[];
 };
 
 export enum Operation {

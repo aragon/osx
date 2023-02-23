@@ -28,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let ensRegistryAddress;
 
   if (!officialEnsRegistryAddress) {
-    const ens = await setupENS(deployer, daoDomain);
+    const ens = await setupENS(daoDomain, hre);
     ensRegistryAddress = ens.address;
   } else {
     ensRegistryAddress = officialEnsRegistryAddress;
@@ -86,12 +86,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (!officialEnsRegistryAddress) {
     // Deploy the Resolver
-    const PublicResolver = await ethers.getContractFactory('PublicResolver');
-    const resolver = await PublicResolver.deploy(
-      ensRegistryContract.address,
-      ethers.constants.AddressZero
-    );
-    await resolver.deployed();
+    await deploy('Plugin_PublicResolver', {
+      contract: 'PublicResolver',
+      from: deployer,
+      args: [
+        ensRegistryContract.address,
+        ethers.constants.AddressZero
+      ],
+      log: true
+    })
+    const resolver = await getContractAddress('Plugin_PublicResolver', hre)
 
     // Register subdomains in the reverse order
     let domainNamesReversed = pluginDomain.split('.');
@@ -108,7 +112,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         ensDomainHash(domain),
         ensLabelHash(domainNamesReversed[i + 1]),
         deployer,
-        resolver.address,
+        resolver,
         0
       );
     }
