@@ -47,7 +47,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == TOKEN_VOTING_INTERFACE_ID ||
@@ -57,7 +57,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @notice getter function for the voting token.
     /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface.
-    /// @return IVotesUpgradeable the token used for voting.
+    /// @return The token used for voting.
     function getVotingToken() public view returns (IVotesUpgradeable) {
         return votingToken;
     }

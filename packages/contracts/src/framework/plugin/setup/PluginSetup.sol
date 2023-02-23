@@ -29,7 +29,7 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
     /// @param _data The data to initialize the storage of the proxy contract.
-    /// @return address The address of the created proxy contract.
+    /// @return The address of the created proxy contract.
     function createERC1967Proxy(
         address _implementation,
         bytes memory _data
@@ -39,7 +39,7 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPluginSetup).interfaceId || super.supportsInterface(_interfaceId);
