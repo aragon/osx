@@ -41,7 +41,7 @@ interface IDAO {
     /// @param _callId The ID of the call. The definition of the value of `callId` is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
     /// @param _allowFailureMap A bitmap allowing execution to succeed, even if individual actions might revert. If the bit at index `i` is 1, the execution succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
+    /// @return The array of results obtained from the executed actions in `bytes`.
     /// @return The constructed failureMap which contains which actions have actually failed.
     function execute(
         bytes32 _callId,
