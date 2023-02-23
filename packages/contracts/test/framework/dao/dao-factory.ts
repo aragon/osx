@@ -11,6 +11,8 @@ import {
   DAOFactory,
   DAOFactory__factory,
   PluginRepoFactory,
+  TokenVotingSetup,
+  TokenVotingSetup__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -19,6 +21,8 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import metadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json'
+
 import {findEvent} from '../../../utils/event';
 import {getMergedABI} from '../../../utils/abi';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
@@ -495,5 +499,53 @@ describe('DAOFactory: ', function () {
     });
 
     expect(installEventCount).to.equal(2);
+  });
+
+  describe('Actual Plugin Installations: ', async () => {
+    let tokenVotingSetup: TokenVotingSetup;
+    let pluginRepo: string;
+    beforeEach(async () => {
+      const tokenVotinSetupFactory = await ethers.getContractFactory(
+        'TokenVotingSetup'
+      );
+      tokenVotingSetup = await tokenVotinSetupFactory.deploy();
+
+      const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
+        'token-voting',
+        tokenVotingSetup.address,
+        ownerAddress,
+        '0x11',
+        '0x11'
+      );
+      let event = await findEvent(tx, EVENTS.PluginRepoRegistered);
+      pluginRepo = event.args.pluginRepo;
+    });
+
+    it('installs token voting', async () => {
+      let tokenVoting = TokenVotingSetup__factory.createInterface();
+
+      const pluginRepoPointer: PluginRepoPointer = [
+        pluginRepo,
+        1,
+        1,
+      ];
+
+      
+      let prepareInstallationDataTypes = metadata.pluginSetupABI.prepareInstallation;
+      defaultData = ethers.utils.defaultAbiCoder.encode(prepareInstallationDataTypes, [
+        Object.values(defaultVotingSettings),
+        Object.values(defaultTokenSettings),
+        Object.values(defaultMintSettings),
+      ]);
+
+      votingPluginInstallationData = createPrepareInstallationParams(
+        pluginRepoPointer,
+        EMPTY_DATA
+      );
+
+      const tx = await daoFactory.createDao(daoSettings, {
+        pluginSetupRef: 
+      }
+    });
   });
 });
