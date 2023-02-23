@@ -140,7 +140,6 @@ describe('DAOFactory: ', function () {
   let pluginRepoRegistry: PluginRepoRegistry;
 
   let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
-  let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
   let pluginRepoMock: PluginRepo;
   let pluginSetupMockRepoAddress: any;
 
