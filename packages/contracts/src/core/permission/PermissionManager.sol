@@ -346,9 +346,9 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who = ANY_ADDR` or `_where = ANY_ADDR`.
-    /// @dev by default, every permission is unrestricted and it's the derived contract's responsibility to override it. NOTE: ROOT_PERMISSION_ID is included and not required to set it again.
     /// @param _permissionId The permission identifier.
-    /// @return Whether ot not permissionId is restricted.
+    /// @return Whether or not the permission is restricted.
+    /// @dev By default, every permission is unrestricted and it is the derived contract's responsibility to override it. Note, that the `ROOT_PERMISSION_ID` is included not required to be set it again.
     function isPermissionRestrictedForAnyAddr(
         bytes32 _permissionId
     ) internal view virtual returns (bool) {
