@@ -5,7 +5,7 @@ node_modules
 coverage
 coverage.json
 typechain
-docs/generated
+docs/osx/03-reference-guide
 
 #Hardhat files
 cache
