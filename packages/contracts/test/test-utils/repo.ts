@@ -32,7 +32,7 @@ export async function deployNewPluginRepo(
 export async function deployPluginRepoFactory(
   signers: any,
   pluginRepoRegistry: PluginRepoRegistry
-): Promise<any> {
+): Promise<PluginRepoFactory> {
   const {abi, bytecode} = await getMergedABI(
     // @ts-ignore
     hre,

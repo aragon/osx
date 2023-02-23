@@ -10,7 +10,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @notice The interface required for a plugin setup contract to be consumed by the `PluginSetupProcessor` for plugin installations, updates, and uninstallations.
 interface IPluginSetup {
     /// @notice The data associated with a prepared setup.
-    /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
+    /// @param helpers The address array of helpers (contracts or EOAs) associated with this plugin version after the installation or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedSetupData {
         address[] helpers;

@@ -6,6 +6,7 @@ import {
   DAO,
   GovernanceERC20,
   GovernanceERC20__factory,
+  IERC165Upgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -19,6 +20,8 @@ export type MintSettings = {
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 const governanceERC20Name = 'GovernanceToken';
 const governanceERC20Symbol = 'GOV';
+
+const addressZero = ethers.constants.AddressZero;
 
 describe('GovernanceERC20', function () {
   let signers: SignerWithAddress[];
@@ -83,10 +86,18 @@ describe('GovernanceERC20', function () {
   });
 
   describe('supportsInterface:', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await token.supportsInterface('0x00000000')).to.be.false;
+    });
+
+    it('supports the `IERC165Upgradeable` interface', async () => {
+      const iface = IERC165Upgradeable__factory.createInterface();
+      expect(await token.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
     it('it supports all inherited interfaces', async () => {
       await Promise.all(
         [
-          'IERC165Upgradeable',
           'IERC20Upgradeable',
           'IERC20PermitUpgradeable',
           'IVotesUpgradeable',
@@ -203,6 +214,141 @@ describe('GovernanceERC20', function () {
       expect(
         await token.getPastVotes(signers[2].address, tx1.blockNumber)
       ).to.eq(balanceSigner2);
+    });
+  });
+
+  describe('afterTokenTransfer', async () => {
+    beforeEach(async () => {
+      token = await GovernanceERC20.deploy(dao.address, 'name', 'symbol', {
+        receivers: [],
+        amounts: [],
+      });
+
+      await dao.grant(token.address, signers[0].address, MINT_PERMISSION_ID);
+    });
+
+    it('turns on delegation after mint', async () => {
+      expect(await token.delegates(signers[0].address)).to.equal(addressZero);
+
+      await expect(token.mint(signers[0].address, 1)).to.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.delegates(signers[0].address)).to.equal(
+        signers[0].address
+      );
+      expect(await token.getVotes(signers[0].address)).to.equal(1);
+    });
+
+    it('turns on delegation for the `to` address after transfer', async () => {
+      // delegation turned on for signers[0]
+      await token.mint(signers[0].address, 100);
+
+      // At this time, signers[1] doesn't have delegation turned on,
+      // but the transfer should turn it on.
+      expect(await token.delegates(signers[1].address)).to.equal(addressZero);
+
+      // Should turn on delegation
+      await expect(token.transfer(signers[1].address, 50)).to.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.getVotes(signers[1].address)).to.equal(50);
+      expect(await token.delegates(signers[1].address)).to.equal(
+        signers[1].address
+      );
+    });
+
+    it('turns on delegation for all users in the chain of transfer A => B => C', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await expect(token.transfer(signers[1].address, 40)).to.emit(
+        token,
+        'DelegateChanged'
+      );
+      await expect(
+        token.connect(signers[1]).transfer(signers[2].address, 20)
+      ).to.emit(token, 'DelegateChanged');
+
+      expect(await token.getVotes(signers[0].address)).to.equal(60);
+      expect(await token.getVotes(signers[1].address)).to.equal(20);
+      expect(await token.getVotes(signers[2].address)).to.equal(20);
+    });
+
+    it('should not turn on delegation on `transfer` if `to` manually turned it off', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 50);
+
+      // turn off delegation
+      await token.connect(signers[1]).delegate(addressZero);
+
+      // Shouldn't turn on delegation
+      await expect(token.transfer(signers[1].address, 50)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.delegates(signers[1].address)).to.equal(addressZero);
+      expect(await token.getVotes(signers[1].address)).to.equal(0);
+    });
+
+    it('should not turn on delegation on `mint` if `to` manually turned it off', async () => {
+      await token.mint(signers[0].address, 100);
+
+      // turn off delegation
+      await token.delegate(addressZero);
+
+      // Shouldn't turn on delegation
+      await expect(token.mint(signers[0].address, 50)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.delegates(signers[0].address)).to.equal(addressZero);
+      expect(await token.getVotes(signers[1].address)).to.equal(0);
+    });
+
+    it('should not turn on delegation on `mint` if it was turned on at least once in the past', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await expect(token.mint(signers[0].address, 100)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.getVotes(signers[0].address)).to.equal(200);
+    });
+
+    it('should not turn on delegation on `transfer` if it was turned on at least once in the past', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 50);
+
+      await expect(token.transfer(signers[1].address, 30)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+
+      expect(await token.getVotes(signers[1].address)).to.equal(80);
+    });
+
+    it('updates voting power after transfer for `from` if delegation turned on', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 30);
+
+      expect(await token.getVotes(signers[0].address)).to.equal(70);
+    });
+
+    it('updates voting power after transfer for `to` if delegation turned on', async () => {
+      await token.mint(signers[0].address, 100);
+
+      await token.transfer(signers[1].address, 30);
+
+      expect(await token.getVotes(signers[1].address)).to.equal(30);
     });
   });
 });
