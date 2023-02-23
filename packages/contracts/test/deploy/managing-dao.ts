@@ -157,7 +157,7 @@ describe('Managing DAO', function () {
   });
 
   it('Should be able to upgrade `DaoRegistry`', async function () {
-    // deploy a new dao implementation.
+    // deploy a new implementation.
     await deployments.deploy('DAORegistryV2', {
       contract: 'DAORegistry',
       from: ownerAddress,
@@ -221,7 +221,7 @@ describe('Managing DAO', function () {
   });
 
   it('Should be able to upgrade `PluginRepoRegistry`', async function () {
-    // deploy a new dao implementation.
+    // deploy a new implementation.
     await deployments.deploy('PluginRepoRegistryV2', {
       contract: 'PluginRepoRegistry',
       from: ownerAddress,
@@ -287,7 +287,7 @@ describe('Managing DAO', function () {
   });
 
   it('Should be able to upgrade `ENSSubdomainRegistrar`', async function () {
-    // deploy a new dao implementation.
+    // deploy a new implementation.
     await deployments.deploy('ENSSubdomainRegistrarV2', {
       contract: 'ENSSubdomainRegistrar',
       from: ownerAddress,
