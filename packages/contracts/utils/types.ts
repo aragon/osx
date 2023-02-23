@@ -9,6 +9,7 @@ export type AragonPluginRepos = {
 
 export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;
+  managingDAOMultisigPluginAddress: string;
 };
 
 export enum Operation {

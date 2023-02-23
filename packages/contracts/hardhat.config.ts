@@ -38,6 +38,7 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
     multisig: '',
   };
   hre.aragonPluginRepos = aragonPluginRepos;
+  hre.managingDAOMultisigPluginAddress = '';
 });
 
 // You need to export an object to set up your config
