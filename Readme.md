@@ -1,6 +1,6 @@
-# Aragon Core
+# Aragon OSx
 
-This workspace contains the Core foundation of the Aragon ecosystem - the human centered approach to DAO's.
+This workspace contains the foundation of the Aragon OSx ecosystem - the human centered approach to DAO's.
 
 For more information on the individual packages, please read the respective `Readme.md`.
 
@@ -18,13 +18,14 @@ To release a new version of the NPM packages and the contracts add one of these 
 This triggers the deployment of the contracts to the networks defined under `packages/contracts/networks.json`. Merges to `develop` triggers a release to testnets and merges to `main` releases to the mainnets.  
 The labels also indicate how the npm packages will be bumped to the next version:
 
-| Label         | Version bump                                                                |
-| ------------- | --------------------------------------------------------------------------- |
-| release:patch | patch bump for `@aragon/core-contracts` and `@aragon/core-contracts-ethers` |
-| release:minor | minor bump for `@aragon/core-contracts` and `@aragon/core-contracts-ethers` |
-| release:major | major bump for `@aragon/core-contracts` and `@aragon/core-contracts-ethers` |
+| Label         | Version bump                                          |
+| ------------- | ----------------------------------------------------- |
+| release:patch | patch bump for `@aragon/osx` and `@aragon/osx-ethers` |
+| release:minor | minor bump for `@aragon/osx` and `@aragon/osx-ethers` |
+| release:major | major bump for `@aragon/osx` and `@aragon/osx-ethers` |
 
 ## Pull request commands
+
 Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.
 
 | Command                                      | Description                                                 |

@@ -1,7 +1,7 @@
 {
-  "name": "@aragon/core-contracts-ethers",
+  "name": "@aragon/osx-ethers",
   "version": "0.8.0-alpha",
-  "description": "Aragon V2 DAO Framework. Contract definition for Ethers.js",
+  "description": "The Aragon OSx contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",
@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aragon/core.git"
+    "url": "git+https://github.com/aragon/osx.git"
   },
   "author": "",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/aragon/core/issues"
+    "url": "https://github.com/aragon/osx/issues"
   },
-  "homepage": "https://github.com/aragon/core#readme",
+  "homepage": "https://github.com/aragon/osx#readme",
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.3.1",
     "@typechain/ethers-v5": "^10.0.0",
