@@ -9,14 +9,14 @@ const func: DeployFunction = async function (hre: EHRE) {
   const {deployments} = hre;
 
   const DAOFactoryDeployment = await deployments.get('DAOFactory');
-  const pluginRepoFactory = await DAOFactory__factory.connect(
+  const daoFactory = DAOFactory__factory.connect(
     DAOFactoryDeployment.address,
     deployer
   );
 
   hre.aragonToVerifyContracts.push(DAOFactoryDeployment);
   hre.aragonToVerifyContracts.push({
-    address: await pluginRepoFactory.daoBase(),
+    address: await daoFactory.daoBase(),
     args: [],
   });
 };

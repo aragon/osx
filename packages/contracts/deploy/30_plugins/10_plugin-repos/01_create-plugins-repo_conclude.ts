@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   const PluginRepoFactoryDeployment = await deployments.get(
     'PluginRepoFactory'
   );
-  const pluginRepoFactory = await PluginRepoFactory__factory.connect(
+  const pluginRepoFactory = PluginRepoFactory__factory.connect(
     PluginRepoFactoryDeployment.address,
     deployer
   );

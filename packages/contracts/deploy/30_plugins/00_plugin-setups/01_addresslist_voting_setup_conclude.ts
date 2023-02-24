@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   const AddresslistVotingSetupDeployment = await deployments.get(
     'AddresslistVotingSetup'
   );
-  const addresslistVotingSetup = await AddresslistVotingSetup__factory.connect(
+  const addresslistVotingSetup = AddresslistVotingSetup__factory.connect(
     AddresslistVotingSetupDeployment.address,
     deployer
   );

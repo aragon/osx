@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   const {deployments} = hre;
 
   const AdminSetupDeployment = await deployments.get('AdminSetup');
-  const adminSetup = await AdminSetup__factory.connect(
+  const adminSetup = AdminSetup__factory.connect(
     AdminSetupDeployment.address,
     deployer
   );

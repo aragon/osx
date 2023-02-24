@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   const {deployments} = hre;
 
   const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetup');
-  const tokenVotingSetup = await TokenVotingSetup__factory.connect(
+  const tokenVotingSetup = TokenVotingSetup__factory.connect(
     TokenVotingSetupDeployment.address,
     deployer
   );
@@ -22,12 +22,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   });
   hre.aragonToVerifyContracts.push({
     address: await tokenVotingSetup.governanceERC20Base(),
-    args: [
-      ethers.constants.AddressZero,
-      '',
-      '',
-      [ethers.constants.AddressZero, ethers.constants.AddressZero],
-    ],
+    args: [ethers.constants.AddressZero, '', '', [[], []]],
   });
   hre.aragonToVerifyContracts.push({
     address: await tokenVotingSetup.governanceWrappedERC20Base(),

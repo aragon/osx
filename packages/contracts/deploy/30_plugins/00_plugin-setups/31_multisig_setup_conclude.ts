@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   const {deployments} = hre;
 
   const MultisigSetupDeployment = await deployments.get('MultisigSetup');
-  const multisigSetup = await MultisigSetup__factory.connect(
+  const multisigSetup = MultisigSetup__factory.connect(
     MultisigSetupDeployment.address,
     deployer
   );

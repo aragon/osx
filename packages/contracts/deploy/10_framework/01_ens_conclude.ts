@@ -8,18 +8,12 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const ensRegistry = await deployments.get('ENSRegistry');
   if (ensRegistry) {
-    hre.aragonToVerifyContracts.push({
-      address: ensRegistry.address,
-      args: ensRegistry.args,
-    });
+    hre.aragonToVerifyContracts.push(ensRegistry);
   }
 
   const publicResolver = await deployments.get('PublicResolver');
   if (publicResolver) {
-    hre.aragonToVerifyContracts.push({
-      address: publicResolver.address,
-      args: publicResolver.args,
-    });
+    hre.aragonToVerifyContracts.push(publicResolver);
   }
 
   hre.aragonToVerifyContracts.push(

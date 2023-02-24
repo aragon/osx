@@ -9,7 +9,7 @@ export type AragonPluginRepos = {
 
 export type AragonVerifyEntry = {
   address: string;
-  args: Array<string | string[]>;
+  args: Array<string | string[] | string[][]>;
 };
 
 export type EHRE = HardhatRuntimeEnvironment & {

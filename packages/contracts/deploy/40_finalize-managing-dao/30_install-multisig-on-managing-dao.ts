@@ -82,7 +82,7 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   // Adding plugin to verify array
   const multisigSetupAddress = await getContractAddress('MultisigSetup', hre);
-  const multisigSetup = await MultisigSetup__factory.connect(
+  const multisigSetup = MultisigSetup__factory.connect(
     multisigSetupAddress,
     deployer
   );
