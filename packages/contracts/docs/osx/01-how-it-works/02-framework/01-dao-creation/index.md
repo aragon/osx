@@ -6,8 +6,8 @@ title: DAO Creation
 
 Two framework contracts manage the `DAO` contract creation process:
 
-- the [`DAOFactory`](../../../03-reference-guide/framework/dao/DAOFactory.md)
-- the [`DAORegistry`](../../../03-reference-guide/framework/dao/DAORegistry.md).
+- The [`DAOFactory`](../../../03-reference-guide/framework/dao/DAOFactory.md)
+- The [`DAORegistry`](../../../03-reference-guide/framework/dao/DAORegistry.md).
 
 <!-- Add subgraphic from the framework overview main graphic-->
 
@@ -15,10 +15,10 @@ Two framework contracts manage the `DAO` contract creation process:
 
 The `DAOFactory` creates and sets up a `DAO` for you in four steps with the `createDao` function. The function requires the `DAOSettings` including
 
-- the trusted forwarder address for future [ERC-2771 (Meta Transaction)](https://eips.ethereum.org/EIPS/eip-2771) compatibility that is set to `address(0)` for now
-- the ENS name (to be registered under the `dao.eth` domain)
-- the [ERC-4824 (Common Interfaces for DAOs)](https://eips.ethereum.org/EIPS/eip-4824) `daoURI`
-- optional metadata
+- The trusted forwarder address for future [ERC-2771 (Meta Transaction)](https://eips.ethereum.org/EIPS/eip-2771) compatibility that is set to `address(0)` for now
+- The ENS name (to be registered under the `dao.eth` domain)
+- The [ERC-4824 (Common Interfaces for DAOs)](https://eips.ethereum.org/EIPS/eip-4824) `daoURI`
+- Optional metadata
 
 as well as an array of `PluginSettings` containing `PluginSetup` contract references and respective setup data for the initial set of plugins to be installed on the DAO.
 
@@ -38,7 +38,7 @@ For more details visit the [`DAOFactory` reference guide entry](../../../03-refe
 
 The `DAORegistry` is used by the `DAOFactory` and contains the `register` function
 
-```solidity title="contracts/framework/dao/DAORegistry.sol"
+```solidity title="@aragon/framework/dao/DAORegistry.sol"
 function register(
   IDAO dao,
   address creator,

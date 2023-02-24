@@ -17,4 +17,4 @@ Plugins can be related to:
 
 - And **anything** else that comes to mind!
 
-In the next section, we will learn more about plugins, the surrounding ecosystem, and its infrastructure.
+In the next section, we will learn more about plugins, how they work, and who owns and manages them.

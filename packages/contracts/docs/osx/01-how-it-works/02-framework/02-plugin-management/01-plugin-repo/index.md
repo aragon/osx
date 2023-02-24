@@ -32,7 +32,7 @@ When you publish the first plugin version, a new plugin repository is automatica
 
 The `PluginRepo` contract is [UUPS upgradeable](https://eips.ethereum.org/EIPS/eip-1822), inherits from the [`PermissionManager`](../../../01-core/02-permissions/index.md) and allows the maintainer of the repository to create new versions with the `createVersion` function:
 
-```solidity title="contracts/framework/repo/PluginRepo.sol"
+```solidity title="@aragon/framework/repo/PluginRepo.sol"
 /// @notice Creates a new plugin version as the latest build for an existing release number or the first build for a new release number for the provided `PluginSetup` contract address and metadata.
 /// @param _release The release number.
 /// @param _pluginSetupAddress The address of the plugin setup contract.
