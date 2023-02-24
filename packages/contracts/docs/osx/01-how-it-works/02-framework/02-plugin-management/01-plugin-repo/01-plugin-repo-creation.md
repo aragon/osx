@@ -23,7 +23,7 @@ For all subsequent builds and releases, `createVersion` inside the registered `P
 The `PluginRepoFactory` is a contract of the Aragon OSx protocol framework infrastructure being called when the first version if a plugin is published.
 It contains the `createPluginRepoWithFirstVersion`,
 
-```solidity title="contracts/framework/repo/PluginRepoFactory.sol"
+```solidity title="@aragon/framework/repo/PluginRepoFactory.sol"
 /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.0`.
 /// @param _subdomain The plugin repository subdomain.
 /// @param _pluginSetup The plugin factory contract associated with the plugin version.
@@ -52,12 +52,12 @@ For more details visit the [`PuginRepoFactory` reference guide entry](../../../.
 ### The `PluginRepoRegistry` Contract
 
 :::note
-This section is work in progress.
+This page is a stub and work in progress.
 :::
 
-The `PluginRepoRegistry` contract is the central contract listing all the plugins within the Aragon framework.
+The `PluginRepoRegistry` contract is the central contract listing all the plugins managed through the Aragon OSx protocol:
 
-```solidity title="contracts/framework/PluginRepoRegistry.sol"
+```solidity title="@aragon/framework/PluginRepoRegistry.sol"
 /// @notice Registers a plugin repository with a subdomain and address.
 /// @param subdomain The subdomain of the PluginRepo.
 /// @param pluginRepo The address of the PluginRepo contract.

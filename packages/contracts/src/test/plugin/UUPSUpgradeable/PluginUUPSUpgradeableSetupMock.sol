@@ -30,7 +30,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
-    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    ) public virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _payload);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
