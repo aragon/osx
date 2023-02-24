@@ -2,7 +2,7 @@
 title: Framework
 ---
 
-## The Infrastructure Running the AraongOS Protocol
+## The Infrastructure Running the Araong OSx Protocol
 
 The Aragon OSx protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
 
