@@ -424,6 +424,30 @@ describe('GovernanceWrappedERC20', function () {
       expect(await token.getVotes(signers[1].address)).to.equal(0);
     });
 
+    it('should not rewrite delegation setting for `transfer` if user set it on before receiving tokens', async () => {
+      await token.depositFor(signers[0].address, 10);
+
+      // user1 delegated to user2.
+      await token.connect(signers[1]).delegate(signers[2].address);
+
+      // When user1 receives his first token, delegation to himself
+      // shouldn't be called so it doesn't overwrite his setting.
+      await expect(token.transfer(signers[1].address, 10)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+    });
+
+    it('should not rewrite delegation setting for `mint` if user set it on before receiving tokens', async () => {
+      // user1 delegated to user2 before receiving tokens.
+      await token.connect(signers[1]).delegate(signers[2].address);
+
+      await expect(token.depositFor(signers[1].address, 10)).to.not.emit(
+        token,
+        'DelegateChanged'
+      );
+    });
+
     it('should not turn on delegation on `mint` if it was turned on at least once in the past', async () => {
       await token.depositFor(signers[0].address, 100);
 
