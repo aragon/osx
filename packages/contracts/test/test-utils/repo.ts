@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {
   PluginRepoRegistry,
   PluginRepoFactory,
-  PluginSetupV1Mock,
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
 } from '../../typechain';

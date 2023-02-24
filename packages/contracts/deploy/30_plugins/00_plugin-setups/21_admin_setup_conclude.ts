@@ -3,7 +3,7 @@ import {AdminSetup__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`\nConcluding admin setup deployment.`);
+  console.log(`Concluding admin setup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 
   const {deployments} = hre;

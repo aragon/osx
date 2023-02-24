@@ -4,7 +4,7 @@ import {TokenVotingSetup__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`\nConcluding token voting setup deployment.`);
+  console.log(`Concluding token voting setup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 
   const {deployments} = hre;
