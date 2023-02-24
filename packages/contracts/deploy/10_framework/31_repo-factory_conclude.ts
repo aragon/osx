@@ -3,7 +3,7 @@ import {EHRE} from '../../utils/types';
 import {PluginRepoFactory__factory} from '../../typechain';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`\nConcluding Plugin Repo Registry deployment.`);
+  console.log(`Concluding Plugin Repo Registry deployment.\n`);
 
   const [deployer] = await hre.ethers.getSigners();
   const {deployments} = hre;

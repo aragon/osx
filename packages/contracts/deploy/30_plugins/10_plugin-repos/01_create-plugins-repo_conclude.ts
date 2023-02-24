@@ -7,7 +7,7 @@ import {EHRE} from '../../../utils/types';
 import {getContractAddress} from '../../helpers';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`\nConcluding multisig setup deployment.`);
+  console.log(`Concluding multisig setup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 
   const {deployments} = hre;

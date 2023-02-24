@@ -2,7 +2,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {EHRE} from '../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`\nConcluding ManagingDao deployment.`);
+  console.log(`Concluding ManagingDao deployment.\n`);
 
   const {deployments} = hre;
 
