@@ -30,7 +30,7 @@ jobs:
 
   changelog:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged && github.actor != 'arabot-1' && contains(toJson(github.event.pull_request.labels.*.name), 'subgraph:') 
+    if: github.event.pull_request.merged && github.actor != 'arabot-1' && contains(toJson(github.event.pull_request.labels.*.name), 'subgraph:')
     steps:
       - uses: actions/checkout@v2
         with:
@@ -94,7 +94,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: "yarn"
+          cache: 'yarn'
           node-version: 14
       - name: Install dependencies
         run: yarn install --pure-lockfile
@@ -108,5 +108,5 @@ jobs:
         env:
           NETWORK_NAME: ${{ matrix.network }}
           THEGRAPH_USERNAME: aragon
-          SUBGRAPH_NAME: zaragoza
+          SUBGRAPH_NAME: osx
           GRAPH_KEY: ${{ secrets.GRAPH_KEY }}

@@ -64,8 +64,8 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Packages
 
-- [ ] Publish a new version of `@aragon/core-contracts` (`./packages/contracts`) to NPM
-- [ ] Publish a new version of `@aragon/core-contracts-ethers` (`./packages/contracts`) to NPM
+- [ ] Publish a new version of `@aragon/osx` (`./packages/contracts`) to NPM
+- [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts`) to NPM
 
 ### Subgraph
 
@@ -73,7 +73,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Update the version in `packages/subgraph/package.json`
 - [ ] Update `packages/subgraph/.env` with the correct values
   - [ ] set `NETWORK_NAME` to the deployed network
-  - [ ] set `SUBGRAPH_NAME` to `core`
+  - [ ] set `SUBGRAPH_NAME` to `osx`
   - [ ] set `GRAPH_KEY` with the value obtained from the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
   - [ ] set the `SUBGRAPH_VERSION` to the same value as in `packages/subgraph/package.json`
 - [ ] Run `yarn manifest` in `packages/subgraph` to generate the manifest

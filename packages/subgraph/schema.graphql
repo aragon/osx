@@ -164,7 +164,7 @@ type Dao @entity {
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")
-  plugins: [IPluginInstallation!]! @derivedFrom(field: "dao") # TODO: Delete or refactor after the plugins left the core subgraph
+  plugins: [IPluginInstallation!]! @derivedFrom(field: "dao") # TODO: Delete or refactor after the plugins left the Aragon OSx subgraph
   proposals: [Proposal!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
@@ -270,7 +270,7 @@ interface IPluginInstallation {
   # state: PluginPreparationState!
 }
 
-### Entities below should move to there respective subgraph once plugin is seperated from core
+### Entities below should move to there respective subgraph once plugin is seperated from the Aragon OSx
 # Proposal
 
 interface Proposal {
@@ -305,7 +305,7 @@ enum VotingMode {
 # TokenVoting
 
 type TokenVotingPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugins once plugin is seperated from core"
+  "TODO: attributes should be appended to Plugins once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
@@ -385,7 +385,7 @@ type TokenVotingProposal implements Proposal @entity {
 # AddresslistVoting
 
 type AddresslistVotingPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
@@ -456,7 +456,7 @@ type AddresslistVotingProposal implements Proposal @entity {
 # Admin (plugin)
 
 type AdminPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugin once plugin is separated from core"
+  "TODO: attributes should be appended to Plugin once plugin is separated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
@@ -499,7 +499,7 @@ type AdminProposal implements Proposal @entity {
 # Multisig
 
 type MultisigPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!

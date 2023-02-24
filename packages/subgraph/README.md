@@ -1,4 +1,4 @@
-# Aragon Core Subgraph
+# Aragon OSx Subgraph
 
 ## Quick Start
 
