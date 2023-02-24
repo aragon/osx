@@ -1,4 +1,3 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import buildMetadataJson from '../../src/plugins/governance/multisig/build-metadata.json';
@@ -7,10 +6,11 @@ import {findEvent} from '../../utils/event';
 import {checkPermission, getContractAddress} from '../helpers';
 import {EHRE, Operation} from '../../utils/types';
 import {hashHelpers} from '../../utils/psp';
+import {MultisigSetup__factory, Multisig__factory} from '../../typechain';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  const {ethers, network, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers, network} = hre;
+  const [deployer] = await ethers.getSigners();
 
   if (network.name !== 'localhost' && network.name !== 'hardhat') {
     if (
@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   }
 
   const approvers = process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') || [
-    deployer,
+    deployer.address,
   ];
   const minApprovals = parseInt(
     process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '1'
@@ -79,6 +79,30 @@ const func: DeployFunction = async function (hre: EHRE) {
   console.log(
     `Prepared (Multisig: ${installationPreparedEvent.plugin}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
   );
+
+  // Adding plugin to verify array
+  const multisigSetupAddress = await getContractAddress('MultisigSetup', hre);
+  const multisigSetup = MultisigSetup__factory.connect(
+    multisigSetupAddress,
+    deployer
+  );
+  hre.aragonToVerifyContracts.push({
+    address: installationPreparedEvent.plugin,
+    args: [
+      await multisigSetup.implementation(),
+      await Multisig__factory.createInterface().encodeFunctionData(
+        'initialize',
+        [
+          managingDAOAddress,
+          approvers,
+          {
+            onlyListed: listedOnly,
+            minApprovals: minApprovals,
+          },
+        ]
+      ),
+    ],
+  });
 
   // Apply multisig plugin to the managingDAO
   const applyParams = [

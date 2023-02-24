@@ -9,6 +9,11 @@
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test", "./typechain", "utils/event.ts"],
-  "files": ["./hardhat.config.ts"]
+  "include": [
+    "./hardhat.config.ts",
+    "./scripts",
+    "./test",
+    "./typechain",
+    "utils/event.ts"
+  ]
 }
