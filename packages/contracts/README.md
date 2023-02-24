@@ -4,7 +4,7 @@ Welcome to the contracts powering the Aragon OSx Protocol!
 
 ## Get Started
 
-To get started running your repository locally, run these commands in the project root in your terminal:
+To get started running your repository locally, run these commands on the project's root folder in your terminal:
 
 ```shell
 npx hardhat accounts
