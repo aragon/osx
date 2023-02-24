@@ -189,7 +189,7 @@ export function handleERC20Deposit(
   erc20Transfer.dao = daoId;
   erc20Transfer.amount = amount;
   erc20Transfer.txHash = event.transaction.hash;
-  erc20Transfer.createdAt = event.transactionLogIndex;
+  erc20Transfer.createdAt = event.block.timestamp;
   erc20Transfer.token = contract.id;
   erc20Transfer.type = 'Deposit';
 
