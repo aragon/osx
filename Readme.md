@@ -73,7 +73,7 @@ An examplary DAO setup showing interactions between the three core contract piec
 
 ### Framework Contracts
 
-In contrast, the *Framework Contracts* are in charge of creating and registering DAOs and plugins. Additionally, these contracts contain the `PluginSetupProcessor` which installs, uninstalls, and updates plugins into DAOs upon request.
+In contrast, the *Framework Contracts* are in charge of creating an open ecosystem around DAOs and plugins. Starting with their respective registries and factories, the framework also includes the `PluginSetupProcessor`, designed to handle plugin installs, uninstalls, and updates upon a DAO's request.
 
 - __Factories and Registries__
     - **The DAO Factory**: In charge of deploying instances of a new DAO based on the parameters given, including which plugins to install and additional metadata the DAO has (like a name, description, etc).
