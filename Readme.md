@@ -1,3 +1,4 @@
+
 # Aragon OSx Protocol
 
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
@@ -52,7 +53,7 @@ The *Core Contracts* describe how every DAO generated in the Aragon OSx protocol
 In a nutshell, each DAO is composed of 3 interconnecting components:
 
 1. **The DAO contract:** The DAO contract is where the **core functionality** of the DAO lies. It is the contract in charge of:
-    - Representing the identity of the DAO (ENS name, logo, description, other metadata)
+    - Representing the identity and metadata of the DAO (ENS name, logo, description, other metadata)
     - Holding and managing the treasury assets
     - Executing arbitrary actions to:
         - transfer assets
