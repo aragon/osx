@@ -497,7 +497,7 @@ describe('GovernanceWrappedERC20', function () {
     });
 
     context('exhaustive tests', async () => {
-      context('`to` has a zero-balance', async () => {
+      context('`to` has a zero balance', async () => {
         beforeEach(async () => {
           expect(await token.balanceOf(to.address)).to.eq(0);
           toDelegate = addressZero;
@@ -624,7 +624,7 @@ describe('GovernanceWrappedERC20', function () {
         });
       });
 
-      context('`to` has a non-zero-balance', async () => {
+      context('`to` has a non-zero balance', async () => {
         beforeEach(async () => {
           await expect(token.depositFor(to.address, 100))
             .to.emit(token, 'DelegateChanged')
