@@ -45,6 +45,7 @@ async function main() {
       resolver,
       0
     );
+    console.log(`Creation tx hash ${creationTx.hash}`)
     await creationTx.wait();
     console.log('Created');
   } else {
@@ -57,6 +58,7 @@ async function main() {
         labelHash,
         wallet.address
       );
+      console.log(`Ownership transfer tx hash ${ownerTx.hash}`)
       await ownerTx.wait();
     } else {
       console.log('Already owner.');

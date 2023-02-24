@@ -64,7 +64,7 @@ interface IMajorityVoting {
     /// @param _proposalId The proposal Id.
     /// @param _account The account address to be checked.
     /// @param  _voteOption Whether the voter abstains, supports or opposes the proposal.
-    /// @return bool Returns true if the account is allowed to vote.
+    /// @return Returns true if the account is allowed to vote.
     /// @dev The function assumes the queried proposal exists.
     function canVote(
         uint256 _proposalId,

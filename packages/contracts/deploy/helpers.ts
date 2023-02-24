@@ -60,7 +60,12 @@ export async function getContractAddress(
   } catch (e) {}
 
   const activeContracts = await getActiveContractsJSON();
-  return activeContracts[hre.network.name][contractName];
+  try {
+    return activeContracts[hre.network.name][contractName];
+  } catch (e) {
+    console.error(e);
+    return '';
+  }
 }
 
 export async function getActiveContractsJSON(): Promise<{
@@ -146,7 +151,9 @@ export async function createPluginRepo(
     releaseMetadata,
     buildMetadata
   );
-
+  console.log(
+    `Creating & registering repo for ${pluginContractName} with tx ${tx.hash}`
+  );
   await tx.wait();
 
   const event = await findEvent(tx, 'PluginRepoRegistered');
@@ -219,6 +226,7 @@ export async function managePermission(
   ]);
 
   const tx = await permissionManagerContract.applyMultiTargetPermissions(items);
+  console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
   await tx.wait();
 
   permissions.forEach(permission => {

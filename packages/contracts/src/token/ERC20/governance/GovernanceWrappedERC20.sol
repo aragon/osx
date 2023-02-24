@@ -55,7 +55,7 @@ contract GovernanceWrappedERC20 is
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IGovernanceWrappedERC20).interfaceId ||
@@ -103,7 +103,7 @@ contract GovernanceWrappedERC20 is
         super._afterTokenTransfer(from, to, amount);
 
         // Automatically turn on delegation on mint/transfer but only for the first time.
-        if (to != address(0) && numCheckpoints(to) == 0) {
+        if (to != address(0) && numCheckpoints(to) == 0 && delegates(to) == address(0)) {
             _delegate(to, to);
         }
     }

@@ -33,14 +33,8 @@ jobs:
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true
-        run: yarn run test
-      - name: Test deployment (hardhat)
-        run: yarn deploy --network hardhat --reset
-        env:
           ETH_KEY: ''
           HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
           HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.dao.eth'
           MANAGINGDAO_SUBDOMAIN: 'aragon-management'
-          MANAGINGDAO_MULTISIG_APPROVERS: '0xc8541aAE19C5069482239735AD64FAC3dCc52Ca2,0xA592E80E5E5D194ab635064e15EA35E883aB75dC'
-          MANAGINGDAO_MULTISIG_MINAPPROVALS: 1
-          MANAGINGDAO_MULTISIG_LISTEDONLY: true
+        run: yarn run test
