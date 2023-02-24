@@ -8,8 +8,8 @@ As mentioned earlier, plugins built by Aragon and third-party developers can be 
 
 The management of these plugins is handled for you by the Aragon OSx protocol so that the process of
 
-- releasing new plugins as well as
-- installing, updating, and uninstalling them to your DAO
+- Releasing new plugins as well as
+- Installing, updating, and uninstalling them to your DAO
 
 becomes as streamlined as possible.
 
@@ -28,15 +28,15 @@ An Aragon OSx Plugin consist of:
 
 - A metadata URI pointing to a `JSON` file containing the
 
-  - aragonApp frontend information
-  - ABI information needed for the setup ABI
+- AragonApp frontend information
+- Information needed for the setup ABI
 
 - A version tag consisting of a
 
-  - release number
-  - build number
+  - Release number
+  - Build number
 
-A detailed explanation of the [build and release versioning](../../../02-how-to-guides/01-plugin-development/03-publication/02-versioning.md) is found in the How-to sections in our developer portal.
+A detailed explanation of the [build and release versioning](../../../02-how-to-guides/02-plugin-development/07-publication/02-versioning.md) is found in the How-to sections in our developer portal.
 
 <div class="center-column">
 

@@ -14,7 +14,7 @@ Given a version tag `RELEASE.BUILD`, we can infer that:
 
       - change or removal of storage variables
       - removal of external functions
-      - change of external function signature
+      - change of external function headers
 
 2.  We are doing a `BUILD` version when we apply backward compatible changes not affecting the interaction with other contracts on the blockchain to:
 
@@ -23,15 +23,19 @@ Given a version tag `RELEASE.BUILD`, we can infer that:
       - addition of
 
         - storage variables
-
-      - addition or change of
-
         - external functions
+
+      - change of
+
+        - external function bodies
 
       - addition, change, or removal of
 
         - internal functions
+        - constants
+        - immutables
         - events
+        - errors
 
     - The `PluginSetup` contract such as
 
@@ -41,9 +45,10 @@ Given a version tag `RELEASE.BUILD`, we can infer that:
         - helper contracts
         - requested permissions
 
-    - The `metadata` URI such as the
+    - The release and build `metadata` URIs such as the
 
       - change of
 
         - the plugin setup ABI
-        - the plugin UI
+        - the plugin UI components
+        - the plugin description

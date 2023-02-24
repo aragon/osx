@@ -12,11 +12,11 @@ If a plugin has a bug or vulnerability that can be exploited, this can result in
 
 Besides, standard vulnerabilities such as
 
-- re-entrancy
-- default function visibility
-- leaving contracts uninitialized
-- time or oracle manipulation attacks
-- integer overflow & underflow
+- Re-entrancy
+- Default function visibility
+- Leaving contracts uninitialized
+- Time or oracle manipulation attacks
+- Integer overflow & underflow
 
 that might be carelessly or intentionally caused, a malicious plugins can hide **backdoors** in its code or request **elevated permissions** in the installation, upgrade, or uninstallation process to the attacker.
 
@@ -43,20 +43,21 @@ Likewise, one must be careful to not lock your DAO accidentally by
 - revoking the `ROOT_PERMISSION_ID` permission from itself or
 - choosing governance settings and execution criteria that most likely can never be met (e.g., requiring 100% participation for a token vote to pass)
 
-:::note
-To Do: This is a draft.
-:::
-
 ### Mitigation
 
 To mitigate the risks mentioned above, proposals requesting the setup of one or multiple plugins must be carefully examined and reviewed by inspecting
 
-- the implementation contract
-- the setup contract, i.e.,
-  - the installation and deployment logic
-  - the requested permission
-  - the helper contracts accompanying the plugin
-- the UI components, i.e.,
-  - misleading (re-)naming of input fields, buttons, or other elements
+- The implementation contract
+- The setup contract, i.e.,
+  - The installation and deployment logic
+  - The requested permission
+  - The helper contracts accompanying the plugin
+- The UI components, i.e.,
+  - Misleading (re-)naming of input fields, buttons, or other elements
 
 Generally, we recommend only installing plugins from trusted, verified sources such as those verified by Aragon.
+
+More information can be found in the How-to guides
+
+- [Operating your DAO](../../../../02-how-to-guides/01-dao/index.md)
+- [Developing a Plugin](../../../../02-how-to-guides/02-plugin-development/index.md)
