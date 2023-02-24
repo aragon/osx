@@ -59,7 +59,7 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
         - call its own functions
         - call functions in external contracts
     - Providing general technical utilities like callback handling and others
-2. **Permissions:** Permissions are an integral part of any DAO and the center of our protocol architecture. The Permissions manager **manages permissions for the DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO. This Permissions manager lives inside the DAO contract.
+2. **Permissions:** They are an integral part of any DAO and the center of our protocol architecture. The Permission manager **manages permissions for the DAO** by specifying which addresses hold a specific permission ID, needed to call certain functions on contracts associated with your DAO. The Permission manager lives inside the DAO contract.
 3. **Plugins**: Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. You'll find some base templates of plugins within the `plugins` folder of the *Core Contracts*. Some examples of plugins that DAOs could install are:
     - Governance (e.g., token voting, one-person one-vote)
     - Asset management (e.g., ERC-20 or NFT minting, token streaming, DeFi)
