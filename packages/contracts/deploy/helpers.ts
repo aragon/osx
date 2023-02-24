@@ -151,7 +151,9 @@ export async function createPluginRepo(
     releaseMetadata,
     buildMetadata
   );
-
+  console.log(
+    `Creating & registering repo for ${pluginContractName} with tx ${tx.hash}`
+  );
   await tx.wait();
 
   const event = await findEvent(tx, 'PluginRepoRegistered');

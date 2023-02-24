@@ -1,4 +1,4 @@
-import {Operation} from '../../core/permission/permission-manager';
+import {Operation} from '../../../utils/types';
 import {BytesLike} from 'ethers';
 
 export type PermissionOperation = {

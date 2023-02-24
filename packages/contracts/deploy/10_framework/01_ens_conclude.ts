@@ -2,18 +2,26 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {EHRE} from '../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`\nConcluding ENS deployment.`);
+  console.log(`Concluding ENS deployment.\n`);
 
   const {deployments} = hre;
 
-  const ensRegistry = await deployments.get('ENSRegistry');
-  if (ensRegistry) {
-    hre.aragonToVerifyContracts.push(ensRegistry);
+  try {
+    const ensRegistry = await deployments.get('ENSRegistry');
+    if (ensRegistry) {
+      hre.aragonToVerifyContracts.push(ensRegistry);
+    }
+  } catch (e) {
+    console.log(`No deployment for ENSRegistry found`);
   }
 
-  const publicResolver = await deployments.get('PublicResolver');
-  if (publicResolver) {
-    hre.aragonToVerifyContracts.push(publicResolver);
+  try {
+    const publicResolver = await deployments.get('PublicResolver');
+    if (publicResolver) {
+      hre.aragonToVerifyContracts.push(publicResolver);
+    }
+  } catch (e) {
+    console.log(`No deployment for PublicResolver found`);
   }
 
   hre.aragonToVerifyContracts.push(
