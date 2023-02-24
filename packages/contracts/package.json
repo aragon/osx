@@ -1,6 +1,6 @@
 {
   "name": "@aragon/core-contracts",
-  "version": "0.7.1-alpha",
+  "version": "0.8.0-alpha",
   "description": "Aragon V2 DAO Framework",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
