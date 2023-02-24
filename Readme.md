@@ -38,10 +38,10 @@ The Aragon OSx protocol architecture is composed of two key sections:
 
 Additionally to those two sections, we have developed several plugins DAOs can easily install upon creation. These are:
 
-- __Token Voting plugin__: enabling token holders to vote yes, no or abstain on incoming DAO proposals
-- __Multisig plugin__: enabling DAO governance based on approval from a pre-defined members list.
-- __Addresslist Voting plugin__: enabling a pre-defined set of addresses to vote yes, no or abstain in a "one person, one vote" mode
-- __Admin plugin__: enabling full access to an account needing to perform initial maintenance tasks without unnecessary overhead
+- __Token Voting plugin__: enables token holders to vote yes, no or abstain on incoming DAO proposals
+- __Multisig plugin__: enables DAO governance based on approval from a pre-defined members list.
+- __Addresslist Voting plugin__: enables a pre-defined set of addresses to vote yes, no or abstain in a "one person, one vote" mode
+- __Admin plugin__: enables full access to an account needing to perform initial maintenance tasks without unnecessary overhead
 
 Let's dive into more detail on each of these sections.
 
