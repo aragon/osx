@@ -38,6 +38,7 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
     multisig: '',
   };
   hre.aragonPluginRepos = aragonPluginRepos;
+  hre.aragonToVerifyContracts = [];
   hre.managingDAOMultisigPluginAddress = '';
 });
 
