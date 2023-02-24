@@ -25,7 +25,7 @@ async function main() {
 
       releasesUpdate = releasesUpdate.concat([
         `Time: ${new Date().toISOString()}  `,
-        `Commit: [${process.env.GITHUB_SHA}](https://github.com/aragon/core/commit/${process.env.GITHUB_SHA})  `,
+        `Commit: [${process.env.GITHUB_SHA}](https://github.com/aragon/osx/commit/${process.env.GITHUB_SHA})  `,
         `Network: ${networkName}  `,
       ]);
 
