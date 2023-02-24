@@ -12,13 +12,16 @@ To use the Aragon OSx contracts inside your project, import them with `yarn add 
 
 <!-- TODO: rename @aragon/core-contracts to @aragon/os-contracts and make sure .sol files are part of the NPM package-->
 
+<details>
+<summary><code>GreeterPlugin</code></summary>
+
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
 import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
-contract MyPlugin is Plugin {
+contract GreeterPlugin is Plugin {
   constructor(IDAO _dao) Plugin(_dao) {}
 
   function greet() external pure returns (string memory) {
@@ -27,7 +30,12 @@ contract MyPlugin is Plugin {
 }
 ```
 
-Next, you write a plugin setup contract
+</details>
+
+Next, you write a plugin setup contract:
+
+<details>
+<summary><code>GreeterSetup</code></summary>
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -37,8 +45,7 @@ import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
 import {PluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import './MyPlugin.sol';
 
-contract MyPluginSetup is PluginSetup {
-  /// @inheritdoc IPluginSetup
+contract GreeterSetup is PluginSetup {
   function prepareInstallation(
     address _dao,
     bytes memory
@@ -46,7 +53,6 @@ contract MyPluginSetup is PluginSetup {
     plugin = address(new MyPlugin(IDAO(_dao)));
   }
 
-  /// @inheritdoc IPluginSetup
   function prepareUninstallation(
     address _dao,
     SetupPayload calldata _payload
@@ -54,10 +60,13 @@ contract MyPluginSetup is PluginSetup {
     (_dao, _payload);
   }
 
-  /// @inheritdoc IPluginSetup
   function getImplementationAddress() external view returns (address) {}
 }
 ```
+
+</details>
+
+Finally, you call [`createPluginRepoWithFirstVersion` in Aragon's deployed `PluginRepoFactory`](../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md) (preferably via the Aragon SDK) <!-- TODO add SDK link-->
 
 ... and that's it 🎉.
 
