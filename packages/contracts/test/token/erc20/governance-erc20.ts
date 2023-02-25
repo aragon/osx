@@ -427,7 +427,7 @@ describe('GovernanceERC20', function () {
             });
 
             it('`from` has the correct voting power', async () => {
-              expect(await token.getVotes(to.address)).to.equal(0);
+              expect(await token.getVotes(from.address)).to.equal(0);
             });
             it('`from`s delegate has not changed', async () => {
               expect(await token.delegates(from.address)).to.equal(
@@ -481,7 +481,7 @@ describe('GovernanceERC20', function () {
             });
 
             it('`from` has the correct voting power', async () => {
-              expect(await token.getVotes(to.address)).to.equal(100);
+              expect(await token.getVotes(from.address)).to.equal(0);
             });
             it('`from`s delegate has not changed', async () => {
               expect(await token.delegates(from.address)).to.equal(
@@ -564,7 +564,6 @@ describe('GovernanceERC20', function () {
                 await expect(token.connect(to).delegate(other.address))
                   .to.emit(token, 'DelegateChanged')
                   .withArgs(to.address, other.address, other.address); // `to` re-delegates to `other` again
-                //toDelegate = other.address;
               });
 
               it('`to` has the correct voting power', async () => {
@@ -590,7 +589,7 @@ describe('GovernanceERC20', function () {
             });
 
             it('`from` has the correct voting power', async () => {
-              expect(await token.getVotes(to.address)).to.equal(0);
+              expect(await token.getVotes(from.address)).to.equal(0);
             });
             it('`from`s delegate has not changed', async () => {
               expect(await token.delegates(from.address)).to.equal(
@@ -635,7 +634,6 @@ describe('GovernanceERC20', function () {
                 await expect(token.connect(to).delegate(other.address))
                   .to.emit(token, 'DelegateChanged')
                   .withArgs(to.address, other.address, other.address); // `to` re-delegates to `other` again
-                //toDelegate = other.address;
               });
 
               it('`to` has the correct voting power', async () => {
@@ -717,7 +715,7 @@ describe('GovernanceERC20', function () {
             });
 
             it('`from` has the correct voting power', async () => {
-              expect(await token.getVotes(to.address)).to.equal(200);
+              expect(await token.getVotes(from.address)).to.equal(0);
             });
             it('`from`s delegate has not changed', async () => {
               expect(await token.delegates(from.address)).to.equal(
