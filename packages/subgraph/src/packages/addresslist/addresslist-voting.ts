@@ -17,6 +17,7 @@ import {
   AddresslistVotingVote
 } from '../../../generated/schema';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
+import {bigIntToBytes32} from '../../utils/helpers';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -32,7 +33,9 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+    event.address.toHexString() +
+    '_' +
+    bigIntToBytes32(event.params.proposalId);
 
   let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
@@ -74,7 +77,7 @@ export function _handleProposalCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.proposalId.toHexString() +
+        bigIntToBytes32(event.params.proposalId) +
         '_' +
         index.toString();
 
@@ -110,7 +113,7 @@ export function handleVoteCast(event: VoteCast): void {
   const member = event.params.voter.toHexString();
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let proposalId = pluginId + '_' + bigIntToBytes32(event.params.proposalId);
   let voterVoteId = member + '_' + proposalId;
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
@@ -186,7 +189,9 @@ export function handleVoteCast(event: VoteCast): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+    event.address.toHexString() +
+    '_' +
+    bigIntToBytes32(event.params.proposalId);
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;

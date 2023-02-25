@@ -16,6 +16,7 @@ import {
   MultisigApprover,
   MultisigProposalApprover
 } from '../../../generated/schema';
+import {bigIntToBytes32} from '../../utils/helpers';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -31,7 +32,9 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+    event.address.toHexString() +
+    '_' +
+    bigIntToBytes32(event.params.proposalId);
 
   let proposalEntity = new MultisigProposal(proposalId);
   proposalEntity.dao = daoId;
@@ -104,7 +107,7 @@ export function handleApproved(event: Approved): void {
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
 
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let proposalId = pluginId + '_' + bigIntToBytes32(event.params.proposalId);
   let approverProposalId = member + '_' + proposalId;
   let approverProposalEntity = MultisigProposalApprover.load(
     approverProposalId
@@ -144,7 +147,9 @@ export function handleApproved(event: Approved): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+    event.address.toHexString() +
+    '_' +
+    bigIntToBytes32(event.params.proposalId);
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executable = false;

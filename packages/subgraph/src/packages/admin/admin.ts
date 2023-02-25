@@ -12,6 +12,7 @@ import {
   Administrator
 } from '../../../generated/schema';
 import {AdminMembers} from '../../../generated/templates';
+import {bigIntToBytes32} from '../../utils/helpers';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -27,7 +28,9 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+    event.address.toHexString() +
+    '_' +
+    bigIntToBytes32(event.params.proposalId);
 
   let pluginId = event.address.toHexString();
 
@@ -72,7 +75,7 @@ export function _handleProposalCreated(
     let actionId =
       event.address.toHexString() +
       '_' +
-      event.params.proposalId.toHexString() +
+      bigIntToBytes32(event.params.proposalId) +
       '_' +
       index.toString();
 
@@ -90,7 +93,9 @@ export function _handleProposalCreated(
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+    event.address.toHexString() +
+    '_' +
+    bigIntToBytes32(event.params.proposalId);
   let proposalEntity = AdminProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
