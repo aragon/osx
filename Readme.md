@@ -1,5 +1,6 @@
+![Aragon](https://res.cloudinary.com/dacofvu8m/image/upload/v1677353961/Aragon%20CodeArena/osx_blue_logo_lqrvkr.png)
 
-# Aragon OSx Protocol
+# Aragon OSx Protocsol
 
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
 
@@ -101,8 +102,6 @@ The [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/c
 The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
 
 ## Tests
-
-You can find some [test DAOs here](https://github.com/aragon/osx/blob/develop/dummy_daos.json), if you’re looking to get started with testing.
 
 To run tests, run these commands in the root folder in your terminal:
 
