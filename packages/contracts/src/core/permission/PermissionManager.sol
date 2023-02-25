@@ -14,7 +14,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
-    /// @notice A special address encoding permissions that are valid for any address.
+    /// @notice A special address encoding permissions that are valid for any address `who` or `where`.
     address internal constant ANY_ADDR = address(type(uint160).max);
 
     /// @notice A special address encoding if a permissions is not set and therefore not allowed.
@@ -32,16 +32,13 @@ abstract contract PermissionManager is Initializable {
     /// @param permissionId The permission identifier.
     error Unauthorized(address where, address who, bytes32 permissionId);
 
-    /// @notice Thrown if a Root permission is set on ANY_ADDR.
-    error RootPermissionForAnyAddressDisallowed();
-
     /// @notice Thrown if a permission has been already granted with a different condition.
     /// @dev This makes sure that condition on the same permission can not be overwriten by a different condition.
     /// @param where The address of the target contract to grant `_who` permission to.
     /// @param who The address (EOA or contract) to which the permission has already been granted.
     /// @param permissionId The permission identifier.
-    /// @param currentCondition The current condition set for permissionId
-    /// @param newCondition The new condition it tries to set for permissionId
+    /// @param currentCondition The current condition set for permissionId.
+    /// @param newCondition The new condition it tries to set for permissionId.
     error PermissionAlreadyGrantedForDifferentCondition(
         address where,
         address who,
@@ -50,13 +47,13 @@ abstract contract PermissionManager is Initializable {
         address newCondition
     );
 
-    /// @notice thrown when WHO or WHERE is ANY_ADDR, but condition is not present.
+    /// @notice Thrown for permission grants where `who` or `where` is `ANY_ADDR`, but no condition is present.
     error ConditionNotPresentForAnyAddress();
 
-    /// @notice thrown when WHO or WHERE is ANY_ADDR and permissionId is ROOT/EXECUTE
+    /// @notice Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
     error PermissionsForAnyAddressDisallowed();
 
-    /// @notice thrown when WHO and WHERE are both ANY_ADDR
+    /// @notice Thrown for permission grants where `who` and `where` are both `ANY_ADDR`.
     error AnyAddressDisallowedForWhoAndWhere();
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
@@ -104,6 +101,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
+    /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function grant(
         address _where,
         address _who,
@@ -118,6 +116,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
     /// @param _condition The `PermissionCondition` that will be asked for authorization on calls connected to the specified permission identifier.
+    /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function grantWithCondition(
         address _where,
         address _who,
@@ -132,6 +131,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` loses permission.
     /// @param _who The address (EOA or contract) losing the permission.
     /// @param _permissionId The permission identifier.
+    /// @dev Note, that revoking permissions with `_who` or `_where` equal to `ANY_ADDR` does not revoke other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function revoke(
         address _where,
         address _who,
@@ -226,6 +226,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @param _condition An address either resolving to a `PermissionCondition` contract address or being the `ALLOW_FLAG` address (`address(2)`).
+    /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function _grantWithCondition(
         address _where,
         address _who,
@@ -277,6 +278,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
+    /// @dev Note, that revoking permissions with `_who` or `_where` equal to `ANY_ADDR` does not revoke other permissions with specific `_who` and `_where` addresses that might have been granted in parallel.
     function _revoke(address _where, address _who, bytes32 _permissionId) internal virtual {
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
         if (permissionsHashed[permHash] != UNSET_FLAG) {
