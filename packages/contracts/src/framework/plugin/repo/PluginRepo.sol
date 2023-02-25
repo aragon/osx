@@ -91,9 +91,9 @@ contract PluginRepo is
     /// @notice Thrown if release does not exist.
     error ReleaseDoesNotExist();
 
-    /// @notice Thrown if a different plugin setup returns the same hash.
-    /// @param expected The expected plugin setup address .
-    /// @param actual The actual plugin setup address found from the hash.
+    /// @notice Thrown if the wrong plugin setup is returned from `latestTagHashForPluginSetup` from a tag hash because of a hash collision.
+    /// @param expected The expected plugin setup address.
+    /// @param actual The actual plugin setup address returned from the tag hash of `expected`.
     error PluginSetupHashCollision(address expected, address actual);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
