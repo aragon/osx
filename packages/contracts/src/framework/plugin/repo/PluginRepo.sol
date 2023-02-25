@@ -91,6 +91,11 @@ contract PluginRepo is
     /// @notice Thrown if release does not exist.
     error ReleaseDoesNotExist();
 
+    /// @notice Thrown if a different plugin setup returns the same hash.
+    /// @param expected The expected plugin setup address .
+    /// @param actual The actual plugin setup address found from the hash.
+    error PluginSetupHashCollision(address expected, address actual);
+
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release The release number.
     /// @param build The build number.
@@ -152,8 +157,14 @@ contract PluginRepo is
             }
         }
 
-        // Make sure the same plugin setup wasn't used in previous releases.
         Version storage version = versions[latestTagHashForPluginSetup[_pluginSetup]];
+
+        // Make sure that the returned plugin setup matches the setup that was used to retrieve the version.
+        if (version.pluginSetup != _pluginSetup) {
+            revert PluginSetupHashCollision({expected: _pluginSetup, actual: version.pluginSetup});
+        }
+
+        // Make sure the same plugin setup wasn't used in previous releases.
         if (version.tag.release != 0 && version.tag.release != _release) {
             revert PluginSetupAlreadyInPreviousRelease(
                 version.tag.release,
