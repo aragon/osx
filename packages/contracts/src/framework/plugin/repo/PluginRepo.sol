@@ -159,18 +159,24 @@ contract PluginRepo is
 
         Version storage version = versions[latestTagHashForPluginSetup[_pluginSetup]];
 
-        // Make sure that the returned plugin setup matches the setup that was used to retrieve the version.
-        if (version.pluginSetup != _pluginSetup) {
-            revert PluginSetupHashCollision({expected: _pluginSetup, actual: version.pluginSetup});
-        }
+        // If `version.tag.release` is not zero, this means the plugin setup exists in the repo.
+        if (version.tag.release != 0) {
+            // Make sure that the returned plugin setup matches the setup that was used to retrieve the version.
+            if (version.pluginSetup != _pluginSetup) {
+                revert PluginSetupHashCollision({
+                    expected: _pluginSetup,
+                    actual: version.pluginSetup
+                });
+            }
 
-        // Make sure the same plugin setup wasn't used in previous releases.
-        if (version.tag.release != 0 && version.tag.release != _release) {
-            revert PluginSetupAlreadyInPreviousRelease(
-                version.tag.release,
-                version.tag.build,
-                _pluginSetup
-            );
+            // Make sure the same plugin setup wasn't used in previous releases.
+            if (version.tag.release != _release) {
+                revert PluginSetupAlreadyInPreviousRelease(
+                    version.tag.release,
+                    version.tag.build,
+                    _pluginSetup
+                );
+            }
         }
 
         uint16 build = ++buildsPerRelease[_release];
