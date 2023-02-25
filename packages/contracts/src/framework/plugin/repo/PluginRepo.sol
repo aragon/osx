@@ -230,9 +230,14 @@ contract PluginRepo is
 
     /// @notice Returns the latest version for a given plugin setup.
     /// @param _pluginSetup The plugin setup address
-    /// @return The latest version associated with the plugin Setup.
-    function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
-        return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
+    /// @return version The latest version associated with the plugin Setup.
+    function getLatestVersion(address _pluginSetup) public view returns (Version memory version) {
+        version = getVersion(latestTagHashForPluginSetup[_pluginSetup]);
+
+        // Make sure that the returned plugin setup matches the setup that was used to retrieve the version.
+        if (version.pluginSetup != _pluginSetup) {
+            revert PluginSetupHashCollision({expected: _pluginSetup, actual: version.pluginSetup});
+        }
     }
 
     /// @notice Returns the version associated with a tag.
