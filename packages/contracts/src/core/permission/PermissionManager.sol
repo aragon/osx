@@ -14,7 +14,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
-    /// @notice A special address encoding permissions that are valid for any addresses `who` or `where`.
+    /// @notice A special address encoding permissions that are valid for any address `who` or `where`.
     address internal constant ANY_ADDR = address(type(uint160).max);
 
     /// @notice A special address encoding if a permissions is not set and therefore not allowed.
