@@ -23,6 +23,11 @@ const governanceERC20Symbol = 'GOV';
 
 const addressZero = ethers.constants.AddressZero;
 
+let from: SignerWithAddress;
+let to: SignerWithAddress;
+let other: SignerWithAddress;
+let toDelegate: string;
+
 describe('GovernanceERC20', function () {
   let signers: SignerWithAddress[];
   let dao: DAO;
@@ -35,6 +40,10 @@ describe('GovernanceERC20', function () {
     signers = await ethers.getSigners();
     dao = await deployNewDAO(signers[0].address);
     GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
+
+    from = signers[0];
+    to = signers[1];
+    other = signers[2];
   });
 
   beforeEach(async function () {
@@ -206,13 +215,13 @@ describe('GovernanceERC20', function () {
 
       // verify that past votes are correct
       expect(
-        await token.getPastVotes(signers[0].address, tx1.blockNumber)
+        await token.getPastVotes(signers[0].address, tx1.blockNumber!)
       ).to.eq(0);
       expect(
-        await token.getPastVotes(signers[1].address, tx1.blockNumber)
+        await token.getPastVotes(signers[1].address, tx1.blockNumber!)
       ).to.eq(balanceSigner1.add(balanceSigner0));
       expect(
-        await token.getPastVotes(signers[2].address, tx1.blockNumber)
+        await token.getPastVotes(signers[2].address, tx1.blockNumber!)
       ).to.eq(balanceSigner2);
     });
   });
@@ -373,6 +382,400 @@ describe('GovernanceERC20', function () {
       await token.transfer(signers[1].address, 30);
 
       expect(await token.getVotes(signers[1].address)).to.equal(30);
+    });
+
+    context('exhaustive tests', async () => {
+      context('`to` has a zero balance', async () => {
+        beforeEach(async () => {
+          expect(await token.balanceOf(to.address)).to.eq(0);
+          toDelegate = addressZero;
+        });
+
+        context('`to` delegated to `other`', async () => {
+          beforeEach(async () => {
+            await expect(token.connect(to).delegate(other.address))
+              .to.emit(token, 'DelegateChanged')
+              .withArgs(to.address, toDelegate, other.address);
+            toDelegate = other.address;
+          });
+
+          context('`to` receives via `mint` from `address(0)`', async () => {
+            beforeEach(async () => {
+              await expect(token.mint(to.address, 100)).to.not.emit(
+                token,
+                'DelegateChanged'
+              );
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(0);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(100);
+            });
+          });
+
+          context('`to` receives via transfer from `from`', async () => {
+            beforeEach(async () => {
+              await token.mint(from.address, 100);
+              await expect(
+                token.connect(from).transfer(to.address, 100)
+              ).to.not.emit(token, 'DelegateChanged');
+            });
+
+            it('`from` has the correct voting power', async () => {
+              expect(await token.getVotes(from.address)).to.equal(0);
+            });
+            it('`from`s delegate has not changed', async () => {
+              expect(await token.delegates(from.address)).to.equal(
+                from.address
+              );
+            });
+            it('`from`s delegate has the correct voting power', async () => {
+              const fromDelegate = await token.delegates(from.address);
+              expect(await token.getVotes(fromDelegate)).to.equal(0);
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(0);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(100);
+            });
+          });
+        });
+
+        context('`to` has not delegated before', async () => {
+          context('`to` receives via `mint` from `address(0)`', async () => {
+            beforeEach(async () => {
+              await expect(token.mint(to.address, 100))
+                .to.emit(token, 'DelegateChanged')
+                .withArgs(to.address, toDelegate, to.address); // the mint triggers automatic self-delegation
+              toDelegate = to.address;
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(100);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(100);
+            });
+          });
+
+          context('`to` receives via transfer from `from`', async () => {
+            beforeEach(async () => {
+              await token.mint(from.address, 100);
+              await expect(token.connect(from).transfer(to.address, 100))
+                .to.emit(token, 'DelegateChanged')
+                .withArgs(to.address, addressZero, to.address); // the transfer triggers automatic self-delegation
+              toDelegate = to.address;
+            });
+
+            it('`from` has the correct voting power', async () => {
+              expect(await token.getVotes(from.address)).to.equal(0);
+            });
+            it('`from`s delegate has not changed', async () => {
+              expect(await token.delegates(from.address)).to.equal(
+                from.address
+              );
+            });
+            it('`from`s delegate has the correct voting power', async () => {
+              const fromDelegate = await token.delegates(from.address);
+              expect(await token.getVotes(fromDelegate)).to.equal(0);
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(100);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(100);
+            });
+          });
+        });
+      });
+
+      context('`to` has a non-zero balance', async () => {
+        beforeEach(async () => {
+          await expect(token.mint(to.address, 100))
+            .to.emit(token, 'DelegateChanged')
+            .withArgs(to.address, addressZero, to.address);
+          toDelegate = to.address;
+          expect(await token.balanceOf(to.address)).to.eq(100);
+        });
+
+        context('`to` delegated to `other`', async () => {
+          beforeEach(async () => {
+            await expect(token.connect(to).delegate(other.address))
+              .to.emit(token, 'DelegateChanged')
+              .withArgs(to.address, to.address, other.address); // this changes the delegate from himself (`to`) to `other`
+            toDelegate = other.address;
+          });
+
+          context('`to` receives via `mint` from `address(0)`', async () => {
+            beforeEach(async () => {
+              await expect(token.mint(to.address, 100)).to.not.emit(
+                token,
+                'DelegateChanged'
+              );
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(0);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(200);
+            });
+
+            context('`to` transfers to `other`', async () => {
+              beforeEach(async () => {
+                await expect(
+                  token.connect(to).transfer(other.address, 100)
+                ).to.not.emit(token, 'DelegateChanged');
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(0);
+              });
+              it('`to`s delegate has not changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(100);
+              });
+            });
+
+            context('`to` delegates to `other`', async () => {
+              beforeEach(async () => {
+                await expect(token.connect(to).delegate(other.address))
+                  .to.emit(token, 'DelegateChanged')
+                  .withArgs(to.address, other.address, other.address); // `to` re-delegates to `other` again
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(0);
+              });
+              it('`to`s delegate is correctly changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(
+                  other.address
+                );
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(200);
+              });
+            });
+          });
+
+          context('`to` receives via transfer from `from`', async () => {
+            beforeEach(async () => {
+              await token.mint(from.address, 100);
+              await expect(
+                token.connect(from).transfer(to.address, 100)
+              ).to.not.emit(token, 'DelegateChanged');
+            });
+
+            it('`from` has the correct voting power', async () => {
+              expect(await token.getVotes(from.address)).to.equal(0);
+            });
+            it('`from`s delegate has not changed', async () => {
+              expect(await token.delegates(from.address)).to.equal(
+                from.address
+              );
+            });
+            it('`from`s delegate has the correct voting power', async () => {
+              const fromDelegate = await token.delegates(from.address);
+              expect(await token.getVotes(fromDelegate)).to.equal(0);
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(0);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(200);
+            });
+
+            context('`to` transfers to `other`', async () => {
+              beforeEach(async () => {
+                await expect(
+                  token.connect(to).transfer(other.address, 100)
+                ).to.not.emit(token, 'DelegateChanged');
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(0);
+              });
+              it('`to`s delegate has not changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(100);
+              });
+            });
+
+            context('`to` delegates to `other`', async () => {
+              beforeEach(async () => {
+                await expect(token.connect(to).delegate(other.address))
+                  .to.emit(token, 'DelegateChanged')
+                  .withArgs(to.address, other.address, other.address); // `to` re-delegates to `other` again
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(0);
+              });
+              it('`to`s delegate is correctly changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(200);
+              });
+            });
+          });
+        });
+
+        context('`to` has not delegated before', async () => {
+          context('`to` receives via `mint` from `address(0)`', async () => {
+            beforeEach(async () => {
+              await expect(token.mint(to.address, 100)).to.not.emit(
+                token,
+                'DelegateChanged'
+              );
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(200);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(200);
+            });
+
+            context('`to` transfers to `other`', async () => {
+              beforeEach(async () => {
+                await expect(token.connect(to).transfer(other.address, 100))
+                  .to.emit(token, 'DelegateChanged')
+                  .withArgs(other.address, addressZero, other.address); // the transfer triggers automatic self-delegation for `other`
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(100); // 100 tokens are still left
+              });
+              it('`to`s delegate has not changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(100);
+              });
+            });
+
+            context('`to` delegates to `other`', async () => {
+              beforeEach(async () => {
+                await expect(token.connect(to).delegate(other.address))
+                  .to.emit(token, 'DelegateChanged')
+                  .withArgs(to.address, to.address, other.address); // `to` delegates to `other`
+                toDelegate = other.address;
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(0);
+              });
+              it('`to`s delegate is correctly changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(200);
+              });
+            });
+          });
+
+          context('`to` receives via transfer from `from`', async () => {
+            beforeEach(async () => {
+              await token.mint(from.address, 100);
+              await expect(
+                token.connect(from).transfer(to.address, 100)
+              ).to.not.emit(token, 'DelegateChanged');
+            });
+
+            it('`from` has the correct voting power', async () => {
+              expect(await token.getVotes(from.address)).to.equal(0);
+            });
+            it('`from`s delegate has not changed', async () => {
+              expect(await token.delegates(from.address)).to.equal(
+                from.address
+              );
+            });
+            it('`from`s delegate has the correct voting power', async () => {
+              const fromDelegate = await token.delegates(from.address);
+              expect(await token.getVotes(fromDelegate)).to.equal(0);
+            });
+
+            it('`to` has the correct voting power', async () => {
+              expect(await token.getVotes(to.address)).to.equal(200);
+            });
+            it('`to`s delegate has not changed', async () => {
+              expect(await token.delegates(to.address)).to.equal(toDelegate);
+            });
+            it('`to`s delegate has the correct voting power', async () => {
+              expect(await token.getVotes(toDelegate)).to.equal(200);
+            });
+
+            context('`to` transfers to `other`', async () => {
+              beforeEach(async () => {
+                await expect(token.connect(to).transfer(other.address, 100))
+                  .to.emit(token, 'DelegateChanged')
+                  .withArgs(other.address, addressZero, other.address);
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(100);
+              });
+              it('`to`s delegate has not changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(100);
+              });
+            });
+
+            context('`to` delegates to `other`', async () => {
+              beforeEach(async () => {
+                await expect(token.connect(to).delegate(other.address))
+                  .to.emit(token, 'DelegateChanged')
+                  .withArgs(to.address, to.address, other.address); // `to` delegates to `other`
+                toDelegate = other.address;
+              });
+
+              it('`to` has the correct voting power', async () => {
+                expect(await token.getVotes(to.address)).to.equal(0);
+              });
+              it('`to`s delegate is correctly changed', async () => {
+                expect(await token.delegates(to.address)).to.equal(toDelegate);
+              });
+              it('`to`s delegate has the correct voting power', async () => {
+                expect(await token.getVotes(toDelegate)).to.equal(200);
+              });
+            });
+          });
+        });
+      });
     });
   });
 });
