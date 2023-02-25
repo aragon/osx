@@ -54,15 +54,15 @@ The *Core Contracts* describe how every DAO generated in the Aragon OSx protocol
 In a nutshell, each DAO is composed of 3 interconnecting components:
 
 1. **The DAO contract:** The DAO contract is where the **core functionality** of the DAO lies. It is the contract in charge of:
-    - Representing the identity and metadata of the DAO (ENS name, logo, description, other metadata)
+    - Representing the identity of the DAO (ENS name, logo, description, other metadata)
     - Holding and managing the treasury assets
     - Executing arbitrary actions to:
         - transfer assets
         - call its own functions
         - call functions in external contracts
     - Providing general technical utilities like callback handling and others
-2. **Permissions:** They are an integral part of any DAO and the center of our protocol architecture. The Permission manager **manages permissions for the DAO** by specifying which addresses hold a specific permission ID, needed to call certain functions on contracts associated with your DAO. The Permission manager lives inside the DAO contract.
-3. **Plugins**: Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. You'll find some base templates of plugins within the `plugins` folder of the *Core Contracts*. Some examples of plugins that DAOs could install are:
+2. **Permissions:** Permissions are an integral part of any DAO and the center of our protocol architecture. The Permissions manager **manages permissions for the DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO. This Permissions manager lives inside the DAO contract.
+3. **Plugins**: Any custom functionality can be aded or removed through plugins, allowing you to **fully customize your DAO**. You'll find some base templates of plugins within the `plugins` folder of the *Core Contracts*. Some examples of plugins that DAOs could install are:
     - Governance (e.g., token voting, one-person one-vote)
     - Asset management (e.g., ERC-20 or NFT minting, token streaming, DeFi)
     - Membership (governing budget allowances, gating access, curating a member list)
@@ -71,11 +71,11 @@ The following graphic shows how an exemplary DAO setup, where the
 
 ![An examplary DAO setup](https://devs.aragon.org/assets/images/dao-plugin.drawio-7086d0911d25218097dae94665b1a7b1.svg)
 
-An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require the caller to hold a certain permission (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
+An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
 
 ### Framework Contracts
 
-In contrast, the *Framework Contracts* are in charge of creating an open ecosystem around DAOs and plugins. Starting with their respective registries and factories, the framework also includes the `PluginSetupProcessor`, designed to handle plugin installs, uninstalls, and updates upon a DAO's request.
+In contrast, the *Framework Contracts* are in charge of creating and registering DAOs and plugins. Additionally, these contracts contain the `PluginSetupProcessor` which installs, uninstalls, and updates plugins into DAOs upon request.
 
 - __Factories and Registries__
     - **The DAO Factory**: In charge of deploying instances of a new DAO based on the parameters given, including which plugins to install and additional metadata the DAO has (like a name, description, etc).
