@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress, managePermission} from '../helpers';
+import {getContractAddress, managePermissions} from '../helpers';
 import {Operation} from '../../utils/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -59,7 +59,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'ROOT_PERMISSION',
     },
   ];
-  await managePermission(managingDaoContract, revokePermissions);
+  await managePermissions(managingDaoContract, revokePermissions);
 
   console.log(
     `\nManagingDao is no longer owned by the (Deployer: ${deployer}),` +

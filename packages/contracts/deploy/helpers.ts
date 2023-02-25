@@ -191,8 +191,29 @@ export type Permission = {
 
 export async function checkPermission(
   permissionManagerContract: ethers.Contract,
-  {operation, where, who, permission, data = '0x'}: Permission
+  permission: Permission
 ) {
+  const checkStatus = await isPermissionSetCorrectly(
+    permissionManagerContract,
+    permission
+  );
+  if (!checkStatus) {
+    const {who, where, operation} = permission;
+    if (operation === Operation.Grant) {
+      throw new Error(
+        `(${who.name}: ${who.address}) doesn't have ${permission.permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
+      );
+    }
+    throw new Error(
+      `(${who.name}: ${who.address}) has ${permission.permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
+    );
+  }
+}
+
+export async function isPermissionSetCorrectly(
+  permissionManagerContract: ethers.Contract,
+  {operation, where, who, permission, data = '0x'}: Permission
+): Promise<boolean> {
   const permissionId = ethers.utils.id(permission);
   const isGranted = await permissionManagerContract.isGranted(
     where.address,
@@ -201,45 +222,62 @@ export async function checkPermission(
     data
   );
   if (!isGranted && operation === Operation.Grant) {
-    throw new Error(
-      `(${who.name}: ${who.address}) doesn't have ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
-    );
+    return false;
   }
 
   if (isGranted && operation === Operation.Revoke) {
-    throw new Error(
-      `(${who.name}: ${who.address}) has ${permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
-    );
+    return false;
   }
+  return true;
 }
 
-export async function managePermission(
+export async function managePermissions(
   permissionManagerContract: ethers.Contract,
   permissions: Permission[]
 ): Promise<void> {
-  const items = permissions.map(permission => [
-    permission.operation,
-    permission.where.address,
-    permission.who.address,
-    permission.condition || ethers.constants.AddressZero,
-    ethers.utils.id(permission.permission),
-  ]);
+  // filtering permission to only apply those that are needed
+  const items: Permission[] = [];
+  for (const permission of permissions) {
+    if (
+      await isPermissionSetCorrectly(permissionManagerContract, permission)
+    ) {
+      continue;
+    }
+    items.push(permission);
+  }
 
-  const tx = await permissionManagerContract.applyMultiTargetPermissions(items);
-  console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
-  await tx.wait();
-
-  permissions.forEach(permission => {
+  if (items.length > 0) {
     console.log(
-      `${
-        permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
-      } the ${permission.permission} of (${permission.where.name}: ${
-        permission.where.address
-      }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
-        tx.hash
-      })`
+      `Setting ${items.length} permissions. Skipped ${
+        permissions.length - items.length
+      }`
     );
-  });
+    const tx = await permissionManagerContract.applyMultiTargetPermissions(
+      items.map(item => [
+        item.operation,
+        item.where.address,
+        item.who.address,
+        item.condition || ethers.constants.AddressZero,
+        ethers.utils.id(item.permission),
+      ])
+    );
+    console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
+    await tx.wait();
+
+    items.forEach(permission => {
+      console.log(
+        `${
+          permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
+        } the ${permission.permission} of (${permission.where.name}: ${
+          permission.where.address
+        }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
+          tx.hash
+        })`
+      );
+    });
+  } else {
+    console.log(`Contract call skipped. No permissions to set...`);
+  }
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
