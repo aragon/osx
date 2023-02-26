@@ -109,7 +109,7 @@ contract PluginRepoFactory {
     }
 
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
-    /// @dev Passing the empty `_subdomain` will cause the tx to revert.
+    /// @dev Passing an empty `_subdomain` will cause the tx to revert.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The initial owner address.
     function _createPluginRepo(
