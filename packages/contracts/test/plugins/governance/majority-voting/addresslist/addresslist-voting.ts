@@ -77,7 +77,7 @@ describe('AddresslistVoting', function () {
     dummyActions = [
       {
         to: signers[0].address,
-        data: '0xffffffff',
+        data: '0x00000000',
         value: 0,
       },
     ];
