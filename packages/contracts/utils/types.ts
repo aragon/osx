@@ -12,16 +12,11 @@ export type AragonVerifyEntry = {
   args: Array<string | string[] | string[][]>;
 };
 
-export interface EHRE extends HardhatRuntimeEnvironment {
+export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;
   aragonToVerifyContracts: AragonVerifyEntry[];
   managingDAOMultisigPluginAddress: string;
-}
-// export type EHRE = HardhatRuntimeEnvironment & {
-//   aragonPluginRepos: AragonPluginRepos;
-//   aragonToVerifyContracts: AragonVerifyEntry[];
-//   managingDAOMultisigPluginAddress: string;
-// };
+};
 
 export enum Operation {
   Grant,
