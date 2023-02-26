@@ -103,8 +103,6 @@ export function handleInstallationApplied(event: InstallationApplied): void {
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
   pluginEntity.save();
-
-  // addPlugin(dao, event.params.plugin);
 }
 
 export function handleUpdatePrepared(event: UpdatePrepared): void {
