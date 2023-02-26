@@ -22,7 +22,7 @@ import {
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {fetchERC20} from '../../utils/tokens/erc20';
 import {bigIntToBytes32} from '../../utils/bytes';
-import {generateProposalId} from '../../utils/proposals';
+import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -38,7 +38,7 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = new TokenVotingProposal(proposalId);
   proposalEntity.dao = daoId;
@@ -77,10 +77,9 @@ export function _handleProposalCreated(
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId =
-        generateProposalId(event.address, pluginProposalId) +
-        '_' +
-        index.toString();
+      let actionId = getProposalId(event.address, pluginProposalId).concat(
+        index.toString()
+      );
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -115,7 +114,7 @@ export function handleVoteCast(event: VoteCast): void {
   let voter = event.params.voter.toHexString();
   let voterId = pluginId + '_' + voter;
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
   let voterVoteId = voter + '_' + proposalId;
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
@@ -204,7 +203,7 @@ export function handleVoteCast(event: VoteCast): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {

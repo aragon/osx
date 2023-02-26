@@ -39,7 +39,7 @@ import {
   createGetProposalCall,
   createNewMultisigSettingsUpdatedEvent
 } from './utils';
-import {generateProposalId} from '../../src/utils/proposals';
+import {getProposalId} from '../../src/utils/proposals';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -90,7 +90,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID = generateProposalId(
+  let entityID = getProposalId(
     Address.fromString(CONTRACT_ADDRESS),
     BigInt.fromString(PROPOSAL_ID)
   );

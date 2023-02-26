@@ -18,7 +18,7 @@ import {
 } from '../../../generated/schema';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {bigIntToBytes32} from '../../utils/bytes';
-import {generateProposalId} from '../../utils/proposals';
+import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -33,12 +33,13 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
+  let pluginAddress = event.address;
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(pluginAddress, pluginProposalId);
 
   let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = event.address.toHexString();
+  proposalEntity.plugin = pluginAddress.toHexString();
   proposalEntity.proposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
@@ -48,7 +49,7 @@ export function _handleProposalCreated(
   proposalEntity.endDate = event.params.endDate;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
-  let contract = AddresslistVoting.bind(event.address);
+  let contract = AddresslistVoting.bind(pluginAddress);
   let proposal = contract.try_getProposal(pluginProposalId);
 
   if (!proposal.reverted) {
@@ -74,9 +75,7 @@ export function _handleProposalCreated(
       const action = actions[index];
 
       let actionId =
-        generateProposalId(event.address, pluginProposalId) +
-        '_' +
-        index.toString();
+        getProposalId(pluginAddress, pluginProposalId) + '_' + index.toString();
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -96,7 +95,7 @@ export function _handleProposalCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
+  let packageEntity = AddresslistVotingPlugin.load(pluginAddress.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
@@ -109,9 +108,10 @@ export function _handleProposalCreated(
 export function handleVoteCast(event: VoteCast): void {
   const pluginProposalId = event.params.proposalId;
   const member = event.params.voter.toHexString();
-  const pluginId = event.address.toHexString();
+  const pluginAddress = event.address;
+  const pluginId = pluginAddress.toHexString();
   const memberId = pluginId + '_' + member;
-  let proposalId = pluginId + '_' + bigIntToBytes32(pluginProposalId);
+  let proposalId = getProposalId(pluginAddress, pluginProposalId);
   let voterVoteId = member + '_' + proposalId;
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
@@ -187,7 +187,7 @@ export function handleVoteCast(event: VoteCast): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {

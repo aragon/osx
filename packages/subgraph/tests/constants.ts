@@ -1,6 +1,6 @@
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
-import {generateProposalId} from '../src/utils/proposals';
+import {getProposalId} from '../src/utils/proposals';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 export const ADDRESS_ONE = '0x0000000000000000000000000000000000000001';
@@ -19,7 +19,7 @@ export const TWO = '2';
 export const THREE = '3';
 
 export const PROPOSAL_ID = ZERO;
-export const PROPOSAL_ENTITY_ID = generateProposalId(
+export const PROPOSAL_ENTITY_ID = getProposalId(
   Address.fromString(CONTRACT_ADDRESS),
   BigInt.fromString(PROPOSAL_ID)
 );

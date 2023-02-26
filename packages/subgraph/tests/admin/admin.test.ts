@@ -23,7 +23,7 @@ import {
   handleProposalExecuted,
   _handleProposalCreated
 } from '../../src/packages/admin/admin';
-import {generateProposalId} from '../../src/utils/proposals';
+import {getProposalId} from '../../src/utils/proposals';
 
 const actionValue = '0';
 const actionData = '0x00000000';
@@ -52,7 +52,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID = generateProposalId(
+  let entityID = getProposalId(
     Address.fromString(CONTRACT_ADDRESS),
     BigInt.fromString(PROPOSAL_ID)
   );
@@ -106,7 +106,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   adminPlugin.save();
 
-  let entityID = generateProposalId(
+  let entityID = getProposalId(
     Address.fromString(CONTRACT_ADDRESS),
     BigInt.fromString(PROPOSAL_ID)
   );

@@ -17,7 +17,7 @@ import {
   MultisigProposalApprover
 } from '../../../generated/schema';
 import {bigIntToBytes32} from '../../utils/bytes';
-import {generateProposalId} from '../../utils/proposals';
+import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -33,7 +33,7 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = new MultisigProposal(proposalId);
   proposalEntity.dao = daoId;
@@ -72,9 +72,7 @@ export function _handleProposalCreated(
       const action = actions[index];
 
       let actionId =
-        generateProposalId(event.address, pluginProposalId) +
-        '_' +
-        index.toString();
+        getProposalId(event.address, pluginProposalId) + '_' + index.toString();
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -104,7 +102,7 @@ export function handleApproved(event: Approved): void {
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
   let approverProposalId = member + '_' + proposalId;
 
   let approverProposalEntity = MultisigProposalApprover.load(
@@ -145,7 +143,7 @@ export function handleApproved(event: Approved): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {

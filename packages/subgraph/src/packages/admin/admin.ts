@@ -13,7 +13,7 @@ import {
 } from '../../../generated/schema';
 import {AdminMembers} from '../../../generated/templates';
 import {bigIntToBytes32} from '../../utils/bytes';
-import {generateProposalId} from '../../utils/proposals';
+import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -29,7 +29,7 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
   let pluginId = event.address.toHexString();
   let administratorAddress = event.params.creator;
 
@@ -70,9 +70,7 @@ export function _handleProposalCreated(
     const action = actions[index];
 
     let actionId =
-      generateProposalId(event.address, pluginProposalId) +
-      '_' +
-      index.toString();
+      getProposalId(event.address, pluginProposalId) + '_' + index.toString();
 
     let actionEntity = new Action(actionId);
     actionEntity.to = action.to;
@@ -88,7 +86,7 @@ export function _handleProposalCreated(
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = generateProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = AdminProposal.load(proposalId);
   if (proposalEntity) {
