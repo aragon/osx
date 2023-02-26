@@ -45,7 +45,6 @@ import {
   createTokenVotingProposalEntityState
 } from './utils';
 
-let pluginProposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
@@ -61,7 +60,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    pluginProposalId,
+    PROPOSAL_ID,
     true,
     false,
 
@@ -88,7 +87,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 
   // create event
   let event = createNewProposalCreatedEvent(
-    pluginProposalId,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     END_DATE,
@@ -126,7 +125,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     'TokenVotingProposal',
     PROPOSAL_ENTITY_ID,
     'proposalId',
-    pluginProposalId
+    PROPOSAL_ID
   );
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -474,7 +473,7 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    pluginProposalId,
+    PROPOSAL_ID,
     true,
     true,
 

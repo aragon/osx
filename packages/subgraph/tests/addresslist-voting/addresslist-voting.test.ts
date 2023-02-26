@@ -32,7 +32,8 @@ import {
   END_DATE,
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
+  PROPOSAL_ENTITY_ID
 } from '../constants';
 import {
   createDummyActions,
@@ -49,9 +50,7 @@ import {
   getProposalCountCall,
   createAddresslistVotingProposalEntityState
 } from './utils';
-import {bigIntToBytes32} from '../../src/utils/bytes';
 
-let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', () => {
@@ -67,7 +66,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    proposalId,
+    PROPOSAL_ID,
     true,
     false,
 
@@ -96,7 +95,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
 
   // create event
   let event = createNewProposalCreatedEvent(
-    proposalId,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     END_DATE,
@@ -109,104 +108,110 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    bigIntToBytes32(BigInt.fromString(proposalId));
   let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks
-  assert.fieldEquals('AddresslistVotingProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AddresslistVotingProposal', entityID, 'dao', DAO_ADDRESS);
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
+    'id',
+    PROPOSAL_ENTITY_ID
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    PROPOSAL_ENTITY_ID,
+    'dao',
+    DAO_ADDRESS
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    PROPOSAL_ENTITY_ID,
     'plugin',
     packageId
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'proposalId',
-    proposalId
+    PROPOSAL_ID
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'creator',
     ADDRESS_ONE
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'metadata',
     STRING_DATA
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'createdAt',
     event.block.timestamp.toString()
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'creationBlockNumber',
     event.block.number.toString()
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'allowFailureMap',
     ALLOW_FAILURE_MAP
   );
 
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'votingMode',
     VOTING_MODES.get(parseInt(VOTING_MODE))
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'supportThreshold',
     SUPPORT_THRESHOLD
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'minVotingPower',
     MIN_VOTING_POWER
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'startDate',
     START_DATE
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'endDate',
     END_DATE
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'snapshotBlock',
     SNAPSHOT_BLOCK
   );
 
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'totalVotingPower',
     TOTAL_VOTING_POWER
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    PROPOSAL_ENTITY_ID,
     'executed',
     'false'
   );

@@ -23,7 +23,7 @@ import {
   handleProposalExecuted,
   _handleProposalCreated
 } from '../../src/packages/admin/admin';
-import {bigIntToBytes32} from '../../src/utils/bytes';
+import {generateProposalId} from '../../src/utils/proposals';
 
 const actionValue = '0';
 const actionData = '0x00000000';
@@ -52,10 +52,10 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    bigIntToBytes32(BigInt.fromString(PROPOSAL_ID));
+  let entityID = generateProposalId(
+    Address.fromString(CONTRACT_ADDRESS),
+    BigInt.fromString(PROPOSAL_ID)
+  );
 
   // checks
   assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
@@ -106,25 +106,25 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   adminPlugin.save();
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    bigIntToBytes32(BigInt.fromString(PROPOSAL_ID));
+  let entityID = generateProposalId(
+    Address.fromString(CONTRACT_ADDRESS),
+    BigInt.fromString(PROPOSAL_ID)
+  );
 
-  let adminstratorAddress = Address.fromString(ADDRESS_ONE);
+  let administratorAddress = Address.fromString(ADDRESS_ONE);
 
   let adminProposal = new AdminProposal(entityID);
   adminProposal.dao = DAO_ADDRESS;
   adminProposal.plugin = pluginId;
   adminProposal.proposalId = BigInt.fromString(PROPOSAL_ID);
-  adminProposal.creator = adminstratorAddress;
+  adminProposal.creator = administratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
   adminProposal.createdAt = BigInt.fromString(START_DATE);
   adminProposal.startDate = BigInt.fromString(START_DATE);
   adminProposal.endDate = BigInt.fromString(START_DATE);
   adminProposal.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
-  adminProposal.administrator = adminstratorAddress.toHexString();
+  adminProposal.administrator = administratorAddress.toHexString();
   adminProposal.save();
 
   const actionId = CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;

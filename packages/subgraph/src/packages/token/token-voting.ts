@@ -1,9 +1,4 @@
-import {
-  Address,
-  BigInt,
-  dataSource,
-  DataSourceContext
-} from '@graphprotocol/graph-ts';
+import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -27,13 +22,8 @@ import {
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {fetchERC20} from '../../utils/tokens/erc20';
 import {bigIntToBytes32} from '../../utils/bytes';
+import {generateProposalId} from '../../utils/proposals';
 
-function generateProposalId(plugin: Address, pluginProposalId: BigInt): string {
-  return plugin
-    .toHexString()
-    .concat('_')
-    .concat(bigIntToBytes32(pluginProposalId));
-}
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');

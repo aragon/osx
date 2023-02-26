@@ -17,6 +17,7 @@ import {
   MultisigProposalApprover
 } from '../../../generated/schema';
 import {bigIntToBytes32} from '../../utils/bytes';
+import {generateProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -31,15 +32,13 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() +
-    '_' +
-    bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
 
   let proposalEntity = new MultisigProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.proposalId = event.params.proposalId;
+  proposalEntity.proposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
@@ -49,7 +48,7 @@ export function _handleProposalCreated(
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = Multisig.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
+  let vote = contract.try_getProposal(pluginProposalId);
 
   if (!vote.reverted) {
     proposalEntity.executed = vote.value.value0;
@@ -75,7 +74,7 @@ export function _handleProposalCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        bigIntToBytes32(event.params.proposalId) +
+        bigIntToBytes32(pluginProposalId) +
         '_' +
         index.toString();
 
@@ -106,9 +105,10 @@ export function handleApproved(event: Approved): void {
   const member = event.params.approver.toHexString();
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
-
-  let proposalId = pluginId + '_' + bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
   let approverProposalId = member + '_' + proposalId;
+
   let approverProposalEntity = MultisigProposalApprover.load(
     approverProposalId
   );
@@ -124,7 +124,7 @@ export function handleApproved(event: Approved): void {
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
     let contract = Multisig.bind(event.address);
-    let proposal = contract.try_getProposal(event.params.proposalId);
+    let proposal = contract.try_getProposal(pluginProposalId);
 
     if (!proposal.reverted) {
       let approvals = proposal.value.value1;
@@ -146,10 +146,9 @@ export function handleApproved(event: Approved): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() +
-    '_' +
-    bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
+
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executable = false;

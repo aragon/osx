@@ -13,6 +13,7 @@ import {
 } from '../../../generated/schema';
 import {AdminMembers} from '../../../generated/templates';
 import {bigIntToBytes32} from '../../utils/bytes';
+import {generateProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -27,44 +28,40 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() +
-    '_' +
-    bigIntToBytes32(event.params.proposalId);
-
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
   let pluginId = event.address.toHexString();
-
-  let adminstratorAddress = event.params.creator;
+  let administratorAddress = event.params.creator;
 
   let proposalEntity = new AdminProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = pluginId;
-  proposalEntity.proposalId = event.params.proposalId;
-  proposalEntity.creator = adminstratorAddress;
+  proposalEntity.proposalId = pluginProposalId;
+  proposalEntity.creator = administratorAddress;
   proposalEntity.metadata = metadata;
   proposalEntity.executed = false;
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
-  proposalEntity.administrator = adminstratorAddress.toHexString();
+  proposalEntity.administrator = administratorAddress.toHexString();
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
-  // Adminstrator
-  let adminstratorId = adminstratorAddress.toHexString() + '_' + pluginId;
-  let adminMemberEntity = AdministratorAdminPlugin.load(adminstratorId);
+  // Administrator
+  let administratorId = administratorAddress.toHexString() + '_' + pluginId;
+  let adminMemberEntity = AdministratorAdminPlugin.load(administratorId);
   if (!adminMemberEntity) {
-    adminMemberEntity = new AdministratorAdminPlugin(adminstratorId);
-    adminMemberEntity.administrator = adminstratorAddress.toHexString();
+    adminMemberEntity = new AdministratorAdminPlugin(administratorId);
+    adminMemberEntity.administrator = administratorAddress.toHexString();
     adminMemberEntity.plugin = pluginId;
     adminMemberEntity.save();
   }
-  let adminstratorEntity = Administrator.load(
-    adminstratorAddress.toHexString()
+  let administratorEntity = Administrator.load(
+    administratorAddress.toHexString()
   );
-  if (!adminstratorEntity) {
-    adminstratorEntity = new Administrator(adminstratorAddress.toHexString());
-    adminstratorEntity.address = adminstratorAddress.toHexString();
-    adminstratorEntity.save();
+  if (!administratorEntity) {
+    administratorEntity = new Administrator(administratorAddress.toHexString());
+    administratorEntity.address = administratorAddress.toHexString();
+    administratorEntity.save();
   }
 
   // actions
@@ -75,7 +72,7 @@ export function _handleProposalCreated(
     let actionId =
       event.address.toHexString() +
       '_' +
-      bigIntToBytes32(event.params.proposalId) +
+      bigIntToBytes32(pluginProposalId) +
       '_' +
       index.toString();
 
@@ -92,10 +89,9 @@ export function _handleProposalCreated(
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() +
-    '_' +
-    bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
+
   let proposalEntity = AdminProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
