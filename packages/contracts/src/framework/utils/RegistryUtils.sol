@@ -6,8 +6,7 @@ pragma solidity 0.8.17;
 /// - the lowercase letters `a-z`
 /// - the digits `0-9`
 /// - the hyphen `-`
-/// @dev The following function allows empty(zero-length) subdomains. It's a caller's responsibility
-/// to check and revert in case needed.
+/// @dev The following function allows empty(zero-length) subdomains. It's a caller's responsibility to check and revert in case needed.
 /// @param subDomain The name of the DAO.
 /// @return `true` if the name is valid or `false` if at least one char is invalid.
 /// @dev Aborts on the first invalid char found.
