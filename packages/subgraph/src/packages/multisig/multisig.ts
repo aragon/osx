@@ -16,7 +16,7 @@ import {
   MultisigApprover,
   MultisigProposalApprover
 } from '../../../generated/schema';
-import {bigIntToBytes32} from '../../utils/helpers';
+import {bigIntToBytes32} from '../../utils/bytes';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();

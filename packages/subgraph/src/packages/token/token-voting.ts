@@ -21,7 +21,7 @@ import {
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {fetchERC20} from '../../utils/tokens/erc20';
-import {bigIntToBytes32} from '../../utils/helpers';
+import {bigIntToBytes32} from '../../utils/bytes';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
