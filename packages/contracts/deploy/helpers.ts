@@ -17,8 +17,8 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
 
 export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
   goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
-  mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41'
-}
+  mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
+};
 
 export const DAO_PERMISSIONS = [
   'ROOT_PERMISSION',
