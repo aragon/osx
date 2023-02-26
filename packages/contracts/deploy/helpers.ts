@@ -261,38 +261,39 @@ export async function managePermissions(
     items.push(permission);
   }
 
-  if (items.length > 0) {
-    console.log(
-      `Setting ${items.length} permissions. Skipped ${
-        permissions.length - items.length
-      }`
-    );
-    const tx = await permissionManagerContract.applyMultiTargetPermissions(
-      items.map(item => [
-        item.operation,
-        item.where.address,
-        item.who.address,
-        item.condition || ethers.constants.AddressZero,
-        ethers.utils.id(item.permission),
-      ])
-    );
-    console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
-    await tx.wait();
-
-    items.forEach(permission => {
-      console.log(
-        `${
-          permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
-        } the ${permission.permission} of (${permission.where.name}: ${
-          permission.where.address
-        }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
-          tx.hash
-        })`
-      );
-    });
-  } else {
+  if (items.length === 0) {
     console.log(`Contract call skipped. No permissions to set...`);
+    return;
   }
+
+  console.log(
+    `Setting ${items.length} permissions. Skipped ${
+      permissions.length - items.length
+    }`
+  );
+  const tx = await permissionManagerContract.applyMultiTargetPermissions(
+    items.map(item => [
+      item.operation,
+      item.where.address,
+      item.who.address,
+      item.condition || ethers.constants.AddressZero,
+      ethers.utils.id(item.permission),
+    ])
+  );
+  console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
+  await tx.wait();
+
+  items.forEach(permission => {
+    console.log(
+      `${
+        permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
+      } the ${permission.permission} of (${permission.where.name}: ${
+        permission.where.address
+      }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
+        tx.hash
+      })`
+    );
+  });
 }
 
 export async function isENSDomainRegistered(
@@ -316,6 +317,43 @@ export async function getENSAddress(hre: EHRE): Promise<string> {
     return ensDeployment.address;
   }
   throw new Error('ENS address not found.');
+}
+
+export async function getPublicResolverAddress(hre: EHRE): Promise<string> {
+  if (ENS_PUBLIC_RESOLVERS[hre.network.name]) {
+    return ENS_PUBLIC_RESOLVERS[hre.network.name];
+  }
+  const publicResolverDeployment = await hre.deployments.get('PublicResolver');
+  if (publicResolverDeployment) {
+    return publicResolverDeployment.address;
+  }
+  throw new Error('PublicResolver address not found.');
+}
+
+export async function registerSubnodeRecord(
+  domain: string,
+  owner: string,
+  ensRegistryAddress: string,
+  publicResolver: string
+): Promise<string> {
+  const domainSplitted = domain.split('.');
+  const subdomain = domainSplitted.splice(0, 1)[0];
+  const parentDomain = domainSplitted.join('.');
+
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  const tx = await ensRegistryContract.setSubnodeRecord(
+    ethers.utils.namehash(parentDomain),
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+    owner,
+    publicResolver,
+    0
+  );
+  await tx.wait();
+  return ensRegistryContract.owner(ethers.utils.namehash(domain));
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

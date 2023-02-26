@@ -1,12 +1,14 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
+import {setupENS} from '../../utils/ens';
 
 import {
   ENS_ADDRESSES,
-  ENS_PUBLIC_RESOLVERS,
   getContractAddress,
+  getENSAddress,
+  getPublicResolverAddress,
+  registerSubnodeRecord,
 } from '../helpers';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -53,18 +55,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // node hasn't been registered yet
   if (daoDomainOwnerAddress === ethers.constants.AddressZero) {
-    const domainSplitted = daoDomain.split('.');
-    const subdomain = domainSplitted.splice(0, 1)[0];
-    const domain = domainSplitted.join('.');
-    const tx = await ensRegistryContract.setSubnodeRecord(
-      ethers.utils.namehash(domain),
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+    daoDomainOwnerAddress = await registerSubnodeRecord(
+      daoDomain,
       deployer,
-      ENS_PUBLIC_RESOLVERS[network.name],
-      0
+      await getENSAddress(hre),
+      await getPublicResolverAddress(hre)
     );
-    await tx.wait();
-    daoDomainOwnerAddress = await ensRegistryContract.owner(daoNode);
   }
   if (daoDomainOwnerAddress != deployer) {
     throw new Error(`${daoDomain} is not owned by deployer: ${deployer}.`);
@@ -73,18 +69,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
   // node hasn't been registered yet
   if (pluginDomainOwnerAddress === ethers.constants.AddressZero) {
-    const domainSplitted = pluginDomain.split('.');
-    const subdomain = domainSplitted.splice(0, 1)[0];
-    const domain = domainSplitted.join('.');
-    const tx = await ensRegistryContract.setSubnodeRecord(
-      ethers.utils.namehash(domain),
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+    pluginDomainOwnerAddress = await registerSubnodeRecord(
+      pluginDomain,
       deployer,
-      ENS_PUBLIC_RESOLVERS[network.name],
-      0
+      await getENSAddress(hre),
+      await getPublicResolverAddress(hre)
     );
-    await tx.wait();
-    pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
   }
   if (pluginDomainOwnerAddress != deployer) {
     throw new Error(`${pluginDomain} is not owned by deployer: ${deployer}.`);
