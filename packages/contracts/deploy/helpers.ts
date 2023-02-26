@@ -1,6 +1,6 @@
 import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
-import {BigNumberish, Contract} from 'ethers';
+import {Contract} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
 
@@ -12,10 +12,13 @@ import {EHRE, Operation} from '../utils/types';
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // dao.eth
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
+
+export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
+  goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
+  mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41'
+}
 
 export const DAO_PERMISSIONS = [
   'ROOT_PERMISSION',
@@ -117,6 +120,20 @@ export async function createPluginRepo(
   releaseMetadata: string,
   buildMetadata: string
 ): Promise<void> {
+  const {network} = hre;
+  const pluginDomain =
+    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
+  if (
+    await isENSDomainRegistered(
+      `${pluginContractName}.${pluginDomain}`,
+      ENS_ADDRESSES[network.name]
+    )
+  ) {
+    // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
+    // Either a fruntrun happened or something else. Thus we abort here
+    throw new Error(`${pluginContractName} is already present! Aborting...`);
+  }
+
   const signers = await ethers.getSigners();
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
@@ -238,9 +255,7 @@ export async function managePermissions(
   // filtering permission to only apply those that are needed
   const items: Permission[] = [];
   for (const permission of permissions) {
-    if (
-      await isPermissionSetCorrectly(permissionManagerContract, permission)
-    ) {
+    if (await isPermissionSetCorrectly(permissionManagerContract, permission)) {
       continue;
     }
     items.push(permission);
@@ -278,6 +293,18 @@ export async function managePermissions(
   } else {
     console.log(`Contract call skipped. No permissions to set...`);
   }
+}
+
+export async function isENSDomainRegistered(
+  domain: string,
+  ensRegistryAddress: string
+): Promise<boolean> {
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  return ensRegistryContract.recordExists(ethers.utils.namehash(domain));
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

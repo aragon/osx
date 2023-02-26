@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
 
-import {ENS_ADDRESSES, getContractAddress} from '../helpers';
+import {ENS_ADDRESSES, ENS_PUBLIC_RESOLVERS, getContractAddress} from '../helpers';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -45,12 +45,43 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoNode = ethers.utils.namehash(daoDomain);
   const pluginNode = ethers.utils.namehash(pluginDomain);
 
-  const daoDomainOwnerAddress = await ensRegistryContract.owner(daoNode);
+  let daoDomainOwnerAddress = await ensRegistryContract.owner(daoNode);
+
+  // node hasn't been registered yet
+  if (daoDomainOwnerAddress === ethers.constants.AddressZero) {
+    const domainSplitted = daoDomain.split('.');
+    const subdomain = domainSplitted.splice(0, 1)[0];
+    const domain = domainSplitted.join('.');
+    const tx = await ensRegistryContract.setSubnodeRecord(
+      ethers.utils.namehash(domain),
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+      deployer,
+      ENS_PUBLIC_RESOLVERS[network.name],
+      0
+    );
+    await tx.wait();
+    daoDomainOwnerAddress = await ensRegistryContract.owner(daoNode);
+  }
   if (daoDomainOwnerAddress != deployer) {
     throw new Error(`${daoDomain} is not owned by deployer: ${deployer}.`);
   }
 
-  const pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
+  let pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
+  // node hasn't been registered yet
+  if (pluginDomainOwnerAddress === ethers.constants.AddressZero) {
+    const domainSplitted = pluginDomain.split('.');
+    const subdomain = domainSplitted.splice(0, 1)[0];
+    const domain = domainSplitted.join('.');
+    const tx = await ensRegistryContract.setSubnodeRecord(
+      ethers.utils.namehash(domain),
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+      deployer,
+      ENS_PUBLIC_RESOLVERS[network.name],
+      0
+    );
+    await tx.wait();
+    pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
+  }
   if (pluginDomainOwnerAddress != deployer) {
     throw new Error(`${pluginDomain} is not owned by deployer: ${deployer}.`);
   }
@@ -79,12 +110,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  // Approving `DAO_ENSSubdomainRegistrar` address as operator of the subdoamin
-  const approveTx = await ensRegistryContract.setApprovalForAll(
-    ensSubdomainRegistrarAddress,
-    true
-  );
-  await approveTx.wait();
+  if (
+    !(await ensRegistryContract.isApprovedForAll(
+      deployer,
+      ensSubdomainRegistrarAddress
+    ))
+  ) {
+    // Approving `DAO_ENSSubdomainRegistrar` address as operator of the subdoamin
+    const approveTx = await ensRegistryContract.setApprovalForAll(
+      ensSubdomainRegistrarAddress,
+      true
+    );
+    await approveTx.wait();
+  }
 
   //////////////////////// Plugin ENS //////////////////////////
   await deploy('Plugin_ENSSubdomainRegistrar', {
@@ -111,12 +149,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  // Approving `Plugin_ENSSubdomainRegistrar` address as operator of the subdoamin
-  const pluginApproveTx = await ensRegistryContract.setApprovalForAll(
-    pluginSubdomainRegistrarAddress,
-    true
-  );
-  await pluginApproveTx.wait();
+  if (
+    !(await ensRegistryContract.isApprovedForAll(
+      deployer,
+      pluginSubdomainRegistrarAddress
+    ))
+  ) {
+    // Approving `Plugin_ENSSubdomainRegistrar` address as operator of the subdoamin
+    const pluginApproveTx = await ensRegistryContract.setApprovalForAll(
+      pluginSubdomainRegistrarAddress,
+      true
+    );
+    await pluginApproveTx.wait();
+  }
 };
 export default func;
 func.tags = ['ENSSubdomainRegistrar'];
