@@ -135,7 +135,7 @@ describe('PluginRepoFactory: ', function () {
       await expect(
         pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
       ).to.be.revertedWithCustomError(
-        pluginRepoFactory,
+        pluginRepoRegistry,
         'EmptyPluginRepoSubdomain'
       );
     });
@@ -225,7 +225,7 @@ describe('PluginRepoFactory: ', function () {
           '0x'
         )
       ).to.be.revertedWithCustomError(
-        pluginRepoFactory,
+        pluginRepoRegistry,
         'EmptyPluginRepoSubdomain'
       );
     });

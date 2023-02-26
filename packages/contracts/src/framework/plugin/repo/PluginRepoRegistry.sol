@@ -27,6 +27,9 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice Thrown if the plugin subdomain doesn't match the regex `[0-9a-z\-]`
     error InvalidPluginSubdomain(string subdomain);
 
+    /// @notice Thrown if the plugin repository subdomain is empty.
+    error EmptyPluginRepoSubdomain();
+
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
         _disableInitializers();
@@ -49,8 +52,9 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
         string calldata subdomain,
         address pluginRepo
     ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
-        // The caller(PluginRepoFactory) explicitly checks
-        // if the subdomain is empty and reverts.
+        if (!(bytes(subdomain).length > 0)) {
+            revert EmptyPluginRepoSubdomain();
+        }
 
         if (!isSubdomainValid(subdomain)) {
             revert InvalidPluginSubdomain({subdomain: subdomain});

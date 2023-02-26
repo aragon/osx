@@ -17,9 +17,6 @@ contract PluginRepoFactory {
     /// @notice The address of the `PluginRepo` base contract.
     address public pluginRepoBase;
 
-    // @notice Thrown if the plugin repository subdomain is empty.
-    error EmptyPluginRepoSubdomain();
-
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
     /// @param _pluginRepoRegistry The aragon plugin registry address.
     constructor(PluginRepoRegistry _pluginRepoRegistry) {
@@ -112,16 +109,13 @@ contract PluginRepoFactory {
     }
 
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
+    /// @dev Passing an empty `_subdomain` will cause the transaction to revert.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The initial owner address.
     function _createPluginRepo(
         string calldata _subdomain,
         address _initialOwner
     ) internal returns (PluginRepo pluginRepo) {
-        if (!(bytes(_subdomain).length > 0)) {
-            revert EmptyPluginRepoSubdomain();
-        }
-
         pluginRepo = PluginRepo(
             createERC1967Proxy(
                 pluginRepoBase,
