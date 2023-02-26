@@ -50,7 +50,7 @@ describe('MerkleDistributor', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await distributor.supportsInterface('0x00000000')).to.be.false;
+      expect(await distributor.supportsInterface('0xffffffff')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {

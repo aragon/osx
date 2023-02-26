@@ -102,7 +102,7 @@ describe('GovernanceWrappedERC20', function () {
 
   describe('supportsInterface:', async () => {
     it('does not support the empty interface', async () => {
-      expect(await governanceToken.supportsInterface('0x00000000')).to.be.false;
+      expect(await governanceToken.supportsInterface('0xffffffff')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {

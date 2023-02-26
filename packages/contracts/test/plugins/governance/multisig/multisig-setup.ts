@@ -54,6 +54,10 @@ describe('MultisigSetup', function () {
     implementationAddress = await multisigSetup.implementation();
   });
 
+  it('does not support the empty interface', async () => {
+    expect(await multisigSetup.supportsInterface('0xffffffff')).to.be.false;
+  });
+
   it('creates multisig base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('Multisig');
     const multisigContract = factory.attach(implementationAddress);

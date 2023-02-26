@@ -65,6 +65,11 @@ describe('AddresslistVotingSetup', function () {
     ]);
   });
 
+  it('does not support the empty interface', async () => {
+    expect(await addresslistVotingSetup.supportsInterface('0xffffffff')).to.be
+      .false;
+  });
+
   it('creates address list voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('AddresslistVoting');
     const addresslistVotingContract = factory.attach(implementationAddress);

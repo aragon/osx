@@ -129,6 +129,10 @@ describe('DAO', function () {
     'Unauthorized'
   );
 
+  it('does not support the empty interface', async () => {
+    expect(await dao.supportsInterface('0xffffffff')).to.be.false;
+  });
+
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(
