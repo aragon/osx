@@ -36,4 +36,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['Create_Register_Plugins'];
+func.tags = ['Create_Register_Plugins', 'Verify'];
