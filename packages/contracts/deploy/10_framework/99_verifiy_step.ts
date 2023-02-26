@@ -39,6 +39,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         `DAOENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${DAOENSSubdomainRegistrarAddress} approved for all`
       );
     }
+
+    const node = await DAOENSSubdomainRegistrar.node();
+    const expectedNode = ethers.utils.namehash(
+      process.env[`${hre.network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || ''
+    );
+    if (node !== expectedNode) {
+      throw new Error(
+        `DAOENSSubdomainRegistrar node (${node}) doesn't match expected node (${expectedNode})`
+      );
+    }
   }
 
   // VERIFYING PLUGIN ENS SUBDOMAIN REGISTRAR
@@ -66,6 +76,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     if (!isApprovedForAll) {
       throw new Error(
         `PluginENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${PluginENSSubdomainRegistrarAddress} approved for all`
+      );
+    }
+
+    const node = await PluginENSSubdomainRegistrar.node();
+    const expectedNode = ethers.utils.namehash(
+      process.env[`${hre.network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || ''
+    );
+    if (node !== expectedNode) {
+      throw new Error(
+        `PluginENSSubdomainRegistrar node (${node}) doesn't match expected node (${expectedNode})`
       );
     }
   }
