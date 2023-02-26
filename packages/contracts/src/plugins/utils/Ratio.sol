@@ -28,15 +28,3 @@ function _applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256
         ++result;
     }
 }
-
-/// @notice Applies a ratio to a value and floors the remainder.
-/// @param _value The value to which the ratio is applied.
-/// @param _ratio The ratio that must be in the interval `[0, 10**6]`.
-/// @return result The resulting value.
-function _applyRatioFloored(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
-    if (_ratio > RATIO_BASE) {
-        revert RatioOutOfBounds({limit: RATIO_BASE, actual: _ratio});
-    }
-
-    result = (_value * _ratio) / RATIO_BASE;
-}
