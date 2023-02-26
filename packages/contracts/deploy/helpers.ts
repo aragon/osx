@@ -126,7 +126,7 @@ export async function createPluginRepo(
   if (
     await isENSDomainRegistered(
       `${pluginContractName}.${pluginDomain}`,
-      ENS_ADDRESSES[network.name]
+      await getENSAddress(hre)
     )
   ) {
     // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
@@ -305,6 +305,17 @@ export async function isENSDomainRegistered(
   );
 
   return ensRegistryContract.recordExists(ethers.utils.namehash(domain));
+}
+
+export async function getENSAddress(hre: EHRE): Promise<string> {
+  if (ENS_ADDRESSES[hre.network.name]) {
+    return ENS_ADDRESSES[hre.network.name];
+  }
+  const ensDeployment = await hre.deployments.get('ENSRegistry');
+  if (ensDeployment) {
+    return ensDeployment.address;
+  }
+  throw new Error('ENS address not found.');
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

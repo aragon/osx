@@ -2,8 +2,8 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {
-  ENS_ADDRESSES,
   getContractAddress,
+  getENSAddress,
   isENSDomainRegistered,
 } from '../helpers';
 
@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (
     await isENSDomainRegistered(
       `${daoSubdomain}.${daoDomain}`,
-      ENS_ADDRESSES[network.name]
+      await getENSAddress(hre)
     )
   ) {
     // not beeing able to register the managing DAO means that something is not right with the framework deployment used.
