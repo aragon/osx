@@ -4,8 +4,7 @@ import {
   DataSourceContext,
   ethereum,
   crypto,
-  ByteArray,
-  log
+  ByteArray
 } from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
@@ -15,8 +14,7 @@ import {
   TokenVoting,
   AddresslistVoting,
   Admin,
-  Multisig,
-  GovernanceERC20
+  Multisig
 } from '../../generated/templates';
 import {
   TokenVotingPlugin,

@@ -1,4 +1,9 @@
-import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  dataSource,
+  DataSourceContext
+} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -23,6 +28,12 @@ import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {fetchERC20} from '../../utils/tokens/erc20';
 import {bigIntToBytes32} from '../../utils/bytes';
 
+function generateProposalId(plugin: Address, pluginProposalId: BigInt): string {
+  return plugin
+    .toHexString()
+    .concat('_')
+    .concat(bigIntToBytes32(pluginProposalId));
+}
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
@@ -36,15 +47,13 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() +
-    '_' +
-    bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
 
   let proposalEntity = new TokenVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.proposalId = event.params.proposalId;
+  proposalEntity.proposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
@@ -54,7 +63,7 @@ export function _handleProposalCreated(
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = TokenVoting.bind(event.address);
-  let proposal = contract.try_getProposal(event.params.proposalId);
+  let proposal = contract.try_getProposal(pluginProposalId);
 
   if (!proposal.reverted) {
     proposalEntity.open = proposal.value.value0;
@@ -81,7 +90,7 @@ export function _handleProposalCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        bigIntToBytes32(event.params.proposalId) +
+        bigIntToBytes32(pluginProposalId) +
         '_' +
         index.toString();
 
@@ -117,7 +126,8 @@ export function handleVoteCast(event: VoteCast): void {
   let pluginId = event.address.toHexString();
   let voter = event.params.voter.toHexString();
   let voterId = pluginId + '_' + voter;
-  let proposalId = pluginId + '_' + bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
   let voterVoteId = voter + '_' + proposalId;
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
@@ -158,7 +168,7 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     let contract = TokenVoting.bind(event.address);
-    let proposal = contract.try_getProposal(event.params.proposalId);
+    let proposal = contract.try_getProposal(pluginProposalId);
 
     if (!proposal.reverted) {
       let parameters = proposal.value.value2;
@@ -205,13 +215,13 @@ export function handleVoteCast(event: VoteCast): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() +
-    '_' +
-    bigIntToBytes32(event.params.proposalId);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = generateProposalId(event.address, pluginProposalId);
+
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executable = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;

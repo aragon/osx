@@ -1,4 +1,4 @@
-import {BigInt, ByteArray, Bytes} from '@graphprotocol/graph-ts';
+import {BigInt} from '@graphprotocol/graph-ts';
 
 export function bigIntToBytes32(input: BigInt): string {
   const hexString = input

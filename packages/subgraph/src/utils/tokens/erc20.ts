@@ -1,16 +1,11 @@
-import {Address, BigInt, Bytes, ethereum, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC20Balance,
   ERC20Contract,
   ERC20Transfer
 } from '../../../generated/schema';
 import {ERC20} from '../../../generated/templates/DaoTemplate/ERC20';
-import {
-  ERC20_transfer,
-  ERC20_transferFrom,
-  getTransferId,
-  TransferType
-} from './common';
+import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
 
 export function fetchERC20(address: Address): ERC20Contract | null {
   let erc20 = ERC20.bind(address);

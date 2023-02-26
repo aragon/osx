@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from 'matchstick-as/assembly/index';
-import {Address, Bytes, BigInt, ethereum, log} from '@graphprotocol/graph-ts';
+import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
 
 import {
   handleNativeTokenDeposited,
@@ -25,7 +25,6 @@ import {
   DAO_TOKEN_ADDRESS,
   ONE_ETH,
   STRING_DATA,
-  HALF_ETH,
   ADDRESS_ZERO,
   CONTRACT_ADDRESS,
   ZERO_BYTES32,
@@ -47,8 +46,6 @@ import {
   createStandardCallbackRegisteredEvent,
   getSupportsInterface
 } from './utils';
-import {createTokenVotingProposalEntityState} from '../token-voting/utils';
-import {decodeWithdrawParams} from '../../src/dao/utils';
 import {
   ERC20_transfer,
   ERC20_transferFrom,
@@ -57,7 +54,6 @@ import {
   getTransferId,
   onERC721Received
 } from '../../src/utils/tokens/common';
-import {DECODE_OFFSET} from '../../src/utils/tokens/common';
 import {ERC721Balance} from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplate/DAO';
 

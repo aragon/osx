@@ -195,6 +195,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executable = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;

@@ -32,8 +32,7 @@ import {
   END_DATE,
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
-  ALLOW_FAILURE_MAP,
-  PROPOSAL_ENTITY_ID
+  ALLOW_FAILURE_MAP
 } from '../constants';
 import {
   createDummyActions,

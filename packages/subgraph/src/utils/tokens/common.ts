@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 export const onERC721Received = '0x150b7a02';
 export const ERC721_safeTransferFromNoData = '0x42842e0e';
