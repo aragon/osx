@@ -70,9 +70,7 @@ export function _handleProposalCreated(
     const action = actions[index];
 
     let actionId =
-      event.address.toHexString() +
-      '_' +
-      bigIntToBytes32(pluginProposalId) +
+      generateProposalId(event.address, pluginProposalId) +
       '_' +
       index.toString();
 
