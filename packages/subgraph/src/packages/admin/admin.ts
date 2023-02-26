@@ -12,7 +12,6 @@ import {
   Administrator
 } from '../../../generated/schema';
 import {AdminMembers} from '../../../generated/templates';
-import {bigIntToBytes32} from '../../utils/bytes';
 import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -47,7 +46,10 @@ export function _handleProposalCreated(
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   // Administrator
-  let administratorId = administratorAddress.toHexString() + '_' + pluginId;
+  let administratorId = administratorAddress
+    .toHexString()
+    .concat('_')
+    .concat(pluginId);
   let adminMemberEntity = AdministratorAdminPlugin.load(administratorId);
   if (!adminMemberEntity) {
     adminMemberEntity = new AdministratorAdminPlugin(administratorId);
@@ -69,8 +71,9 @@ export function _handleProposalCreated(
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
 
-    let actionId =
-      getProposalId(event.address, pluginProposalId) + '_' + index.toString();
+    let actionId = getProposalId(event.address, pluginProposalId)
+      .concat('_')
+      .concat(index.toString());
 
     let actionEntity = new Action(actionId);
     actionEntity.to = action.to;

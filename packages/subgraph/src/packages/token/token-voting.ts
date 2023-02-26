@@ -21,7 +21,6 @@ import {
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {fetchERC20} from '../../utils/tokens/erc20';
-import {bigIntToBytes32} from '../../utils/bytes';
 import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -112,10 +111,10 @@ export function _handleProposalCreated(
 export function handleVoteCast(event: VoteCast): void {
   let pluginId = event.address.toHexString();
   let voter = event.params.voter.toHexString();
-  let voterId = pluginId + '_' + voter;
+  let voterId = pluginId.concat('_').concat(voter);
   let pluginProposalId = event.params.proposalId;
   let proposalId = getProposalId(event.address, pluginProposalId);
-  let voterVoteId = voter + '_' + proposalId;
+  let voterVoteId = voter.concat('_').concat(proposalId);
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
   if (voteOption === 'None') {

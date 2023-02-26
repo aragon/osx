@@ -127,7 +127,10 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.administrator = administratorAddress.toHexString();
   adminProposal.save();
 
-  const actionId = CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;
+  const actionId = CONTRACT_ADDRESS.concat('_')
+    .concat(PROPOSAL_ID)
+    .concat('_')
+    .concat(PROPOSAL_ID);
   let action = new Action(actionId);
   action.to = Address.fromString(ADDRESS_TWO);
   action.value = BigInt.fromString(actionValue);

@@ -17,7 +17,6 @@ import {
   AddresslistVotingVote
 } from '../../../generated/schema';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {bigIntToBytes32} from '../../utils/bytes';
 import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -74,8 +73,9 @@ export function _handleProposalCreated(
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId =
-        getProposalId(pluginAddress, pluginProposalId) + '_' + index.toString();
+      let actionId = getProposalId(pluginAddress, pluginProposalId)
+        .concat('_')
+        .concat(index.toString());
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -110,9 +110,9 @@ export function handleVoteCast(event: VoteCast): void {
   const member = event.params.voter.toHexString();
   const pluginAddress = event.address;
   const pluginId = pluginAddress.toHexString();
-  const memberId = pluginId + '_' + member;
+  const memberId = pluginId.concat('_').concat(member);
   let proposalId = getProposalId(pluginAddress, pluginProposalId);
-  let voterVoteId = member + '_' + proposalId;
+  let voterVoteId = member.concat('_').concat(proposalId);
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
   if (voteOption === 'None') {

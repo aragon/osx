@@ -16,7 +16,6 @@ import {
   MultisigApprover,
   MultisigProposalApprover
 } from '../../../generated/schema';
-import {bigIntToBytes32} from '../../utils/bytes';
 import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -71,8 +70,9 @@ export function _handleProposalCreated(
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId =
-        getProposalId(event.address, pluginProposalId) + '_' + index.toString();
+      let actionId = getProposalId(event.address, pluginProposalId)
+        .concat('_')
+        .concat(index.toString());
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -100,10 +100,10 @@ export function _handleProposalCreated(
 export function handleApproved(event: Approved): void {
   const member = event.params.approver.toHexString();
   const pluginId = event.address.toHexString();
-  const memberId = pluginId + '_' + member;
+  const memberId = pluginId.concat('_').concat(member);
   let pluginProposalId = event.params.proposalId;
   let proposalId = getProposalId(event.address, pluginProposalId);
-  let approverProposalId = member + '_' + proposalId;
+  let approverProposalId = member.concat('_').concat(proposalId);
 
   let approverProposalEntity = MultisigProposalApprover.load(
     approverProposalId
