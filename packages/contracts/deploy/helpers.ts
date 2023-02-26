@@ -189,7 +189,7 @@ export async function checkSetManagingDao(
   contract: Contract,
   expectedDaoAddress: string
 ) {
-  const setDAO = await contract.callStatic.dao();
+  const setDAO = await contract.dao();
   if (setDAO !== expectedDaoAddress) {
     throw new Error(
       `${contract.address} has wrong DAO. Expected ${setDAO} to be ${expectedDaoAddress}`
@@ -312,10 +312,12 @@ export async function getENSAddress(hre: EHRE): Promise<string> {
   if (ENS_ADDRESSES[hre.network.name]) {
     return ENS_ADDRESSES[hre.network.name];
   }
+
   const ensDeployment = await hre.deployments.get('ENSRegistry');
   if (ensDeployment) {
     return ensDeployment.address;
   }
+
   throw new Error('ENS address not found.');
 }
 
@@ -323,10 +325,12 @@ export async function getPublicResolverAddress(hre: EHRE): Promise<string> {
   if (ENS_PUBLIC_RESOLVERS[hre.network.name]) {
     return ENS_PUBLIC_RESOLVERS[hre.network.name];
   }
+
   const publicResolverDeployment = await hre.deployments.get('PublicResolver');
   if (publicResolverDeployment) {
     return publicResolverDeployment.address;
   }
+
   throw new Error('PublicResolver address not found.');
 }
 

@@ -29,11 +29,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'ENSRegistry',
       ensAddr
     );
-    const isApprovedForAll =
-      await ensRegistryContract.callStatic.isApprovedForAll(
-        deployer,
-        DAOENSSubdomainRegistrarAddress
-      );
+    const isApprovedForAll = await ensRegistryContract.isApprovedForAll(
+      deployer,
+      DAOENSSubdomainRegistrarAddress
+    );
     if (!isApprovedForAll) {
       throw new Error(
         `DAOENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${DAOENSSubdomainRegistrarAddress} approved for all`
@@ -68,11 +67,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'ENSRegistry',
       ensAddr
     );
-    const isApprovedForAll =
-      await ensRegistryContract.callStatic.isApprovedForAll(
-        deployer,
-        PluginENSSubdomainRegistrarAddress
-      );
+    const isApprovedForAll = await ensRegistryContract.isApprovedForAll(
+      deployer,
+      PluginENSSubdomainRegistrarAddress
+    );
     if (!isApprovedForAll) {
       throw new Error(
         `PluginENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${PluginENSSubdomainRegistrarAddress} approved for all`
@@ -99,8 +97,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await checkSetManagingDao(DAORegistry, managingDAOAddress);
   // scope to reuse same const again
   {
-    const SubdomainRegistrarAddress =
-      await DAORegistry.callStatic.subdomainRegistrar();
+    const SubdomainRegistrarAddress = await DAORegistry.subdomainRegistrar();
     if (SubdomainRegistrarAddress !== DAOENSSubdomainRegistrarAddress) {
       throw new Error(
         `${DAORegistry} has wrong SubdomainRegistrarAddress set. Expected ${DAOENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
@@ -121,7 +118,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // scope to reuse same const again
   {
     const SubdomainRegistrarAddress =
-      await PluginRepoRegistry.callStatic.subdomainRegistrar();
+      await PluginRepoRegistry.subdomainRegistrar();
     if (SubdomainRegistrarAddress !== PluginENSSubdomainRegistrarAddress) {
       throw new Error(
         `${PluginRepoRegistry} has wrong SubdomainRegistrarAddress set. Expected ${PluginENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
@@ -141,7 +138,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // scope to reuse same const again
   {
     const SetPluginRepoRegistryAddress =
-      await PluginRepoFactory.callStatic.pluginRepoRegistry();
+      await PluginRepoFactory.pluginRepoRegistry();
     if (SetPluginRepoRegistryAddress !== PluginRepoRegistryAddress) {
       throw new Error(
         `${PluginRepoFactoryAddress} has wrong PluginRepoRegistry set. Expected ${SetPluginRepoRegistryAddress} to be ${PluginRepoRegistryAddress}`
@@ -161,7 +158,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // scope to reuse same const again
   {
     const SetPluginRepoRegistryAddress =
-      await PluginSetupProcessor.callStatic.repoRegistry();
+      await PluginSetupProcessor.repoRegistry();
     if (SetPluginRepoRegistryAddress !== PluginRepoRegistryAddress) {
       throw new Error(
         `${PluginRepoFactoryAddress} has wrong PluginRepoRegistry set. Expected ${SetPluginRepoRegistryAddress} to be ${PluginRepoRegistryAddress}`
@@ -177,7 +174,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   // scope to reuse same const again
   {
-    const SetDAORegistryAddress = await DAOFactory.callStatic.daoRegistry();
+    const SetDAORegistryAddress = await DAOFactory.daoRegistry();
     if (SetDAORegistryAddress !== DAORegistryAddress) {
       throw new Error(
         `${PluginRepoFactoryAddress} has wrong DAORegistry set. Expected ${SetDAORegistryAddress} to be ${DAORegistryAddress}`
@@ -186,7 +183,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   // scope to reuse same const again
   {
-    const SetPSP = await DAOFactory.callStatic.pluginSetupProcessor();
+    const SetPSP = await DAOFactory.pluginSetupProcessor();
     if (SetPSP !== PluginSetupProcessorAddress) {
       throw new Error(
         `${PluginRepoFactoryAddress} has wrong PluginSetupProcessor set. Expected ${SetPSP} to be ${PluginSetupProcessorAddress}`

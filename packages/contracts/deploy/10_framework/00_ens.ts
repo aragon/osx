@@ -99,7 +99,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   // Get DAO's `ENSSubdomainRegistrar` contract.
-  const ensSubdomainRegistrarAddress = await getContractAddress(
+  const daoSubdomainRegistrarAddress = await getContractAddress(
     'DAO_ENSSubdomainRegistrar',
     hre
   );
@@ -107,12 +107,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (
     !(await ensRegistryContract.isApprovedForAll(
       deployer,
-      ensSubdomainRegistrarAddress
+      daoSubdomainRegistrarAddress
     ))
   ) {
     // Approving `DAO_ENSSubdomainRegistrar` address as operator of the subdoamin
     const approveTx = await ensRegistryContract.setApprovalForAll(
-      ensSubdomainRegistrarAddress,
+      daoSubdomainRegistrarAddress,
       true
     );
     await approveTx.wait();
