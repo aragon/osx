@@ -67,7 +67,7 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
     - Asset management (e.g., ERC-20 or NFT minting, token streaming, DeFi)
     - Membership (governing budget allowances, access gating, curating a member list)
 
-The following graphic shows how an exemplary DAO setup, where the
+The following graphic shows an exemplary DAO setup:
 
 ![An examplary DAO setup](https://devs.aragon.org/assets/images/dao-plugin.drawio-7086d0911d25218097dae94665b1a7b1.svg)
 
