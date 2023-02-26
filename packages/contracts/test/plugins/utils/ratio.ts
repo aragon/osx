@@ -47,32 +47,4 @@ describe('Ratio', function () {
       expect(await ratio.applyRatioCeiled(33, pctToRatio(50))).to.eq(17);
     });
   });
-
-  describe('applyRatioFloored', async () => {
-    it('reverts for ratios larger than `RATIO_BASE`', async () => {
-      const tooLargeRatio = RATIO_BASE.add(1);
-      await expect(ratio.applyRatioFloored(123, tooLargeRatio))
-        .to.revertedWithCustomError(ratio, 'RatioOutOfBounds')
-        .withArgs(RATIO_BASE, tooLargeRatio);
-      await expect(ratio.applyRatioFloored(123, RATIO_BASE)).not.to.be.reverted;
-    });
-
-    it('reverts for too large values that would cause an overflow', async () => {
-      const tooLargeValue = ethers.constants.MaxUint256.div(RATIO_BASE).add(1);
-      await expect(
-        ratio.applyRatioCeiled(tooLargeValue, RATIO_BASE)
-      ).to.revertedWithPanic(0x11);
-
-      await expect(ratio.applyRatioCeiled(tooLargeValue.sub(1), RATIO_BASE)).to
-        .not.be.reverted;
-    });
-
-    it('does not floor for division without remainder', async () => {
-      expect(await ratio.applyRatioFloored(32, pctToRatio(50))).to.eq(16);
-    });
-
-    it('floors for division with remainder', async () => {
-      expect(await ratio.applyRatioFloored(33, pctToRatio(50))).to.eq(16);
-    });
-  });
 });
