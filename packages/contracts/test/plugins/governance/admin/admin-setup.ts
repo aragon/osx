@@ -42,6 +42,10 @@ describe('AdminSetup', function () {
     implementationAddress = await adminSetup.implementation();
   });
 
+  it('does not support the empty interface', async () => {
+    expect(await adminSetup.supportsInterface('0xffffffff')).to.be.false;
+  });
+
   it('creates admin address base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('Admin');
     const adminAddressContract = factory.attach(implementationAddress);

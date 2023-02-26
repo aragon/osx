@@ -77,7 +77,7 @@ describe('AddresslistVoting', function () {
     dummyActions = [
       {
         to: signers[0].address,
-        data: '0x00000000',
+        data: '0xffffffff',
         value: 0,
       },
     ];
@@ -154,7 +154,7 @@ describe('AddresslistVoting', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await voting.supportsInterface('0x00000000')).to.be.false;
+      expect(await voting.supportsInterface('0xffffffff')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {

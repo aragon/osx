@@ -79,6 +79,10 @@ describe('TokenVotingSetup', function () {
     ]);
   });
 
+  it('does not support the empty interface', async () => {
+    expect(await tokenVotingSetup.supportsInterface('0xffffffff')).to.be.false;
+  });
+
   it('creates token voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('TokenVoting');
     const tokenVoting = factory.attach(implementationAddress);

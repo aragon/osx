@@ -1971,7 +1971,7 @@ describe('Plugin Setup Processor', function () {
         // Solidity default values, the below overrides them with the correct data
         // So when PSP calls it, it can expect the same information as if it would call
         // the normal/original `proxy/plugin`.
-        fake.supportsInterface.whenCalledWith('0x00000000').returns(false);
+        fake.supportsInterface.whenCalledWith('0xffffffff').returns(false);
         fake.supportsInterface.whenCalledWith('0x01ffc9a7').returns(true);
         fake.supportsInterface.whenCalledWith('0x41de6830').returns(true);
       });
