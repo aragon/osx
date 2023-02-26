@@ -2,7 +2,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {Operation} from '../../utils/types';
-import {getContractAddress, managePermission} from '../helpers';
+import {getContractAddress, managePermissions} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
@@ -44,7 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'UPGRADE_REGISTRY_PERMISSION',
     },
   ];
-  await managePermission(managingDaoContract, grantPermissions);
+  await managePermissions(managingDaoContract, grantPermissions);
 };
 export default func;
 func.tags = ['Plugin_Registry_Permissions'];

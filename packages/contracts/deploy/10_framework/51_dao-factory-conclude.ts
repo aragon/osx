@@ -22,4 +22,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['DAOFactory'];
+func.tags = ['DAOFactory', 'Verify'];

@@ -24,4 +24,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['PluginRepoFactory'];
+func.tags = ['PluginRepoFactory', 'Verify'];

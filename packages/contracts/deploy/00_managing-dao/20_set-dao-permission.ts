@@ -5,7 +5,7 @@ import {Operation} from '../../utils/types';
 import {
   DAO_PERMISSIONS,
   getContractAddress,
-  managePermission,
+  managePermissions,
 } from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     };
   });
 
-  await managePermission(managingDaoContract, permissions);
+  await managePermissions(managingDaoContract, permissions);
 };
 export default func;
 func.tags = ['SetManagingDaoPermissions'];

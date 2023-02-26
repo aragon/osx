@@ -1,14 +1,20 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress} from '../helpers';
+import {
+  getContractAddress,
+  getENSAddress,
+  isENSDomainRegistered,
+} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {getNamedAccounts, ethers} = hre;
+  const {getNamedAccounts, ethers, network} = hre;
   const {deployer} = await getNamedAccounts();
 
   // Get info from .env
   const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoDomain =
+    process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
 
   if (!daoSubdomain)
     throw new Error('ManagingDAO subdomain has not been set in .env');
@@ -25,6 +31,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     daoRegistryAddress
   );
 
+  if (
+    await isENSDomainRegistered(
+      `${daoSubdomain}.${daoDomain}`,
+      await getENSAddress(hre)
+    )
+  ) {
+    // not beeing able to register the managing DAO means that something is not right with the framework deployment used.
+    // Either a fruntrun happened or something else. Thus we abort here
+    throw new Error(
+      `A DAO with ${daoSubdomain}.${daoDomain} is already registered! Aborting...`
+    );
+  }
   // Register `managingDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
     managingDAOAddress,

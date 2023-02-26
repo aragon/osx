@@ -2,7 +2,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {Operation} from '../../utils/types';
-import {getContractAddress, managePermission} from '../helpers';
+import {getContractAddress, managePermissions} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nSetting framework permission.`);
@@ -81,7 +81,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'UPGRADE_REGISTRAR_PERMISSION',
     },
   ];
-  await managePermission(managingDaoContract, grantPermissions);
+  await managePermissions(managingDaoContract, grantPermissions);
 };
 export default func;
 func.tags = ['ENS_Permissions'];

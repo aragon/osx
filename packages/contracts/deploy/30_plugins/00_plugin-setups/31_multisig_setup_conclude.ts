@@ -22,4 +22,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['MultisigSetup'];
+func.tags = ['MultisigSetup', 'Verify'];

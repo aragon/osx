@@ -18,7 +18,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Set the chosen DAO ENS domain (in step 1) to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
 - [ ] Set the chosen Plugin ENS domain (in step 2) to `NETWORK_PLUGIN_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_PLUGIN_ENS_DOMAIN`)
-- [ ] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`
+- [ ] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
 - [ ] Set the multisig members of the managing DAO as a comma (`,`) separated list to `MANAGINGDAO_MULTISIG_APPROVERS` in `.env`
 - [ ] Set the amount of minimum approvals the managing DAO needs to `MANAGINGDAO_MULTISIG_MINAPPROVALS` in `.env`
 
@@ -35,6 +35,10 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Go to the blockchain explorer and verify that each address is verified
   - [ ] If it is not try to verfiy it with `npx hardhat verify --network NETWORK ADDRESS CONTRUCTOR-ARGS`. More infos on how to use this command can be found here: [https://hardhat.org/hardhat-runner/docs/guides/verifying](https://hardhat.org/hardhat-runner/docs/guides/verifying)
   - [ ] If it is a proxy try to activate the blockchain explorer's proxy feature
+  - [ ] If the proxies are not verified with the `Similar Match Source Code` feature
+    - [ ] Remove `import '@openzeppelin/hardhat-upgrades'` from `packages/contracts/hardhat.config.ts`
+    - [ ] Verify one of the proxies
+    - [ ] Check if the other proxies are now verified with `Similar Match Source Code`
 - [ ] Update `active_contracts.json` with the new deployed addresses
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
 
