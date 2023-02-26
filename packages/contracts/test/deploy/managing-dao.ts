@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import {BigNumberish} from 'ethers';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 
 import hre, {ethers, deployments, getNamedAccounts, artifacts} from 'hardhat';
@@ -10,7 +9,6 @@ import {
   ENSSubdomainRegistrar,
   Multisig,
   PluginRepoRegistry,
-  PluginSetupProcessor,
 } from '../../typechain';
 import {EHRE} from '../../utils/types';
 

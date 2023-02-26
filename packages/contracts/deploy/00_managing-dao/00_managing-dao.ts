@@ -1,6 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+import {MANAGING_DAO_METADATA, uploadToIPFS} from '../helpers';
+
 /** NOTE:
  * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */
@@ -8,7 +10,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nDeploying ManagingDao.`);
 
-  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deployments, getNamedAccounts, ethers, network} = hre;
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
@@ -17,8 +19,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ` At the final step when Multisig is available, it will be installed on managingDAO and all roles for the Deployer will be revoked.`
   );
 
+  const metadataCIDPath = await uploadToIPFS(
+    JSON.stringify(MANAGING_DAO_METADATA),
+    network.name
+  );
+
   const initializeParams = {
-    metadata: '0x',
+    metadata: ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`)
+    ),
     initialOwner: deployer,
     trustedForwarder: ethers.constants.AddressZero,
     daoURI: '0x',

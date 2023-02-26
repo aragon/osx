@@ -20,6 +20,24 @@ export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
   mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
 };
 
+export const MANAGING_DAO_METADATA = {
+  name: 'Aragon Managing DAO',
+  description:
+    'Aragon OSx includes a group of global smart contracts that allow for a DAO ecosystem to be built on top. These contracts will require future improvements and general maintenance. The Managing DAO is intended to perform such maintenance tasks and holds the permissions to deliver any new capabilities that are added in the future.',
+  avatar:
+    'https://ipfs.eth.aragon.network/ipfs/QmVyy3ci7F2zHG6JUJ1XbcwLKuxWrQ6hqNvSnjmDmdYJzP/',
+  links: [
+    {
+      name: 'Web site',
+      url: 'https://www.aragon.org',
+    },
+    {
+      name: 'Developer Portal',
+      url: 'https://devs.aragon.org/',
+    },
+  ],
+};
+
 export const DAO_PERMISSIONS = [
   'ROOT_PERMISSION',
   'UPGRADE_DAO_PERMISSION',
