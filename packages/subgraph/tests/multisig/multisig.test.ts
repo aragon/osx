@@ -39,6 +39,7 @@ import {
   createGetProposalCall,
   createNewMultisigSettingsUpdatedEvent
 } from './utils';
+import {bigIntToBytes32} from '../../src/utils/bytes';
 
 let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
@@ -93,7 +94,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   let entityID =
     Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
-    BigInt.fromString(proposalId).toHexString();
+    bigIntToBytes32(BigInt.fromString(proposalId));
   let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks

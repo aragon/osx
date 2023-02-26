@@ -75,7 +75,7 @@ export function _handleProposalCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.proposalId.toHexString() +
+        bigIntToBytes32(event.params.proposalId) +
         '_' +
         index.toString();
 

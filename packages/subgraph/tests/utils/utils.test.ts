@@ -1,6 +1,6 @@
 import {BigInt} from '@graphprotocol/graph-ts';
 
-import {assert, describe, test, log} from 'matchstick-as/assembly/index';
+import {assert, describe, test} from 'matchstick-as/assembly/index';
 import {bigIntToBytes32} from '../../src/utils/bytes';
 import {
   HALF_UINT256_BYTES32,

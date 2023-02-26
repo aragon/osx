@@ -23,6 +23,7 @@ import {
   handleProposalExecuted,
   _handleProposalCreated
 } from '../../src/packages/admin/admin';
+import {bigIntToBytes32} from '../../src/utils/bytes';
 
 const actionValue = '0';
 const actionData = '0x00000000';
@@ -54,7 +55,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   let entityID =
     Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
-    BigInt.fromString(PROPOSAL_ID).toHexString();
+    bigIntToBytes32(BigInt.fromString(PROPOSAL_ID));
 
   // checks
   assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
@@ -108,7 +109,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   let entityID =
     Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
-    BigInt.fromString(PROPOSAL_ID).toHexString();
+    bigIntToBytes32(BigInt.fromString(PROPOSAL_ID));
 
   let adminstratorAddress = Address.fromString(ADDRESS_ONE);
 

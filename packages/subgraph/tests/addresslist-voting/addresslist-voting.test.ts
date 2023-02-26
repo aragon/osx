@@ -32,7 +32,8 @@ import {
   END_DATE,
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
+  PROPOSAL_ENTITY_ID
 } from '../constants';
 import {
   createDummyActions,
@@ -49,6 +50,7 @@ import {
   getProposalCountCall,
   createAddresslistVotingProposalEntityState
 } from './utils';
+import {bigIntToBytes32} from '../../src/utils/bytes';
 
 let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
@@ -58,8 +60,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   let addresslistVotingPlugin = new AddresslistVotingPlugin(
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
-  addresslistVotingPlugin.dao = DAO_ADDRESS
-  addresslistVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS)
+  addresslistVotingPlugin.dao = DAO_ADDRESS;
+  addresslistVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   addresslistVotingPlugin.save();
 
   // create calls
@@ -111,7 +113,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   let entityID =
     Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
-    BigInt.fromString(proposalId).toHexString();
+    bigIntToBytes32(BigInt.fromString(proposalId));
   let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks
@@ -454,14 +456,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
 
 test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() + '_' + '0x0';
-  createAddresslistVotingProposalEntityState(
-    entityID,
-    DAO_ADDRESS,
-    CONTRACT_ADDRESS,
-    ADDRESS_ONE
-  );
+  let proposal = createAddresslistVotingProposalEntityState();
 
   // create event
   let event = createNewProposalExecutedEvent('0', CONTRACT_ADDRESS);
@@ -470,23 +465,33 @@ test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', 
   handleProposalExecuted(event);
 
   // checks
-  assert.fieldEquals('AddresslistVotingProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AddresslistVotingProposal', entityID, 'executed', 'true');
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    proposal.id,
+    'id',
+    proposal.id
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    proposal.id,
+    'executed',
+    'true'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    proposal.id,
     'executionDate',
     event.block.timestamp.toString()
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    proposal.id,
     'executionBlockNumber',
     event.block.number.toString()
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
-    entityID,
+    proposal.id,
     'executionTxHash',
     event.transaction.hash.toHexString()
   );
@@ -498,8 +503,8 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
   // create state
   let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let addresslistVotingPlugin = new AddresslistVotingPlugin(entityID);
-  addresslistVotingPlugin.dao = DAO_ADDRESS
-  addresslistVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS)
+  addresslistVotingPlugin.dao = DAO_ADDRESS;
+  addresslistVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   addresslistVotingPlugin.save();
 
   // create event

@@ -1,4 +1,5 @@
-import {Address} from '@graphprotocol/graph-ts';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {bigIntToBytes32} from '../src/utils/bytes';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 export const ADDRESS_ONE = '0x0000000000000000000000000000000000000001';
@@ -18,7 +19,9 @@ export const THREE = '3';
 
 export const PROPOSAL_ID = ZERO;
 export const PROPOSAL_ENTITY_ID =
-  Address.fromString(CONTRACT_ADDRESS).toHexString() + '_0x' + PROPOSAL_ID;
+  Address.fromString(CONTRACT_ADDRESS).toHexString() +
+  '_' +
+  bigIntToBytes32(BigInt.fromString(PROPOSAL_ID));
 
 export const STRING_DATA = 'Some String Data ...';
 
