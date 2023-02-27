@@ -45,7 +45,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   preparationEntity.pluginRepo = event.params.pluginSetupRepo.toHexString();
   preparationEntity.pluginVersion = pluginVersionId;
   preparationEntity.data = event.params.data;
-  preparationEntity.pluginAddress =  event.params.plugin;
+  preparationEntity.pluginAddress = event.params.plugin;
   preparationEntity.helpers = helpers;
   preparationEntity.type = 'Installation';
   preparationEntity.save();
@@ -73,6 +73,8 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   pluginEntity.state = 'InstallationPrepared';
   pluginEntity.dao = dao;
   pluginEntity.save();
+
+  addPlugin(dao, event.params.plugin);
 }
 
 export function handleInstallationApplied(event: InstallationApplied): void {
@@ -96,13 +98,11 @@ export function handleInstallationApplied(event: InstallationApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
-  pluginEntity.pluginAddress =  event.params.plugin;
+  pluginEntity.pluginAddress = event.params.plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
   pluginEntity.save();
-
-  addPlugin(dao, event.params.plugin);
 }
 
 export function handleUpdatePrepared(event: UpdatePrepared): void {

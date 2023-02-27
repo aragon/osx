@@ -11,7 +11,9 @@ import {
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
   START_DATE,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
+  PROPOSAL_ENTITY_ID,
+  ZERO
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -23,6 +25,7 @@ import {
   handleProposalExecuted,
   _handleProposalCreated
 } from '../../src/packages/admin/admin';
+import {getProposalId} from '../../src/utils/proposals';
 
 const actionValue = '0';
 const actionData = '0x00000000';
@@ -51,10 +54,10 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    BigInt.fromString(PROPOSAL_ID).toHexString();
+  let entityID = getProposalId(
+    Address.fromString(CONTRACT_ADDRESS),
+    BigInt.fromString(PROPOSAL_ID)
+  );
 
   // checks
   assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
@@ -105,28 +108,28 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
   adminPlugin.save();
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    BigInt.fromString(PROPOSAL_ID).toHexString();
+  let entityID = getProposalId(
+    Address.fromString(CONTRACT_ADDRESS),
+    BigInt.fromString(PROPOSAL_ID)
+  );
 
-  let adminstratorAddress = Address.fromString(ADDRESS_ONE);
+  let administratorAddress = Address.fromString(ADDRESS_ONE);
 
   let adminProposal = new AdminProposal(entityID);
   adminProposal.dao = DAO_ADDRESS;
   adminProposal.plugin = pluginId;
   adminProposal.proposalId = BigInt.fromString(PROPOSAL_ID);
-  adminProposal.creator = adminstratorAddress;
+  adminProposal.creator = administratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
   adminProposal.createdAt = BigInt.fromString(START_DATE);
   adminProposal.startDate = BigInt.fromString(START_DATE);
   adminProposal.endDate = BigInt.fromString(START_DATE);
   adminProposal.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
-  adminProposal.administrator = adminstratorAddress.toHexString();
+  adminProposal.administrator = administratorAddress.toHexString();
   adminProposal.save();
 
-  const actionId = CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;
+  const actionId = PROPOSAL_ENTITY_ID.concat('_').concat(ZERO);
   let action = new Action(actionId);
   action.to = Address.fromString(ADDRESS_TWO);
   action.value = BigInt.fromString(actionValue);

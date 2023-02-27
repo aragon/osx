@@ -1,4 +1,4 @@
-import {ethereum, Bytes, Address, BigInt, log} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {Dao} from '../../generated/schema';
 

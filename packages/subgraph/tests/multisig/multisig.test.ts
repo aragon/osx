@@ -39,8 +39,8 @@ import {
   createGetProposalCall,
   createNewMultisigSettingsUpdatedEvent
 } from './utils';
+import {getProposalId} from '../../src/utils/proposals';
 
-let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
@@ -58,7 +58,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    proposalId,
+    PROPOSAL_ID,
     false,
 
     // ProposalParameters
@@ -77,7 +77,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
 
   // create event
   let event = createNewProposalCreatedEvent(
-    proposalId,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     END_DATE,
@@ -90,17 +90,18 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    BigInt.fromString(proposalId).toHexString();
+  let entityID = getProposalId(
+    Address.fromString(CONTRACT_ADDRESS),
+    BigInt.fromString(PROPOSAL_ID)
+  );
+
   let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks
   assert.fieldEquals('MultisigProposal', entityID, 'id', entityID);
   assert.fieldEquals('MultisigProposal', entityID, 'dao', DAO_ADDRESS);
   assert.fieldEquals('MultisigProposal', entityID, 'plugin', packageId);
-  assert.fieldEquals('MultisigProposal', entityID, 'proposalId', proposalId);
+  assert.fieldEquals('MultisigProposal', entityID, 'proposalId', PROPOSAL_ID);
   assert.fieldEquals('MultisigProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'startDate', START_DATE);
   assert.fieldEquals('MultisigProposal', entityID, 'endDate', END_DATE);
@@ -156,7 +157,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    proposalId,
+    PROPOSAL_ID,
     false,
 
     // ProposalParameters

@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
 import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
 import {getTransferId, TransferType} from './common';

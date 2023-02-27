@@ -21,6 +21,7 @@ import {
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {fetchERC20} from '../../utils/tokens/erc20';
+import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -35,13 +36,13 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = getProposalId(event.address, pluginProposalId);
 
   let proposalEntity = new TokenVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.proposalId = event.params.proposalId;
+  proposalEntity.proposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
@@ -51,7 +52,7 @@ export function _handleProposalCreated(
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = TokenVoting.bind(event.address);
-  let proposal = contract.try_getProposal(event.params.proposalId);
+  let proposal = contract.try_getProposal(pluginProposalId);
 
   if (!proposal.reverted) {
     proposalEntity.open = proposal.value.value0;
@@ -75,12 +76,9 @@ export function _handleProposalCreated(
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
+      let actionId = getProposalId(event.address, pluginProposalId)
+        .concat('_')
+        .concat(index.toString());
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -113,9 +111,10 @@ export function _handleProposalCreated(
 export function handleVoteCast(event: VoteCast): void {
   let pluginId = event.address.toHexString();
   let voter = event.params.voter.toHexString();
-  let voterId = pluginId + '_' + voter;
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
-  let voterVoteId = voter + '_' + proposalId;
+  let voterId = pluginId.concat('_').concat(voter);
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = getProposalId(event.address, pluginProposalId);
+  let voterVoteId = voter.concat('_').concat(proposalId);
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
   if (voteOption === 'None') {
@@ -155,7 +154,7 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     let contract = TokenVoting.bind(event.address);
-    let proposal = contract.try_getProposal(event.params.proposalId);
+    let proposal = contract.try_getProposal(pluginProposalId);
 
     if (!proposal.reverted) {
       let parameters = proposal.value.value2;
@@ -202,11 +201,13 @@ export function handleVoteCast(event: VoteCast): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let pluginProposalId = event.params.proposalId;
+  let proposalId = getProposalId(event.address, pluginProposalId);
+
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executable = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;

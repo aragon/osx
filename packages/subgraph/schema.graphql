@@ -305,7 +305,7 @@ enum VotingMode {
 # TokenVoting
 
 type TokenVotingPlugin implements IPluginInstallation @entity {
-  "TODO: attributes should be appended to Plugins once plugin is seperated from Aragon OSx"
+  "TODO: attributes should be appended to Plugins once plugin is separated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!

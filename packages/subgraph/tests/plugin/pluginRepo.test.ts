@@ -1,8 +1,8 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {ADDRESS_ONE, ADDRESS_TWO} from '../constants';
+import {ADDRESS_ONE} from '../constants';
 import {createVersionCreated} from './utils';
 import {handleVersionCreated} from '../../src/plugin/pluginRepo';
-import {Address, Bytes} from '@graphprotocol/graph-ts';
+import {Bytes} from '@graphprotocol/graph-ts';
 
 test('versionCreated event', () => {
   let event = createVersionCreated(
