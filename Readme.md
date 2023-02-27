@@ -101,6 +101,14 @@ The [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/c
 
 The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
 
+## Audit
+
+The core smart contracts have been audited by [Halborn](https://www.halborn.com/). 
+
+- [Security audit report](./audits/AragonOSx-security-audit-report-halborn.pdf)
+- The commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
+- February 24th 2023
+
 ## Tests
 
 To run tests, run these commands in the root folder in your terminal:
