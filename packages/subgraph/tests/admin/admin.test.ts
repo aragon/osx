@@ -12,7 +12,8 @@ import {
   CONTRACT_ADDRESS,
   START_DATE,
   ALLOW_FAILURE_MAP,
-  PROPOSAL_ENTITY_ID
+  PROPOSAL_ENTITY_ID,
+  ZERO
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -128,7 +129,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.administrator = administratorAddress.toHexString();
   adminProposal.save();
 
-  const actionId = PROPOSAL_ENTITY_ID.concat('_').concat(PROPOSAL_ID);
+  const actionId = PROPOSAL_ENTITY_ID.concat('_').concat(ZERO);
   let action = new Action(actionId);
   action.to = Address.fromString(ADDRESS_TWO);
   action.value = BigInt.fromString(actionValue);
