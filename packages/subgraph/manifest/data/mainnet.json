@@ -1,6 +1,6 @@
 {
   "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
-  "network": "goerli",
+  "network": "mainnet",
   "dataSources": {
     "DAORegistry": {
       "name": "DAORegistry",
