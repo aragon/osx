@@ -41,7 +41,7 @@ Let's again start with the deployment and initialization. Here, it is simple bec
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx-contracts/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
 
 contract SimpleAdminSetup is PluginSetup {
@@ -63,7 +63,7 @@ The skeleton of our `SimpleAdminSetup` contract inheriting from `PluginSetup` lo
 <summary><code>SimpleAdminSetup</code>: The Sekeleton</summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx-contracts/core/permissions/PermissionsLib.sol';
 
 contract SimpleAdminSetup is PluginSetup {
   /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
@@ -233,8 +233,8 @@ pragma solidity 0.8.17;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
-import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {PermissionLib} from '@aragon/osx-contracts/core/permissions/PermissionsLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx-contracts/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
 
 contract SimpleAdminSetup is PluginSetup {
