@@ -3,16 +3,16 @@
     "version": "1.0.0",
     "description": "The Aragon OSx Solidity contracts",
     "publishConfig": {
-      "access": "public"
+        "access": "public"
     },
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/aragon/osx.git"
+        "type": "git",
+        "url": "git+https://github.com/aragon/osx.git"
     },
     "author": "",
     "license": "AGPL-3.0-or-later",
     "bugs": {
-      "url": "https://github.com/aragon/osx/issues"
+        "url": "https://github.com/aragon/osx/issues"
     },
     "homepage": "https://github.com/aragon/osx#readme"
-  }
+}
