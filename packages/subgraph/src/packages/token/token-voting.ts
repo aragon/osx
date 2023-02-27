@@ -76,9 +76,9 @@ export function _handleProposalCreated(
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId = getProposalId(event.address, pluginProposalId).concat(
-        index.toString()
-      );
+      let actionId = getProposalId(event.address, pluginProposalId)
+        .concat('_')
+        .concat(index.toString());
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
