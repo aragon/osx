@@ -33,7 +33,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: 'yarn'
+          cache: "yarn"
           node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
@@ -52,7 +52,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: 'yarn'
+          cache: "yarn"
           node-version: 16
       - name: Install dependencies
         run: yarn
@@ -61,7 +61,7 @@ jobs:
       - name: Build manifest
         run: yarn run manifest
         env:
-          NETWORK_NAME: 'goerli'
+          NETWORK_NAME: "goerli"
       - name: Build
         run: yarn run build
       - name: Run Tests

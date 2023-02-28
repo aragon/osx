@@ -52,7 +52,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: 'yarn'
+          cache: "yarn"
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies
@@ -79,7 +79,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: updates changelog.md
-        run: VERSION=$(cat package.json | jq -r .version)
+        run:
+          VERSION=$(cat package.json | jq -r .version)
           sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./packages/${{ matrix.package }}/CHANGELOG.md"
       - uses: actions/upload-artifact@v2
         with:
