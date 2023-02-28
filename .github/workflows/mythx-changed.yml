@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       mode:
-        description: "Mythx scan mode (quick|standard|deep)"
+        description: 'Mythx scan mode (quick|standard|deep)'
         required: true
         type: string
     secrets:
@@ -22,7 +22,7 @@ on:
         required: true
         type: string
       mode:
-        description: "Mythx scan mode (quick|standard|deep)"
+        description: 'Mythx scan mode (quick|standard|deep)'
         required: true
         default: standard
         type: choice
@@ -45,8 +45,8 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: "yarn"
-          node-version: 14
+          cache: 'yarn'
+          node-version: 16
       - uses: actions/setup-python@v4
       - name: Install mythx-cli
         run: pip install mythx-cli
