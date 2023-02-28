@@ -8,9 +8,7 @@ Aragon OSx makes it easy for you to write, maintain, and distribute your own plu
 
 ### Hello, World!
 
-To use the Aragon OSx contracts inside your project, import them with `yarn add @aragon/core-contracts` and start developing your own plugin implementation:
-
-<!-- TODO: rename @aragon/core-contracts to @aragon/os-contracts and make sure .sol files are part of the NPM package-->
+To use the Aragon OSx contracts inside your project, import them with `yarn add @aragon/osx` and start developing your own plugin implementation:
 
 <details>
 <summary><code>GreeterPlugin</code></summary>

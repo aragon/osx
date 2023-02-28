@@ -9,7 +9,20 @@ Within this monorepo, you will be able to find 3 individual packages:
 - [Subgraph](https://github.com/aragon/osx/tree/develop/packages/subgraph): contains all code generating our subgraph and event indexing.
 - [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): contains the connection between the ethers package and our contracts.
 
+The contents of this repository are distributed via 3 different NPM packages:
+- `@aragon/osx`: The source files, including the protocol contracts and interfaces
+- `@aragon/osx-artifacts`: The contracts bytecode and ABI to use the protocol or deploy it
+- `@aragon/osx-ethers`: The TypeScript wrappers to use the protocol or deploy it using ethers.js
+
 For more information on the individual packages, please read the respective `README.md`.
+
+## Audit
+
+The core smart contracts have been audited by [Halborn](https://www.halborn.com/). 
+
+- [Security audit report](./audits/AragonOSx-security-audit-report-halborn.pdf)
+- The commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
+- February 24th 2023
 
 ## Contributing
 
@@ -100,14 +113,6 @@ You can find all plugins built by the Aragon team [here](https://github.com/arag
 The [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts) emits events that get indexed within our `subgraph`. This `subgraph`, whose [source code can be found here](https://github.com/aragon/osx/tree/develop/packages/subgraph), is what then fuels the [Aragon SDK](https://github.com/aragon/sdk).
 
 The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
-
-## Audit
-
-The core smart contracts have been audited by [Halborn](https://www.halborn.com/). 
-
-- [Security audit report](./audits/AragonOSx-security-audit-report-halborn.pdf)
-- The commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
-- February 24th 2023
 
 ## Tests
 
