@@ -5,6 +5,8 @@ import {
   getContractAddress,
   getENSAddress,
   isENSDomainRegistered,
+  MANAGING_DAO_METADATA,
+  uploadToIPFS,
 } from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -52,6 +54,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await registerTx.wait();
   console.log(
     `Registered the (managingDAO: ${managingDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
+  );
+
+  // Set Metadata for the Managing DAO
+  const managingDaoContract = await ethers.getContractAt(
+    'DAO',
+    managingDAOAddress
+  );
+
+  const metadataCIDPath = await uploadToIPFS(
+    JSON.stringify(MANAGING_DAO_METADATA),
+    network.name
+  );
+
+  await managingDaoContract.setMetadata(
+    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`))
   );
 };
 export default func;

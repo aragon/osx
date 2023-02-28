@@ -19,15 +19,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ` At the final step when Multisig is available, it will be installed on managingDAO and all roles for the Deployer will be revoked.`
   );
 
-  const metadataCIDPath = await uploadToIPFS(
-    JSON.stringify(MANAGING_DAO_METADATA),
-    network.name
-  );
-
   const initializeParams = {
-    metadata: ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`)
-    ),
+    metadata: '0x',
     initialOwner: deployer,
     trustedForwarder: ethers.constants.AddressZero,
     daoURI: '0x',

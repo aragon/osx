@@ -47,6 +47,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       who: {name: 'Deployer', address: deployer},
       permission: 'APPLY_INSTALLATION_PERMISSION',
     },
+    {
+      operation: Operation.Grant,
+      where: {name: 'DAO', address: managingDAOAddress},
+      who: {name: 'Deployer', address: deployer},
+      permission: 'SET_METADATA_PERMISSION',
+    },
   ];
   await managePermissions(managingDaoContract, grantPermissions);
 };
