@@ -19,7 +19,7 @@ To use the Aragon OSx contracts inside your project, import them with `yarn add 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {Plugin, IDAO} from '@aragon/osx-contracts/core/plugin/Plugin.sol';
+import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
 contract GreeterPlugin is Plugin {
   constructor(IDAO _dao) Plugin(_dao) {}
@@ -41,8 +41,8 @@ Next, you write a plugin setup contract:
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {PermissionLib} from '@aragon/osx-contracts/core/permissions/PermissionsLib.sol';
-import {PluginSetup} from '@aragon/osx-contracts/framework/plugin/setup/PluginSetup.sol';
+import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
+import {PluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import './MyPlugin.sol';
 
 contract GreeterSetup is PluginSetup {
