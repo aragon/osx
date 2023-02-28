@@ -2,6 +2,14 @@
 
 Welcome to the contracts powering the Aragon OSx Protocol!
 
+```sh
+# import the JSON ABI and the bytecode
+yarn add @aragon/osx-artifacts
+
+# import the source files to build on top
+yarn add @aragon/osx-contracts
+```
+
 ## Get Started
 
 To get started running your repository locally, run these commands on the project's root folder in your terminal:
