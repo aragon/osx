@@ -12,7 +12,7 @@ Now, we show the setup contracts associated with the 3 builds we have implemente
 <summary><code>SimpleStorageBuild0</code></summary>
 
 ```solidity
-import {PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
+import {PluginUUPSUpgradeable} from '@aragon/osx-contracts/core/plugin/PluginUUPSUpgradeable.sol';
 
 /// @title SimpleStorage v1.0
 contract SimpleStorageBuild0 is PluginUUPSUpgradeable {
@@ -40,8 +40,8 @@ For the first version, the setup is very similar to the [setup example for the n
 <summary><code>SimpleStorageBuild0Setup</code></summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
-import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {PermissionLib} from '@aragon/osx-contracts/core/permissions/PermissionsLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx-contracts/framework/plugin/setup/PluginSetup.sol';
 import {SimpleStorageBuild0} from './SimpleStorageBuild0.sol';
 
 /// @title SimpleStorageSetup v1.0

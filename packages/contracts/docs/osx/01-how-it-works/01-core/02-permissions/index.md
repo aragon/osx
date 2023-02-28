@@ -21,7 +21,7 @@ Identifiers, permissions, and modifiers link everything together.
 
 To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of Aragon OSx contracts. They look something like this:
 
-```solidity title="@aragon/osx/core/dao/DAO.sol"
+```solidity title="@aragon/osx-contracts/core/dao/DAO.sol"
 bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
 ```
 
@@ -29,7 +29,7 @@ bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
 
 A permission specifies an address `who` being allowed to call certain functions on a contract address `where`. In the `PermissionManager` contract, permissions are defined as the concatenation of the word `"PERMISSION"` with the `who` and `where` address, as well as the `bytes32` permission identifier `permissionId`.
 
-```solidity title="@aragon/osx/core/permission/PermissionManager.sol"
+```solidity title="@aragon/osx-contracts/core/permission/PermissionManager.sol"
 function permissionHash(
   address _where,
   address _who,
@@ -41,7 +41,7 @@ function permissionHash(
 
 This concatenated information is then stored as `keccak256` hashes inside a mapping like this one:
 
-```solidity title="@aragon/osx/core/permission/PermissionManager.sol"
+```solidity title="@aragon/osx-contracts/core/permission/PermissionManager.sol"
 mapping(bytes32 => address) internal permissionsHashed;
 ```
 
@@ -53,7 +53,7 @@ Using **authorization modifiers** is how we make functions permissioned. Permiss
 
 For example, one can call the `execute` function in the DAO when the address making the call has been granted the `EXECUTE_PERMISSION_ID` permission.
 
-```solidity title="@aragon/osx/core/dao/DAO.sol"
+```solidity title="@aragon/osx-contracts/core/dao/DAO.sol"
 function execute(
   bytes32 callId,
   Action[] calldata _actions,
@@ -74,7 +74,7 @@ To manage permissions, the DAO contract has the `grant`, `revoke` and `grantWith
 The `grant` and `revoke` functions are the main functions we use to manage permissions.
 Both receive the `_permissionId` identifier of the permission and the `_where` and `_who` addresses as arguments.
 
-```solidity title="@aragon/osx/core/permission/PermissionManager.sol"
+```solidity title="@aragon/osx-contracts/core/permission/PermissionManager.sol"
 function grant(
   address _where,
   address _who,
@@ -99,7 +99,7 @@ Exceptions are, again, the [DAO creation](../../02-framework/01-dao-creation/ind
 
 Aragon OSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
 
-```solidity title="@aragon/osx/core/permission/PermissionManager.sol"
+```solidity title="@aragon/osx-contracts/core/permission/PermissionManager.sol"
 function grantWithCondition(
   address _where,
   address _who,

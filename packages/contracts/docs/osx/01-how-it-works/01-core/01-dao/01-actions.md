@@ -6,7 +6,7 @@ title: Advanced Action Execution
 
 The DAO's `execute` function is part of the `DAO.sol` contract and has the following function header:
 
-```solidity title="@aragon/osx/core/dao/DAO.sol"
+```solidity title="@aragon/osx-contracts/core/dao/DAO.sol"
 function execute(
         bytes32 _callId,
         Action[] calldata _actions,
@@ -27,7 +27,7 @@ It offers two features that we will dive into in this article:
 
 In our framework, actions are represented by a solidity struct:
 
-```solidity title="@aragon/osx/core/dao/IDAO.sol"
+```solidity title="@aragon/osx-contracts/core/dao/IDAO.sol"
 /// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
 /// @param to The address to call.
 /// @param value The native token value to be sent with the call.
