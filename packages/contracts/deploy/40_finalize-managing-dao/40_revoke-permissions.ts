@@ -58,6 +58,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       who: {name: 'Deployer', address: deployer},
       permission: 'ROOT_PERMISSION',
     },
+    {
+      operation: Operation.Revoke,
+      where: {name: 'DAO', address: managingDAOAddress},
+      who: {name: 'Deployer', address: deployer},
+      permission: 'SET_METADATA_PERMISSION',
+    },
   ];
   await managePermissions(managingDaoContract, revokePermissions);
 

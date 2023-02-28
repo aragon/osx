@@ -67,22 +67,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  const SET_METADATA_PERMISSION = ethers.utils.id('SET_METADATA_PERMISSION');
-
-  await managingDaoContract.grant(
-    managingDAOAddress,
-    deployer,
-    SET_METADATA_PERMISSION
-  );
-
   await managingDaoContract.setMetadata(
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`))
-  );
-
-  await managingDaoContract.revoke(
-    managingDAOAddress,
-    deployer,
-    SET_METADATA_PERMISSION
   );
 };
 export default func;
