@@ -6,9 +6,6 @@ title: Proposal Review
 
 :::note
 This page is a stub and more sections will be added in the future.
-:::
-
-Proposa
 
 <!--
 ### Financial Proposals
