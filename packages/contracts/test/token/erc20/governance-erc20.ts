@@ -99,10 +99,6 @@ describe('GovernanceERC20', function () {
       expect(await token.supportsInterface('0xffffffff')).to.be.false;
     });
 
-    it("", () => {
-      
-    })
-
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
       expect(await token.supportsInterface(getInterfaceID(iface))).to.be.true;
