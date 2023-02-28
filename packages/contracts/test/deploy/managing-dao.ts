@@ -1,11 +1,12 @@
 import {expect} from 'chai';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 
-import hre, {ethers, deployments, getNamedAccounts, artifacts} from 'hardhat';
+import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {Deployment} from 'hardhat-deploy/dist/types';
 import {
   DAO,
   DAORegistry,
+  DAO__factory,
   ENSSubdomainRegistrar,
   Multisig,
   PluginRepoRegistry,
@@ -53,10 +54,10 @@ describe('Managing DAO', function () {
     newImplementationAddress: string
   ) {
     // create proposal to upgrade to new implementation
-    const iface = new ethers.utils.Interface(managingDaoDeployment.abi);
-    const data = iface.encodeFunctionData('upgradeTo', [
-      newImplementationAddress,
-    ]);
+    const data = DAO__factory.createInterface().encodeFunctionData(
+      'upgradeTo',
+      [newImplementationAddress]
+    );
     const actions = contractAddress.map(contract => {
       return {to: contract, value: 0, data: data};
     });
@@ -283,7 +284,7 @@ describe('Managing DAO', function () {
 
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
-      ensSubdomainRegistrars.map(e => e.address),
+      ensSubdomainRegistrars.map(ensSR => ensSR.address),
       ensSubdomainRegistrarV2Deployment.address
     );
 
@@ -335,7 +336,7 @@ describe('Managing DAO', function () {
 
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
-      Object.values(ehre.aragonPluginRepos).map(e => e),
+      Object.values(ehre.aragonPluginRepos),
       pluginRepoV2Deployment.address
     );
 
