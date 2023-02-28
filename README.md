@@ -10,9 +10,9 @@ Within this monorepo, you will be able to find 3 individual packages:
 - [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): contains the connection between the ethers package and our contracts.
 
 The contents of this repository are distributed via 3 different NPM packages:
-- `@aragon/osx-contracts`: The source files, including the protocol contracts and interfaces
+- `@aragon/osx`: The source files, including the protocol contracts and interfaces
 - `@aragon/osx-artifacts`: The contracts bytecode and ABI to use the protocol or deploy it
-- `@aragon/osx-ethers`: The TypeScript wrappers to use the protocol or deploy it
+- `@aragon/osx-ethers`: The TypeScript wrappers to use the protocol or deploy it using ethers.js
 
 For more information on the individual packages, please read the respective `README.md`.
 

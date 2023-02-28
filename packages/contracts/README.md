@@ -7,7 +7,7 @@ Welcome to the contracts powering the Aragon OSx Protocol!
 yarn add @aragon/osx-artifacts
 
 # import the source files to build on top
-yarn add @aragon/osx-contracts
+yarn add @aragon/osx
 ```
 
 ## Get Started
