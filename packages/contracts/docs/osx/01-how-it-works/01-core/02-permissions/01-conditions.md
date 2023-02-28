@@ -7,7 +7,7 @@ title: Conditions
 Permission conditions relay the decision if an authorized call is permitted to another contract.
 This contract must implement the `IPermissionCondition` interface.
 
-```solidity title="@aragon/osx-contracts/core/permission/IPermissionCondition.sol"
+```solidity title="@aragon/osx/core/permission/IPermissionCondition.sol"
 interface IPermissionCondition {
   /// @notice This method is used to check if a call is permitted.
   /// @param _where The address of the target contract.
