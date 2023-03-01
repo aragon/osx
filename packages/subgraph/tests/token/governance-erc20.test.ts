@@ -5,19 +5,18 @@ import {
   clearStore,
   dataSourceMock,
   test,
-  describe,
+  describe
 } from 'matchstick-as';
 import {
   ADDRESS_FIVE,
   ADDRESS_ONE,
   ADDRESS_SIX,
   ADDRESS_TWO,
-  ONE_ETH,
+  ONE_ETH
 } from '../constants';
-import {createNewERC20TransferEvent} from './utils';
+import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
 import {handleTransfer} from '../../src/packages/token/governance-erc20';
-import {Address, BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
-import {TokenVotingMember} from '../../generated/schema';
+import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
 
 describe('Governance ERC20', () => {
   beforeAll(() => {
@@ -79,13 +78,11 @@ describe('Governance ERC20', () => {
     });
 
     test('it should update an existing from entity', () => {
-      const fromUserId = ADDRESS_ONE.concat('_').concat(ADDRESS_SIX);
-
-      const user = new TokenVotingMember(fromUserId);
-      user.address = Address.fromString(ADDRESS_ONE);
-      user.plugin = ADDRESS_FIVE; // uses other plugin address to make sure that the code reuses the entity
-      user.balance = BigInt.fromString(ONE_ETH).times(BigInt.fromString('10'));
-      user.save();
+      const fromUserId = createTokenVotingMember(
+        ADDRESS_ONE,
+        ADDRESS_SIX,
+        ONE_ETH + '0'
+      );
 
       const mockEvent = createNewERC20TransferEvent(
         ADDRESS_ONE,
@@ -105,7 +102,7 @@ describe('Governance ERC20', () => {
         'TokenVotingMember',
         fromUserId,
         'plugin',
-        ADDRESS_FIVE
+        ADDRESS_SIX
       );
       assert.fieldEquals(
         'TokenVotingMember',
@@ -118,13 +115,11 @@ describe('Governance ERC20', () => {
     });
 
     test('it should update an existing to entity', () => {
-      const toUserId = ADDRESS_TWO.concat('_').concat(ADDRESS_SIX);
-
-      const user = new TokenVotingMember(toUserId);
-      user.address = Address.fromString(ADDRESS_TWO);
-      user.plugin = ADDRESS_FIVE; // uses other plugin address to make sure that the code reuses the entity
-      user.balance = BigInt.fromString(ONE_ETH).times(BigInt.fromString('10'));
-      user.save();
+      const toUserId = createTokenVotingMember(
+        ADDRESS_TWO,
+        ADDRESS_SIX,
+        ONE_ETH + '0'
+      );
 
       const mockEvent = createNewERC20TransferEvent(
         ADDRESS_ONE,
@@ -135,7 +130,7 @@ describe('Governance ERC20', () => {
       handleTransfer(mockEvent);
       assert.fieldEquals('TokenVotingMember', toUserId, 'id', toUserId);
       assert.fieldEquals('TokenVotingMember', toUserId, 'address', ADDRESS_TWO);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'plugin', ADDRESS_FIVE);
+      assert.fieldEquals('TokenVotingMember', toUserId, 'plugin', ADDRESS_SIX);
       assert.fieldEquals(
         'TokenVotingMember',
         toUserId,
