@@ -1,4 +1,4 @@
-{{h 2}} {{visibility}} {{toLowerCase type}} `{{name}}`
+{{h 1}} {{visibility}} {{toLowerCase type}} `{{name}}`
 
 {{{natspec.notice}}}
 
@@ -12,12 +12,12 @@
 | Input | Type | Description |
 |:----- | ---- | ----------- |
 {{#each params}}
-| {{name}} | {{type}} | {{{joinLines natspec}}} |
+| `{{{name}}}` | `{{{type}}}` | {{{joinLines natspec}}} |
 {{/each}}
 {{#if natspec.returns}}
 | **Output** | |
 {{#each returns}}
-| {{#if name}}{{name}}{{else}}[{{@index}}]{{/if}} | {{type}} | {{{joinLines natspec}}} |
+| {{#if name}} `{{name}}` {{else}} `{{@index}}` {{/if}} | `{{type}}` | {{{joinLines natspec}}} |
 {{/each}}
 {{/if}}
 {{else}}
@@ -25,7 +25,7 @@
 | Output | Type | Description |
 | ------ | ---- | ----------- |
 {{#each returns}}
-| {{#if name}}{{name}}{{else}}[{{@index}}]{{/if}} | {{type}} | {{{joinLines natspec}}} |
+| {{#if name}} `{{{name}}}` {{else}} `{{{@index}}}` {{/if}} | `{{type}}` | {{{joinLines natspec}}} |
 {{/each}}
 {{/if}}
 {{/if}}
