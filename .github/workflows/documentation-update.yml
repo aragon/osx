@@ -26,8 +26,7 @@ jobs:
         run: find . -type f -name '*.md' -exec perl -i -0777 -pe 's/<!--CONTRACT_END-->.*//s' {} \;
         working-directory: packages/contracts/docs/osx/03-reference-guide
       - name: Format with prettier
-        run: yarn run prettier '**/*.md' --write
-        working-directory: packages/contracts/docs/osx/03-reference-guide
+        run: yarn run prettier 'packages/contracts/docs/osx/03-reference-guide/**/*.md' --write
       - name: Checkout builders-portal
         uses: actions/checkout@v3
         with:
