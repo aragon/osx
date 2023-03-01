@@ -2,17 +2,30 @@
 
 Welcome to the contracts powering the Aragon OSx Protocol!
 
-```sh
-# import the JSON ABI and the bytecode
-yarn add @aragon/osx-artifacts
+Install the NPM package to import the solidity source files or the contract artifacts:
 
-# import the source files to build on top
+```sh
+# solidity source files
 yarn add @aragon/osx
+
+# JSON ABI and bytecode
+yarn add @aragon/osx-artifacts
 ```
 
 ## Get Started
 
-To get started running your repository locally, run these commands on the project's root folder in your terminal:
+To get started running your repository locally:
+
+Copy `.env.example` into a file called `.env` or create a new one with these 3 keys defined:
+
+```sh
+# keys used for running tests
+HARDHAT_DAO_ENS_DOMAIN=dao.eth
+HARDHAT_PLUGIN_ENS_DOMAIN=dao.eth
+MANAGINGDAO_SUBDOMAIN=management
+```
+
+Run these commands on the project's root folder in your terminal:
 
 ```shell
 npx hardhat accounts
@@ -45,7 +58,7 @@ If you like what we're doing and would love to support, please review our `CONTR
 
 To try out Etherscan verification, you first need to deploy a contract to an Ethereum testnet that's supported by Etherscan, such as [goerli](https://goerli.etherscan.io) or [sepolia](https://sepolia.etherscan.io).
 
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+In this project, copy the `.env.example` file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
 
 ```shell
 hardhat run --network ropsten scripts/sample-script.ts
