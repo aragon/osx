@@ -9950,10 +9950,10 @@ solidity-ast@^0.4.15:
   resolved "https://registry.yarnpkg.com/solidity-ast/-/solidity-ast-0.4.38.tgz#103e8340e871882e10cfb5c06fab9bf8dff4100a"
   integrity sha512-e7gT6g8l8M2rAzH648QA3/IihCNy/anFoWyChVD+T+zfX4FjXbT8AO2DB3wG1iEmIBib9/+vD+GvTElWWpdw+w==
 
-solidity-ast@^0.4.31:
-  version "0.4.35"
-  resolved "https://registry.yarnpkg.com/solidity-ast/-/solidity-ast-0.4.35.tgz#82e064b14dc989338123264bde2235cad751f128"
-  integrity sha512-F5bTDLh3rmDxRmLSrs3qt3nvxJprWSEkS7h2KmuXDx7XTfJ6ZKVTV1rtPIYCqJAuPsU/qa8YUeFn7jdOAZcTPA==
+solidity-ast@^0.4.38:
+  version "0.4.46"
+  resolved "https://registry.yarnpkg.com/solidity-ast/-/solidity-ast-0.4.46.tgz#d0745172dced937741d07464043564e35b147c59"
+  integrity sha512-MlPZQfPhjWXqh7YxWcBGDXaPZIfMYCOHYoLEhGDWulNwEPIQQZuB7mA9eP17CU0jY/bGR4avCEUVVpvHtT2gbA==
 
 solidity-comments-extractor@^0.0.7:
   version "0.0.7"
@@ -9986,13 +9986,13 @@ solidity-coverage@^0.8.2:
     shelljs "^0.8.3"
     web3-utils "^1.3.6"
 
-solidity-docgen@^0.6.0-beta.19:
-  version "0.6.0-beta.19"
-  resolved "https://registry.yarnpkg.com/solidity-docgen/-/solidity-docgen-0.6.0-beta.19.tgz#6b5f0c6fae4f61913511ff3db31b8ef488db03fa"
-  integrity sha512-EEaDg3pm3yJmE+0ML8i5Ezej/nfVncwuDijFogiPTIc44kA23eLbLD8jZ0tMeGlmjyV8eOOQqukAA35tE6rORQ==
+solidity-docgen@^0.6.0-beta.35:
+  version "0.6.0-beta.35"
+  resolved "https://registry.yarnpkg.com/solidity-docgen/-/solidity-docgen-0.6.0-beta.35.tgz#174d7fe54efa8b10f7d3cbe0dfc40e52e11bf867"
+  integrity sha512-9QdwK1THk/MWIdq1PEW/6dvtND0pUqpFTsbKwwU9YQIMYuRhH1lek9SsgnsGGYtdJ0VTrXXcVT30q20a8Y610A==
   dependencies:
     handlebars "^4.7.7"
-    solidity-ast "^0.4.31"
+    solidity-ast "^0.4.38"
 
 source-map-support@^0.5.13, source-map-support@^0.5.17, source-map-support@^0.5.19, source-map-support@^0.5.20:
   version "0.5.21"
