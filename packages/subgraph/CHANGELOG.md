@@ -1,4 +1,4 @@
-# Aragon Core Subgraph
+# Aragon OSx Subgraph
 
 All notable changes to this project will be documented in this file.
 
@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Add `executable` attribute to `MultisigProposal`.
+
+### Changed
+
+- Changed proposal entity id to `bytes32` from `bigint`.
+- Fixed the `supportThresholdReachedEarly` check in `handleVoteCast` of `TokenVoting` and `AddresslistVoting`.
+
 ## 0.9.0-alpha
+
 On 2023-02-16 16:23:28
 
 ## 0.7.1-alpha

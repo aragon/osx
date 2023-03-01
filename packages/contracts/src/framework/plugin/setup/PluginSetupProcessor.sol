@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -392,7 +392,7 @@ contract PluginSetupProcessor {
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
     /// @return preparedSetupData The data struct containing the array of helper contracts and permissions that the setup has prepared.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for.
+    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for.
     function prepareUpdate(
         address _dao,
         PrepareUpdateParams calldata _params
@@ -441,7 +441,7 @@ contract PluginSetupProcessor {
         bytes32 preparedSetupId;
 
         // If the current and new plugin setup are identical, this is an UI update.
-        // In this case, the permission hash is set to the empt array hash and the `prepareUpdate` call is skipped to avoid side effects.
+        // In this case, the permission hash is set to the empty array hash and the `prepareUpdate` call is skipped to avoid side effects.
         if (currentVersion.pluginSetup == newVersion.pluginSetup) {
             preparedSetupId = _getPreparedSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
@@ -450,6 +450,12 @@ contract PluginSetupProcessor {
                 bytes(""),
                 PreparationType.Update
             );
+
+            // Because UI updates do not change the plugin functionality, the array of helpers
+            // associated with this plugin version `preparedSetupData.helpers` and being returned must
+            // equal `_params.setupPayload.currentHelpers` returned by the previous setup step (installation or update )
+            // that this update is transitioning from.
+            preparedSetupData.helpers = _params.setupPayload.currentHelpers;
         } else {
             // Check that plugin is `PluginUUPSUpgradable`.
             if (!_params.setupPayload.plugin.supportsInterface(type(IPlugin).interfaceId)) {
@@ -518,9 +524,8 @@ contract PluginSetupProcessor {
             _params.pluginSetupRef.versionTag
         );
 
-        address currentImplementation = PluginUUPSUpgradeable(_params.plugin)
-            .getImplementationAddress();
-        address newImplementation = PluginSetup(version.pluginSetup).getImplementationAddress();
+        address currentImplementation = PluginUUPSUpgradeable(_params.plugin).implementation();
+        address newImplementation = PluginSetup(version.pluginSetup).implementation();
 
         if (currentImplementation != newImplementation) {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);
@@ -543,7 +548,7 @@ contract PluginSetupProcessor {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
+    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
     function prepareUninstallation(
         address _dao,
         PrepareUninstallationParams calldata _params
@@ -603,7 +608,7 @@ contract PluginSetupProcessor {
     /// @param _dao The address of the DAO.
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `applyUninstallation` function.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
+    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
     function applyUninstallation(
         address _dao,
         ApplyUninstallationParams calldata _params

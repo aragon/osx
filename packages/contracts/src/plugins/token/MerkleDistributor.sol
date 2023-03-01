@@ -14,7 +14,7 @@ import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 /// @title MerkleDistributor
-/// @author Uniswap 2020
+/// @author Uniswap 2020, Modified by Aragon Association 2021-2023
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -38,11 +38,6 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     /// @param amount The amount to be claimed.
     error TokenClaimInvalid(uint256 index, address to, uint256 amount);
 
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Initializes the plugin.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -60,7 +55,7 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IMerkleDistributor).interfaceId ||

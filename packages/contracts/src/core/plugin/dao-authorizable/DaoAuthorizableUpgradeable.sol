@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -22,7 +22,7 @@ abstract contract DaoAuthorizableUpgradeable is ContextUpgradeable {
     }
 
     /// @notice Returns the DAO contract.
-    /// @return IDAO The DAO contract.
+    /// @return The DAO contract.
     function dao() public view returns (IDAO) {
         return dao_;
     }

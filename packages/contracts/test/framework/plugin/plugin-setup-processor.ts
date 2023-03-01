@@ -30,11 +30,10 @@ import {
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
-import {findEvent} from '../../../utils/event';
-import {Operation} from '../../core/permission/permission-manager';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {findEvent} from '../../../utils/event';
+import {Operation} from '../../../utils/types';
 
 import {
   mockPermissionsOperations,
@@ -173,7 +172,7 @@ describe('Plugin Setup Processor', function () {
     const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
       'PluginUUPSUpgradeableSetupV4Mock'
     );
-    setupUV4 = await SetupV4.deploy(await setupUV3.getImplementationAddress());
+    setupUV4 = await SetupV4.deploy(await setupUV3.implementation());
 
     // Deploy PluginCloneableSetupMock
     const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
@@ -304,9 +303,9 @@ describe('Plugin Setup Processor', function () {
 
       const proxy = await pluginFactory
         .attach(plugin)
-        .callStatic.getImplementationAddress();
+        .callStatic.implementation();
 
-      expect(proxy).to.equal(await setup.callStatic.getImplementationAddress());
+      expect(proxy).to.equal(await setup.callStatic.implementation());
     }
   });
 
@@ -425,8 +424,27 @@ describe('Plugin Setup Processor', function () {
         ).not.to.be.reverted;
       });
 
-      it.skip("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
-        // use smock to.have.been.calledWith
+      it("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
+        // Uses setupUV1
+        const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
+
+        const data = '0x11';
+
+        // Reset the cache so previus tests don't trick this test that
+        // the function was really called, even though it mightn't have been.
+        // This is needed because smock contracts are not deployed in beforeEach,
+        // but in before, so there's only one instance of them for all tests.
+        setupUV1.prepareInstallation.reset();
+
+        await psp.prepareInstallation(
+          targetDao.address,
+          createPrepareInstallationParams(pluginRepoPointer, data)
+        );
+
+        expect(setupUV1.prepareInstallation).to.have.been.calledWith(
+          targetDao.address,
+          data
+        );
       });
 
       it('successfully prepares a plugin installation with the correct event arguments', async () => {
@@ -436,7 +454,7 @@ describe('Plugin Setup Processor', function () {
           2,
           Operation.Grant
         );
-        const expectedHelpers = mockHelpers(1);
+        const expectedHelpers = mockHelpers(2);
         const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
 
         const preparedSetupId = getPreparedSetupId(
@@ -623,10 +641,6 @@ describe('Plugin Setup Processor', function () {
         )
           .to.emit(psp, 'InstallationApplied')
           .withArgs(targetDao.address, plugin, preparedSetupId, appliedSetupId);
-      });
-
-      it.skip('successfully calls daos multi bulk with correct permissions', async () => {
-        // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
       });
 
       // 1. call prepareinstall 2 times for the same plugin version
@@ -824,9 +838,9 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if prepare uninstallation params do not match the current `appliedSetupId`', async () => {
-        // helpersUV1 contains one helper address. Let's remove
-        // to make sure modified helpers will cause test to fail.
         {
+          // helpersUV1 contains two helper addresses. Let's remove one
+          // to make sure modified helpers will cause test to fail.
           const modifiedHelpers = [...helpersUV1].slice(0, -1);
 
           const appliedSetupId = getAppliedSetupId(
@@ -847,6 +861,30 @@ describe('Plugin Setup Processor', function () {
             .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
             .withArgs(currentAppliedSetupId, appliedSetupId);
         }
+
+        {
+          // Reverse order/sequence which still should cause to revert.
+          const modifiedHelpers = [...helpersUV1].reverse();
+
+          const appliedSetupId = getAppliedSetupId(
+            pluginRepoPointer,
+            modifiedHelpers
+          );
+
+          await expect(
+            prepareUninstallation(
+              psp,
+              targetDao.address,
+              proxy,
+              pluginRepoPointer,
+              modifiedHelpers,
+              EMPTY_DATA
+            )
+          )
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(currentAppliedSetupId, appliedSetupId);
+        }
+
         {
           const modifiedPluginRepoPointer = [
             pluginRepoPointer[0],
@@ -971,8 +1009,28 @@ describe('Plugin Setup Processor', function () {
         setupUV1.prepareUninstallation.reset();
       });
 
-      it.skip("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
-        // use smock to.have.been.calledWith
+      it("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
+        const data = '0x11';
+
+        // Reset the cache so previus tests don't trick this test that
+        // the function was really called, even though it mightn't have been.
+        // This is needed because smock contracts are not deployed in beforeEach,
+        // but in before, so there's only one instance of them for all tests.
+        setupUV1.prepareUninstallation.reset();
+
+        await prepareUninstallation(
+          psp,
+          targetDao.address,
+          proxy,
+          pluginRepoPointer,
+          helpersUV1,
+          data
+        );
+
+        expect(setupUV1.prepareUninstallation).to.have.been.calledWith(
+          targetDao.address,
+          [proxy, helpersUV1, data]
+        );
       });
 
       it('successfully prepares a plugin uninstallation with the correct event arguments', async () => {
@@ -1094,10 +1152,6 @@ describe('Plugin Setup Processor', function () {
         )
           .to.be.revertedWithCustomError(psp, 'SetupNotApplicable')
           .withArgs(preparedSetupId);
-      });
-
-      it.skip('successfully calls daos multi bulk with correct permissions', async () => {
-        // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
       });
 
       it('EDGE-CASE: reverts for all uninstall preparations once one of them is applied', async () => {
@@ -1366,53 +1420,78 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if prepare update params do not match the current `appliedSetupId`', async () => {
-        const modifiedHelpers = [...helpersUV1].slice(0, -1);
-
-        // Run the prepare update with modified helpers.
-        await expect(
-          psp.prepareUpdate(
-            targetDao.address,
-            createPrepareUpdateParams(
-              proxy,
-              currentVersion, // current installed version
-              newVersion, // new version
-              pluginRepoPointer[0],
-              modifiedHelpers,
-              EMPTY_DATA
+        {
+          // Run the prepare update with modified helpers.
+          const modifiedHelpers = [...helpersUV1].slice(0, -1);
+          await expect(
+            psp.prepareUpdate(
+              targetDao.address,
+              createPrepareUpdateParams(
+                proxy,
+                currentVersion, // current installed version
+                newVersion, // new version
+                pluginRepoPointer[0],
+                modifiedHelpers,
+                EMPTY_DATA
+              )
             )
           )
-        )
-          .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
-          .withArgs(
-            currentAppliedSetupId,
-            getAppliedSetupId(pluginRepoPointer, modifiedHelpers)
-          );
-
-        // Modify it so it believes the current version is newVersion
-        // which should cause revert.
-        const modifiedPluginRepoPointer: PluginRepoPointer = [
-          pluginRepoPointer[0],
-          ...newVersion,
-        ];
-
-        await expect(
-          psp.prepareUpdate(
-            targetDao.address,
-            createPrepareUpdateParams(
-              proxy,
-              newVersion,
-              [newVersion[0], newVersion[1] + 1], // increase version so it doesn't fail with invalid version update.
-              pluginRepoPointer[0],
-              helpersUV1,
-              EMPTY_DATA
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(
+              currentAppliedSetupId,
+              getAppliedSetupId(pluginRepoPointer, modifiedHelpers)
+            );
+        }
+        {
+          // Change helpers's sequence which still should still cause revert.
+          const modifiedHelpers = [...helpersUV1].reverse();
+          await expect(
+            psp.prepareUpdate(
+              targetDao.address,
+              createPrepareUpdateParams(
+                proxy,
+                currentVersion, // current installed version
+                newVersion, // new version
+                pluginRepoPointer[0],
+                modifiedHelpers,
+                EMPTY_DATA
+              )
             )
           )
-        )
-          .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
-          .withArgs(
-            currentAppliedSetupId,
-            getAppliedSetupId(modifiedPluginRepoPointer, helpersUV1)
-          );
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(
+              currentAppliedSetupId,
+              getAppliedSetupId(pluginRepoPointer, modifiedHelpers)
+            );
+        }
+
+        {
+          // Modify it so it believes the current version is newVersion
+          // which should cause revert.
+          const modifiedPluginRepoPointer: PluginRepoPointer = [
+            pluginRepoPointer[0],
+            ...newVersion,
+          ];
+
+          await expect(
+            psp.prepareUpdate(
+              targetDao.address,
+              createPrepareUpdateParams(
+                proxy,
+                newVersion,
+                [newVersion[0], newVersion[1] + 1], // increase version so it doesn't fail with invalid version update.
+                pluginRepoPointer[0],
+                helpersUV1,
+                EMPTY_DATA
+              )
+            )
+          )
+            .to.be.revertedWithCustomError(psp, 'InvalidAppliedSetupId')
+            .withArgs(
+              currentAppliedSetupId,
+              getAppliedSetupId(modifiedPluginRepoPointer, helpersUV1)
+            );
+        }
       });
 
       it('reverts if same setup is already prepared', async () => {
@@ -1524,8 +1603,31 @@ describe('Plugin Setup Processor', function () {
         expect(setupUV4.prepareUpdate).to.have.callCount(0);
       });
 
-      it.skip("successfully calls plugin setup's prepareUpdate with correct arguments", async () => {
-        // use smock to.have.been.calledWith
+      it("successfully calls plugin setup's prepareUpdate with correct arguments", async () => {
+        const data = '0x11';
+
+        // Reset the cache so previus tests don't trick this test that
+        // the function was really called, even though it mightn't have been.
+        // This is needed because smock contracts are not deployed in beforeEach,
+        // but in before, so there's only one instance of them for all tests.
+        setupUV2.prepareUpdate.reset();
+
+        await prepareUpdate(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          newVersion,
+          pluginRepoPointer[0],
+          helpersUV1,
+          data
+        );
+
+        expect(setupUV2.prepareUpdate).to.have.been.calledWith(
+          targetDao.address,
+          1, // build
+          [proxy, helpersUV1, data]
+        );
       });
 
       it('successfully prepares update and emits the correct arguments', async () => {
@@ -1710,11 +1812,7 @@ describe('Plugin Setup Processor', function () {
         )
       )
         .to.be.revertedWithCustomError(psp, 'PluginProxyUpgradeFailed')
-        .withArgs(
-          proxy,
-          await setupUV2.callStatic.getImplementationAddress(),
-          initData
-        );
+        .withArgs(proxy, await setupUV2.callStatic.implementation(), initData);
     });
 
     it('reverts if preparation has not happened yet for update', async () => {
@@ -1860,8 +1958,97 @@ describe('Plugin Setup Processor', function () {
       ).to.be.reverted;
     });
 
-    it.skip('successfully calls daos multi bulk with correct permissions', async () => {
-      // use smock to.have.been.calledWith. Note you need to deploy dao with smock.
+    describe('Whether upgrade functions of proxy get called the right way', async () => {
+      let fake: any;
+
+      beforeEach(async () => {
+        // create a fake on the same plugin(proxy) address.
+        fake = await smock.fake('PluginUUPSUpgradeable', {
+          address: proxy,
+        });
+
+        // Since smock fake will end up having functions that always returns
+        // Solidity default values, the below overrides them with the correct data
+        // So when PSP calls it, it can expect the same information as if it would call
+        // the normal/original `proxy/plugin`.
+        fake.supportsInterface.whenCalledWith('0xffffffff').returns(false);
+        fake.supportsInterface.whenCalledWith('0x01ffc9a7').returns(true);
+        fake.supportsInterface.whenCalledWith('0x41de6830').returns(true);
+      });
+
+      it('correctly applies updates when plugin setups are same, but UI different', async () => {
+        // plugin setup addresses are the same, so it treats it as UIs are different.
+        const currentV: VersionTag = [1, 5];
+        const newV: VersionTag = [1, 6];
+        const currentPluginRepoPointer: PluginRepoPointer = [
+          repoU.address,
+          1,
+          5,
+        ];
+
+        const {plugin, helpers} = await installPlugin(
+          psp,
+          targetDao.address,
+          currentPluginRepoPointer
+        );
+
+        await updatePlugin(
+          psp,
+          targetDao.address,
+          plugin,
+          currentV,
+          newV,
+          repoU.address,
+          helpers,
+          EMPTY_DATA
+        );
+
+        expect(fake.upgradeTo).to.have.callCount(0);
+        expect(fake.upgradeToAndCall).to.have.callCount(0);
+      });
+
+      it('successfully calls `upgradeToAndCall` on plugin if initData was provided by pluginSetup', async () => {
+        const {initData} = await updatePlugin(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          newVersion, // uses setupUV2
+          repoU.address,
+          helpersUV1,
+          EMPTY_DATA
+        );
+
+        const newImpl = await setupUV2.implementation();
+        expect(fake.upgradeToAndCall).to.have.been.calledWith(
+          newImpl,
+          initData
+        );
+      });
+
+      it('successfully calls `upgradeTo` on plugin if no initData was provided', async () => {
+        setupUV2.prepareUpdate.returns([
+          EMPTY_DATA,
+          [mockHelpers(1), mockPermissionsOperations(0, 1, Operation.Grant)],
+        ]);
+
+        const {initData} = await updatePlugin(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          newVersion, // uses setupUV2
+          repoU.address,
+          helpersUV1,
+          EMPTY_DATA
+        );
+
+        // Reset so other tests continue using the default/original data
+        setupUV2.prepareUpdate.reset();
+
+        const newImpl = await setupUV2.implementation();
+        expect(fake.upgradeTo).to.have.been.calledWith(newImpl);
+      });
     });
 
     it('successfuly updates and emits the correct event arguments', async () => {
@@ -1941,8 +2128,8 @@ describe('Plugin Setup Processor', function () {
 
       it('points to the V1 implementation', async () => {
         expect(
-          await PluginUV1.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupUV1.callStatic.getImplementationAddress());
+          await PluginUV1.attach(proxy).callStatic.implementation()
+        ).to.equal(await setupUV1.callStatic.implementation());
       });
 
       it('initializes the members', async () => {
@@ -1950,7 +2137,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('sets the V1 helpers', async () => {
-        expect(helpersUV1).to.deep.equal(mockHelpers(1));
+        expect(helpersUV1).to.deep.equal(mockHelpers(2));
       });
 
       it('sets the V1 permissions', async () => {
@@ -1959,7 +2146,20 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('updates to V2', async () => {
+      it('updates to V2: Contract was actually updated', async () => {
+        await updateAndValidatePluginUpdate(
+          psp,
+          targetDao.address,
+          proxy,
+          currentVersion,
+          [1, 2],
+          pluginRepoPointer[0],
+          helpersUV1,
+          EMPTY_DATA
+        );
+      });
+
+      it('updates to V2: fake (was it called)', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2010,8 +2210,8 @@ describe('Plugin Setup Processor', function () {
 
         it('points to the V2 implementation', async () => {
           expect(
-            await PluginUV2.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupUV2.callStatic.getImplementationAddress());
+            await PluginUV2.attach(proxy).callStatic.implementation()
+          ).to.equal(await setupUV2.callStatic.implementation());
         });
 
         it('initializes the members', async () => {
@@ -2068,10 +2268,8 @@ describe('Plugin Setup Processor', function () {
 
           it('points to the V3 implementation', async () => {
             expect(
-              await PluginUV3.attach(
-                proxy
-              ).callStatic.getImplementationAddress()
-            ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+              await PluginUV3.attach(proxy).callStatic.implementation()
+            ).to.equal(await setupUV3.callStatic.implementation());
           });
 
           it('initializes the members', async () => {
@@ -2117,8 +2315,8 @@ describe('Plugin Setup Processor', function () {
 
         it('points to the V3 implementation', async () => {
           expect(
-            await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+            await PluginUV3.attach(proxy).callStatic.implementation()
+          ).to.equal(await setupUV3.callStatic.implementation());
         });
 
         it('initializes the members', async () => {
@@ -2164,8 +2362,8 @@ describe('Plugin Setup Processor', function () {
 
       it('points to the V2 implementation', async () => {
         expect(
-          await PluginUV2.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupUV2.callStatic.getImplementationAddress());
+          await PluginUV2.attach(proxy).callStatic.implementation()
+        ).to.equal(await setupUV2.callStatic.implementation());
       });
 
       it('initializes the members', async () => {
@@ -2222,8 +2420,8 @@ describe('Plugin Setup Processor', function () {
 
         it('points to the V3 implementation', async () => {
           expect(
-            await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+            await PluginUV3.attach(proxy).callStatic.implementation()
+          ).to.equal(await setupUV3.callStatic.implementation());
         });
 
         it('initializes the members', async () => {
@@ -2270,8 +2468,8 @@ describe('Plugin Setup Processor', function () {
 
       it('points to the V3 implementation', async () => {
         expect(
-          await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupUV3.callStatic.getImplementationAddress());
+          await PluginUV3.attach(proxy).callStatic.implementation()
+        ).to.equal(await setupUV3.callStatic.implementation());
       });
 
       it('initializes the members', async () => {
@@ -2356,15 +2554,14 @@ async function updateAndValidatePluginUpdate(
   // on the plugin. The below check for this still is not 100% ensuring,
   // As function `upgradeTo` might be called but event `Upgraded`
   // not thrown(OZ changed the logic or name) which will trick the test to pass..
-  const currentImpl = await currentPluginSetup.getImplementationAddress();
-  const newImpl = await newPluginSetup.getImplementationAddress();
+  const currentImpl = await currentPluginSetup.implementation();
+  const newImpl = await newPluginSetup.implementation();
 
   if (currentImpl != newImpl) {
-    // ensure that the logic address was also correctly modified on the proxy.
     const proxyContract = await ethers.getContractAt(
       'PluginUUPSUpgradeable',
       proxy
     );
-    expect(await proxyContract.getImplementationAddress()).to.equal(newImpl);
+    expect(await proxyContract.implementation()).to.equal(newImpl);
   }
 }

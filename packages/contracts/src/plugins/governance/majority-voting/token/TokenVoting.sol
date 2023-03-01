@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -28,11 +28,6 @@ contract TokenVoting is IMembership, MajorityVotingBase {
     /// @notice Thrown if the voting power is zero
     error NoVotingPower();
 
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -52,7 +47,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == TOKEN_VOTING_INTERFACE_ID ||
@@ -62,7 +57,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @notice getter function for the voting token.
     /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface.
-    /// @return IVotesUpgradeable the token used for voting.
+    /// @return The token used for voting.
     function getVotingToken() public view returns (IVotesUpgradeable) {
         return votingToken;
     }

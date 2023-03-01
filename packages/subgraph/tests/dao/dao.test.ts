@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from 'matchstick-as/assembly/index';
-import {Address, Bytes, BigInt, ethereum, log} from '@graphprotocol/graph-ts';
+import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
 
 import {
   handleNativeTokenDeposited,
@@ -25,7 +25,6 @@ import {
   DAO_TOKEN_ADDRESS,
   ONE_ETH,
   STRING_DATA,
-  HALF_ETH,
   ADDRESS_ZERO,
   CONTRACT_ADDRESS,
   ZERO_BYTES32,

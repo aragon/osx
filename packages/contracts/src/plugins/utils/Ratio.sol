@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -27,16 +27,4 @@ function _applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256
     if (remainder != 0) {
         ++result;
     }
-}
-
-/// @notice Applies a ratio to a value and floors the remainder.
-/// @param _value The value to which the ratio is applied.
-/// @param _ratio The ratio that must be in the interval `[0, 10**6]`.
-/// @return result The resulting value.
-function _applyRatioFloored(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
-    if (_ratio > RATIO_BASE) {
-        revert RatioOutOfBounds({limit: RATIO_BASE, actual: _ratio});
-    }
-
-    result = (_value * _ratio) / RATIO_BASE;
 }

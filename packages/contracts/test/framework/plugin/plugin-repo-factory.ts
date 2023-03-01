@@ -9,11 +9,18 @@ import {
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 
-import {PluginRepoRegistry, DAO} from '../../../typechain';
+import {
+  PluginRepoRegistry,
+  DAO,
+  PluginRepoFactory,
+  PluginRepoFactory__factory,
+} from '../../../typechain';
 import {getMergedABI} from '../../../utils/abi';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
+  VersionCreated: 'VersionCreated',
+  ReleaseMetadataUpdated: 'ReleaseMetadataUpdated',
 };
 
 const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
@@ -24,17 +31,14 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
-async function getPluginRepoRegistryEvents(tx: any) {
-  const data = await tx.wait();
-  const {events} = data;
-  const {subdomain, pluginRepo} = events.find(
-    ({event}: {event: any}) => event === EVENTS.PluginRepoRegistered
-  ).args;
+async function getExpectedRepoAddress(from: string) {
+  const nonce = await ethers.provider.getTransactionCount(from);
+  const expectedAddress = ethers.utils.getContractAddress({
+    from: from,
+    nonce,
+  });
 
-  return {
-    subdomain,
-    pluginRepo,
-  };
+  return expectedAddress;
 }
 
 describe('PluginRepoFactory: ', function () {
@@ -42,7 +46,7 @@ describe('PluginRepoFactory: ', function () {
   let pluginRepoRegistry: PluginRepoRegistry;
   let ownerAddress: string;
   let managingDao: DAO;
-  let pluginRepoFactory: any;
+  let pluginRepoFactory: PluginRepoFactory;
 
   let mergedABI: any;
   let pluginRepoFactoryBytecode: any;
@@ -84,7 +88,8 @@ describe('PluginRepoFactory: ', function () {
       mergedABI,
       pluginRepoFactoryBytecode,
       signers[0]
-    );
+    ) as PluginRepoFactory__factory;
+
     pluginRepoFactory = await PluginRepoFactory.deploy(
       pluginRepoRegistry.address
     );
@@ -104,102 +109,177 @@ describe('PluginRepoFactory: ', function () {
     );
   });
 
-  it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
-    await managingDao.revoke(
-      pluginRepoRegistry.address,
-      pluginRepoFactory.address,
-      REGISTER_PLUGIN_REPO_PERMISSION_ID
-    );
-
-    const pluginRepoSubdomain = 'my-pluginRepo';
-
-    await expect(
-      pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
-    )
-      .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
-      .withArgs(
-        managingDao.address,
+  describe('CreatePluginRepo', async () => {
+    it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
+      await managingDao.revoke(
         pluginRepoRegistry.address,
         pluginRepoFactory.address,
         REGISTER_PLUGIN_REPO_PERMISSION_ID
       );
-  });
 
-  it('fail to create new pluginRepo with empty subdomain', async () => {
-    const pluginRepoSubdomain = '';
-
-    await expect(
-      pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
-    ).to.be.revertedWithCustomError(
-      pluginRepoFactory,
-      'EmptyPluginRepoSubdomain'
-    );
-  });
-
-  it('create new pluginRepo', async () => {
-    const pluginRepoSubdomain = 'my-plugin-repo';
-
-    let tx = await pluginRepoFactory.createPluginRepo(
-      pluginRepoSubdomain,
-      ownerAddress
-    );
-
-    const {subdomain, pluginRepo} = await getPluginRepoRegistryEvents(tx);
-
-    expect(subdomain).to.equal(pluginRepoSubdomain);
-    expect(pluginRepo).not.undefined;
-  });
-
-  it.skip('fail creating new pluginRepo with wrong major version', async () => {
-    const pluginSetupMock = await deployMockPluginSetup();
-
-    const pluginRepoSubdomain = 'my-plugin-repo';
-    const pluginSetupAddress = pluginSetupMock.address;
-    const contentURI = '0x00';
-
-    // Get the contract to be deployed by calling `createPluginRepoWithVersion` with `callStatic`
-
-    const PluginRepo = await ethers.getContractFactory('PluginRepo');
-    const pluginRepoToBeCreated = PluginRepo.attach(
-      pluginRepoFactory.callStatic.createPluginRepoWithFirstVersion(
-        pluginRepoSubdomain,
-        pluginSetupAddress,
-        contentURI,
-        ownerAddress
+      await expect(
+        pluginRepoFactory.createPluginRepo('my-pluginRepo', ownerAddress)
       )
-    );
+        .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
+        .withArgs(
+          managingDao.address,
+          pluginRepoRegistry.address,
+          pluginRepoFactory.address,
+          REGISTER_PLUGIN_REPO_PERMISSION_ID
+        );
+    });
 
-    await expect(
-      pluginRepoFactory.createPluginRepoWithFirstVersion(
+    it('fail to create new pluginRepo with empty subdomain', async () => {
+      const pluginRepoSubdomain = '';
+
+      await expect(
+        pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
+      ).to.be.revertedWithCustomError(
+        pluginRepoRegistry,
+        'EmptyPluginRepoSubdomain'
+      );
+    });
+
+    it('creates new pluginRepo and sets up correct permissions', async () => {
+      const pluginRepoSubdomain = 'my-plugin-repo';
+      const expectedRepoAddress = await getExpectedRepoAddress(
+        pluginRepoFactory.address
+      );
+      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      const pluginRepo = PluginRepo.attach(expectedRepoAddress);
+
+      let tx = await pluginRepoFactory.createPluginRepo(
         pluginRepoSubdomain,
-        pluginSetupAddress,
-        contentURI,
         ownerAddress
-      )
-    )
-      .to.be.revertedWithCustomError(pluginRepoToBeCreated, 'BumpInvalid')
-      .withArgs([0, 0, 0], [0, 0, 0]);
+      );
+
+      await expect(tx)
+        .to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered)
+        .withArgs(pluginRepoSubdomain, expectedRepoAddress)
+        .to.not.emit(pluginRepo, EVENTS.VersionCreated)
+        .to.not.emit(pluginRepo, EVENTS.ReleaseMetadataUpdated);
+
+      const permissions = [
+        ethers.utils.id('MAINTAINER_PERMISSION'),
+        ethers.utils.id('UPGRADE_REPO_PERMISSION'),
+        ethers.utils.id('ROOT_PERMISSION'),
+      ];
+
+      for (let i = 0; i < permissions.length; i++) {
+        expect(
+          await pluginRepo.isGranted(
+            pluginRepo.address,
+            ownerAddress,
+            permissions[i],
+            '0x'
+          )
+        ).to.be.true;
+
+        expect(
+          await pluginRepo.isGranted(
+            pluginRepo.address,
+            pluginRepoFactory.address,
+            permissions[i],
+            '0x'
+          )
+        ).to.be.false;
+      }
+    });
   });
 
-  it('create new pluginRepo with version', async () => {
-    const pluginSetupMock = await deployMockPluginSetup();
+  describe('CreatePluginRepoWithFirstVersion', async () => {
+    it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
+      await managingDao.revoke(
+        pluginRepoRegistry.address,
+        pluginRepoFactory.address,
+        REGISTER_PLUGIN_REPO_PERMISSION_ID
+      );
 
-    const pluginRepoSubdomain = 'my-plugin-repo';
-    const pluginSetupAddress = pluginSetupMock.address;
-    const releaseMetadata = '0x00';
-    const buildMetadata = '0x00';
+      await expect(
+        pluginRepoFactory.createPluginRepoWithFirstVersion(
+          'my-pluginRepo',
+          ownerAddress,
+          ownerAddress,
+          '0x',
+          '0x'
+        )
+      )
+        .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
+        .withArgs(
+          managingDao.address,
+          pluginRepoRegistry.address,
+          pluginRepoFactory.address,
+          REGISTER_PLUGIN_REPO_PERMISSION_ID
+        );
+    });
 
-    let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-      pluginRepoSubdomain,
-      pluginSetupAddress,
-      ownerAddress,
-      releaseMetadata,
-      buildMetadata
-    );
+    it('fail to create new pluginRepo with empty subdomain', async () => {
+      const pluginRepoSubdomain = '';
 
-    const {subdomain, pluginRepo} = await getPluginRepoRegistryEvents(tx);
+      await expect(
+        pluginRepoFactory.createPluginRepoWithFirstVersion(
+          pluginRepoSubdomain,
+          ownerAddress,
+          ownerAddress,
+          '0x',
+          '0x'
+        )
+      ).to.be.revertedWithCustomError(
+        pluginRepoRegistry,
+        'EmptyPluginRepoSubdomain'
+      );
+    });
 
-    expect(subdomain).to.equal(pluginRepoSubdomain);
-    expect(pluginRepo).not.undefined;
+    it('creates new pluginRepo with correct permissions', async () => {
+      const pluginRepoSubdomain = 'my-plugin-repo';
+      const pluginSetupMock = await deployMockPluginSetup();
+      const expectedRepoAddress = await getExpectedRepoAddress(
+        pluginRepoFactory.address
+      );
+      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      const pluginRepo = PluginRepo.attach(expectedRepoAddress);
+
+      let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
+        pluginRepoSubdomain,
+        pluginSetupMock.address,
+        ownerAddress,
+        '0x11',
+        '0x11'
+      );
+
+      await expect(tx)
+        .to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered)
+        .withArgs(pluginRepoSubdomain, expectedRepoAddress)
+        .to.emit(pluginRepo, EVENTS.VersionCreated)
+        .withArgs(1, 1, pluginSetupMock.address, '0x11')
+        .to.emit(pluginRepo, EVENTS.ReleaseMetadataUpdated)
+        .withArgs(1, '0x11');
+
+      const permissions = [
+        ethers.utils.id('MAINTAINER_PERMISSION'),
+        ethers.utils.id('UPGRADE_REPO_PERMISSION'),
+        ethers.utils.id('ROOT_PERMISSION'),
+      ];
+
+      for (let i = 0; i < permissions.length; i++) {
+        expect(
+          await pluginRepo.isGranted(
+            pluginRepo.address,
+            ownerAddress,
+            permissions[i],
+            '0x'
+          )
+        ).to.be.true;
+
+        expect(
+          await pluginRepo.isGranted(
+            pluginRepo.address,
+            pluginRepoFactory.address,
+            permissions[i],
+            '0x'
+          )
+        ).to.be.false;
+      }
+    });
   });
 });

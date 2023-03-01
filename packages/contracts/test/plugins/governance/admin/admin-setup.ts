@@ -1,12 +1,12 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
+import {Operation} from '../../../../utils/types';
 import {AdminSetup} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../core/permission/permission-manager';
-import {adminInterface} from './admin';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
+import {adminInterface} from './admin';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -39,7 +39,11 @@ describe('AdminSetup', function () {
     const AdminSetup = await ethers.getContractFactory('AdminSetup');
     adminSetup = await AdminSetup.deploy();
 
-    implementationAddress = await adminSetup.getImplementationAddress();
+    implementationAddress = await adminSetup.implementation();
+  });
+
+  it('does not support the empty interface', async () => {
+    expect(await adminSetup.supportsInterface('0xffffffff')).to.be.false;
   });
 
   it('creates admin address base with the correct interface', async () => {

@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {
   PluginRepoRegistry,
   PluginRepoFactory,
-  PluginSetupV1Mock,
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
 } from '../../typechain';
@@ -32,7 +31,7 @@ export async function deployNewPluginRepo(
 export async function deployPluginRepoFactory(
   signers: any,
   pluginRepoRegistry: PluginRepoRegistry
-): Promise<any> {
+): Promise<PluginRepoFactory> {
   const {abi, bytecode} = await getMergedABI(
     // @ts-ignore
     hre,

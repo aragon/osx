@@ -1,9 +1,11 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
 import {IDAO} from "../../dao/IDAO.sol";
 
+/// @title IProposal
+/// @author Aragon Association - 2022-2023
 /// @notice An interface to be implemented by DAO plugins that define membership.
 interface IMembership {
     /// @notice Emitted when members are added to the DAO plugin.

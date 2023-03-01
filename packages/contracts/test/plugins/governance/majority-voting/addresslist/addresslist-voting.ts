@@ -154,7 +154,7 @@ describe('AddresslistVoting', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await voting.supportsInterface('0x00000000')).to.be.false;
+      expect(await voting.supportsInterface('0xffffffff')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {

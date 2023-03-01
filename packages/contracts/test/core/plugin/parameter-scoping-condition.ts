@@ -8,6 +8,7 @@ import {
   DAO,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
+import {deployWithProxy} from '../../test-utils/proxy';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 
@@ -28,7 +29,8 @@ describe('TestParameterScopingCondition', function () {
 
     // Deploy the component
     const TestPlugin = await ethers.getContractFactory('TestPlugin');
-    testPlugin = await TestPlugin.deploy();
+
+    testPlugin = await deployWithProxy(TestPlugin);
     await testPlugin.initialize(managingDao.address);
 
     // Deploy the condition

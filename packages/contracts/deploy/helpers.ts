@@ -1,20 +1,51 @@
 import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
-import {BigNumberish, Contract} from 'ethers';
+import {Contract} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
+import {EHRE, Operation} from '../utils/types';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // dao.eth
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
+
+export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
+  goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
+  mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
+};
+
+export const MANAGING_DAO_METADATA = {
+  name: 'Aragon Managing DAO',
+  description:
+    'Aragon OSx includes a group of global smart contracts that allow for a DAO ecosystem to be built on top. These contracts will require future improvements and general maintenance. The Managing DAO is intended to perform such maintenance tasks and holds the permissions to deliver any new capabilities that are added in the future.',
+  avatar:
+    'https://ipfs.eth.aragon.network/ipfs/QmVyy3ci7F2zHG6JUJ1XbcwLKuxWrQ6hqNvSnjmDmdYJzP/',
+  links: [
+    {
+      name: 'Web site',
+      url: 'https://www.aragon.org',
+    },
+    {
+      name: 'Developer Portal',
+      url: 'https://devs.aragon.org/',
+    },
+  ],
+};
+
+export const DAO_PERMISSIONS = [
+  'ROOT_PERMISSION',
+  'UPGRADE_DAO_PERMISSION',
+  'SET_SIGNATURE_VALIDATOR_PERMISSION',
+  'SET_TRUSTED_FORWARDER_PERMISSION',
+  'SET_METADATA_PERMISSION',
+  'REGISTER_STANDARD_CALLBACK_PERMISSION',
+];
 
 export async function uploadToIPFS(
   metadata: string,
@@ -27,7 +58,7 @@ export async function uploadToIPFS(
     },
   });
 
-  if (networkName == 'hardhat' || networkName == 'localhost') {
+  if (networkName === 'hardhat' || networkName === 'localhost') {
     // return a dummy path
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }
@@ -50,7 +81,12 @@ export async function getContractAddress(
   } catch (e) {}
 
   const activeContracts = await getActiveContractsJSON();
-  return activeContracts[hre.network.name][contractName];
+  try {
+    return activeContracts[hre.network.name][contractName];
+  } catch (e) {
+    console.error(e);
+    return '';
+  }
 }
 
 export async function getActiveContractsJSON(): Promise<{
@@ -96,12 +132,26 @@ export async function detemineDeployerNextAddress(
 }
 
 export async function createPluginRepo(
-  hre: HardhatRuntimeEnvironment,
+  hre: EHRE,
   pluginContractName: string,
   pluginSetupContractName: string,
   releaseMetadata: string,
   buildMetadata: string
 ): Promise<void> {
+  const {network} = hre;
+  const pluginDomain =
+    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
+  if (
+    await isENSDomainRegistered(
+      `${pluginContractName}.${pluginDomain}`,
+      await getENSAddress(hre)
+    )
+  ) {
+    // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
+    // Either a fruntrun happened or something else. Thus we abort here
+    throw new Error(`${pluginContractName} is already present! Aborting...`);
+  }
+
   const signers = await ethers.getSigners();
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
@@ -136,15 +186,13 @@ export async function createPluginRepo(
     releaseMetadata,
     buildMetadata
   );
-
+  console.log(
+    `Creating & registering repo for ${pluginContractName} with tx ${tx.hash}`
+  );
   await tx.wait();
 
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
-
-  if (!hre.aragonPluginRepos) {
-    hre.aragonPluginRepos = {};
-  }
 
   hre.aragonPluginRepos[pluginContractName] = repoAddress;
 
@@ -159,7 +207,7 @@ export async function checkSetManagingDao(
   contract: Contract,
   expectedDaoAddress: string
 ) {
-  const setDAO = await contract.callStatic.dao();
+  const setDAO = await contract.dao();
   if (setDAO !== expectedDaoAddress) {
     throw new Error(
       `${contract.address} has wrong DAO. Expected ${setDAO} to be ${expectedDaoAddress}`
@@ -167,25 +215,167 @@ export async function checkSetManagingDao(
   }
 }
 
+export type Permission = {
+  operation: Operation;
+  where: {name: string; address: string};
+  who: {name: string; address: string};
+  permission: string;
+  condition?: string;
+  data?: string;
+};
+
 export async function checkPermission(
-  permissionManager: Contract,
-  where: string,
-  who: string,
-  permission: string,
-  data = '0x'
+  permissionManagerContract: ethers.Contract,
+  permission: Permission
 ) {
+  const checkStatus = await isPermissionSetCorrectly(
+    permissionManagerContract,
+    permission
+  );
+  if (!checkStatus) {
+    const {who, where, operation} = permission;
+    if (operation === Operation.Grant) {
+      throw new Error(
+        `(${who.name}: ${who.address}) doesn't have ${permission.permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
+      );
+    }
+    throw new Error(
+      `(${who.name}: ${who.address}) has ${permission.permission} on (${where.name}: ${where.address}) in ${permissionManagerContract.address}`
+    );
+  }
+}
+
+export async function isPermissionSetCorrectly(
+  permissionManagerContract: ethers.Contract,
+  {operation, where, who, permission, data = '0x'}: Permission
+): Promise<boolean> {
   const permissionId = ethers.utils.id(permission);
-  const isGranted = await permissionManager.callStatic.isGranted(
-    where,
-    who,
+  const isGranted = await permissionManagerContract.isGranted(
+    where.address,
+    who.address,
     permissionId,
     data
   );
-  if (!isGranted) {
-    throw new Error(
-      `${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`
-    );
+  if (!isGranted && operation === Operation.Grant) {
+    return false;
   }
+
+  if (isGranted && operation === Operation.Revoke) {
+    return false;
+  }
+  return true;
+}
+
+export async function managePermissions(
+  permissionManagerContract: ethers.Contract,
+  permissions: Permission[]
+): Promise<void> {
+  // filtering permission to only apply those that are needed
+  const items: Permission[] = [];
+  for (const permission of permissions) {
+    if (await isPermissionSetCorrectly(permissionManagerContract, permission)) {
+      continue;
+    }
+    items.push(permission);
+  }
+
+  if (items.length === 0) {
+    console.log(`Contract call skipped. No permissions to set...`);
+    return;
+  }
+
+  console.log(
+    `Setting ${items.length} permissions. Skipped ${
+      permissions.length - items.length
+    }`
+  );
+  const tx = await permissionManagerContract.applyMultiTargetPermissions(
+    items.map(item => [
+      item.operation,
+      item.where.address,
+      item.who.address,
+      item.condition || ethers.constants.AddressZero,
+      ethers.utils.id(item.permission),
+    ])
+  );
+  console.log(`Set permissions with ${tx.hash}. Waiting for confirmation...`);
+  await tx.wait();
+
+  items.forEach(permission => {
+    console.log(
+      `${
+        permission.operation === Operation.Grant ? 'Granted' : 'Revoked'
+      } the ${permission.permission} of (${permission.where.name}: ${
+        permission.where.address
+      }) for (${permission.who.name}: ${permission.who.address}), see (tx: ${
+        tx.hash
+      })`
+    );
+  });
+}
+
+export async function isENSDomainRegistered(
+  domain: string,
+  ensRegistryAddress: string
+): Promise<boolean> {
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  return ensRegistryContract.recordExists(ethers.utils.namehash(domain));
+}
+
+export async function getENSAddress(hre: EHRE): Promise<string> {
+  if (ENS_ADDRESSES[hre.network.name]) {
+    return ENS_ADDRESSES[hre.network.name];
+  }
+
+  const ensDeployment = await hre.deployments.get('ENSRegistry');
+  if (ensDeployment) {
+    return ensDeployment.address;
+  }
+
+  throw new Error('ENS address not found.');
+}
+
+export async function getPublicResolverAddress(hre: EHRE): Promise<string> {
+  if (ENS_PUBLIC_RESOLVERS[hre.network.name]) {
+    return ENS_PUBLIC_RESOLVERS[hre.network.name];
+  }
+
+  const publicResolverDeployment = await hre.deployments.get('PublicResolver');
+  if (publicResolverDeployment) {
+    return publicResolverDeployment.address;
+  }
+
+  throw new Error('PublicResolver address not found.');
+}
+
+export async function registerSubnodeRecord(
+  domain: string,
+  owner: string,
+  ensRegistryAddress: string,
+  publicResolver: string
+): Promise<string> {
+  const domainSplitted = domain.split('.');
+  const subdomain = domainSplitted.splice(0, 1)[0];
+  const parentDomain = domainSplitted.join('.');
+
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  const tx = await ensRegistryContract.setSubnodeRecord(
+    ethers.utils.namehash(parentDomain),
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+    owner,
+    publicResolver,
+    0
+  );
+  await tx.wait();
+  return ensRegistryContract.owner(ethers.utils.namehash(domain));
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

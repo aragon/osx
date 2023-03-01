@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AddresslistVotingSetup} from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {Operation} from '../../../../core/permission/permission-manager';
+import {Operation} from '../../../../../utils/types';
 import {
   VotingSettings,
   VotingMode,
@@ -57,13 +57,17 @@ describe('AddresslistVotingSetup', function () {
     );
     addresslistVotingSetup = await AddresslistVotingSetup.deploy();
 
-    implementationAddress =
-      await addresslistVotingSetup.getImplementationAddress();
+    implementationAddress = await addresslistVotingSetup.implementation();
 
     defaultData = abiCoder.encode(metadata.pluginSetupABI.prepareInstallation, [
       Object.values(defaultVotingSettings),
       defaultMembers,
     ]);
+  });
+
+  it('does not support the empty interface', async () => {
+    expect(await addresslistVotingSetup.supportsInterface('0xffffffff')).to.be
+      .false;
   });
 
   it('creates address list voting base with the correct interface', async () => {

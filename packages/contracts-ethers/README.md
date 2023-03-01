@@ -1,18 +1,19 @@
-# Aragon Core Contracts for ethers.js
+# Aragon OSx Contracts for ethers.js
 
 NPM package that provides ethers.js wrappers to use the Aragon DAO framework smart contracts.
 
 ```sh
-yarn add @aragon/core-contracts-ethers
+yarn add @aragon/osx-ethers
 ```
 
 ## Usage
 
 ### Attaching to a contract
+
 ```ts
 import {
   DAOFactory__factory
-} from "@aragon/core-contracts-ethers";
+} from "@aragon/osx-ethers";
 
 // Use it
 const daoFactoryInstance = DAOFactory__factory.connect(...);
@@ -21,7 +22,7 @@ const daoFactoryInstance = DAOFactory__factory.connect(...);
 ### Getting the list of global contract addresses
 
 ```ts
-import { activeContractsList } from "@aragon/core-contracts-ethers";
+import {activeContractsList} from '@aragon/osx-ethers';
 
 console.log(activeContractsList.rinkeby.DAOFactory);
 // '0x2290E6dF695C5272cE942015c90aAe24bFB94960'

@@ -1,13 +1,13 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress} from '../helpers';
+import {Operation} from '../../utils/types';
+import {getContractAddress, managePermissions} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
-  let grantTx;
 
-  // Get managing DAO address.
+  // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
@@ -28,21 +28,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
-    'REGISTER_PLUGIN_REPO_PERMISSION'
-  );
-
-  // Gransting Permissions
-  grantTx = await managingDaoContract.grant(
-    pluginRepoRegistryAddress,
-    pluginRepoFactoryAddress,
-    REGISTER_PLUGIN_REPO_PERMISSION_ID
-  );
-  await grantTx.wait();
-
-  console.log(
-    `Granted the REGISTER_PLUGIN_REPO_PERMISSION of 'pluginRepoRegistry' (${pluginRepoRegistryAddress}) to 'pluginRepoFactory' (${pluginRepoFactoryAddress}) (tx: ${grantTx.hash})`
-  );
+  // Grant `REGISTER_PLUGIN_REPO_PERMISSION` of `PluginRepoRegistry` to `DAOFactory`.
+  // Grant `UPGRADE_REGISTRY_PERMISSION` of `PluginRepoRegistry` to `ManagingDAO`.
+  const grantPermissions = [
+    {
+      operation: Operation.Grant,
+      where: {name: 'PluginRepoRegistry', address: pluginRepoRegistryAddress},
+      who: {name: 'PluginRepoFactory', address: pluginRepoFactoryAddress},
+      permission: 'REGISTER_PLUGIN_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {name: 'PluginRepoRegistry', address: pluginRepoRegistryAddress},
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'UPGRADE_REGISTRY_PERMISSION',
+    },
+  ];
+  await managePermissions(managingDaoContract, grantPermissions);
 };
 export default func;
 func.tags = ['Plugin_Registry_Permissions'];

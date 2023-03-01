@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -26,7 +26,7 @@ interface IMultisig {
     /// - the voter is not listed.
     /// @param _proposalId The proposal Id.
     /// @param _account The address of the user to check.
-    /// @return bool Returns true if the account is allowed to vote.
+    /// @return Returns true if the account is allowed to vote.
     /// @dev The function assumes the queried proposal exists.
     function canApprove(uint256 _proposalId, address _account) external view returns (bool);
 

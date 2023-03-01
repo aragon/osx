@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -10,7 +10,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @notice The interface required for a plugin setup contract to be consumed by the `PluginSetupProcessor` for plugin installations, updates, and uninstallations.
 interface IPluginSetup {
     /// @notice The data associated with a prepared setup.
-    /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
+    /// @param helpers The address array of helpers (contracts or EOAs) associated with this plugin version after the installation or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedSetupData {
         address[] helpers;
@@ -34,7 +34,7 @@ interface IPluginSetup {
     /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData);
 
     /// @notice Prepares the update of a plugin.
@@ -58,8 +58,8 @@ interface IPluginSetup {
         SetupPayload calldata _payload
     ) external returns (PermissionLib.MultiTargetPermission[] memory permissions);
 
-    /// @notice Returns the plugin's base implementation.
-    /// @return address The address of the plugin implementation contract.
+    /// @notice Returns the plugin implementation address.
+    /// @return The address of the plugin implementation contract.
     /// @dev The implementation can be instantiated via the `new` keyword, cloned via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)), or proxied via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    function getImplementationAddress() external view returns (address);
+    function implementation() external view returns (address);
 }

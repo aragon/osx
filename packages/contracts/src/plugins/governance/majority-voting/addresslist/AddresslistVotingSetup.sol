@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -16,9 +16,6 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
     AddresslistVoting private immutable addresslistVotingBase;
 
-    /// @notice The address zero to be used as condition address for permissions.
-    address private constant NO_CONDITION = address(0);
-
     /// @notice The contract constructor, that deployes the `AddresslistVoting` plugin logic contract.
     constructor() {
         addresslistVotingBase = new AddresslistVoting();
@@ -27,10 +24,8 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
         (MajorityVotingBase.VotingSettings memory votingSettings, address[] memory members) = abi
             .decode(_data, (MajorityVotingBase.VotingSettings, address[]));
@@ -40,7 +35,7 @@ contract AddresslistVotingSetup is PluginSetup {
             address(addresslistVotingBase),
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
-                dao,
+                _dao,
                 votingSettings,
                 members
             )
@@ -56,7 +51,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
@@ -64,7 +59,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -72,7 +67,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -81,7 +76,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -101,7 +96,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
@@ -109,7 +104,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -117,7 +112,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -125,13 +120,13 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view returns (address) {
+    function implementation() external view returns (address) {
         return address(addresslistVotingBase);
     }
 }

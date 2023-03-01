@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -16,9 +16,6 @@ contract PluginRepoFactory {
 
     /// @notice The address of the `PluginRepo` base contract.
     address public pluginRepoBase;
-
-    // @notice Thrown if the plugin repository subdomain is empty.
-    error EmptyPluginRepoSubdomain();
 
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
     /// @param _pluginRepoRegistry The aragon plugin registry address.
@@ -41,7 +38,7 @@ contract PluginRepoFactory {
     /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.0`.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
-    /// @param _maintainer The plugin maintainer address.
+    /// @param _maintainer The maintainer of the plugin repo. This address has permission to update metadata, upgrade the repo logic, and manage the repo permissions.
     /// @param _releaseMetadata The release metadata URI.
     /// @param _buildMetadata The build metadata URI.
     /// @dev After the creation of the `PluginRepo` and release of the first version by the factory, ownership is transferred to the `_maintainer` address.
@@ -68,10 +65,11 @@ contract PluginRepoFactory {
     function _setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
         PermissionLib.SingleTargetPermission[]
-            memory items = new PermissionLib.SingleTargetPermission[](5);
+            memory items = new PermissionLib.SingleTargetPermission[](6);
 
         bytes32 rootPermissionID = pluginRepo.ROOT_PERMISSION_ID();
         bytes32 maintainerPermissionID = pluginRepo.MAINTAINER_PERMISSION_ID();
+        bytes32 upgradePermissionID = pluginRepo.UPGRADE_REPO_PERMISSION_ID();
 
         // Grant the plugin maintainer all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
@@ -82,7 +80,7 @@ contract PluginRepoFactory {
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.UPGRADE_REPO_PERMISSION_ID()
+            upgradePermissionID
         );
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
@@ -101,21 +99,23 @@ contract PluginRepoFactory {
             address(this),
             maintainerPermissionID
         );
+        items[5] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Revoke,
+            address(this),
+            upgradePermissionID
+        );
 
         pluginRepo.applySingleTargetPermissions(address(pluginRepo), items);
     }
 
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
+    /// @dev Passing an empty `_subdomain` will cause the transaction to revert.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The initial owner address.
     function _createPluginRepo(
         string calldata _subdomain,
         address _initialOwner
     ) internal returns (PluginRepo pluginRepo) {
-        if (!(bytes(_subdomain).length > 0)) {
-            revert EmptyPluginRepoSubdomain();
-        }
-
         pluginRepo = PluginRepo(
             createERC1967Proxy(
                 pluginRepoBase,

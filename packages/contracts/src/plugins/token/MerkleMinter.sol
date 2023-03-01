@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -33,11 +33,6 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     /// @inheritdoc IMerkleMinter
     IMerkleDistributor public override distributorBase;
 
-    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
-    constructor() {
-        _disableInitializers();
-    }
-
     /// @notice Initializes the MerkleMinter.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -63,7 +58,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
+    /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IMerkleMinter).interfaceId ||

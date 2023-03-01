@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {DAO, MultisigSetup, Multisig__factory} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../core/permission/permission-manager';
+import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {MultisigSettings, multisigInterface} from './multisig';
@@ -51,7 +51,11 @@ describe('MultisigSetup', function () {
 
     MultisigFactory = await ethers.getContractFactory('Multisig');
 
-    implementationAddress = await multisigSetup.getImplementationAddress();
+    implementationAddress = await multisigSetup.implementation();
+  });
+
+  it('does not support the empty interface', async () => {
+    expect(await multisigSetup.supportsInterface('0xffffffff')).to.be.false;
   });
 
   it('creates multisig base with the correct interface', async () => {

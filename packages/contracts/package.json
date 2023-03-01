@@ -1,7 +1,7 @@
 {
-  "name": "@aragon/core-contracts",
-  "version": "0.7.1-alpha",
-  "description": "Aragon V2 DAO Framework",
+  "name": "@aragon/osx-artifacts",
+  "version": "1.0.0",
+  "description": "The Aragon OSx Solidity contracts",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",
@@ -26,14 +26,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aragon/core.git"
+    "url": "git+https://github.com/aragon/osx.git"
   },
   "author": "",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/aragon/core/issues"
+    "url": "https://github.com/aragon/osx/issues"
   },
-  "homepage": "https://github.com/aragon/core#readme",
+  "homepage": "https://github.com/aragon/osx#readme",
   "devDependencies": {
     "@defi-wonderland/smock": "^2.3.4",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
@@ -59,7 +59,7 @@
     "eslint-plugin-promise": "^5.1.1",
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.5.1",
-    "hardhat": "^2.12.2",
+    "hardhat": "^2.12.7",
     "hardhat-deploy": "^0.9.26",
     "hardhat-gas-reporter": "^1.0.4",
     "ipfs-http-client": "51.0.0",

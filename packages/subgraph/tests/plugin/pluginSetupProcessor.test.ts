@@ -6,8 +6,6 @@ import {
   ADDRESS_FOUR,
   ADDRESS_FIVE,
   ADDRESS_ZERO,
-  ONE_ETH,
-  DAO_TOKEN_ADDRESS,
   PLUGIN_SETUP_ID,
   ADDRESS_SIX,
   APPLIED_PLUGIN_SETUP_ID
@@ -78,6 +76,11 @@ test('InstallationPrepared event', function() {
       ethereum.Value.fromBytes(Bytes.fromHexString('0x5678'))
     ]
   ];
+
+  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE, false);
+  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE, false);
+  getSupportsInterface(plugin, ADMIN_INTERFACE, false);
+  getSupportsInterface(plugin, MULTISIG_INTERFACE, false);
 
   let event = createInstallationPreparedEvent(
     ADDRESS_THREE,
@@ -233,11 +236,6 @@ test('InstallationApplied event', function() {
   }
   let installationIdString = installationId.toHexString();
   let preparationId = `${installationIdString}_${setupId}`;
-
-  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE, false);
-  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE, false);
-  getSupportsInterface(plugin, ADMIN_INTERFACE, false);
-  getSupportsInterface(plugin, MULTISIG_INTERFACE, false);
 
   let event = createInstallationAppliedEvent(
     dao,

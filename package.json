@@ -1,10 +1,10 @@
 {
-  "name": "@aragon/core",
+  "name": "@aragon/osx",
   "version": "0.1.0",
   "description": "Aragon DAO Framework",
-  "repository": "https://github.com/aragon/core",
+  "repository": "https://github.com/aragon/osx",
   "author": "Aragon Association",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "workspaces": {
     "packages": [

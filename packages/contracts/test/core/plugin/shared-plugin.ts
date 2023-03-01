@@ -4,6 +4,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {TestSharedPlugin, TestIdGatingCondition, DAO} from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
+import {deployWithProxy} from '../../test-utils/proxy';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
   'ID_GATED_ACTION_PERMISSION'
@@ -32,7 +33,7 @@ describe('SharedPlugin', function () {
     const TestSharedPlugin = await ethers.getContractFactory(
       'TestSharedPlugin'
     );
-    testPlugin = await TestSharedPlugin.deploy();
+    testPlugin = await deployWithProxy(TestSharedPlugin);
     await testPlugin.initialize(managingDao.address);
 
     expectedUnauthorizedErrorArguments = [

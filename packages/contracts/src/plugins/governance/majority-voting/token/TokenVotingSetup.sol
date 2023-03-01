@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.17;
 
@@ -28,9 +28,6 @@ contract TokenVotingSetup is PluginSetup {
 
     /// @notice The address of the `TokenVoting` base contract.
     TokenVoting private immutable tokenVotingBase;
-
-    /// @notice The address zero to be used as condition address for permissions.
-    address private constant NO_CONDITION = address(0);
 
     /// @notice The address of the `GovernanceERC20` base contract.
     address public immutable governanceERC20Base;
@@ -79,10 +76,8 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
-        bytes memory _data
+        bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        IDAO dao = IDAO(_dao);
-
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
@@ -135,7 +130,7 @@ contract TokenVotingSetup is PluginSetup {
             // Clone a `GovernanceERC20`.
             token = governanceERC20Base.clone();
             GovernanceERC20(token).initialize(
-                dao,
+                IDAO(_dao),
                 tokenSettings.name,
                 tokenSettings.symbol,
                 mintSettings
@@ -147,7 +142,7 @@ contract TokenVotingSetup is PluginSetup {
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
-            abi.encodeWithSelector(TokenVoting.initialize.selector, dao, votingSettings, token)
+            abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, token)
         );
 
         // Prepare permissions
@@ -162,7 +157,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -170,7 +165,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -179,7 +174,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -190,7 +185,7 @@ contract TokenVotingSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 token,
                 _dao,
-                NO_CONDITION,
+                PermissionLib.NO_CONDITION,
                 tokenMintPermission
             );
         }
@@ -225,7 +220,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -233,7 +228,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -241,7 +236,7 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_CONDITION,
+            PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -253,14 +248,14 @@ contract TokenVotingSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 token,
                 _dao,
-                NO_CONDITION,
+                PermissionLib.NO_CONDITION,
                 GovernanceERC20(token).MINT_PERMISSION_ID()
             );
         }
     }
 
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    function implementation() external view virtual override returns (address) {
         return address(tokenVotingBase);
     }
 

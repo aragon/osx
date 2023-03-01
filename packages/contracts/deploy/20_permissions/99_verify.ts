@@ -1,5 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+
+import {Operation} from '../../utils/types';
 import {checkPermission, getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -7,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {ethers} = hre;
 
-  // Get managing DAO address.
+  // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
@@ -47,35 +49,41 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // ENS PERMISSIONS
-  await checkPermission(
-    managingDaoContract,
-    daoEnsSubdomainRegistrarAddress,
-    daoRegistryAddress,
-    'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-  );
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
+    where: {
+      name: 'DAOSubdomainRegistrar',
+      address: daoEnsSubdomainRegistrarAddress,
+    },
+    who: {name: 'DAORegistry', address: daoRegistryAddress},
+    permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
+  });
 
-  await checkPermission(
-    managingDaoContract,
-    pluginEnsSubdomainRegistrarAddress,
-    pluginRepoRegistryAddress,
-    'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-  );
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
+    where: {
+      name: 'PluginSubdomainRegistrar',
+      address: pluginEnsSubdomainRegistrarAddress,
+    },
+    who: {name: 'RepoRegistry', address: pluginRepoRegistryAddress},
+    permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
+  });
 
   // DAO REGISTRY PERMISSIONS
-  await checkPermission(
-    managingDaoContract,
-    daoRegistryAddress,
-    daoFactoryAddress,
-    'REGISTER_DAO_PERMISSION'
-  );
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
+    where: {name: 'DAORegistry', address: daoRegistryAddress},
+    who: {name: 'DAOFactory', address: daoFactoryAddress},
+    permission: 'REGISTER_DAO_PERMISSION',
+  });
 
   // PLUGIN REPO REGISTRY PERMISSIONS
-  await checkPermission(
-    managingDaoContract,
-    pluginRepoRegistryAddress,
-    pluginRepoFactoryAddress,
-    'REGISTER_PLUGIN_REPO_PERMISSION'
-  );
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Grant,
+    where: {name: 'RepoRegistry', address: pluginRepoRegistryAddress},
+    who: {name: 'RepoFactory', address: pluginRepoFactoryAddress},
+    permission: 'REGISTER_PLUGIN_REPO_PERMISSION',
+  });
 
   console.log('Permissions verified');
 };

@@ -1,4 +1,4 @@
-import {Bytes, log, store} from '@graphprotocol/graph-ts';
+import {Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,

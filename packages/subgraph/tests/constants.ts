@@ -1,4 +1,6 @@
-import {Address} from '@graphprotocol/graph-ts';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
+
+import {getProposalId} from '../src/utils/proposals';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 export const ADDRESS_ONE = '0x0000000000000000000000000000000000000001';
@@ -17,8 +19,10 @@ export const TWO = '2';
 export const THREE = '3';
 
 export const PROPOSAL_ID = ZERO;
-export const PROPOSAL_ENTITY_ID =
-  Address.fromString(CONTRACT_ADDRESS).toHexString() + '_0x' + PROPOSAL_ID;
+export const PROPOSAL_ENTITY_ID = getProposalId(
+  Address.fromString(CONTRACT_ADDRESS),
+  BigInt.fromString(PROPOSAL_ID)
+);
 
 export const STRING_DATA = 'Some String Data ...';
 
@@ -50,6 +54,16 @@ export const CREATED_AT = '1644850000';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
+export const ONE_BYTES32 =
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
+export const HALF_UINT256_BYTES32 =
+  '0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+export const MAX_UINT256_BYTES32 =
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+export const MAX_UINT256_NUMBER_STRING =
+  '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+
 export const PLUGIN_SETUP_ID =
   '0xfb3fd2c4cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 export const APPLIED_PLUGIN_SETUP_ID =

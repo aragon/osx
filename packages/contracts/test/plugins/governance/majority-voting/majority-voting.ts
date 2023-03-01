@@ -66,7 +66,8 @@ describe('MajorityVotingMock', function () {
     const MajorityVotingBase = await ethers.getContractFactory(
       'MajorityVotingMock'
     );
-    votingBase = await MajorityVotingBase.deploy();
+
+    votingBase = await deployWithProxy(MajorityVotingBase);
     await dao.grant(
       votingBase.address,
       ownerAddress,
@@ -86,7 +87,7 @@ describe('MajorityVotingMock', function () {
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
-      expect(await votingBase.supportsInterface('0x00000000')).to.be.false;
+      expect(await votingBase.supportsInterface('0xffffffff')).to.be.false;
     });
 
     it('supports the `IERC165Upgradeable` interface', async () => {

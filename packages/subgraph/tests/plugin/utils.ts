@@ -5,7 +5,6 @@ import {
   InstallationApplied,
   InstallationPrepared,
   InstallationPreparedPreparedSetupDataStruct,
-  PrepareInstallationCallPreparedSetupDataPermissionsStruct,
   UninstallationApplied,
   UninstallationPrepared,
   UpdateApplied,
