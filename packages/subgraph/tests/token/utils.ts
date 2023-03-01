@@ -7,7 +7,7 @@ import {
   ProposalCreated,
   ProposalExecuted
 } from '../../generated/templates/TokenVoting/TokenVoting';
-import {TokenVotingProposal} from '../../generated/schema';
+import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
@@ -24,6 +24,7 @@ import {
   CREATED_AT,
   ALLOW_FAILURE_MAP
 } from '../constants';
+import {Transfer as ERC20TransferEvent} from '../../generated/templates/DaoTemplate/ERC20';
 
 // events
 
@@ -250,4 +251,47 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.save();
 
   return tokenVotingProposal;
+}
+
+export function createNewERC20TransferEvent(
+  from: string,
+  to: string,
+  amount: string
+): ERC20TransferEvent {
+  let transferEvent = changetype<ERC20TransferEvent>(newMockEvent());
+
+  let fromParam = new ethereum.EventParam(
+    'from',
+    ethereum.Value.fromAddress(Address.fromString(from))
+  );
+  let toParam = new ethereum.EventParam(
+    'to',
+    ethereum.Value.fromAddress(Address.fromString(to))
+  );
+  let amountParam = new ethereum.EventParam(
+    'amount',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(amount))
+  );
+
+  transferEvent.parameters.push(fromParam);
+  transferEvent.parameters.push(toParam);
+  transferEvent.parameters.push(amountParam);
+
+  return transferEvent;
+}
+
+export function createTokenVotingMember(
+  address: string,
+  plugin: string,
+  balance: string
+): string {
+  const fromUserId = address.concat('_').concat(plugin);
+
+  const user = new TokenVotingMember(fromUserId);
+  user.address = Address.fromString(address);
+  user.plugin = plugin; // uses other plugin address to make sure that the code reuses the entity
+  user.balance = BigInt.fromString(balance);
+  user.save();
+
+  return fromUserId;
 }
