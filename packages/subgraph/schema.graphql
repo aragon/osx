@@ -137,7 +137,7 @@ type Action @entity {
   value: BigInt!
   data: Bytes!
   dao: Dao!
-  proposal: Proposal!
+  proposal: Proposal
   execResult: Bytes
 }
 
@@ -280,6 +280,22 @@ interface Proposal {
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
+  executed: Boolean!
+  createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
+  executionTxHash: Bytes
+}
+
+type TransactionActionsProposal implements Proposal @entity {
+  id: ID!
+  dao: Dao!
+  creator: Bytes!
+  metadata: String
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt
+  failureMap: BigInt
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -353,6 +369,7 @@ type TokenVotingProposal implements Proposal @entity {
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   plugin: TokenVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -424,6 +441,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   plugin: AddresslistVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -486,6 +504,7 @@ type AdminProposal implements Proposal @entity {
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -533,6 +552,7 @@ type MultisigProposal implements Proposal @entity {
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   plugin: MultisigPlugin!
   proposalId: BigInt!
   creator: Bytes!

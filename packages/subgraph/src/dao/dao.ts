@@ -1,4 +1,4 @@
-import {Bytes, store} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes, log, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -16,7 +16,9 @@ import {
   Dao,
   ContractPermissionId,
   Permission,
-  StandardCallback
+  StandardCallback,
+  Action,
+  TransactionActionsProposal
 } from '../../generated/schema';
 
 import {ADDRESS_ZERO} from '../utils/constants';
@@ -61,16 +63,59 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
+  let proposalId = event.params.actor
+    .toHexString()
+    .concat('_')
+    .concat(event.params.callId.toHexString());
+
+  // If proposal exists, it belongs to one of the plugins.
+  // Otherwise, we fallback and create it
+  // (in case execute was called without through any plugin).
+  let proposal = TransactionActionsProposal.load(proposalId);
+  if (!proposal) {
+    proposal = new TransactionActionsProposal(proposalId);
+    proposal.dao = event.address.toHexString();
+    proposal.createdAt = event.block.timestamp;
+    proposal.endDate = event.block.timestamp;
+    proposal.startDate = event.block.timestamp;
+    proposal.creator = event.params.actor;
+    proposal.executionTxHash = event.transaction.hash;
+    proposal.executed = true;
+  }
+
+  proposal.failureMap = event.params.failureMap;
+  proposal.save();
+
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
-    let proposalId = event.params.actor
-      .toHexString()
-      .concat('_')
-      .concat(event.params.callId.toHexString());
 
-    if (action.data.toHexString() == '0x') {
+    let actionId = proposalId.concat('_').concat(index.toString());
+    let actionEntity = Action.load(actionId);
+
+    // In case the execute on the dao is called by the address
+    // That we don't currently index for the actions in the subgraph,
+    // we fallback and still create an action, but no attachment to the proposal.
+    // NOTE that it's important to generate action id differently to not allow overwriting.
+    if (!actionEntity) {
+      actionId = actionId
+        .concat('_')
+        .concat(event.transaction.hash.toHexString())
+        .concat('_')
+        .concat(event.transactionLogIndex.toHexString());
+      actionEntity = new Action(actionId);
+      actionEntity.to = action.to;
+      actionEntity.value = action.value;
+      actionEntity.data = action.data;
+      actionEntity.proposal = proposal.id;
+      actionEntity.dao = event.address.toHexString();
+    }
+
+    actionEntity.execResult = event.params.execResults[index];
+    actionEntity.save();
+
+    if (action.data.toHexString() == '0x' && action.value.gt(BigInt.zero())) {
       handleNativeAction(
         event.address,
         action.to,
