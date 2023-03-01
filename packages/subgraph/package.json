@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-subgraph",
-  "version": "0.10.0-alpha",
+  "version": "1.0.1",
   "description": "The Aragon OSx Subgraph",
   "homepage": "https://github.com/aragon/osx",
   "license": "AGPL-3.0-or-later",
