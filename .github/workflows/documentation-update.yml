@@ -18,12 +18,15 @@ jobs:
           cache: 'yarn'
           node-version: 14
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn iyarnstall --frozen-lockfile
       - name: Generate Docs
         run: yarn run docgen
         working-directory: packages/contracts/
-      - name: Remove triple slashes from generated files
+      - name: Remove triple slashes from the generated contract docs introduced by solidity-docgen
         run: find . -type f -name '*.md' -exec perl -pi -e 's/\/\/\/\s*//g' {} \;
+        working-directory: packages/contracts/docs/osx/03-reference-guide
+      - name: Remove repetitions from the generated contract docs introduced by solidity-docgen
+        run: find . -type f -name '*.md' -exec perl -i -0777 -pe 's/<!--CONTRACT_END-->.*//s' {} \;
         working-directory: packages/contracts/docs/osx/03-reference-guide
       - name: Checkout builders-portal
         uses: actions/checkout@v3
