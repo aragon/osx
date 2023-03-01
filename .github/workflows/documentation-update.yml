@@ -22,9 +22,6 @@ jobs:
       - name: Generate Docs
         run: yarn run docgen
         working-directory: packages/contracts/
-      - name: Remove repetitions from the generated contract docs introduced by solidity-docgen
-        run: find . -type f -name '*.md' -exec perl -i -0777 -pe 's/<!--CONTRACT_END-->.*//s' {} \;
-        working-directory: packages/contracts/docs/osx/03-reference-guide
       - name: Format with prettier
         run: yarn run prettier 'packages/contracts/docs/osx/03-reference-guide/**/*.md' --write
       - name: Checkout builders-portal
