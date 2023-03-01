@@ -24,6 +24,10 @@ export const PROPOSAL_ENTITY_ID = getProposalId(
   BigInt.fromString(PROPOSAL_ID)
 );
 
+export const PLUGIN_ENTITY_ID = Address.fromString(
+  CONTRACT_ADDRESS
+).toHexString();
+
 export const STRING_DATA = 'Some String Data ...';
 
 export const ONE_ETH = '1000000000000000000';
