@@ -9986,10 +9986,10 @@ solidity-coverage@^0.8.2:
     shelljs "^0.8.3"
     web3-utils "^1.3.6"
 
-solidity-docgen@^0.6.0-beta.34:
-  version "0.6.0-beta.34"
-  resolved "https://registry.yarnpkg.com/solidity-docgen/-/solidity-docgen-0.6.0-beta.34.tgz#f1766b13ea864ea71b8e727796d30a69ea90014a"
-  integrity sha512-igdGrkg8gT1jn+B2NwzjEtSf+7NTrSi/jz88zO7MZWgETmcWbXaxgAsQP4BQeC4YFeH0Pie1NsLP7+9qDgvFtA==
+solidity-docgen@^0.6.0-beta.35:
+  version "0.6.0-beta.35"
+  resolved "https://registry.yarnpkg.com/solidity-docgen/-/solidity-docgen-0.6.0-beta.35.tgz#174d7fe54efa8b10f7d3cbe0dfc40e52e11bf867"
+  integrity sha512-9QdwK1THk/MWIdq1PEW/6dvtND0pUqpFTsbKwwU9YQIMYuRhH1lek9SsgnsGGYtdJ0VTrXXcVT30q20a8Y610A==
   dependencies:
     handlebars "^4.7.7"
     solidity-ast "^0.4.38"
