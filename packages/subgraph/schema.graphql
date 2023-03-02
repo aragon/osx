@@ -163,15 +163,12 @@ type Dao @entity {
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  proposals: [Proposal!] @derivedFrom(field: "dao")
+  proposals: [Proposal!]! @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
-  standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
+  standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
-  pluginPreparations: [PluginPreparation!]! @derivedFrom(field: "dao")
-  pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")
-
-  plugins: [IPlugin!]! @derivedFrom(field: "dao") # TODO: Delete or refactor after the plugins left the Aragon OSx subgraph
+  plugins: [IPlugin!]! @derivedFrom(field: "dao") # TODO: Refactor to `PluginInstallation` after the plugins left the Aragon OSx subgraph
 }
 
 # Plugins
@@ -239,7 +236,7 @@ type PluginPreparation @entity(immutable: true) {
 type PluginInstallation @entity {
   id: ID! # psp installationId
   dao: Dao!
-  pluginAddress: Bytes # The plugin address provided by the applied preparation
+  plugin: IPlugin # The plugin address as id provided by the applied preparation
   appliedPreparation: PluginPreparation
   appliedSetupId: Bytes # The setupId of the application see PSP documentation for more info
   appliedVersion: PluginVersion # Stored to track installations in the different plugin versions
@@ -266,7 +263,7 @@ interface IPlugin {
   dao: Dao!
   pluginAddress: Bytes!
 
-  installation: [PluginInstallation!] @derivedFrom(field: "pluginAddress")
+  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   # TODO: Uncomment as soon as the plugins have their own subgraph
   # appliedPreparation: PluginPreparation
@@ -314,6 +311,8 @@ type TokenVotingPlugin implements IPlugin @entity {
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
+
+  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
@@ -395,6 +394,8 @@ type AddresslistVotingPlugin implements IPlugin @entity {
   dao: Dao!
   pluginAddress: Bytes!
 
+  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+
   proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
   supportThreshold: BigInt
@@ -466,6 +467,8 @@ type AdminPlugin implements IPlugin @entity {
   dao: Dao!
   pluginAddress: Bytes!
 
+  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
   administrators: [AdministratorAdminPlugin!]! @derivedFrom(field: "plugin")
 }
@@ -508,6 +511,8 @@ type MultisigPlugin implements IPlugin @entity {
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
+
+  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")

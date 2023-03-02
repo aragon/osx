@@ -8,7 +8,8 @@ import {
   ADDRESS_ZERO,
   PLUGIN_SETUP_ID,
   ADDRESS_SIX,
-  APPLIED_PLUGIN_SETUP_ID
+  APPLIED_PLUGIN_SETUP_ID,
+  CONTRACT_ADDRESS
 } from '../constants';
 import {
   createInstallationAppliedEvent,
@@ -43,7 +44,7 @@ import {
 
 test('InstallationPrepared event', function() {
   let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
+  let plugin = CONTRACT_ADDRESS;
   let setupId = PLUGIN_SETUP_ID;
   let pluginSetupRepo = ADDRESS_TWO;
   let pluginVersionId = `${pluginSetupRepo}_1_1`;
@@ -261,7 +262,7 @@ test('InstallationApplied event', function() {
   assert.fieldEquals(
     'PluginInstallation',
     installationIdString,
-    'pluginAddress',
+    'plugin',
     plugin.toLowerCase()
   );
   assert.fieldEquals(
@@ -496,7 +497,7 @@ test('UpdateApplied event', function() {
   assert.fieldEquals(
     'PluginInstallation',
     installationIdString,
-    'pluginAddress',
+    'plugin',
     plugin.toLowerCase()
   );
   assert.fieldEquals(
