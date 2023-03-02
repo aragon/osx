@@ -22,6 +22,8 @@ jobs:
       - name: Generate Docs
         run: yarn run docgen
         working-directory: packages/contracts/
+      - name: Format with prettier
+        run: yarn run prettier 'packages/contracts/docs/osx/03-reference-guide/**/*.md' --write
       - name: Checkout builders-portal
         uses: actions/checkout@v3
         with:
