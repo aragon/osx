@@ -40,13 +40,17 @@ For the first version, the setup is very similar to the [setup example for the n
 <summary><code>SimpleStorageBuild0Setup</code></summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleStorageBuild0} from './SimpleStorageBuild0.sol';
 
 /// @title SimpleStorageSetup v1.0
 contract SimpleStorageBuild0Setup is PluginSetup {
-  constructor() PluginSetup(address(new SimpleStorageBuild0)) {}
+  address private immutable simpleStorageImplementation;
+
+  constructor() {
+    simpleStorageImplementation = address(new SimpleStorageBuild0());
+  }
 
   /// @inheritdoc IPluginSetup
   function prepareInstallation(
@@ -56,7 +60,7 @@ contract SimpleStorageBuild0Setup is PluginSetup {
     uint256 number = abi.decode(_data, (uint256));
 
     plugin = createERC1967Proxy(
-      implementation,
+      simpleStorageImplementation,
       abi.encodeWithSelector(SimpleStorageBuild0.initializeBuild0.selector, _dao, number)
     );
 
@@ -146,7 +150,11 @@ Additionally, since we want to support updates from build 0 to build 1, we must 
 ```solidity
 /// @title SimpleStorageSetup v1.1
 contract SimpleStorageBuild1Setup is PluginSetup {
-  constructor() PluginSetup(address(new SimpleStorageBuild1)) {}
+  address private immutable simpleStorageImplementation;
+
+  constructor() {
+    simpleStorageImplementation = address(new SimpleStorageBuild1());
+  }
 
   /// @inheritdoc IPluginSetup
   function prepareInstallation(
@@ -156,7 +164,7 @@ contract SimpleStorageBuild1Setup is PluginSetup {
     (uint256 _number, address _account) = abi.decode(_data, (uint256, address));
 
     plugin = createERC1967Proxy(
-      implementation,
+      simpleStorageImplementation,
       abi.encodeWithSelector(SimpleStorageBuild1.initializeBuild1.selector, _dao, _number, _account)
     );
 
@@ -291,7 +299,11 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 ```solidity
 /// @title SimpleStorageSetup v1.2
 contract SimpleStorageBuild2Setup is PluginSetup {
-  constructor() PluginSetup(address(new SimpleStorageBuild2)) {}
+  address private immutable simpleStorageImplementation;
+
+  constructor() {
+    simpleStorageImplementation = address(new SimpleStorageBuild2());
+  }
 
   /// @inheritdoc IPluginSetup
   function prepareInstallation(
@@ -301,7 +313,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
     (uint256 _number, address _account) = abi.decode(_data, (uint256, address));
 
     plugin = createERC1967Proxy(
-      implementation,
+      simpleStorageImplementation,
       abi.encodeWithSelector(SimpleStorageBuild2.initializeBuild2.selector, _dao, _number, _account)
     );
 
