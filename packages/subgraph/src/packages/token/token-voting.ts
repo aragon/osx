@@ -196,10 +196,13 @@ export function handleVoteCast(event: VoteCast): void {
         // `N_yes + N_no + N_abstain >= minVotingPower = minParticipation * N_total`
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
-        // set the executable param
+        // Used when proposal has ended.
         proposalEntity.executable =
-          (supportThresholdReached || supportThresholdReachedEarly) &&
-          minParticipationReached;
+          supportThresholdReached && minParticipationReached;
+
+        // Used when proposal has not ended.
+        proposalEntity.earlyExecutable =
+          supportThresholdReachedEarly && minParticipationReached;
       }
       proposalEntity.save();
     }

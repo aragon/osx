@@ -377,6 +377,7 @@ type TokenVotingProposal implements Proposal @entity {
   endDate: BigInt!
   creationBlockNumber: BigInt!
   executable: Boolean
+  earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
   executionTxHash: Bytes
@@ -448,6 +449,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   endDate: BigInt!
   creationBlockNumber: BigInt!
   executable: Boolean
+  earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
   executionTxHash: Bytes
