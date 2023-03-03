@@ -1,8 +1,10 @@
 ---
 title: Aragon OSx
+sidebar_label: Intro
+sidebar_position: 0
 ---
 
-## The Contracts behind Aragon OSx
+## The Contracts Behind the Protocol
 
 The Aragon OSx protocol allows you to customize your DAO by managing contract permissions or developing your own plugin. To **add the contracts to your project**, open a terminal in your projects root folder and type
 
