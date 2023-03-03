@@ -176,7 +176,7 @@ type Dao @entity {
 type PluginRepo @entity(immutable: true) {
   id: ID! # address
   subdomain: String!
-  versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+  releases: [PluginRelease!]! @derivedFrom(field: "pluginRepo")
   # Holds all preparations. Also applied ones.
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
   # Holds all installed and uninstalled installations.
@@ -188,13 +188,23 @@ type PluginSetup @entity(immutable: true) {
   versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
 }
 
+type PluginRelease @entity {
+  id: ID! # pluginRepo + release
+  pluginRepo: PluginRepo!
+  release: Int!
+  metadata: String! # release metadata
+  builds: [PluginVersion!]! @derivedFrom(field: "release")
+}
+
 type PluginVersion @entity(immutable: true) {
   id: ID! # pluginRepo + release + build
   pluginRepo: PluginRepo!
   pluginSetup: PluginSetup
-  release: Int!
+
+  release: PluginRelease!
   build: Int!
-  metadata: Bytes!
+
+  metadata: String! # build metadata
   # Holds all preparations. Also applied ones.
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginVersion")
   # Holds all installed and uninstalled installations.
