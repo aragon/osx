@@ -188,12 +188,18 @@ export function handleVoteCast(event: VoteCast): void {
           .times(yes)
           .gt(supportThreshold.times(noVotesWorstCase));
 
+        // `(1 - supportThreshold) * N_yes > supportThreshold *  N_no
+        let supportThresholdReached = BASE.minus(supportThreshold)
+          .times(yes)
+          .gt(supportThreshold.times(no));
+
         // `N_yes + N_no + N_abstain >= minVotingPower = minParticipation * N_total`
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // set the executable param
         proposalEntity.executable =
-          supportThresholdReachedEarly && minParticipationReached;
+          (supportThresholdReached || supportThresholdReachedEarly) &&
+          minParticipationReached;
       }
       proposalEntity.save();
     }
