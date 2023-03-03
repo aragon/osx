@@ -80,11 +80,14 @@ export function handleExecuted(event: Executed): void {
     proposal.startDate = event.block.timestamp;
     proposal.creator = event.params.actor;
     proposal.executionTxHash = event.transaction.hash;
+    // Since DAO doesn't emit allowFailureMap by mistake, we got no choice now.
+    // Using event.params.failureMap is still better than assining 0
+    // Becau
+    proposal.allowFailureMap = BigInt.zero();
     proposal.executed = true;
+    proposal.failureMap = event.params.failureMap;
+    proposal.save();
   }
-
-  proposal.failureMap = event.params.failureMap;
-  proposal.save();
 
   let actions = event.params.actions;
 

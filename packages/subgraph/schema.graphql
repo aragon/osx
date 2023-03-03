@@ -294,7 +294,7 @@ type TransactionActionsProposal implements Proposal @entity {
   creator: Bytes!
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt
+  allowFailureMap: BigInt!
   failureMap: BigInt
   executed: Boolean!
   createdAt: BigInt!
