@@ -1,4 +1,4 @@
-import {BigInt, Bytes, log, store} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -34,6 +34,7 @@ import {
   ERC721_transferFrom,
   onERC721Received
 } from '../utils/tokens/common';
+import {updateProposalWithFailureMap} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -68,12 +69,34 @@ export function handleExecuted(event: Executed): void {
     .concat('_')
     .concat(event.params.callId.toHexString());
 
-  // If proposal exists, it belongs to one of the plugins.
-  // Otherwise, we fallback and create it
-  // (in case execute was called without through any plugin).
-  let proposal = TransactionActionsProposal.load(proposalId);
-  if (!proposal) {
-    proposal = new TransactionActionsProposal(proposalId);
+  // Not an effective solution, until each plugin has
+  // its own subgraph separately.
+  // If proposal found, update its failureMap.
+  let wasUpdated = updateProposalWithFailureMap(
+    proposalId,
+    event.params.failureMap
+  );
+
+  // Entity TokenVotingProposal[0x55563897b904bc176f7a983e176e23c5f59104e3_0x0000000000000000000000000000000000000000000000000000000000000000]:
+  // missing value for non-nullable field `votingMode`
+
+  // If not updated, proposal wasn't found which means,
+  // it was called by the address that
+  // Subgraph doesn't index, in which case, we still create
+  // proposal entity in order to group its actions together.
+  if (!wasUpdated) {
+    // The id generation must include hash + logindex
+    // This is important to not allow overwriting. since
+    // the uniqueness of callId isn't checked in DAO, there
+    // might be a case when 2 different tx might end up having the same
+    // proposal ID which will cause overwrite. In case of plugins,
+    // It's plugin's responsibility to pass unique callId per execute.
+    proposalId = proposalId
+      .concat('_')
+      .concat(event.transaction.hash.toHexString())
+      .concat('_')
+      .concat(event.transactionLogIndex.toHexString());
+    let proposal = new TransactionActionsProposal(proposalId);
     proposal.dao = event.address.toHexString();
     proposal.createdAt = event.block.timestamp;
     proposal.endDate = event.block.timestamp;
@@ -81,8 +104,7 @@ export function handleExecuted(event: Executed): void {
     proposal.creator = event.params.actor;
     proposal.executionTxHash = event.transaction.hash;
     // Since DAO doesn't emit allowFailureMap by mistake, we got no choice now.
-    // Using event.params.failureMap is still better than assining 0
-    // Becau
+    // In such case, `allowFailureMap` shouldn't be fully trusted.
     proposal.allowFailureMap = BigInt.zero();
     proposal.executed = true;
     proposal.failureMap = event.params.failureMap;
@@ -102,16 +124,11 @@ export function handleExecuted(event: Executed): void {
     // we fallback and still create an action, but no attachment to the proposal.
     // NOTE that it's important to generate action id differently to not allow overwriting.
     if (!actionEntity) {
-      actionId = actionId
-        .concat('_')
-        .concat(event.transaction.hash.toHexString())
-        .concat('_')
-        .concat(event.transactionLogIndex.toHexString());
       actionEntity = new Action(actionId);
       actionEntity.to = action.to;
       actionEntity.value = action.value;
       actionEntity.data = action.data;
-      actionEntity.proposal = proposal.id;
+      actionEntity.proposal = proposalId;
       actionEntity.dao = event.address.toHexString();
     }
 

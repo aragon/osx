@@ -509,7 +509,11 @@ describe('handleExecuted', () => {
     let proposalId = event.params.actor
       .toHexString()
       .concat('_')
-      .concat(event.params.callId.toHexString());
+      .concat(event.params.callId.toHexString())
+      .concat('_')
+      .concat(event.transaction.hash.toHexString())
+      .concat('_')
+      .concat(event.transactionLogIndex.toHexString());
 
     assert.entityCount('TransactionActionsProposal', 1);
     assert.entityCount('Action', 2);
@@ -518,13 +522,7 @@ describe('handleExecuted', () => {
     eq('TransactionActionsProposal', proposalId, 'failureMap', failureMap);
 
     for (let i = 0; i < event.params.actions.length; i++) {
-      let actionId = proposalId
-        .concat('_')
-        .concat(i.toString())
-        .concat('_')
-        .concat(event.transaction.hash.toHexString())
-        .concat('_')
-        .concat(event.transactionLogIndex.toHexString());
+      let actionId = proposalId.concat('_').concat(i.toString());
 
       eq('Action', actionId, 'id', actionId);
       eq('Action', actionId, 'execResult', execResults[i].toHexString());
@@ -557,7 +555,11 @@ describe('handleExecuted', () => {
     let proposalId = event.params.actor
       .toHexString()
       .concat('_')
-      .concat(event.params.callId.toHexString());
+      .concat(event.params.callId.toHexString())
+      .concat('_')
+      .concat(event.transaction.hash.toHexString())
+      .concat('_')
+      .concat(event.transactionLogIndex.toHexString());
 
     let actionId = proposalId.concat('_').concat('0');
 
@@ -567,6 +569,7 @@ describe('handleExecuted', () => {
     proposal.createdAt = event.block.timestamp;
     proposal.endDate = event.block.timestamp;
     proposal.startDate = event.block.timestamp;
+    proposal.allowFailureMap = BigInt.zero();
     proposal.creator = event.params.actor;
     proposal.executionTxHash = event.transaction.hash;
     proposal.executed = true;
@@ -639,7 +642,11 @@ describe('handleExecuted', () => {
         let proposalId = event.params.actor
           .toHexString()
           .concat('_')
-          .concat(event.params.callId.toHexString());
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -737,7 +744,11 @@ describe('handleExecuted', () => {
         let proposalId = event.params.actor
           .toHexString()
           .concat('_')
-          .concat(event.params.callId.toHexString());
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -864,7 +875,11 @@ describe('handleExecuted', () => {
         let proposalId = event.params.actor
           .toHexString()
           .concat('_')
-          .concat(event.params.callId.toHexString());
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenId, 'id', tokenId);
@@ -953,7 +968,11 @@ describe('handleExecuted', () => {
         let proposalId = event.params.actor
           .toHexString()
           .concat('_')
-          .concat(event.params.callId.toHexString());
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenId, 'id', tokenId);
