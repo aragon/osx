@@ -77,9 +77,6 @@ export function handleExecuted(event: Executed): void {
     event.params.failureMap
   );
 
-  // Entity TokenVotingProposal[0x55563897b904bc176f7a983e176e23c5f59104e3_0x0000000000000000000000000000000000000000000000000000000000000000]:
-  // missing value for non-nullable field `votingMode`
-
   // If not updated, proposal wasn't found which means,
   // it was called by the address that
   // Subgraph doesn't index, in which case, we still create

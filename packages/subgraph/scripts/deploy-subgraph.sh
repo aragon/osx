@@ -47,8 +47,7 @@ else
     graph deploy $FULLNAME \
         --version-label $SUBGRAPH_VERSION \
         --node https://app.satsuma.xyz/api/subgraphs/deploy \
-        --ipfs https://api.thegraph.com/ipfs/ \
-        --deploy-key $GRAPH_KEY
+        --deploy-key $GRAPH_KEY > deploy-output.txt
 
     SUBGRAPH_ID=$(grep "Build completed:" deploy-output.txt | grep -oE "Qm[a-zA-Z0-9]{44}")
     rm deploy-output.txt
