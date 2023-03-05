@@ -118,7 +118,7 @@ export function handleExecuted(event: Executed): void {
 
     // In case the execute on the dao is called by the address
     // That we don't currently index for the actions in the subgraph,
-    // we fallback and still create an action, but no attachment to the proposal.
+    // we fallback and still create an action.
     // NOTE that it's important to generate action id differently to not allow overwriting.
     if (!actionEntity) {
       actionEntity = new Action(actionId);
