@@ -73,7 +73,7 @@ function encodeWithFunctionSelector(
   funcSelector: string,
   isDynamic: boolean = false
 ): Bytes {
-  // ethereum.encode inside subgraph doesn't append 0x00...20 while the actual event
+  // ethereum.decode inside subgraph doesn't append 0x00...20 while the actual event
   // thrown from the real network includes this appended offset. Due to this, mappings contain
   // extra logic(appending the offset to the actual calldata in order to do ethereum.decode).
   // Due to this, from the tests, we need to append it as well. Note that this rule only applies
