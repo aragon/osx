@@ -42,8 +42,7 @@ import {
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall,
-  createTokenVotingProposalEntityState,
-  giorgi
+  createTokenVotingProposalEntityState
 } from './utils';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
