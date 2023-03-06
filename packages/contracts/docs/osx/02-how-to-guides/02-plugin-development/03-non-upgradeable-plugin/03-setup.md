@@ -105,7 +105,7 @@ contract SimpleAdminSetup is PluginSetup {
 </details>
 
 We have a constructor storing the implementation contract instantiated via `new` in the private immutable variable `implementation` to save gas and a `implementation` function to return it.
-Next, we have to external functions, `prepareInstallation` and `prepareUninstallation` that we are going to implement.
+Next, we have two external functions, `prepareInstallation` and `prepareUninstallation` that we are going to implement.
 
 ### Implementing the `prepareInstallation` function
 
