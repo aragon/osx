@@ -1,6 +1,6 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
-import {MultisigProposal} from '../../generated/schema';
+import {MultisigPlugin, MultisigProposal} from '../../generated/schema';
 
 import {
   ProposalCreated,
@@ -21,7 +21,10 @@ import {
   TWO,
   START_DATE,
   END_DATE,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
+  ZERO,
+  THREE,
+  PLUGIN_ENTITY_ID
 } from '../constants';
 
 // events
@@ -261,6 +264,25 @@ export function createGetProposalCall(
 }
 
 // state
+
+export function createMultisigPluginState(
+  entityID: string = PLUGIN_ENTITY_ID,
+  dao: string = DAO_ADDRESS,
+  pluginAddress: string = CONTRACT_ADDRESS,
+  proposalCount: string = ZERO,
+  minApprovals: string = THREE,
+  onlyListed: boolean = false
+): MultisigPlugin {
+  let multisigPlugin = new MultisigPlugin(entityID);
+  multisigPlugin.dao = dao;
+  multisigPlugin.pluginAddress = Bytes.fromHexString(pluginAddress);
+  multisigPlugin.proposalCount = BigInt.fromString(proposalCount);
+  multisigPlugin.minApprovals = parseInt(minApprovals) as i32;
+  multisigPlugin.onlyListed = onlyListed;
+  multisigPlugin.save();
+
+  return multisigPlugin;
+}
 
 export function createMultisigProposalEntityState(
   entityID: string = PROPOSAL_ENTITY_ID,

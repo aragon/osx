@@ -7,7 +7,6 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @title IMajorityVoting
 /// @author Aragon Association - 2022-2023
 /// @notice The interface of majority voting plugin.
-/// @dev This contract implements the `IMajorityVoting` interface.
 interface IMajorityVoting {
     /// @notice Vote options that a voter can chose from.
     /// @param None The default option state of a voter indicating the absence of from the vote. This option neither influences support nor participation.

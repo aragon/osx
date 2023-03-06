@@ -39,7 +39,7 @@ Next, you write a plugin setup contract:
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
 import {PluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import './MyPlugin.sol';
 
@@ -58,7 +58,7 @@ contract GreeterSetup is PluginSetup {
     (_dao, _payload);
   }
 
-  function getImplementationAddress() external view returns (address) {}
+  function implementation() external view returns (address) {}
 }
 ```
 

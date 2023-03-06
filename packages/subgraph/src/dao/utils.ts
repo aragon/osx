@@ -5,65 +5,50 @@ import {
   Bytes,
   ethereum
 } from '@graphprotocol/graph-ts';
+import {
+  AddresslistVotingProposal,
+  AdminProposal,
+  MultisigProposal,
+  TokenVotingProposal,
+  TransactionActionsProposal
+} from '../../generated/schema';
+import {Admin, TokenVoting} from '../../generated/templates';
 
 import {ADDRESS_ZERO} from '../utils/constants';
 
-class WithdrawParams {
-  token: Address = Address.fromString(ADDRESS_ZERO);
-  to: Address = Address.fromString(ADDRESS_ZERO);
-  amount: BigInt = BigInt.zero();
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  reference: string = '';
-}
-
-/**
- *
- * @param data is ethereum function call data without the function signiture for dao's Withdraw function
- * @returns WithdrawParams
- */
-export function decodeWithdrawParams(data: ByteArray): WithdrawParams {
-  let tokenSubArray = data.subarray(12, 32);
-  let toSubArray = data.subarray(44, 64);
-  let amountSubArray = data.subarray(64, 96);
-  // skip next 32 Bytes as it is just an indicator that the next batch is string
-  let referenceLengthSubArray = data.subarray(128, 160);
-  let referenceSubArray = data.subarray(160);
-
-  let tokenAddress = Address.fromString(
-    Address.fromUint8Array(tokenSubArray).toHexString()
-  );
-
-  let toAddress = Address.fromString(
-    Address.fromUint8Array(toSubArray).toHexString()
-  );
-
-  let amountDecoded = ethereum.decode(
-    'uint256',
-    changetype<Bytes>(amountSubArray)
-  );
-  let amountBigInt = BigInt.zero();
-  if (amountDecoded) {
-    amountBigInt = amountDecoded.toBigInt();
+// AssemblyScript struggles having mutliple return types. Due to this,
+// The below seems most effective way.
+export function updateProposalWithFailureMap(
+  proposalId: string,
+  failureMap: BigInt
+): boolean {
+  let tokenVotingProposal = TokenVotingProposal.load(proposalId);
+  if (tokenVotingProposal) {
+    tokenVotingProposal.failureMap = failureMap;
+    tokenVotingProposal.save();
+    return true;
   }
 
-  let referenceLengthDecoded = ethereum.decode(
-    'uint256',
-    changetype<Bytes>(referenceLengthSubArray)
-  );
-  let referenceLength: i32 = 0;
-  if (referenceLengthDecoded) {
-    referenceLength = referenceLengthDecoded.toI32();
+  let multisigProposal = MultisigProposal.load(proposalId);
+  if (multisigProposal) {
+    multisigProposal.failureMap = failureMap;
+    multisigProposal.save();
+    return true;
   }
 
-  // @dev perhaps a length limmit is need such as no more than 288 char
-  let refrenceStringArray = referenceSubArray.subarray(0, referenceLength);
-  let referenceBytes = Bytes.fromByteArray(
-    changetype<ByteArray>(refrenceStringArray)
-  );
-  let withdrawParams = new WithdrawParams();
-  withdrawParams.token = tokenAddress;
-  withdrawParams.to = toAddress;
-  withdrawParams.amount = amountBigInt;
-  withdrawParams.reference = referenceBytes.toString();
-  return withdrawParams;
+  let addresslistProposal = AddresslistVotingProposal.load(proposalId);
+  if (addresslistProposal) {
+    addresslistProposal.failureMap = failureMap;
+    addresslistProposal.save();
+    return true;
+  }
+
+  let adminProposal = AdminProposal.load(proposalId);
+  if (adminProposal) {
+    adminProposal.failureMap = failureMap;
+    adminProposal.save();
+    return true;
+  }
+
+  return false;
 }

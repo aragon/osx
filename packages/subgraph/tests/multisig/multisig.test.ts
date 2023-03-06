@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   handleMembersAdded,
@@ -9,7 +9,7 @@ import {
   _handleProposalCreated,
   handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
-import {MultisigPlugin, MultisigApprover} from '../../generated/schema';
+import {MultisigApprover} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -21,7 +21,6 @@ import {
   SNAPSHOT_BLOCK,
   ONE,
   TWO,
-  THREE,
   PROPOSAL_ENTITY_ID,
   START_DATE,
   END_DATE,
@@ -37,7 +36,8 @@ import {
   getProposalCountCall,
   createMultisigProposalEntityState,
   createGetProposalCall,
-  createNewMultisigSettingsUpdatedEvent
+  createNewMultisigSettingsUpdatedEvent,
+  createMultisigPluginState
 } from './utils';
 import {getProposalId} from '../../src/utils/proposals';
 
@@ -45,14 +45,7 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   // create state
-  let multisigPlugin = new MultisigPlugin(
-    Address.fromString(CONTRACT_ADDRESS).toHexString()
-  );
-  multisigPlugin.dao = DAO_ADDRESS;
-  multisigPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
-  multisigPlugin.minApprovals = BigInt.fromString(THREE);
-  multisigPlugin.onlyListed = false;
-  multisigPlugin.save();
+  createMultisigPluginState();
 
   // create calls
   getProposalCountCall(CONTRACT_ADDRESS, '1');
@@ -386,17 +379,15 @@ test('Run Multisig (handleMembersRemoved) mappings with mock event', () => {
 
 test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', () => {
   // create state
-  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
-  let multisigPlugin = new MultisigPlugin(entityID);
-  multisigPlugin.dao = DAO_ADDRESS;
-  multisigPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
-  multisigPlugin.onlyListed = false;
-  multisigPlugin.save();
+  let entityID = createMultisigPluginState().id;
 
   // create event
+  let onlyListed = true;
+  let minApproval = '5';
+
   let event = createNewMultisigSettingsUpdatedEvent(
-    true,
-    '5',
+    onlyListed,
+    minApproval,
     CONTRACT_ADDRESS
   );
 
@@ -404,18 +395,25 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'true');
-  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '5');
+  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', `${onlyListed}`);
+  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', minApproval);
 
   // create event
-  event = createNewMultisigSettingsUpdatedEvent(false, '4', CONTRACT_ADDRESS);
+  onlyListed = false;
+  minApproval = '4';
+
+  event = createNewMultisigSettingsUpdatedEvent(
+    onlyListed,
+    minApproval,
+    CONTRACT_ADDRESS
+  );
 
   // handle event
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'false');
-  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '4');
+  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', `${onlyListed}`);
+  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', minApproval);
 
   clearStore();
 });

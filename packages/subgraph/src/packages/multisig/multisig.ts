@@ -193,7 +193,7 @@ export function handleMultisigSettingsUpdated(
   let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;
-    packageEntity.minApprovals = BigInt.fromU32(event.params.minApprovals);
+    packageEntity.minApprovals = event.params.minApprovals;
     packageEntity.save();
   }
 }

@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `minApprovals` to int on `MultisigPlugin`.
 - Changed proposal entity id to `bytes32` from `bigint`.
 - Fixed the `supportThresholdReachedEarly` check in `handleVoteCast` of `TokenVoting` and `AddresslistVoting`.
 

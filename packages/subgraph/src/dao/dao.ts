@@ -1,4 +1,4 @@
-import {Bytes, store} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -16,7 +16,9 @@ import {
   Dao,
   ContractPermissionId,
   Permission,
-  StandardCallback
+  StandardCallback,
+  Action,
+  TransactionActionsProposal
 } from '../../generated/schema';
 
 import {ADDRESS_ZERO} from '../utils/constants';
@@ -32,6 +34,7 @@ import {
   ERC721_transferFrom,
   onERC721Received
 } from '../utils/tokens/common';
+import {updateProposalWithFailureMap} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -61,16 +64,75 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
+  let proposalId = event.params.actor
+    .toHexString()
+    .concat('_')
+    .concat(event.params.callId.toHexString());
+
+  // Not an effective solution, until each plugin has
+  // its own subgraph separately.
+  // If proposal found, update its failureMap.
+  let wasUpdated = updateProposalWithFailureMap(
+    proposalId,
+    event.params.failureMap
+  );
+
+  // If not updated, proposal wasn't found which means,
+  // it was called by the address that
+  // Subgraph doesn't index, in which case, we still create
+  // proposal entity in order to group its actions together.
+  if (!wasUpdated) {
+    // The id generation must include hash + logindex
+    // This is important to not allow overwriting. since
+    // the uniqueness of callId isn't checked in DAO, there
+    // might be a case when 2 different tx might end up having the same
+    // proposal ID which will cause overwrite. In case of plugins,
+    // It's plugin's responsibility to pass unique callId per execute.
+    proposalId = proposalId
+      .concat('_')
+      .concat(event.transaction.hash.toHexString())
+      .concat('_')
+      .concat(event.transactionLogIndex.toHexString());
+    let proposal = new TransactionActionsProposal(proposalId);
+    proposal.dao = event.address.toHexString();
+    proposal.createdAt = event.block.timestamp;
+    proposal.endDate = event.block.timestamp;
+    proposal.startDate = event.block.timestamp;
+    proposal.creator = event.params.actor;
+    proposal.executionTxHash = event.transaction.hash;
+    // Since DAO doesn't emit allowFailureMap by mistake, we got no choice now.
+    // In such case, `allowFailureMap` shouldn't be fully trusted.
+    proposal.allowFailureMap = BigInt.zero();
+    proposal.executed = true;
+    proposal.failureMap = event.params.failureMap;
+    proposal.save();
+  }
+
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
-    let proposalId = event.params.actor
-      .toHexString()
-      .concat('_')
-      .concat(event.params.callId.toHexString());
 
-    if (action.data.toHexString() == '0x') {
+    let actionId = proposalId.concat('_').concat(index.toString());
+    let actionEntity = Action.load(actionId);
+
+    // In case the execute on the dao is called by the address
+    // That we don't currently index for the actions in the subgraph,
+    // we fallback and still create an action.
+    // NOTE that it's important to generate action id differently to not allow overwriting.
+    if (!actionEntity) {
+      actionEntity = new Action(actionId);
+      actionEntity.to = action.to;
+      actionEntity.value = action.value;
+      actionEntity.data = action.data;
+      actionEntity.proposal = proposalId;
+      actionEntity.dao = event.address.toHexString();
+    }
+
+    actionEntity.execResult = event.params.execResults[index];
+    actionEntity.save();
+
+    if (action.data.toHexString() == '0x' && action.value.gt(BigInt.zero())) {
       handleNativeAction(
         event.address,
         action.to,
