@@ -98,7 +98,7 @@ export function handleInstallationApplied(event: InstallationApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
-  pluginEntity.plugin = event.params.plugin.toHexString();
+  pluginEntity.plugin = plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
@@ -184,7 +184,7 @@ export function handleUpdateApplied(event: UpdateApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
-  pluginEntity.plugin = event.params.plugin.toHexString();
+  pluginEntity.plugin = plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
