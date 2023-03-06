@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-artifacts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The Aragon OSx Solidity contracts",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -73,9 +73,7 @@
     "tmp-promise": "^3.0.3",
     "ts-node": "^8.1.0",
     "typechain": "^5.2.0",
-    "typescript": "^4.4.4"
-  },
-  "dependencies": {
+    "typescript": "^4.4.4",
     "@ensdomains/ens-contracts": "0.0.11",
     "@opengsn/contracts": "2.2.6",
     "@openzeppelin/contracts": "4.8.1",
