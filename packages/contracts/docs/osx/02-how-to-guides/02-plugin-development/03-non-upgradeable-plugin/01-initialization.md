@@ -43,7 +43,7 @@ contract SimpleAdmin is Plugin {
 </details>
 
 :::note
-We used Solidity's `immutable` keyword so that the admin variable can never be changed. Immutable variables can only be declared in the constructor.
+We used Solidity's `immutable` keyword so that the admin variable can never be changed. Immutable variables can only be initialized in the constructor.
 :::
 
 The `Plugin(_dao)` constructor stores the `IDAO _dao` reference in the right place. If our plugin implementation is deployed often, which we expect, we can [save significant amounts of gas by deployment through the minimal proxy pattern](https://blog.openzeppelin.com/workshop-recap-cheap-contract-deployment-through-clones/).

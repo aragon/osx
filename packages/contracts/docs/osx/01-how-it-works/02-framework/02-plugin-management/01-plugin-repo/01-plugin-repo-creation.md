@@ -18,7 +18,7 @@ and are introduced in the following.
 For all subsequent builds and releases, `createVersion` inside the registered `PluginRepo` has to be called.
  -->
 
-### The `PuginRepoFactory` Contract
+### The `PluginRepoFactory` Contract
 
 The `PluginRepoFactory` is a contract of the Aragon OSx protocol framework infrastructure being called when the first version if a plugin is published.
 It contains the `createPluginRepoWithFirstVersion`,
@@ -47,7 +47,7 @@ Additional to the information required by the [`createVersion` function discusse
 - A valid ENS `_subdomain` name under that isn't already taken
 - The address of the plugin repo maintainer who ends up having the `ROOT_PERMISSION_ID`, `MAINTAINER_PERMISSION_ID`, and `UPGRADE_REPO_PERMISSION_ID` permission allowing to call the internal `PermissionManager`, the `createVersion` and `updateReleaseMetadata` functions as well as upgrading the contract.
 
-For more details visit the [`PuginRepoFactory` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
+For more details visit the [`PluginRepoFactory` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
 
 ### The `PluginRepoRegistry` Contract
 

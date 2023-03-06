@@ -25,7 +25,7 @@ Different versions might contain
 
 </div>
 
-### The `PuginRepo` Contract
+### The `PluginRepo` Contract
 
 The `PluginRepo` contract versions the releases of a `Plugin`. The first version of a plugin is always published with the version tag `1.0`.
 When you publish the first plugin version, a new plugin repository is automatically created for you by the Aragon OSx protocol in which you are the maintainer. The creation process is described in the [plugin repo creation process](./01-plugin-repo-creation.md) section.

@@ -77,34 +77,6 @@ If this is the case, the function call will succeed, otherwise it will revert.
 We can now add additional constraints to it by using the `grantWithCondition` function.
 Below, we show four exemplary conditions for different 4 different use cases that we could attach to the permission.
 
-### Condition 1: Checking the properties
-
-Let’s imagine that we want to make sure that `_amount` is not more than `1 ETH` without changing the code of `Example` contract.
-
-We can realize this requirement by deploying a `ParameterConstraintCondition` condition.
-
-```solidity title="ParameterConstraintCondition.sol"
-contract ParameterConstraintCondition is IPermissionCondition {
-	uint256 internal maxValue;
-
-	constructor(uint256 _maxValue) {
-      	maxValue = _maxValue;
-    }
-
-	function isGranted(
-		address _where,
-		address _who,
-		bytes32 _permissionId,
-		bytes calldata _data
-	) external view returns (bool) {
-    (_where, _who, _permissionId); // Prevent compiler warnings resulting from unused arguments.
-
-    (address _to, uint256 _amount) = abi.decode(_data, (address, uint256));
-
-		return _amount <= _maxValue;
-}
-```
-
 ### Condition 1: Adding Parameter Constraints
 
 Let’s imagine that we want to make sure that `_amount` is not more than `1 ETH` without changing the code of `Example` contract.
