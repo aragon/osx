@@ -232,7 +232,7 @@ type PluginPreparation @entity(immutable: true) {
   type: PluginPreparationType!
 }
 
-# Don't implement IPluginInstallation. Otherwise it would show up under plugins in the DAO entity
+# Don't implement IPlugin. Otherwise it would show up under plugins in the DAO entity
 type PluginInstallation @entity {
   id: ID! # psp installationId
   dao: Dao!
