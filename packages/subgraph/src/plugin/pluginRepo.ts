@@ -7,6 +7,8 @@ import {
   PluginSetup,
   PluginRelease
 } from '../../generated/schema';
+import {getPluginVersionId} from './utils';
+import {log} from '@graphprotocol/graph-ts';
 
 export function handleVersionCreated(event: VersionCreated): void {
   // PluginSetup
@@ -20,11 +22,15 @@ export function handleVersionCreated(event: VersionCreated): void {
 
   // PluginVersion
   let pluginRepoId = event.address.toHexString();
-  let pluginRelease = event.params.release.toString();
-  let pluginReleaseId = pluginRepoId.concat('_').concat(pluginRelease);
-  let pluginVersionId = pluginReleaseId
+  let pluginReleaseId = pluginRepoId
     .concat('_')
-    .concat(event.params.build.toString());
+    .concat(event.params.release.toString());
+
+  let pluginVersionId = getPluginVersionId(
+    pluginRepoId,
+    event.params.release,
+    event.params.build
+  );
 
   let entity = new PluginVersion(pluginVersionId);
   entity.pluginRepo = event.address.toHexString();
