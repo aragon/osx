@@ -395,12 +395,7 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals(
-    'MultisigPlugin',
-    entityID,
-    'onlyListed',
-    onlyListed ? 'true' : 'false'
-  );
+  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', `${onlyListed}`);
   assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', minApproval);
 
   // create event
@@ -417,12 +412,7 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals(
-    'MultisigPlugin',
-    entityID,
-    'onlyListed',
-    onlyListed ? 'true' : 'false'
-  );
+  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', `${onlyListed}`);
   assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', minApproval);
 
   clearStore();
