@@ -528,8 +528,8 @@ type MultisigPlugin implements IPluginInstallation @entity {
   members: [MultisigApprover!]! @derivedFrom(field: "plugin")
 
   # multisig settings
-  minApprovals: BigInt
-  onlyListed: Boolean!
+  minApprovals: Int
+  onlyListed: Boolean
 }
 
 type MultisigApprover @entity {
