@@ -76,7 +76,7 @@ contract SimpleAdminSetup is PluginSetup {
 
   /// @notice The constructor setting the `SimpleAdmin` implementation contract to clone from.
   constructor() {
-    implementationBase = address(new SimpleAdmin());
+    simpleAdminImplementation = address(new SimpleAdmin());
   }
 
   /// @inheritdoc IPluginSetup
