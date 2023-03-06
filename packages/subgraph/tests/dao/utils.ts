@@ -255,6 +255,7 @@ export function createNewExecutedEvent(
   actor: string,
   callId: string,
   actions: ethereum.Tuple[],
+  failureMap: BigInt,
   execResults: Bytes[],
   contractAddress: string
 ): Executed {
@@ -275,6 +276,12 @@ export function createNewExecutedEvent(
     'actions',
     ethereum.Value.fromTupleArray(actions)
   );
+
+  let failureMapParam = new ethereum.EventParam(
+    'failureMap',
+    ethereum.Value.fromUnsignedBigInt(failureMap)
+  );
+
   let execResultsParams = new ethereum.EventParam(
     'execResults',
     ethereum.Value.fromBytesArray(execResults)
@@ -283,6 +290,7 @@ export function createNewExecutedEvent(
   newExecutedEvent.parameters.push(actorParam);
   newExecutedEvent.parameters.push(callIdParam);
   newExecutedEvent.parameters.push(actionsParam);
+  newExecutedEvent.parameters.push(failureMapParam);
   newExecutedEvent.parameters.push(execResultsParams);
 
   return newExecutedEvent;

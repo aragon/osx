@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from 'matchstick-as/assembly/index';
-import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {Address, Bytes, BigInt, ethereum, log} from '@graphprotocol/graph-ts';
 
 import {
   handleNativeTokenDeposited,
@@ -54,8 +54,13 @@ import {
   getTransferId,
   onERC721Received
 } from '../../src/utils/tokens/common';
-import {ERC721Balance} from '../../generated/schema';
+import {
+  Action,
+  ERC721Balance,
+  TransactionActionsProposal
+} from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplate/DAO';
+import {getProposalId} from '../../src/utils/proposals';
 
 const eq = assert.fieldEquals;
 
@@ -89,7 +94,9 @@ function encodeWithFunctionSelector(
 function createExecutedEvent(
   tuple: ethereum.Value[][],
   selectors: string[],
-  isDynamic: boolean = false
+  isDynamic: boolean,
+  execResults: Bytes[],
+  failureMap: string
 ): Executed {
   let actions: ethereum.Tuple[] = [];
   for (let i = 0; i < selectors.length; i++) {
@@ -108,11 +115,18 @@ function createExecutedEvent(
     actions.push(action[0]);
   }
 
+  if (execResults.length == 0) {
+    for (let i = 0; i < actions.length; i++) {
+      execResults[i] = Bytes.fromHexString('0x11');
+    }
+  }
+
   let event = createNewExecutedEvent(
     Address.fromHexString(CONTRACT_ADDRESS).toHexString(),
     ZERO_BYTES32,
     actions,
-    [Bytes.fromUTF8('')],
+    BigInt.fromString(failureMap),
+    execResults,
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
 
@@ -251,7 +265,6 @@ describe('handleDeposited: ', () => {
     eq('ERC20Transfer', transferId, 'amount', ERC20_AMOUNT_HALF);
     eq('ERC20Transfer', transferId, 'from', from);
     eq('ERC20Transfer', transferId, 'to', DAO_ADDRESS);
-    // eq('ERC20Transfer', transferId, 'proposal', '');  TODO:
     eq('ERC20Transfer', transferId, 'type', 'Deposit');
     eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
     eq('ERC20Transfer', transferId, 'createdAt', timestamp.toString());
@@ -312,7 +325,6 @@ describe('handleDeposited: ', () => {
     eq('NativeTransfer', transferId, 'amount', ONE_ETH);
     eq('NativeTransfer', transferId, 'from', from);
     eq('NativeTransfer', transferId, 'to', DAO_ADDRESS);
-    // eq('NativeTransfer', transferId, 'proposal', '');  TODO:
     eq('NativeTransfer', transferId, 'type', 'Deposit');
     eq('NativeTransfer', transferId, 'txHash', txHash.toHexString());
     eq('NativeTransfer', transferId, 'createdAt', timestamp.toString());
@@ -404,7 +416,6 @@ describe('handleCallbackReceived: ', () => {
       eq('ERC721Transfer', transferId, 'tokenId', '1');
       eq('ERC721Transfer', transferId, 'from', ADDRESS_FOUR);
       eq('ERC721Transfer', transferId, 'to', DAO_ADDRESS);
-      // eq('ERC721Transfer', transferId, 'proposal', '');  TODO:
       eq('ERC721Transfer', transferId, 'type', 'Deposit');
       eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
       eq('ERC721Transfer', transferId, 'createdAt', timestamp.toString());
@@ -474,6 +485,123 @@ describe('handleExecuted', () => {
     clearStore();
   });
 
+  test('successfuly creates action and proposal if not found', () => {
+    let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
+    let selector = '0x11111111';
+
+    let execResults = [
+      Bytes.fromHexString('0x11'),
+      Bytes.fromHexString('0x22')
+    ];
+
+    let failureMap = '2';
+
+    let event = createExecutedEvent(
+      [tuple, tuple],
+      [selector, selector],
+      false,
+      execResults,
+      failureMap
+    );
+
+    handleExecuted(event);
+
+    let proposalId = event.params.actor
+      .toHexString()
+      .concat('_')
+      .concat(event.params.callId.toHexString())
+      .concat('_')
+      .concat(event.transaction.hash.toHexString())
+      .concat('_')
+      .concat(event.transactionLogIndex.toHexString());
+
+    assert.entityCount('TransactionActionsProposal', 1);
+    assert.entityCount('Action', 2);
+
+    eq('TransactionActionsProposal', proposalId, 'id', proposalId);
+    eq('TransactionActionsProposal', proposalId, 'failureMap', failureMap);
+
+    for (let i = 0; i < event.params.actions.length; i++) {
+      let actionId = proposalId.concat('_').concat(i.toString());
+
+      eq('Action', actionId, 'id', actionId);
+      eq('Action', actionId, 'execResult', execResults[i].toHexString());
+      eq('Action', actionId, 'dao', DAO_ADDRESS);
+      eq('Action', actionId, 'proposal', proposalId);
+      eq(
+        'Action',
+        actionId,
+        'data',
+        encodeWithFunctionSelector(tuple, selector).toHexString()
+      );
+    }
+  });
+
+  test('successfuly updates action and proposal if found', () => {
+    let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
+    let selector = '0x11111111';
+    let execResult = Bytes.fromHexString('0x11');
+    let failureMap = '2';
+
+    let event = createExecutedEvent(
+      [tuple],
+      [selector],
+      false,
+      [execResult],
+      failureMap
+    );
+
+    let proposalId = event.params.actor
+      .toHexString()
+      .concat('_')
+      .concat(event.params.callId.toHexString())
+      .concat('_')
+      .concat(event.transaction.hash.toHexString())
+      .concat('_')
+      .concat(event.transactionLogIndex.toHexString());
+
+    let actionId = proposalId.concat('_').concat('0');
+
+    // create proposal
+    let proposal = new TransactionActionsProposal(proposalId);
+    proposal.dao = event.address.toHexString();
+    proposal.createdAt = event.block.timestamp;
+    proposal.endDate = event.block.timestamp;
+    proposal.startDate = event.block.timestamp;
+    proposal.allowFailureMap = BigInt.zero();
+    proposal.creator = event.params.actor;
+    proposal.executionTxHash = event.transaction.hash;
+    proposal.executed = true;
+    proposal.save();
+
+    // create action
+    let action = new Action(actionId);
+    action.to = Address.fromString(DAO_TOKEN_ADDRESS);
+    action.data = Bytes.fromHexString('0x');
+    action.value = BigInt.zero();
+    action.dao = event.address.toHexString();
+    action.proposal = proposal.id;
+    action.save();
+
+    // Check that before `handleExecute`, execResults are empty
+    assert.entityCount('Action', 1);
+    assert.entityCount('TransactionActionsProposal', 1);
+    assert.assertTrue(action.execResult === null);
+    assert.assertTrue(proposal.failureMap === null);
+
+    handleExecuted(event);
+
+    // The action and proposal count should be the same.
+    assert.entityCount('Action', 1);
+    assert.entityCount('TransactionActionsProposal', 1);
+
+    eq('Action', actionId, 'id', actionId);
+    eq('Action', actionId, 'execResult', execResult.toHexString());
+
+    eq('TransactionActionsProposal', proposalId, 'id', proposalId);
+    eq('TransactionActionsProposal', proposalId, 'failureMap', failureMap);
+  });
+
   describe('ERC20 action', () => {
     beforeAll(() => {
       createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', '6', '10');
@@ -499,9 +627,24 @@ describe('handleExecuted', () => {
           ethereum.Value.fromUnsignedBigInt(transferToken)
         ];
 
-        let event = createExecutedEvent([tupleArray], [ERC20_transfer]);
+        let event = createExecutedEvent(
+          [tupleArray],
+          [ERC20_transfer],
+          false,
+          [],
+          '0'
+        );
 
         handleExecuted(event);
+
+        let proposalId = event.params.actor
+          .toHexString()
+          .concat('_')
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -529,7 +672,7 @@ describe('handleExecuted', () => {
         eq('ERC20Transfer', transferId, 'amount', transferToken.toString());
         eq('ERC20Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC20Transfer', transferId, 'to', ADDRESS_THREE);
-        // eq('ERC20Transfer', transferId, 'proposal', '');  TODO:
+        eq('ERC20Transfer', transferId, 'proposal', proposalId);
         eq('ERC20Transfer', transferId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC20Transfer', transferId, 'createdAt', timestamp.toString());
@@ -542,7 +685,13 @@ describe('handleExecuted', () => {
           ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
         ];
 
-        let event = createExecutedEvent([tupleArray], [ERC20_transfer]);
+        let event = createExecutedEvent(
+          [tupleArray],
+          [ERC20_transfer],
+          false,
+          [],
+          '0'
+        );
 
         handleExecuted(event);
 
@@ -580,9 +729,24 @@ describe('handleExecuted', () => {
           ethereum.Value.fromUnsignedBigInt(transferToken)
         ];
 
-        let event = createExecutedEvent([tupleArray], [ERC20_transferFrom]);
+        let event = createExecutedEvent(
+          [tupleArray],
+          [ERC20_transferFrom],
+          false,
+          [],
+          '0'
+        );
 
         handleExecuted(event);
+
+        let proposalId = event.params.actor
+          .toHexString()
+          .concat('_')
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -610,7 +774,7 @@ describe('handleExecuted', () => {
         eq('ERC20Transfer', transferId, 'amount', transferToken.toString());
         eq('ERC20Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC20Transfer', transferId, 'to', ADDRESS_THREE);
-        // eq('ERC20Transfer', transferId, 'proposal', '');  TODO:
+        eq('ERC20Transfer', transferId, 'proposal', proposalId);
         eq('ERC20Transfer', transferId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC20Transfer', transferId, 'createdAt', timestamp.toString());
@@ -624,7 +788,13 @@ describe('handleExecuted', () => {
           ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
         ];
 
-        let event = createExecutedEvent([tupleArray], [ERC20_transferFrom]);
+        let event = createExecutedEvent(
+          [tupleArray],
+          [ERC20_transferFrom],
+          false,
+          [],
+          '0'
+        );
 
         handleExecuted(event);
 
@@ -684,7 +854,13 @@ describe('handleExecuted', () => {
           ethereum.Value.fromUnsignedBigInt(transferToKen)
         ];
 
-        let event = createExecutedEvent([tupleArray], [ERC721_transferFrom]);
+        let event = createExecutedEvent(
+          [tupleArray],
+          [ERC721_transferFrom],
+          false,
+          [],
+          '0'
+        );
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -693,6 +869,15 @@ describe('handleExecuted', () => {
         let transferId = getTransferId(txHash, logIndex, 0);
 
         handleExecuted(event);
+
+        let proposalId = event.params.actor
+          .toHexString()
+          .concat('_')
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenId, 'id', tokenId);
@@ -714,7 +899,7 @@ describe('handleExecuted', () => {
         eq('ERC721Transfer', transferId, 'tokenId', transferToKen.toString());
         eq('ERC721Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC721Transfer', transferId, 'to', ADDRESS_THREE);
-        // eq('ERC721Transfer', transferId, 'proposal', '');  TODO:
+        eq('ERC721Transfer', transferId, 'proposal', proposalId);
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC721Transfer', transferId, 'createdAt', timestamp.toString());
@@ -736,7 +921,10 @@ describe('handleExecuted', () => {
 
         let event = createExecutedEvent(
           [tuple1, tuple2],
-          [ERC721_transferFrom, ERC721_transferFrom]
+          [ERC721_transferFrom, ERC721_transferFrom],
+          false,
+          [],
+          '0'
         );
 
         handleExecuted(event);
@@ -762,7 +950,9 @@ describe('handleExecuted', () => {
         let event = createExecutedEvent(
           [tupleArray],
           [ERC721_safeTransferFromWithData],
-          true
+          true,
+          [],
+          '0'
         );
 
         let txHash = event.transaction.hash;
@@ -772,6 +962,15 @@ describe('handleExecuted', () => {
         let transferId = getTransferId(txHash, logIndex, 0);
 
         handleExecuted(event);
+
+        let proposalId = event.params.actor
+          .toHexString()
+          .concat('_')
+          .concat(event.params.callId.toHexString())
+          .concat('_')
+          .concat(event.transaction.hash.toHexString())
+          .concat('_')
+          .concat(event.transactionLogIndex.toHexString());
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenId, 'id', tokenId);
@@ -793,7 +992,7 @@ describe('handleExecuted', () => {
         eq('ERC721Transfer', transferId, 'tokenId', transferToKen.toString());
         eq('ERC721Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC721Transfer', transferId, 'to', ADDRESS_THREE);
-        // eq('ERC721Transfer', transferId, 'proposal', '');  TODO:
+        eq('ERC721Transfer', transferId, 'proposal', proposalId);
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC721Transfer', transferId, 'createdAt', timestamp.toString());
@@ -818,7 +1017,9 @@ describe('handleExecuted', () => {
         let event = createExecutedEvent(
           [tuple1, tuple2],
           [ERC721_safeTransferFromWithData, ERC721_safeTransferFromWithData],
-          true
+          true,
+          [],
+          '0'
         );
 
         handleExecuted(event);

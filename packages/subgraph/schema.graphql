@@ -65,7 +65,7 @@ interface TokenTransfer {
   from: Bytes!
   to: Bytes!
   type: TransferType!
-  proposal: Proposal
+  proposal: IProposal
   txHash: Bytes!
   createdAt: BigInt!
 }
@@ -77,7 +77,7 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   amount: BigInt!
   from: Bytes!
   to: Bytes!
-  proposal: Proposal
+  proposal: IProposal
   type: TransferType!
   txHash: Bytes!
   createdAt: BigInt!
@@ -90,7 +90,7 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   tokenId: BigInt!
   from: Bytes!
   to: Bytes!
-  proposal: Proposal
+  proposal: IProposal
   type: TransferType!
   txHash: Bytes!
   createdAt: BigInt!
@@ -103,7 +103,7 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   from: Bytes!
   to: Bytes!
   reference: String!
-  proposal: Proposal
+  proposal: IProposal
   type: TransferType!
   txHash: Bytes!
   createdAt: BigInt!
@@ -137,7 +137,7 @@ type Action @entity {
   value: BigInt!
   data: Bytes!
   dao: Dao!
-  proposal: Proposal!
+  proposal: IProposal!
   execResult: Bytes
 }
 
@@ -165,7 +165,7 @@ type Dao @entity {
   permissions: [Permission!]! @derivedFrom(field: "dao")
   pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")
   plugins: [IPluginInstallation!]! @derivedFrom(field: "dao") # TODO: Delete or refactor after the plugins left the Aragon OSx subgraph
-  proposals: [Proposal!] @derivedFrom(field: "dao")
+  proposals: [IProposal!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
@@ -273,13 +273,29 @@ interface IPluginInstallation {
 ### Entities below should move to there respective subgraph once plugin is seperated from the Aragon OSx
 # Proposal
 
-interface Proposal {
+interface IProposal {
   id: ID! # package + proposalId
   dao: Dao!
   creator: Bytes!
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
+  executed: Boolean!
+  createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
+  executionTxHash: Bytes
+}
+
+type TransactionActionsProposal implements IProposal @entity {
+  id: ID!
+  dao: Dao!
+  creator: Bytes!
+  metadata: String
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
+  failureMap: BigInt
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -348,11 +364,12 @@ type TokenVotingVote @entity {
   updatedAt: BigInt!
 }
 
-type TokenVotingProposal implements Proposal @entity {
+type TokenVotingProposal implements IProposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   plugin: TokenVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -419,11 +436,12 @@ type AddresslistVotingVote @entity {
   updatedAt: BigInt!
 }
 
-type AddresslistVotingProposal implements Proposal @entity {
+type AddresslistVotingProposal implements IProposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   plugin: AddresslistVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -479,13 +497,14 @@ type AdministratorAdminPlugin @entity {
   plugin: AdminPlugin!
 }
 
-type AdminProposal implements Proposal @entity {
+type AdminProposal implements IProposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
   creator: Bytes! # Administrator address
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -528,11 +547,12 @@ type MultisigProposalApprover @entity(immutable: true) {
   createdAt: BigInt!
 }
 
-type MultisigProposal implements Proposal @entity {
+type MultisigProposal implements IProposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
+  failureMap: BigInt
   plugin: MultisigPlugin!
   proposalId: BigInt!
   creator: Bytes!
