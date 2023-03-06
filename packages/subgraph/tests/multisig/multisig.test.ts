@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   handleMembersAdded,
@@ -9,7 +9,7 @@ import {
   _handleProposalCreated,
   handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
-import {MultisigPlugin, MultisigApprover} from '../../generated/schema';
+import {MultisigApprover} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -21,7 +21,6 @@ import {
   SNAPSHOT_BLOCK,
   ONE,
   TWO,
-  THREE,
   PROPOSAL_ENTITY_ID,
   START_DATE,
   END_DATE,
@@ -383,11 +382,11 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   let entityID = createMultisigPluginState().id;
 
   // create event
-  let onlyListed = 'true';
+  let onlyListed = true;
   let minApproval = '5';
 
   let event = createNewMultisigSettingsUpdatedEvent(
-    onlyListed === 'true',
+    onlyListed,
     minApproval,
     CONTRACT_ADDRESS
   );
@@ -396,15 +395,20 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', onlyListed);
+  assert.fieldEquals(
+    'MultisigPlugin',
+    entityID,
+    'onlyListed',
+    onlyListed ? 'true' : 'false'
+  );
   assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', minApproval);
 
   // create event
-  onlyListed = 'false';
+  onlyListed = false;
   minApproval = '4';
 
   event = createNewMultisigSettingsUpdatedEvent(
-    onlyListed === 'true',
+    onlyListed,
     minApproval,
     CONTRACT_ADDRESS
   );
@@ -413,7 +417,12 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', onlyListed);
+  assert.fieldEquals(
+    'MultisigPlugin',
+    entityID,
+    'onlyListed',
+    onlyListed ? 'true' : 'false'
+  );
   assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', minApproval);
 
   clearStore();
