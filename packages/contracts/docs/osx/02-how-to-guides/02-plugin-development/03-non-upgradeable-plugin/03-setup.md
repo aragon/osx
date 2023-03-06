@@ -46,11 +46,16 @@ import {SimpleAdmin} from './SimpleAdmin.sol';
 
 contract SimpleAdminSetup is PluginSetup {
   /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
-  address private immutable implementation;
+  address private immutable simpleAdminImplementation;
 
   /// @notice The constructor setting the `SimpleAdmin` implementation contract to clone from.
   constructor() {
-    implementation = address(new SimpleAdmin());
+    simpleAdminImplementation = address(new SimpleAdmin());
+  }
+
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleAdminImplementation;
   }
 }
 ```
@@ -63,15 +68,15 @@ The skeleton of our `SimpleAdminSetup` contract inheriting from `PluginSetup` lo
 <summary><code>SimpleAdminSetup</code>: The Sekeleton</summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
 
 contract SimpleAdminSetup is PluginSetup {
   /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
-  address private immutable implementation;
+  address private immutable simpleAdminImplementation;
 
   /// @notice The constructor setting the `SimpleAdmin` implementation contract to clone from.
   constructor() {
-    implementation = address(new SimpleAdmin());
+    simpleAdminImplementation = address(new SimpleAdmin());
   }
 
   /// @inheritdoc IPluginSetup
@@ -91,16 +96,16 @@ contract SimpleAdminSetup is PluginSetup {
   }
 
   /// @inheritdoc IPluginSetup
-  function getImplementationAddress() external view returns (address) {
-    return implementation;
+  function implementation() external view returns (address) {
+    return simpleAdminImplementation;
   }
 }
 ```
 
 </details>
 
-We have a constructor storing the implementation contract instantiated via `new` in the private immutable variable `implementation` to save gas and a `getImplementationAddress` function to return it.
-Next, we have to external functions, `prepareInstallation` and `prepareUninstallation` that we are going to implement.
+We have a constructor storing the implementation contract instantiated via `new` in the private immutable variable `implementation` to save gas and a `implementation` function to return it.
+Next, we have two external functions, `prepareInstallation` and `prepareUninstallation` that we are going to implement.
 
 ### Implementing the `prepareInstallation` function
 
@@ -123,7 +128,7 @@ function prepareInstallation(
   plugin = implementation.clone();
 
   // Initialize cloned plugin contract.
-  Admin(plugin).initialize(IDAO(_dao), admin);
+  SimpleAdmin(plugin).initialize(IDAO(_dao), admin);
 
   // Prepare permissions
   PermissionLib.MultiTargetPermission[]
@@ -135,7 +140,7 @@ function prepareInstallation(
     where: plugin,
     who: admin,
     condition: PermissionLib.NO_CONDITION,
-    permissionId: Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+    permissionId: SimpleAdmin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
   });
 
   // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
@@ -195,7 +200,7 @@ function prepareUninstallation(
 ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
   // Collect addresses
   address plugin = _payload.plugin;
-  address admin = Admin(plugin).admin();
+  address admin = SimpleAdmin(plugin).admin();
 
   // Prepare permissions
   permissions = new PermissionLib.MultiTargetPermission[](2);
@@ -205,7 +210,7 @@ function prepareUninstallation(
     where: plugin,
     who: admin,
     condition: PermissionLib.NO_CONDITION,
-    permissionId: Admin(plugin).ADMIN_EXECUTE_PERMISSION_ID()
+    permissionId: SimpleAdmin(plugin).ADMIN_EXECUTE_PERMISSION_ID()
   });
 
   permissions[1] = PermissionLib.MultiTargetPermission({
@@ -233,7 +238,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 
-import {PermissionLib} from '@aragon/osx/core/permissions/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
 
@@ -241,7 +246,7 @@ contract SimpleAdminSetup is PluginSetup {
   using Clones for address;
 
   /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
-  address private immutable implementation;
+  address private immutable simpleAdminImplementation;
 
   /// @notice Thrown if the admin address is zero.
   /// @param admin The admin address.
@@ -249,7 +254,7 @@ contract SimpleAdminSetup is PluginSetup {
 
   /// @notice The constructor setting the `Admin` implementation contract to clone from.
   constructor() {
-    implementation = address(new SimpleAdmin());
+    simpleAdminImplementation = address(new SimpleAdmin());
   }
 
   /// @inheritdoc IPluginSetup
@@ -280,7 +285,7 @@ contract SimpleAdminSetup is PluginSetup {
       where: plugin,
       who: admin,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+      permissionId: SimpleAdmin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
     });
 
     // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
@@ -325,8 +330,8 @@ contract SimpleAdminSetup is PluginSetup {
   }
 
   /// @inheritdoc IPluginSetup
-  function getImplementationAddress() external view returns (address) {
-    return implementation;
+  function implementation() external view returns (address) {
+    return simpleAdminImplementation;
   }
 }
 ```
