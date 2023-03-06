@@ -1,6 +1,9 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {newMockEvent} from 'matchstick-as';
-import {VersionCreated} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
+import {
+  ReleaseMetadataUpdated,
+  VersionCreated
+} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {
   InstallationApplied,
   InstallationPrepared,
@@ -12,6 +15,29 @@ import {
   UpdatePreparedPreparedSetupDataStruct,
   UpdatePreparedSetupPayloadStruct
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
+
+export function createReleaseMetadataUpdatedEvent(
+  release: string,
+  buildMetadata: Bytes
+): ReleaseMetadataUpdated {
+  let newEvent = changetype<ReleaseMetadataUpdated>(newMockEvent());
+
+  newEvent.parameters = [];
+
+  let releaseParam = new ethereum.EventParam(
+    'release',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(release))
+  );
+  let buildMetadataParam = new ethereum.EventParam(
+    'buildMetadata',
+    ethereum.Value.fromBytes(buildMetadata)
+  );
+
+  newEvent.parameters.push(releaseParam);
+  newEvent.parameters.push(buildMetadataParam);
+
+  return newEvent;
+}
 
 export function createVersionCreated(
   release: string,

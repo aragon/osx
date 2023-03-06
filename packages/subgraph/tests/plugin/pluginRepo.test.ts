@@ -1,34 +1,126 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {ADDRESS_ONE} from '../constants';
-import {createVersionCreated} from './utils';
-import {handleVersionCreated} from '../../src/plugin/pluginRepo';
+import {ADDRESS_ONE, ONE} from '../constants';
+import {createReleaseMetadataUpdatedEvent, createVersionCreated} from './utils';
+import {
+  handleReleaseMetadataUpdated,
+  handleVersionCreated
+} from '../../src/plugin/pluginRepo';
 import {Bytes} from '@graphprotocol/graph-ts';
 
-test('versionCreated event', () => {
+test('PluginRepo (handleVersionCreated) mappings with mock event', () => {
+  let release = ONE;
+  let build = ONE;
+  let pluginSetup = ADDRESS_ONE;
+  let buildMetadata = 'Qm1234';
+
   let event = createVersionCreated(
-    '1',
-    '1',
-    ADDRESS_ONE,
-    Bytes.fromHexString('0x1234')
+    release,
+    build,
+    pluginSetup,
+    Bytes.fromUTF8(buildMetadata)
   );
+
   handleVersionCreated(event);
-  let id = `${event.address.toHexString()}_1_1`;
+
+  let pluginRepoId = event.address.toHexString();
+
+  let pluginVersionId = pluginRepoId
+    .concat('_')
+    .concat(release)
+    .concat('_')
+    .concat(build);
+
+  let pluginReleaseId = pluginRepoId.concat('_').concat(release);
 
   assert.entityCount('PluginVersion', 1);
-  assert.fieldEquals('PluginVersion', id, 'id', id);
+  assert.fieldEquals('PluginVersion', pluginVersionId, 'id', pluginVersionId);
   assert.fieldEquals(
     'PluginVersion',
-    id,
+    pluginVersionId,
     'pluginRepo',
     event.address.toHexString()
   );
-  assert.fieldEquals('PluginVersion', id, 'release', '1');
-  assert.fieldEquals('PluginVersion', id, 'build', '1');
-  assert.fieldEquals('PluginVersion', id, 'pluginSetup', ADDRESS_ONE);
-  assert.fieldEquals('PluginVersion', id, 'metadata', '0x1234');
+  assert.fieldEquals(
+    'PluginVersion',
+    pluginVersionId,
+    'release',
+    pluginReleaseId
+  );
+  assert.fieldEquals('PluginVersion', pluginVersionId, 'build', build);
+  assert.fieldEquals(
+    'PluginVersion',
+    pluginVersionId,
+    'pluginSetup',
+    pluginSetup
+  );
+  assert.fieldEquals(
+    'PluginVersion',
+    pluginVersionId,
+    'metadata',
+    buildMetadata
+  );
 
   assert.entityCount('PluginSetup', 1);
-  assert.fieldEquals('PluginSetup', ADDRESS_ONE, 'id', ADDRESS_ONE);
+  assert.fieldEquals('PluginSetup', pluginSetup, 'id', pluginSetup);
 
   clearStore();
+});
+
+test('PluginRepo (handleReleaseMetadataUpdated) mappings with mock event', () => {
+  let release = ONE;
+  let releaseMetadata = 'Qm1234';
+
+  let event = createReleaseMetadataUpdatedEvent(
+    release,
+    Bytes.fromUTF8(releaseMetadata)
+  );
+
+  handleReleaseMetadataUpdated(event);
+
+  assert.entityCount('PluginRelease', 1);
+
+  let pluginRepoId = event.address.toHexString();
+  let pluginReleaseEntityId = pluginRepoId.concat('_').concat(release);
+
+  assert.fieldEquals(
+    'PluginRelease',
+    pluginReleaseEntityId,
+    'id',
+    pluginReleaseEntityId
+  );
+  assert.fieldEquals(
+    'PluginRelease',
+    pluginReleaseEntityId,
+    'pluginRepo',
+    pluginRepoId
+  );
+  assert.fieldEquals(
+    'PluginRelease',
+    pluginReleaseEntityId,
+    'release',
+    release
+  );
+  assert.fieldEquals(
+    'PluginRelease',
+    pluginReleaseEntityId,
+    'metadata',
+    releaseMetadata
+  );
+
+  // simulated update of release metadata
+  let updatedMetadata = 'Qm5678';
+  let updatingMetadataEvent = createReleaseMetadataUpdatedEvent(
+    release,
+    Bytes.fromUTF8(updatedMetadata)
+  );
+  handleReleaseMetadataUpdated(updatingMetadataEvent);
+
+  assert.entityCount('PluginRelease', 1);
+
+  assert.fieldEquals(
+    'PluginRelease',
+    pluginReleaseEntityId,
+    'metadata',
+    updatedMetadata
+  );
 });
