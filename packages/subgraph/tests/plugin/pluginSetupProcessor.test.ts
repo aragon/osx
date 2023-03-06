@@ -30,7 +30,10 @@ import {
 import {assert, clearStore, test} from 'matchstick-as';
 import {PluginPreparation} from '../../generated/schema';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {getSupportsInterface} from '../../tests/dao/utils';
+import {
+  createDaoEntityState,
+  getSupportsInterface
+} from '../../tests/dao/utils';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
@@ -223,6 +226,11 @@ test('InstallationPrepared event', function() {
     'state',
     'InstallationPrepared'
   );
+
+  // TODO: once matchstick can support polymorphism, we should have a test like:
+  // @dev: create a DAO in state so that we can check if IPlugin will be linked to the DAO
+  // let daoEntity = createDaoEntityState()
+  // assert.i32Equals(daoEntity.plugins.length, 1);
 
   clearStore();
 });

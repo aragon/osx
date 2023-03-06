@@ -263,7 +263,7 @@ interface IPlugin {
   dao: Dao!
   pluginAddress: Bytes!
 
-  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   # TODO: Uncomment as soon as the plugins have their own subgraph
   # appliedPreparation: PluginPreparation
@@ -312,7 +312,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   dao: Dao!
   pluginAddress: Bytes!
 
-  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
@@ -394,7 +394,7 @@ type AddresslistVotingPlugin implements IPlugin @entity {
   dao: Dao!
   pluginAddress: Bytes!
 
-  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
@@ -467,7 +467,7 @@ type AdminPlugin implements IPlugin @entity {
   dao: Dao!
   pluginAddress: Bytes!
 
-  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
   administrators: [AdministratorAdminPlugin!]! @derivedFrom(field: "plugin")
@@ -512,7 +512,7 @@ type MultisigPlugin implements IPlugin @entity {
   dao: Dao!
   pluginAddress: Bytes!
 
-  installation: [PluginInstallation!]! @derivedFrom(field: "plugin")
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
