@@ -9,31 +9,32 @@ import {
 } from '../../generated/schema';
 
 export function handleVersionCreated(event: VersionCreated): void {
-  let pluginRepoId = event.address.toHexString();
+  // PluginSetup
   let pluginSetupId = event.params.pluginSetup.toHexString();
-  let pluginRelease = event.params.release.toString();
-
-  let pluginVersionId = pluginRepoId
-    .concat('_')
-    .concat(pluginRelease)
-    .concat('_')
-    .concat(event.params.build.toString());
-
-  let pluginReleaseId = pluginRepoId.concat('_').concat(pluginRelease);
-
-  let entity = new PluginVersion(pluginVersionId);
-  entity.pluginRepo = event.address.toHexString();
-  entity.release = pluginReleaseId;
-  entity.build = event.params.build;
-  entity.pluginSetup = pluginSetupId;
-  entity.metadata = event.params.buildMetadata.toString();
-  entity.save();
 
   let pluginSetupEntity = PluginSetup.load(pluginSetupId);
   if (!pluginSetupEntity) {
     pluginSetupEntity = new PluginSetup(pluginSetupId);
     pluginSetupEntity.save();
   }
+
+  // PluginVersion
+  let pluginRepoId = event.address.toHexString();
+  let pluginRelease = event.params.release.toString();
+  let pluginReleaseId = pluginRepoId.concat('_').concat(pluginRelease);
+  let pluginVersionId = pluginReleaseId
+    .concat('_')
+    .concat(event.params.build.toString());
+
+  let entity = new PluginVersion(pluginVersionId);
+  entity.pluginRepo = event.address.toHexString();
+  entity.pluginSetup = pluginSetupId;
+
+  entity.release = pluginReleaseId;
+  entity.build = event.params.build;
+
+  entity.metadata = event.params.buildMetadata.toString();
+  entity.save();
 }
 
 export function handleReleaseMetadataUpdated(
