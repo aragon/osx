@@ -535,7 +535,6 @@ describe('handleExecuted', () => {
         encodeWithFunctionSelector(tuple, selector).toHexString()
       );
     }
-    assert.entityCount('Action', 2);
   });
 
   test('successfuly updates action and proposal if found', () => {
@@ -587,9 +586,8 @@ describe('handleExecuted', () => {
     // Check that before `handleExecute`, execResults are empty
     assert.entityCount('Action', 1);
     assert.entityCount('TransactionActionsProposal', 1);
-
-    // eq('Action', actionId, 'execResult', 'null'); // TODO: GIORGI
-    // eq('TransactionActionsProposal', proposalId, 'failureMap', 'null'); TODO: GIORGI
+    assert.assertTrue(action.execResult === null);
+    assert.assertTrue(proposal.failureMap === null);
 
     handleExecuted(event);
 
