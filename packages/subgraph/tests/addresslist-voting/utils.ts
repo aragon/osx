@@ -264,7 +264,8 @@ export function createAddresslistVotingProposalEntityState(
 
   createdAt: string = CREATED_AT,
   creationBlockNumber: BigInt = new BigInt(0),
-  executable: boolean = false
+  executable: boolean = false,
+  earlyExecutable: boolean = false
 ): AddresslistVotingProposal {
   let addresslistProposal = new AddresslistVotingProposal(entityID);
   addresslistProposal.dao = Address.fromString(dao).toHexString();
@@ -288,6 +289,7 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
   addresslistProposal.creationBlockNumber = creationBlockNumber;
   addresslistProposal.executable = executable;
+  addresslistProposal.earlyExecutable = earlyExecutable;
 
   addresslistProposal.save();
 
