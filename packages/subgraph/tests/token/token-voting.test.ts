@@ -41,9 +41,9 @@ import {
   createNewProposalExecutedEvent,
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
-  getProposalCountCall,
-  createTokenVotingProposalEntityState
+  getProposalCountCall
 } from './utils';
+import {TokenVotingProposalBuilder} from '../helpers/builders/token/token-voting-proposal';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -227,43 +227,27 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 });
 
 test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
-  let proposal = createTokenVotingProposalEntityState();
+  // create state
+  let tokenVotingProposalBuilder = new TokenVotingProposalBuilder();
+
+  let proposal = tokenVotingProposalBuilder.buildOrUpdateEntity();
+  tokenVotingProposalBuilder.assertEntity();
+
+  // tokenVotingProposalBuilder.assertEntity_tokenVotingProposal();
 
   // create calls 1
-  createGetProposalCall(
-    CONTRACT_ADDRESS,
-    PROPOSAL_ID,
-    true,
-    false,
-
-    VOTING_MODE,
-    SUPPORT_THRESHOLD,
-    MIN_VOTING_POWER,
-    START_DATE,
-    END_DATE,
-    SNAPSHOT_BLOCK,
-
-    '0', // abstain
-    '1', // yes
-    '0', // no
-
-    actions,
-    ALLOW_FAILURE_MAP
-  );
-
-  createTotalVotingPowerCall(
-    CONTRACT_ADDRESS,
-    SNAPSHOT_BLOCK,
-    TOTAL_VOTING_POWER
-  );
+  tokenVotingProposalBuilder.yes = '1';
+  tokenVotingProposalBuilder.fireCall_getProposal(actions);
+  tokenVotingProposalBuilder.fireCall_totalVotingPower();
 
   // create event
-  let event = createNewVoteCastEvent(
-    PROPOSAL_ID,
-    ADDRESS_ONE,
-    '2', // Yes
-    '1', // votingPower
-    CONTRACT_ADDRESS
+  let voter = ADDRESS_ONE;
+  let voterVoteOption = '2'; // yes
+  let voterVotingPower = '1';
+  let event = tokenVotingProposalBuilder.fireEvent_VoteCast(
+    voter,
+    voterVoteOption,
+    voterVotingPower
   );
 
   handleVoteCast(event);
@@ -417,7 +401,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
 test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option "None"', () => {
   // create state
-  let proposal = createTokenVotingProposalEntityState();
+  let proposal = new TokenVotingProposalBuilder().buildOrUpdateEntity();
 
   // create calls
   createGetProposalCall(
@@ -463,12 +447,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
 
 test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
-  createTokenVotingProposalEntityState(
-    PROPOSAL_ENTITY_ID,
-    DAO_ADDRESS,
-    CONTRACT_ADDRESS,
-    ADDRESS_ONE
-  );
+  new TokenVotingProposalBuilder().buildOrUpdateEntity();
 
   // create calls
   createGetProposalCall(
