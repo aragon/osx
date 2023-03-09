@@ -829,6 +829,23 @@ describe('DAO', function () {
     });
   });
 
+  describe('hasPermission', async () => {
+    const permission = ethers.utils.id('PERMISSION_TEST');
+
+    it('returns `false` if the permission is not set', async () => {
+      expect(
+        await dao.hasPermission(dao.address, ownerAddress, permission, '0x')
+      ).to.be.false;
+    });
+
+    it('returns `true` if permission is set', async () => {
+      await dao.grant(dao.address, ownerAddress, permission);
+      expect(
+        await dao.hasPermission(dao.address, ownerAddress, permission, '0x')
+      ).to.be.true;
+    });
+  });
+
   describe('ERC1271', async () => {
     it('should register the interfaceId', async () => {
       expect(

@@ -204,6 +204,21 @@ describe('AddresslistVoting', function () {
     });
   });
 
+  describe('isMember', async () => {
+    beforeEach(async () => {
+      await voting.initialize(dao.address, votingSettings, []);
+    });
+
+    it('should return false, if user is not listed', async () => {
+      expect(await voting.isMember(signers[0].address)).to.be.false;
+    });
+
+    it('should return true if user is in the latest list', async () => {
+      await voting.addAddresses([signers[0].address]);
+      expect(await voting.isMember(signers[0].address)).to.be.true;
+    });
+  });
+
   describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
       await voting.initialize(dao.address, votingSettings, []);

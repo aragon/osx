@@ -302,6 +302,22 @@ describe('Multisig', function () {
     });
   });
 
+  describe('isMember', async () => {
+    it('should return false, if user is not listed', async () => {
+      expect(await multisig.isMember(signers[0].address)).to.be.false;
+    });
+
+    it('should return true if user is in the latest list', async () => {
+      multisigSettings.minApprovals = 1;
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address],
+        multisigSettings
+      );
+      expect(await multisig.isMember(signers[0].address)).to.be.true;
+    });
+  });
+
   describe('addAddresses:', async () => {
     it('should add new members to the address list and emit the `MembersAdded` event', async () => {
       multisigSettings.minApprovals = 1;
@@ -811,6 +827,17 @@ describe('Multisig', function () {
         await advanceTime(5000);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
+      });
+    });
+
+    describe('hasApproved', async () => {
+      it("returns `false` if user hasn't approved yet", async () => {
+        expect(await multisig.hasApproved(id, signers[0].address)).to.be.false;
+      });
+
+      it('returns `true` if user has approved', async () => {
+        await multisig.approve(id, true);
+        expect(await multisig.hasApproved(id, signers[0].address)).to.be.true;
       });
     });
 
