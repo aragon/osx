@@ -1,7 +1,11 @@
 import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
 import {assert, log} from 'matchstick-as';
-import {TokenVotingProposal} from '../../../../generated/schema';
+import {
+  TokenVotingProposal,
+  TokenVotingVote
+} from '../../../../generated/schema';
 import {VoteCast} from '../../../../generated/templates/TokenVoting/TokenVoting';
+import {VOTER_OPTIONS, VOTE_OPTIONS} from '../../../../src/utils/constants';
 import {
   ADDRESS_ONE,
   ALLOW_FAILURE_MAP,
@@ -18,7 +22,8 @@ import {
   SUPPORT_THRESHOLD,
   VOTING_MODE,
   TOTAL_VOTING_POWER,
-  ZERO
+  ZERO,
+  TWO
 } from '../../../constants';
 import {createNewVoteCastEvent} from '../../../token/utils';
 import {
@@ -127,7 +132,7 @@ export class TokenVotingProposalBuilder {
     let event = createNewVoteCastEvent(
       this.proposalId,
       voter,
-      voterVoteOption,
+      VOTE_OPTIONS.get(voterVoteOption) as string,
       voterVotingPower,
       this.plugin
     );
@@ -172,22 +177,77 @@ export class TokenVotingProposalBuilder {
     let thisMap = this.toMap();
 
     let entries = entity.entries;
+
     for (let i = 0; i < entries.length; i++) {
-      let entry = entries[i];
-      let value = thisMap.get(entry.key) as string;
-      assert.fieldEquals('TokenVotingProposal', this.id, entry.key, value);
+      let key = entries[i].key;
+      let value = thisMap.get(key) as string;
+      assert.fieldEquals('TokenVotingProposal', this.id, key, value);
     }
   }
 }
 
 // TODO we need an abstract class so all "builders follow the same pattern"
-// class TokenVotingVoteBase {
-//   public id: string = '';
-//   public voter: string = '';
-//   public proposal: string = '';
-//   public voteOption: string = '';
-//   public votingPower: string = '';
-//   public createdAt: string = '';
-//   public voteReplaced: string = '';
-//   public updatedAt: string = '';
-// }
+export class TokenVotingVoteBuilder {
+  public id: string = ADDRESS_ONE.concat('_').concat(PROPOSAL_ENTITY_ID);
+  public voter: string = ADDRESS_ONE;
+  public proposal: string = PROPOSAL_ENTITY_ID;
+  public voteOption: string = VOTER_OPTIONS.get(0) as string;
+  public votingPower: string = TWO;
+  public createdAt: string = CREATED_AT;
+  public voteReplaced: string = 'false';
+  public updatedAt: string = ZERO;
+
+  // build entity
+  // if id not changed it will update
+  buildOrUpdateEntity(): TokenVotingVote {
+    let entity = new TokenVotingVote(this.id);
+
+    entity.voter = CONTRACT_ADDRESS.concat('_').concat(this.voter);
+    entity.proposal = this.proposal;
+    entity.voteOption = this.voteOption;
+    entity.votingPower = BigInt.fromString(this.votingPower);
+    entity.createdAt = BigInt.fromString(this.createdAt);
+    entity.voteReplaced = this.voteReplaced === 'true';
+    entity.updatedAt = BigInt.fromString(this.updatedAt);
+
+    entity.save();
+    return entity;
+  }
+
+  toMap(): Map<string, string> {
+    return new Map<string, string>()
+      .set('id', this.id)
+      .set(
+        'voter',
+        Address.fromHexString(CONTRACT_ADDRESS)
+          .toHexString()
+          .concat('_')
+          .concat(this.voter)
+      )
+      .set('proposal', this.proposal)
+      .set('voteOption', this.voteOption)
+      .set('votingPower', this.votingPower)
+      .set('createdAt', this.createdAt)
+      .set('voteReplaced', this.voteReplaced)
+      .set('updatedAt', this.updatedAt);
+  }
+
+  // assertions
+  assertEntity(): void {
+    let entity = TokenVotingVote.load(this.id);
+    if (!entity) throw new Error(`Entity not found for id: ${this.id}`);
+
+    let thisMap = this.toMap();
+
+    let entries = entity.entries;
+    for (let i = 0; i < entries.length; i++) {
+      let key = entries[i].key;
+      log.debug('getting for key = {}', [key]);
+      let value = thisMap.get(key) as string;
+
+      log.debug('testing key = {}, value = {}', [key, value]);
+
+      assert.fieldEquals('TokenVotingVote', this.id, key, value);
+    }
+  }
+}

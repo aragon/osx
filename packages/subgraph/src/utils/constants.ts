@@ -7,6 +7,12 @@ export const VOTER_OPTIONS = new Map<number, string>()
   .set(2, 'Yes')
   .set(3, 'No');
 
+export const VOTE_OPTIONS = new Map<string, string>()
+  .set('None', '0')
+  .set('Abstain', '1')
+  .set('Yes', '2')
+  .set('No', '3');
+
 export const VOTING_MODES = new Map<number, string>()
   .set(0, 'Standard')
   .set(1, 'EarlyExecution')
