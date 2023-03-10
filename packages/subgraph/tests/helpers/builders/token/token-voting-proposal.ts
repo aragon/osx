@@ -242,10 +242,7 @@ export class TokenVotingVoteBuilder {
     let entries = entity.entries;
     for (let i = 0; i < entries.length; i++) {
       let key = entries[i].key;
-      log.debug('getting for key = {}', [key]);
       let value = thisMap.get(key) as string;
-
-      log.debug('testing key = {}, value = {}', [key, value]);
 
       assert.fieldEquals('TokenVotingVote', this.id, key, value);
     }

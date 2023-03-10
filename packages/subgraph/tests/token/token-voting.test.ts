@@ -235,11 +235,11 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   let proposalBuilder = new TokenVotingProposalBuilder();
 
   let proposal = proposalBuilder.buildOrUpdateEntity();
+
+  // check proposal entity
   proposalBuilder.assertEntity();
 
-  // tokenVotingProposalBuilder.assertEntity_tokenVotingProposal();
-
-  // create calls 1
+  // create calls
   proposalBuilder.yes = '1';
   proposalBuilder.fireCall_getProposal(actions);
   proposalBuilder.fireCall_totalVotingPower();
@@ -256,12 +256,10 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     voteBuilder.votingPower
   );
 
+  // test handler
   handleVoteCast(event);
 
-  log.debug('event timestamp = {}', [event.block.timestamp.toString()]);
-
-  // checks
-  let voteEntityID = ADDRESS_ONE + '_' + proposal.id;
+  // checks vote entity created via handler (not builder)
   voteBuilder.assertEntity();
 
   // check voter
