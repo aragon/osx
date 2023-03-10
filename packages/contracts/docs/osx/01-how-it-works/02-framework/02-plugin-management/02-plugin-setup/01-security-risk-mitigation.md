@@ -4,7 +4,7 @@ title: Security
 
 ## Risks and Their Mitigation
 
-Adding code to your DAO in the form of plugins can introduce risks to your DAO, if this code comes from unaudited and untrusted sources.
+Adding code to your DAO in the form of plugins can introduce risks if this code comes from unaudited and untrusted sources.
 
 ### Risks
 
