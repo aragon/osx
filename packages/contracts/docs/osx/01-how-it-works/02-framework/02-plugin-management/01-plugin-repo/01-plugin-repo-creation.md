@@ -40,7 +40,7 @@ function createPluginRepoWithFirstVersion(
 ) external returns (PluginRepo pluginRepo);
 ```
 
-which creates a `PluginRepo` with the first version `1.0` inside and registers it in the Aragon OSx `PluginRepoRegistry` contract with an [ENS subdomain](../../03-ens-names.md) under the `dao-plugin.eth` domain managed by Aragon.
+which creates a `PluginRepo` with the first version `1.0` inside and registers it in the Aragon OSx `PluginRepoRegistry` contract with an [ENS subdomain](../../03-ens-names.md) under the `plugin.dao.eth` domain managed by Aragon.
 
 Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-puginrepo-contract), it receives
 
