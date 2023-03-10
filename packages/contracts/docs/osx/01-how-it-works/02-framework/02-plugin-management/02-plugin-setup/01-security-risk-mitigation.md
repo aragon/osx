@@ -4,7 +4,7 @@ title: Security
 
 ## Risks and Their Mitigation
 
-With the freedom to
+Adding code to your DAO in the form of plugins can introduce risks to your DAO, if this code comes from unaudited and untrusted sources.
 
 ### Risks
 
