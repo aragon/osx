@@ -20,5 +20,11 @@
     "gasPrice": 40000000000,
     "chainId": 137,
     "feesUrl": "https://gasstation-mainnet.matic.network/v2"
+  },
+  "mumbai": {
+    "url": "https://rpc.ankr.com/polygon_mumbai",
+    "isTestnet": true,
+    "chainId": 80001,
+    "feesUrl": "https://gasstation-mumbai.matic.today/v2"
   }
 }
