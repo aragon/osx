@@ -73,4 +73,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = ['RegisterManagingDAO'];
+func.tags = ['RevokeManagingPermissionsDAO'];
