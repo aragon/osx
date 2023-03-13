@@ -4,7 +4,7 @@ title: Versioning
 
 ## Versioning Your Plugin
 
-The Aragon OSx protocol has an on-chain versioning system built-in.
+The Aragon OSx protocol has an on-chain versioning system built-in and distinguishes between releases and builds.
 
 Given a version tag `RELEASE.BUILD`, we can infer that:
 

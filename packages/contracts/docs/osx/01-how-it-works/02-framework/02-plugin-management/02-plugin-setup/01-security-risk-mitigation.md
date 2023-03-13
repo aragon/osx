@@ -4,7 +4,7 @@ title: Security
 
 ## Risks and Their Mitigation
 
-With the freedom to
+Adding code to your DAO in the form of plugins can introduce risks, particularly, if this code comes from unaudited and untrusted sources.
 
 ### Risks
 
@@ -18,7 +18,7 @@ Besides, standard vulnerabilities such as
 - Time or oracle manipulation attacks
 - Integer overflow & underflow
 
-that might be carelessly or intentionally caused, a malicious plugins can hide **backdoors** in its code or request **elevated permissions** in the installation, upgrade, or uninstallation process to the attacker.
+that might be carelessly or intentionally caused, a malicious plugin can hide **backdoors** in its code or request **elevated permissions** in the installation, upgrade, or uninstallation process to the attacker.
 
 #### Backdoors
 
