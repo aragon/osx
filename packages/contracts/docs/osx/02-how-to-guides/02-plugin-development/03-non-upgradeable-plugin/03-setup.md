@@ -25,7 +25,7 @@ contract SimpleAdmin is PluginCloneable {
   /// @notice Executes actions in the associated DAO.
   /// @param _actions The actions to be executed by the DAO.
   function execute(IDAO.Action[] calldata _actions) external auth(ADMIN_EXECUTE_PERMISSION_ID) {
-    dao().execute({callId: 0x0, actions: _actions, allowFailureMap: 0});
+    dao().execute({_callId: 0x0, _actions: _actions, _allowFailureMap: 0});
   }
 }
 ```
