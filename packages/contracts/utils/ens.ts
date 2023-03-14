@@ -36,8 +36,8 @@ export async function setupENS(domains: string[], hre: EHRE): Promise<any> {
   for (let i = 0; i < domains.length; i++) {
     console.log(`Registering subdomain ${domains[i]}`);
 
-    const resolved = await ens.resolver(ensDomainHash(domains[i]));
-    if (resolved === resolver.address) {
+    const resolvedResolver = await ens.resolver(ensDomainHash(domains[i]));
+    if (resolvedResolver === resolver.address) {
       console.log(`${domains[i]} already registered. Skipping...`);
       continue;
     }
@@ -56,12 +56,12 @@ export async function setupENS(domains: string[], hre: EHRE): Promise<any> {
         .join('.');
 
       // skipping if it is already set
-      const resolved = await ens.resolver(
+      const resolvedResolver = await ens.resolver(
         ensDomainHash(
           `${domainNamesReversed[i + 1]}${domain ? '.' + domain : ''}`
         )
       );
-      if (resolved !== ethers.constants.AddressZero) {
+      if (resolvedResolver !== ethers.constants.AddressZero) {
         continue;
       }
 
