@@ -9,13 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `installations` to `IPlugin`.
 - Added `PluginRelease`.
 - Added `metadata` to `PluginVersion`.
 
 ### Changed
 
+- Changed `plugin` field of `Dao` from `IPluginInstallation` to `IPlugin`.
+- Changed `pluginAddress` field of `PluginInstallation` to `plugin`.
+- Changed `IPluginInstallation` to `IPlugin`.
 - Changed `release: Int!` to `release: PluginRelease!` in `PluginVersion`
 - Changed `versions` to `releases` in `PluginRepo`.
+
+### Removed
+
+- Removed `pluginInstallations` from `Dao`.
 
 ## [1.0.1]
 

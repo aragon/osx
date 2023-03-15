@@ -15,6 +15,7 @@ import {
 import {
   addPlugin,
   getPluginInstallationId,
+  getPluginVersionId,
   PERMISSION_OPERATIONS
 } from './utils';
 
@@ -23,7 +24,12 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   let plugin = event.params.plugin.toHexString();
   let setupId = event.params.preparedSetupId.toHexString();
   let pluginRepo = event.params.pluginSetupRepo.toHexString();
-  let pluginVersionId = `${pluginRepo}_${event.params.versionTag.release}_${event.params.versionTag.build}`;
+  let pluginVersionId = getPluginVersionId(
+    pluginRepo,
+    event.params.versionTag.release,
+    event.params.versionTag.build
+  );
+
   let installationId = getPluginInstallationId(dao, plugin);
   if (!installationId) {
     log.error('Failed to get installationId', [dao, plugin]);
@@ -98,7 +104,7 @@ export function handleInstallationApplied(event: InstallationApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
-  pluginEntity.pluginAddress = event.params.plugin;
+  pluginEntity.plugin = plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
@@ -110,7 +116,13 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
   let plugin = event.params.setupPayload.plugin.toHexString();
   let setupId = event.params.preparedSetupId.toHexString();
   let pluginRepo = event.params.pluginSetupRepo.toHexString();
-  let pluginVersionId = `${pluginRepo}_${event.params.versionTag.release}_${event.params.versionTag.build}`;
+
+  let pluginVersionId = getPluginVersionId(
+    pluginRepo,
+    event.params.versionTag.release,
+    event.params.versionTag.build
+  );
+
   let installationId = getPluginInstallationId(dao, plugin);
   if (!installationId) {
     log.error('Failed to get installationId', [dao, plugin]);
@@ -184,7 +196,7 @@ export function handleUpdateApplied(event: UpdateApplied): void {
     pluginEntity.appliedPluginRepo = pluginPreparationEntity.pluginRepo;
     pluginEntity.appliedVersion = pluginPreparationEntity.pluginVersion;
   }
-  pluginEntity.pluginAddress = event.params.plugin;
+  pluginEntity.plugin = plugin;
   pluginEntity.appliedPreparation = preparationId;
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
@@ -200,7 +212,13 @@ export function handleUninstallationPrepared(
   let plugin = event.params.setupPayload.plugin.toHexString();
   let setupId = event.params.preparedSetupId.toHexString();
   let pluginRepo = event.params.pluginSetupRepo.toHexString();
-  let pluginVersionId = `${pluginRepo}_${event.params.versionTag.release}_${event.params.versionTag.build}`;
+
+  let pluginVersionId = getPluginVersionId(
+    pluginRepo,
+    event.params.versionTag.release,
+    event.params.versionTag.build
+  );
+
   let installationId = getPluginInstallationId(dao, plugin);
   if (!installationId) {
     log.error('Failed to get installationId', [dao, plugin]);

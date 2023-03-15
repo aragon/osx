@@ -163,12 +163,12 @@ type Dao @entity {
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  pluginInstallations: [PluginInstallation!]! @derivedFrom(field: "dao")
-  plugins: [IPluginInstallation!]! @derivedFrom(field: "dao") # TODO: Delete or refactor after the plugins left the Aragon OSx subgraph
-  proposals: [IProposal!] @derivedFrom(field: "dao")
+  proposals: [IProposal!]! @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
-  standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
+  standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
+
+  plugins: [IPlugin!]! @derivedFrom(field: "dao") # TODO: Refactor to `PluginInstallation` after the plugins left the Aragon OSx subgraph
 }
 
 # Plugins
@@ -242,11 +242,11 @@ type PluginPreparation @entity(immutable: true) {
   type: PluginPreparationType!
 }
 
-# Don't implement IPluginInstallation. Otherwise it would show up under plugins in the DAO entity
+# Don't implement IPlugin. Otherwise it would show up under plugins in the DAO entity
 type PluginInstallation @entity {
   id: ID! # psp installationId
   dao: Dao!
-  pluginAddress: Bytes # The plugin address provided by the applied preparation
+  plugin: IPlugin # The plugin address as id provided by the applied preparation
   appliedPreparation: PluginPreparation
   appliedSetupId: Bytes # The setupId of the application see PSP documentation for more info
   appliedVersion: PluginVersion # Stored to track installations in the different plugin versions
@@ -268,10 +268,12 @@ enum PluginPreparationState {
   Uninstalled
 }
 
-interface IPluginInstallation {
-  id: ID! # psp installationId
+interface IPlugin {
+  id: ID! # plugin address
   dao: Dao!
   pluginAddress: Bytes!
+
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   # TODO: Uncomment as soon as the plugins have their own subgraph
   # appliedPreparation: PluginPreparation
@@ -330,11 +332,13 @@ enum VotingMode {
 
 # TokenVoting
 
-type TokenVotingPlugin implements IPluginInstallation @entity {
+type TokenVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugins once plugin is separated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
+
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
@@ -412,11 +416,13 @@ type TokenVotingProposal implements IProposal @entity {
 
 # AddresslistVoting
 
-type AddresslistVotingPlugin implements IPluginInstallation @entity {
+type AddresslistVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
+
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
   votingMode: VotingMode
@@ -485,11 +491,13 @@ type AddresslistVotingProposal implements IProposal @entity {
 
 # Admin (plugin)
 
-type AdminPlugin implements IPluginInstallation @entity {
+type AdminPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is separated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
+
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
   administrators: [AdministratorAdminPlugin!]! @derivedFrom(field: "plugin")
@@ -529,11 +537,13 @@ type AdminProposal implements IProposal @entity {
 
 # Multisig
 
-type MultisigPlugin implements IPluginInstallation @entity {
+type MultisigPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
   id: ID!
   dao: Dao!
   pluginAddress: Bytes!
+
+  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
