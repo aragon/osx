@@ -15,23 +15,23 @@ Now, we show the setup contracts associated with the 3 builds we have implemente
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {IDAO, PluginUUPSUpgradeable} from "@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
 /// @title SimpleStorage build 1
 contract SimpleStorageBuild1 is PluginUUPSUpgradeable {
-    bytes32 public constant STORE_PERMISSION_ID = keccak256("STORE_PERMISSION");
+  bytes32 public constant STORE_PERMISSION_ID = keccak256('STORE_PERMISSION');
 
-    uint256 public number; // added in build 1
+  uint256 public number; // added in build 1
 
-    /// @notice Initializes the plugin when build 1 is installed.
-    function initializeBuild1(IDAO _dao, uint256 _number) external initializer {
-        __PluginUUPSUpgradeable_init(_dao);
-        number = _number;
-    }
+  /// @notice Initializes the plugin when build 1 is installed.
+  function initializeBuild1(IDAO _dao, uint256 _number) external initializer {
+    __PluginUUPSUpgradeable_init(_dao);
+    number = _number;
+  }
 
-    function storeNumber(uint256 _number) external auth(STORE_PERMISSION_ID) {
-        number = _number;
-    }
+  function storeNumber(uint256 _number) external auth(STORE_PERMISSION_ID) {
+    number = _number;
+  }
 }
 ```
 
@@ -47,64 +47,64 @@ For the first build, the setup is very similar to the [setup example for the non
 
 pragma solidity 0.8.17;
 
-import {PermissionLib} from "@aragon/osx/core/permission/PermissionLib.sol";
-import {PluginSetup, IPluginSetup} from "@aragon/osx/framework/plugin/setup/PluginSetup.sol";
-import {SimpleStorageBuild1} from "./SimpleStorageBuild1.sol";
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {SimpleStorageBuild1} from './SimpleStorageBuild1.sol';
 
 /// @title SimpleStorageSetup build 1
 contract SimpleStorageBuild1Setup is PluginSetup {
-    address private immutable simpleStorageImplementation;
+  address private immutable simpleStorageImplementation;
 
-    constructor() {
-        simpleStorageImplementation = address(new SimpleStorageBuild1());
-    }
+  constructor() {
+    simpleStorageImplementation = address(new SimpleStorageBuild1());
+  }
 
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(
-        address _dao,
-        bytes memory _data
-    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        uint256 number = abi.decode(_data, (uint256));
+  /// @inheritdoc IPluginSetup
+  function prepareInstallation(
+    address _dao,
+    bytes memory _data
+  ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+    uint256 number = abi.decode(_data, (uint256));
 
-        plugin = createERC1967Proxy(
-            simpleStorageImplementation,
-            abi.encodeWithSelector(SimpleStorageBuild1.initializeBuild1.selector, _dao, number)
-        );
+    plugin = createERC1967Proxy(
+      simpleStorageImplementation,
+      abi.encodeWithSelector(SimpleStorageBuild1.initializeBuild1.selector, _dao, number)
+    );
 
-        PermissionLib.MultiTargetPermission[]
-            memory permissions = new PermissionLib.MultiTargetPermission[](1);
+    PermissionLib.MultiTargetPermission[]
+      memory permissions = new PermissionLib.MultiTargetPermission[](1);
 
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: SimpleStorageBuild1(this.implementation()).STORE_PERMISSION_ID()
-        });
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Grant,
+      where: plugin,
+      who: _dao,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: SimpleStorageBuild1(this.implementation()).STORE_PERMISSION_ID()
+    });
 
-        preparedSetupData.permissions = permissions;
-    }
+    preparedSetupData.permissions = permissions;
+  }
 
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        SetupPayload calldata _payload
-    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        permissions = new PermissionLib.MultiTargetPermission[](1);
+  /// @inheritdoc IPluginSetup
+  function prepareUninstallation(
+    address _dao,
+    SetupPayload calldata _payload
+  ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    permissions = new PermissionLib.MultiTargetPermission[](1);
 
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _payload.plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: SimpleStorageBuild1(this.implementation()).STORE_PERMISSION_ID()
-        });
-    }
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Revoke,
+      where: _payload.plugin,
+      who: _dao,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: SimpleStorageBuild1(this.implementation()).STORE_PERMISSION_ID()
+    });
+  }
 
-    /// @inheritdoc IPluginSetup
-    function implementation() external view returns (address) {
-        return simpleStorageImplementation;
-    }
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleStorageImplementation;
+  }
 }
 ```
 
@@ -119,42 +119,40 @@ contract SimpleStorageBuild1Setup is PluginSetup {
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {IDAO, PluginUUPSUpgradeable} from "@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
 /// @title SimpleStorage build 2
 contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
-    bytes32 public constant STORE_PERMISSION_ID = keccak256("STORE_PERMISSION");
+  bytes32 public constant STORE_PERMISSION_ID = keccak256('STORE_PERMISSION');
 
-    uint256 public number; // added in build 1
-    address public account; // added in build 2
+  uint256 public number; // added in build 1
+  address public account; // added in build 2
 
-    /// @notice Initializes the plugin when build 2 is installed.
-    function initializeBuild2(
-        IDAO _dao,
-        uint256 _number,
-        address _account
-    ) external reinitializer(2) {
-        __PluginUUPSUpgradeable_init(_dao);
-        number = _number;
-        account = _account;
-    }
+  /// @notice Initializes the plugin when build 2 is installed.
+  function initializeBuild2(
+    IDAO _dao,
+    uint256 _number,
+    address _account
+  ) external reinitializer(2) {
+    __PluginUUPSUpgradeable_init(_dao);
+    number = _number;
+    account = _account;
+  }
 
-    /// @notice Initializes the plugin when the update from build 1 to build 2 is applied.
-    /// @dev The initialization of `SimpleStorageBuild1` has already happened.
-    function initializeFromBuild1(address _account) external reinitializer(2) {
-        account = _account;
-    }
+  /// @notice Initializes the plugin when the update from build 1 to build 2 is applied.
+  /// @dev The initialization of `SimpleStorageBuild1` has already happened.
+  function initializeFromBuild1(address _account) external reinitializer(2) {
+    account = _account;
+  }
 
+  function storeNumber(uint256 _number) external auth(STORE_PERMISSION_ID) {
+    number = _number;
+  }
 
-    function storeNumber(uint256 _number) external auth(STORE_PERMISSION_ID) {
-        number = _number;
-    }
-
-    function storeAccount(address _account) external auth(STORE_PERMISSION_ID) {
-        account = _account;
-    }
+  function storeAccount(address _account) external auth(STORE_PERMISSION_ID) {
+    account = _account;
+  }
 }
-
 ```
 
 </details>
@@ -171,91 +169,86 @@ Additionally, since we want to support updates from build 1 to build 2, we must 
 
 pragma solidity 0.8.17;
 
-import {PermissionLib} from "@aragon/osx/core/permission/PermissionLib.sol";
-import {PluginSetup, IPluginSetup} from "@aragon/osx/framework/plugin/setup/PluginSetup.sol";
-import {SimpleStorageBuild2} from "./SimpleStorageBuild2.sol";
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {SimpleStorageBuild2} from './SimpleStorageBuild2.sol';
 
 /// @title SimpleStorageSetup build 2
 contract SimpleStorageBuild2Setup is PluginSetup {
-    address private immutable simpleStorageImplementation;
+  address private immutable simpleStorageImplementation;
 
-    constructor() {
-        simpleStorageImplementation = address(new SimpleStorageBuild2());
+  constructor() {
+    simpleStorageImplementation = address(new SimpleStorageBuild2());
+  }
+
+  /// @inheritdoc IPluginSetup
+  function prepareInstallation(
+    address _dao,
+    bytes memory _data
+  ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+    (uint256 _number, address _account) = abi.decode(_data, (uint256, address));
+
+    plugin = createERC1967Proxy(
+      simpleStorageImplementation,
+      abi.encodeWithSelector(SimpleStorageBuild2.initializeBuild2.selector, _dao, _number, _account)
+    );
+
+    PermissionLib.MultiTargetPermission[]
+      memory permissions = new PermissionLib.MultiTargetPermission[](1);
+
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Grant,
+      where: plugin,
+      who: _dao,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: SimpleStorageBuild2(this.implementation()).STORE_PERMISSION_ID()
+    });
+
+    preparedSetupData.permissions = permissions;
+  }
+
+  /// @inheritdoc IPluginSetup
+  function prepareUpdate(
+    address _dao,
+    uint16 _currentBuild,
+    SetupPayload calldata _payload
+  )
+    external
+    pure
+    override
+    returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
+  {
+    (_dao, preparedSetupData);
+
+    if (_currentBuild == 0) {
+      address _account = abi.decode(_payload.data, (address));
+      initData = abi.encodeWithSelector(
+        SimpleStorageBuild2.initializeFromBuild1.selector,
+        _account
+      );
     }
+  }
 
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(
-        address _dao,
-        bytes memory _data
-    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        (uint256 _number, address _account) = abi.decode(_data, (uint256, address));
+  /// @inheritdoc IPluginSetup
+  function prepareUninstallation(
+    address _dao,
+    SetupPayload calldata _payload
+  ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    permissions = new PermissionLib.MultiTargetPermission[](1);
 
-        plugin = createERC1967Proxy(
-            simpleStorageImplementation,
-            abi.encodeWithSelector(
-                SimpleStorageBuild2.initializeBuild2.selector,
-                _dao,
-                _number,
-                _account
-            )
-        );
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Revoke,
+      where: _payload.plugin,
+      who: _dao,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: SimpleStorageBuild2(this.implementation()).STORE_PERMISSION_ID()
+    });
+  }
 
-        PermissionLib.MultiTargetPermission[]
-            memory permissions = new PermissionLib.MultiTargetPermission[](1);
-
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: SimpleStorageBuild2(this.implementation()).STORE_PERMISSION_ID()
-        });
-
-        preparedSetupData.permissions = permissions;
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUpdate(
-        address _dao,
-        uint16 _currentBuild,
-        SetupPayload calldata _payload
-    )
-        external
-        pure
-        override
-        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
-    {
-        (_dao, preparedSetupData);
-
-        if (_currentBuild == 0) {
-            address _account = abi.decode(_payload.data, (address));
-            initData = abi.encodeWithSelector(
-                SimpleStorageBuild2.initializeFromBuild1.selector,
-                _account
-            );
-        }
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        SetupPayload calldata _payload
-    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        permissions = new PermissionLib.MultiTargetPermission[](1);
-
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _payload.plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: SimpleStorageBuild2(this.implementation()).STORE_PERMISSION_ID()
-        });
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view returns (address) {
-        return simpleStorageImplementation;
-    }
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleStorageImplementation;
+  }
 }
 ```
 
@@ -272,66 +265,66 @@ Let's have a close look at the implemented `prepareUpdate` function. The functio
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {IDAO, PluginUUPSUpgradeable} from "@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
 /// @title SimpleStorage build 3
 contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
-    bytes32 public constant STORE_NUMBER_PERMISSION_ID = keccak256("STORE_NUMBER_PERMISSION"); // changed in build 3
-    bytes32 public constant STORE_ACCOUNT_PERMISSION_ID = keccak256("STORE_ACCOUNT_PERMISSION"); // added in build 3
+  bytes32 public constant STORE_NUMBER_PERMISSION_ID = keccak256('STORE_NUMBER_PERMISSION'); // changed in build 3
+  bytes32 public constant STORE_ACCOUNT_PERMISSION_ID = keccak256('STORE_ACCOUNT_PERMISSION'); // added in build 3
 
-    uint256 public number; // added in build 1
-    address public account; // added in build 2
+  uint256 public number; // added in build 1
+  address public account; // added in build 2
 
-    // added in build 3
-    event NumberStored(uint256 number);
-    event AccountStored(address account);
-    error AlreadyStored();
+  // added in build 3
+  event NumberStored(uint256 number);
+  event AccountStored(address account);
+  error AlreadyStored();
 
-    /// @notice Initializes the plugin when build 3 is installed.
-    function initializeBuild3(
-        IDAO _dao,
-        uint256 _number,
-        address _account
-    ) external reinitializer(3) {
-        __PluginUUPSUpgradeable_init(_dao);
-        number = _number;
-        account = _account;
+  /// @notice Initializes the plugin when build 3 is installed.
+  function initializeBuild3(
+    IDAO _dao,
+    uint256 _number,
+    address _account
+  ) external reinitializer(3) {
+    __PluginUUPSUpgradeable_init(_dao);
+    number = _number;
+    account = _account;
 
-        emit NumberStored({number: _number});
-        emit AccountStored({account: _account});
-    }
+    emit NumberStored({number: _number});
+    emit AccountStored({account: _account});
+  }
 
-    /// @notice Initializes the plugin when the update from build 2 to build 3 is applied.
-    /// @dev The initialization of `SimpleStorageBuild2` has already happened.
-    function initializeFromBuild2() external reinitializer(3) {
-        emit NumberStored({number: number});
-        emit AccountStored({account: account});
-    }
+  /// @notice Initializes the plugin when the update from build 2 to build 3 is applied.
+  /// @dev The initialization of `SimpleStorageBuild2` has already happened.
+  function initializeFromBuild2() external reinitializer(3) {
+    emit NumberStored({number: number});
+    emit AccountStored({account: account});
+  }
 
-    /// @notice Initializes the plugin when the update from build 1 to build 3 is applied.
-    /// @dev The initialization of `SimpleStorageBuild1` has already happened.
-    function initializeFromBuild1(address _account) external reinitializer(3) {
-        account = _account;
+  /// @notice Initializes the plugin when the update from build 1 to build 3 is applied.
+  /// @dev The initialization of `SimpleStorageBuild1` has already happened.
+  function initializeFromBuild1(address _account) external reinitializer(3) {
+    account = _account;
 
-        emit NumberStored({number: number});
-        emit AccountStored({account: _account});
-    }
+    emit NumberStored({number: number});
+    emit AccountStored({account: _account});
+  }
 
-    function storeNumber(uint256 _number) external auth(STORE_NUMBER_PERMISSION_ID) {
-        if (_number == number) revert AlreadyStored();
+  function storeNumber(uint256 _number) external auth(STORE_NUMBER_PERMISSION_ID) {
+    if (_number == number) revert AlreadyStored();
 
-        number = _number;
+    number = _number;
 
-        emit NumberStored({number: _number});
-    }
+    emit NumberStored({number: _number});
+  }
 
-    function storeAccount(address _account) external auth(STORE_ACCOUNT_PERMISSION_ID) {
-        if (_account == account) revert AlreadyStored();
+  function storeAccount(address _account) external auth(STORE_ACCOUNT_PERMISSION_ID) {
+    if (_account == account) revert AlreadyStored();
 
-        account = _account;
+    account = _account;
 
-        emit AccountStored({account: _account});
-    }
+    emit AccountStored({account: _account});
+  }
 }
 ```
 
@@ -345,121 +338,116 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
 
 pragma solidity 0.8.17;
 
-import {PermissionLib} from "@aragon/osx/core/permission/PermissionLib.sol";
-import {PluginSetup, IPluginSetup} from "@aragon/osx/framework/plugin/setup/PluginSetup.sol";
-import {SimpleStorageBuild2} from "../build2/SimpleStorageBuild2.sol";
-import {SimpleStorageBuild3} from "./SimpleStorageBuild3.sol";
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {SimpleStorageBuild2} from '../build2/SimpleStorageBuild2.sol';
+import {SimpleStorageBuild3} from './SimpleStorageBuild3.sol';
 
 /// @title SimpleStorageSetup build 3
 contract SimpleStorageBuild3Setup is PluginSetup {
-    address private immutable simpleStorageImplementation;
+  address private immutable simpleStorageImplementation;
 
-    constructor() {
-        simpleStorageImplementation = address(new SimpleStorageBuild3());
+  constructor() {
+    simpleStorageImplementation = address(new SimpleStorageBuild3());
+  }
+
+  /// @inheritdoc IPluginSetup
+  function prepareInstallation(
+    address _dao,
+    bytes memory _data
+  ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+    (uint256 _number, address _account) = abi.decode(_data, (uint256, address));
+
+    plugin = createERC1967Proxy(
+      simpleStorageImplementation,
+      abi.encodeWithSelector(SimpleStorageBuild3.initializeBuild3.selector, _dao, _number, _account)
+    );
+
+    PermissionLib.MultiTargetPermission[]
+      memory permissions = new PermissionLib.MultiTargetPermission[](2);
+
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Grant,
+      where: plugin,
+      who: _dao,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: SimpleStorageBuild3(this.implementation()).STORE_NUMBER_PERMISSION_ID()
+    });
+
+    permissions[1] = permissions[0];
+    permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_ACCOUNT_PERMISSION_ID();
+
+    preparedSetupData.permissions = permissions;
+  }
+
+  /// @inheritdoc IPluginSetup
+  function prepareUpdate(
+    address _dao,
+    uint16 _currentBuild,
+    SetupPayload calldata _payload
+  )
+    external
+    view
+    override
+    returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
+  {
+    if (_currentBuild == 0) {
+      address _account = abi.decode(_payload.data, (address));
+      initData = abi.encodeWithSelector(
+        SimpleStorageBuild3.initializeFromBuild1.selector,
+        _account
+      );
+    } else if (_currentBuild == 1) {
+      initData = abi.encodeWithSelector(SimpleStorageBuild3.initializeFromBuild2.selector);
     }
 
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(
-        address _dao,
-        bytes memory _data
-    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        (uint256 _number, address _account) = abi.decode(_data, (uint256, address));
+    PermissionLib.MultiTargetPermission[]
+      memory permissions = new PermissionLib.MultiTargetPermission[](3);
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Revoke,
+      where: _dao,
+      who: _payload.plugin,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: keccak256('STORE_PERMISSION')
+    });
 
-        plugin = createERC1967Proxy(
-            simpleStorageImplementation,
-            abi.encodeWithSelector(
-                SimpleStorageBuild3.initializeBuild3.selector,
-                _dao,
-                _number,
-                _account
-            )
-        );
+    permissions[1] = permissions[0];
+    permissions[1].operation = PermissionLib.Operation.Grant;
+    permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_NUMBER_PERMISSION_ID();
 
-        PermissionLib.MultiTargetPermission[]
-            memory permissions = new PermissionLib.MultiTargetPermission[](2);
+    permissions[2] = permissions[1];
+    permissions[2].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_ACCOUNT_PERMISSION_ID();
 
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: SimpleStorageBuild3(this.implementation()).STORE_NUMBER_PERMISSION_ID()
-        });
+    preparedSetupData.permissions = permissions;
+  }
 
-        permissions[1] = permissions[0];
-        permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
-            .STORE_ACCOUNT_PERMISSION_ID();
+  /// @inheritdoc IPluginSetup
+  function prepareUninstallation(
+    address _dao,
+    SetupPayload calldata _payload
+  ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    permissions = new PermissionLib.MultiTargetPermission[](2);
 
-        preparedSetupData.permissions = permissions;
-    }
+    permissions[0] = PermissionLib.MultiTargetPermission({
+      operation: PermissionLib.Operation.Revoke,
+      where: _payload.plugin,
+      who: _dao,
+      condition: PermissionLib.NO_CONDITION,
+      permissionId: SimpleStorageBuild3(this.implementation()).STORE_NUMBER_PERMISSION_ID()
+    });
 
-    /// @inheritdoc IPluginSetup
-    function prepareUpdate(
-        address _dao,
-        uint16 _currentBuild,
-        SetupPayload calldata _payload
-    )
-        external
-        view
-        override
-        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
-    {
-        if (_currentBuild == 0) {
-            address _account = abi.decode(_payload.data, (address));
-            initData = abi.encodeWithSelector(
-                SimpleStorageBuild3.initializeFromBuild1.selector,
-                _account
-            );
-        } else if (_currentBuild == 1) {
-            initData = abi.encodeWithSelector(SimpleStorageBuild3.initializeFromBuild2.selector);
-        }
+    permissions[1] = permissions[1];
+    permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_ACCOUNT_PERMISSION_ID();
+  }
 
-        PermissionLib.MultiTargetPermission[]
-            memory permissions = new PermissionLib.MultiTargetPermission[](3);
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _dao,
-            who: _payload.plugin,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("STORE_PERMISSION")
-        });
-
-        permissions[1] = permissions[0];
-        permissions[1].operation = PermissionLib.Operation.Grant;
-        permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
-            .STORE_NUMBER_PERMISSION_ID();
-
-        permissions[2] = permissions[1];
-        permissions[2].permissionId = SimpleStorageBuild3(this.implementation())
-            .STORE_ACCOUNT_PERMISSION_ID();
-
-        preparedSetupData.permissions = permissions;
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        SetupPayload calldata _payload
-    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        permissions = new PermissionLib.MultiTargetPermission[](2);
-
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _payload.plugin,
-            who: _dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: SimpleStorageBuild3(this.implementation()).STORE_NUMBER_PERMISSION_ID()
-        });
-
-        permissions[1] = permissions[1];
-        permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
-            .STORE_ACCOUNT_PERMISSION_ID();
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view returns (address) {
-        return simpleStorageImplementation;
-    }
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleStorageImplementation;
+  }
 }
 ```
 
