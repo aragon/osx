@@ -76,6 +76,11 @@ contract DAO is
     /// @param index The index of the action in the action array that failed.
     error ActionFailed(uint256 index);
 
+    /// @notice Thrown if an action has insufficent gas left.
+    /// @param limit The minimal gas that should be left.
+    /// @param actual The actual gas left.
+    error InsufficientGas(uint256 limit, uint256 actual);
+
     /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
 
@@ -182,23 +187,37 @@ contract DAO is
         execResults = new bytes[](_actions.length);
 
         for (uint256 i = 0; i < _actions.length; ) {
-            address to = _actions[i].to;
-            (bool success, bytes memory response) = to.call{value: _actions[i].value}(
-                _actions[i].data
-            );
+            // Check if failure is allowed
+            if (!hasBit(_allowFailureMap, uint8(i))) {
+                (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
+                    _actions[i].data
+                );
 
-            if (!success) {
-                // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if (!hasBit(_allowFailureMap, uint8(i))) {
+                if (!success) {
                     revert ActionFailed(i);
                 }
 
-                // If the call failed, but was allowed in allowFailureMap, store that
-                // this specific action has actually failed.
-                failureMap = flipBit(failureMap, uint8(i));
-            }
+                execResults[i] = result;
+            } else {
+                uint256 gasBefore = gasleft();
 
-            execResults[i] = response;
+                (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
+                    _actions[i].data
+                );
+                uint256 gasAfter = gasleft();
+
+                if (!success) {
+                    // This check prevents this actions to fail because of insufficient gas
+                    if (gasAfter < gasBefore / 64) {
+                        revert InsufficientGas({limit: gasBefore / 64, actual: gasAfter});
+                    }
+
+                    // Store that this specific action has actually failed.
+                    failureMap = flipBit(failureMap, uint8(i));
+                }
+
+                execResults[i] = result;
+            }
 
             unchecked {
                 ++i;
