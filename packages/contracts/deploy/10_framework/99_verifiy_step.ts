@@ -138,7 +138,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // scope to reuse same const again
   {
     const SetPluginRepoRegistryAddress =
-      await PluginRepoFactory.pluginRepoRegistry();
+      await PluginRepoFactory.PLUGIN_REPO_REGISTRY();
     if (SetPluginRepoRegistryAddress !== PluginRepoRegistryAddress) {
       throw new Error(
         `${PluginRepoFactoryAddress} has wrong PluginRepoRegistry set. Expected ${SetPluginRepoRegistryAddress} to be ${PluginRepoRegistryAddress}`

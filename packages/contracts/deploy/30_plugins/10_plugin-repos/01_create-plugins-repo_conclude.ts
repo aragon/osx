@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   );
   const managingDaoAddress = await getContractAddress('DAO', hre);
 
-  const pluginRepoBase = await pluginRepoFactory.pluginRepoBase();
+  const pluginRepoBase = await pluginRepoFactory.PLUGIN_REPO_BASE();
   const initializeData =
     PluginRepo__factory.createInterface().encodeFunctionData('initialize', [
       managingDaoAddress,

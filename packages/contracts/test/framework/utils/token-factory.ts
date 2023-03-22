@@ -5,11 +5,6 @@ import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
 import {
   DAO,
   GovernanceERC20,
-  GovernanceERC20__factory,
-  GovernanceWrappedERC20,
-  GovernanceWrappedERC20__factory,
-  MerkleMinter,
-  MerkleMinter__factory,
   TokenFactory,
   TokenFactory__factory,
 } from '../../typechain';
@@ -35,46 +30,17 @@ const zeroAddr = ethers.constants.AddressZero;
 
 describe('Core: TokenFactory', () => {
   let tokenFactory: MockContract<TokenFactory>;
-  let governanceBase: MockContract<GovernanceERC20>;
-  let governanceWrappedBase: MockContract<GovernanceWrappedERC20>;
-  let merkleMinterBase: MockContract<MerkleMinter>;
+  let governanceBase: string;
+  let merkleMinterBase: string;
 
   beforeEach(async () => {
-    const GovernanceBaseFactory = await smock.mock<GovernanceERC20__factory>(
-      'GovernanceERC20'
-    );
-    governanceBase = await GovernanceBaseFactory.deploy(
-      zeroAddr,
-      'name',
-      'symbol',
-      {receivers: [], amounts: []}
-    );
-
-    const GovernanceWrappedBaseFactory =
-      await smock.mock<GovernanceWrappedERC20__factory>(
-        'GovernanceWrappedERC20'
-      );
-    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(
-      zeroAddr,
-      'name',
-      'symbol'
-    );
-
-    const MerkleMinterBaseFactory = await smock.mock<MerkleMinter__factory>(
-      'MerkleMinter'
-    );
-    merkleMinterBase = await MerkleMinterBaseFactory.deploy();
-
     const TokenFactoryFactory = await smock.mock<TokenFactory__factory>(
       'TokenFactory'
     );
     tokenFactory = await TokenFactoryFactory.deploy();
 
-    await tokenFactory.setVariables({
-      governanceERC20Base: governanceBase.address,
-      governanceWrappedERC20Base: governanceWrappedBase.address,
-      merkleMinterBase: merkleMinterBase.address,
-    });
+    governanceBase = await tokenFactory.GOVERNANCE_ERC20_BASE()
+    merkleMinterBase = await tokenFactory.MERKLE_MINTER_BASE()
   });
 
   describe('createToken', () => {
@@ -209,9 +175,9 @@ describe('Core: TokenFactory', () => {
         mintConfig
       );
 
-      expect(token).not.to.be.eq(governanceBase.address);
+      expect(token).not.to.be.eq(governanceBase);
       expect(minter).not.to.be.eq(zeroAddr);
-      expect(minter).not.to.be.eq(merkleMinterBase.address);
+      expect(minter).not.to.be.eq(merkleMinterBase);
     });
 
     it('should emit TokenCreated', async () => {

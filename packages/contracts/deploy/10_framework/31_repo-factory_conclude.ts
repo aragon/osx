@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   hre.aragonToVerifyContracts.push(pluginRepoFactoryDeployment);
   hre.aragonToVerifyContracts.push({
-    address: await pluginRepoFactory.pluginRepoBase(),
+    address: await pluginRepoFactory.PLUGIN_REPO_BASE(),
     args: [],
   });
 };
