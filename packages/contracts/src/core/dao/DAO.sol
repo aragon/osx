@@ -77,9 +77,7 @@ contract DAO is
     error ActionFailed(uint256 index);
 
     /// @notice Thrown if an action has insufficent gas left.
-    /// @param limit The minimal gas that should be left.
-    /// @param actual The actual gas left.
-    error InsufficientGas(uint256 limit, uint256 actual);
+    error InsufficientGas();
 
     /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
@@ -207,9 +205,9 @@ contract DAO is
                 uint256 gasAfter = gasleft();
 
                 if (!success) {
-                    // This check prevents this actions to fail because of insufficient gas
+                    // This check prevents this action to fail because of insufficient gas
                     if (gasAfter < gasBefore / 64) {
-                        revert InsufficientGas({limit: gasBefore / 64, actual: gasAfter});
+                        revert InsufficientGas();
                     }
 
                     // Store that this specific action has actually failed.

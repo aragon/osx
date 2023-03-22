@@ -2,7 +2,14 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, TestERC1155, TestERC20, TestERC721} from '../../../typechain';
+import {
+  DAO,
+  TestERC1155,
+  TestERC20,
+  TestERC721,
+  IERC1271__factory,
+  GasConsumer__factory,
+} from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
 
@@ -16,7 +23,6 @@ import {
 
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../test-utils/error';
-import {IERC1271__factory} from '../../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
@@ -366,6 +372,33 @@ describe('DAO', function () {
       expect(event.args.actions[0].value).to.equal(data.succeedAction.value);
       expect(event.args.actions[0].data).to.equal(data.succeedAction.data);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
+    });
+
+    it('reverts if failure is allowed but not enough gas is provided', async () => {
+      const GasConsumer = new GasConsumer__factory(signers[0]);
+      let gasConsumer = await GasConsumer.deploy();
+
+      const gasConsumingAction = {
+        to: gasConsumer.address,
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
+        value: 0,
+      };
+      const expectedGas = 495453;
+
+      let allowFailureMap = ethers.BigNumber.from(0);
+      allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
+
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas - 1,
+        })
+      ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
+
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas,
+        })
+      ).to.not.be.reverted;
     });
 
     describe('Transfering tokens', async () => {
