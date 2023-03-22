@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the `auth` modifier to always use `where = address(this)` and adapted errors.
 - Use OZ's upgradeable contracts for `PluginCloneable`.
 - Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
+- Changes `pluginRepoBase` to `PLUGIN_REPO_BASE` and marks it as `immutable` in `PluginRepoFactory`.
+- Changes `pluginRepoRegistry` to `PLUGIN_REPO_REGISTRY` and marks it as `immutable` in `PluginRepoFactory`.
+- Changes `governanceERC20Base` to `GOVERNANCE_ERC20_BASE` and marks it as `immutable` in `TokenFactory`.
+- Changes `governanceWrappedERC20Base` to `GOVERNANCE_WRAPPED_ERC20_BASE` and marks it as `immutable` in `TokenFactory`.
+- Changes `merkleMinterBase` to `MERKLE_MINTER_BASE` and marks it as `immutable` in `TokenFactory`.
+- Changes `distributorBase` to `DISTRIBUTOR_BASE` and marks it as `immutable` in `TokenFactory`.
 
 ### Removed
 
