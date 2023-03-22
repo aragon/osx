@@ -39,8 +39,8 @@ describe('Core: TokenFactory', () => {
     );
     tokenFactory = await TokenFactoryFactory.deploy();
 
-    governanceBase = await tokenFactory.GOVERNANCE_ERC20_BASE()
-    merkleMinterBase = await tokenFactory.MERKLE_MINTER_BASE()
+    governanceBase = await tokenFactory.GOVERNANCE_ERC20_BASE();
+    merkleMinterBase = await tokenFactory.MERKLE_MINTER_BASE();
   });
 
   describe('createToken', () => {
