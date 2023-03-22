@@ -191,26 +191,30 @@ contract DAO is
                     _actions[i].data
                 );
 
+                // Check if the call failed.
                 if (!success) {
                     revert ActionFailed(i);
                 }
 
                 execResults[i] = result;
             } else {
-                uint256 gasBefore = gasleft();
+                uint256 gasBefore = gasleft(); // gasleft: 2 gas, assignment:
 
                 (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
                     _actions[i].data
                 );
                 uint256 gasAfter = gasleft();
 
+                // Check if the call failed.
                 if (!success) {
-                    // This check prevents this action to fail because of insufficient gas
+                    // Make sure that the action call did not fail because 63/64 of `gasleft()` was insufficient to execute the external call `.to.call` (see https://eips.ethereum.org/EIPS/eip-150).
+                    // In specific scenarios, i.e. proposal execution where the last action in the action array is allowed to fail, the account calling `execute` could force-fail this action by setting a gas limit
+                    // where 63/64 is insufficient causing the `.to.call` to fail, but where the remaining 1/64 gas are sufficient to successfully finish the `execute` call.
                     if (gasAfter < gasBefore / 64) {
                         revert InsufficientGas();
                     }
 
-                    // Store that this specific action has actually failed.
+                    // Store that this action failed.
                     failureMap = flipBit(failureMap, uint8(i));
                 }
 
