@@ -383,7 +383,7 @@ describe('DAO', function () {
         data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
         value: 0,
       };
-      const expectedGas = 495453; // Providing less gas causes the `gasConsumingAction` to fail. The  although it would be possible to
+      const expectedGas = 495453; // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
 
       let allowFailureMap = ethers.BigNumber.from(0);
       allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
