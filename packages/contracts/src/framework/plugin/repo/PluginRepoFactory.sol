@@ -12,17 +12,17 @@ import {PluginRepo} from "./PluginRepo.sol";
 /// @notice This contract creates `PluginRepo` proxies and registers them on an `PluginRepoRegistry` contract.
 contract PluginRepoFactory {
     /// @notice The Aragon plugin registry contract.
-    PluginRepoRegistry public pluginRepoRegistry;
+    PluginRepoRegistry public immutable PLUGIN_REPO_REGISTRY;
 
     /// @notice The address of the `PluginRepo` base contract.
-    address public pluginRepoBase;
+    address public immutable PLUGIN_REPO_BASE;
 
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
     /// @param _pluginRepoRegistry The aragon plugin registry address.
     constructor(PluginRepoRegistry _pluginRepoRegistry) {
-        pluginRepoRegistry = _pluginRepoRegistry;
+        PLUGIN_REPO_REGISTRY = _pluginRepoRegistry;
 
-        pluginRepoBase = address(new PluginRepo());
+        PLUGIN_REPO_BASE = address(new PluginRepo());
     }
 
     /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
@@ -118,11 +118,11 @@ contract PluginRepoFactory {
     ) internal returns (PluginRepo pluginRepo) {
         pluginRepo = PluginRepo(
             createERC1967Proxy(
-                pluginRepoBase,
+                PLUGIN_REPO_BASE,
                 abi.encodeWithSelector(PluginRepo.initialize.selector, _initialOwner)
             )
         );
 
-        pluginRepoRegistry.registerPluginRepo(_subdomain, address(pluginRepo));
+        PLUGIN_REPO_REGISTRY.registerPluginRepo(_subdomain, address(pluginRepo));
     }
 }
