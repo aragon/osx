@@ -6,13 +6,20 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {keccak256, solidityPack} from 'ethers/lib/utils';
 
-import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../../typechain';
+import {
+  PluginRepo,
+  PluginUUPSUpgradeableSetupV1Mock,
+  PluginSetupDummy__factory,
+  PluginSetupDummyCloneFactory__factory,
+} from '../../../typechain';
 import {
   deployMockPluginSetup,
   deployNewPluginRepo,
 } from '../../test-utils/repo';
 import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {ZERO_BYTES32} from '../../test-utils/dao';
+import {sign} from 'crypto';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -82,6 +89,7 @@ describe('PluginRepo', function () {
           MAINTAINER_PERMISSION_ID
         );
     });
+
     it('fails if the plugin setup does not support the `IPluginSetup` interface', async function () {
       // If EOA Address is passed
       await expect(
@@ -299,6 +307,38 @@ describe('PluginRepo', function () {
         )
       ).to.not.emit(pluginRepo, 'ReleaseMetadataUpdated');
     });
+
+    it('allows to create placeholder builds for the same release', async () => {
+      const PluginSetupDummy = new PluginSetupDummy__factory(signers[0]);
+      const dummy1 = await PluginSetupDummy.deploy();
+      const dummy2 = await PluginSetupDummy.deploy();
+
+      // Release 1
+      await expect(
+        pluginRepo.createVersion(1, dummy1.address, ZERO_BYTES32, ZERO_BYTES32)
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(1, 1, dummy1.address, ZERO_BYTES32);
+
+      await expect(
+        pluginRepo.createVersion(1, dummy1.address, ZERO_BYTES32, ZERO_BYTES32)
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(1, 2, dummy1.address, ZERO_BYTES32);
+
+      // Release 2
+      await expect(
+        pluginRepo.createVersion(2, dummy2.address, ZERO_BYTES32, ZERO_BYTES32)
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(2, 1, dummy2.address, ZERO_BYTES32);
+
+      await expect(
+        pluginRepo.createVersion(2, dummy2.address, ZERO_BYTES32, ZERO_BYTES32)
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(2, 2, dummy2.address, ZERO_BYTES32);
+    });
   });
 
   describe('updateReleaseMetadata', async () => {
@@ -370,13 +410,6 @@ describe('PluginRepo', function () {
         1,
         pluginSetup_R1_B1.address,
         BUILD_METADATA_R1_B1,
-        RELEASE_METADATA
-      );
-
-      await pluginRepo.createVersion(
-        1,
-        pluginSetup_R1_B2.address,
-        BUILD_METADATA_R1_B2,
         RELEASE_METADATA
       );
 
