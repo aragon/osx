@@ -10,7 +10,6 @@ import {
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginSetupDummy__factory,
-  PluginSetupDummyCloneFactory__factory,
 } from '../../../typechain';
 import {
   deployMockPluginSetup,
@@ -19,7 +18,6 @@ import {
 import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32} from '../../test-utils/dao';
-import {sign} from 'crypto';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
