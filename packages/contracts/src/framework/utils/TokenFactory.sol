@@ -24,16 +24,16 @@ contract TokenFactory {
     using Clones for address;
 
     /// @notice The address of the `GovernanceERC20` base contract to clone from.
-    address public governanceERC20Base;
+    address public immutable GOVERNANCE_ERC20_BASE;
 
     /// @notice The address of the `GovernanceWrappedERC20` base contract to clone from.
-    address public governanceWrappedERC20Base;
+    address public immutable GOVERNANCE_WRAPPED_ERC20_BASE;
 
     /// @notice The address of the `MerkleMinter` base contract to clone from.
-    address public merkleMinterBase;
+    address public immutable MERKLE_MINTER_BASE;
 
     /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter` clones.
-    MerkleDistributor public distributorBase;
+    MerkleDistributor public immutable DISTRIBUTOR_BASE;
 
     /// @notice Emitted when a new token is created.
     /// @param token [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token address.
@@ -66,7 +66,19 @@ contract TokenFactory {
 
     /// @notice Initializes the different base contracts for the factory to clone from.
     constructor() {
-        setupBases();
+        DISTRIBUTOR_BASE = new MerkleDistributor();
+        GOVERNANCE_ERC20_BASE = address(
+            new GovernanceERC20(
+                IDAO(address(0)),
+                "baseName",
+                "baseSymbol",
+                GovernanceERC20.MintSettings(new address[](0), new uint256[](0))
+            )
+        );
+        GOVERNANCE_WRAPPED_ERC20_BASE = address(
+            new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "baseName", "baseSymbol")
+        );
+        MERKLE_MINTER_BASE = address(new MerkleMinter());
     }
 
     /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token depending on the address used in the `TokenConfig` provided.
@@ -93,7 +105,7 @@ contract TokenFactory {
                 revert TokenNotERC20(token, data);
             }
 
-            token = governanceWrappedERC20Base.clone();
+            token = GOVERNANCE_WRAPPED_ERC20_BASE.clone();
             // user already has a token. we need to wrap it in
             // GovernanceWrappedERC20 in order to make the token
             // include governance functionality.
@@ -108,7 +120,7 @@ contract TokenFactory {
             return (ERC20VotesUpgradeable(token), MerkleMinter(address(0)));
         }
 
-        token = governanceERC20Base.clone();
+        token = GOVERNANCE_ERC20_BASE.clone();
         GovernanceERC20(token).initialize(
             _managingDao,
             _tokenConfig.name,
@@ -117,15 +129,15 @@ contract TokenFactory {
         );
 
         // Clone and initialize a `MerkleMinter`
-        address merkleMinter = merkleMinterBase.clone();
+        address merkleMinter = MERKLE_MINTER_BASE.clone();
         MerkleMinter(merkleMinter).initialize(
             _managingDao,
             IERC20MintableUpgradeable(token),
-            distributorBase
+            DISTRIBUTOR_BASE
         );
 
         // Emit the event
-        emit TokenCreated(IERC20Upgradeable(token), MerkleMinter(merkleMinter), distributorBase);
+        emit TokenCreated(IERC20Upgradeable(token), MerkleMinter(merkleMinter), DISTRIBUTOR_BASE);
 
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
@@ -138,22 +150,5 @@ contract TokenFactory {
         _managingDao.grant(merkleMinter, address(_managingDao), merkleMintPermission);
 
         return (ERC20VotesUpgradeable(token), MerkleMinter(merkleMinter));
-    }
-
-    /// @notice Private helper method to set up the required base contracts on TokenFactory deployment.
-    function setupBases() private {
-        distributorBase = new MerkleDistributor();
-        governanceERC20Base = address(
-            new GovernanceERC20(
-                IDAO(address(0)),
-                "baseName",
-                "baseSymbol",
-                GovernanceERC20.MintSettings(new address[](0), new uint256[](0))
-            )
-        );
-        governanceWrappedERC20Base = address(
-            new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "baseName", "baseSymbol")
-        );
-        merkleMinterBase = address(new MerkleMinter());
     }
 }
