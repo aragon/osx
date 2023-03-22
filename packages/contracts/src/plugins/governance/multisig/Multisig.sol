@@ -127,6 +127,10 @@ contract Multisig is
         address[] calldata _members,
         MultisigSettings calldata _multisigSettings
     ) external initializer {
+        if (_members.length > type(uint16).max) {
+            revert AddresslistLengthOutOfBounds({limit: type(uint16).max, actual: _members.length});
+        }
+
         __PluginUUPSUpgradeable_init(_dao);
 
         _addAddresses(_members);
