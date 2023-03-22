@@ -48,7 +48,7 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant MAINTAINER_PERMISSION_ID = keccak256("MAINTAINER_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `createVersion` function.
+    /// @notice The ID of the permission required to update the implementation address.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
     /// @notice The mapping between release and build numbers.
