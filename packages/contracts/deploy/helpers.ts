@@ -8,7 +8,7 @@ import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
 import {EHRE, Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {PluginRepo__factory} from '../typechain';
+import {PluginRepo__factory, PluginSetupDummy__factory} from '../typechain';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -212,6 +212,7 @@ export async function createVersion(
   );
 
   console.log(`Creating build for release ${releaseNumber} with tx ${tx.hash}`);
+
   await tx.wait();
 
   const versionCreatedEvent = await findEvent(tx, 'VersionCreated');
@@ -267,13 +268,19 @@ export async function populatePluginRepo(
   for (const latestVersion of latestVersions) {
     const releaseNumber = latestVersion.versionTag[0];
     const latestBuildNumber = latestVersion.versionTag[1];
+
+    const signers = await ethers.getSigners();
+
+    const PluginSetupDummy = new PluginSetupDummy__factory(signers[0]);
+    const pluginSetupDummy = await PluginSetupDummy.deploy(); // TODO use clone factory
+
     for (let i = 1; i < latestBuildNumber; i++) {
       await createVersion(
         hre.aragonPluginRepos[pluginRepoName],
-        'PluginSetupDummy',
+        pluginSetupDummy.address,
         releaseNumber,
-        '',
-        '{}'
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${123}`)), //TODO TODO
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${123}`)) //TODO TODO
       );
     }
 

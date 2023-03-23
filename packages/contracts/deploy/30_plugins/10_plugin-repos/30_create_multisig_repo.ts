@@ -35,7 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await createPluginRepo(hre, 'multisig');
   await populatePluginRepo(hre, 'multisig', [
     {
-      versionTag: [1, 1],
+      versionTag: [1, 2],
       pluginSetupContract: multisigSetupContract,
       releaseMetadata: ethers.utils.hexlify(
         ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
