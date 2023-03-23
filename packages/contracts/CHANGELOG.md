@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the `auth` modifier to always use `where = address(this)` and adapted errors.
 - Use OZ's upgradeable contracts for `PluginCloneable`.
 - Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
+- Disallows creating a new proposal in the Multisig plugin in the same block whereas the settings have been changed.
 
 ### Removed
 

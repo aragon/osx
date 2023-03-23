@@ -60,6 +60,10 @@ contract Multisig is
         uint16 minApprovals;
     }
 
+    /// @notice Keeps track at which the settings has been changed the last time.
+    /// @dev This variable is used to prevent proposal creations from happing in the same block as the settings have been changed.
+    uint64 public lastMultisigSettingsChange;
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MULTISIG_INTERFACE_ID =
         this.initialize.selector ^
@@ -90,7 +94,7 @@ contract Multisig is
     error ApprovalCastForbidden(uint256 proposalId, address sender);
 
     /// @notice Thrown if the proposal execution is forbidden.
-    /// @param proposalId The ID of the proposal.
+    /// @param proposalId The ID of the proposal.s
     error ProposalExecutionForbidden(uint256 proposalId);
 
     /// @notice Thrown if the minimal approvals value is out of bounds (less than 1 or greater than the number of members in the address list).
@@ -212,6 +216,12 @@ contract Multisig is
         uint64 _endDate
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = block.number.toUint64() - 1;
+
+        // Revert if the settings have been changed in the same block as this proposal should be created in.
+        // This prevents a malicious party from voting with previous addresses and the new settings.
+        if (lastMultisigSettingsChange > snapshotBlock) {
+            revert ProposalCreationForbidden(_msgSender());
+        }
 
         if (multisigSettings.onlyListed && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
@@ -425,6 +435,7 @@ contract Multisig is
         }
 
         multisigSettings = _multisigSettings;
+        lastMultisigSettingsChange = block.number.toUint64();
 
         emit MultisigSettingsUpdated({
             onlyListed: _multisigSettings.onlyListed,
