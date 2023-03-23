@@ -51,4 +51,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['Create_Token_Voting_Repo'];
+func.tags = ['CreateTokenVotingRepo'];

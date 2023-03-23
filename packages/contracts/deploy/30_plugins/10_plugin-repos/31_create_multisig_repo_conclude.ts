@@ -33,4 +33,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['Create_Multisig_Repo', 'Verify'];
+func.tags = ['CreateMultisigRepo', 'Verify'];

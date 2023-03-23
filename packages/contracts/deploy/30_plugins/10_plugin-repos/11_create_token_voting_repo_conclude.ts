@@ -33,4 +33,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['Create_Token_Voting_Repo', 'Verify'];
+func.tags = ['CreateTokenVotingRepo', 'Verify'];
