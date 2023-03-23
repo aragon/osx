@@ -54,7 +54,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   );
 
   // Installing multisig
-  const multisigRepoAddress = hre.aragonPluginRepos.multisig;
+  const multisigRepoAddress = hre.aragonPluginRepos['multisig'];
   const versionTag = [1, 1];
   const pluginSetupRef = [versionTag, multisigRepoAddress];
 
