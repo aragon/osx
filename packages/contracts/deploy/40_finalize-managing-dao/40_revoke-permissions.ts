@@ -1,10 +1,9 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {getContractAddress, managePermissions} from '../helpers';
-import {Operation} from '../../utils/types';
+import {EHRE, Operation} from '../../utils/types';
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (hre: EHRE) {
   const {getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
 
@@ -70,7 +69,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['address-list-voting'],
+        address: hre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'MAINTAINER_PERMISSION',
@@ -79,7 +78,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['address-list-voting'],
+        address: hre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'UPGRADE_REPO_PERMISSION',
@@ -88,7 +87,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['token-voting'],
+        address: hre.aragonPluginRepos['token-voting'],
       },
       who: {name: 'de', address: managingDAOAddress},
       permission: 'MAINTAINER_PERMISSION',
@@ -97,7 +96,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['token-voting'],
+        address: hre.aragonPluginRepos['token-voting'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'UPGRADE_REPO_PERMISSION',
@@ -106,7 +105,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['admin'],
+        address: hre.aragonPluginRepos['admin'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'MAINTAINER_PERMISSION',
@@ -115,7 +114,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['admin'],
+        address: hre.aragonPluginRepos['admin'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'UPGRADE_REPO_PERMISSION',
@@ -124,7 +123,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['multisig'],
+        address: hre.aragonPluginRepos['multisig'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'MAINTAINER_PERMISSION',
@@ -133,7 +132,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {
         name: 'PluginRepo',
-        address: ehre.aragonPluginRepos['multisig'],
+        address: hre.aragonPluginRepos['multisig'],
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'UPGRADE_REPO_PERMISSION',
