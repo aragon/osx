@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `IPluginInstallation` to `IPlugin`.
 - Changed `release: Int!` to `release: PluginRelease!` in `PluginVersion`
 - Changed `versions` to `releases` in `PluginRepo`.
+- Changes `Permission` entity to be muteable.
 
 ### Removed
 
