@@ -94,7 +94,7 @@ contract Multisig is
     error ApprovalCastForbidden(uint256 proposalId, address sender);
 
     /// @notice Thrown if the proposal execution is forbidden.
-    /// @param proposalId The ID of the proposal.s
+    /// @param proposalId The ID of the proposal.
     error ProposalExecutionForbidden(uint256 proposalId);
 
     /// @notice Thrown if the minimal approvals value is out of bounds (less than 1 or greater than the number of members in the address list).
