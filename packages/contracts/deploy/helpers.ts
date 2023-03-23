@@ -232,7 +232,7 @@ export async function createVersion(
 
 export type LatestVersion = {
   versionTag: VersionTag;
-  pluginSetupContractName: string;
+  pluginSetupContract: string;
   releaseMetadata: string;
   buildMetadata: string;
 };
@@ -262,37 +262,33 @@ export async function populatePluginRepo(
   pluginRepoName: string,
   latestVersions: LatestVersion[]
 ): Promise<void> {
+  // make sure that the latestVersions array is sorted by version tag
   if (!isSorted(latestVersions)) {
     throw new Error(`${latestVersions} is not sorted in ascending order`);
   }
-  // make sure that the latestVersions array is sorted by version tag
 
-  // populate the repo
-  latestVersions.map(latestVersion => {
+  for (const latestVersion of latestVersions) {
     const releaseNumber = latestVersion.versionTag[0];
     const latestBuildNumber = latestVersion.versionTag[1];
-    let dummyBuildsCount = latestBuildNumber - 1;
-
-    // create dummy build
-    [...Array(dummyBuildsCount)].forEach((_, i) =>
-      createVersion(
+    for (let i = 1; i < latestBuildNumber; i++) {
+      await createVersion(
         hre.aragonPluginRepos[pluginRepoName],
         'PluginSetupDummy',
         releaseNumber,
         '',
         '{}'
-      )
-    );
+      );
+    }
 
     // create latest builds
-    createVersion(
+    await createVersion(
       hre.aragonPluginRepos[pluginRepoName],
-      latestVersion.pluginSetupContractName,
+      latestVersion.pluginSetupContract,
       releaseNumber,
       latestVersion.releaseMetadata,
       latestVersion.buildMetadata
     );
-  });
+  }
 }
 
 export async function checkSetManagingDao(

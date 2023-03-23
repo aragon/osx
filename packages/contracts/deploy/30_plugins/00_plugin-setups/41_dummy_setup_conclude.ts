@@ -1,5 +1,4 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {PluginSetupDummy__factory} from '../../../typechain';
 import {EHRE} from '../../../utils/types';
 
 const func: DeployFunction = async function (hre: EHRE) {
