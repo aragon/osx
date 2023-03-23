@@ -153,7 +153,6 @@ export async function createPluginRepo(
 
   const signers = await ethers.getSigners();
 
-  //  const managingDAOAddress = await getContractAddress('DAO', hre);
   const pluginRepoFactoryAddress = await getContractAddress(
     'PluginRepoFactory',
     hre
@@ -173,11 +172,10 @@ export async function createPluginRepo(
   );
 
   const {deployer} = await hre.getNamedAccounts();
-  //console.log(deployer);
 
   const tx = await pluginRepoFactoryContract.createPluginRepo(
     pluginName,
-    deployer //managingDAOAddress
+    deployer
   );
   console.log(
     `Creating & registering repo for ${pluginName} with tx ${tx.hash}`
@@ -238,7 +236,6 @@ export type LatestVersion = {
 };
 
 function isSorted(latestVersions: LatestVersion[]): boolean {
-  console.log(latestVersions);
   // The list of latest versions has to start with the first release, otherwise something is wrong and we must stop.
   if (latestVersions[0].versionTag[0] != 1) {
     return false;
