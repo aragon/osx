@@ -30,6 +30,6 @@ contract PluginSetupDummy is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function implementation() external pure returns (address) {
-        revert DummyCannotBeUsed();
+        return address(0);
     }
 }

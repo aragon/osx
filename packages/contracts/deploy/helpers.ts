@@ -7,6 +7,8 @@ import IPFS from 'ipfs-http-client';
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
 import {EHRE, Operation} from '../utils/types';
+import {VersionTag} from '../test/test-utils/psp/types';
+import {PluginRepo__factory} from '../typechain';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -133,28 +135,25 @@ export async function detemineDeployerNextAddress(
 
 export async function createPluginRepo(
   hre: EHRE,
-  pluginContractName: string,
-  pluginSetupContractName: string,
-  releaseMetadata: string,
-  buildMetadata: string
+  pluginName: string
 ): Promise<void> {
   const {network} = hre;
   const pluginDomain =
     process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
   if (
     await isENSDomainRegistered(
-      `${pluginContractName}.${pluginDomain}`,
+      `${pluginName}.${pluginDomain}`,
       await getENSAddress(hre)
     )
   ) {
     // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
-    // Either a fruntrun happened or something else. Thus we abort here
-    throw new Error(`${pluginContractName} is already present! Aborting...`);
+    // Either a frontrun happened or something else. Thus we abort here
+    throw new Error(`${pluginName} is already present! Aborting...`);
   }
 
   const signers = await ethers.getSigners();
 
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  //  const managingDAOAddress = await getContractAddress('DAO', hre);
   const pluginRepoFactoryAddress = await getContractAddress(
     'PluginRepoFactory',
     hre
@@ -173,34 +172,127 @@ export async function createPluginRepo(
     pluginRepoFactoryAddress
   );
 
-  // register a plugin
-  const pluginSetupAddress = await getContractAddress(
-    pluginSetupContractName,
-    hre
-  );
+  const {deployer} = await hre.getNamedAccounts();
+  //console.log(deployer);
 
-  const tx = await pluginRepoFactoryContract.createPluginRepoWithFirstVersion(
-    pluginContractName,
-    pluginSetupAddress,
-    managingDAOAddress,
-    releaseMetadata,
-    buildMetadata
+  const tx = await pluginRepoFactoryContract.createPluginRepo(
+    pluginName,
+    deployer //managingDAOAddress
   );
   console.log(
-    `Creating & registering repo for ${pluginContractName} with tx ${tx.hash}`
+    `Creating & registering repo for ${pluginName} with tx ${tx.hash}`
   );
   await tx.wait();
 
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
 
-  hre.aragonPluginRepos[pluginContractName] = repoAddress;
+  hre.aragonPluginRepos[pluginName] = repoAddress;
 
   console.log(
-    `Created & registered repo for ${pluginContractName} at address: ${repoAddress}, with contentURI ${ethers.utils.toUtf8String(
-      releaseMetadata
-    )}`
+    `Created & registered repo for ${pluginName} at address: ${repoAddress}` //, with contentURI ${ethers.utils.toUtf8String(releaseMetadata)}`
   );
+}
+
+export async function createVersion(
+  pluginRepoContract: string,
+  pluginSetupContract: string,
+  releaseNumber: number,
+  releaseMetadata: string,
+  buildMetadata: string
+): Promise<void> {
+  const signers = await ethers.getSigners();
+
+  const PluginRepo = new PluginRepo__factory(signers[0]);
+  const pluginRepo = PluginRepo.attach(pluginRepoContract);
+
+  const tx = await pluginRepo.createVersion(
+    releaseNumber,
+    pluginSetupContract,
+    releaseMetadata,
+    buildMetadata
+  );
+
+  console.log(`Creating build for release ${releaseNumber} with tx ${tx.hash}`);
+  await tx.wait();
+
+  const versionCreatedEvent = await findEvent(tx, 'VersionCreated');
+  versionCreatedEvent.args.pluginRepo;
+
+  console.log(
+    `Created build ${versionCreatedEvent.args.build} for release ${
+      versionCreatedEvent.args.release
+    } with setup address: ${
+      versionCreatedEvent.args.pluginSetup
+    }, with build metadata ${ethers.utils.toUtf8String(
+      buildMetadata
+    )} and release metadata ${ethers.utils.toUtf8String(releaseMetadata)}`
+  );
+}
+
+export type LatestVersion = {
+  versionTag: VersionTag;
+  pluginSetupContractName: string;
+  releaseMetadata: string;
+  buildMetadata: string;
+};
+
+function isSorted(latestVersions: LatestVersion[]): boolean {
+  console.log(latestVersions);
+  // The list of latest versions has to start with the first release, otherwise something is wrong and we must stop.
+  if (latestVersions[0].versionTag[0] != 1) {
+    return false;
+  }
+
+  for (let i = 0; i < latestVersions.length - 1; i++) {
+    if (
+      !(
+        latestVersions[i + 1].versionTag[0] ==
+        latestVersions[i].versionTag[0] + 1
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export async function populatePluginRepo(
+  hre: EHRE,
+  pluginRepoName: string,
+  latestVersions: LatestVersion[]
+): Promise<void> {
+  if (!isSorted(latestVersions)) {
+    throw new Error(`${latestVersions} is not sorted in ascending order`);
+  }
+  // make sure that the latestVersions array is sorted by version tag
+
+  // populate the repo
+  latestVersions.map(latestVersion => {
+    const releaseNumber = latestVersion.versionTag[0];
+    const latestBuildNumber = latestVersion.versionTag[1];
+    let dummyBuildsCount = latestBuildNumber - 1;
+
+    // create dummy build
+    [...Array(dummyBuildsCount)].forEach((_, i) =>
+      createVersion(
+        hre.aragonPluginRepos[pluginRepoName],
+        'PluginSetupDummy',
+        releaseNumber,
+        '',
+        '{}'
+      )
+    );
+
+    // create latest builds
+    createVersion(
+      hre.aragonPluginRepos[pluginRepoName],
+      latestVersion.pluginSetupContractName,
+      releaseNumber,
+      latestVersion.releaseMetadata,
+      latestVersion.buildMetadata
+    );
+  });
 }
 
 export async function checkSetManagingDao(

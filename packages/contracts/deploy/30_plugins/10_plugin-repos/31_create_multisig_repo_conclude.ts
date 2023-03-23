@@ -4,10 +4,9 @@ import {
   PluginRepo__factory,
 } from '../../../typechain';
 import {EHRE} from '../../../utils/types';
-import {getContractAddress} from '../../helpers';
 
 const func: DeployFunction = async function (hre: EHRE) {
-  console.log(`Concluding multisig setup deployment.\n`);
+  console.log(`Concluding AddresslistVotingSetup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 
   const {deployments} = hre;
@@ -19,21 +18,19 @@ const func: DeployFunction = async function (hre: EHRE) {
     PluginRepoFactoryDeployment.address,
     deployer
   );
-  const managingDaoAddress = await getContractAddress('DAO', hre);
 
-  const pluginRepoBase = await pluginRepoFactory.pluginRepoBase();
   const initializeData =
     PluginRepo__factory.createInterface().encodeFunctionData('initialize', [
-      managingDaoAddress,
+      deployer.address,
     ]);
 
-  for (const i in hre.aragonPluginRepos) {
-    hre.aragonToVerifyContracts.push({
-      address: hre.aragonPluginRepos[i],
-      args: [pluginRepoBase, initializeData],
-    });
-  }
+  const pluginRepoBase = await pluginRepoFactory.pluginRepoBase();
+
+  hre.aragonToVerifyContracts.push({
+    address: hre.aragonPluginRepos['multisig'],
+    args: [pluginRepoBase, initializeData],
+  });
 };
 
 export default func;
-func.tags = ['Create_Register_Plugins', 'Verify'];
+func.tags = ['Create_Multisig_Repo', 'Verify'];

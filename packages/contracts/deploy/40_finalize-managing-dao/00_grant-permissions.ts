@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {Operation} from '../../utils/types';
+import {EHRE, Operation} from '../../utils/types';
 import {getContractAddress, managePermissions} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -25,9 +25,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress
   );
 
-  // Grant `REGISTER_DAO_PERMISSION` to deployer.
+  const ehre = hre as EHRE;
+
+  // Grant `REGISTER_DAO_PERMISSION` to `Deployer`.
   // Grant `ROOT_PERMISSION` to `PluginSetupProcessor`.
   // Grant `APPLY_INSTALLATION_PERMISSION` to `Deployer`.
+  // Grant `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `mMnagingDao`.
   const grantPermissions = [
     {
       operation: Operation.Grant,
@@ -52,6 +55,79 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       where: {name: 'DAO', address: managingDAOAddress},
       who: {name: 'Deployer', address: deployer},
       permission: 'SET_METADATA_PERMISSION',
+    },
+    // Plugin Repos
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['address-list-voting'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['address-list-voting'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['token-voting'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['token-voting'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['admin'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['admin'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['multisig'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['multisig'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'UPGRADE_REPO_PERMISSION',
     },
   ];
   await managePermissions(managingDaoContract, grantPermissions);

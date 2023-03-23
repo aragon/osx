@@ -3,8 +3,10 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 export type AragonPluginRepos = {
   'address-list-voting': string;
   'token-voting': string;
-  admin: string;
-  multisig: string;
+  // prettier-ignore
+  'admin': string;
+  // prettier-ignore
+  'multisig': string;
 };
 
 export type AragonVerifyEntry = {

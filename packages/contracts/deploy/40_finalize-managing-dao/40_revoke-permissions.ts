@@ -29,10 +29,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress
   );
 
-  // Revoke `REGISTER_DAO_PERMISSION` from deployer.
+  // Revoke `REGISTER_DAO_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `Deployer`.
+  // Revoke `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer`.
   const revokePermissions = [
     {
       operation: Operation.Revoke,
@@ -63,6 +64,79 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       where: {name: 'DAO', address: managingDAOAddress},
       who: {name: 'Deployer', address: deployer},
       permission: 'SET_METADATA_PERMISSION',
+    },
+    // Plugin Repos
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['address-list-voting'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['address-list-voting'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['token-voting'],
+      },
+      who: {name: 'de', address: managingDAOAddress},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['token-voting'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['admin'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['admin'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['multisig'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'MAINTAINER_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'PluginRepo',
+        address: ehre.aragonPluginRepos['multisig'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'UPGRADE_REPO_PERMISSION',
     },
   ];
   await managePermissions(managingDaoContract, revokePermissions);
