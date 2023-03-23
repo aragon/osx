@@ -412,6 +412,13 @@ describe('PluginRepo', function () {
       );
 
       await pluginRepo.createVersion(
+        1,
+        pluginSetup_R1_B2.address,
+        BUILD_METADATA_R1_B2,
+        RELEASE_METADATA
+      );
+
+      await pluginRepo.createVersion(
         2,
         pluginSetup_R2_B1.address,
         BUILD_METADATA_R2_B1,
