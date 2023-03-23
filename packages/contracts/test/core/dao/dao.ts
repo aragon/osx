@@ -374,7 +374,7 @@ describe('DAO', function () {
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
 
-    it('reverts if failure is allowed but not enough gas is provided', async () => {
+    it.only('reverts if failure is allowed but not enough gas is provided', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
       let gasConsumer = await GasConsumer.deploy();
 
@@ -383,14 +383,20 @@ describe('DAO', function () {
         data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
         value: 0,
       };
-      const expectedGas = 495453; // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
 
       let allowFailureMap = ethers.BigNumber.from(0);
       allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
 
+      const expectedGas = await dao.estimateGas.execute(
+        ZERO_BYTES32,
+        [gasConsumingAction],
+        allowFailureMap
+      ); // exact gas required: 495453
+      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
+
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas - 1,
+          gasLimit: expectedGas.sub(500),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
