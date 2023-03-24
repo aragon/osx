@@ -76,16 +76,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         address: repoAddress,
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
-      permission: 'UPGRADE_PERMISSION',
-    });
-
-    grantPermissions.push({
-      operation: Operation.Grant,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: 'MAINTAINER_PERMISSION',
     });
 
