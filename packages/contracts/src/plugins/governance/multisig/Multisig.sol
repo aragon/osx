@@ -130,7 +130,7 @@ contract Multisig is
         IDAO _dao,
         address[] calldata _members,
         MultisigSettings calldata _multisigSettings
-    ) external reinitializer(2) {
+    ) external initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
         if (_members.length > type(uint16).max) {
