@@ -17,7 +17,7 @@ const EVENTS = {
   Registered: 'Registered',
 };
 
-describe.only('InterfaceBasedRegistry', function () {
+describe('InterfaceBasedRegistry', function () {
   let signers: SignerWithAddress[];
   let interfaceBasedRegistryMock: InterfaceBasedRegistryMock;
   let dao: DAO;
