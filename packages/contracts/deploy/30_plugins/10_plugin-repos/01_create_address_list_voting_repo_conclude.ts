@@ -4,7 +4,6 @@ import {
   PluginRepo__factory,
 } from '../../../typechain';
 import {EHRE} from '../../../utils/types';
-//import {getContractAddress} from '../../helpers';
 
 const func: DeployFunction = async function (hre: EHRE) {
   console.log(`Concluding AddresslistVotingSetup deployment.\n`);
@@ -20,7 +19,6 @@ const func: DeployFunction = async function (hre: EHRE) {
     deployer
   );
 
-  //const managingDaoAddress = await getContractAddress('DAO', hre);
   const initializeData =
     PluginRepo__factory.createInterface().encodeFunctionData('initialize', [
       deployer.address,
