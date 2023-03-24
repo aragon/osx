@@ -14,8 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Added check to `execute()` in `DAO` to prevent griefing attacks if the caller provides insufficient gas on actions being allowed to fail.
-- Disallows creating a new proposal in the Multisig plugin in the same block whereas the settings have been changed.
+- Disallow creating a new proposal in the Multisig plugin in the same block where the settings have been changed.
 - Updates `MultisigSetup` to be used as Release 1 Build 2.
+- Added `PlaceholderSetup` contract and adapted deploy scripts.
 
 ### Removed
 
@@ -24,7 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Created the `IMultisig` interface.
-- Added `PlaceholderSetup` contract and adapted deploy scripts.
 
 ### Changed
 
