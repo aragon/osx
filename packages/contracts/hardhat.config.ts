@@ -64,7 +64,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
-      blockGasLimit: 30000000,
+      blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
       gasPrice: 8000000000,
     },
     ...networks,
