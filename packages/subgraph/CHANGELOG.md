@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## [1.1.0]
+
 ### Added
 
 - Added `installations` to `IPlugin`.
 - Added `PluginRelease`.
 - Added `metadata` to `PluginVersion`.
+- Added configuration for mumbai.
 
 ### Changed
 
