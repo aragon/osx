@@ -98,7 +98,7 @@ const func: DeployFunction = async function (hre: EHRE) {
         name: 'token-voting PluginRepo',
         address: hre.aragonPluginRepos['token-voting'],
       },
-      who: {name: 'de', address: managingDAOAddress},
+      who: {name: 'de', address: deployer},
       permission: 'ROOT_PERMISSION',
     },
     {
@@ -107,7 +107,7 @@ const func: DeployFunction = async function (hre: EHRE) {
         name: 'token-voting PluginRepo',
         address: hre.aragonPluginRepos['token-voting'],
       },
-      who: {name: 'de', address: managingDAOAddress},
+      who: {name: 'de', address: deployer},
       permission: 'MAINTAINER_PERMISSION',
     },
     {
