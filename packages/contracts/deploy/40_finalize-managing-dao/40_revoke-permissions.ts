@@ -64,116 +64,42 @@ const func: DeployFunction = async function (hre: EHRE) {
       who: {name: 'Deployer', address: deployer},
       permission: 'SET_METADATA_PERMISSION',
     },
-    // Plugin Repos
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'address-list-voting PluginRepo',
-        address: hre.aragonPluginRepos['address-list-voting'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'ROOT_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'address-list-voting PluginRepo',
-        address: hre.aragonPluginRepos['address-list-voting'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'MAINTAINER_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'address-list-voting PluginRepo',
-        address: hre.aragonPluginRepos['address-list-voting'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'UPGRADE_REPO_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'token-voting PluginRepo',
-        address: hre.aragonPluginRepos['token-voting'],
-      },
-      who: {name: 'de', address: deployer},
-      permission: 'ROOT_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'token-voting PluginRepo',
-        address: hre.aragonPluginRepos['token-voting'],
-      },
-      who: {name: 'de', address: deployer},
-      permission: 'MAINTAINER_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'token-voting PluginRepo',
-        address: hre.aragonPluginRepos['token-voting'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'UPGRADE_REPO_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'admin PluginRepo',
-        address: hre.aragonPluginRepos['admin'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'ROOT_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'admin PluginRepo',
-        address: hre.aragonPluginRepos['admin'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'MAINTAINER_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'admin PluginRepo',
-        address: hre.aragonPluginRepos['admin'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'UPGRADE_REPO_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'multisig PluginRepo',
-        address: hre.aragonPluginRepos['multisig'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'ROOT_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'multisig PluginRepo',
-        address: hre.aragonPluginRepos['multisig'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'MAINTAINER_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {
-        name: 'multisig PluginRepo',
-        address: hre.aragonPluginRepos['multisig'],
-      },
-      who: {name: 'Deployer', address: deployer},
-      permission: 'UPGRADE_REPO_PERMISSION',
-    },
   ];
+
+  for (const [repoName, repoAddress] of Object.entries(
+    (hre as EHRE).aragonPluginRepos
+  )) {
+    revokePermissions.push({
+      operation: Operation.Revoke,
+      where: {
+        name: repoName + ' PluginRepo',
+        address: repoAddress,
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'ROOT_PERMISSION',
+    });
+
+    revokePermissions.push({
+      operation: Operation.Revoke,
+      where: {
+        name: repoName + ' PluginRepo',
+        address: repoAddress,
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'MAINTAINER_PERMISSION',
+    });
+
+    revokePermissions.push({
+      operation: Operation.Revoke,
+      where: {
+        name: repoName + ' PluginRepo',
+        address: repoAddress,
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'UPGRADE_REPO_PERMISSION',
+    });
+  }
+
   await managePermissions(managingDaoContract, revokePermissions);
 
   console.log(
