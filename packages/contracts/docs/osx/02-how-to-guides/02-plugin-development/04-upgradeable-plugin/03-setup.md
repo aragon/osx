@@ -220,7 +220,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
   {
     (_dao, preparedSetupData);
 
-    if (_currentBuild == 0) {
+    if (_currentBuild == 1) {
       address _account = abi.decode(_payload.data, (address));
       initData = abi.encodeWithSelector(
         SimpleStorageBuild2.initializeFromBuild1.selector,
@@ -392,13 +392,13 @@ contract SimpleStorageBuild3Setup is PluginSetup {
     override
     returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
   {
-    if (_currentBuild == 0) {
+    if (_currentBuild == 1) {
       address _account = abi.decode(_payload.data, (address));
       initData = abi.encodeWithSelector(
         SimpleStorageBuild3.initializeFromBuild1.selector,
         _account
       );
-    } else if (_currentBuild == 1) {
+    } else if (_currentBuild == 2) {
       initData = abi.encodeWithSelector(SimpleStorageBuild3.initializeFromBuild2.selector);
     }
 

@@ -12,7 +12,7 @@ import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgrade
 import {Addresslist} from "../../utils/Addresslist.sol";
 import {IMultisig} from "./IMultisig.sol";
 
-/// @title Multisig
+/// @title Multisig - Release 1, Build 2
 /// @author Aragon Association - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 contract Multisig is
@@ -122,7 +122,7 @@ contract Multisig is
     /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
     event MultisigSettingsUpdated(bool onlyListed, uint16 indexed minApprovals);
 
-    /// @notice Initializes the component.
+    /// @notice Initializes release 1, build 2.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _multisigSettings The multisig settings.
@@ -130,8 +130,12 @@ contract Multisig is
         IDAO _dao,
         address[] calldata _members,
         MultisigSettings calldata _multisigSettings
-    ) external initializer {
+    ) external reinitializer(2) {
         __PluginUUPSUpgradeable_init(_dao);
+
+        if (_members.length > type(uint16).max) {
+            revert AddresslistLengthOutOfBounds({limit: type(uint16).max, actual: _members.length});
+        }
 
         _addAddresses(_members);
         emit MembersAdded({members: _members});
