@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+- Added check to `execute()` in `DAO` to prevent griefing attacks if the caller provides insufficient gas on actions being allowed to fail.
+
+### Removed
+
+## v1.0.1
+
+### Added
+
 - Created the `IMultisig` interface.
 
 ### Changed
