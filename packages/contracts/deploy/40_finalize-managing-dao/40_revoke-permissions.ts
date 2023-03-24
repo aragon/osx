@@ -32,7 +32,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `Deployer`.
-  // Revoke `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer`.
+  // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer`.
   const revokePermissions = [
     {
       operation: Operation.Revoke,
@@ -72,6 +72,15 @@ const func: DeployFunction = async function (hre: EHRE) {
         address: hre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'Deployer', address: deployer},
+      permission: 'ROOT_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'address-list-voting PluginRepo',
+        address: hre.aragonPluginRepos['address-list-voting'],
+      },
+      who: {name: 'Deployer', address: deployer},
       permission: 'MAINTAINER_PERMISSION',
     },
     {
@@ -82,6 +91,15 @@ const func: DeployFunction = async function (hre: EHRE) {
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'token-voting PluginRepo',
+        address: hre.aragonPluginRepos['token-voting'],
+      },
+      who: {name: 'de', address: managingDAOAddress},
+      permission: 'ROOT_PERMISSION',
     },
     {
       operation: Operation.Revoke,
@@ -108,6 +126,15 @@ const func: DeployFunction = async function (hre: EHRE) {
         address: hre.aragonPluginRepos['admin'],
       },
       who: {name: 'Deployer', address: deployer},
+      permission: 'ROOT_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'admin PluginRepo',
+        address: hre.aragonPluginRepos['admin'],
+      },
+      who: {name: 'Deployer', address: deployer},
       permission: 'MAINTAINER_PERMISSION',
     },
     {
@@ -118,6 +145,15 @@ const func: DeployFunction = async function (hre: EHRE) {
       },
       who: {name: 'Deployer', address: deployer},
       permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {
+        name: 'multisig PluginRepo',
+        address: hre.aragonPluginRepos['multisig'],
+      },
+      who: {name: 'Deployer', address: deployer},
+      permission: 'ROOT_PERMISSION',
     },
     {
       operation: Operation.Revoke,

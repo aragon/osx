@@ -30,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Grant `REGISTER_DAO_PERMISSION` to `Deployer`.
   // Grant `ROOT_PERMISSION` to `PluginSetupProcessor`.
   // Grant `APPLY_INSTALLATION_PERMISSION` to `Deployer`.
-  // Grant `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `mMnagingDao`.
+  // Grant `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `managingDao`.
   const grantPermissions = [
     {
       operation: Operation.Grant,
@@ -64,6 +64,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         address: ehre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'ROOT_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'address-list-voting PluginRepo',
+        address: ehre.aragonPluginRepos['address-list-voting'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: 'MAINTAINER_PERMISSION',
     },
     {
@@ -75,6 +84,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: 'UPGRADE_REPO_PERMISSION',
     },
+
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'token-voting PluginRepo',
+        address: ehre.aragonPluginRepos['token-voting'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'ROOT_PERMISSION',
+    },
     {
       operation: Operation.Grant,
       where: {
@@ -100,6 +119,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         address: ehre.aragonPluginRepos['admin'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'ROOT_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'admin PluginRepo',
+        address: ehre.aragonPluginRepos['admin'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: 'MAINTAINER_PERMISSION',
     },
     {
@@ -110,6 +138,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: 'UPGRADE_REPO_PERMISSION',
+    },
+    {
+      operation: Operation.Grant,
+      where: {
+        name: 'multisig PluginRepo',
+        address: ehre.aragonPluginRepos['multisig'],
+      },
+      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      permission: 'ROOT_PERMISSION',
     },
     {
       operation: Operation.Grant,
