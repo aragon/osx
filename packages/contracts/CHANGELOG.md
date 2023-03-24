@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Adds check to `Multisig.initialize()` that members length isn't bigger than max uint16.
+
 ### Changed
 
 - Added check to `execute()` in `DAO` to prevent griefing attacks if the caller provides insufficient gas on actions being allowed to fail.
+- Disallows creating a new proposal in the Multisig plugin in the same block whereas the settings have been changed.
+- Updates `MultisigSetup` to be used as Release 1 Build 2.
 
 ### Removed
 
@@ -20,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Created the `IMultisig` interface.
-- Adds check to `Multisig.initialize()` that members length isn't bigger than max uint16.
 
 ### Changed
 
@@ -36,8 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the `auth` modifier to always use `where = address(this)` and adapted errors.
 - Use OZ's upgradeable contracts for `PluginCloneable`.
 - Renamed `getDAO()` to `dao()` and changed the `dao` state variable mutability to private.
-- Disallows creating a new proposal in the Multisig plugin in the same block whereas the settings have been changed.
-- Updates `MultisigSetup` to be used as Release 1 Build 2.
 
 ### Removed
 
