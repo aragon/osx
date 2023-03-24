@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  await deploy('PluginSetupDummy', {
+  await deploy('PlaceholderSetup', {
     from: deployer,
     args: [],
     log: true,
@@ -24,4 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['PluginSetupDummy'];
+func.tags = ['PlaceholderSetup'];

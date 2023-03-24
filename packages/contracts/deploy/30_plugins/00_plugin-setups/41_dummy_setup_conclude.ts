@@ -7,9 +7,9 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const {deployments} = hre;
 
-  const DummySetupDeployment = await deployments.get('PluginSetupDummy');
+  const DummySetupDeployment = await deployments.get('PlaceholderSetup');
   hre.aragonToVerifyContracts.push(DummySetupDeployment);
 };
 
 export default func;
-func.tags = ['PluginSetupDummy', 'Verify'];
+func.tags = ['PlaceholderSetup', 'Verify'];

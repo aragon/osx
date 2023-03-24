@@ -8,7 +8,7 @@ import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
 import {EHRE, Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {PluginRepo__factory, PluginSetupDummy__factory} from '../typechain';
+import {PluginRepo__factory, PlaceholderSetup__factory} from '../typechain';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -271,8 +271,8 @@ export async function populatePluginRepo(
 
     const signers = await ethers.getSigners();
 
-    const PluginSetupDummy = new PluginSetupDummy__factory(signers[0]);
-    const pluginSetupDummy = await PluginSetupDummy.deploy(); // TODO use clone factory
+    const PlaceholderSetup = new PlaceholderSetup__factory(signers[0]);
+    const pluginSetupDummy = await PlaceholderSetup.deploy(); // TODO use clone factory
 
     const emptyMetadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(''));
 

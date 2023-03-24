@@ -9,7 +9,7 @@ import {keccak256, solidityPack} from 'ethers/lib/utils';
 import {
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
-  PluginSetupDummy__factory,
+  PlaceholderSetup__factory,
 } from '../../../typechain';
 import {
   deployMockPluginSetup,
@@ -307,35 +307,55 @@ describe('PluginRepo', function () {
     });
 
     it('allows to create placeholder builds for the same release', async () => {
-      const PluginSetupDummy = new PluginSetupDummy__factory(signers[0]);
-      const dummy1 = await PluginSetupDummy.deploy();
-      const dummy2 = await PluginSetupDummy.deploy();
+      const PlaceholderSetup = new PlaceholderSetup__factory(signers[0]);
+      const placeholder1 = await PlaceholderSetup.deploy();
+      const placeholder2 = await PlaceholderSetup.deploy();
 
       // Release 1
       await expect(
-        pluginRepo.createVersion(1, dummy1.address, ZERO_BYTES32, ZERO_BYTES32)
+        pluginRepo.createVersion(
+          1,
+          placeholder1.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
       )
         .to.emit(pluginRepo, 'VersionCreated')
-        .withArgs(1, 1, dummy1.address, ZERO_BYTES32);
+        .withArgs(1, 1, placeholder1.address, ZERO_BYTES32);
 
       await expect(
-        pluginRepo.createVersion(1, dummy1.address, ZERO_BYTES32, ZERO_BYTES32)
+        pluginRepo.createVersion(
+          1,
+          placeholder1.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
       )
         .to.emit(pluginRepo, 'VersionCreated')
-        .withArgs(1, 2, dummy1.address, ZERO_BYTES32);
+        .withArgs(1, 2, placeholder1.address, ZERO_BYTES32);
 
       // Release 2
       await expect(
-        pluginRepo.createVersion(2, dummy2.address, ZERO_BYTES32, ZERO_BYTES32)
+        pluginRepo.createVersion(
+          2,
+          placeholder2.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
       )
         .to.emit(pluginRepo, 'VersionCreated')
-        .withArgs(2, 1, dummy2.address, ZERO_BYTES32);
+        .withArgs(2, 1, placeholder2.address, ZERO_BYTES32);
 
       await expect(
-        pluginRepo.createVersion(2, dummy2.address, ZERO_BYTES32, ZERO_BYTES32)
+        pluginRepo.createVersion(
+          2,
+          placeholder2.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
       )
         .to.emit(pluginRepo, 'VersionCreated')
-        .withArgs(2, 2, dummy2.address, ZERO_BYTES32);
+        .withArgs(2, 2, placeholder2.address, ZERO_BYTES32);
     });
   });
 
