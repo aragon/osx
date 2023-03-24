@@ -53,9 +53,9 @@ const func: DeployFunction = async function (hre: EHRE) {
     pspAddress
   );
 
-  // Installing multisig
-  const multisigRepoAddress = hre.aragonPluginRepos.multisig;
-  const versionTag = [1, 1];
+  // Install multisig build 2
+  const multisigRepoAddress = hre.aragonPluginRepos['multisig'];
+  const versionTag = [1, 2];
   const pluginSetupRef = [versionTag, multisigRepoAddress];
 
   // Prepare multisig plugin for managingDAO
@@ -77,7 +77,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   hre.managingDAOMultisigPluginAddress = installationPreparedEvent.plugin;
 
   console.log(
-    `Prepared (Multisig: ${installationPreparedEvent.plugin}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
+    `Prepared (Multisig: ${installationPreparedEvent.plugin} version ${versionTag}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
   );
 
   // Adding plugin to verify array
