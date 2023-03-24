@@ -18,6 +18,7 @@ export type EHRE = HardhatRuntimeEnvironment & {
   aragonPluginRepos: AragonPluginRepos;
   aragonToVerifyContracts: AragonVerifyEntry[];
   managingDAOMultisigPluginAddress: string;
+  placeholderBuildCIDPath: string;
 };
 
 export enum Operation {

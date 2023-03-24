@@ -274,13 +274,17 @@ export async function populatePluginRepo(
     const PluginSetupDummy = new PluginSetupDummy__factory(signers[0]);
     const pluginSetupDummy = await PluginSetupDummy.deploy(); // TODO use clone factory
 
+    const emptyMetadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(''));
+
     for (let i = 1; i < latestBuildNumber; i++) {
       await createVersion(
         hre.aragonPluginRepos[pluginRepoName],
         pluginSetupDummy.address,
         releaseNumber,
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${123}`)), //TODO TODO
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${123}`)) //TODO TODO
+        emptyMetadata,
+        ethers.utils.hexlify(
+          ethers.utils.toUtf8Bytes(`ipfs://${hre.placeholderBuildCIDPath}`)
+        )
       );
     }
 
