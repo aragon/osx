@@ -3,8 +3,13 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../../test-utils/proxy';
 
-import {DAO, InterfaceBasedRegistryMock} from '../../../typechain';
+import {
+  DAO,
+  IDAO__factory,
+  InterfaceBasedRegistryMock,
+} from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
+import {getInterfaceID} from '../../test-utils/interfaces';
 
 const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
 
@@ -36,7 +41,10 @@ describe('InterfaceBasedRegistry', function () {
     );
 
     // Let the interface registry register `DAO` contracts for testing purposes
-    await interfaceBasedRegistryMock.initialize(dao.address);
+    await interfaceBasedRegistryMock.initialize(
+      dao.address,
+      getInterfaceID(IDAO__factory.createInterface())
+    );
 
     // grant REGISTER_PERMISSION_ID to registrer
     dao.grant(

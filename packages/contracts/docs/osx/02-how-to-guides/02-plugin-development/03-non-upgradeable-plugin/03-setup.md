@@ -68,7 +68,7 @@ The skeleton of our `SimpleAdminSetup` contract inheriting from `PluginSetup` lo
 <summary><code>SimpleAdminSetup</code>: The Sekeleton</summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 
 contract SimpleAdminSetup is PluginSetup {
   /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
@@ -238,7 +238,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 
-import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
 
@@ -340,4 +340,4 @@ contract SimpleAdminSetup is PluginSetup {
 
 ### Subsequent Builds
 
-For subsequent builds or releases, you simply write a new implementation and associated setup contract providing an `prepareInstallation` and `prepareUninstallation` function. If DAOs want to install the new build or release, it must uninstall its current plugin and freshly install the new plugin version, which can happen in the same action array in a governance proposal. However, the plugin storage and event history will be lost since this is a non-upgradeable plugin. If you want to prevent the latter, you can learn how to write an upgradeable plugin in the next section.
+For subsequent builds or releases, you simply write a new implementation and associated setup contract providing an `prepareInstallation` and `prepareUninstallation` function. If a DAO wants to install the new build or release, it must uninstall its current plugin and freshly install the new plugin version, which can happen in the same action array in a governance proposal. However, the plugin storage and event history will be lost since this is a non-upgradeable plugin. If you want to prevent the latter, you can learn how to write an upgradeable plugin in the next section.

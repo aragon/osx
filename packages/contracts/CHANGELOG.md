@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Adds check to `Multisig.initialize()` that members length isn't bigger than max uint16.
+
+### Changed
+
+- Added check to `execute()` in `DAO` to prevent griefing attacks if the caller provides insufficient gas on actions being allowed to fail.
+- Disallows creating a new proposal in the Multisig plugin in the same block whereas the settings have been changed.
+- Updates `MultisigSetup` to be used as Release 1 Build 2.
+
+### Removed
+
+## v1.0.1
+
+### Added
+
 - Created the `IMultisig` interface.
 - Added `PlaceholderSetup` contract and adapted deploy scripts.
 

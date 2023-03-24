@@ -118,7 +118,9 @@ type ContractPermissionId @entity(immutable: true) {
   permissionId: Bytes!
 }
 
-type Permission @entity(immutable: true) {
+# Cannot be immutable because a permission can be revoked and granted in the same TX.
+# This results in an error in the subgraph if the entity is immutable.
+type Permission @entity {
   "no need to store granted as we can delete permission when revoked"
   id: ID! # where + permissionId + who
   dao: Dao!

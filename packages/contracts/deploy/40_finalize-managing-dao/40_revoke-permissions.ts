@@ -113,4 +113,4 @@ const func: DeployFunction = async function (hre: EHRE) {
   );
 };
 export default func;
-func.tags = ['RegisterManagingDAO'];
+func.tags = ['RevokeManagingPermissionsDAO'];

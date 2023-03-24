@@ -12,7 +12,10 @@ Now, we show the setup contracts associated with the 3 builds we have implemente
 <summary><code>SimpleStorageBuild1</code></summary>
 
 ```solidity
-import {PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
+// SPDX-License-Identifier: AGPL-3.0-or-later
+pragma solidity 0.8.17;
+
+import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
 /// @title SimpleStorage build 1
 contract SimpleStorageBuild1 is PluginUUPSUpgradeable {
@@ -40,7 +43,11 @@ For the first build, the setup is very similar to the [setup example for the non
 <summary><code>SimpleStorageBuild1Setup</code></summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+pragma solidity 0.8.17;
+
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleStorageBuild1} from './SimpleStorageBuild1.sol';
 
@@ -72,7 +79,7 @@ contract SimpleStorageBuild1Setup is PluginSetup {
       where: plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild1(implementation).STORE_PERMISSION_ID()
+      permissionId: SimpleStorageBuild1(this.implementation()).STORE_PERMISSION_ID()
     });
 
     preparedSetupData.permissions = permissions;
@@ -90,8 +97,13 @@ contract SimpleStorageBuild1Setup is PluginSetup {
       where: _payload.plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild1(implementation).STORE_PERMISSION_ID()
+      permissionId: SimpleStorageBuild1(this.implementation()).STORE_PERMISSION_ID()
     });
+  }
+
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleStorageImplementation;
   }
 }
 ```
@@ -104,6 +116,11 @@ contract SimpleStorageBuild1Setup is PluginSetup {
 <summary><code>SimpleStorageBuild2</code></summary>
 
 ```solidity
+// SPDX-License-Identifier: AGPL-3.0-or-later
+pragma solidity 0.8.17;
+
+import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
+
 /// @title SimpleStorage build 2
 contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
   bytes32 public constant STORE_PERMISSION_ID = keccak256('STORE_PERMISSION');
@@ -124,7 +141,7 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 
   /// @notice Initializes the plugin when the update from build 1 to build 2 is applied.
   /// @dev The initialization of `SimpleStorageBuild1` has already happened.
-  function initializeFromBuild1(IDAO _dao, address _account) external reinitializer(2) {
+  function initializeFromBuild1(address _account) external reinitializer(2) {
     account = _account;
   }
 
@@ -148,6 +165,14 @@ Additionally, since we want to support updates from build 1 to build 2, we must 
 <summary><code>SimpleStorageBuild2Setup</code></summary>
 
 ```solidity
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+pragma solidity 0.8.17;
+
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {SimpleStorageBuild2} from './SimpleStorageBuild2.sol';
+
 /// @title SimpleStorageSetup build 2
 contract SimpleStorageBuild2Setup is PluginSetup {
   address private immutable simpleStorageImplementation;
@@ -176,7 +201,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
       where: plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild2(implementation).STORE_PERMISSION_ID()
+      permissionId: SimpleStorageBuild2(this.implementation()).STORE_PERMISSION_ID()
     });
 
     preparedSetupData.permissions = permissions;
@@ -189,11 +214,13 @@ contract SimpleStorageBuild2Setup is PluginSetup {
     SetupPayload calldata _payload
   )
     external
-    view
+    pure
     override
     returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
   {
-    if (_currentBuild == 0) {
+    (_dao, preparedSetupData);
+
+    if (_currentBuild == 1) {
       address _account = abi.decode(_payload.data, (address));
       initData = abi.encodeWithSelector(
         SimpleStorageBuild2.initializeFromBuild1.selector,
@@ -214,8 +241,13 @@ contract SimpleStorageBuild2Setup is PluginSetup {
       where: _payload.plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild2(implementation).STORE_PERMISSION_ID()
+      permissionId: SimpleStorageBuild2(this.implementation()).STORE_PERMISSION_ID()
     });
+  }
+
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleStorageImplementation;
   }
 }
 ```
@@ -224,12 +256,17 @@ contract SimpleStorageBuild2Setup is PluginSetup {
 
 Let's have a close look at the implemented `prepareUpdate` function. The function only contains a condition checking from which build number the update is transitioning to build 1. Here, it is the build number 0 as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of intializing the storage that was added in this build.
 
-### Build 2
+### Build 3
 
 <details>
 <summary><code>SimpleStorageBuild3</code></summary>
 
 ```solidity
+// SPDX-License-Identifier: AGPL-3.0-or-later
+pragma solidity 0.8.17;
+
+import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
+
 /// @title SimpleStorage build 3
 contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
   bytes32 public constant STORE_NUMBER_PERMISSION_ID = keccak256('STORE_NUMBER_PERMISSION'); // changed in build 3
@@ -297,6 +334,15 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
 <summary><code>SimpleStorageBuild3Setup</code></summary>
 
 ```solidity
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+pragma solidity 0.8.17;
+
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
+import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
+import {SimpleStorageBuild2} from '../build2/SimpleStorageBuild2.sol';
+import {SimpleStorageBuild3} from './SimpleStorageBuild3.sol';
+
 /// @title SimpleStorageSetup build 3
 contract SimpleStorageBuild3Setup is PluginSetup {
   address private immutable simpleStorageImplementation;
@@ -325,11 +371,12 @@ contract SimpleStorageBuild3Setup is PluginSetup {
       where: plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild3(implementation).STORE_NUMBER_PERMISSION_ID()
+      permissionId: SimpleStorageBuild3(this.implementation()).STORE_NUMBER_PERMISSION_ID()
     });
 
     permissions[1] = permissions[0];
-    permissions[1].permissionId = SimpleStorageBuild3(implementation).STORE_ACCOUNT_PERMISSION_ID();
+    permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_ACCOUNT_PERMISSION_ID();
 
     preparedSetupData.permissions = permissions;
   }
@@ -345,13 +392,13 @@ contract SimpleStorageBuild3Setup is PluginSetup {
     override
     returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
   {
-    if (_currentBuild == 0) {
+    if (_currentBuild == 1) {
       address _account = abi.decode(_payload.data, (address));
       initData = abi.encodeWithSelector(
         SimpleStorageBuild3.initializeFromBuild1.selector,
         _account
       );
-    } else if (_currentBuild == 1) {
+    } else if (_currentBuild == 2) {
       initData = abi.encodeWithSelector(SimpleStorageBuild3.initializeFromBuild2.selector);
     }
 
@@ -362,15 +409,17 @@ contract SimpleStorageBuild3Setup is PluginSetup {
       where: _dao,
       who: _payload.plugin,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild2(implementation).STORE_PERMISSION_ID()
+      permissionId: keccak256('STORE_PERMISSION')
     });
 
     permissions[1] = permissions[0];
     permissions[1].operation = PermissionLib.Operation.Grant;
-    permissions[1].permissionId = SimpleStorageBuild3(implementation).STORE_NUMBER_PERMISSION_ID();
+    permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_NUMBER_PERMISSION_ID();
 
     permissions[2] = permissions[1];
-    permissions[2].permissionId = SimpleStorageBuild3(implementation).STORE_ACCOUNT_PERMISSION_ID();
+    permissions[2].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_ACCOUNT_PERMISSION_ID();
 
     preparedSetupData.permissions = permissions;
   }
@@ -387,11 +436,17 @@ contract SimpleStorageBuild3Setup is PluginSetup {
       where: _payload.plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleStorageBuild3(implementation).STORE_NUMBER_PERMISSION_ID()
+      permissionId: SimpleStorageBuild3(this.implementation()).STORE_NUMBER_PERMISSION_ID()
     });
 
     permissions[1] = permissions[1];
-    permissions[1].permissionId = SimpleStorageBuild3(implementation).STORE_ACCOUNT_PERMISSION_ID();
+    permissions[1].permissionId = SimpleStorageBuild3(this.implementation())
+      .STORE_ACCOUNT_PERMISSION_ID();
+  }
+
+  /// @inheritdoc IPluginSetup
+  function implementation() external view returns (address) {
+    return simpleStorageImplementation;
   }
 }
 ```

@@ -11,6 +11,7 @@ import {
   IMultisig__factory,
   IPlugin__factory,
   IProposal__factory,
+  Multisig,
 } from '../../../../typechain';
 import {
   findEvent,
@@ -61,7 +62,7 @@ export async function approveWithSigners(
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
-  let multisig: any;
+  let multisig: Multisig;
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -205,6 +206,14 @@ describe('Multisig', function () {
       )
         .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
+    });
+
+    it('should revert if members list is longer than uint16 max', async () => {
+      const megaMember = signers[1];
+      const members: string[] = new Array(65537).fill(megaMember.address);
+      await expect(multisig.initialize(dao.address, members, multisigSettings))
+        .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
+        .withArgs(65535, members.length);
     });
   });
 
@@ -372,7 +381,7 @@ describe('Multisig', function () {
       await expect(multisig.removeAddresses([signers[0].address]))
         .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(
-          (await multisig.addresslistLength()) - 1,
+          (await multisig.addresslistLength()).sub(1),
           multisigSettings.minApprovals
         );
     });
@@ -391,7 +400,7 @@ describe('Multisig', function () {
       await expect(multisig.removeAddresses([signers[2].address]))
         .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(
-          (await multisig.addresslistLength()) - 1,
+          (await multisig.addresslistLength()).sub(1),
           multisigSettings.minApprovals
         );
     });
@@ -506,6 +515,56 @@ describe('Multisig', function () {
           [],
           allowFailureMap
         );
+    });
+
+    it('reverts if the multisig settings have been changed in the same block', async () => {
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address], // signers[0] is listed
+        multisigSettings
+      );
+      await dao.grant(
+        multisig.address,
+        dao.address,
+        await multisig.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+      );
+
+      await ethers.provider.send('evm_setAutomine', [false]);
+
+      const endDate = await timestampIn(5000);
+
+      await multisig.connect(signers[0]).createProposal(
+        dummyMetadata,
+        [
+          {
+            to: multisig.address,
+            value: 0,
+            data: multisig.interface.encodeFunctionData(
+              'updateMultisigSettings',
+              [
+                {
+                  onlyListed: false,
+                  minApprovals: 1,
+                },
+              ]
+            ),
+          },
+        ],
+        0,
+        true,
+        true,
+        0,
+        endDate
+      );
+      await expect(
+        multisig
+          .connect(signers[0])
+          .createProposal(dummyMetadata, [], 0, true, true, 0, endDate)
+      )
+        .to.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
+        .withArgs(signers[0].address);
+
+      await ethers.provider.send('evm_setAutomine', [true]);
     });
 
     context('`onlyListed` is set to `false`:', async () => {

@@ -68,7 +68,7 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 
   /// @notice Initializes the plugin when the update from build 1 to build 2 is applied.
   /// @dev The initialization of `SimpleStorageBuild1` has already happened.
-  function initializeFromBuild1(IDAO _dao, address _account) external reinitializer(2) {
+  function initializeFromBuild1(address _account) external reinitializer(2) {
     account = _account;
   }
 

@@ -67,9 +67,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  await managingDaoContract.setMetadata(
+  const setMetadataTX = await managingDaoContract.setMetadata(
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`))
   );
+  await setMetadataTX.wait();
 };
 export default func;
 func.tags = ['RegisterManagingDAO'];

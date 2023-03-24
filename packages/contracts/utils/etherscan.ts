@@ -44,7 +44,7 @@ export const verifyContract = async (
       address: address,
       constructorArgs: path,
     };
-    await runTaskWithRetry('verify:verify', params, times, msDelay, cleanup);
+    await runTaskWithRetry('verify', params, times, msDelay, cleanup);
   } catch (error) {
     console.warn(`Verify task error: ${error}`);
   }
