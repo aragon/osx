@@ -6,9 +6,7 @@
       "address[] members",
       "tuple(bool onlyListed, uint16 minApprovals)"
     ],
-    "prepareUpdate": {
-      "from": {"build": 1, "input": []}
-    },
+    "prepareUpdate": []
     "prepareUninstallation": []
   }
 }
