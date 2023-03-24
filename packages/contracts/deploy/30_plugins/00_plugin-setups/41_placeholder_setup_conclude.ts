@@ -6,8 +6,8 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   const {deployments} = hre;
 
-  const DummySetupDeployment = await deployments.get('PlaceholderSetup');
-  hre.aragonToVerifyContracts.push(DummySetupDeployment);
+  const PlaceholderSetupDeployment = await deployments.get('PlaceholderSetup');
+  hre.aragonToVerifyContracts.push(PlaceholderSetupDeployment);
 };
 
 export default func;
