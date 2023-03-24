@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Created the `IMultisig` interface.
-- Adds check to `Multisig.initialize()` that members length isn't bigger than max uint16. 
+- Adds check to `Multisig.initialize()` that members length isn't bigger than max uint16.
 
 ### Changed
 
