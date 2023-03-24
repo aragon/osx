@@ -1,8 +1,10 @@
-export async function findEvent(tx: any, eventName: string) {
-  const {events} = await tx.wait();
-  const event = events.find(({event}: {event: any}) => event === eventName);
+import {ContractTransaction} from 'ethers';
 
-  return event;
+export async function findEvent<T>(tx: ContractTransaction, eventName: string) {
+  const receipt = await tx.wait();
+  const event = (receipt.events || []).find(event => event.event === eventName);
+
+  return event as T | undefined;
 }
 
 export async function filterEvents(tx: any, eventName: string) {

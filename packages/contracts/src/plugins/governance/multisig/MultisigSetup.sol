@@ -8,7 +8,7 @@ import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
 import {Multisig} from "./Multisig.sol";
 
-/// @title MultisigSetup
+/// @title MultisigSetup - Release 1, Build 2
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Multisig` plugin.
 contract MultisigSetup is PluginSetup {
@@ -70,6 +70,18 @@ contract MultisigSetup is PluginSetup {
 
         preparedSetupData.permissions = permissions;
     }
+
+    /// @inheritdoc IPluginSetup
+    function prepareUpdate(
+        address _dao,
+        uint16 _currentBuild,
+        SetupPayload calldata _payload
+    )
+        external
+        pure
+        override
+        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
+    {}
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
