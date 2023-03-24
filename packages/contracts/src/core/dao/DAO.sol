@@ -184,27 +184,24 @@ contract DAO is
 
         execResults = new bytes[](_actions.length);
 
+        uint256 gasBefore;
+        uint256 gasAfter;
+
         for (uint256 i = 0; i < _actions.length; ) {
+            gasBefore = gasleft();
+
+            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
+                _actions[i].data
+            );
+            gasAfter = gasleft();
+
             // Check if failure is allowed
             if (!hasBit(_allowFailureMap, uint8(i))) {
-                (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
-                    _actions[i].data
-                );
-
                 // Check if the call failed.
                 if (!success) {
                     revert ActionFailed(i);
                 }
-
-                execResults[i] = result;
             } else {
-                uint256 gasBefore = gasleft(); // gasleft: 2 gas, assignment:
-
-                (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
-                    _actions[i].data
-                );
-                uint256 gasAfter = gasleft();
-
                 // Check if the call failed.
                 if (!success) {
                     // Make sure that the action call did not fail because 63/64 of `gasleft()` was insufficient to execute the external call `.to.call` (see https://eips.ethereum.org/EIPS/eip-150).
@@ -217,9 +214,9 @@ contract DAO is
                     // Store that this action failed.
                     failureMap = flipBit(failureMap, uint8(i));
                 }
-
-                execResults[i] = result;
             }
+
+            execResults[i] = result;
 
             unchecked {
                 ++i;
