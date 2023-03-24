@@ -68,7 +68,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'address-list-voting PluginRepo',
         address: hre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'Deployer', address: deployer},
@@ -77,7 +77,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'address-list-voting PluginRepo',
         address: hre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'Deployer', address: deployer},
@@ -86,7 +86,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'token-voting PluginRepo',
         address: hre.aragonPluginRepos['token-voting'],
       },
       who: {name: 'de', address: managingDAOAddress},
@@ -95,7 +95,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'token-voting PluginRepo',
         address: hre.aragonPluginRepos['token-voting'],
       },
       who: {name: 'Deployer', address: deployer},
@@ -104,7 +104,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'admin PluginRepo',
         address: hre.aragonPluginRepos['admin'],
       },
       who: {name: 'Deployer', address: deployer},
@@ -113,7 +113,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'admin PluginRepo',
         address: hre.aragonPluginRepos['admin'],
       },
       who: {name: 'Deployer', address: deployer},
@@ -122,7 +122,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'multisig PluginRepo',
         address: hre.aragonPluginRepos['multisig'],
       },
       who: {name: 'Deployer', address: deployer},
@@ -131,7 +131,7 @@ const func: DeployFunction = async function (hre: EHRE) {
     {
       operation: Operation.Revoke,
       where: {
-        name: 'PluginRepo',
+        name: 'multisig PluginRepo',
         address: hre.aragonPluginRepos['multisig'],
       },
       who: {name: 'Deployer', address: deployer},

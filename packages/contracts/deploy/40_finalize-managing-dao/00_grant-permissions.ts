@@ -60,7 +60,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'address-list-voting PluginRepo',
         address: ehre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -69,7 +69,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'address-list-voting PluginRepo',
         address: ehre.aragonPluginRepos['address-list-voting'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -78,7 +78,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'token-voting PluginRepo',
         address: ehre.aragonPluginRepos['token-voting'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -87,7 +87,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'token-voting PluginRepo',
         address: ehre.aragonPluginRepos['token-voting'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -96,7 +96,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'admin PluginRepo',
         address: ehre.aragonPluginRepos['admin'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -105,7 +105,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'admin PluginRepo',
         address: ehre.aragonPluginRepos['admin'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -114,7 +114,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'multisig PluginRepo',
         address: ehre.aragonPluginRepos['multisig'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},
@@ -123,7 +123,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'PluginRepo',
+        name: 'multisig PluginRepo',
         address: ehre.aragonPluginRepos['multisig'],
       },
       who: {name: 'ManagingDAO', address: managingDAOAddress},

@@ -128,7 +128,7 @@ describe('Managing DAO', function () {
     );
   });
 
-  it('should has deployments', async function () {
+  it('should have deployments', async function () {
     expect(await deployments.all()).to.not.be.empty;
   });
 
