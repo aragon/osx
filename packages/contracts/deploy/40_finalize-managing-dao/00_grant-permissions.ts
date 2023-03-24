@@ -2,13 +2,14 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {EHRE, Operation} from '../../utils/types';
-import {getContractAddress, managePermissions} from '../helpers';
+import {getContractAddress, managePermissions, Permission} from '../helpers';
+import {PluginRepo__factory} from '../../typechain';
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (hre: EHRE) {
   console.log(`\nFinalizing ManagingDao.`);
 
   const {getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
@@ -33,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {name: 'DAORegistry', address: daoRegistryAddress},
-      who: {name: 'Deployer', address: deployer},
+      who: {name: 'Deployer', address: deployer.address},
       permission: 'REGISTER_DAO_PERMISSION',
     },
     {
@@ -45,21 +46,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {name: 'PluginSetupProcessor', address: pspAddress},
-      who: {name: 'Deployer', address: deployer},
+      who: {name: 'Deployer', address: deployer.address},
       permission: 'APPLY_INSTALLATION_PERMISSION',
     },
     {
       operation: Operation.Grant,
       where: {name: 'DAO', address: managingDAOAddress},
-      who: {name: 'Deployer', address: deployer},
+      who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
     },
   ];
 
-  for (const [repoName, repoAddress] of Object.entries(
-    (hre as EHRE).aragonPluginRepos
-  )) {
-    grantPermissions.push({
+  await managePermissions(managingDaoContract, grantPermissions);
+
+  for (const repoName in hre.aragonPluginRepos) {
+    const repoAddress = hre.aragonPluginRepos[repoName];
+    const grantPluginRepoPermissions: Permission[] = [];
+    grantPluginRepoPermissions.push({
       operation: Operation.Grant,
       where: {
         name: repoName + ' PluginRepo',
@@ -69,7 +72,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'ROOT_PERMISSION',
     });
 
-    grantPermissions.push({
+    grantPluginRepoPermissions.push({
       operation: Operation.Grant,
       where: {
         name: repoName + ' PluginRepo',
@@ -79,7 +82,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'MAINTAINER_PERMISSION',
     });
 
-    grantPermissions.push({
+    grantPluginRepoPermissions.push({
       operation: Operation.Grant,
       where: {
         name: repoName + ' PluginRepo',
@@ -88,9 +91,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       who: {name: 'ManagingDAO', address: managingDAOAddress},
       permission: 'UPGRADE_REPO_PERMISSION',
     });
+    await managePermissions(
+      PluginRepo__factory.connect(repoAddress, deployer),
+      grantPluginRepoPermissions
+    );
   }
-
-  await managePermissions(managingDaoContract, grantPermissions);
 };
 export default func;
 func.tags = ['RegisterManagingDAO'];
