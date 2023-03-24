@@ -323,8 +323,8 @@ describe('Managing DAO', function () {
     let implementationValues = await readImplementationValueFromSlot([
       ehre.aragonPluginRepos['token-voting'],
       ehre.aragonPluginRepos['address-list-voting'],
-      ehre.aragonPluginRepos.admin,
-      ehre.aragonPluginRepos.multisig,
+      ehre.aragonPluginRepos['admin'],
+      ehre.aragonPluginRepos['multisig'],
     ]);
 
     for (let index = 0; index < implementationValues.length; index++) {
@@ -344,8 +344,8 @@ describe('Managing DAO', function () {
     implementationValues = await readImplementationValueFromSlot([
       ehre.aragonPluginRepos['token-voting'],
       ehre.aragonPluginRepos['address-list-voting'],
-      ehre.aragonPluginRepos.admin,
-      ehre.aragonPluginRepos.multisig,
+      ehre.aragonPluginRepos['admin'],
+      ehre.aragonPluginRepos['multisig'],
     ]);
 
     for (let index = 0; index < implementationValues.length; index++) {
