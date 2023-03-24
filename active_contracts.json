@@ -44,5 +44,31 @@
     "token-voting-repo": "0xb7401cD221ceAFC54093168B814Cc3d42579287f",
     "admin-repo": "0xA4371a239D08bfBA6E8894eccf8466C6323A52C3",
     "multisig-repo": "0x8c278e37D0817210E18A7958524b7D0a1fAA6F7b"
+  },
+  "mumbai": {
+    "managingDAOImplemenation": "0x38e85D5A0A7F49EcfD24FF191E543a7c7001068d",
+    "managingDAO": "0xd3d5A6b2dB077B5eBBDe90f85eAF4b8466e7EA25",
+    "ENSRegistry": "0x42256AD2900d4eCd684ceAF2107f78a25433a526",
+    "PublicResolver": "0x9540237cb446979839AbeC89d5861ce327d4EF75",
+    "DAO_ENSSubdomainRegistrar_Implementation": "0xB7BbDb76AAF2822Fa8DA356409f53EFF4356044b",
+    "DAO_ENSSubdomainRegistrar": "0x4c98505008C78A83F0Dec3c756645cEfb5080AEE",
+    "Plugin_ENSSubdomainRegistrar_Implementation": "0x4975261C62C0575B2166981a38f1EA4a3C2759Ca",
+    "Plugin_ENSSubdomainRegistrar": "0x0FC876E0D465Bb90bA9b463A9C079211aC13F9b8",
+    "DAORegistry_Implementation": "0xFf65396a237901f9d878e012BDA193B0539ec950",
+    "DAORegistry": "0xef928847d1F2860459F7005b61B632C7De5878A3",
+    "PluginRepoRegistry_Implementation": "0x4DEA9d628E2c929D3C8377c46e4223099fE337EE",
+    "PluginRepoRegistry": "0x847d61e6fff6a266298886Ff88Cbd9B3102721C5",
+    "PluginRepoFactory": "0x667754e946335C72d828A2bedc1AD83e1805d6dE",
+    "PluginSetupProcessor": "0xc4fD92b543fE2808B0ad9237E74cdfE619152abF",
+    "DAOFactory": "0xe15f84B083Fc73027318DD78c83853F91cC84E53",
+    "AddresslistVotingSetup": "0xbF06efe19627fa4D694e362B8eB708D610f98481",
+    "TokenVotingSetup": "0x5C1f7Dca99dF07beBDD9B07507A002D1e4c67Dd2",
+    "AdminSetup": "0xD6AA80b85E422F2DdFB5107bCD3a21E09F0dDa93",
+    "MultisigSetup": "0x1ECa622BF49b6b98a6eB7A07171Faf0530c15ee7",
+    "PlaceholderSetup": "0x4F6f58b1683cc8f11743dDB96078a5937Fe932a9",
+    "address-list-voting-repo": "0x9531c5c5C1207a319cBDe3A944f6dC54FA088243",
+    "token-voting-repo": "0x296c00A28B6e532e37b8D4665ad3Dc40CE588cB8",
+    "admin-repo": "0x746E5F3fCBFc797EF98f38483c6B955349D1542D",
+    "multisig-repo": "0x6E8dA9b20078657c18397407d2a2671AC907F83B"
   }
 }
