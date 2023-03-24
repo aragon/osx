@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   // Grant `REGISTER_DAO_PERMISSION` to `Deployer`.
   // Grant `ROOT_PERMISSION` to `PluginSetupProcessor`.
   // Grant `APPLY_INSTALLATION_PERMISSION` to `Deployer`.
-  // Grant `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `managingDao`.
+
   const grantPermissions = [
     {
       operation: Operation.Grant,
@@ -59,6 +59,7 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   await managePermissions(managingDaoContract, grantPermissions);
 
+  // Grant `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `managingDao` on the permission manager of each PluginRepo.
   for (const repoName in hre.aragonPluginRepos) {
     const repoAddress = hre.aragonPluginRepos[repoName];
     const grantPluginRepoPermissions: Permission[] = [];

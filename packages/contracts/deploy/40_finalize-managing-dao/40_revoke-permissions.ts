@@ -33,7 +33,6 @@ const func: DeployFunction = async function (hre: EHRE) {
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `Deployer`.
-  // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer`.
   const revokePermissions = [
     {
       operation: Operation.Revoke,
@@ -68,6 +67,7 @@ const func: DeployFunction = async function (hre: EHRE) {
   ];
   await managePermissions(managingDaoContract, revokePermissions);
 
+  // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer` on the permission manager of each PluginRepo.
   for (const repoName in hre.aragonPluginRepos) {
     const repoAddress = hre.aragonPluginRepos[repoName];
     const revokePluginRepoPermissions: Permission[] = [];
