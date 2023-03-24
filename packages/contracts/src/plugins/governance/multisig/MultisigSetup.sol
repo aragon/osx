@@ -81,9 +81,7 @@ contract MultisigSetup is PluginSetup {
         pure
         override
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
-    {
-        (_dao, preparedSetupData);
-    }
+    {}
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(

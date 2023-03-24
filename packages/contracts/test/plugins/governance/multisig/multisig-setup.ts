@@ -246,6 +246,28 @@ describe('MultisigSetup', function () {
     });
   });
 
+  describe('prepareUpdate', async () => {
+    it.only('should return nothing', async () => {
+      const dao = ethers.Wallet.createRandom().address;
+      const currentBuild = 1;
+      const prepareUpdateData = await multisigSetup.callStatic.prepareUpdate(
+        dao,
+        currentBuild,
+        {
+          currentHelpers: [
+            ethers.Wallet.createRandom().address,
+            ethers.Wallet.createRandom().address,
+          ],
+          data: '0x00',
+          plugin: ethers.Wallet.createRandom().address,
+        }
+      );
+      expect(prepareUpdateData.initData).to.be.eq('0x');
+      expect(prepareUpdateData.preparedSetupData.permissions).to.be.eql([]);
+      expect(prepareUpdateData.preparedSetupData.helpers).to.be.eql([]);
+    });
+  });
+
   describe('prepareUninstallation', async () => {
     it('correctly returns permissions', async () => {
       const plugin = ethers.Wallet.createRandom().address;
