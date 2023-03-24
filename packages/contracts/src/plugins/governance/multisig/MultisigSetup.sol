@@ -83,10 +83,6 @@ contract MultisigSetup is PluginSetup {
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
     {
         (_dao, preparedSetupData);
-
-        if (_currentBuild == 1) {
-            // No actions required
-        }
     }
 
     /// @inheritdoc IPluginSetup
