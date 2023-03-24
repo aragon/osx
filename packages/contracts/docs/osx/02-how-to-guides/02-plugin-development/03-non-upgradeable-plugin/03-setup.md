@@ -140,7 +140,7 @@ function prepareInstallation(
     where: plugin,
     who: admin,
     condition: PermissionLib.NO_CONDITION,
-    permissionId: SimpleAdmin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+    permissionId: SimpleAdmin(plugin).ADMIN_EXECUTE_PERMISSION_ID()
   });
 
   // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
@@ -285,7 +285,7 @@ contract SimpleAdminSetup is PluginSetup {
       where: plugin,
       who: admin,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleAdmin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+      permissionId: SimpleAdmin(plugin).ADMIN_EXECUTE_PERMISSION_ID()
     });
 
     // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
