@@ -7,7 +7,7 @@ import {PluginSetup, IPluginSetup} from "../../framework/plugin/setup/PluginSetu
 
 /// @title PlaceholderSetup
 /// @author Aragon Association - 2023
-/// @notice The setup contract acting as a placeholder for outdated plugin builds. These are used to save gas when giving builds and releases identical plugin repos after deployment that do not need to be published when deploying a plugin repo to a new chain or layer.
+/// @notice A placeholder setup contract for outdated plugin builds. When moving plugin repos to new chains or layers where only the latest release and build should be available, this placeholder can be used to populate previous builds.
 contract PlaceholderSetup is PluginSetup {
     /// @notice Thrown if the dummy is used.
     error PlaceholderSetupCannotBeUsed();
