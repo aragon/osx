@@ -8,7 +8,7 @@ import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
 import {Multisig} from "./Multisig.sol";
 
-/// @title MultisigSetup - Build 2
+/// @title MultisigSetup - Release 1, Build 2
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Multisig` plugin.
 contract MultisigSetup is PluginSetup {
