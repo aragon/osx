@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disallow creating a new proposal in the Multisig plugin in the same block where the settings have been changed.
 - Updates `MultisigSetup` to be used as Release 1 Build 2.
 
-
 ## v1.0.1
 
 ### Added
