@@ -15,12 +15,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  await deploy('PlaceholderSetupCloneFactory', {
-    from: deployer,
-    args: [],
-    log: true,
-  });
-
   const {network} = hre;
 
   hre.placeholderBuildCIDPath = await uploadToIPFS(

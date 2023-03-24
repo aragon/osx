@@ -8,7 +8,7 @@ import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
 import {EHRE, Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {PluginRepo__factory, PlaceholderSetup__factory} from '../typechain';
+import {PluginRepo__factory, PlaceholderSetupCloneFactory} from '../typechain';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -269,17 +269,14 @@ export async function populatePluginRepo(
     const releaseNumber = latestVersion.versionTag[0];
     const latestBuildNumber = latestVersion.versionTag[1];
 
-    const signers = await ethers.getSigners();
-
-    const PlaceholderSetup = new PlaceholderSetup__factory(signers[0]);
-    const pluginSetupDummy = await PlaceholderSetup.deploy(); // TODO use clone factory
+    const placeholderSetup = await getContractAddress('PlaceholderSetup', hre);
 
     const emptyMetadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(''));
 
     for (let i = 1; i < latestBuildNumber; i++) {
       await createVersion(
         hre.aragonPluginRepos[pluginRepoName],
-        pluginSetupDummy.address,
+        placeholderSetup,
         releaseNumber,
         emptyMetadata,
         ethers.utils.hexlify(
