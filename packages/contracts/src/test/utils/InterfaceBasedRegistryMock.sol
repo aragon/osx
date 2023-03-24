@@ -9,8 +9,8 @@ contract InterfaceBasedRegistryMock is InterfaceBasedRegistry {
 
     event Registered(address);
 
-    function initialize(IDAO _dao) external initializer {
-        __InterfaceBasedRegistry_init(_dao, type(IDAO).interfaceId);
+    function initialize(IDAO _dao, bytes4 targetInterface) external initializer {
+        __InterfaceBasedRegistry_init(_dao, targetInterface);
     }
 
     function register(address registrant) external auth(REGISTER_PERMISSION_ID) {
