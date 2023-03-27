@@ -1,11 +1,11 @@
 ---
-title: Upgradeable Plugins
+title: Initialization
 ---
 
-## Initializing Non-upgradeable Plugins
+## Initializing Upgradeable Plugins
 
 To deploy your implementation contract via the [UUPS pattern (ERC-1822)](https://eips.ethereum.org/EIPS/eip-1822), you inherit from the `PluginUUPSUpgradeable` contract.
-For the same reason you had to [initialize your non-upgradeable `PluginClonable`](./../03-non-upgradeable-plugin/01-initialization.md#deployment-via-the-minimal-proxy-pattern) deployed via the minimal proxy pattern, you must write an `initialize` function for contracts deployed via the minimal proxy pattern:
+For the same reason you had to [initialize your non-upgradeable `PluginClonable`](./../03-non-upgradeable-plugin/01-initialization.md#deployment-via-the-minimal-proxy-pattern) deployed via the minimal proxy pattern, you must write an `initialize` function for contracts deployed via the UUPS proxy pattern:
 
 <details>
 <summary><code>SimpleStorageBuild1</code> Initialization</summary>

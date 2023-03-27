@@ -1,5 +1,5 @@
 ---
-title: Setup Upgradeable Plugins
+title: Setup
 ---
 
 ## Developing the Setup Contract for Upgradeable Contracts
