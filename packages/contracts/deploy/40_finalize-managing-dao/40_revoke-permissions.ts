@@ -64,6 +64,12 @@ const func: DeployFunction = async function (hre: EHRE) {
       who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
     },
+    {
+      operation: Operation.Revoke,
+      where: {name: 'DAO', address: managingDAOAddress},
+      who: {name: 'Deployer', address: deployer.address},
+      permission: 'EXECUTE_PERMISSION',
+    },
   ];
   await managePermissions(managingDaoContract, revokePermissions);
 

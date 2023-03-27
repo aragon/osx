@@ -39,4 +39,9 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['ENSSubdomainRegistrar', 'Verify'];
+func.tags = [
+  'ENSRegistry',
+  'ENSSubdomains',
+  'ENSSubdomainRegistrars',
+  'Verify',
+];
