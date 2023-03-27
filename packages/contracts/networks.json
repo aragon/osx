@@ -17,7 +17,6 @@
   "polygon": {
     "url": "https://polygon-mainnet.infura.io/v3/1011d31bf5b34d68b94895caa2d2da58",
     "isTestnet": false,
-    "gasPrice": 40000000000,
     "chainId": 137,
     "feesUrl": "https://gasstation-mainnet.matic.network/v2"
   },
