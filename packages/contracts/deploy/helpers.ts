@@ -471,5 +471,67 @@ export async function registerSubnodeRecord(
   return ensRegistryContract.owner(ethers.utils.namehash(domain));
 }
 
+export async function transferSubnodeRecord(
+  domain: string,
+  newOwner: string,
+  ensRegistryAddress: string
+): Promise<void> {
+  const domainSplitted = domain.split('.');
+  const subdomain = domainSplitted.splice(0, 1)[0];
+  const parentDomain = domainSplitted.join('.');
+
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  const tx = await ensRegistryContract.setSubnodeOwner(
+    ethers.utils.namehash(parentDomain),
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+    newOwner
+  );
+  console.log(
+    `Transfering owner of ${domain} to ${newOwner} with tx ${tx.hash}`
+  );
+  await tx.wait();
+}
+
+// transfers owner ship of a domain and all parent domains to a new owner if it matches the expected current owner
+export async function transferSubnodeChain(
+  fullDomain: string,
+  newOwner: string,
+  currentOwner: string,
+  ensRegistryAddress: string
+): Promise<void> {
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  const daoDomainSplitted = fullDomain.split('.').reverse();
+  let domain = '';
+  // +1 on length because we also need to check the owner of the empty domain
+  for (let i = 0; i < daoDomainSplitted.length + 1; i++) {
+    const domainOwner = await ensRegistryContract.callStatic.owner(
+      ethers.utils.namehash(domain)
+    );
+    if (domainOwner !== newOwner && domainOwner === currentOwner) {
+      const tx = await ensRegistryContract.setOwner(
+        ethers.utils.namehash(domain),
+        newOwner
+      );
+      console.log(
+        `Changing owner of ${domain} from (currentOwner) ${domainOwner} to ${newOwner} (newOwner)`
+      );
+      await tx.wait();
+    }
+
+    domain = `${daoDomainSplitted[i]}.${domain}`;
+    if (i === 0) {
+      domain = daoDomainSplitted[i];
+    }
+  }
+}
+
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
 export default function () {}

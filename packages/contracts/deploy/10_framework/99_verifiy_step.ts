@@ -30,12 +30,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ensAddr
     );
     const isApprovedForAll = await ensRegistryContract.isApprovedForAll(
-      deployer,
+      managingDAOAddress,
       DAOENSSubdomainRegistrarAddress
     );
     if (!isApprovedForAll) {
       throw new Error(
-        `DAOENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${DAOENSSubdomainRegistrarAddress} approved for all`
+        `DAOENSSubdomainRegistrar isn't approved for all. Expected ${managingDAOAddress} to have ${DAOENSSubdomainRegistrarAddress} approved for all`
       );
     }
 
@@ -68,12 +68,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ensAddr
     );
     const isApprovedForAll = await ensRegistryContract.isApprovedForAll(
-      deployer,
+      managingDAOAddress,
       PluginENSSubdomainRegistrarAddress
     );
     if (!isApprovedForAll) {
       throw new Error(
-        `PluginENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${PluginENSSubdomainRegistrarAddress} approved for all`
+        `PluginENSSubdomainRegistrar isn't approved for all. Expected ${managingDAOAddress} to have ${PluginENSSubdomainRegistrarAddress} approved for all`
       );
     }
 

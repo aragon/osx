@@ -1,8 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-
-import {MANAGING_DAO_METADATA, uploadToIPFS} from '../helpers';
-
 /** NOTE:
  * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */

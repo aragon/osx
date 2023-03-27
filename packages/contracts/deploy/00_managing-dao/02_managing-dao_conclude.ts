@@ -11,4 +11,4 @@ const func: DeployFunction = async function (hre: EHRE) {
 };
 
 export default func;
-func.tags = ['ManagingDao', 'Verify'];
+func.tags = ['ManagingDao', 'ManagingDaoPermissions', 'Verify'];
