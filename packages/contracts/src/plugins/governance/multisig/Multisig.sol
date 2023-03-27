@@ -60,10 +60,6 @@ contract Multisig is
         uint16 minApprovals;
     }
 
-    /// @notice Keeps track at which the settings has been changed the last time.
-    /// @dev This variable is used to prevent proposal creations from happing in the same block as the settings have been changed.
-    uint64 public lastMultisigSettingsChange;
-
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MULTISIG_INTERFACE_ID =
         this.initialize.selector ^
@@ -80,6 +76,10 @@ contract Multisig is
 
     /// @notice The current plugin settings.
     MultisigSettings public multisigSettings;
+
+    /// @notice Keeps track at which block number the multisig settings have been changed the last time.
+    /// @dev This variable prevents a proposal from being created in the same block in which the multisig settings change.
+    uint64 public lastMultisigSettingsChange;
 
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
@@ -450,5 +450,5 @@ contract Multisig is
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 }
