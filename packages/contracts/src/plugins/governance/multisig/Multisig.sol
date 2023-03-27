@@ -79,7 +79,7 @@ contract Multisig is
 
     /// @notice Keeps track at which block number the multisig settings have been changed the last time.
     /// @dev This variable prevents a proposal from being created in the same block in which the multisig settings change.
-    uint64 private lastMultisigSettingsChange;
+    uint64 public lastMultisigSettingsChange;
 
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
