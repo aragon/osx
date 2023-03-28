@@ -22,10 +22,8 @@ jobs:
         with:
           cache: 'yarn'
           node-version: 16
-      - name: Install yarn
-        run: npm i -G yarn
       - name: Install dependencies
-        run: yarn
+        run: cd ../../ && yarn install --pure-lockfile
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts
