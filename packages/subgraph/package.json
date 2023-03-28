@@ -14,6 +14,7 @@
     "deploy:local": "LOCAL=true scripts/deploy-subgraph.sh",
     "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
     "stop:dev": "docker-compose -f docker/docker-compose.yml down",
+    "generate:builders": "ts-node scripts/generator.ts",
     "test": "graph test -r",
     "coverage": "graph test -c",
     "formatting:check": "prettier '**/*.{json,ts,js}' -c",
@@ -26,6 +27,9 @@
     "@typescript-eslint/parser": "^5.18.0",
     "eslint": "^8.12.0",
     "matchstick-as": "^0.5.1",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "ts-morph": "^17.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
   }
 }
