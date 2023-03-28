@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          node-version: 14
+          node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Build manifest
@@ -53,7 +53,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          node-version: 14
+          node-version: 16
       - name: Install dependencies
         run: yarn
       - name: Build contracts
