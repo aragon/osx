@@ -20,6 +20,8 @@ import {
   IPlugin__factory,
   IProposal__factory,
 } from '../../../../typechain';
+import {ProposalCreatedEvent} from '../../../../typechain/Admin';
+import {ExecutedEvent} from '../../../../typechain/DAO';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -197,7 +199,10 @@ describe('Admin', function () {
 
       await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
-      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        PROPOSAL_EVENTS.PROPOSAL_CREATED
+      );
 
       expect(event.args.proposalId).to.equal(currentExpectedProposalId);
       expect(event.args.creator).to.equal(ownerAddress);
@@ -228,7 +233,10 @@ describe('Admin', function () {
 
       await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
-      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        PROPOSAL_EVENTS.PROPOSAL_CREATED
+      );
 
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
@@ -243,7 +251,7 @@ describe('Admin', function () {
           dummyActions,
           allowFailureMap
         );
-        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+        const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
         expect(event.args.actor).to.equal(plugin.address);
         expect(event.args.callId).to.equal(toBytes32(proposalId));
@@ -259,7 +267,7 @@ describe('Admin', function () {
         const proposalId = 1;
 
         const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
-        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+        const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
         expect(event.args.callId).to.equal(toBytes32(proposalId));
       }
