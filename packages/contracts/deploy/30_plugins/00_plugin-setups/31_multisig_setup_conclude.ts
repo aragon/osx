@@ -1,9 +1,9 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {MultisigSetup__factory} from '../../../typechain';
-import {EHRE} from '../../../utils/types';
 import {setTimeout} from 'timers/promises';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding multisig setup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 

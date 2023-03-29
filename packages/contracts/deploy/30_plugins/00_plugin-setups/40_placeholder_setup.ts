@@ -3,9 +3,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {uploadToIPFS} from '../../helpers';
 
 import placeholderBuildMetadata from '../../../src/plugins/placeholder-version/build-metadata.json';
-import {EHRE} from '../../../utils/types';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();

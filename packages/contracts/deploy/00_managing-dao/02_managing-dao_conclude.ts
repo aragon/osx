@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {EHRE} from '../../utils/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding ManagingDao deployment.\n`);
 
   const {deployments} = hre;

@@ -1,8 +1,8 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {EHRE} from '../../utils/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {PluginRepoFactory__factory} from '../../typechain';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding Plugin Repo Registry deployment.\n`);
 
   const [deployer] = await hre.ethers.getSigners();

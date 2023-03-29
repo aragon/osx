@@ -1,9 +1,9 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DAO} from '../../typechain';
-import {EHRE} from '../../utils/types';
 import {getContractAddress, getENSAddress} from '../helpers';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers, network} = hre;
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();

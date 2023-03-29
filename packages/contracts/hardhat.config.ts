@@ -13,7 +13,7 @@ import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
-import {AragonPluginRepos} from './utils/types';
+import {AragonPluginRepos, EHRE} from './utils/types';
 
 dotenv.config();
 

@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, aragonPluginRepos} = hre;
 
   const deployedContracts = await deployments.all();
-  const deployedContractAddresses = {};
+  const deployedContractAddresses: {[index: string]: string} = {};
 
   for (const deployment in deployedContracts) {
     // skip proxies because they are included twice

@@ -1,11 +1,11 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {
   PluginRepoFactory__factory,
   PluginRepo__factory,
 } from '../../../typechain';
-import {EHRE} from '../../../utils/types';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding AddresslistVotingSetup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 

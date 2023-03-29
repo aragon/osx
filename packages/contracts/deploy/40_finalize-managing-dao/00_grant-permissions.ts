@@ -1,14 +1,14 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {EHRE, Operation} from '../../utils/types';
+import {Operation} from '../../utils/types';
 import {getContractAddress, managePermissions, Permission} from '../helpers';
 import {PluginRepo__factory} from '../../typechain';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);
 
-  const {getNamedAccounts, ethers} = hre;
+  const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
   // Get `DAORegistry` address.
