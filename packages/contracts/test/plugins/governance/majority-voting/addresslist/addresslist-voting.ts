@@ -40,6 +40,11 @@ import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {majorityVotingBaseInterface} from '../majority-voting';
+import {ExecutedEvent} from '../../../../../typechain/DAO';
+import {
+  ProposalCreatedEvent,
+  ProposalExecutedEvent,
+} from '../../../../../typechain/AddresslistVoting';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -464,7 +469,10 @@ describe('AddresslistVoting', function () {
         .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST);
 
-      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        PROPOSAL_EVENTS.PROPOSAL_CREATED
+      );
       expect(event.args.proposalId).to.equal(id);
       expect(event.args.creator).to.equal(signers[0].address);
       expect(event.args.metadata).to.equal(dummyMetadata);
@@ -534,7 +542,10 @@ describe('AddresslistVoting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
-      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        PROPOSAL_EVENTS.PROPOSAL_CREATED
+      );
       expect(event.args.proposalId).to.equal(id);
       expect(event.args.creator).to.equal(signers[0].address);
       expect(event.args.metadata).to.equal(dummyMetadata);
@@ -899,7 +910,7 @@ describe('AddresslistVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Abstain, true);
         {
-          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
           expect(event.args.actor).to.equal(voting.address);
           expect(event.args.callId).to.equal(toBytes32(id));
@@ -914,7 +925,10 @@ describe('AddresslistVoting', function () {
 
         // check for the `ProposalExecuted` event in the voting contract
         {
-          const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_EXECUTED);
+          const event = await findEvent<ProposalExecutedEvent>(
+            tx,
+            PROPOSAL_EVENTS.PROPOSAL_EXECUTED
+          );
           expect(event.args.proposalId).to.equal(id);
         }
 

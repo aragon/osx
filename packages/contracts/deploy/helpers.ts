@@ -6,9 +6,11 @@ import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
-import {EHRE, Operation} from '../utils/types';
+import {Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {PluginRepo__factory, PlaceholderSetupCloneFactory} from '../typechain';
+import {PluginRepo__factory} from '../typechain';
+import {VersionCreatedEvent} from '../typechain/PluginRepo';
+import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -134,7 +136,7 @@ export async function detemineDeployerNextAddress(
 }
 
 export async function createPluginRepo(
-  hre: EHRE,
+  hre: HardhatRuntimeEnvironment,
   pluginName: string
 ): Promise<void> {
   const {network} = hre;
@@ -182,7 +184,10 @@ export async function createPluginRepo(
   );
   await tx.wait();
 
-  const event = await findEvent(tx, 'PluginRepoRegistered');
+  const event = await findEvent<PluginRepoRegisteredEvent>(
+    tx,
+    'PluginRepoRegistered'
+  );
   const repoAddress = event.args.pluginRepo;
 
   hre.aragonPluginRepos[pluginName] = repoAddress;
@@ -215,8 +220,10 @@ export async function createVersion(
 
   await tx.wait();
 
-  const versionCreatedEvent = await findEvent(tx, 'VersionCreated');
-  versionCreatedEvent.args.pluginRepo;
+  const versionCreatedEvent = await findEvent<VersionCreatedEvent>(
+    tx,
+    'VersionCreated'
+  );
 
   console.log(
     `Created build ${versionCreatedEvent.args.build} for release ${
@@ -256,7 +263,7 @@ function isSorted(latestVersions: LatestVersion[]): boolean {
 }
 
 export async function populatePluginRepo(
-  hre: EHRE,
+  hre: HardhatRuntimeEnvironment,
   pluginRepoName: string,
   latestVersions: LatestVersion[]
 ): Promise<void> {
@@ -318,7 +325,7 @@ export type Permission = {
 };
 
 export async function checkPermission(
-  permissionManagerContract: ethers.Contract,
+  permissionManagerContract: Contract,
   permission: Permission
 ) {
   const checkStatus = await isPermissionSetCorrectly(
@@ -339,7 +346,7 @@ export async function checkPermission(
 }
 
 export async function isPermissionSetCorrectly(
-  permissionManagerContract: ethers.Contract,
+  permissionManagerContract: Contract,
   {operation, where, who, permission, data = '0x'}: Permission
 ): Promise<boolean> {
   const permissionId = ethers.utils.id(permission);
@@ -360,7 +367,7 @@ export async function isPermissionSetCorrectly(
 }
 
 export async function managePermissions(
-  permissionManagerContract: ethers.Contract,
+  permissionManagerContract: Contract,
   permissions: Permission[]
 ): Promise<void> {
   // filtering permission to only apply those that are needed
@@ -419,7 +426,9 @@ export async function isENSDomainRegistered(
   return ensRegistryContract.recordExists(ethers.utils.namehash(domain));
 }
 
-export async function getENSAddress(hre: EHRE): Promise<string> {
+export async function getENSAddress(
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
   if (ENS_ADDRESSES[hre.network.name]) {
     return ENS_ADDRESSES[hre.network.name];
   }
@@ -432,7 +441,9 @@ export async function getENSAddress(hre: EHRE): Promise<string> {
   throw new Error('ENS address not found.');
 }
 
-export async function getPublicResolverAddress(hre: EHRE): Promise<string> {
+export async function getPublicResolverAddress(
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
   if (ENS_PUBLIC_RESOLVERS[hre.network.name]) {
     return ENS_PUBLIC_RESOLVERS[hre.network.name];
   }

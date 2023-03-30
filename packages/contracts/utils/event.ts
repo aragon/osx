@@ -4,7 +4,11 @@ export async function findEvent<T>(tx: ContractTransaction, eventName: string) {
   const receipt = await tx.wait();
   const event = (receipt.events || []).find(event => event.event === eventName);
 
-  return event as T | undefined;
+  if (!event) {
+    throw new Error(`Event ${eventName} not found in TX.`);
+  }
+
+  return event as T;
 }
 
 export async function filterEvents(tx: any, eventName: string) {

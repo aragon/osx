@@ -14,6 +14,10 @@ import {
   TokenFactory__factory,
 } from '../../../typechain';
 import {findEvent} from '../../../utils/event';
+import {
+  TokenCreatedEvent,
+  WrappedTokenEvent,
+} from '../../../typechain/TokenFactory';
 
 chai.use(smock.matchers);
 
@@ -156,7 +160,7 @@ describe('Core: TokenFactory', () => {
         mintConfig
       );
 
-      const event = await findEvent(tx, 'WrappedToken');
+      const event = await findEvent<WrappedTokenEvent>(tx, 'WrappedToken');
       const factory = await ethers.getContractFactory('GovernanceWrappedERC20');
       const wrappedToken = factory.attach(event.args.token);
 
@@ -254,7 +258,7 @@ describe('Core: TokenFactory', () => {
         mintConfig
       );
 
-      const event = await findEvent(tx, 'TokenCreated');
+      const event = await findEvent<TokenCreatedEvent>(tx, 'TokenCreated');
       const erc20Contract = await ethers.getContractAt(
         'ERC20Upgradeable',
         event.args.token

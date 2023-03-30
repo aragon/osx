@@ -437,10 +437,6 @@ describe('MultisigSetup', function () {
           'InstallationPrepared'
         );
 
-        if (!preparedEvent) {
-          throw new Error('Failed to get InstallationPrepared event');
-        }
-
         await expect(
           psp.applyInstallation(dao.address, {
             pluginSetupRef: {
@@ -494,10 +490,6 @@ describe('MultisigSetup', function () {
           tx,
           'UpdatePrepared'
         );
-
-        if (!preparedEvent) {
-          throw new Error('UpdatePrepared event not found1');
-        }
 
         await expect(
           psp.applyUpdate(dao.address, {
@@ -570,10 +562,6 @@ describe('MultisigSetup', function () {
           tx,
           'InstallationPrepared'
         );
-
-        if (!preparedEvent) {
-          throw new Error('Failed to get InstallationPrepared event');
-        }
 
         await expect(
           psp.applyInstallation(dao.address, {
