@@ -45,6 +45,8 @@ import {
   prepareUninstallation,
   prepareUpdate,
 } from '../../test-utils/psp/wrappers';
+import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
+import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -253,7 +255,10 @@ describe('DAOFactory: ', function () {
       '0x00',
       '0x00'
     );
-    const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
+    const event = await findEvent<PluginRepoRegisteredEvent>(
+      tx,
+      EVENTS.PluginRepoRegistered
+    );
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
     const factory = await ethers.getContractFactory('PluginRepo');
@@ -556,7 +561,10 @@ describe('DAOFactory: ', function () {
         '0x11',
         '0x11'
       );
-      let event = await findEvent(tx, EVENTS.PluginRepoRegistered);
+      let event = await findEvent<PluginRepoRegisteredEvent>(
+        tx,
+        EVENTS.PluginRepoRegistered
+      );
       adminPluginRepoAddress = event.args.pluginRepo;
 
       // create dao with admin plugin.
@@ -576,8 +584,11 @@ describe('DAOFactory: ', function () {
         data
       );
       tx = await daoFactory.createDao(daoSettings, [adminPluginInstallation]);
-      event = await findEvent(tx, EVENTS.InstallationPrepared);
       {
+        const event = await findEvent<InstallationPreparedEvent>(
+          tx,
+          EVENTS.InstallationPrepared
+        );
         const adminFactory = await ethers.getContractFactory('Admin');
         adminPlugin = adminFactory.attach(event.args.plugin);
 

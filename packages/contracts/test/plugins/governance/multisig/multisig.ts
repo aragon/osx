@@ -34,6 +34,11 @@ import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
+import {
+  ApprovedEvent,
+  ProposalExecutedEvent,
+} from '../../../../typechain/Multisig';
+import {ExecutedEvent} from '../../../../typechain/DAO';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -923,7 +928,7 @@ describe('Multisig', function () {
 
         const tx = await multisig.connect(signers[0]).approve(id, false);
 
-        const event = await findEvent(tx, 'Approved');
+        const event = await findEvent<ApprovedEvent>(tx, 'Approved');
         expect(event.args.proposalId).to.eq(id);
         expect(event.args.approver).to.not.eq(multisig.address);
         expect(event.args.approver).to.eq(signers[0].address);
@@ -1091,18 +1096,22 @@ describe('Multisig', function () {
 
         // `tryExecution` is turned on but the vote is not decided yet
         let tx = await multisig.connect(signers[1]).approve(id, true);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await expect(
+          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
+        ).to.rejectedWith('Event Executed not found in TX.');
 
         expect(await multisig.canExecute(id)).to.equal(false);
 
         // `tryExecution` is turned off and the vote is decided
         tx = await multisig.connect(signers[2]).approve(id, false);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await expect(
+          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
+        ).to.rejectedWith('Event Executed not found in TX.');
 
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
         {
-          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
           expect(event.args.actor).to.equal(multisig.address);
           expect(event.args.callId).to.equal(toBytes32(id));
@@ -1118,7 +1127,10 @@ describe('Multisig', function () {
 
         // check for the `ProposalExecuted` event in the voting contract
         {
-          const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_EXECUTED);
+          const event = await findEvent<ProposalExecutedEvent>(
+            tx,
+            PROPOSAL_EVENTS.PROPOSAL_EXECUTED
+          );
           expect(event.args.proposalId).to.equal(id);
         }
 

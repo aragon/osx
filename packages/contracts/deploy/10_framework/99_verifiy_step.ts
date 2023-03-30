@@ -6,8 +6,7 @@ import {checkSetManagingDao, getContractAddress} from '../helpers';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying framework deployment.');
 
-  const {getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers} = hre;
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);

@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(
       `Verifying address ${element.address} with constructor argument ${element.args}.`
     );
-    await verifyContract(element.address, element.args);
+    await verifyContract(element.address, element.args || []);
 
     // Etherscan Max rate limit is 1/5s,
     // use 6s just to be safe.

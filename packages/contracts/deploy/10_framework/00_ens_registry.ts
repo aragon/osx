@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {setupENS} from '../../utils/ens';
 
-import {ENS_ADDRESSES, getContractAddress} from '../helpers';
+import {ENS_ADDRESSES} from '../helpers';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

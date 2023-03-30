@@ -4,11 +4,13 @@ import buildMetadataJson from '../../src/plugins/governance/multisig/build-metad
 import {findEvent} from '../../utils/event';
 
 import {checkPermission, getContractAddress} from '../helpers';
-import {EHRE, Operation} from '../../utils/types';
+import {Operation} from '../../utils/types';
 import {hashHelpers} from '../../utils/psp';
 import {MultisigSetup__factory, Multisig__factory} from '../../typechain';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {InstallationPreparedEvent} from '../../typechain/PluginSetupProcessor';
 
-const func: DeployFunction = async function (hre: EHRE) {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
   const [deployer] = await ethers.getSigners();
 
@@ -55,29 +57,37 @@ const func: DeployFunction = async function (hre: EHRE) {
 
   // Install multisig build 2
   const multisigRepoAddress = hre.aragonPluginRepos['multisig'];
-  const versionTag = [1, 2];
-  const pluginSetupRef = [versionTag, multisigRepoAddress];
+  const versionTag = {
+    release: 1,
+    build: 2,
+  };
+  const pluginSetupRef = {
+    pluginSetupRepo: multisigRepoAddress,
+    versionTag,
+  };
 
   // Prepare multisig plugin for managingDAO
   const data = ethers.utils.defaultAbiCoder.encode(
     buildMetadataJson.pluginSetupABI.prepareInstallation,
     [approvers, [listedOnly, minApprovals]]
   );
-  const prepareParams = [pluginSetupRef, data];
-  const prepareTx = await pspContract.prepareInstallation(
-    managingDAOAddress,
-    prepareParams
-  );
+  const prepareTx = await pspContract.prepareInstallation(managingDAOAddress, {
+    data,
+    pluginSetupRef,
+  });
   await prepareTx.wait();
 
   // extract info from prepare event
-  const event = await findEvent(prepareTx, 'InstallationPrepared');
+  const event = await findEvent<InstallationPreparedEvent>(
+    prepareTx,
+    'InstallationPrepared'
+  );
   const installationPreparedEvent = event.args;
 
   hre.managingDAOMultisigPluginAddress = installationPreparedEvent.plugin;
 
   console.log(
-    `Prepared (Multisig: ${installationPreparedEvent.plugin} version ${versionTag}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
+    `Prepared (Multisig: ${installationPreparedEvent.plugin} version (release: ${versionTag.release} / build: ${versionTag.build}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
   );
 
   // Adding plugin to verify array
@@ -105,16 +115,14 @@ const func: DeployFunction = async function (hre: EHRE) {
   });
 
   // Apply multisig plugin to the managingDAO
-  const applyParams = [
+  const applyTx = await pspContract.applyInstallation(managingDAOAddress, {
+    helpersHash: hashHelpers(
+      installationPreparedEvent.preparedSetupData.helpers
+    ),
+    permissions: installationPreparedEvent.preparedSetupData.permissions,
+    plugin: installationPreparedEvent.plugin,
     pluginSetupRef,
-    installationPreparedEvent.plugin,
-    installationPreparedEvent.preparedSetupData.permissions,
-    hashHelpers(installationPreparedEvent.preparedSetupData.helpers),
-  ];
-  const applyTx = await pspContract.applyInstallation(
-    managingDAOAddress,
-    applyParams
-  );
+  });
   await applyTx.wait();
 
   await checkPermission(managingDaoContract, {

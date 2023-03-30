@@ -1,11 +1,12 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {getContractAddress, managePermissions, Permission} from '../helpers';
-import {EHRE, Operation} from '../../utils/types';
+import {Operation} from '../../utils/types';
 import {PluginRepo__factory} from '../../typechain';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const func: DeployFunction = async function (hre: EHRE) {
-  const {getNamedAccounts, ethers} = hre;
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
