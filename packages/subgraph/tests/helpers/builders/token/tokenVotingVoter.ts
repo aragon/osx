@@ -6,6 +6,9 @@ import {ADDRESS_ONE, CONTRACT_ADDRESS, ZERO} from '../../../constants';
 export class TokenVotingVoterBuild extends TokenVotingVoter {
   constructor() {
     super(ADDRESS_ONE);
+  }
+
+  withDefault() {
     this.address = ADDRESS_ONE;
     this.plugin = CONTRACT_ADDRESS;
     this.lastUpdated = BigInt.fromString(ZERO);

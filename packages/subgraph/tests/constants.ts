@@ -19,14 +19,6 @@ export const TWO = '2';
 export const THREE = '3';
 
 export const PROPOSAL_ID = ZERO;
-export const PROPOSAL_ENTITY_ID = getProposalId(
-  Address.fromString(CONTRACT_ADDRESS),
-  BigInt.fromString(PROPOSAL_ID)
-);
-
-export const PLUGIN_ENTITY_ID = Address.fromString(
-  CONTRACT_ADDRESS
-).toHexString();
 
 export const STRING_DATA = 'Some String Data ...';
 
@@ -72,3 +64,12 @@ export const PLUGIN_SETUP_ID =
   '0xfb3fd2c4cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 export const APPLIED_PLUGIN_SETUP_ID =
   '0x00000000cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
+
+export const PROPOSAL_ENTITY_ID = getProposalId(
+  Address.fromString(CONTRACT_ADDRESS),
+  BigInt.fromString(PROPOSAL_ID)
+);
+
+export const PLUGIN_ENTITY_ID = Address.fromString(
+  CONTRACT_ADDRESS
+).toHexString();
