@@ -115,7 +115,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   console.log(
-    `\nManagingDao is no longer owned by the (Deployer: ${deployer}),` +
+    `\nManagingDao is no longer owned by the (Deployer: ${deployer.address}),` +
       ` and all future actions of the (managingDAO: ${managingDAOAddress}) will be handled by the newly installed (Multisig plugin).`
   );
 };
