@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity >=0.8.0 <0.9.0;
 
 // The base value to encode real-valued ratios on the interval `[0,1]` as integers on the interval `[0, 10**6]`.
 uint256 constant RATIO_BASE = 10 ** 6;

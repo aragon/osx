@@ -39,7 +39,7 @@ Let's again start with the deployment and initialization. Here, it is simple bec
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
@@ -234,7 +234,7 @@ After putting everything together, we obtain the final `SimpleAdminSetup` contra
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 
