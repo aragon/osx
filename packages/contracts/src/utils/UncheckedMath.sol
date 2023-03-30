@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity >=0.8.8 <0.9.0;
+pragma solidity ^0.8.8;
 
 /// @notice Increments an unsigned integer by one without checking the result for overflow errors (using safe math).
 /// @param i The number to be incremented.
