@@ -1,13 +1,15 @@
 {
   "goerli": {
-    "url": "https://goerli.infura.io/v3/92aa62d2bb5449cfafe04b83ca8636f1",
+    "url": "https://rpc.tenderly.co/fork/2013fa6d-e840-4248-b9da-3d4e5b475fb3",
     "isTestnet": true,
-    "chainId": 5
+    "chainId": 5,
+    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
   },
   "mainnet": {
-    "url": "https://mainnet.eth.aragon.network/",
+    "url": "https://rpc.tenderly.co/fork/0fc1f619-9017-499f-adcd-f8f176ceb1a2",
     "isTestnet": false,
-    "chainId": 1
+    "chainId": 1,
+    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
   },
   "arbitrum": {
     "url": "https://arbitrum-mainnet.infura.io/v3/92aa62d2bb5449cfafe04b83ca8636f1",
@@ -18,12 +20,14 @@
     "url": "https://polygon-mainnet.infura.io/v3/1011d31bf5b34d68b94895caa2d2da58",
     "isTestnet": false,
     "chainId": 137,
-    "feesUrl": "https://gasstation-mainnet.matic.network/v2"
+    "feesUrl": "https://gasstation-mainnet.matic.network/v2",
+    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
   },
   "mumbai": {
     "url": "https://rpc.ankr.com/polygon_mumbai",
     "isTestnet": true,
     "chainId": 80001,
-    "feesUrl": "https://gasstation-mumbai.matic.today/v2"
+    "feesUrl": "https://gasstation-mumbai.matic.today/v2",
+    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
   }
 }

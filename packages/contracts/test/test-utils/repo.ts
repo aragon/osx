@@ -5,7 +5,7 @@ import {
   PluginRepoFactory,
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
-} from '../../typechain';
+} from '../../../typechain';
 import {deployWithProxy} from './proxy';
 import {getMergedABI} from '../../utils/abi';
 

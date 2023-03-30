@@ -12,7 +12,7 @@ import {
   MerkleMinter__factory,
   TokenFactory,
   TokenFactory__factory,
-} from '../../typechain';
+} from '../../../typechain';
 import {findEvent} from '../../../utils/event';
 
 chai.use(smock.matchers);

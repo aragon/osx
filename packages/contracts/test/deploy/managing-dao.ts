@@ -10,8 +10,8 @@ import {
   ENSSubdomainRegistrar,
   Multisig,
   PluginRepoRegistry,
-} from '../../typechain';
-import {EHRE} from '../../utils/types';
+} from '../../../typechain';
+import {EHRE} from '../../../utils/types';
 
 async function deployAll() {
   await deployments.fixture();
