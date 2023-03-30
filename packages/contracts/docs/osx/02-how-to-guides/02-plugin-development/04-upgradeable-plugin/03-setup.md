@@ -13,7 +13,7 @@ Now, we show the setup contracts associated with the 3 builds we have implemente
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
@@ -45,7 +45,7 @@ For the first build, the setup is very similar to the [setup example for the non
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
@@ -117,7 +117,7 @@ contract SimpleStorageBuild1Setup is PluginSetup {
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
@@ -167,7 +167,7 @@ Additionally, since we want to support updates from build 1 to build 2, we must 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
@@ -263,7 +263,7 @@ Let's have a close look at the implemented `prepareUpdate` function. The functio
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
@@ -336,7 +336,7 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';

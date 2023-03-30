@@ -15,7 +15,7 @@ To use the Aragon OSx contracts inside your project, import them with `yarn add 
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
@@ -37,7 +37,7 @@ Next, you write a plugin setup contract:
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.8.8 <0.9.0;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
