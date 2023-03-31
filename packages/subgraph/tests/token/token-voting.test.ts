@@ -234,9 +234,15 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   let eRC20ContractBuilder = new ERC20ContractBuilder().withDefaultValues();
 
+  eRC20ContractBuilder.buildOrUpdate();
+  eRC20ContractBuilder.assertEntity();
+
   log.debug('decimals == {}', [eRC20ContractBuilder.decimals.toString()]);
   eRC20ContractBuilder.decimals = 44;
   log.debug('decimals == {}', [eRC20ContractBuilder.decimals.toString()]);
+
+  eRC20ContractBuilder.buildOrUpdate();
+  eRC20ContractBuilder.assertEntity();
 
   // create state
   let proposalBuilder = new TokenVotingProposalBuilder().withDefaultValues();
@@ -244,29 +250,32 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   proposalBuilder.buildOrUpdate();
 
   // check proposal entity
-  // proposalBuilder.assertEntity();
+  proposalBuilder.assertEntity();
 
   // // create calls
-  // proposalBuilder.yes = bigInt.fromString(ONE);
-  // proposalBuilder.fireCall_getProposal(actions);
-  // proposalBuilder.fireCall_totalVotingPower();
+  proposalBuilder.yes = bigInt.fromString(ONE);
+  proposalBuilder.fireCall_getProposal(actions);
+  proposalBuilder.fireCall_totalVotingPower();
 
-  // // create event
-  // let voteBuilder = new TokenVotingVoteBuilder();
-  // voteBuilder.voteOption = 'Yes';
-  // voteBuilder.votingPower = bigInt.fromString(ONE);
+  // create event
+  let voteBuilder = new TokenVotingVoteBuilder().withDefaultValues();
+  voteBuilder.voteOption = 'Yes';
+  voteBuilder.votingPower = bigInt.fromString(ONE);
 
-  // // fire an event of `VoteCast` with voter info.
-  // let event = proposalBuilder.fireEvent_VoteCast(
-  //   voteBuilder.voter,
-  //   voteBuilder.voteOption,
-  //   voteBuilder.votingPower.toString()
-  // );
+  log.debug('id = {}', [voteBuilder.id]);
+  log.debug('voter = {}', [voteBuilder.voter]);
 
-  // // test handler
-  // handleVoteCast(event);
+  // fire an event of `VoteCast` with voter info.
+  let event = proposalBuilder.fireEvent_VoteCast(
+    voteBuilder.voter,
+    voteBuilder.voteOption,
+    voteBuilder.votingPower.toString()
+  );
 
-  // // checks vote entity created via handler (not builder)
+  // test handler
+  handleVoteCast(event);
+
+  // checks vote entity created via handler (not builder)
   // voteBuilder.assertEntity();
 
   // check voter

@@ -25,6 +25,7 @@ export class TokenVotingVoterBuild extends TokenVotingVoter {
     let entries = entity.entries;
     for (let i = 0; i < entries.length; i++) {
       let key = entries[i].key;
+
       let value = this.get(key)?.toString();
 
       if (!value) {

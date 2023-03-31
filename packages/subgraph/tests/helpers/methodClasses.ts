@@ -137,12 +137,12 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
   }
 }
 
-class TokenVotingVoteBuilder extends TokenVotingVote {
+class TokenVotingVoteMethods extends TokenVotingVote {
   // build entity
   // if id not changed it will update
-  withDefaultValues(): TokenVotingVoteBuilder {
+  withDefaultValues(): TokenVotingVoteMethods {
     this.id = ADDRESS_ONE.concat('_').concat(PROPOSAL_ENTITY_ID);
-    this.voter = CONTRACT_ADDRESS.concat('_').concat(ADDRESS_ONE);
+    this.voter = ADDRESS_ONE;
     this.proposal = PROPOSAL_ENTITY_ID;
     this.voteOption = VOTER_OPTIONS.get(0) as string;
     this.votingPower = BigInt.fromString(TWO);
