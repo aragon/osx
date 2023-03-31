@@ -6,7 +6,7 @@ import {
   TestERC721__factory,
   GovernanceERC20__factory,
   TestERC1155__factory,
-} from '../../../typechain';
+} from '../../typechain';
 import {deployWithProxy} from './proxy';
 
 export const ZERO_BYTES32 =
