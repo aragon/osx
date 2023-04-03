@@ -40,6 +40,7 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];
   hre.managingDAOMultisigPluginAddress = '';
+  hre.managingDAOActions = [];
 });
 
 // You need to export an object to set up your config
@@ -66,6 +67,7 @@ const config: HardhatUserConfig = {
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
       gasPrice: 8000000000,
+      deploy: ['./deploy/new', './deploy/verification'],
     },
     ...networks,
   },

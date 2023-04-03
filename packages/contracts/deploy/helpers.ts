@@ -544,5 +544,26 @@ export async function transferSubnodeChain(
   }
 }
 
+/**
+ * Returns the managing DAO' multisig address defined in the environment variables. Throws if not found
+ *
+ * @export
+ * @param {HardhatRuntimeEnvironment} hre
+ * @return {string}
+ */
+export function getManagingDAOMultisigAddress(
+  hre: HardhatRuntimeEnvironment
+): string {
+  const {network} = hre;
+  const address =
+    process.env[`${network.name.toUpperCase()}_MANAGINGDAO_MULTISIG`];
+  if (!address) {
+    throw new Error(
+      `Failed to find managing DAO multisig address in env variables for ${network.name}`
+    );
+  }
+  return address;
+}
+
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
 export default function () {}
