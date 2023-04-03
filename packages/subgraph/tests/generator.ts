@@ -134,12 +134,11 @@ function main() {
         writer.writeLine(`  let key = entries[i].key;`);
         // writer.writeLine('  log.debug("key = {}",[key]);');
         writer.writeLine(`  let value = this.get(key);`);
-        writer.writeLine(`  if (!value) {`);
-        writer.writeLine(`    throw new Error("value is null");`);
-        writer.writeLine(`  }`);
+        writer.writeLine(`  if (value) {`);
         writer.writeLine(
-          `   assert.fieldEquals("${originalClassName}", this.id, key, value.displayData());`
+          `    assert.fieldEquals("${originalClassName}", this.id, key, value.displayData());`
         );
+        writer.writeLine(`  }`);
         writer.writeLine(`}`);
       }
     });

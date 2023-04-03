@@ -29,7 +29,9 @@ import {
   ALLOW_FAILURE_MAP,
   ADDRESS_TWO,
   PROPOSAL_ENTITY_ID,
-  ONE
+  ONE,
+  ZERO,
+  TWO
 } from '../constants';
 
 import {
@@ -47,7 +49,8 @@ import {
 import {
   ERC20ContractBuilder,
   TokenVotingProposalBuilder,
-  TokenVotingVoteBuilder
+  TokenVotingVoteBuilder,
+  TokenVotingVoterBuilder
 } from '../helpers/schemaBuilders';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
@@ -232,18 +235,6 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 });
 
 test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
-  let eRC20ContractBuilder = new ERC20ContractBuilder().withDefaultValues();
-
-  eRC20ContractBuilder.buildOrUpdate();
-  eRC20ContractBuilder.assertEntity();
-
-  log.debug('decimals == {}', [eRC20ContractBuilder.decimals.toString()]);
-  eRC20ContractBuilder.decimals = 44;
-  log.debug('decimals == {}', [eRC20ContractBuilder.decimals.toString()]);
-
-  eRC20ContractBuilder.buildOrUpdate();
-  eRC20ContractBuilder.assertEntity();
-
   // create state
   let proposalBuilder = new TokenVotingProposalBuilder().withDefaultValues();
 
@@ -258,16 +249,15 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   proposalBuilder.fireCall_totalVotingPower();
 
   // create event
+  let voterBuilder = new TokenVotingVoterBuilder().withDefaultValues();
+
   let voteBuilder = new TokenVotingVoteBuilder().withDefaultValues();
   voteBuilder.voteOption = 'Yes';
   voteBuilder.votingPower = bigInt.fromString(ONE);
 
-  log.debug('id = {}', [voteBuilder.id]);
-  log.debug('voter = {}', [voteBuilder.voter]);
-
   // fire an event of `VoteCast` with voter info.
   let event = proposalBuilder.fireEvent_VoteCast(
-    voteBuilder.voter,
+    voterBuilder.address,
     voteBuilder.voteOption,
     voteBuilder.votingPower.toString()
   );
@@ -276,140 +266,59 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event);
 
   // checks vote entity created via handler (not builder)
-  // voteBuilder.assertEntity();
+  voteBuilder.assertEntity();
 
-  // check voter
-  // let memberId =
-  //   Address.fromString(CONTRACT_ADDRESS).toHexString() +
-  //   '_' +
-  //   Address.fromString(ADDRESS_ONE).toHexString();
+  // check proposal
+  // expected changes to the proposal entity
+  proposalBuilder.castedVotingPower = BigInt.fromString(ONE);
+  proposalBuilder.executable = false;
+  // assert proposal entity
+  proposalBuilder.assertEntity();
 
-  // assert.fieldEquals('TokenVotingVoter', memberId, 'id', memberId);
-  // assert.fieldEquals('TokenVotingVoter', memberId, 'address', ADDRESS_ONE);
-  // assert.fieldEquals(
-  //   'TokenVotingVoter',
-  //   memberId,
-  //   'plugin',
-  //   Address.fromString(CONTRACT_ADDRESS).toHexString()
-  // );
-  // assert.fieldEquals(
-  //   'TokenVotingVoter',
-  //   memberId,
-  //   'lastUpdated',
-  //   event.block.timestamp.toString()
-  // );
+  // Check when voter replace vote
+  // create calls 2
+  proposalBuilder.yes = BigInt.fromString(ZERO);
+  proposalBuilder.no = BigInt.fromString(ONE);
+  proposalBuilder.fireCall_getProposal(actions);
+  proposalBuilder.fireCall_totalVotingPower();
 
-  // // check proposal
-  // assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
+  voteBuilder.voteOption = 'No';
 
-  // // Check executable
-  // // abstain: 0, yes: 1, no: 0
-  // // support          : 100%
-  // // worstCaseSupport :  33%
-  // // participation    :  33%
-  // assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'false');
-  // // check vote count
-  // assert.fieldEquals(
-  //   'TokenVotingProposal',
-  //   proposal.id,
-  //   'castedVotingPower',
-  //   '1'
-  // );
+  let event2 = proposalBuilder.fireEvent_VoteCast(
+    voterBuilder.address,
+    voteBuilder.voteOption,
+    voteBuilder.votingPower.toString()
+  );
 
-  // // Check when voter replace vote
-  // // create calls 2
-  // createGetProposalCall(
-  //   CONTRACT_ADDRESS,
-  //   PROPOSAL_ID,
-  //   true,
-  //   false,
+  handleVoteCast(event2);
 
-  //   VOTING_MODE,
-  //   SUPPORT_THRESHOLD,
-  //   MIN_VOTING_POWER,
-  //   START_DATE,
-  //   END_DATE,
-  //   SNAPSHOT_BLOCK,
+  // expected changes in TokenVotingVote
+  voteBuilder.voteReplaced = true;
+  voteBuilder.updatedAt = bigInt.fromString(ONE);
 
-  //   '0', // abstain
-  //   '0', // yes
-  //   '1', // no
+  // checks vote entity created via handler (not builder)
+  voteBuilder.assertEntity();
 
-  //   actions,
-  //   ALLOW_FAILURE_MAP
-  // );
+  // create calls 3
+  proposalBuilder.yes = BigInt.fromString(TWO);
+  proposalBuilder.no = BigInt.fromString(ZERO);
+  proposalBuilder.fireCall_getProposal(actions);
 
-  // createTotalVotingPowerCall(
-  //   CONTRACT_ADDRESS,
-  //   SNAPSHOT_BLOCK,
-  //   TOTAL_VOTING_POWER
-  // );
+  voteBuilder.voteOption = 'Yes';
 
-  // // create event
-  // let event2 = createNewVoteCastEvent(
-  //   PROPOSAL_ID,
-  //   ADDRESS_ONE,
-  //   '3', // No
-  //   '1', // votingPower
-  //   CONTRACT_ADDRESS
-  // );
+  let event3 = proposalBuilder.fireEvent_VoteCast(
+    voterBuilder.address,
+    voteBuilder.voteOption,
+    voteBuilder.votingPower.toString()
+  );
 
-  // handleVoteCast(event2);
+  handleVoteCast(event3);
 
-  // // checks 2
-  // assert.fieldEquals('TokenVotingVote', voteEntityID, 'voteReplaced', 'true');
-  // assert.fieldEquals(
-  //   'TokenVotingVote',
-  //   voteEntityID,
-  //   'updatedAt',
-  //   event2.block.timestamp.toString()
-  // );
+  // expected changes to the proposal entity
+  proposalBuilder.executable = true;
+  proposalBuilder.castedVotingPower = BigInt.fromString(TWO);
 
-  // // create calls 3
-  // createGetProposalCall(
-  //   CONTRACT_ADDRESS,
-  //   PROPOSAL_ID,
-  //   true,
-  //   false,
-
-  //   VOTING_MODE,
-  //   SUPPORT_THRESHOLD,
-  //   MIN_VOTING_POWER,
-  //   START_DATE,
-  //   END_DATE,
-  //   SNAPSHOT_BLOCK,
-
-  //   '0', // abstain
-  //   '2', // yes
-  //   '0', // no
-
-  //   actions,
-  //   ALLOW_FAILURE_MAP
-  // );
-  // // create event 3
-  // let event3 = createNewVoteCastEvent(
-  //   PROPOSAL_ID,
-  //   ADDRESS_TWO,
-  //   '2', // yes
-  //   '1', // votingPower
-  //   CONTRACT_ADDRESS
-  // );
-
-  // handleVoteCast(event3);
-
-  // // Check executable
-  // // abstain: 0, yes: 2, no: 0
-  // // support          : 100%
-  // // worstCaseSupport :  67%
-  // // participation    :  67%
-  // assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'true');
-
-  // assert.fieldEquals(
-  //   'TokenVotingProposal',
-  //   proposal.id,
-  //   'castedVotingPower',
-  //   '2'
-  // );
+  proposalBuilder.assertEntity();
 
   clearStore();
 });

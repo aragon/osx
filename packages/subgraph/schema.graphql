@@ -356,7 +356,7 @@ type TokenVotingMember @entity {
 
 type TokenVotingVoter @entity {
   id: ID! # address
-  address: String # address as string to facilitate filtering by address on the UI
+  address: String! # address as string to facilitate filtering by address on the UI
   proposals: [TokenVotingVote!]! @derivedFrom(field: "voter")
   plugin: TokenVotingPlugin!
   lastUpdated: BigInt

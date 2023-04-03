@@ -1,6 +1,6 @@
 /**
  * IMPORTANT: Do not export classes from this file.
- * The classes of this file is meant to be incorporated into the classes of ./schemaBuilders.ts
+ * The classes of this file are meant to be incorporated into the classes of ./schemaBuilders.ts
  */
 
 import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
@@ -45,9 +45,12 @@ class ERC20ContractMethods extends ERC20Contract {
 }
 class TokenVotingVoterMethods extends TokenVotingVoter {
   withDefaultValues(): TokenVotingVoterMethods {
-    this.id = ADDRESS_ONE;
-    this.address = ADDRESS_ONE;
-    this.plugin = CONTRACT_ADDRESS;
+    this.id = Address.fromHexString(CONTRACT_ADDRESS)
+      .toHexString()
+      .concat('_')
+      .concat(Address.fromHexString(ADDRESS_ONE).toHexString());
+    this.address = Address.fromHexString(ADDRESS_ONE).toHexString();
+    this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
     this.lastUpdated = BigInt.fromString(ZERO);
 
     return this;
@@ -76,6 +79,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     this.yes = BigInt.fromString(ZERO);
     this.no = BigInt.fromString(ZERO);
     this.abstain = BigInt.fromString(ZERO);
+    this.castedVotingPower = BigInt.fromString(ZERO);
 
     this.totalVotingPower = BigInt.fromString(TOTAL_VOTING_POWER);
     this.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
@@ -141,8 +145,14 @@ class TokenVotingVoteMethods extends TokenVotingVote {
   // build entity
   // if id not changed it will update
   withDefaultValues(): TokenVotingVoteMethods {
-    this.id = ADDRESS_ONE.concat('_').concat(PROPOSAL_ENTITY_ID);
-    this.voter = ADDRESS_ONE;
+    this.id = Address.fromHexString(ADDRESS_ONE)
+      .toHexString()
+      .concat('_')
+      .concat(PROPOSAL_ENTITY_ID);
+    this.voter = Address.fromHexString(CONTRACT_ADDRESS)
+      .toHexString()
+      .concat('_')
+      .concat(Address.fromHexString(ADDRESS_ONE).toHexString());
     this.proposal = PROPOSAL_ENTITY_ID;
     this.voteOption = VOTER_OPTIONS.get(0) as string;
     this.votingPower = BigInt.fromString(TWO);
