@@ -1,13 +1,33 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {DAO, MultisigSetup, Multisig__factory} from '../../../../typechain';
+import {
+  DAO,
+  InterfaceBasedRegistryMock,
+  InterfaceBasedRegistryMock__factory,
+  IPluginRepo__factory,
+  Multisig,
+  MultisigSetup,
+  MultisigSetup__factory,
+  Multisig__factory,
+  PluginRepo,
+  PluginRepo__factory,
+  PluginSetupProcessor,
+  PluginSetupProcessor__factory,
+} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {MultisigSettings, multisigInterface} from './multisig';
+import {deployWithProxy} from '../../../test-utils/proxy';
+import {findEvent} from '../../../../utils/event';
+import {
+  InstallationPreparedEvent,
+  UpdatePreparedEvent,
+} from '../../../../typechain/PluginSetupProcessor';
+import {hashHelpers} from '../../../../utils/psp';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -246,6 +266,28 @@ describe('MultisigSetup', function () {
     });
   });
 
+  describe('prepareUpdate', async () => {
+    it('should return nothing', async () => {
+      const dao = ethers.Wallet.createRandom().address;
+      const currentBuild = 1;
+      const prepareUpdateData = await multisigSetup.callStatic.prepareUpdate(
+        dao,
+        currentBuild,
+        {
+          currentHelpers: [
+            ethers.Wallet.createRandom().address,
+            ethers.Wallet.createRandom().address,
+          ],
+          data: '0x00',
+          plugin: ethers.Wallet.createRandom().address,
+        }
+      );
+      expect(prepareUpdateData.initData).to.be.eq('0x');
+      expect(prepareUpdateData.preparedSetupData.permissions).to.be.eql([]);
+      expect(prepareUpdateData.preparedSetupData.helpers).to.be.eql([]);
+    });
+  });
+
   describe('prepareUninstallation', async () => {
     it('correctly returns permissions', async () => {
       const plugin = ethers.Wallet.createRandom().address;
@@ -283,6 +325,269 @@ describe('MultisigSetup', function () {
           EXECUTE_PERMISSION_ID,
         ],
       ]);
+    });
+  });
+
+  // TODO: Improve checks by using smock with the proxy (We don't know how yet)
+  describe('Updates', async () => {
+    let psp: PluginSetupProcessor;
+    let setup1: MultisigSetup;
+    let setup2: MultisigSetup;
+    let dao: DAO;
+    let managingDAO: DAO;
+    let owner: SignerWithAddress;
+    let pluginRepoRegistry: InterfaceBasedRegistryMock;
+    let pluginRepo: PluginRepo;
+
+    before(async () => {
+      [owner] = await ethers.getSigners();
+      managingDAO = await deployNewDAO(owner.address);
+
+      // Create the PluginRepo
+      const pluginRepoFactory = new PluginRepo__factory(owner);
+      pluginRepo = await deployWithProxy<PluginRepo>(pluginRepoFactory);
+      await pluginRepo.initialize(owner.address);
+
+      // Create the PluginRepoRegistry
+      const pluginRepoRegistryFactory = new InterfaceBasedRegistryMock__factory(
+        owner
+      );
+      pluginRepoRegistry = await pluginRepoRegistryFactory.deploy();
+      pluginRepoRegistry.initialize(
+        managingDAO.address,
+        getInterfaceID(IPluginRepo__factory.createInterface())
+      );
+
+      // Grant the owner full rights on the registry
+      await managingDAO.grant(
+        pluginRepoRegistry.address,
+        owner.address,
+        await pluginRepoRegistry.REGISTER_PERMISSION_ID()
+      );
+
+      // Register the PluginRepo in the registry
+      await pluginRepoRegistry.register(pluginRepo.address);
+
+      // Create the PluginSetupProcessor
+      const pspFactory = new PluginSetupProcessor__factory(owner);
+      psp = await pspFactory.deploy(pluginRepoRegistry.address);
+
+      // Prepare all MultisigSetup' - We can reuse the same for now
+      const multisigSetupFactory = new MultisigSetup__factory(owner);
+      setup1 = await multisigSetupFactory.deploy();
+      setup2 = await multisigSetupFactory.deploy();
+
+      // Create the versions in the plugin repo
+      await expect(pluginRepo.createVersion(1, setup1.address, '0x00', '0x00'))
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(1, 1, setup1.address, '0x00');
+      await expect(pluginRepo.createVersion(1, setup2.address, '0x00', '0x00'))
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(1, 2, setup2.address, '0x00');
+    });
+
+    describe('Release 1 Build 1', () => {
+      let plugin: Multisig;
+      let helpers: string[];
+
+      before(async () => {
+        dao = await deployNewDAO(owner.address);
+        // grant the owner full permission for plugins
+        await dao.applySingleTargetPermissions(psp.address, [
+          {
+            operation: Operation.Grant,
+            who: owner.address,
+            permissionId: await psp.APPLY_INSTALLATION_PERMISSION_ID(),
+          },
+          {
+            operation: Operation.Grant,
+            who: owner.address,
+            permissionId: await psp.APPLY_UPDATE_PERMISSION_ID(),
+          },
+          {
+            operation: Operation.Grant,
+            who: owner.address,
+            permissionId: await psp.APPLY_UNINSTALLATION_PERMISSION_ID(),
+          },
+        ]);
+        // grant the PSP root to apply stuff
+        await dao.grant(
+          dao.address,
+          psp.address,
+          await dao.ROOT_PERMISSION_ID()
+        );
+      });
+
+      it('should install', async () => {
+        const tx = await psp.prepareInstallation(dao.address, {
+          pluginSetupRef: {
+            versionTag: {
+              build: 1,
+              release: 1,
+            },
+            pluginSetupRepo: pluginRepo.address,
+          },
+          data: ethers.utils.defaultAbiCoder.encode(
+            ['address[]', '(bool, uint16)'],
+            [[owner.address], [true, 1]]
+          ),
+        });
+        const preparedEvent = await findEvent<InstallationPreparedEvent>(
+          tx,
+          'InstallationPrepared'
+        );
+
+        await expect(
+          psp.applyInstallation(dao.address, {
+            pluginSetupRef: {
+              versionTag: {
+                build: 1,
+                release: 1,
+              },
+              pluginSetupRepo: pluginRepo.address,
+            },
+            helpersHash: hashHelpers(
+              preparedEvent.args.preparedSetupData.helpers
+            ),
+            permissions: preparedEvent.args.preparedSetupData.permissions,
+            plugin: preparedEvent.args.plugin,
+          })
+        ).to.emit(psp, 'InstallationApplied');
+
+        plugin = Multisig__factory.connect(preparedEvent.args.plugin, owner);
+        helpers = preparedEvent.args.preparedSetupData.helpers;
+
+        expect(await plugin.implementation()).to.be.eq(
+          await setup1.implementation()
+        );
+      });
+
+      it('should update to Release 1 Build 2', async () => {
+        // grant psp permission to update the proxy implementation
+        await dao.grant(
+          plugin.address,
+          psp.address,
+          await plugin.UPGRADE_PLUGIN_PERMISSION_ID()
+        );
+
+        const tx = await psp.prepareUpdate(dao.address, {
+          currentVersionTag: {
+            release: 1,
+            build: 1,
+          },
+          newVersionTag: {
+            release: 1,
+            build: 2,
+          },
+          pluginSetupRepo: pluginRepo.address,
+          setupPayload: {
+            plugin: plugin.address,
+            currentHelpers: helpers,
+            data: '0x00',
+          },
+        });
+        const preparedEvent = await findEvent<UpdatePreparedEvent>(
+          tx,
+          'UpdatePrepared'
+        );
+
+        await expect(
+          psp.applyUpdate(dao.address, {
+            plugin: plugin.address,
+            helpersHash: hashHelpers(
+              preparedEvent.args.preparedSetupData.helpers
+            ),
+            permissions: preparedEvent.args.preparedSetupData.permissions,
+            initData: preparedEvent.args.initData,
+            pluginSetupRef: {
+              versionTag: {
+                release: 1,
+                build: 2,
+              },
+              pluginSetupRepo: pluginRepo.address,
+            },
+          })
+        ).to.emit(psp, 'UpdateApplied');
+
+        expect(await plugin.implementation()).to.be.eq(
+          await setup2.implementation()
+        );
+      });
+    });
+
+    describe('Release 1 Build 2', () => {
+      before(async () => {
+        dao = await deployNewDAO(owner.address);
+        // grant the owner full permission for plugins
+        await dao.applySingleTargetPermissions(psp.address, [
+          {
+            operation: Operation.Grant,
+            who: owner.address,
+            permissionId: await psp.APPLY_INSTALLATION_PERMISSION_ID(),
+          },
+          {
+            operation: Operation.Grant,
+            who: owner.address,
+            permissionId: await psp.APPLY_UPDATE_PERMISSION_ID(),
+          },
+          {
+            operation: Operation.Grant,
+            who: owner.address,
+            permissionId: await psp.APPLY_UNINSTALLATION_PERMISSION_ID(),
+          },
+        ]);
+        // grant the PSP root to apply stuff
+        await dao.grant(
+          dao.address,
+          psp.address,
+          await dao.ROOT_PERMISSION_ID()
+        );
+      });
+
+      it('should install', async () => {
+        const tx = await psp.prepareInstallation(dao.address, {
+          pluginSetupRef: {
+            versionTag: {
+              release: 1,
+              build: 2,
+            },
+            pluginSetupRepo: pluginRepo.address,
+          },
+          data: ethers.utils.defaultAbiCoder.encode(
+            ['address[]', '(bool, uint16)'],
+            [[owner.address], [true, 1]]
+          ),
+        });
+        const preparedEvent = await findEvent<InstallationPreparedEvent>(
+          tx,
+          'InstallationPrepared'
+        );
+
+        await expect(
+          psp.applyInstallation(dao.address, {
+            pluginSetupRef: {
+              versionTag: {
+                release: 1,
+                build: 2,
+              },
+              pluginSetupRepo: pluginRepo.address,
+            },
+            helpersHash: hashHelpers(
+              preparedEvent.args.preparedSetupData.helpers
+            ),
+            permissions: preparedEvent.args.preparedSetupData.permissions,
+            plugin: preparedEvent.args.plugin,
+          })
+        ).to.emit(psp, 'InstallationApplied');
+
+        let plugin = Multisig__factory.connect(
+          preparedEvent.args.plugin,
+          owner
+        );
+        expect(await plugin.implementation()).to.be.eq(
+          await setup2.implementation()
+        );
+      });
     });
   });
 });

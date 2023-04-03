@@ -11,7 +11,6 @@ import {
   Multisig,
   PluginRepoRegistry,
 } from '../../typechain';
-import {EHRE} from '../../utils/types';
 
 async function deployAll() {
   await deployments.fixture();
@@ -21,7 +20,6 @@ const IMPLEMENTATION_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
 
 describe('Managing DAO', function () {
-  let ehre: EHRE;
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
   let managingDao: DAO;
@@ -79,9 +77,6 @@ describe('Managing DAO', function () {
     // deploy framework
     await deployAll();
 
-    // prepare ehre
-    ehre = hre as EHRE;
-
     // ManagingDAO
     managingDaoDeployment = await deployments.get('DAO');
     managingDao = await ethers.getContractAt(
@@ -124,11 +119,11 @@ describe('Managing DAO', function () {
 
     multisig = await ethers.getContractAt(
       'Multisig',
-      ehre.managingDAOMultisigPluginAddress
+      hre.managingDAOMultisigPluginAddress
     );
   });
 
-  it('should has deployments', async function () {
+  it('should have deployments', async function () {
     expect(await deployments.all()).to.not.be.empty;
   });
 
@@ -321,10 +316,10 @@ describe('Managing DAO', function () {
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
     let implementationValues = await readImplementationValueFromSlot([
-      ehre.aragonPluginRepos['token-voting'],
-      ehre.aragonPluginRepos['address-list-voting'],
-      ehre.aragonPluginRepos.admin,
-      ehre.aragonPluginRepos.multisig,
+      hre.aragonPluginRepos['token-voting'],
+      hre.aragonPluginRepos['address-list-voting'],
+      hre.aragonPluginRepos['admin'],
+      hre.aragonPluginRepos['multisig'],
     ]);
 
     for (let index = 0; index < implementationValues.length; index++) {
@@ -336,16 +331,16 @@ describe('Managing DAO', function () {
 
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
-      Object.values(ehre.aragonPluginRepos),
+      Object.values(hre.aragonPluginRepos),
       pluginRepoV2Deployment.address
     );
 
     // re-read from slot
     implementationValues = await readImplementationValueFromSlot([
-      ehre.aragonPluginRepos['token-voting'],
-      ehre.aragonPluginRepos['address-list-voting'],
-      ehre.aragonPluginRepos.admin,
-      ehre.aragonPluginRepos.multisig,
+      hre.aragonPluginRepos['token-voting'],
+      hre.aragonPluginRepos['address-list-voting'],
+      hre.aragonPluginRepos['admin'],
+      hre.aragonPluginRepos['multisig'],
     ]);
 
     for (let index = 0; index < implementationValues.length; index++) {

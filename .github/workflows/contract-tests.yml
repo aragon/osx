@@ -21,11 +21,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          node-version: 14
-      - name: Install yarn
-        run: npm i -G yarn
+          node-version: 16
       - name: Install dependencies
-        run: yarn
+        run: cd ../../ && yarn install --pure-lockfile
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts

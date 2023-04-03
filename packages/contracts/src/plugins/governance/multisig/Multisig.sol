@@ -12,7 +12,7 @@ import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgrade
 import {Addresslist} from "../../utils/Addresslist.sol";
 import {IMultisig} from "./IMultisig.sol";
 
-/// @title Multisig
+/// @title Multisig - Release 1, Build 2
 /// @author Aragon Association - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 contract Multisig is
@@ -77,6 +77,10 @@ contract Multisig is
     /// @notice The current plugin settings.
     MultisigSettings public multisigSettings;
 
+    /// @notice Keeps track at which block number the multisig settings have been changed the last time.
+    /// @dev This variable prevents a proposal from being created in the same block in which the multisig settings change.
+    uint64 public lastMultisigSettingsChange;
+
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
@@ -118,7 +122,7 @@ contract Multisig is
     /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
     event MultisigSettingsUpdated(bool onlyListed, uint16 indexed minApprovals);
 
-    /// @notice Initializes the component.
+    /// @notice Initializes Release 1, Build 2.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _multisigSettings The multisig settings.
@@ -128,6 +132,10 @@ contract Multisig is
         MultisigSettings calldata _multisigSettings
     ) external initializer {
         __PluginUUPSUpgradeable_init(_dao);
+
+        if (_members.length > type(uint16).max) {
+            revert AddresslistLengthOutOfBounds({limit: type(uint16).max, actual: _members.length});
+        }
 
         _addAddresses(_members);
         emit MembersAdded({members: _members});
@@ -212,6 +220,12 @@ contract Multisig is
         uint64 _endDate
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = block.number.toUint64() - 1;
+
+        // Revert if the settings have been changed in the same block as this proposal should be created in.
+        // This prevents a malicious party from voting with previous addresses and the new settings.
+        if (lastMultisigSettingsChange > snapshotBlock) {
+            revert ProposalCreationForbidden(_msgSender());
+        }
 
         if (multisigSettings.onlyListed && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
@@ -425,6 +439,7 @@ contract Multisig is
         }
 
         multisigSettings = _multisigSettings;
+        lastMultisigSettingsChange = block.number.toUint64();
 
         emit MultisigSettingsUpdated({
             onlyListed: _multisigSettings.onlyListed,
@@ -435,5 +450,5 @@ contract Multisig is
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 }

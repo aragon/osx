@@ -17,7 +17,7 @@ contract TokenFaucet is Plugin {
         token = _token
     }
 
-    function claim() auth(MINT_PERMISSION_ID) external returns {
+    function claim() auth(MINT_PERMISSION_ID) external {
         token.mint({to: msg.sender, amount: 5});
     }
 }

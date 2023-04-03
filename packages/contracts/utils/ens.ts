@@ -34,6 +34,14 @@ export async function setupENS(domains: string[], hre: EHRE): Promise<any> {
   const resolver = await deployments.get('PublicResolver');
 
   for (let i = 0; i < domains.length; i++) {
+    console.log(`Registering subdomain ${domains[i]}`);
+
+    const resolvedResolver = await ens.resolver(ensDomainHash(domains[i]));
+    if (resolvedResolver === resolver.address) {
+      console.log(`${domains[i]} already registered. Skipping...`);
+      continue;
+    }
+
     // Register subdomains in the reverse order
     let domainNamesReversed = domains[i].split('.');
     domainNamesReversed.push(''); //add the root domain
@@ -46,15 +54,31 @@ export async function setupENS(domains: string[], hre: EHRE): Promise<any> {
         .filter(value => value !== '')
         .reverse()
         .join('.');
-      await ens.setSubnodeRecord(
+
+      // skipping if it is already set
+      const resolvedResolver = await ens.resolver(
+        ensDomainHash(
+          `${domainNamesReversed[i + 1]}${domain ? '.' + domain : ''}`
+        )
+      );
+      if (resolvedResolver !== ethers.constants.AddressZero) {
+        continue;
+      }
+
+      const tx = await ens.setSubnodeRecord(
         ensDomainHash(domain),
         ensLabelHash(domainNamesReversed[i + 1]),
         deployer.address,
         resolver.address,
         0
       );
+      await tx.wait();
     }
+
+    console.log(`Registered subdomain ${domains[i]}`);
   }
+
+  console.log(`ENS Setup complete!`);
 
   return ens;
 }

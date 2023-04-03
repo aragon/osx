@@ -53,7 +53,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          node-version: 14
+          node-version: 16
           registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies
         run: yarn install --pure-lockfile

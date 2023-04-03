@@ -39,4 +39,4 @@ by checking if the caller `hasPermission`.
 
 </div>
 
-Whereas deployed plugin instances belong to the DAO, the developer of the original plugin implementation owns the implementation and setup contract of the plugin. The plugin developer is the maintainer of an Aragon OSx [plugin repo](../../02-framework/02-plugin-management/01-plugin-repo/index.md). Finally, the Aragon OSx protocol manages the registry in which the plugin repositories are listed, which is to required to install a plugin using the Aragon OSx framework infrastructure to your DAO.
+Whereas deployed plugin instances belong to the DAO, the developer of the original plugin implementation owns the implementation and setup contract of the plugin. The plugin developer is the maintainer of an Aragon OSx [plugin repo](../../02-framework/02-plugin-management/01-plugin-repo/index.md). Finally, the Aragon OSx protocol manages the registry in which the plugin repositories are listed, which is required to install a plugin using the Aragon OSx framework infrastructure to your DAO.

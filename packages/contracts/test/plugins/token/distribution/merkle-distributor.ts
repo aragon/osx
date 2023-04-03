@@ -136,6 +136,30 @@ describe('MerkleDistributor', function () {
       await token.setBalance(distributor.address, 201);
     });
 
+    describe('unclaimedBalance', async () => {
+      it('returns the correct `unclaimedBalance`', async () => {
+        const proof0 = tree.getProof(0, wallet0, BigNumber.from(100));
+        expect(
+          await distributor.unclaimedBalance(0, wallet0, 100, proof0)
+        ).to.equal(100);
+      });
+
+      it('returns 0 if proof incorrect', async () => {
+        const proof0 = [ZERO_BYTES32];
+        expect(
+          await distributor.unclaimedBalance(0, wallet0, 100, proof0)
+        ).to.equal(0);
+      });
+
+      it('returns 0 if it was already claimed', async () => {
+        const proof0 = tree.getProof(0, wallet0, BigNumber.from(100));
+        await distributor.claim(0, wallet0, 100, proof0);
+        expect(
+          await distributor.unclaimedBalance(0, wallet0, 100, proof0)
+        ).to.equal(0);
+      });
+    });
+
     it('successful claim', async () => {
       const proof0 = tree.getProof(0, wallet0, BigNumber.from(100));
       await expect(distributor.claim(0, wallet0, 100, proof0))

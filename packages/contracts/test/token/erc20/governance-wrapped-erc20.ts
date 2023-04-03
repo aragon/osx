@@ -98,6 +98,17 @@ describe('GovernanceWrappedERC20', function () {
         governanceWrappedERC20Symbol
       );
     });
+
+    it('should return default decimals if not modified', async () => {
+      expect(await governanceToken.decimals()).to.eq(18);
+    });
+
+    it('should return modified decimals', async () => {
+      const defaultDecimals = await erc20.decimals();
+      erc20.setDecimals(5);
+      expect(await governanceToken.decimals()).to.eq(5);
+      erc20.setDecimals(defaultDecimals);
+    });
   });
 
   describe('supportsInterface:', async () => {

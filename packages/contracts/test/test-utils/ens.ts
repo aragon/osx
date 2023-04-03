@@ -8,7 +8,7 @@ import {
   ENSSubdomainRegistrar,
   ENSRegistry,
   PublicResolver,
-} from '../../typechain';
+} from '../../../typechain';
 
 export async function deployENSSubdomainRegistrar(
   owner: SignerWithAddress,

@@ -4,7 +4,8 @@ import {
   DataSourceContext,
   ethereum,
   crypto,
-  ByteArray
+  ByteArray,
+  log
 } from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
@@ -203,4 +204,16 @@ export function getPluginInstallationId(
     );
   }
   return null;
+}
+
+export function getPluginVersionId(
+  pluginRepo: string,
+  release: i32,
+  build: i32
+): string {
+  return pluginRepo
+    .concat('_')
+    .concat(release.toString())
+    .concat('_')
+    .concat(build.toString());
 }

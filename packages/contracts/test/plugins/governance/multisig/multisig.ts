@@ -11,6 +11,7 @@ import {
   IMultisig__factory,
   IPlugin__factory,
   IProposal__factory,
+  Multisig,
 } from '../../../../typechain';
 import {
   findEvent,
@@ -33,6 +34,11 @@ import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
+import {
+  ApprovedEvent,
+  ProposalExecutedEvent,
+} from '../../../../typechain/Multisig';
+import {ExecutedEvent} from '../../../../typechain/DAO';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -61,7 +67,7 @@ export async function approveWithSigners(
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
-  let multisig: any;
+  let multisig: Multisig;
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -206,6 +212,14 @@ describe('Multisig', function () {
         .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
     });
+
+    it('should revert if members list is longer than uint16 max', async () => {
+      const megaMember = signers[1];
+      const members: string[] = new Array(65537).fill(megaMember.address);
+      await expect(multisig.initialize(dao.address, members, multisigSettings))
+        .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
+        .withArgs(65535, members.length);
+    });
   });
 
   describe('plugin interface: ', async () => {
@@ -302,6 +316,22 @@ describe('Multisig', function () {
     });
   });
 
+  describe('isMember', async () => {
+    it('should return false, if user is not listed', async () => {
+      expect(await multisig.isMember(signers[0].address)).to.be.false;
+    });
+
+    it('should return true if user is in the latest list', async () => {
+      multisigSettings.minApprovals = 1;
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address],
+        multisigSettings
+      );
+      expect(await multisig.isMember(signers[0].address)).to.be.true;
+    });
+  });
+
   describe('addAddresses:', async () => {
     it('should add new members to the address list and emit the `MembersAdded` event', async () => {
       multisigSettings.minApprovals = 1;
@@ -356,7 +386,7 @@ describe('Multisig', function () {
       await expect(multisig.removeAddresses([signers[0].address]))
         .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(
-          (await multisig.addresslistLength()) - 1,
+          (await multisig.addresslistLength()).sub(1),
           multisigSettings.minApprovals
         );
     });
@@ -375,7 +405,7 @@ describe('Multisig', function () {
       await expect(multisig.removeAddresses([signers[2].address]))
         .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(
-          (await multisig.addresslistLength()) - 1,
+          (await multisig.addresslistLength()).sub(1),
           multisigSettings.minApprovals
         );
     });
@@ -490,6 +520,56 @@ describe('Multisig', function () {
           [],
           allowFailureMap
         );
+    });
+
+    it('reverts if the multisig settings have been changed in the same block', async () => {
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address], // signers[0] is listed
+        multisigSettings
+      );
+      await dao.grant(
+        multisig.address,
+        dao.address,
+        await multisig.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+      );
+
+      await ethers.provider.send('evm_setAutomine', [false]);
+
+      const endDate = await timestampIn(5000);
+
+      await multisig.connect(signers[0]).createProposal(
+        dummyMetadata,
+        [
+          {
+            to: multisig.address,
+            value: 0,
+            data: multisig.interface.encodeFunctionData(
+              'updateMultisigSettings',
+              [
+                {
+                  onlyListed: false,
+                  minApprovals: 1,
+                },
+              ]
+            ),
+          },
+        ],
+        0,
+        true,
+        true,
+        0,
+        endDate
+      );
+      await expect(
+        multisig
+          .connect(signers[0])
+          .createProposal(dummyMetadata, [], 0, true, true, 0, endDate)
+      )
+        .to.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
+        .withArgs(signers[0].address);
+
+      await ethers.provider.send('evm_setAutomine', [true]);
     });
 
     context('`onlyListed` is set to `false`:', async () => {
@@ -814,6 +894,17 @@ describe('Multisig', function () {
       });
     });
 
+    describe('hasApproved', async () => {
+      it("returns `false` if user hasn't approved yet", async () => {
+        expect(await multisig.hasApproved(id, signers[0].address)).to.be.false;
+      });
+
+      it('returns `true` if user has approved', async () => {
+        await multisig.approve(id, true);
+        expect(await multisig.hasApproved(id, signers[0].address)).to.be.true;
+      });
+    });
+
     describe('approve:', async () => {
       it('reverts when approving multiple times', async () => {
         await multisig.approve(id, true);
@@ -837,7 +928,7 @@ describe('Multisig', function () {
 
         const tx = await multisig.connect(signers[0]).approve(id, false);
 
-        const event = await findEvent(tx, 'Approved');
+        const event = await findEvent<ApprovedEvent>(tx, 'Approved');
         expect(event.args.proposalId).to.eq(id);
         expect(event.args.approver).to.not.eq(multisig.address);
         expect(event.args.approver).to.eq(signers[0].address);
@@ -1005,18 +1096,22 @@ describe('Multisig', function () {
 
         // `tryExecution` is turned on but the vote is not decided yet
         let tx = await multisig.connect(signers[1]).approve(id, true);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await expect(
+          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
+        ).to.rejectedWith('Event Executed not found in TX.');
 
         expect(await multisig.canExecute(id)).to.equal(false);
 
         // `tryExecution` is turned off and the vote is decided
         tx = await multisig.connect(signers[2]).approve(id, false);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await expect(
+          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
+        ).to.rejectedWith('Event Executed not found in TX.');
 
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
         {
-          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
           expect(event.args.actor).to.equal(multisig.address);
           expect(event.args.callId).to.equal(toBytes32(id));
@@ -1032,7 +1127,10 @@ describe('Multisig', function () {
 
         // check for the `ProposalExecuted` event in the voting contract
         {
-          const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_EXECUTED);
+          const event = await findEvent<ProposalExecutedEvent>(
+            tx,
+            PROPOSAL_EVENTS.PROPOSAL_EXECUTED
+          );
           expect(event.args.proposalId).to.equal(id);
         }
 

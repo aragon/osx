@@ -8,7 +8,8 @@ import {
   ADDRESS_ZERO,
   PLUGIN_SETUP_ID,
   ADDRESS_SIX,
-  APPLIED_PLUGIN_SETUP_ID
+  APPLIED_PLUGIN_SETUP_ID,
+  CONTRACT_ADDRESS
 } from '../constants';
 import {
   createInstallationAppliedEvent,
@@ -29,7 +30,10 @@ import {
 import {assert, clearStore, test} from 'matchstick-as';
 import {PluginPreparation} from '../../generated/schema';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {getSupportsInterface} from '../../tests/dao/utils';
+import {
+  createDaoEntityState,
+  getSupportsInterface
+} from '../../tests/dao/utils';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
@@ -43,7 +47,7 @@ import {
 
 test('InstallationPrepared event', function() {
   let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
+  let plugin = CONTRACT_ADDRESS;
   let setupId = PLUGIN_SETUP_ID;
   let pluginSetupRepo = ADDRESS_TWO;
   let pluginVersionId = `${pluginSetupRepo}_1_1`;
@@ -223,6 +227,11 @@ test('InstallationPrepared event', function() {
     'InstallationPrepared'
   );
 
+  // TODO: once matchstick can support polymorphism, we should have a test like:
+  // @dev: create a DAO in state so that we can check if IPlugin will be linked to the DAO
+  // let daoEntity = createDaoEntityState()
+  // assert.i32Equals(daoEntity.plugins.length, 1);
+
   clearStore();
 });
 
@@ -261,7 +270,7 @@ test('InstallationApplied event', function() {
   assert.fieldEquals(
     'PluginInstallation',
     installationIdString,
-    'pluginAddress',
+    'plugin',
     plugin.toLowerCase()
   );
   assert.fieldEquals(
@@ -496,7 +505,7 @@ test('UpdateApplied event', function() {
   assert.fieldEquals(
     'PluginInstallation',
     installationIdString,
-    'pluginAddress',
+    'plugin',
     plugin.toLowerCase()
   );
   assert.fieldEquals(

@@ -6,7 +6,11 @@ import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
-import {EHRE, Operation} from '../utils/types';
+import {Operation} from '../utils/types';
+import {VersionTag} from '../test/test-utils/psp/types';
+import {PluginRepo__factory} from '../typechain';
+import {VersionCreatedEvent} from '../typechain/PluginRepo';
+import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -132,29 +136,25 @@ export async function detemineDeployerNextAddress(
 }
 
 export async function createPluginRepo(
-  hre: EHRE,
-  pluginContractName: string,
-  pluginSetupContractName: string,
-  releaseMetadata: string,
-  buildMetadata: string
+  hre: HardhatRuntimeEnvironment,
+  pluginName: string
 ): Promise<void> {
   const {network} = hre;
   const pluginDomain =
     process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
   if (
     await isENSDomainRegistered(
-      `${pluginContractName}.${pluginDomain}`,
+      `${pluginName}.${pluginDomain}`,
       await getENSAddress(hre)
     )
   ) {
     // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
-    // Either a fruntrun happened or something else. Thus we abort here
-    throw new Error(`${pluginContractName} is already present! Aborting...`);
+    // Either a frontrun happened or something else. Thus we abort here
+    throw new Error(`${pluginName} is already present! Aborting...`);
   }
 
   const signers = await ethers.getSigners();
 
-  const managingDAOAddress = await getContractAddress('DAO', hre);
   const pluginRepoFactoryAddress = await getContractAddress(
     'PluginRepoFactory',
     hre
@@ -173,34 +173,134 @@ export async function createPluginRepo(
     pluginRepoFactoryAddress
   );
 
-  // register a plugin
-  const pluginSetupAddress = await getContractAddress(
-    pluginSetupContractName,
-    hre
-  );
+  const {deployer} = await hre.getNamedAccounts();
 
-  const tx = await pluginRepoFactoryContract.createPluginRepoWithFirstVersion(
-    pluginContractName,
-    pluginSetupAddress,
-    managingDAOAddress,
-    releaseMetadata,
-    buildMetadata
+  const tx = await pluginRepoFactoryContract.createPluginRepo(
+    pluginName,
+    deployer
   );
   console.log(
-    `Creating & registering repo for ${pluginContractName} with tx ${tx.hash}`
+    `Creating & registering repo for ${pluginName} with tx ${tx.hash}`
   );
   await tx.wait();
 
-  const event = await findEvent(tx, 'PluginRepoRegistered');
+  const event = await findEvent<PluginRepoRegisteredEvent>(
+    tx,
+    'PluginRepoRegistered'
+  );
   const repoAddress = event.args.pluginRepo;
 
-  hre.aragonPluginRepos[pluginContractName] = repoAddress;
+  hre.aragonPluginRepos[pluginName] = repoAddress;
 
   console.log(
-    `Created & registered repo for ${pluginContractName} at address: ${repoAddress}, with contentURI ${ethers.utils.toUtf8String(
-      releaseMetadata
-    )}`
+    `Created & registered repo for ${pluginName} at address: ${repoAddress}` //, with contentURI ${ethers.utils.toUtf8String(releaseMetadata)}`
   );
+}
+
+export async function createVersion(
+  pluginRepoContract: string,
+  pluginSetupContract: string,
+  releaseNumber: number,
+  releaseMetadata: string,
+  buildMetadata: string
+): Promise<void> {
+  const signers = await ethers.getSigners();
+
+  const PluginRepo = new PluginRepo__factory(signers[0]);
+  const pluginRepo = PluginRepo.attach(pluginRepoContract);
+
+  const tx = await pluginRepo.createVersion(
+    releaseNumber,
+    pluginSetupContract,
+    releaseMetadata,
+    buildMetadata
+  );
+
+  console.log(`Creating build for release ${releaseNumber} with tx ${tx.hash}`);
+
+  await tx.wait();
+
+  const versionCreatedEvent = await findEvent<VersionCreatedEvent>(
+    tx,
+    'VersionCreated'
+  );
+
+  console.log(
+    `Created build ${versionCreatedEvent.args.build} for release ${
+      versionCreatedEvent.args.release
+    } with setup address: ${
+      versionCreatedEvent.args.pluginSetup
+    }, with build metadata ${ethers.utils.toUtf8String(
+      buildMetadata
+    )} and release metadata ${ethers.utils.toUtf8String(releaseMetadata)}`
+  );
+}
+
+export type LatestVersion = {
+  versionTag: VersionTag;
+  pluginSetupContract: string;
+  releaseMetadata: string;
+  buildMetadata: string;
+};
+
+function isSorted(latestVersions: LatestVersion[]): boolean {
+  // The list of latest versions has to start with the first release, otherwise something is wrong and we must stop.
+  if (latestVersions[0].versionTag[0] != 1) {
+    return false;
+  }
+
+  for (let i = 0; i < latestVersions.length - 1; i++) {
+    if (
+      !(
+        latestVersions[i + 1].versionTag[0] ==
+        latestVersions[i].versionTag[0] + 1
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export async function populatePluginRepo(
+  hre: HardhatRuntimeEnvironment,
+  pluginRepoName: string,
+  latestVersions: LatestVersion[]
+): Promise<void> {
+  // make sure that the latestVersions array is sorted by version tag
+  if (!isSorted(latestVersions)) {
+    throw new Error(`${latestVersions} is not sorted in ascending order`);
+  }
+
+  for (const latestVersion of latestVersions) {
+    const releaseNumber = latestVersion.versionTag[0];
+    const latestBuildNumber = latestVersion.versionTag[1];
+
+    const placeholderSetup = await getContractAddress('PlaceholderSetup', hre);
+
+    const emptyMetadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(''));
+
+    for (let i = 1; i < latestBuildNumber; i++) {
+      await createVersion(
+        hre.aragonPluginRepos[pluginRepoName],
+        placeholderSetup,
+        releaseNumber,
+        emptyMetadata,
+        ethers.utils.hexlify(
+          ethers.utils.toUtf8Bytes(`ipfs://${hre.placeholderBuildCIDPath}`)
+        )
+      );
+    }
+
+    // create latest builds
+    await createVersion(
+      hre.aragonPluginRepos[pluginRepoName],
+      latestVersion.pluginSetupContract,
+      releaseNumber,
+      latestVersion.releaseMetadata,
+      latestVersion.buildMetadata
+    );
+  }
 }
 
 export async function checkSetManagingDao(
@@ -225,7 +325,7 @@ export type Permission = {
 };
 
 export async function checkPermission(
-  permissionManagerContract: ethers.Contract,
+  permissionManagerContract: Contract,
   permission: Permission
 ) {
   const checkStatus = await isPermissionSetCorrectly(
@@ -246,7 +346,7 @@ export async function checkPermission(
 }
 
 export async function isPermissionSetCorrectly(
-  permissionManagerContract: ethers.Contract,
+  permissionManagerContract: Contract,
   {operation, where, who, permission, data = '0x'}: Permission
 ): Promise<boolean> {
   const permissionId = ethers.utils.id(permission);
@@ -267,7 +367,7 @@ export async function isPermissionSetCorrectly(
 }
 
 export async function managePermissions(
-  permissionManagerContract: ethers.Contract,
+  permissionManagerContract: Contract,
   permissions: Permission[]
 ): Promise<void> {
   // filtering permission to only apply those that are needed
@@ -326,7 +426,9 @@ export async function isENSDomainRegistered(
   return ensRegistryContract.recordExists(ethers.utils.namehash(domain));
 }
 
-export async function getENSAddress(hre: EHRE): Promise<string> {
+export async function getENSAddress(
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
   if (ENS_ADDRESSES[hre.network.name]) {
     return ENS_ADDRESSES[hre.network.name];
   }
@@ -339,7 +441,9 @@ export async function getENSAddress(hre: EHRE): Promise<string> {
   throw new Error('ENS address not found.');
 }
 
-export async function getPublicResolverAddress(hre: EHRE): Promise<string> {
+export async function getPublicResolverAddress(
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
   if (ENS_PUBLIC_RESOLVERS[hre.network.name]) {
     return ENS_PUBLIC_RESOLVERS[hre.network.name];
   }
@@ -376,6 +480,89 @@ export async function registerSubnodeRecord(
   );
   await tx.wait();
   return ensRegistryContract.owner(ethers.utils.namehash(domain));
+}
+
+export async function transferSubnodeRecord(
+  domain: string,
+  newOwner: string,
+  ensRegistryAddress: string
+): Promise<void> {
+  const domainSplitted = domain.split('.');
+  const subdomain = domainSplitted.splice(0, 1)[0];
+  const parentDomain = domainSplitted.join('.');
+
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  const tx = await ensRegistryContract.setSubnodeOwner(
+    ethers.utils.namehash(parentDomain),
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
+    newOwner
+  );
+  console.log(
+    `Transfering owner of ${domain} to ${newOwner} with tx ${tx.hash}`
+  );
+  await tx.wait();
+}
+
+// transfers owner ship of a domain and all parent domains to a new owner if it matches the expected current owner
+export async function transferSubnodeChain(
+  fullDomain: string,
+  newOwner: string,
+  currentOwner: string,
+  ensRegistryAddress: string
+): Promise<void> {
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  const daoDomainSplitted = fullDomain.split('.').reverse();
+  let domain = '';
+  // +1 on length because we also need to check the owner of the empty domain
+  for (let i = 0; i < daoDomainSplitted.length + 1; i++) {
+    const domainOwner = await ensRegistryContract.callStatic.owner(
+      ethers.utils.namehash(domain)
+    );
+    if (domainOwner !== newOwner && domainOwner === currentOwner) {
+      const tx = await ensRegistryContract.setOwner(
+        ethers.utils.namehash(domain),
+        newOwner
+      );
+      console.log(
+        `Changing owner of ${domain} from (currentOwner) ${domainOwner} to ${newOwner} (newOwner)`
+      );
+      await tx.wait();
+    }
+
+    domain = `${daoDomainSplitted[i]}.${domain}`;
+    if (i === 0) {
+      domain = daoDomainSplitted[i];
+    }
+  }
+}
+
+/**
+ * Returns the managing DAO' multisig address defined in the environment variables. Throws if not found
+ *
+ * @export
+ * @param {HardhatRuntimeEnvironment} hre
+ * @return {string}
+ */
+export function getManagingDAOMultisigAddress(
+  hre: HardhatRuntimeEnvironment
+): string {
+  const {network} = hre;
+  const address =
+    process.env[`${network.name.toUpperCase()}_MANAGINGDAO_MULTISIG`];
+  if (!address) {
+    throw new Error(
+      `Failed to find managing DAO multisig address in env variables for ${network.name}`
+    );
+  }
+  return address;
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

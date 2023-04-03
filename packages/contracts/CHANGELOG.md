@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [UPCOMING]
+## v1.2.0
+
+### Added
+
+- Adds check to `Multisig.initialize()` that members length isn't bigger than max uint16.
+- Added `PlaceholderSetup` contract and adapted deploy scripts.
+
+### Changed
+
+- Added check to `execute()` in `DAO` to prevent griefing attacks if the caller provides insufficient gas on actions being allowed to fail.
+- Disallow creating a new proposal in the Multisig plugin in the same block where the settings have been changed.
+- Updates `MultisigSetup` to be used as Release 1 Build 2.
+
+## v1.0.1
 
 ### Added
 

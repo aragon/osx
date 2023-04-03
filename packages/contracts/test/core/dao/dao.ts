@@ -2,7 +2,14 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, TestERC1155, TestERC20, TestERC721} from '../../../typechain';
+import {
+  DAO,
+  TestERC1155,
+  TestERC20,
+  TestERC721,
+  IERC1271__factory,
+  GasConsumer__factory,
+} from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
 
@@ -16,14 +23,13 @@ import {
 
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../test-utils/error';
-import {IERC1271__factory} from '../../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {defaultAbiCoder} from 'ethers/lib/utils';
+import {ExecutedEvent} from '../../../typechain/DAO';
 
 chai.use(smock.matchers);
 
@@ -288,7 +294,7 @@ describe('DAO', function () {
       num = flipBit(0, num);
 
       const tx = await dao.execute(ZERO_BYTES32, [data.failAction], num);
-      const event = await findEvent(tx, EVENTS.Executed);
+      const event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
 
       // Check that failAction's revertMessage was correctly stored in the dao's execResults
       expect(event.args.execResults[0]).to.includes(data.failActionMessage);
@@ -297,7 +303,7 @@ describe('DAO', function () {
 
     it('returns the correct result if action succeeds', async () => {
       const tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
-      const event = await findEvent(tx, EVENTS.Executed);
+      const event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
 
@@ -323,7 +329,7 @@ describe('DAO', function () {
 
       // If the below call not fails, means allowFailureMap is correct.
       let tx = await dao.execute(ZERO_BYTES32, actions, allowFailureMap);
-      let event = await findEvent(tx, EVENTS.Executed);
+      let event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
 
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
@@ -358,7 +364,7 @@ describe('DAO', function () {
       let tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
       let rc = await tx.wait();
 
-      const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+      const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
       expect(event.args.actions.length).to.equal(1);
@@ -366,6 +372,39 @@ describe('DAO', function () {
       expect(event.args.actions[0].value).to.equal(data.succeedAction.value);
       expect(event.args.actions[0].data).to.equal(data.succeedAction.data);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
+    });
+
+    it('reverts if failure is allowed but not enough gas is provided', async () => {
+      const GasConsumer = new GasConsumer__factory(signers[0]);
+      let gasConsumer = await GasConsumer.deploy();
+
+      const gasConsumingAction = {
+        to: gasConsumer.address,
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
+        value: 0,
+      };
+
+      let allowFailureMap = ethers.BigNumber.from(0);
+      allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
+
+      const expectedGas = await dao.estimateGas.execute(
+        ZERO_BYTES32,
+        [gasConsumingAction],
+        allowFailureMap
+      ); // exact gas required: 495453
+      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
+
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas.sub(500),
+        })
+      ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
+
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas,
+        })
+      ).to.not.be.reverted;
     });
 
     describe('Transfering tokens', async () => {
@@ -826,6 +865,23 @@ describe('DAO', function () {
 
       // holds amount now
       expect(await ethers.provider.getBalance(dao.address)).to.equal(amount);
+    });
+  });
+
+  describe('hasPermission', async () => {
+    const permission = ethers.utils.id('PERMISSION_TEST');
+
+    it('returns `false` if the permission is not set', async () => {
+      expect(
+        await dao.hasPermission(dao.address, ownerAddress, permission, '0x')
+      ).to.be.false;
+    });
+
+    it('returns `true` if permission is set', async () => {
+      await dao.grant(dao.address, ownerAddress, permission);
+      expect(
+        await dao.hasPermission(dao.address, ownerAddress, permission, '0x')
+      ).to.be.true;
     });
   });
 

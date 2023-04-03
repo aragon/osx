@@ -224,7 +224,8 @@ export function createTokenVotingProposalEntityState(
   allowFailureMap: string = ALLOW_FAILURE_MAP,
   createdAt: string = CREATED_AT,
   creationBlockNumber: BigInt = new BigInt(0),
-  executable: boolean = false
+  executable: boolean = false,
+  earlyExecutable: boolean = false
 ): TokenVotingProposal {
   let tokenVotingProposal = new TokenVotingProposal(entityID);
   tokenVotingProposal.dao = Address.fromString(dao).toHexString();
@@ -247,6 +248,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
   tokenVotingProposal.creationBlockNumber = creationBlockNumber;
   tokenVotingProposal.executable = executable;
+  tokenVotingProposal.earlyExecutable = earlyExecutable;
 
   tokenVotingProposal.save();
 

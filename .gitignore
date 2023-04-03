@@ -33,6 +33,7 @@ yarn-error.log*
 # deployments
 deployments
 deployed_contracts.json
+managingDAOTX.json
 
 # generated
 packages/contracts/docs/core/03-reference-guide/*

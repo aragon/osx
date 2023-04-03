@@ -12,7 +12,12 @@ import {
   MerkleMinter__factory,
   TokenFactory,
   TokenFactory__factory,
-} from '../../typechain';
+} from '../../../typechain';
+import {findEvent} from '../../../utils/event';
+import {
+  TokenCreatedEvent,
+  WrappedTokenEvent,
+} from '../../../typechain/TokenFactory';
 
 chai.use(smock.matchers);
 
@@ -30,7 +35,9 @@ interface MintConfig {
   amounts: number[];
 }
 
-describe.skip('Core: TokenFactory', () => {
+const zeroAddr = ethers.constants.AddressZero;
+
+describe('Core: TokenFactory', () => {
   let tokenFactory: MockContract<TokenFactory>;
   let governanceBase: MockContract<GovernanceERC20>;
   let governanceWrappedBase: MockContract<GovernanceWrappedERC20>;
@@ -41,7 +48,7 @@ describe.skip('Core: TokenFactory', () => {
       'GovernanceERC20'
     );
     governanceBase = await GovernanceBaseFactory.deploy(
-      ethers.constants.AddressZero,
+      zeroAddr,
       'name',
       'symbol',
       {receivers: [], amounts: []}
@@ -52,7 +59,7 @@ describe.skip('Core: TokenFactory', () => {
         'GovernanceWrappedERC20'
       );
     governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(
-      ethers.constants.AddressZero,
+      zeroAddr,
       'name',
       'symbol'
     );
@@ -66,12 +73,12 @@ describe.skip('Core: TokenFactory', () => {
       'TokenFactory'
     );
     tokenFactory = await TokenFactoryFactory.deploy();
-    tokenFactory.setVariable('governanceERC20Base', governanceBase.address);
-    tokenFactory.setVariable(
-      'governanceWrappedERC20Base',
-      governanceWrappedBase.address
-    );
-    tokenFactory.setVariable('merkleMinterBase', merkleMinterBase.address);
+
+    await tokenFactory.setVariables({
+      governanceERC20Base: governanceBase.address,
+      governanceWrappedERC20Base: governanceWrappedBase.address,
+      merkleMinterBase: merkleMinterBase.address,
+    });
   });
 
   describe('createToken', () => {
@@ -81,11 +88,13 @@ describe.skip('Core: TokenFactory', () => {
       dao = await smock.fake<DAO>('DAO');
       dao.isGranted.returns(true);
       dao.hasPermission.returns(true);
+      dao.grant.returns();
     });
 
     it('should fail if token addr is no ERC20 contract', async () => {
+      // NOTE that any contract that don't contain `balanceOf` is enough to use.
       const dummyContractFactory = await ethers.getContractFactory(
-        'DummyContract'
+        'ActionExecute'
       );
       const dummyContract = await dummyContractFactory.deploy();
       const config: TokenConfig = {
@@ -100,14 +109,40 @@ describe.skip('Core: TokenFactory', () => {
       };
 
       await expect(
-        tokenFactory.callStatic.createToken(dao.address, config, mintConfig)
-      ).to.revertedWith('Address: low-level call failed');
+        tokenFactory.createToken(dao.address, config, mintConfig)
+      ).to.be.revertedWith('Address: low-level static call failed');
+    });
+
+    it('should fail if token addr contains balanceOf, but returns different type', async () => {
+      const erc20Contract = await smock.fake<GovernanceERC20>(
+        'GovernanceERC20'
+      );
+
+      erc20Contract.balanceOf.returns(true);
+
+      const config: TokenConfig = {
+        addr: erc20Contract.address,
+        name: 'FakeToken',
+        symbol: 'FT',
+      };
+
+      const mintConfig: MintConfig = {
+        receivers: ['0x0000000000000000000000000000000000000002'],
+        amounts: [1],
+      };
+
+      await expect(
+        tokenFactory.createToken(dao.address, config, mintConfig)
+      ).to.be.revertedWithCustomError(tokenFactory, 'TokenNotERC20');
     });
 
     it('should create a GovernanceWrappedERC20 clone', async () => {
       const erc20Contract = await smock.fake<GovernanceERC20>(
         'GovernanceERC20'
       );
+
+      erc20Contract.balanceOf.returns(2);
+
       const config: TokenConfig = {
         addr: erc20Contract.address,
         name: 'FakeToken',
@@ -119,20 +154,26 @@ describe.skip('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const [wrappedToken, merkleMinter] =
-        await tokenFactory.callStatic.createToken(
-          dao.address,
-          config,
-          mintConfig
-        );
+      const tx = await tokenFactory.createToken(
+        dao.address,
+        config,
+        mintConfig
+      );
 
-      expect(wrappedToken).not.to.be.eq(governanceWrappedBase.address);
+      const event = await findEvent<WrappedTokenEvent>(tx, 'WrappedToken');
+      const factory = await ethers.getContractFactory('GovernanceWrappedERC20');
+      const wrappedToken = factory.attach(event.args.token);
+
+      expect(await wrappedToken.underlying()).to.equal(erc20Contract.address);
     });
 
     it('should return MerkleMinter with 0x0', async () => {
       const erc20Contract = await smock.fake<GovernanceERC20>(
         'GovernanceERC20'
       );
+
+      erc20Contract.balanceOf.returns(2);
+
       const config: TokenConfig = {
         addr: erc20Contract.address,
         name: 'FakeToken',
@@ -144,18 +185,19 @@ describe.skip('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      let tx = await tokenFactory.callStatic.createToken(
-        dao.address,
-        config,
-        mintConfig
-      );
+      let [wrappedToken, merkleMinter] =
+        await tokenFactory.callStatic.createToken(
+          dao.address,
+          config,
+          mintConfig
+        );
 
-      expect(tx[1]).to.be.eq('0x0000000000000000000000000000000000000000');
+      expect(merkleMinter).to.be.eq(zeroAddr);
     });
 
-    it('should create a GovernanceERC20 clone', async () => {
+    it('should create a GovernanceERC20 and merkleminter clone', async () => {
       const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000000',
+        addr: zeroAddr,
         name: 'FakeToken',
         symbol: 'FT',
       };
@@ -165,40 +207,20 @@ describe.skip('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      let tx = await tokenFactory.callStatic.createToken(
+      let [token, minter] = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
       );
 
-      expect(tx[0]).not.to.be.eq(governanceBase.address);
-    });
-
-    it('should create a MerkleMinter clone', async () => {
-      const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000000',
-        name: 'FakeToken',
-        symbol: 'FT',
-      };
-
-      const mintConfig: MintConfig = {
-        receivers: ['0x0000000000000000000000000000000000000002'],
-        amounts: [1],
-      };
-
-      let tx = await tokenFactory.callStatic.createToken(
-        dao.address,
-        config,
-        mintConfig
-      );
-
-      expect(tx[1]).not.to.be.eq('0x0000000000000000000000000000000000000000');
-      expect(tx[1]).not.to.be.eq(merkleMinterBase.address);
+      expect(token).not.to.be.eq(governanceBase.address);
+      expect(minter).not.to.be.eq(zeroAddr);
+      expect(minter).not.to.be.eq(merkleMinterBase.address);
     });
 
     it('should emit TokenCreated', async () => {
       const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000000',
+        addr: zeroAddr,
         name: 'FakeToken',
         symbol: 'FT',
       };
@@ -211,11 +233,13 @@ describe.skip('Core: TokenFactory', () => {
       await expect(
         tokenFactory.createToken(dao.address, config, mintConfig)
       ).to.emit(tokenFactory, 'TokenCreated');
+
+      // Maybe withArgs
     });
 
     it('should mint tokens', async () => {
       const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000000',
+        addr: zeroAddr,
         name: 'FakeToken',
         symbol: 'FT',
       };
@@ -233,66 +257,23 @@ describe.skip('Core: TokenFactory', () => {
         config,
         mintConfig
       );
-      const rc = await tx.wait();
-      const eventArgs =
-        rc.events?.find(e => e.event === 'TokenCreated')?.args || [];
 
+      const event = await findEvent<TokenCreatedEvent>(tx, 'TokenCreated');
       const erc20Contract = await ethers.getContractAt(
         'ERC20Upgradeable',
-        eventArgs[0]
+        event.args.token
       );
 
       for (const i in mintConfig.receivers) {
         await expect(tx)
           .to.emit(erc20Contract, 'Transfer')
-          .withArgs(
-            '0x0000000000000000000000000000000000000000',
-            mintConfig.receivers[i],
-            mintConfig.amounts[i]
-          );
+          .withArgs(zeroAddr, mintConfig.receivers[i], mintConfig.amounts[i]);
       }
-    });
-
-    it('should mint tokens to DAO treasury', async () => {
-      const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000000',
-        name: 'FakeToken',
-        symbol: 'FT',
-      };
-
-      const mintAddress = '0x0000000000000000000000000000000000000001';
-
-      const mintConfig: MintConfig = {
-        receivers: [mintAddress],
-        amounts: [1],
-      };
-
-      const tx = await tokenFactory.createToken(
-        dao.address,
-        config,
-        mintConfig
-      );
-      const rc = await tx.wait();
-      const eventArgs =
-        rc.events?.find(e => e.event === 'TokenCreated')?.args || [];
-
-      const erc20Contract = await ethers.getContractAt(
-        'ERC20Upgradeable',
-        eventArgs[0]
-      );
-
-      await expect(tx)
-        .to.emit(erc20Contract, 'Transfer')
-        .withArgs(
-          '0x0000000000000000000000000000000000000000',
-          mintConfig.receivers[0],
-          mintConfig.amounts[0]
-        );
     });
 
     it('should grant proper permissions', async () => {
       const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000000',
+        addr: zeroAddr,
         name: 'FakeToken',
         symbol: 'FT',
       };

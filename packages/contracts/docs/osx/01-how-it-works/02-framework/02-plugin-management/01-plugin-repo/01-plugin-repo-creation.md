@@ -13,7 +13,7 @@ and are introduced in the following.
 
 <!-- TODO
 - call `createPluginRepoWithFirstVersion` in `PluginRepoFactory`
-- this creates the `PluginRepo` with a `1.0` version release and registers it in the `PluginRepoRegistry` with an ENS name
+- this creates the `PluginRepo` with a `1.1` version release and registers it in the `PluginRepoRegistry` with an ENS name
 
 For all subsequent builds and releases, `createVersion` inside the registered `PluginRepo` has to be called.
  -->
@@ -24,7 +24,7 @@ The `PluginRepoFactory` is a contract of the Aragon OSx protocol framework infra
 It contains the `createPluginRepoWithFirstVersion`,
 
 ```solidity title="@aragon/framework/repo/PluginRepoFactory.sol"
-/// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.0`.
+/// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.1`.
 /// @param _subdomain The plugin repository subdomain.
 /// @param _pluginSetup The plugin factory contract associated with the plugin version.
 /// @param _maintainer The plugin maintainer address.
@@ -40,7 +40,7 @@ function createPluginRepoWithFirstVersion(
 ) external returns (PluginRepo pluginRepo);
 ```
 
-which creates a `PluginRepo` with the first version `1.0` inside and registers it in the Aragon OSx `PluginRepoRegistry` contract with an [ENS subdomain](../../03-ens-names.md) under the `dao-plugin.eth` domain managed by Aragon.
+which creates a `PluginRepo` with the first release and first build (`v1.1`) inside and registers it in the Aragon OSx `PluginRepoRegistry`contract with an [ENS subdomain](../../03-ens-names.md) under the`plugin.dao.eth` domain managed by Aragon.
 
 Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-puginrepo-contract), it receives
 

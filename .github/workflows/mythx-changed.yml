@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: "yarn"
-          node-version: 14
+          node-version: 16
       - uses: actions/setup-python@v4
       - name: Install mythx-cli
         run: pip install mythx-cli

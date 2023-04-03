@@ -25,7 +25,7 @@ contract SimpleAdmin is PluginCloneable {
   /// @notice Executes actions in the associated DAO.
   /// @param _actions The actions to be executed by the DAO.
   function execute(IDAO.Action[] calldata _actions) external auth(ADMIN_EXECUTE_PERMISSION_ID) {
-    dao().execute({callId: 0x0, actions: _actions, allowFailureMap: 0});
+    dao().execute({_callId: 0x0, _actions: _actions, _allowFailureMap: 0});
   }
 }
 ```
@@ -68,7 +68,7 @@ The skeleton of our `SimpleAdminSetup` contract inheriting from `PluginSetup` lo
 <summary><code>SimpleAdminSetup</code>: The Sekeleton</summary>
 
 ```solidity
-import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 
 contract SimpleAdminSetup is PluginSetup {
   /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
@@ -140,7 +140,7 @@ function prepareInstallation(
     where: plugin,
     who: admin,
     condition: PermissionLib.NO_CONDITION,
-    permissionId: SimpleAdmin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+    permissionId: SimpleAdmin(plugin).ADMIN_EXECUTE_PERMISSION_ID()
   });
 
   // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
@@ -238,7 +238,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 
-import {PermissionLib} from '@aragon/osx/core/permission/PermissionsLib.sol';
+import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
 
@@ -285,7 +285,7 @@ contract SimpleAdminSetup is PluginSetup {
       where: plugin,
       who: admin,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: SimpleAdmin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+      permissionId: SimpleAdmin(plugin).ADMIN_EXECUTE_PERMISSION_ID()
     });
 
     // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
@@ -340,4 +340,4 @@ contract SimpleAdminSetup is PluginSetup {
 
 ### Subsequent Builds
 
-For subsequent builds or releases, you simply write a new implementation and associated setup contract providing an `prepareInstallation` and `prepareUninstallation` function. If DAOs want to install the new build or release, it must uninstall its current plugin and freshly install the new plugin version, which can happen in the same action array in a governance proposal. However, the plugin storage and event history will be lost since this is a non-upgradeable plugin. If you want to prevent the latter, you can learn how to write an upgradeable plugin in the next section.
+For subsequent builds or releases, you simply write a new implementation and associated setup contract providing an `prepareInstallation` and `prepareUninstallation` function. If a DAO wants to install the new build or release, it must uninstall its current plugin and freshly install the new plugin version, which can happen in the same action array in a governance proposal. However, the plugin storage and event history will be lost since this is a non-upgradeable plugin. If you want to prevent the latter, you can learn how to write an upgradeable plugin in the next section.

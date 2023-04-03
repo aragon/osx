@@ -6,13 +6,18 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {keccak256, solidityPack} from 'ethers/lib/utils';
 
-import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../../typechain';
+import {
+  PluginRepo,
+  PluginUUPSUpgradeableSetupV1Mock,
+  PlaceholderSetup__factory,
+} from '../../../typechain';
 import {
   deployMockPluginSetup,
   deployNewPluginRepo,
 } from '../../test-utils/repo';
 import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {ZERO_BYTES32} from '../../test-utils/dao';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -82,6 +87,7 @@ describe('PluginRepo', function () {
           MAINTAINER_PERMISSION_ID
         );
     });
+
     it('fails if the plugin setup does not support the `IPluginSetup` interface', async function () {
       // If EOA Address is passed
       await expect(
@@ -298,6 +304,58 @@ describe('PluginRepo', function () {
           '0x'
         )
       ).to.not.emit(pluginRepo, 'ReleaseMetadataUpdated');
+    });
+
+    it('allows to create placeholder builds for the same release', async () => {
+      const PlaceholderSetup = new PlaceholderSetup__factory(signers[0]);
+      const placeholder1 = await PlaceholderSetup.deploy();
+      const placeholder2 = await PlaceholderSetup.deploy();
+
+      // Release 1
+      await expect(
+        pluginRepo.createVersion(
+          1,
+          placeholder1.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(1, 1, placeholder1.address, ZERO_BYTES32);
+
+      await expect(
+        pluginRepo.createVersion(
+          1,
+          placeholder1.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(1, 2, placeholder1.address, ZERO_BYTES32);
+
+      // Release 2
+      await expect(
+        pluginRepo.createVersion(
+          2,
+          placeholder2.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(2, 1, placeholder2.address, ZERO_BYTES32);
+
+      await expect(
+        pluginRepo.createVersion(
+          2,
+          placeholder2.address,
+          ZERO_BYTES32,
+          ZERO_BYTES32
+        )
+      )
+        .to.emit(pluginRepo, 'VersionCreated')
+        .withArgs(2, 2, placeholder2.address, ZERO_BYTES32);
     });
   });
 

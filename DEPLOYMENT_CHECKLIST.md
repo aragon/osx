@@ -28,6 +28,13 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ## After-Deployment
 
+### Configuration updates
+
+- [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
+- [ ] Update `active_contracts.json` with the new deployed addresses
+- [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Add the managing DAOs' multisig address to `packages/subgraph/.env-example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
+
 ### Verification
 
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
@@ -39,8 +46,6 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
     - [ ] Remove `import '@openzeppelin/hardhat-upgrades'` from `packages/contracts/hardhat.config.ts`
     - [ ] Verify one of the proxies
     - [ ] Check if the other proxies are now verified with `Similar Match Source Code`
-- [ ] Update `active_contracts.json` with the new deployed addresses
-- [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
 
 ### Configurations
 
@@ -71,6 +76,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Publish a new version of `@aragon/osx-artifacts` (`./packages/contracts`) to NPM
 - [ ] Publish a new version of `@aragon/osx` (`./packages/contracts/src`) to NPM
 - [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts-ethers`) to NPM
+- [ ] Update the changelog with the new version
 
 ### Subgraph
 

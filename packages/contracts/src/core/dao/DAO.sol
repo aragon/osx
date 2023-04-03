@@ -76,6 +76,9 @@ contract DAO is
     /// @param index The index of the action in the action array that failed.
     error ActionFailed(uint256 index);
 
+    /// @notice Thrown if an action has insufficent gas left.
+    error InsufficientGas();
+
     /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
 
@@ -181,24 +184,39 @@ contract DAO is
 
         execResults = new bytes[](_actions.length);
 
+        uint256 gasBefore;
+        uint256 gasAfter;
+
         for (uint256 i = 0; i < _actions.length; ) {
-            address to = _actions[i].to;
-            (bool success, bytes memory response) = to.call{value: _actions[i].value}(
+            gasBefore = gasleft();
+
+            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );
+            gasAfter = gasleft();
 
-            if (!success) {
-                // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if (!hasBit(_allowFailureMap, uint8(i))) {
+            // Check if failure is allowed
+            if (!hasBit(_allowFailureMap, uint8(i))) {
+                // Check if the call failed.
+                if (!success) {
                     revert ActionFailed(i);
                 }
+            } else {
+                // Check if the call failed.
+                if (!success) {
+                    // Make sure that the action call did not fail because 63/64 of `gasleft()` was insufficient to execute the external call `.to.call` (see https://eips.ethereum.org/EIPS/eip-150).
+                    // In specific scenarios, i.e. proposal execution where the last action in the action array is allowed to fail, the account calling `execute` could force-fail this action by setting a gas limit
+                    // where 63/64 is insufficient causing the `.to.call` to fail, but where the remaining 1/64 gas are sufficient to successfully finish the `execute` call.
+                    if (gasAfter < gasBefore / 64) {
+                        revert InsufficientGas();
+                    }
 
-                // If the call failed, but was allowed in allowFailureMap, store that
-                // this specific action has actually failed.
-                failureMap = flipBit(failureMap, uint8(i));
+                    // Store that this action failed.
+                    failureMap = flipBit(failureMap, uint8(i));
+                }
             }
 
-            execResults[i] = response;
+            execResults[i] = result;
 
             unchecked {
                 ++i;

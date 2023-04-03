@@ -80,6 +80,7 @@ import {
   uninstallPlugin,
 } from '../../test-utils/psp/atomic-helpers';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -241,7 +242,10 @@ describe('Plugin Setup Processor', function () {
       buildMetadata
     );
 
-    let event = await findEvent(tx, EVENTS.PluginRepoRegistered);
+    let event = await findEvent<PluginRepoRegisteredEvent>(
+      tx,
+      EVENTS.PluginRepoRegistered
+    );
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     repoU = PluginRepo.attach(event.args.pluginRepo);
 
@@ -260,7 +264,10 @@ describe('Plugin Setup Processor', function () {
       buildMetadata
     );
 
-    event = await findEvent(tx, EVENTS.PluginRepoRegistered);
+    event = await findEvent<PluginRepoRegisteredEvent>(
+      tx,
+      EVENTS.PluginRepoRegistered
+    );
     repoC = PluginRepo.attach(event.args.pluginRepo);
     await repoC.createVersion(1, setupCV1Bad.address, EMPTY_DATA, EMPTY_DATA);
     await repoC.createVersion(1, setupCV2.address, EMPTY_DATA, EMPTY_DATA);
