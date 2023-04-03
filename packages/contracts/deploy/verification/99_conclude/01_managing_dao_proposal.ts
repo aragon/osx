@@ -46,6 +46,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
     return;
   }
+
+  console.log(
+    `ManagingDAOMultisig (${managingDAOMultisigAddress}) does allow deployer ${deployer.address} to create proposal.`
+  );
+  const tx = await managingDAOMultisig.createProposal(
+    ethers.utils.toUtf8Bytes(`ipfs://${cid}`),
+    hre.managingDAOActions,
+    0,
+    true,
+    true,
+    0,
+    Math.round(Date.now() / 1000) + 30 * 24 * 60 * 60 // Lets the proposal end in 30 days
+  );
+  console.log(`Creating proposal with tx ${tx.hash}`);
+  await tx.wait();
+  console.log(
+    `Proposal created in managingDAO Multisig ${managingDAOMultisigAddress}`
+  );
 };
 export default func;
 func.tags = ['ManagingDAOProposal'];
