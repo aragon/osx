@@ -376,7 +376,7 @@ describe('DAO', function () {
       expect(event.args.allowFailureMap).to.equal(0);
     });
 
-    it.only('reverts if failure is allowed but not enough gas is provided', async () => {
+    it('reverts if failure is allowed but not enough gas is provided', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
       let gasConsumer = await GasConsumer.deploy();
 
