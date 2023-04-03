@@ -61,7 +61,8 @@ interface IDAO {
         bytes32 callId,
         Action[] actions,
         uint256 failureMap,
-        bytes[] execResults
+        bytes[] execResults,
+        uint256 allowFailureMap
     );
 
     /// @notice Emitted when a standard callback is registered.

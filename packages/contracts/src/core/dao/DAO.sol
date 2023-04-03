@@ -228,7 +228,8 @@ contract DAO is
             callId: _callId,
             actions: _actions,
             failureMap: failureMap,
-            execResults: execResults
+            execResults: execResults,
+            allowFailureMap: _allowFailureMap
         });
     }
 
