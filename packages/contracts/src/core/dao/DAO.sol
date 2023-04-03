@@ -208,7 +208,7 @@ contract DAO is
                     // In specific scenarios, i.e. proposal execution where the last action in the action array is allowed to fail, the account calling `execute` could force-fail this action by setting a gas limit
                     // where 63/64 is insufficient causing the `.to.call` to fail, but where the remaining 1/64 gas are sufficient to successfully finish the `execute` call.
                     if (gasAfter < gasBefore / 64) {
-                        revert InsufficientGas();
+                       revert InsufficientGas();
                     }
 
                     // Store that this action failed.
