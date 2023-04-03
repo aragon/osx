@@ -33,7 +33,7 @@ function main() {
 
   // Import assert into generated file
   outputFile.addImportDeclaration({
-    namedImports: ['assert'],
+    namedImports: ['assert', 'log'],
     moduleSpecifier: `matchstick-as`
   });
 
@@ -63,17 +63,6 @@ function main() {
       statements: (writer: CodeBlockWriter) => {
         const defaultEntityId = '0x1';
         writer.writeLine(`super('${defaultEntityId}');`);
-
-        // classDeclaration.getSetAccessors().forEach(accessor => {
-        //   // Extract the property name from the accessor name
-        //   const propertyName = accessor.getName();
-
-        //   if (propertyName !== 'id') {
-        //     const value = DEFAULTS_VALUES[originalClassName][propertyName];
-
-        //     writer.writeLine(`this.${propertyName} = ${value};`);
-        //   }
-        // });
       }
     });
 
@@ -126,15 +115,40 @@ function main() {
     newClass.addMethod({
       name: 'assertEntity',
       returnType: 'void',
+      parameters: [
+        {
+          name: 'debug',
+          type: 'boolean',
+          initializer: 'false'
+        }
+      ],
       statements: (writer: CodeBlockWriter) => {
         writer.writeLine(`let entity = ${originalClassName}.load(this.id);`);
         writer.writeLine(`if (!entity) throw new Error("Entity not found");`);
         writer.writeLine(`let entries = entity.entries;`);
         writer.writeLine(`for (let i = 0; i < entries.length; i++) {`);
         writer.writeLine(`  let key = entries[i].key;`);
-        // writer.writeLine('  log.debug("key = {}",[key]);');
+
+        writer.writeLine(`  if (debug) {`);
+        writer.writeLine(`    log.debug('asserting for key: {}', [key]);`);
+        writer.writeLine(`  }`);
+
         writer.writeLine(`  let value = this.get(key);`);
-        writer.writeLine(`  if (value) {`);
+
+        writer.writeLine(`  if (!value) {`);
+        writer.writeLine(`    if (debug) {`);
+        writer.writeLine(
+          `      log.debug('value is null for key: {}', [key]);`
+        );
+        writer.writeLine(`    }`);
+        writer.writeLine(`  } else {`);
+
+        writer.writeLine(`    if (debug) {`);
+        writer.writeLine(
+          `      log.debug('asserting with value: {}', [value.displayData()]);`
+        );
+        writer.writeLine(`    }`);
+
         writer.writeLine(
           `    assert.fieldEquals("${originalClassName}", this.id, key, value.displayData());`
         );
