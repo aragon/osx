@@ -1,4 +1,4 @@
-import {ClassDeclaration, CodeBlockWriter, Project} from 'ts-morph';
+import {CodeBlockWriter, Project} from 'ts-morph';
 
 function main() {
   const project = new Project();
