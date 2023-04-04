@@ -2,20 +2,16 @@
   "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
   "network": "mainnet",
   "dataSources": {
-    "DAORegistries": [
-      {
-        "name": "DAORegistry",
-        "address": "0x7a62da7B56fB3bfCdF70E900787010Bc4c9Ca42e",
-        "startBlock": 16721812
-      }
-    ],
-    "PluginRepoRegistries": [
-      {
-        "name": "PluginRepoRegistry",
-        "address": "0x5B3B36BdC9470963A2734D6a0d2F6a64C21C159f",
-        "startBlock": 16721812
-      }
-    ],
+    "DAORegistry": {
+      "name": "DAORegistry",
+      "address": "0x7a62da7B56fB3bfCdF70E900787010Bc4c9Ca42e",
+      "startBlock": 16721812
+    },
+    "PluginRepoRegistry": {
+      "name": "PluginRepoRegistry",
+      "address": "0x5B3B36BdC9470963A2734D6a0d2F6a64C21C159f",
+      "startBlock": 16721812
+    },
     "PluginSetupProcessors": [
       {
         "name": "PluginSetupProcessor",

@@ -5,14 +5,13 @@ repository: https://github.com/aragon/osx
 schema:
   file: ./schema.graphql
 dataSources:
-  {{#dataSources.DAORegistries}}
   - kind: ethereum/contract
-    name: {{name}}
+    name: {{dataSources.DAORegistry.name}}
     network: {{network}}
     source:
       abi: DAORegistry
-      address: '{{address}}'
-      startBlock: {{startBlock}}
+      address: '{{dataSources.DAORegistry.address}}'
+      startBlock: {{dataSources.DAORegistry.startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -28,15 +27,13 @@ dataSources:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
       file: ./src/registries/daoRegistry.ts
-  {{/dataSources.DAORegistries}}
-  {{#dataSources.PluginRepoRegistries}}
   - kind: ethereum/contract
-    name: {{name}}
+    name: {{dataSources.PluginRepoRegistry.name}}
     network: {{network}}
     source:
       abi: PluginRepoRegistry
-      address: '{{address}}'
-      startBlock: {{startBlock}}
+      address: '{{dataSources.PluginRepoRegistry.address}}'
+      startBlock: {{dataSources.PluginRepoRegistry.startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -50,7 +47,6 @@ dataSources:
         - event: PluginRepoRegistered(string,address)
           handler: handlePluginRepoRegistered
       file: ./src/registries/pluginRepoRegistry.ts
-  {{/dataSources.PluginRepoRegistries}}
   {{#dataSources.PluginSetupProcessors}}
   - kind: ethereum/contract
     name: {{name}}
