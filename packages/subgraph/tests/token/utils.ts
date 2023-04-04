@@ -24,7 +24,7 @@ import {
   CREATED_AT,
   ALLOW_FAILURE_MAP
 } from '../constants';
-import {Transfer as ERC20TransferEvent} from '../../generated/templates/DaoTemplate/ERC20';
+import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
 
 // events
 

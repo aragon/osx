@@ -12,10 +12,12 @@
       "address": "0xc796bB1AfEBc56daDF6CAcD2aDa78055e5381971",
       "startBlock": 33514164
     },
-    "PluginSetupProcessor": {
-      "name": "PluginRepoRegistry",
-      "address": "0x9227b311C5cecB416707F1C8B7Ca1b52649AabEc",
-      "startBlock": 33514164
-    }
+    "PluginSetupProcessors": [
+      {
+        "name": "PluginSetupProcessor",
+        "address": "0x9227b311C5cecB416707F1C8B7Ca1b52649AabEc",
+        "startBlock": 33514164
+      }
+    ]
   }
 }

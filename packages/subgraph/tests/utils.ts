@@ -4,13 +4,13 @@ import {createMockedFunction} from 'matchstick-as/assembly/index';
 export function createMockGetter(
   contractAddress: string,
   funcName: string,
-  funcSigniture: string,
+  funcSignature: string,
   returns: ethereum.Value[]
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
     funcName,
-    funcSigniture
+    funcSignature
   )
     .withArgs([])
     .returns(returns);

@@ -4,7 +4,7 @@ import {
   ERC721Contract,
   ERC721Transfer
 } from '../../../generated/schema';
-import {ERC721} from '../../../generated/templates/DaoTemplate/ERC721';
+import {ERC721} from '../../../generated/templates/DaoTemplateV1_0_0/ERC721';
 import {supportsInterface} from '../erc165';
 import {DECODE_OFFSET, getTransferId, TransferType} from './common';
 import {

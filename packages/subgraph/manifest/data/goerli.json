@@ -12,10 +12,12 @@
       "address": "0x970Eb7Dd57c9F0dc4c5a10c06653d1103946b508",
       "startBlock": 8548226
     },
-    "PluginSetupProcessor": {
-      "name": "PluginSetupProcessor",
-      "address": "0xE8B5d8D66a02CD1b9Bd32a4064D7ABa45F51305e",
-      "startBlock": 8548226
-    }
+    "PluginSetupProcessors": [
+      {
+        "name": "PluginSetupProcessor",
+        "address": "0xE8B5d8D66a02CD1b9Bd32a4064D7ABa45F51305e",
+        "startBlock": 8548226
+      }
+    ]
   }
 }

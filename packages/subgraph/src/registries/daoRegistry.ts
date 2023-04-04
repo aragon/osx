@@ -1,5 +1,5 @@
 import {DAORegistered} from '../../generated/DAORegistry/DAORegistry';
-import {DaoTemplate} from '../../generated/templates';
+import {DaoTemplateV1_0_0, DaoTemplateV1_2_0} from '../../generated/templates';
 import {Dao} from '../../generated/schema';
 import {dataSource} from '@graphprotocol/graph-ts';
 
@@ -21,7 +21,8 @@ export function handleDAORegistered(event: DAORegistered): void {
   entity.createdAt = event.block.timestamp;
 
   // subscribe to templates
-  DaoTemplate.create(event.params.dao);
+  DaoTemplateV1_0_0.create(event.params.dao);
+  DaoTemplateV1_2_0.create(event.params.dao);
 
   entity.save();
 }

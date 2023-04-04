@@ -3,7 +3,7 @@ import {
   Administrator,
   AdministratorAdminPlugin
 } from '../../../generated/schema';
-import {Granted, Revoked} from '../../../generated/templates/DaoTemplate/DAO';
+import {Granted, Revoked} from '../../../generated/templates/Admin/DAO';
 
 export function handleGranted(event: Granted): void {
   if (

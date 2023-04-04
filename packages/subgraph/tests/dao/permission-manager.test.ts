@@ -1,7 +1,7 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, ByteArray, Bytes, crypto} from '@graphprotocol/graph-ts';
 
-import {handleGranted, handleRevoked} from '../../src/dao/dao';
+import {handleGranted, handleRevoked} from '../../src/dao/dao_v1_0_0';
 import {Permission, ContractPermissionId} from '../../generated/schema';
 import {
   DAO_ADDRESS,
