@@ -96,7 +96,7 @@ dataSources:
 # templates
 templates:
   # DAO
-  - name: DaoTemplate
+  - name: DaoTemplateV1
     kind: ethereum/contract
     network: {{network}}
     source:
@@ -120,7 +120,7 @@ templates:
         - name: AddresslistVoting
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
-          file: $ARAGON_OSX_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
+          file: $ARAGON_OSX_MODULE/../subgraph/abis/DAO_v1.json
         - name: CallbackHandler
           file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
       eventHandlers:
@@ -144,6 +144,24 @@ templates:
           handler: handleStandardCallbackRegistered
         - event: SignatureValidatorSet(address)
           handler: handleSignatureValidatorSet
+  - name: DaoTemplateV1_2
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: DAO
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/dao/dao_v1_2.ts
+      entities:
+        - Dao
+      abis:
+        - name: DAO
+          file: $ARAGON_OSX_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
+      eventHandlers:
+        - event: Executed(indexed address,bytes32,(address,uint256,bytes)[],uint256,uint256,bytes[])
+          handler: handleExecuted
   # TokenVoting (package)
   - name: TokenVoting
     kind: ethereum/contract

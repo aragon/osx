@@ -18,7 +18,7 @@ import {
   handleSignatureValidatorSet,
   handleStandardCallbackRegistered,
   handleCallbackReceived
-} from '../../src/dao/dao';
+} from '../../src/dao/dao_v1';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -59,8 +59,7 @@ import {
   ERC721Balance,
   TransactionActionsProposal
 } from '../../generated/schema';
-import {Executed} from '../../generated/templates/DaoTemplate/DAO';
-import {getProposalId} from '../../src/utils/proposals';
+import {Executed} from '../../generated/templates/DaoTemplateV1/DAO';
 
 const eq = assert.fieldEquals;
 
