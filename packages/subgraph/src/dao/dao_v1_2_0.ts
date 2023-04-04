@@ -2,7 +2,7 @@ import {TransactionActionsProposal} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct
-} from '../../generated/templates/DaoTemplateV1_2/DAO';
+} from '../../generated/templates/DaoTemplateV1_2_0/DAO';
 import {handleAction} from './utils';
 
 export function handleExecuted(event: Executed): void {

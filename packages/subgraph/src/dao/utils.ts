@@ -9,7 +9,7 @@ import {
 import {
   Executed,
   ExecutedActionsStruct
-} from '../../generated/templates/DaoTemplateV1/DAO';
+} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   ERC721_transferFrom,
   ERC721_safeTransferFromNoData,

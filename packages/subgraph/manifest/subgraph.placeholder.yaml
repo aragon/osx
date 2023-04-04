@@ -96,7 +96,7 @@ dataSources:
 # templates
 templates:
   # DAO
-  - name: DaoTemplateV1
+  - name: DaoTemplateV1_0_0
     kind: ethereum/contract
     network: {{network}}
     source:
@@ -105,7 +105,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/dao/dao_v1.ts
+      file: ./src/dao/dao_v1_0_0.ts
       entities:
         - Dao
       abis:
@@ -120,7 +120,7 @@ templates:
         - name: AddresslistVoting
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
-          file: $ARAGON_OSX_MODULE/../subgraph/abis/DAO_v1.json
+          file: $ARAGON_OSX_MODULE/../subgraph/abis/DAO_v1_0_0.json
         - name: CallbackHandler
           file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
       eventHandlers:
@@ -144,7 +144,7 @@ templates:
           handler: handleStandardCallbackRegistered
         - event: SignatureValidatorSet(address)
           handler: handleSignatureValidatorSet
-  - name: DaoTemplateV1_2
+  - name: DaoTemplateV1_2_0
     kind: ethereum/contract
     network: {{network}}
     source:
@@ -153,7 +153,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/dao/dao_v1_2.ts
+      file: ./src/dao/dao_v1_2_0.ts
       entities:
         - Dao
       abis:

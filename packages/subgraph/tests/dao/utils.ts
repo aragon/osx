@@ -13,7 +13,7 @@ import {
   SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived
-} from '../../generated/templates/DaoTemplateV1/DAO';
+} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 
 // events
 

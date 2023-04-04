@@ -11,7 +11,7 @@ import {
   SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived
-} from '../../generated/templates/DaoTemplateV1/DAO';
+} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   Dao,
   ContractPermissionId,
@@ -23,17 +23,10 @@ import {
 
 import {ADDRESS_ZERO} from '../utils/constants';
 
-import {handleERC721Action, handleERC721Received} from '../utils/tokens/erc721';
-import {handleERC20Action, handleERC20Deposit} from '../utils/tokens/erc20';
-import {handleNativeAction, handleNativeDeposit} from '../utils/tokens/eth';
-import {
-  ERC20_transfer,
-  ERC20_transferFrom,
-  ERC721_safeTransferFromNoData,
-  ERC721_safeTransferFromWithData,
-  ERC721_transferFrom,
-  onERC721Received
-} from '../utils/tokens/common';
+import {handleERC721Received} from '../utils/tokens/erc721';
+import {handleERC20Deposit} from '../utils/tokens/erc20';
+import {handleNativeDeposit} from '../utils/tokens/eth';
+import {onERC721Received} from '../utils/tokens/common';
 import {handleAction, updateProposalWithFailureMap} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
@@ -68,8 +61,6 @@ export function handleExecuted(event: Executed): void {
     .toHexString()
     .concat('_')
     .concat(event.params.callId.toHexString());
-
-  event.params.callId;
 
   // Not an effective solution, until each plugin has
   // its own subgraph separately.
