@@ -14,7 +14,7 @@
     "deploy:local": "LOCAL=true scripts/deploy-subgraph.sh",
     "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
     "stop:dev": "docker-compose -f docker/docker-compose.yml down",
-    "test": "graph test",
+    "test": "graph test -r",
     "coverage": "graph test -c",
     "formatting:check": "prettier '**/*.{json,ts,js}' -c",
     "formatting:write": "prettier '**/*.{json,ts,js}' --write"

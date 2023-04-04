@@ -44,7 +44,8 @@ import {
   createTrustedForwarderSetEvent,
   createSignatureValidatorSetEvent,
   createStandardCallbackRegisteredEvent,
-  getSupportsInterface
+  getSupportsInterface,
+  encodeWithFunctionSelector
 } from './utils';
 import {
   ERC20_transfer,
@@ -66,28 +67,6 @@ const eq = assert.fieldEquals;
 let daoId = Address.fromString(DAO_ADDRESS).toHexString();
 let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
 let balanceId = daoId.concat('_').concat(tokenId);
-
-function encodeWithFunctionSelector(
-  tuple: Array<ethereum.Value>,
-  funcSelector: string,
-  isDynamic: boolean = false
-): Bytes {
-  // ethereum.decode inside subgraph doesn't append 0x00...20 while the actual event
-  // thrown from the real network includes this appended offset. Due to this, mappings contain
-  // extra logic(appending the offset to the actual calldata in order to do ethereum.decode).
-  // Due to this, from the tests, we need to append it as well. Note that this rule only applies
-  // when the emitted event contains at least 1 dynamic type.
-  let index = isDynamic == true ? 66 : 2;
-
-  let calldata = ethereum
-    .encode(ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tuple)))!
-    .toHexString()
-    .substring(index);
-
-  let functionData = funcSelector.concat(calldata);
-
-  return Bytes.fromHexString(functionData);
-}
 
 // create Executed event with multiple actions
 function createExecutedEvent(
@@ -120,13 +99,14 @@ function createExecutedEvent(
     }
   }
 
-  let event = createNewExecutedEvent(
+  let event = createNewExecutedEvent<Executed>(
     Address.fromHexString(CONTRACT_ADDRESS).toHexString(),
     ZERO_BYTES32,
     actions,
     BigInt.fromString(failureMap),
     execResults,
-    Address.fromHexString(DAO_ADDRESS).toHexString()
+    Address.fromHexString(DAO_ADDRESS).toHexString(),
+    null
   );
 
   return event;
