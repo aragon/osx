@@ -5,7 +5,7 @@ import {
   ProposalCreated,
   ProposalExecuted
 } from '../../generated/templates/Admin/Admin';
-import {Granted, Revoked} from '../../generated/templates/DaoTemplate/DAO';
+import {Granted, Revoked} from '../../generated/templates/Admin/DAO';
 import {ADDRESS_ZERO} from '../constants';
 // events
 
