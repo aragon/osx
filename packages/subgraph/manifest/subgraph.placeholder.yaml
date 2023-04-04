@@ -5,13 +5,14 @@ repository: https://github.com/aragon/osx
 schema:
   file: ./schema.graphql
 dataSources:
+  {{#dataSources.DAORegistries}}
   - kind: ethereum/contract
-    name: DAORegistry
+    name: {{name}}
     network: {{network}}
     source:
       abi: DAORegistry
-      address: '{{dataSources.DAORegistry.address}}'
-      startBlock: {{dataSources.DAORegistry.startBlock}}
+      address: '{{address}}'
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -27,13 +28,15 @@ dataSources:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
       file: ./src/registries/daoRegistry.ts
+  {{/dataSources.DAORegistries}}
+  {{#dataSources.PluginRepoRegistries}}
   - kind: ethereum/contract
-    name: PluginRepoRegistry
+    name: {{name}}
     network: {{network}}
     source:
       abi: PluginRepoRegistry
-      address: '{{dataSources.PluginRepoRegistry.address}}'
-      startBlock: {{dataSources.PluginRepoRegistry.startBlock}}
+      address: '{{address}}'
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -47,13 +50,15 @@ dataSources:
         - event: PluginRepoRegistered(string,address)
           handler: handlePluginRepoRegistered
       file: ./src/registries/pluginRepoRegistry.ts
+  {{/dataSources.PluginRepoRegistries}}
+  {{#dataSources.PluginSetupProcessors}}
   - kind: ethereum/contract
-    name: PluginSetupProcessor
+    name: {{name}}
     network: {{network}}
     source:
       abi: PluginSetupProcessor
-      address: '{{dataSources.PluginSetupProcessor.address}}'
-      startBlock: {{dataSources.PluginSetupProcessor.startBlock}}
+      address: '{{address}}'
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -87,6 +92,7 @@ dataSources:
         - event: UninstallationApplied(indexed address,indexed address,bytes32)
           handler: handleUninstallationApplied
       file: ./src/plugin/pluginSetupProcessor.ts
+  {{/dataSources.PluginSetupProcessors}}
 # templates
 templates:
   # DAO
@@ -99,7 +105,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/dao/dao.ts
+      file: ./src/dao/dao_v1.ts
       entities:
         - Dao
       abis:
@@ -152,6 +158,8 @@ templates:
       entities:
         - Dao
       abis:
+        - name: ERC20
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: TokenVoting
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
@@ -255,6 +263,8 @@ templates:
       entities:
         - Dao
       abis:
+        - name: DAO
+          file: $ARAGON_OSX_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
         - name: Admin
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/admin/Admin.sol/Admin.json
       eventHandlers:

@@ -187,7 +187,9 @@ export function handleVoteCast(event: VoteCast): void {
 
         // Used when proposal has not ended.
         proposalEntity.earlyExecutable =
-          supportThresholdReachedEarly && minParticipationReached;
+          supportThresholdReachedEarly &&
+          minParticipationReached &&
+          proposalEntity.votingMode === VOTING_MODES.get(1);
       }
       proposalEntity.save();
     }
