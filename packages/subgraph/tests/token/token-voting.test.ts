@@ -303,12 +303,17 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // check proposal
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
 
-  // Check executable
+  // Check potentiallyExecutable
   // abstain: 0, yes: 1, no: 0
   // support          : 100%
   // worstCaseSupport :  33%
   // participation    :  33%
-  assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'false');
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    proposal.id,
+    'potentiallyExecutable',
+    'false'
+  );
   // check vote count
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -398,12 +403,17 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
   handleVoteCast(event3);
 
-  // Check executable
+  // Check potentiallyExecutable
   // abstain: 0, yes: 2, no: 0
   // support          : 100%
   // worstCaseSupport :  67%
   // participation    :  67%
-  assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'true');
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    proposal.id,
+    'potentiallyExecutable',
+    'true'
+  );
 
   assert.fieldEquals(
     'TokenVotingProposal',
