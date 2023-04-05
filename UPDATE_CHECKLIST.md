@@ -55,7 +55,7 @@ If the deployer **is** allowed to create a proposal
 
 ### Packages
 
-wait till the managing DAO has made the necessary changes and then:
+Wait until the managing DAO has made the necessary changes and then:
 
 - [ ] Publish a new version of `@aragon/osx-artifacts` (`./packages/contracts`) to NPM
 - [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts-ethers`) to NPM
