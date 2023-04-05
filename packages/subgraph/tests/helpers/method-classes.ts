@@ -3,14 +3,18 @@
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
 
-import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {Address, bigInt, BigInt, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC20Contract,
+  TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
   TokenVotingVoter
 } from '../../generated/schema';
-import {VoteCast} from '../../generated/templates/TokenVoting/TokenVoting';
+import {
+  ProposalCreated,
+  VoteCast
+} from '../../generated/templates/TokenVoting/TokenVoting';
 import {VOTER_OPTIONS, VOTE_OPTIONS} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
@@ -28,9 +32,18 @@ import {
   TOTAL_VOTING_POWER,
   TWO,
   VOTING_MODE,
-  ZERO
+  ZERO,
+  MIN_PARTICIPATION,
+  MIN_DURATION,
+  ONE,
+  DAO_TOKEN_ADDRESS,
+  STRING_DATA
 } from '../constants';
-import {createNewVoteCastEvent} from '../token/utils';
+import {
+  createNewProposalCreatedEvent,
+  createNewVoteCastEvent,
+  getProposalCountCall
+} from '../token/utils';
 import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
 
 class ERC20ContractMethods extends ERC20Contract {
@@ -125,6 +138,24 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
   }
 
   // event
+  fireEvent_ProposalCreated(
+    actions: ethereum.Tuple[],
+    description: string = STRING_DATA
+  ): ProposalCreated {
+    let event = createNewProposalCreatedEvent(
+      this.proposalId.toString(),
+      this.creator.toHexString(),
+      this.startDate.toString(),
+      this.endDate.toString(),
+      description,
+      actions,
+      this.allowFailureMap.toString(),
+      this.plugin
+    );
+
+    return event;
+  }
+
   fireEvent_VoteCast(
     voter: string,
     voterVoteOption: string,
@@ -161,5 +192,32 @@ class TokenVotingVoteMethods extends TokenVotingVote {
     this.updatedAt = BigInt.fromString(ZERO);
 
     return this;
+  }
+}
+
+class TokenVotingPluginMethods extends TokenVotingPlugin {
+  // build entity
+  // if id not changed it will update
+  withDefaultValues(): TokenVotingPluginMethods {
+    const pluginAddress = Address.fromHexString(CONTRACT_ADDRESS);
+    this.id = pluginAddress.toHexString();
+    this.dao = Address.fromHexString(DAO_ADDRESS).toHexString();
+    this.pluginAddress = pluginAddress;
+    this.votingMode = VOTING_MODE;
+    this.supportThreshold = BigInt.fromString(SUPPORT_THRESHOLD);
+    this.minParticipation = BigInt.fromString(MIN_PARTICIPATION);
+    this.minDuration = BigInt.fromString(MIN_DURATION);
+    this.minProposerVotingPower = BigInt.zero();
+    this.proposalCount = BigInt.zero();
+    this.token = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+
+    return this;
+  }
+
+  fireCall_getProposalCountCall(): void {
+    getProposalCountCall(
+      this.pluginAddress.toHexString(),
+      this.proposalCount.toString()
+    );
   }
 }

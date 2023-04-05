@@ -348,7 +348,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   minParticipation: BigInt
   minDuration: BigInt
   minProposerVotingPower: BigInt
-  proposalCount: BigInt
+  proposalCount: BigInt!
   token: Token
   members: [TokenVotingMember!]! @derivedFrom(field: "plugin")
 }

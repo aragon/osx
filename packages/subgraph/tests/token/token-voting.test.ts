@@ -47,6 +47,7 @@ import {
   getProposalCountCall
 } from './utils';
 import {
+  ExtendedTokenVotingPlugin,
   ExtendedTokenVotingProposal,
   ExtendedTokenVotingVote,
   ExtendedTokenVotingVoter
@@ -56,179 +57,35 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
-  let tokenVotingPlugin = new TokenVotingPlugin(
-    Address.fromString(CONTRACT_ADDRESS).toHexString()
-  );
-  tokenVotingPlugin.dao = DAO_ADDRESS;
-  tokenVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
-  tokenVotingPlugin.save();
+  let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+  tokenVotingPlugin.buildOrUpdate();
+  // assert with default value
+  // eg. proposalCount is `0`.
+  tokenVotingPlugin.assertEntity();
+
+  let proposal = new ExtendedTokenVotingProposal().withDefaultValues();
 
   // create calls
-  getProposalCountCall(CONTRACT_ADDRESS, '1');
-  createGetProposalCall(
-    CONTRACT_ADDRESS,
-    PROPOSAL_ID,
-    true,
-    false,
-
-    VOTING_MODE,
-    SUPPORT_THRESHOLD,
-    MIN_VOTING_POWER,
-    START_DATE,
-    END_DATE,
-    SNAPSHOT_BLOCK,
-
-    '0', // abstain
-    '0', // yes
-    '0', // no
-
-    actions,
-    ALLOW_FAILURE_MAP
-  );
-
-  createTotalVotingPowerCall(
-    CONTRACT_ADDRESS,
-    SNAPSHOT_BLOCK,
-    TOTAL_VOTING_POWER
-  );
+  tokenVotingPlugin.proposalCount = BigInt.fromString(ONE);
+  tokenVotingPlugin.fireCall_getProposalCountCall();
+  proposal.fireCall_getProposal(actions);
+  proposal.fireCall_totalVotingPower();
 
   // create event
-  let event = createNewProposalCreatedEvent(
-    PROPOSAL_ID,
-    ADDRESS_ONE,
-    START_DATE,
-    END_DATE,
-    STRING_DATA,
-    [],
-    ALLOW_FAILURE_MAP,
-    CONTRACT_ADDRESS
-  );
+  let event = proposal.fireEvent_ProposalCreated(actions, STRING_DATA);
 
   // handle event
-  _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
-
-  let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
+  _handleProposalCreated(event, proposal.dao, STRING_DATA);
 
   // checks
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'id',
-    PROPOSAL_ENTITY_ID
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'dao',
-    DAO_ADDRESS
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'plugin',
-    packageId
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'proposalId',
-    PROPOSAL_ID
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'creator',
-    ADDRESS_ONE
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'metadata',
-    STRING_DATA
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'allowFailureMap',
-    ALLOW_FAILURE_MAP
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'createdAt',
-    event.block.timestamp.toString()
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'creationBlockNumber',
-    event.block.number.toString()
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'startDate',
-    START_DATE
-  );
-
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'votingMode',
-    VOTING_MODES.get(parseInt(VOTING_MODE))
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'supportThreshold',
-    SUPPORT_THRESHOLD
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'minVotingPower',
-    MIN_VOTING_POWER
-  );
-
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'startDate',
-    START_DATE
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'endDate',
-    END_DATE
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'snapshotBlock',
-    SNAPSHOT_BLOCK
-  );
-
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'totalVotingPower',
-    TOTAL_VOTING_POWER
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    PROPOSAL_ENTITY_ID,
-    'executed',
-    'false'
-  );
+  // expected changes
+  proposal.creationBlockNumber = BigInt.fromString(ONE);
+  proposal.votingMode = VOTING_MODES.get(parseInt(VOTING_MODE)) as string;
+  // check TokenVotingProposal
+  proposal.assertEntity();
 
   // check TokenVotingPlugin
-  assert.fieldEquals(
-    'TokenVotingPlugin',
-    Address.fromString(CONTRACT_ADDRESS).toHexString(),
-    'proposalCount',
-    '1'
-  );
+  tokenVotingPlugin.assertEntity();
 
   clearStore();
 });
@@ -439,10 +296,8 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
 test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
-  let tokenVotingPlugin = new TokenVotingPlugin(entityID);
-  tokenVotingPlugin.dao = DAO_ADDRESS;
-  tokenVotingPlugin.pluginAddress = Bytes.fromHexString(CONTRACT_ADDRESS);
-  tokenVotingPlugin.save();
+  let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+  tokenVotingPlugin.buildOrUpdate();
 
   // create event
   let event = createNewVotingSettingsUpdatedEvent(
