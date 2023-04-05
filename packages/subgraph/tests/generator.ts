@@ -4,11 +4,11 @@ function main() {
   const project = new Project();
   const sourceFile = project.addSourceFileAtPath('./generated/schema.ts');
   const sourceMethodFile = project.addSourceFileAtPath(
-    './tests/helpers/methodClasses.ts'
+    './tests/helpers/method-classes.ts'
   );
 
   const outputFile = project.createSourceFile(
-    './tests/helpers/schemaBuilders.ts',
+    './tests/helpers/extended-schema.ts',
     '',
     {
       overwrite: true
@@ -21,7 +21,7 @@ function main() {
   // Get additional method classes
   const sourceMethodClasses = sourceMethodFile.getClasses();
 
-  // Add all imports from sourceMethodClasses
+  // Add all imports from sourcemethod-classes
   const methodsImportDeclarations = sourceMethodFile.getImportDeclarations();
   methodsImportDeclarations.forEach(importDeclaration => {
     if (
@@ -50,7 +50,7 @@ function main() {
   sourceClasses.forEach(classDeclaration => {
     // Create a new class based on the original one
     const originalClassName = classDeclaration.getName() as string;
-    const newClassName = `${originalClassName}Builder`;
+    const newClassName = `Extended${originalClassName}`;
     const newClass = outputFile.addClass({
       name: newClassName,
       isExported: true,
@@ -74,7 +74,7 @@ function main() {
         methods.forEach(method => {
           let returnType = method.getReturnTypeNode()?.getText() || '';
           if (returnType === `${originalClassName}Methods`) {
-            returnType = `${originalClassName}Builder`;
+            returnType = `Extended${originalClassName}`;
           }
 
           const newMethod = newClass.addMethod({

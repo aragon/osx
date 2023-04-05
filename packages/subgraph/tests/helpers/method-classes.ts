@@ -1,6 +1,6 @@
 /**
  * IMPORTANT: Do not export classes from this file.
- * The classes of this file are meant to be incorporated into the classes of ./schemaBuilders.ts
+ * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
 
 import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';

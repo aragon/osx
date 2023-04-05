@@ -47,11 +47,10 @@ import {
   getProposalCountCall
 } from './utils';
 import {
-  ERC20ContractBuilder,
-  TokenVotingProposalBuilder,
-  TokenVotingVoteBuilder,
-  TokenVotingVoterBuilder
-} from '../helpers/schemaBuilders';
+  ExtendedTokenVotingProposal,
+  ExtendedTokenVotingVote,
+  ExtendedTokenVotingVoter
+} from '../helpers/extended-schema';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -236,96 +235,96 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 
 test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // create state
-  let proposalBuilder = new TokenVotingProposalBuilder().withDefaultValues();
+  let proposal = new ExtendedTokenVotingProposal().withDefaultValues();
 
-  proposalBuilder.buildOrUpdate();
+  proposal.buildOrUpdate();
 
   // check proposal entity
-  proposalBuilder.assertEntity();
+  proposal.assertEntity();
 
   // // create calls
-  proposalBuilder.yes = bigInt.fromString(ONE);
-  proposalBuilder.fireCall_getProposal(actions);
-  proposalBuilder.fireCall_totalVotingPower();
+  proposal.yes = bigInt.fromString(ONE);
+  proposal.fireCall_getProposal(actions);
+  proposal.fireCall_totalVotingPower();
 
   // create event
-  let voterBuilder = new TokenVotingVoterBuilder().withDefaultValues();
+  let voter = new ExtendedTokenVotingVoter().withDefaultValues();
 
-  let voteBuilder = new TokenVotingVoteBuilder().withDefaultValues();
-  voteBuilder.voteOption = 'Yes';
-  voteBuilder.votingPower = bigInt.fromString(ONE);
+  let vote = new ExtendedTokenVotingVote().withDefaultValues();
+  vote.voteOption = 'Yes';
+  vote.votingPower = bigInt.fromString(ONE);
 
   // fire an event of `VoteCast` with voter info.
-  let event = proposalBuilder.fireEvent_VoteCast(
-    voterBuilder.address,
-    voteBuilder.voteOption,
-    voteBuilder.votingPower.toString()
+  let event = proposal.fireEvent_VoteCast(
+    voter.address,
+    vote.voteOption,
+    vote.votingPower.toString()
   );
 
   // test handler
   handleVoteCast(event);
 
   // checks vote entity created via handler (not builder)
-  voteBuilder.assertEntity();
+  vote.assertEntity();
 
   // check proposal
   // expected changes to the proposal entity
-  proposalBuilder.castedVotingPower = BigInt.fromString(ONE);
-  proposalBuilder.executable = false;
+  proposal.castedVotingPower = BigInt.fromString(ONE);
+  proposal.executable = false;
   // assert proposal entity
-  proposalBuilder.assertEntity();
+  proposal.assertEntity();
 
   // Check when voter replace vote
   // create calls 2
-  proposalBuilder.yes = BigInt.fromString(ZERO);
-  proposalBuilder.no = BigInt.fromString(ONE);
-  proposalBuilder.fireCall_getProposal(actions);
-  proposalBuilder.fireCall_totalVotingPower();
+  proposal.yes = BigInt.fromString(ZERO);
+  proposal.no = BigInt.fromString(ONE);
+  proposal.fireCall_getProposal(actions);
+  proposal.fireCall_totalVotingPower();
 
-  voteBuilder.voteOption = 'No';
+  vote.voteOption = 'No';
 
-  let event2 = proposalBuilder.fireEvent_VoteCast(
-    voterBuilder.address,
-    voteBuilder.voteOption,
-    voteBuilder.votingPower.toString()
+  let event2 = proposal.fireEvent_VoteCast(
+    voter.address,
+    vote.voteOption,
+    vote.votingPower.toString()
   );
 
   handleVoteCast(event2);
 
   // expected changes in TokenVotingVote
-  voteBuilder.voteReplaced = true;
-  voteBuilder.updatedAt = bigInt.fromString(ONE);
+  vote.voteReplaced = true;
+  vote.updatedAt = bigInt.fromString(ONE);
 
   // checks vote entity created via handler (not builder)
-  voteBuilder.assertEntity();
+  vote.assertEntity();
 
   // create calls 3
-  proposalBuilder.yes = BigInt.fromString(TWO);
-  proposalBuilder.no = BigInt.fromString(ZERO);
-  proposalBuilder.fireCall_getProposal(actions);
+  proposal.yes = BigInt.fromString(TWO);
+  proposal.no = BigInt.fromString(ZERO);
+  proposal.fireCall_getProposal(actions);
 
-  voteBuilder.voteOption = 'Yes';
+  vote.voteOption = 'Yes';
 
-  let event3 = proposalBuilder.fireEvent_VoteCast(
-    voterBuilder.address,
-    voteBuilder.voteOption,
-    voteBuilder.votingPower.toString()
+  let event3 = proposal.fireEvent_VoteCast(
+    voter.address,
+    vote.voteOption,
+    vote.votingPower.toString()
   );
 
   handleVoteCast(event3);
 
   // expected changes to the proposal entity
-  proposalBuilder.executable = true;
-  proposalBuilder.castedVotingPower = BigInt.fromString(TWO);
+  proposal.executable = true;
+  proposal.castedVotingPower = BigInt.fromString(TWO);
 
-  proposalBuilder.assertEntity();
+  proposal.assertEntity();
 
   clearStore();
 });
 
 test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option "None"', () => {
   // create state
-  let proposal = new TokenVotingProposalBuilder().withDefaultValues();
+  let proposal = new ExtendedTokenVotingProposal().withDefaultValues();
   proposal.buildOrUpdate();
 
   // create calls
@@ -372,7 +371,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
 
 test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
-  new TokenVotingProposalBuilder().withDefaultValues().buildOrUpdate();
+  new ExtendedTokenVotingProposal().withDefaultValues().buildOrUpdate();
 
   // create calls
   createGetProposalCall(
