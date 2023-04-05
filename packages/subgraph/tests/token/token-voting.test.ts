@@ -182,7 +182,6 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option "None"', () => {
   // create state
   let proposal = new ExtendedTokenVotingProposal().withDefaultValues();
-  proposal.buildOrUpdate();
 
   // create calls
   createGetProposalCall(
