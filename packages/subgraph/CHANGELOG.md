@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `method-classes`.
+- Added `schema-extender.ts`.
 - Added `installations` to `IPlugin`.
 - Added `PluginRelease`.
 - Added `metadata` to `PluginVersion`.
