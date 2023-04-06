@@ -126,34 +126,37 @@ function main() {
         writer.writeLine(`let entity = ${originalClassName}.load(this.id);`);
         writer.writeLine(`if (!entity) throw new Error("Entity not found");`);
         writer.writeLine(`let entries = entity.entries;`);
-        writer.writeLine(`for (let i = 0; i < entries.length; i++) {`);
-        writer.writeLine(`  let key = entries[i].key;`);
+        writer.write('for (let i = 0; i < entries.length; i++)').block(() => {
+          writer.writeLine(`let key = entries[i].key;`);
 
-        writer.writeLine(`  if (debug) {`);
-        writer.writeLine(`    log.debug('asserting for key: {}', [key]);`);
-        writer.writeLine(`  }`);
+          writer.write('if (debug)').block(() => {
+            writer.writeLine(`log.debug('asserting for key: {}', [key]);`);
+          });
 
-        writer.writeLine(`  let value = this.get(key);`);
+          writer.writeLine(`let value = this.get(key);`);
 
-        writer.writeLine(`  if (!value) {`);
-        writer.writeLine(`    if (debug) {`);
-        writer.writeLine(
-          `      log.debug('value is null for key: {}', [key]);`
-        );
-        writer.writeLine(`    }`);
-        writer.writeLine(`  } else {`);
+          writer
+            .write('if (!value)')
+            .block(() => {
+              writer.write('if (debug)').block(() => {
+                writer.writeLine(
+                  `log.debug('value is null for key: {}', [key]);`
+                );
+              });
+            })
+            .write('else')
+            .block(() => {
+              writer.write('if (debug)').block(() => {
+                writer.writeLine(
+                  `log.debug('asserting with value: {}', [value.displayData()]);`
+                );
+              });
 
-        writer.writeLine(`    if (debug) {`);
-        writer.writeLine(
-          `      log.debug('asserting with value: {}', [value.displayData()]);`
-        );
-        writer.writeLine(`    }`);
-
-        writer.writeLine(
-          `    assert.fieldEquals("${originalClassName}", this.id, key, value.displayData());`
-        );
-        writer.writeLine(`  }`);
-        writer.writeLine(`}`);
+              writer.writeLine(
+                `assert.fieldEquals("${originalClassName}", this.id, key, value.displayData());`
+              );
+            });
+        });
       }
     });
   });
