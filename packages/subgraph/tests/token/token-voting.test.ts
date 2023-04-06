@@ -73,12 +73,12 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 
   // create calls
   tokenVotingPlugin.proposalCount = BigInt.fromString(ONE);
-  tokenVotingPlugin.fireCall_getProposalCountCall();
-  proposal.fireCall_getProposal(actions);
-  proposal.fireCall_totalVotingPower();
+  tokenVotingPlugin.mockCall_getProposalCountCall();
+  proposal.mockCall_getProposal(actions);
+  proposal.mockCall_totalVotingPower();
 
   // create event
-  let event = proposal.fireEvent_ProposalCreated(actions, STRING_DATA);
+  let event = proposal.createEvent_ProposalCreated(actions, STRING_DATA);
 
   // handle event
   _handleProposalCreated(event, proposal.dao, STRING_DATA);
@@ -107,8 +107,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
   // // create calls
   proposal.yes = bigInt.fromString(ONE);
-  proposal.fireCall_getProposal(actions);
-  proposal.fireCall_totalVotingPower();
+  proposal.mockCall_getProposal(actions);
+  proposal.mockCall_totalVotingPower();
 
   // create event
   let voter = new ExtendedTokenVotingVoter().withDefaultValues();
@@ -118,7 +118,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   vote.votingPower = bigInt.fromString(ONE);
 
   // fire an event of `VoteCast` with voter info.
-  let event = proposal.fireEvent_VoteCast(
+  let event = proposal.createEvent_VoteCast(
     voter.address,
     vote.voteOption,
     vote.votingPower.toString()
@@ -133,7 +133,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // check proposal
   // expected changes to the proposal entity
   proposal.castedVotingPower = BigInt.fromString(ONE);
-  proposal.executable = false;
+  proposal.potentiallyExecutable = false;
   // assert proposal entity
   proposal.assertEntity();
 
@@ -141,12 +141,12 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // create calls 2
   proposal.yes = BigInt.fromString(ZERO);
   proposal.no = BigInt.fromString(ONE);
-  proposal.fireCall_getProposal(actions);
-  proposal.fireCall_totalVotingPower();
+  proposal.mockCall_getProposal(actions);
+  proposal.mockCall_totalVotingPower();
 
   vote.voteOption = 'No';
 
-  let event2 = proposal.fireEvent_VoteCast(
+  let event2 = proposal.createEvent_VoteCast(
     voter.address,
     vote.voteOption,
     vote.votingPower.toString()
@@ -164,11 +164,11 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // create calls 3
   proposal.yes = BigInt.fromString(TWO);
   proposal.no = BigInt.fromString(ZERO);
-  proposal.fireCall_getProposal(actions);
+  proposal.mockCall_getProposal(actions);
 
   vote.voteOption = 'Yes';
 
-  let event3 = proposal.fireEvent_VoteCast(
+  let event3 = proposal.createEvent_VoteCast(
     voter.address,
     vote.voteOption,
     vote.votingPower.toString()
@@ -177,7 +177,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event3);
 
   // expected changes to the proposal entity
-  proposal.executable = true;
+  proposal.potentiallyExecutable = true;
   proposal.castedVotingPower = BigInt.fromString(TWO);
 
   proposal.assertEntity();
@@ -189,7 +189,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
   let proposal = new ExtendedTokenVotingProposal().withDefaultValues();
 
   // create calls
-  proposal.fireCall_getProposal(actions);
+  proposal.mockCall_getProposal(actions);
 
   // create event
   let voter = new ExtendedTokenVotingVoter().withDefaultValues();
@@ -197,7 +197,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
   vote.voteOption = 'None';
   vote.votingPower = BigInt.fromString(ONE);
 
-  let event = proposal.fireEvent_VoteCast(
+  let event = proposal.createEvent_VoteCast(
     voter.address,
     vote.voteOption,
     vote.votingPower.toString()
@@ -218,10 +218,10 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
   proposal.buildOrUpdate();
 
   // create calls
-  proposal.fireCall_getProposal(actions);
+  proposal.mockCall_getProposal(actions);
 
   // create event
-  let event = proposal.fireEvent_ProposalExecuted();
+  let event = proposal.createEvent_ProposalExecuted();
 
   // handle event
   handleProposalExecuted(event);
@@ -241,7 +241,7 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   tokenVotingPlugin.buildOrUpdate();
 
   // create event
-  let event = tokenVotingPlugin.fireEvent_VotingSettingsUpdated();
+  let event = tokenVotingPlugin.createEvent_VotingSettingsUpdated();
 
   // handle event
   handleVotingSettingsUpdated(event);

@@ -108,14 +108,14 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     this.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.creationBlockNumber = BigInt.fromString(ZERO);
-    this.executable = false;
+    this.potentiallyExecutable = false;
 
     return this;
   }
 
   // calls
   // (only read call from contracts related to this)
-  fireCall_getProposal(actions: ethereum.Tuple[]): void {
+  mockCall_getProposal(actions: ethereum.Tuple[]): void {
     if (!this.yes || !this.no || !this.abstain) {
       throw new Error('Yes, No, or Abstain can not be null');
     } else {
@@ -139,7 +139,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     }
   }
 
-  fireCall_totalVotingPower(): void {
+  mockCall_totalVotingPower(): void {
     createTotalVotingPowerCall(
       this.plugin,
       this.snapshotBlock.toString(),
@@ -148,7 +148,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
   }
 
   // event
-  fireEvent_ProposalCreated(
+  createEvent_ProposalCreated(
     actions: ethereum.Tuple[],
     description: string = STRING_DATA
   ): ProposalCreated {
@@ -166,7 +166,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     return event;
   }
 
-  fireEvent_VoteCast(
+  createEvent_VoteCast(
     voter: string,
     voterVoteOption: string,
     voterVotingPower: string
@@ -181,7 +181,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     return event;
   }
 
-  fireEvent_ProposalExecuted(): ProposalExecuted {
+  createEvent_ProposalExecuted(): ProposalExecuted {
     let event = createNewProposalExecutedEvent(
       this.proposalId.toString(),
       this.plugin
@@ -232,14 +232,14 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     return this;
   }
 
-  fireCall_getProposalCountCall(): void {
+  mockCall_getProposalCountCall(): void {
     getProposalCountCall(
       this.pluginAddress.toHexString(),
       this.proposalCount.toString()
     );
   }
 
-  fireEvent_VotingSettingsUpdated(): VotingSettingsUpdated {
+  createEvent_VotingSettingsUpdated(): VotingSettingsUpdated {
     let event: VotingSettingsUpdated;
     event = createNewVotingSettingsUpdatedEvent(
       VOTING_MODE_INDEXES.get(this.votingMode as string) as string, // for event we need the index of the mapping to simulate the contract event
