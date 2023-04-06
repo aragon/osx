@@ -18,6 +18,11 @@ export const VOTING_MODES = new Map<number, string>()
   .set(1, 'EarlyExecution')
   .set(2, 'VoteReplacement');
 
+export const VOTING_MODE_INDEXES = new Map<string, string>()
+  .set('Standard', '0')
+  .set('EarlyExecution', '1')
+  .set('VoteReplacement', '2');
+
 export const TOKEN_VOTING_INTERFACE = '0x50eb001e';
 export const ADDRESSLIST_VOTING_INTERFACE = '0x5f21eb8b';
 export const ADMIN_INTERFACE = '0xa5793356';

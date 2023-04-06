@@ -4,6 +4,7 @@
  */
 
 import {Address, bigInt, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {log} from 'matchstick-as';
 import {
   ERC20Contract,
   TokenVotingPlugin,
@@ -13,9 +14,16 @@ import {
 } from '../../generated/schema';
 import {
   ProposalCreated,
-  VoteCast
+  ProposalExecuted,
+  VoteCast,
+  VotingSettingsUpdated
 } from '../../generated/templates/TokenVoting/TokenVoting';
-import {VOTER_OPTIONS, VOTE_OPTIONS} from '../../src/utils/constants';
+import {
+  VOTER_OPTIONS,
+  VOTE_OPTIONS,
+  VOTING_MODES,
+  VOTING_MODE_INDEXES
+} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
   ALLOW_FAILURE_MAP,
@@ -41,7 +49,9 @@ import {
 } from '../constants';
 import {
   createNewProposalCreatedEvent,
+  createNewProposalExecutedEvent,
   createNewVoteCastEvent,
+  createNewVotingSettingsUpdatedEvent,
   getProposalCountCall
 } from '../token/utils';
 import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
@@ -98,7 +108,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     this.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.creationBlockNumber = BigInt.fromString(ZERO);
-    this.executable = true;
+    this.executable = false;
 
     return this;
   }
@@ -170,6 +180,14 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     );
     return event;
   }
+
+  fireEvent_ProposalExecuted(): ProposalExecuted {
+    let event = createNewProposalExecutedEvent(
+      this.proposalId.toString(),
+      this.plugin
+    );
+    return event;
+  }
 }
 
 class TokenVotingVoteMethods extends TokenVotingVote {
@@ -203,7 +221,7 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     this.id = pluginAddress.toHexString();
     this.dao = Address.fromHexString(DAO_ADDRESS).toHexString();
     this.pluginAddress = pluginAddress;
-    this.votingMode = VOTING_MODE;
+    this.votingMode = VOTING_MODES.get(parseInt(VOTING_MODE)) as string;
     this.supportThreshold = BigInt.fromString(SUPPORT_THRESHOLD);
     this.minParticipation = BigInt.fromString(MIN_PARTICIPATION);
     this.minDuration = BigInt.fromString(MIN_DURATION);
@@ -219,5 +237,19 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
       this.pluginAddress.toHexString(),
       this.proposalCount.toString()
     );
+  }
+
+  fireEvent_VotingSettingsUpdated(): VotingSettingsUpdated {
+    let event: VotingSettingsUpdated;
+    event = createNewVotingSettingsUpdatedEvent(
+      VOTING_MODE_INDEXES.get(this.votingMode as string) as string, // for event we need the index of the mapping to simulate the contract event
+      (this.supportThreshold as BigInt).toString(),
+      (this.minParticipation as BigInt).toString(),
+      (this.minDuration as BigInt).toString(),
+      (this.minProposerVotingPower as BigInt).toString(),
+      this.pluginAddress.toHexString()
+    );
+
+    return event;
   }
 }
