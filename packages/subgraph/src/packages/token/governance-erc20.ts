@@ -1,7 +1,7 @@
 import {Address, BigInt, dataSource} from '@graphprotocol/graph-ts';
 
 import {TokenVotingMember} from '../../../generated/schema';
-import {Transfer} from '../../../generated/templates/DaoTemplate/ERC20';
+import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 
 function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
   let id = user

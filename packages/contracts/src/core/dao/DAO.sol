@@ -227,6 +227,7 @@ contract DAO is
             actor: msg.sender,
             callId: _callId,
             actions: _actions,
+            allowFailureMap: _allowFailureMap,
             failureMap: failureMap,
             execResults: execResults
         });
