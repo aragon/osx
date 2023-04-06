@@ -247,7 +247,7 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   handleVotingSettingsUpdated(event);
 
   // checks
-  tokenVotingPlugin.assertEntity(true);
+  tokenVotingPlugin.assertEntity();
 
   clearStore();
 });
