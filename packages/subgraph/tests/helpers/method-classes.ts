@@ -58,7 +58,7 @@ import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
 
 class ERC20ContractMethods extends ERC20Contract {
   withDefaultValues(): ERC20ContractMethods {
-    this.id = CONTRACT_ADDRESS;
+    this.id = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
     this.name = 'Test Token';
     this.symbol = 'TT';
     this.decimals = 18;
@@ -71,8 +71,8 @@ class TokenVotingVoterMethods extends TokenVotingVoter {
     this.id = Address.fromHexString(CONTRACT_ADDRESS)
       .toHexString()
       .concat('_')
-      .concat(Address.fromHexString(ADDRESS_ONE).toHexString());
-    this.address = Address.fromHexString(ADDRESS_ONE).toHexString();
+      .concat(ADDRESS_ONE);
+    this.address = ADDRESS_ONE;
     this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
     this.lastUpdated = BigInt.fromString(ZERO);
 
@@ -84,10 +84,10 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
   withDefaultValues(): TokenVotingProposalMethods {
     this.id = PROPOSAL_ENTITY_ID;
 
-    this.dao = Address.fromString(DAO_ADDRESS).toHexString();
-    this.plugin = Address.fromString(CONTRACT_ADDRESS).toHexString();
+    this.dao = DAO_ADDRESS;
+    this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
     this.proposalId = BigInt.fromString(PROPOSAL_ID);
-    this.creator = Address.fromString(ADDRESS_ONE);
+    this.creator = Address.fromHexString(ADDRESS_ONE);
 
     this.open = true;
     this.executed = false;
@@ -171,10 +171,18 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     voterVoteOption: string,
     voterVotingPower: string
   ): VoteCast {
+    if (!VOTE_OPTIONS.has(voterVoteOption)) {
+      throw new Error('Voter vote option is not valid.');
+    }
+
+    // we use casting here to remove autocompletion complaint
+    // since we know it will be captured by the previous check
+    let voteOption = VOTE_OPTIONS.get(voterVoteOption) as string;
+
     let event = createNewVoteCastEvent(
       this.proposalId.toString(),
       voter,
-      VOTE_OPTIONS.get(voterVoteOption) as string,
+      voteOption,
       voterVotingPower,
       this.plugin
     );
@@ -194,16 +202,22 @@ class TokenVotingVoteMethods extends TokenVotingVote {
   // build entity
   // if id not changed it will update
   withDefaultValues(): TokenVotingVoteMethods {
-    this.id = Address.fromHexString(ADDRESS_ONE)
-      .toHexString()
-      .concat('_')
-      .concat(PROPOSAL_ENTITY_ID);
+    let voterOptionIndex = 0;
+    if (!VOTER_OPTIONS.has(voterOptionIndex)) {
+      throw new Error('Voter option is not valid.');
+    }
+
+    // we use casting here to remove autocompletion complaint
+    // since we know it will be captured by the previous check
+    let voterOption = VOTER_OPTIONS.get(voterOptionIndex) as string;
+
+    this.id = ADDRESS_ONE.concat('_').concat(PROPOSAL_ENTITY_ID);
     this.voter = Address.fromHexString(CONTRACT_ADDRESS)
       .toHexString()
       .concat('_')
-      .concat(Address.fromHexString(ADDRESS_ONE).toHexString());
+      .concat(ADDRESS_ONE);
     this.proposal = PROPOSAL_ENTITY_ID;
-    this.voteOption = VOTER_OPTIONS.get(0) as string;
+    this.voteOption = voterOption;
     this.votingPower = BigInt.fromString(TWO);
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.voteReplaced = false;
@@ -217,17 +231,26 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
   // build entity
   // if id not changed it will update
   withDefaultValues(): TokenVotingPluginMethods {
+    let votingModeIndex = parseInt(VOTING_MODE);
+    if (!VOTING_MODES.has(votingModeIndex)) {
+      throw new Error('voting mode is not valid.');
+    }
+
+    // we use casting here to remove autocompletion complaint
+    // since we know it will be captured by the previous check
+    let votingMode = VOTING_MODES.get(votingModeIndex) as string;
+
     const pluginAddress = Address.fromHexString(CONTRACT_ADDRESS);
     this.id = pluginAddress.toHexString();
-    this.dao = Address.fromHexString(DAO_ADDRESS).toHexString();
+    this.dao = DAO_ADDRESS;
     this.pluginAddress = pluginAddress;
-    this.votingMode = VOTING_MODES.get(parseInt(VOTING_MODE)) as string;
+    this.votingMode = votingMode;
     this.supportThreshold = BigInt.fromString(SUPPORT_THRESHOLD);
     this.minParticipation = BigInt.fromString(MIN_PARTICIPATION);
     this.minDuration = BigInt.fromString(MIN_DURATION);
     this.minProposerVotingPower = BigInt.zero();
     this.proposalCount = BigInt.zero();
-    this.token = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+    this.token = DAO_TOKEN_ADDRESS;
 
     return this;
   }
@@ -240,9 +263,22 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
   }
 
   createEvent_VotingSettingsUpdated(): VotingSettingsUpdated {
-    let event: VotingSettingsUpdated;
-    event = createNewVotingSettingsUpdatedEvent(
-      VOTING_MODE_INDEXES.get(this.votingMode as string) as string, // for event we need the index of the mapping to simulate the contract event
+    if (this.votingMode === null) {
+      throw new Error('Voting mode is null.');
+    }
+
+    // we cast to string only for stoping rust compiler complaints.
+    let votingMode: string = this.votingMode as string;
+    if (!VOTING_MODE_INDEXES.has(votingMode)) {
+      throw new Error('Voting mode index is not valid.');
+    }
+
+    // we use casting here to remove autocompletion complaint
+    // since we know it will be captured by the previous check
+    let votingModeIndex = VOTING_MODE_INDEXES.get(votingMode) as string;
+
+    let event = createNewVotingSettingsUpdatedEvent(
+      votingModeIndex, // for event we need the index of the mapping to simulate the contract event
       (this.supportThreshold as BigInt).toString(),
       (this.minParticipation as BigInt).toString(),
       (this.minDuration as BigInt).toString(),
