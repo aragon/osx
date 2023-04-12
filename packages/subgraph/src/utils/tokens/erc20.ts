@@ -4,7 +4,7 @@ import {
   ERC20Contract,
   ERC20Transfer
 } from '../../../generated/schema';
-import {ERC20} from '../../../generated/templates/DaoTemplate/ERC20';
+import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
 import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
 
 export function fetchERC20(address: Address): ERC20Contract | null {

@@ -333,6 +333,7 @@ describe('DAO', function () {
 
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
+      expect(event.args.allowFailureMap).to.equal(allowFailureMap);
 
       // construct the failureMap which only has those
       // bits set at indexes where actions failed
@@ -340,7 +341,7 @@ describe('DAO', function () {
       for (let i = 0; i < 3; i++) {
         failureMap = flipBit(i, failureMap);
       }
-      // Check that dao crrectly generated failureMap
+      // Check that dao correctly generated failureMap
       expect(event.args.failureMap).to.equal(failureMap);
 
       // Check that execResult emitted correctly stores action results.
@@ -372,6 +373,7 @@ describe('DAO', function () {
       expect(event.args.actions[0].value).to.equal(data.succeedAction.value);
       expect(event.args.actions[0].data).to.equal(data.succeedAction.data);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
+      expect(event.args.allowFailureMap).to.equal(0);
     });
 
     it('reverts if failure is allowed but not enough gas is provided', async () => {
@@ -392,11 +394,11 @@ describe('DAO', function () {
         [gasConsumingAction],
         allowFailureMap
       ); // exact gas required: 495453
-      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
 
+      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(500),
+          gasLimit: expectedGas.sub(800),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 

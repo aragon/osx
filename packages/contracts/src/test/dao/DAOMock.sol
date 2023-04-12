@@ -38,7 +38,7 @@ contract DAOMock is IDAO, PermissionManager {
         uint256 allowFailureMap
     ) external override returns (bytes[] memory execResults, uint256 failureMap) {
         (allowFailureMap);
-        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
+        emit Executed(msg.sender, callId, _actions, allowFailureMap, failureMap, execResults);
     }
 
     function deposit(

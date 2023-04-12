@@ -24,7 +24,7 @@ import {
   CREATED_AT,
   ALLOW_FAILURE_MAP
 } from '../constants';
-import {Transfer as ERC20TransferEvent} from '../../generated/templates/DaoTemplate/ERC20';
+import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
 
 // events
 
@@ -247,7 +247,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
   tokenVotingProposal.creationBlockNumber = creationBlockNumber;
-  tokenVotingProposal.executable = executable;
+  tokenVotingProposal.potentiallyExecutable = executable;
   tokenVotingProposal.earlyExecutable = earlyExecutable;
 
   tokenVotingProposal.save();

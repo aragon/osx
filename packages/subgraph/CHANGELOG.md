@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Supports now multiple `DAORegistries`, `PluginRepoRegistries` and `PluginSetupProcessors` as datasources.
+- Splits `DAO` into multiple versions.
+- Fixes typing issues in tests and subgraph manifest.
+
 ## [1.1.0]
 
 ### Added
@@ -18,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `executable` attribute of the proposal entities to `potentiallyExecutable`.
 - Changed `plugin` field of `Dao` from `IPluginInstallation` to `IPlugin`.
 - Changed `pluginAddress` field of `PluginInstallation` to `plugin`.
 - Changed `IPluginInstallation` to `IPlugin`.

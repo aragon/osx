@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 
-import {PluginRepoRegistry, PluginSetupProcessor} from '../../typechain';
+import {PluginRepoRegistry, PluginSetupProcessor} from '../../../typechain';
 
 import {getMergedABI} from '../../utils/abi';
 

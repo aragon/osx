@@ -47,6 +47,7 @@ export function _handleProposalCreated(
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
+  proposalEntity.potentiallyExecutable = false;
 
   let contract = AddresslistVoting.bind(pluginAddress);
   let proposal = contract.try_getProposal(pluginProposalId);
@@ -182,12 +183,14 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.executable =
+        proposalEntity.potentiallyExecutable =
           supportThresholdReached && minParticipationReached;
 
         // Used when proposal has not ended.
         proposalEntity.earlyExecutable =
-          supportThresholdReachedEarly && minParticipationReached;
+          supportThresholdReachedEarly &&
+          minParticipationReached &&
+          proposalEntity.votingMode === VOTING_MODES.get(1);
       }
       proposalEntity.save();
     }
@@ -201,7 +204,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
-    proposalEntity.executable = false;
+    proposalEntity.potentiallyExecutable = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;

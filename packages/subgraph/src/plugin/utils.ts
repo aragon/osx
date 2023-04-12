@@ -5,12 +5,11 @@ import {
   ethereum,
   crypto,
   ByteArray,
-  log
 } from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
 import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
-import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
+import {ERC165 as ERC165Contract} from '../../generated/PluginSetupProcessor/ERC165';
 import {
   TokenVoting,
   AddresslistVoting,

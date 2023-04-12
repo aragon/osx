@@ -13,7 +13,7 @@ import {
   SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived
-} from '../../generated/templates/DaoTemplate/DAO';
+} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 
 // events
 
@@ -251,15 +251,16 @@ export function createNewRevokedEvent(
   return newGrantedEvent;
 }
 
-export function createNewExecutedEvent(
+export function createNewExecutedEvent<T extends Executed>(
   actor: string,
   callId: string,
   actions: ethereum.Tuple[],
   failureMap: BigInt,
   execResults: Bytes[],
-  contractAddress: string
-): Executed {
-  let newExecutedEvent = changetype<Executed>(newMockEvent());
+  contractAddress: string,
+  allowFailureMap: BigInt | null // used from DAO V1.2 and higher
+): T {
+  let newExecutedEvent = changetype<T>(newMockEvent());
 
   newExecutedEvent.address = Address.fromString(contractAddress);
   newExecutedEvent.parameters = [];
@@ -277,6 +278,14 @@ export function createNewExecutedEvent(
     ethereum.Value.fromTupleArray(actions)
   );
 
+  let allowFailureMapParam: ethereum.EventParam | null = null;
+  if (allowFailureMap) {
+    allowFailureMapParam = new ethereum.EventParam(
+      'allowFailureMap',
+      ethereum.Value.fromUnsignedBigInt(allowFailureMap)
+    );
+  }
+
   let failureMapParam = new ethereum.EventParam(
     'failureMap',
     ethereum.Value.fromUnsignedBigInt(failureMap)
@@ -290,6 +299,11 @@ export function createNewExecutedEvent(
   newExecutedEvent.parameters.push(actorParam);
   newExecutedEvent.parameters.push(callIdParam);
   newExecutedEvent.parameters.push(actionsParam);
+
+  if (allowFailureMapParam) {
+    newExecutedEvent.parameters.push(allowFailureMapParam);
+  }
+
   newExecutedEvent.parameters.push(failureMapParam);
   newExecutedEvent.parameters.push(execResultsParams);
 
@@ -493,4 +507,26 @@ export function createDaoEntityState(
   daoEntity.save();
 
   return daoEntity;
+}
+
+export function encodeWithFunctionSelector(
+  tuple: Array<ethereum.Value>,
+  funcSelector: string,
+  isDynamic: boolean = false
+): Bytes {
+  // ethereum.decode inside subgraph doesn't append 0x00...20 while the actual event
+  // thrown from the real network includes this appended offset. Due to this, mappings contain
+  // extra logic(appending the offset to the actual calldata in order to do ethereum.decode).
+  // Due to this, from the tests, we need to append it as well. Note that this rule only applies
+  // when the emitted event contains at least 1 dynamic type.
+  let index = isDynamic == true ? 66 : 2;
+
+  let calldata = ethereum
+    .encode(ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tuple)))!
+    .toHexString()
+    .substring(index);
+
+  let functionData = funcSelector.concat(calldata);
+
+  return Bytes.fromHexString(functionData);
 }

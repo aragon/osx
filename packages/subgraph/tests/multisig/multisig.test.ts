@@ -209,7 +209,12 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 
   // check proposal
   assert.fieldEquals('MultisigProposal', proposal.id, 'approvals', ONE);
-  assert.fieldEquals('MultisigProposal', proposal.id, 'executable', 'false');
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposal.id,
+    'potentiallyExecutable',
+    'false'
+  );
 
   // create 2nd approve, to test approvals
   // create calls
@@ -242,7 +247,12 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 
   // Check
   assert.fieldEquals('MultisigProposal', proposal.id, 'approvals', TWO);
-  assert.fieldEquals('MultisigProposal', proposal.id, 'executable', 'true');
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposal.id,
+    'potentiallyExecutable',
+    'true'
+  );
 
   clearStore();
 });
