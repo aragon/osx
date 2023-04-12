@@ -5,6 +5,7 @@ import {
   ethereum,
   crypto,
   ByteArray,
+  BigInt
 } from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
@@ -44,6 +45,7 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
     packageEntity = new TokenVotingPlugin(pluginId);
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
+    packageEntity.proposalCount = BigInt.zero();
     let contract = TokenVotingContract.bind(plugin);
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
@@ -80,6 +82,7 @@ function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
     packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
+    packageEntity.proposalCount = BigInt.zero();
 
     let contract = AddresslistVotingContract.bind(plugin);
 
@@ -136,6 +139,7 @@ function createMultisigPlugin(plugin: Address, daoId: string): void {
     packageEntity.onlyListed = false;
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
+    packageEntity.proposalCount = BigInt.zero();
 
     // Create template
     let context = new DataSourceContext();

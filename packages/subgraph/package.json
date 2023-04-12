@@ -8,12 +8,14 @@
     "lint": "eslint . --ext .ts",
     "build:contracts": "cd ../contracts && yarn build",
     "manifest": "scripts/build-manifest.sh",
-    "build": "scripts/build-subgraph.sh",
+    "extend:schema": "yarn ts-node tests/schema-extender.ts",
+    "build": "scripts/build-subgraph.sh && yarn extend:schema",
     "deploy": "scripts/deploy-subgraph.sh",
     "create:local": "graph create aragon/aragon-core-rinkeby --node http://localhost:8020",
     "deploy:local": "LOCAL=true scripts/deploy-subgraph.sh",
     "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
     "stop:dev": "docker-compose -f docker/docker-compose.yml down",
+    "test:fast": "graph test",
     "test": "graph test -r",
     "coverage": "graph test -c",
     "formatting:check": "prettier '**/*.{json,ts,js}' -c",
@@ -26,6 +28,8 @@
     "@typescript-eslint/parser": "^5.18.0",
     "eslint": "^8.12.0",
     "matchstick-as": "^0.5.1",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "ts-morph": "^17.0.1",
+    "typescript": "^4.9.5"
   }
 }

@@ -5,7 +5,7 @@ import {
   test,
   describe,
   beforeEach,
-  afterEach,
+  afterEach
 } from 'matchstick-as/assembly/index';
 
 import {ADDRESS_ONE, ADDRESS_TWO, DAO_ADDRESS} from '../constants';
