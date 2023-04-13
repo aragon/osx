@@ -3,15 +3,30 @@
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
 
-import {Address, bigInt, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  bigInt,
+  BigInt,
+  Bytes,
+  ethereum
+} from '@graphprotocol/graph-ts';
 import {log} from 'matchstick-as';
 import {
+  Dao,
+  ERC20Balance,
   ERC20Contract,
+  ERC20Transfer,
+  NativeBalance,
+  NativeTransfer,
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
   TokenVotingVoter
 } from '../../generated/schema';
+import {
+  Deposited,
+  NativeTokenDeposited
+} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   ProposalCreated,
   ProposalExecuted,
@@ -24,6 +39,7 @@ import {
   VOTING_MODES,
   VOTING_MODE_INDEXES
 } from '../../src/utils/constants';
+import {getTransferId} from '../../src/utils/tokens/common';
 import {
   ADDRESS_ONE,
   ALLOW_FAILURE_MAP,
@@ -45,8 +61,16 @@ import {
   MIN_DURATION,
   ONE,
   DAO_TOKEN_ADDRESS,
-  STRING_DATA
+  STRING_DATA,
+  ADDRESS_TWO,
+  ADDRESS_THREE,
+  ADDRESS_ZERO
 } from '../constants';
+import {
+  createNewDepositedEvent,
+  createNewNativeTokenDepositedEvent,
+  getBalanceOf
+} from '../dao/utils';
 import {
   createNewProposalCreatedEvent,
   createNewProposalExecutedEvent,
@@ -54,18 +78,163 @@ import {
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall
 } from '../token/utils';
-import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
+import {
+  createGetProposalCall,
+  createTotalVotingPowerCall,
+  createTokenCalls
+} from '../utils';
 
 class ERC20ContractMethods extends ERC20Contract {
   withDefaultValues(): ERC20ContractMethods {
-    this.id = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
-    this.name = 'Test Token';
-    this.symbol = 'TT';
-    this.decimals = 18;
+    this.id = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+    this.name = 'DAO Token';
+    this.symbol = 'DAOT';
+    this.decimals = 6;
+
+    return this;
+  }
+
+  // calls
+  mockCall_createTokenCalls(totalSupply: string | null = null): void {
+    if (!this.name) {
+      throw new Error('Name is null');
+    }
+    if (!this.symbol) {
+      throw new Error('Symbol is null');
+    }
+    // we cast to string only for stoping rust compiler complaints.
+    createTokenCalls(
+      this.id,
+      this.name as string,
+      this.symbol as string,
+      this.decimals.toString(),
+      totalSupply
+    );
+  }
+
+  mockCall_balanceOf(account: string, amount: string): void {
+    getBalanceOf(this.id, account, amount);
+  }
+}
+
+// ERC20Balance
+class ERC20BalanceMethods extends ERC20Balance {
+  withDefaultValues(): ERC20BalanceMethods {
+    let daoId = Address.fromString(DAO_ADDRESS).toHexString();
+    let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    let balanceId = daoId.concat('_').concat(tokenId);
+
+    this.id = balanceId;
+    this.token = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+    this.dao = DAO_ADDRESS;
+    this.balance = BigInt.zero();
+    this.lastUpdated = BigInt.zero();
+    return this;
+  }
+}
+
+class ERC20TransferMethods extends ERC20Transfer {
+  withDefaultValue(
+    id: string = getTransferId(Bytes.empty(), BigInt.zero(), 0)
+  ): ERC20TransferMethods {
+    this.id = id;
+    this.dao = DAO_ADDRESS;
+    this.token = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    this.amount = BigInt.zero();
+    this.from = Address.fromHexString(ADDRESS_ONE);
+    this.to = Address.fromHexString(DAO_ADDRESS);
+    this.proposal = PROPOSAL_ENTITY_ID;
+    this.type = 'Deposit';
+    this.txHash = Bytes.empty();
+    this.createdAt = BigInt.fromString(CREATED_AT);
 
     return this;
   }
 }
+
+// NativeTransfer
+class NativeTransferMethods extends NativeTransfer {
+  withDefaultValues(
+    id: string = getTransferId(Bytes.empty(), BigInt.zero(), 0)
+  ): NativeTransferMethods {
+    this.id = id;
+    this.dao = DAO_ADDRESS;
+    this.amount = BigInt.zero();
+    this.from = Address.fromHexString(ADDRESS_ONE);
+    this.to = Address.fromHexString(DAO_ADDRESS);
+    this.reference = 'Native Deposit';
+    this.proposal = PROPOSAL_ENTITY_ID;
+    this.type = 'Deposit';
+    this.txHash = Bytes.empty();
+    this.createdAt = BigInt.fromString(CREATED_AT);
+
+    return this;
+  }
+}
+
+// NativeBalance
+class NativeBalanceMethods extends NativeBalance {
+  withDefaultValues(): NativeBalanceMethods {
+    this.id = DAO_ADDRESS.concat('_').concat(ADDRESS_ZERO);
+    this.dao = DAO_ADDRESS;
+    this.balance = BigInt.zero();
+    this.lastUpdated = BigInt.zero();
+
+    return this;
+  }
+}
+
+// DAO
+class DaoMethods extends Dao {
+  withDefaultValues(): DaoMethods {
+    this.id = DAO_ADDRESS;
+    this.subdomain = '';
+    this.creator = Address.fromHexString(ADDRESS_ONE);
+    this.metadata = STRING_DATA;
+    this.createdAt = BigInt.fromString(CREATED_AT);
+    this.token = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    this.trustedForwarder = Address.fromHexString(ADDRESS_TWO);
+    this.signatureValidator = Address.fromHexString(ADDRESS_THREE);
+    return this;
+  }
+
+  // events
+  createEvent_NativeTokenDeposited(
+    senderAddress: string,
+    amount: string
+  ): NativeTokenDeposited {
+    let event = createNewNativeTokenDepositedEvent(
+      senderAddress,
+      amount,
+      this.id
+    );
+
+    return event;
+  }
+
+  createEvent_Deposited(
+    senderAddress: string,
+    amount: string,
+    reference: string
+  ): Deposited {
+    if (!this.token) {
+      throw new Error('Token is null');
+    }
+
+    // we cast to string only for stoping rust compiler complaints.
+    let event = createNewDepositedEvent(
+      senderAddress,
+      this.token as string,
+      amount,
+      reference,
+      this.id
+    );
+
+    return event;
+  }
+}
+
+// Token Voting
 class TokenVotingVoterMethods extends TokenVotingVoter {
   withDefaultValues(): TokenVotingVoterMethods {
     this.id = Address.fromHexString(CONTRACT_ADDRESS)
@@ -74,7 +243,7 @@ class TokenVotingVoterMethods extends TokenVotingVoter {
       .concat(ADDRESS_ONE);
     this.address = ADDRESS_ONE;
     this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
-    this.lastUpdated = BigInt.fromString(ZERO);
+    this.lastUpdated = BigInt.zero();
 
     return this;
   }
