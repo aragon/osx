@@ -3,19 +3,15 @@
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
 
-import {
-  Address,
-  bigInt,
-  BigInt,
-  Bytes,
-  ethereum
-} from '@graphprotocol/graph-ts';
-import {log} from 'matchstick-as';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   Dao,
   ERC20Balance,
   ERC20Contract,
   ERC20Transfer,
+  ERC721Balance,
+  ERC721Contract,
+  ERC721Transfer,
   NativeBalance,
   NativeTransfer,
   TokenVotingPlugin,
@@ -24,6 +20,7 @@ import {
   TokenVotingVoter
 } from '../../generated/schema';
 import {
+  CallbackReceived,
   Deposited,
   NativeTokenDeposited
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
@@ -67,6 +64,7 @@ import {
   ADDRESS_ZERO
 } from '../constants';
 import {
+  createCallbackReceivedEvent,
   createNewDepositedEvent,
   createNewNativeTokenDepositedEvent,
   getBalanceOf
@@ -84,6 +82,70 @@ import {
   createTokenCalls
 } from '../utils';
 
+// ERC721Contract
+class ERC721ContractMethods extends ERC721Contract {
+  withDefaultValues(): ERC721ContractMethods {
+    this.id = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+    this.name = 'name';
+    this.symbol = 'symbol';
+    return this;
+  }
+
+  // calls
+  mockCall_createTokenCalls(): void {
+    if (!this.name) {
+      throw new Error('Name is null');
+    }
+    if (!this.symbol) {
+      throw new Error('Symbol is null');
+    }
+    // we cast to string only for stoping rust compiler complaints.
+    createTokenCalls(
+      this.id,
+      this.name as string,
+      this.symbol as string,
+      null,
+      null
+    );
+  }
+}
+
+// ERC721Balance
+class ERC721BalanceMethods extends ERC721Balance {
+  withDefaultValues(): ERC721BalanceMethods {
+    let daoId = Address.fromString(DAO_ADDRESS).toHexString();
+    let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    let balanceId = daoId.concat('_').concat(tokenId);
+
+    this.id = balanceId;
+    this.token = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+    this.dao = DAO_ADDRESS;
+    this.tokenIds = [BigInt.zero()];
+    this.lastUpdated = BigInt.zero();
+    return this;
+  }
+}
+
+// ERC721Transfer
+class ERC721TransferMethods extends ERC721Transfer {
+  withDefaultValues(
+    id: string = getTransferId(Bytes.empty(), BigInt.zero(), 0)
+  ): ERC721TransferMethods {
+    this.id = id;
+    this.dao = DAO_ADDRESS;
+    this.token = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    this.tokenId = BigInt.zero();
+    this.from = Address.fromHexString(ADDRESS_ONE);
+    this.to = Address.fromHexString(DAO_ADDRESS);
+    this.proposal = PROPOSAL_ENTITY_ID;
+    this.type = 'Deposit';
+    this.txHash = Bytes.empty();
+    this.createdAt = BigInt.fromString(CREATED_AT);
+    return this;
+  }
+}
+
+// ERC20Contract
 class ERC20ContractMethods extends ERC20Contract {
   withDefaultValues(): ERC20ContractMethods {
     this.id = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
@@ -228,6 +290,25 @@ class DaoMethods extends Dao {
       amount,
       reference,
       this.id
+    );
+
+    return event;
+  }
+
+  createEvent_CallbackReceived(
+    onERC721Received: string,
+    functionData: Bytes
+  ): CallbackReceived {
+    if (!this.token) {
+      throw new Error('Token is null');
+    }
+
+    // we cast to string only for stoping rust compiler complaints.
+    let event = createCallbackReceivedEvent(
+      this.id,
+      Bytes.fromHexString(onERC721Received),
+      this.token as string,
+      functionData
     );
 
     return event;
