@@ -289,6 +289,34 @@ describe('DAO', function () {
         .withArgs(0);
     });
 
+    it('reverts on re-entrant actions', async () => {
+      // Grant DAO execute permission on itself.
+      await dao.grant(
+        dao.address,
+        dao.address,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      );
+
+      // Create a reentrant action calling `dao.execute` again.
+      const reentrantAction = {
+        to: dao.address,
+        data: dao.interface.encodeFunctionData('execute', [
+          ZERO_BYTES32,
+          [data.succeedAction],
+          0,
+        ]),
+        value: 0,
+      };
+
+      // Create  an action array with an normal action and an reentrant action.
+      const actions = [data.succeedAction, reentrantAction];
+
+      // Expect the second, reentrant action to fail.
+      await expect(dao.execute(ZERO_BYTES32, actions, 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(1);
+    });
+
     it('succeeds if action is failable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = flipBit(0, num);
@@ -393,12 +421,14 @@ describe('DAO', function () {
         ZERO_BYTES32,
         [gasConsumingAction],
         allowFailureMap
-      ); // exact gas required: 495453
+      ); // expectedGas = 520720 gas
+
+      console.log(expectedGas.toNumber());
 
       // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(800),
+          gasLimit: expectedGas.sub(2800), // 2796 gas is the limit value for which the call cannot finish successfully anymore (520720 gas - 2796 gas = 517924 gas)
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
