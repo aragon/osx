@@ -431,7 +431,7 @@ describe('handleCallbackReceived: ', () => {
       erc721Transfer.txHash = txHash;
       erc721Transfer.createdAt = timestamp;
       // assert
-      erc721Transfer.assertEntity(true);
+      erc721Transfer.assertEntity();
 
       clearStore();
     });
@@ -450,10 +450,10 @@ describe('handleCallbackReceived: ', () => {
         true
       );
 
-      let newEvent = createCallbackReceivedEvent(
-        DAO_ADDRESS,
-        Bytes.fromHexString(onERC721Received),
-        DAO_TOKEN_ADDRESS,
+      let dao = new ExtendedDao().withDefaultValues();
+
+      let newEvent = dao.createEvent_CallbackReceived(
+        onERC721Received,
         functionData
       );
 
@@ -465,10 +465,8 @@ describe('handleCallbackReceived: ', () => {
         onERC721Received,
         true
       );
-      newEvent = createCallbackReceivedEvent(
-        DAO_ADDRESS,
-        Bytes.fromHexString(onERC721Received),
-        DAO_TOKEN_ADDRESS,
+      newEvent = dao.createEvent_CallbackReceived(
+        onERC721Received,
         functionData
       );
 
@@ -476,7 +474,12 @@ describe('handleCallbackReceived: ', () => {
       assert.entityCount('ERC721Contract', 1);
       assert.entityCount('ERC721Transfer', 1);
       assert.entityCount('ERC721Balance', 1);
-      eq('ERC721Balance', balanceId, 'tokenIds', '[1]');
+      // check ERC721Balance entity
+      let erc721Balance = new ExtendedERC721Balance().withDefaultValues();
+      // expexted changes
+      erc721Balance.tokenIds = [BigInt.fromU32(1)];
+      erc721Balance.lastUpdated = newEvent.block.timestamp;
+      erc721Balance.assertEntity();
 
       // Change log index so it will enforce to generate new transferId
       // to make sure we can assert ERC721Transfer to be 2.
@@ -488,7 +491,10 @@ describe('handleCallbackReceived: ', () => {
       assert.entityCount('ERC721Contract', 1);
       assert.entityCount('ERC721Transfer', 2);
       assert.entityCount('ERC721Balance', 1);
-      eq('ERC721Balance', balanceId, 'tokenIds', '[1, 2]');
+      // check ERC721Balance entity
+      // expexted changes
+      erc721Balance.tokenIds = [BigInt.fromU32(1), BigInt.fromU32(2)];
+      erc721Balance.assertEntity();
     });
   });
 });
