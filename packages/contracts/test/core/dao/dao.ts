@@ -423,8 +423,6 @@ describe('DAO', function () {
         allowFailureMap
       ); // expectedGas = 520720 gas
 
-      console.log(expectedGas.toNumber());
-
       // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
