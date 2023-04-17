@@ -12,7 +12,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.so
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
@@ -32,8 +31,7 @@ contract DAO is
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
-    CallbackHandler,
-    ReentrancyGuardUpgradeable
+    CallbackHandler
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
@@ -62,14 +60,23 @@ contract DAO is
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
 
-    /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO uri.
+    /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO URI.
     string private _daoURI;
+
+    /// @notice The state variable for the reentrancy guard of the `execute` function.
+    uint256 private _reentrancyStatus;
+
+    /// @notice Thrown if a call is re-entrant.
+    error ReentrantCall();
 
     /// @notice Thrown if the action array length is larger than `MAX_ACTIONS`.
     error TooManyActions();
@@ -112,6 +119,8 @@ contract DAO is
         address _trustedForwarder,
         string calldata daoURI_
     ) external initializer {
+        _reentrancyStatus = _NOT_ENTERED;
+
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
@@ -177,10 +186,16 @@ contract DAO is
     )
         external
         override
-        nonReentrant
         auth(EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
+        // Protect against reentrancy.
+        if (_reentrancyStatus == _ENTERED) {
+            revert ReentrantCall();
+        }
+        _reentrancyStatus = _ENTERED;
+
+        // Check action array length.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
         }
@@ -234,6 +249,8 @@ contract DAO is
             failureMap: failureMap,
             execResults: execResults
         });
+
+        _reentrancyStatus = _NOT_ENTERED;
     }
 
     /// @inheritdoc IDAO
@@ -358,5 +375,5 @@ contract DAO is
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[47] private __gap;
+    uint256[46] private __gap;
 }
