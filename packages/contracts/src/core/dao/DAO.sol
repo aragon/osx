@@ -75,7 +75,7 @@ contract DAO is
     /// @notice The state variable for the reentrancy guard of the `execute` function.
     uint256 private _reentrancyStatus;
 
-    /// @notice Thrown if a call is re-entrant.
+    /// @notice Thrown if a call is reentrant.
     error ReentrantCall();
 
     /// @notice Thrown if the action array length is larger than `MAX_ACTIONS`.
@@ -99,6 +99,19 @@ contract DAO is
     /// @notice Emitted when a new DAO uri is set.
     /// @param daoURI The new uri.
     event NewURI(string daoURI);
+
+    /// @notice A modifier to protect the `execute()` function against reentrancy.
+    /// @dev If this is used multiple times, private `_beforeNonReentrant()` and `_afterNonReentrant()` functions should be created to prevent code duplication.
+    modifier nonReentrant() {
+        if (_reentrancyStatus == _ENTERED) {
+            revert ReentrantCall();
+        }
+        _reentrancyStatus = _ENTERED;
+
+        _;
+
+        _reentrancyStatus = _NOT_ENTERED;
+    }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
     constructor() {
@@ -186,16 +199,11 @@ contract DAO is
     )
         external
         override
+        nonReentrant
         auth(EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
-        // Protect against reentrancy.
-        if (_reentrancyStatus == _ENTERED) {
-            revert ReentrantCall();
-        }
-        _reentrancyStatus = _ENTERED;
-
-        // Check action array length.
+        // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
         }
@@ -205,6 +213,7 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
+        //
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
 
@@ -249,8 +258,6 @@ contract DAO is
             failureMap: failureMap,
             execResults: execResults
         });
-
-        _reentrancyStatus = _NOT_ENTERED;
     }
 
     /// @inheritdoc IDAO
