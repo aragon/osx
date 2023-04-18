@@ -7,7 +7,7 @@ import {
   PermissionConditionMock,
 } from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
-import {OZ_ERRORS} from '../../test-utils/error';
+import {OZ_ERRORS} from '../../test-utils/oz-constants';
 import {Operation} from '../../../utils/types';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');

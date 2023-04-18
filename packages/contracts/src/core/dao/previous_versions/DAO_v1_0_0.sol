@@ -13,22 +13,22 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import {PermissionManager} from "../permission/PermissionManager.sol";
-import {CallbackHandler} from "../utils/CallbackHandler.sol";
-import {hasBit, flipBit} from "../utils/BitMap.sol";
-import {IEIP4824} from "./IEIP4824.sol";
-import {IDAO} from "./IDAO.sol";
+import {PermissionManager} from "../../permission/PermissionManager.sol";
+import {CallbackHandler} from "../../utils/CallbackHandler.sol";
+import {hasBit, flipBit} from "../../utils/BitMap.sol";
+import {IEIP4824} from "../IEIP4824.sol";
+import {IDAO_v1_0_0} from "./IDAO_v1_0_0.sol";
 
-/// @title DAO v1.1.0
+/// @title DAO v1.0.0
 /// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO is
+contract DAO_v1_0_0 is
     IEIP4824,
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
-    IDAO,
+    IDAO_v1_0_0,
     UUPSUpgradeable,
     PermissionManager,
     CallbackHandler
@@ -60,23 +60,14 @@ contract DAO is
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
-    uint256 private constant _NOT_ENTERED = 1;
-    uint256 private constant _ENTERED = 2;
-
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
 
-    /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO URI.
+    /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO uri.
     string private _daoURI;
-
-    /// @notice The state variable for the reentrancy guard of the `execute` function.
-    uint256 private _reentrancyStatus;
-
-    /// @notice Thrown if a call is reentrant.
-    error ReentrantCall();
 
     /// @notice Thrown if the action array length is larger than `MAX_ACTIONS`.
     error TooManyActions();
@@ -84,9 +75,6 @@ contract DAO is
     /// @notice Thrown if action execution has failed.
     /// @param index The index of the action in the action array that failed.
     error ActionFailed(uint256 index);
-
-    /// @notice Thrown if an action has insufficent gas left.
-    error InsufficientGas();
 
     /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
@@ -99,19 +87,6 @@ contract DAO is
     /// @notice Emitted when a new DAO uri is set.
     /// @param daoURI The new uri.
     event NewURI(string daoURI);
-
-    /// @notice A modifier to protect the `execute()` function against reentrancy.
-    /// @dev If this is used multiple times, private `_beforeNonReentrant()` and `_afterNonReentrant()` functions should be created to prevent code duplication.
-    modifier nonReentrant() {
-        if (_reentrancyStatus == _ENTERED) {
-            revert ReentrantCall();
-        }
-        _reentrancyStatus = _ENTERED;
-
-        _;
-
-        _reentrancyStatus = _NOT_ENTERED;
-    }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
     constructor() {
@@ -132,9 +107,7 @@ contract DAO is
         address _trustedForwarder,
         string calldata daoURI_
     ) external initializer {
-        _reentrancyStatus = _NOT_ENTERED;
-
-        _registerInterface(type(IDAO).interfaceId);
+        _registerInterface(type(IDAO_v1_0_0).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
         _registerTokenInterfaces();
@@ -162,19 +135,19 @@ contract DAO is
     /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_DAO_PERMISSION_ID) {}
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function setTrustedForwarder(
         address _newTrustedForwarder
     ) external override auth(SET_TRUSTED_FORWARDER_PERMISSION_ID) {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function getTrustedForwarder() external view virtual override returns (address) {
         return trustedForwarder;
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function hasPermission(
         address _where,
         address _who,
@@ -184,14 +157,14 @@ contract DAO is
         return isGranted(_where, _who, _permissionId, _data);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function setMetadata(
         bytes calldata _metadata
     ) external override auth(SET_METADATA_PERMISSION_ID) {
         _setMetadata(_metadata);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function execute(
         bytes32 _callId,
         Action[] calldata _actions,
@@ -199,51 +172,33 @@ contract DAO is
     )
         external
         override
-        nonReentrant
         auth(EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
-        // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
         }
 
         execResults = new bytes[](_actions.length);
 
-        uint256 gasBefore;
-        uint256 gasAfter;
-
-        //
         for (uint256 i = 0; i < _actions.length; ) {
-            gasBefore = gasleft();
-
-            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
+            address to = _actions[i].to;
+            (bool success, bytes memory response) = to.call{value: _actions[i].value}(
                 _actions[i].data
             );
-            gasAfter = gasleft();
 
-            // Check if failure is allowed
-            if (!hasBit(_allowFailureMap, uint8(i))) {
-                // Check if the call failed.
-                if (!success) {
+            if (!success) {
+                // If the call failed and wasn't allowed in allowFailureMap, revert.
+                if (!hasBit(_allowFailureMap, uint8(i))) {
                     revert ActionFailed(i);
                 }
-            } else {
-                // Check if the call failed.
-                if (!success) {
-                    // Make sure that the action call did not fail because 63/64 of `gasleft()` was insufficient to execute the external call `.to.call` (see https://eips.ethereum.org/EIPS/eip-150).
-                    // In specific scenarios, i.e. proposal execution where the last action in the action array is allowed to fail, the account calling `execute` could force-fail this action by setting a gas limit
-                    // where 63/64 is insufficient causing the `.to.call` to fail, but where the remaining 1/64 gas are sufficient to successfully finish the `execute` call.
-                    if (gasAfter < gasBefore / 64) {
-                        revert InsufficientGas();
-                    }
 
-                    // Store that this action failed.
-                    failureMap = flipBit(failureMap, uint8(i));
-                }
+                // If the call failed, but was allowed in allowFailureMap, store that
+                // this specific action has actually failed.
+                failureMap = flipBit(failureMap, uint8(i));
             }
 
-            execResults[i] = result;
+            execResults[i] = response;
 
             unchecked {
                 ++i;
@@ -254,13 +209,12 @@ contract DAO is
             actor: msg.sender,
             callId: _callId,
             actions: _actions,
-            allowFailureMap: _allowFailureMap,
             failureMap: failureMap,
             execResults: execResults
         });
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function deposit(
         address _token,
         uint256 _amount,
@@ -281,7 +235,7 @@ contract DAO is
         emit Deposited(msg.sender, _token, _amount, _reference);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function setSignatureValidator(
         address _signatureValidator
     ) external override auth(SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
@@ -290,11 +244,11 @@ contract DAO is
         emit SignatureValidatorSet({signatureValidator: _signatureValidator});
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function isValidSignature(
         bytes32 _hash,
         bytes memory _signature
-    ) external view override(IDAO, IERC1271) returns (bytes4) {
+    ) external view override(IDAO_v1_0_0, IERC1271) returns (bytes4) {
         if (address(signatureValidator) == address(0)) {
             // Return the invalid magic number
             return bytes4(0);
@@ -351,7 +305,7 @@ contract DAO is
         );
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_0_0
     function registerStandardCallback(
         bytes4 _interfaceId,
         bytes4 _callbackSelector,
@@ -382,5 +336,5 @@ contract DAO is
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[46] private __gap;
+    uint256[47] private __gap;
 }

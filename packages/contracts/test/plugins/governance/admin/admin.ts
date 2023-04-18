@@ -11,7 +11,7 @@ import {
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {OZ_ERRORS} from '../../../test-utils/error';
+import {OZ_ERRORS} from '../../../test-utils/oz-constants';
 import {toBytes32} from '../../../test-utils/voting';
 import {
   AdminCloneFactory,

@@ -1,4 +1,5 @@
 import {ContractTransaction} from 'ethers';
+import {Interface, LogDescription} from 'ethers/lib/utils';
 
 export async function findEvent<T>(tx: ContractTransaction, eventName: string) {
   const receipt = await tx.wait();
@@ -9,6 +10,20 @@ export async function findEvent<T>(tx: ContractTransaction, eventName: string) {
   }
 
   return event as T;
+}
+
+export async function findEventTopicLog(
+  tx: ContractTransaction,
+  iface: Interface,
+  eventName: string
+): Promise<LogDescription> {
+  const receipt = await tx.wait();
+  const topic = iface.getEventTopic(eventName);
+  const log = receipt.logs.find(x => x.topics.indexOf(topic) >= 0);
+  if (!log) {
+    throw new Error(`No logs found for this event ${eventName} topic.`);
+  }
+  return iface.parseLog(log);
 }
 
 export async function filterEvents(tx: any, eventName: string) {

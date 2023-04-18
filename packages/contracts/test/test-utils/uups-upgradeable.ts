@@ -1,7 +1,9 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract} from 'ethers';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
+import {IMPLEMENTATION_SLOT} from './oz-constants';
 
 /// Used as a common test suite to test upgradeability of the contracts.
 /// Presumes that `upgrade` object is set on `this` inside the actual test file.
@@ -73,9 +75,19 @@ export function shouldUpgradeCorrectly(
       const {user, contract, dao} = this.upgrade;
       await dao.grant(contract.address, user.address, upgradePermissionId);
       const connect = contract.connect(user);
+
+      // Check the event.
       await expect(connect.upgradeTo(uupsCompatibleBase))
         .to.emit(contract, 'Upgraded')
         .withArgs(uupsCompatibleBase);
+
+      // Check the storage slot.
+      const encoded = await ethers.provider.getStorageAt(
+        contract.address,
+        IMPLEMENTATION_SLOT
+      );
+      const implementation = defaultAbiCoder.decode(['address'], encoded)[0];
+      expect(implementation).to.equal(uupsCompatibleBase);
     });
   });
 }

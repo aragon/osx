@@ -9,6 +9,12 @@ import {
   TestERC721,
   IERC1271__factory,
   GasConsumer__factory,
+  DAOFactory__factory,
+  PluginRepo__factory,
+  DAORegistry__factory,
+  DAO__factory,
+  Admin__factory,
+  PluginSetupProcessor__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -22,7 +28,7 @@ import {
 } from '../../test-utils/dao';
 
 import {getInterfaceID} from '../../test-utils/interfaces';
-import {OZ_ERRORS} from '../../test-utils/error';
+import {OZ_ERRORS} from '../../test-utils/oz-constants';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
@@ -30,6 +36,8 @@ import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
+import {getActiveContractsJSON} from '../../../deploy/helpers';
+import {BigNumber} from 'ethers';
 
 chai.use(smock.matchers);
 
@@ -55,7 +63,7 @@ const EVENTS = {
   CallbackReceived: 'CallbackReceived',
 };
 
-const PERMISSION_IDS = {
+export const PERMISSION_IDS = {
   UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
@@ -404,10 +412,11 @@ describe('DAO', function () {
       expect(event.args.allowFailureMap).to.equal(0);
     });
 
-    it('reverts if failure is allowed but not enough gas is provided', async () => {
+    it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
       let gasConsumer = await GasConsumer.deploy();
 
+      // Prepare an action array calling `consumeGas` twenty times.
       const gasConsumingAction = {
         to: gasConsumer.address,
         data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
@@ -421,15 +430,51 @@ describe('DAO', function () {
         ZERO_BYTES32,
         [gasConsumingAction],
         allowFailureMap
-      ); // expectedGas = 520720 gas
+      );
 
-      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
+      // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(2800), // 2796 gas is the limit value for which the call cannot finish successfully anymore (520720 gas - 2796 gas = 517924 gas)
+          gasLimit: expectedGas.sub(3000),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
+      // Provide enough gas so that the entire call passes.
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas,
+        })
+      ).to.not.be.reverted;
+    });
+
+    it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
+      const GasConsumer = new GasConsumer__factory(signers[0]);
+      let gasConsumer = await GasConsumer.deploy();
+
+      // Prepare an action array calling `consumeGas` one times.
+      const gasConsumingAction = {
+        to: gasConsumer.address,
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [1]),
+        value: 0,
+      };
+
+      let allowFailureMap = ethers.BigNumber.from(0);
+      allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
+
+      const expectedGas = await dao.estimateGas.execute(
+        ZERO_BYTES32,
+        [gasConsumingAction],
+        allowFailureMap
+      );
+
+      // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas.sub(10000),
+        })
+      ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
+
+      // Provide enough gas so that the entire call passes.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
           gasLimit: expectedGas,

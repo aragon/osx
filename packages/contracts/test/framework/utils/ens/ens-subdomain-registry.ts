@@ -11,7 +11,7 @@ import {
 } from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
-import {OZ_ERRORS} from '../../../test-utils/error';
+import {OZ_ERRORS} from '../../../test-utils/oz-constants';
 import {setupResolver} from '../../../test-utils/ens';
 import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
