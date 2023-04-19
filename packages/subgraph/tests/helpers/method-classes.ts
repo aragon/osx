@@ -14,6 +14,7 @@ import {
   ERC721Transfer,
   NativeBalance,
   NativeTransfer,
+  TokenVotingMember,
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
@@ -24,6 +25,10 @@ import {
   Deposited,
   NativeTokenDeposited
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
+import {
+  DelegateChanged,
+  DelegateVotesChanged
+} from '../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   ProposalCreated,
   ProposalExecuted,
@@ -56,7 +61,6 @@ import {
   ZERO,
   MIN_PARTICIPATION,
   MIN_DURATION,
-  ONE,
   DAO_TOKEN_ADDRESS,
   STRING_DATA,
   ADDRESS_TWO,
@@ -70,6 +74,8 @@ import {
   getBalanceOf
 } from '../dao/utils';
 import {
+  createNewDelegateChangedEvent,
+  createNewDelegateVotesChangedEvent,
   createNewProposalCreatedEvent,
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
@@ -81,6 +87,8 @@ import {
   createTotalVotingPowerCall,
   createTokenCalls
 } from '../utils';
+
+/* eslint-disable  @typescript-eslint/no-unused-vars */
 
 // ERC721Contract
 class ERC721ContractMethods extends ERC721Contract {
@@ -491,6 +499,7 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     let votingMode = VOTING_MODES.get(votingModeIndex) as string;
 
     const pluginAddress = Address.fromHexString(CONTRACT_ADDRESS);
+
     this.id = pluginAddress.toHexString();
     this.dao = DAO_ADDRESS;
     this.pluginAddress = pluginAddress;
@@ -534,6 +543,62 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
       (this.minDuration as BigInt).toString(),
       (this.minProposerVotingPower as BigInt).toString(),
       this.pluginAddress.toHexString()
+    );
+
+    return event;
+  }
+}
+
+// TokenVotingMember
+
+class TokenVotingMemberMethods extends TokenVotingMember {
+  withDefaultValues(
+    memberAddress: string = ADDRESS_ONE,
+    pluginAddress: string = CONTRACT_ADDRESS
+  ): TokenVotingMemberMethods {
+    const plugin = Address.fromHexString(pluginAddress);
+    let id = memberAddress.concat('_').concat(plugin.toHexString());
+
+    this.id = id;
+    this.address = Address.fromHexString(memberAddress);
+    this.balance = BigInt.zero();
+    this.plugin = plugin.toHexString();
+    this.delegatee = id;
+    this.delegateVotes = BigInt.zero();
+
+    return this;
+  }
+
+  createEvent_DelegateChanged(
+    delegator: string = this.address.toHexString(),
+    fromDelegate: string = ADDRESS_ONE,
+    toDelegate: string = ADDRESS_ONE,
+    tokenContract: string = Address.fromHexString(
+      DAO_TOKEN_ADDRESS
+    ).toHexString()
+  ): DelegateChanged {
+    let event = createNewDelegateChangedEvent(
+      delegator,
+      fromDelegate,
+      toDelegate,
+      tokenContract
+    );
+
+    return event;
+  }
+
+  createEvent_DelegateVotesChanged(
+    newBalance: string = '0',
+    previousBalance: string = '0',
+    tokenContract: string = Address.fromHexString(
+      DAO_TOKEN_ADDRESS
+    ).toHexString()
+  ): DelegateVotesChanged {
+    let event = createNewDelegateVotesChangedEvent(
+      this.address.toHexString(),
+      previousBalance,
+      newBalance,
+      tokenContract
     );
 
     return event;

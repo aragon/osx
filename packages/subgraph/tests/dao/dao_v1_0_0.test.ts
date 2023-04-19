@@ -7,7 +7,7 @@ import {
   describe,
   test
 } from 'matchstick-as/assembly/index';
-import {Address, Bytes, BigInt, ethereum, log} from '@graphprotocol/graph-ts';
+import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
 
 import {
   handleNativeTokenDeposited,
@@ -35,11 +35,8 @@ import {
 } from '../constants';
 import {createDummyActions, createTokenCalls} from '../utils';
 import {
-  createNewNativeTokenDepositedEvent,
-  createNewDepositedEvent,
   getBalanceOf,
   createNewExecutedEvent,
-  createCallbackReceivedEvent,
   createDaoEntityState,
   createTrustedForwarderSetEvent,
   createSignatureValidatorSetEvent,
@@ -264,7 +261,7 @@ describe('handleDeposited: ', () => {
     erc20Transfer.amount = balance;
     erc20Transfer.txHash = txHash;
     // assert
-    erc20Transfer.assertEntity(true);
+    erc20Transfer.assertEntity();
     assert.entityCount('ERC20Transfer', 1);
   });
 
