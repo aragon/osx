@@ -209,6 +209,23 @@ templates:
           handler: handleDelegateChanged
         - event: DelegateVotesChanged(indexed address,uint256,uint256)
           handler: handleDelegateVotesChanged
+
+  - name: GovernanceWrappedERC20
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: GovernanceWrappedERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/token/governance-erc20.ts
+      entities:
+        - Dao
+      abis:
+        - name: GovernanceWrappedERC20
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
+
   # AddresslistVoting (package)
   - name: AddresslistVoting
     kind: ethereum/contract
