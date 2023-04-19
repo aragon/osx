@@ -19,7 +19,7 @@ export async function findEventTopicLog(
 ): Promise<LogDescription> {
   const receipt = await tx.wait();
   const topic = iface.getEventTopic(eventName);
-  const log = receipt.logs.find(x => x.topics.indexOf(topic) >= 0);
+  const log = receipt.logs.find(x => x.topics[0] === topic);
   if (!log) {
     throw new Error(`No logs found for this event ${eventName} topic.`);
   }
