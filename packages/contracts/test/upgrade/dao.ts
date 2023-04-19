@@ -2,14 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {
-  DAOFactory__factory,
-  PluginRepo__factory,
-  DAORegistry__factory,
-  DAO__factory,
-  DAOV100,
-  DAOV100__factory,
-} from '../../typechain';
+import {DAO__factory, DAOV100, DAOV100__factory} from '../../typechain';
 
 import {daoExampleURI} from '../test-utils/dao';
 
