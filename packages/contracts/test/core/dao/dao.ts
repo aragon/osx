@@ -9,12 +9,6 @@ import {
   TestERC721,
   IERC1271__factory,
   GasConsumer__factory,
-  DAOFactory__factory,
-  PluginRepo__factory,
-  DAORegistry__factory,
-  DAO__factory,
-  Admin__factory,
-  PluginSetupProcessor__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -36,8 +30,6 @@ import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
-import {getActiveContractsJSON} from '../../../deploy/helpers';
-import {BigNumber} from 'ethers';
 
 chai.use(smock.matchers);
 

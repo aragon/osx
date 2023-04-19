@@ -34,44 +34,47 @@ describe('DAO Upgrade', function () {
   });
 
   it('upgrades v1.0.0 to v1.1.0', async () => {
-    const daoV100 = await deployWithProxy<DAOV100>(DaoV100);
-    await daoV100.initialize(
+    const proxy = await deployWithProxy<DAOV100>(DaoV100);
+    await proxy.initialize(
       DUMMY_METADATA,
       signers[0].address,
       ethers.constants.AddressZero,
       daoExampleURI
     );
 
-    const oldImplementation = await readImplementationValueFromSlot(
-      daoV100.address
+    // Store the current implementation
+    const implementationBeforeUpgrade = await readImplementationValueFromSlot(
+      proxy.address
     );
 
-    daoV100.grant(
-      daoV100.address,
+    proxy.grant(
+      proxy.address,
       signers[0].address,
       UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
     );
 
     // Deploy the new implementation
-    const daoV110 = await DaoV110.deploy();
+    const newImplementation = await DaoV110.deploy();
 
     // Upgrade to the new implementation
-    const upgradeTx = await daoV100.upgradeTo(daoV110.address);
+    const upgradeTx = await proxy.upgradeTo(newImplementation.address);
 
     // Check the stored implementation.
-    const newImplementation = await readImplementationValueFromSlot(
-      daoV100.address
+    const implementationAfterUpgrade = await readImplementationValueFromSlot(
+      proxy.address
     );
-    expect(newImplementation).to.equal(daoV110.address);
-    expect(newImplementation).to.not.equal(oldImplementation);
+    expect(implementationAfterUpgrade).to.equal(newImplementation.address);
+    expect(implementationAfterUpgrade).to.not.equal(
+      implementationBeforeUpgrade
+    );
 
     // Check the emitted implementation.
     const emittedImplementation = (
       await findEventTopicLog(upgradeTx, DaoV100.interface, 'Upgraded')
     ).args.implementation;
-    expect(emittedImplementation).to.equal(daoV110.address);
+    expect(emittedImplementation).to.equal(newImplementation.address);
 
     // Check that storage is not corrupted.
-    expect(await daoV100.callStatic.daoURI()).to.equal(daoExampleURI);
+    expect(await proxy.callStatic.daoURI()).to.equal(daoExampleURI);
   });
 });
