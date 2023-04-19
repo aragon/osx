@@ -213,7 +213,6 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
-        //
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
 
