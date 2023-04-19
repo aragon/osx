@@ -22,7 +22,7 @@ import {
 } from '../../test-utils/dao';
 
 import {getInterfaceID} from '../../test-utils/interfaces';
-import {OZ_ERRORS} from '../../test-utils/oz-constants';
+import {OZ_ERRORS} from '../../test-utils/error';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';

@@ -19,7 +19,7 @@ import {
   ONE_YEAR,
 } from '../../../test-utils/voting';
 import {deployWithProxy} from '../../../test-utils/proxy';
-import {OZ_ERRORS} from '../../../test-utils/oz-constants';
+import {OZ_ERRORS} from '../../../test-utils/error';
 import {daoExampleURI} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 

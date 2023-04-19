@@ -37,7 +37,7 @@ import {
   toBytes32,
 } from '../../../../test-utils/voting';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../../test-utils/oz-constants';
+import {OZ_ERRORS} from '../../../../test-utils/error';
 import {shouldUpgradeCorrectly} from '../../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';

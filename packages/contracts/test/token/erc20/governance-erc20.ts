@@ -9,7 +9,7 @@ import {
   IERC165Upgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {OZ_ERRORS} from '../../test-utils/oz-constants';
+import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
 
 export type MintSettings = {

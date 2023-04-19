@@ -22,7 +22,7 @@ import {
 } from '../../../../utils/event';
 import {getMergedABI} from '../../../../utils/abi';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../test-utils/oz-constants';
+import {OZ_ERRORS} from '../../../test-utils/error';
 import {
   advanceTime,
   getTime,

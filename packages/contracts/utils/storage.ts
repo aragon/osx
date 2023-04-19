@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
-import {IMPLEMENTATION_SLOT} from '../test/test-utils/oz-constants';
-
 import {defaultAbiCoder} from 'ethers/lib/utils';
+
+import {IMPLEMENTATION_SLOT} from '../test/test-utils/uups-upgradeable';
 
 export async function readImplementationValuesFromSlot(
   contractAddresses: string[]

@@ -9,7 +9,7 @@ import {
   GovernanceWrappedERC20__factory,
   IERC165Upgradeable__factory,
 } from '../../../typechain';
-import {OZ_ERRORS} from '../../test-utils/oz-constants';
+import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
 
 export type AccountBalance = {account: string; amount: number};
