@@ -363,7 +363,7 @@ export function createTokenVotingMember(
   user.balance = BigInt.fromString(balance);
 
   user.delegatee = fromUserId;
-  user.delegateVotes = BigInt.zero();
+  user.votingPower = BigInt.zero();
   user.save();
 
   return fromUserId;

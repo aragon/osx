@@ -550,7 +550,6 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
 }
 
 // TokenVotingMember
-
 class TokenVotingMemberMethods extends TokenVotingMember {
   withDefaultValues(
     memberAddress: string = ADDRESS_ONE,
@@ -564,7 +563,7 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     this.balance = BigInt.zero();
     this.plugin = plugin.toHexString();
     this.delegatee = id;
-    this.delegateVotes = BigInt.zero();
+    this.votingPower = BigInt.zero();
 
     return this;
   }

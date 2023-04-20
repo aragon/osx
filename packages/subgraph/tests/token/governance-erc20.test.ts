@@ -277,7 +277,7 @@ describe('Governance ERC20', () => {
 
       // assert
       // expected changes
-      member.delegateVotes = BigInt.fromString(newBalance);
+      member.votingPower = BigInt.fromString(newBalance);
       member.assertEntity();
       assert.entityCount('TokenVotingMember', 1);
     });

@@ -20,7 +20,7 @@ function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
     member.plugin = pluginId;
 
     member.delegatee = id; // we assume by default member delegates itself
-    member.delegateVotes = BigInt.zero();
+    member.votingPower = BigInt.zero();
   }
 
   return member;
@@ -79,7 +79,7 @@ export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
 
   if (event.params.delegate != Address.zero()) {
     let member = getOrCreateMember(event.params.delegate, pluginId);
-    member.delegateVotes = event.params.newBalance;
+    member.votingPower = event.params.newBalance;
     member.save();
   }
 }
