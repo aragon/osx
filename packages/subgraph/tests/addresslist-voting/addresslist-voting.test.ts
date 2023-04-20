@@ -132,7 +132,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   assert.fieldEquals(
     'AddresslistVotingProposal',
     PROPOSAL_ENTITY_ID,
-    'proposalId',
+    'pluginProposalId',
     PROPOSAL_ID
   );
   assert.fieldEquals(

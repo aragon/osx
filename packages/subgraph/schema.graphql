@@ -387,7 +387,7 @@ type TokenVotingProposal implements IProposal @entity {
   allowFailureMap: BigInt!
   failureMap: BigInt
   plugin: TokenVotingPlugin!
-  proposalId: BigInt!
+  pluginProposalId: BigInt!
   creator: Bytes!
   metadata: String
 
@@ -462,7 +462,7 @@ type AddresslistVotingProposal implements IProposal @entity {
   allowFailureMap: BigInt!
   failureMap: BigInt
   plugin: AddresslistVotingPlugin!
-  proposalId: BigInt!
+  pluginProposalId: BigInt!
   creator: Bytes!
   metadata: String
 
@@ -532,7 +532,7 @@ type AdminProposal implements IProposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   plugin: AdminPlugin!
-  proposalId: BigInt!
+  pluginProposalId: BigInt!
   administrator: Administrator!
   executionTxHash: Bytes
 }
@@ -578,7 +578,7 @@ type MultisigProposal implements IProposal @entity {
   allowFailureMap: BigInt!
   failureMap: BigInt
   plugin: MultisigPlugin!
-  proposalId: BigInt!
+  pluginProposalId: BigInt!
   creator: Bytes!
   metadata: String
   createdAt: BigInt!

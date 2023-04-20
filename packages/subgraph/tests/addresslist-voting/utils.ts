@@ -270,7 +270,7 @@ export function createAddresslistVotingProposalEntityState(
   let addresslistProposal = new AddresslistVotingProposal(entityID);
   addresslistProposal.dao = Address.fromString(dao).toHexString();
   addresslistProposal.plugin = Address.fromString(pkg).toHexString();
-  addresslistProposal.proposalId = BigInt.fromString(proposalId);
+  addresslistProposal.pluginProposalId = BigInt.fromString(proposalId);
   addresslistProposal.creator = Address.fromString(creator);
 
   addresslistProposal.open = open;

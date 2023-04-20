@@ -94,7 +94,12 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('MultisigProposal', entityID, 'id', entityID);
   assert.fieldEquals('MultisigProposal', entityID, 'dao', DAO_ADDRESS);
   assert.fieldEquals('MultisigProposal', entityID, 'plugin', packageId);
-  assert.fieldEquals('MultisigProposal', entityID, 'proposalId', PROPOSAL_ID);
+  assert.fieldEquals(
+    'MultisigProposal',
+    entityID,
+    'pluginProposalId',
+    PROPOSAL_ID
+  );
   assert.fieldEquals('MultisigProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'startDate', START_DATE);
   assert.fieldEquals('MultisigProposal', entityID, 'endDate', END_DATE);

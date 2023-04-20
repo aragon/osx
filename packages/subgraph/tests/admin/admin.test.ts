@@ -63,7 +63,12 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
   assert.fieldEquals('AdminProposal', entityID, 'dao', DAO_ADDRESS);
   assert.fieldEquals('AdminProposal', entityID, 'plugin', pluginId);
-  assert.fieldEquals('AdminProposal', entityID, 'proposalId', PROPOSAL_ID);
+  assert.fieldEquals(
+    'AdminProposal',
+    entityID,
+    'pluginProposalId',
+    PROPOSAL_ID
+  );
   assert.fieldEquals('AdminProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('AdminProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals('AdminProposal', entityID, 'executed', 'false');
@@ -118,7 +123,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   let adminProposal = new AdminProposal(entityID);
   adminProposal.dao = DAO_ADDRESS;
   adminProposal.plugin = pluginId;
-  adminProposal.proposalId = BigInt.fromString(PROPOSAL_ID);
+  adminProposal.pluginProposalId = BigInt.fromString(PROPOSAL_ID);
   adminProposal.creator = administratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
