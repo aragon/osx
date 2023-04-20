@@ -288,7 +288,6 @@ describe('handleDeposited: ', () => {
     // assert
     erc20Balance.assertEntity();
 
-    // getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_FULL);
     daoTokenContract.mockCall_balanceOf(DAO_ADDRESS, ERC20_AMOUNT_FULL);
 
     newEvent.transactionLogIndex = BigInt.fromI32(2);
