@@ -15,6 +15,7 @@ import {
   NativeBalance,
   NativeTransfer,
   TokenVotingMember,
+  ERC20WrapperContract,
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
@@ -30,6 +31,7 @@ import {
   DelegateVotesChanged
 } from '../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
+  MembershipContractAnnounced,
   ProposalCreated,
   ProposalExecuted,
   VoteCast,
@@ -76,6 +78,10 @@ import {
 import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
+  WRAPPED_CONTRACT_ADDRESS
+} from '../constants';
+import {
+  createNewMembershipContractAnnouncedEvent,
   createNewProposalCreatedEvent,
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
@@ -154,6 +160,16 @@ class ERC721TransferMethods extends ERC721Transfer {
 }
 
 // ERC20Contract
+class ERC20WrapperContractMethods extends ERC20WrapperContract {
+  withDefaultValues(): ERC20WrapperContractMethods{
+    this.id = Address.fromHexString(WRAPPED_CONTRACT_ADDRESS).toHexString();
+    this.name = 'Wrapped Test Token'
+    this.symbol = 'WTT'
+    this.underlyingToken = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
+    return this
+  }
+}
+
 class ERC20ContractMethods extends ERC20Contract {
   withDefaultValues(): ERC20ContractMethods {
     this.id = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
@@ -546,6 +562,18 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     );
 
     return event;
+  }
+
+  createEvent_MembershipContractAnnounced():MembershipContractAnnounced{
+    if (this.token === null) {
+      throw new Error('Token is null')
+    }
+    let event = createNewMembershipContractAnnouncedEvent(
+      this.token as string,
+      this.pluginAddress.toHexString()
+    )
+
+    return event
   }
 }
 

@@ -5,9 +5,13 @@ import {
   handleVoteCast,
   handleProposalExecuted,
   handleVotingSettingsUpdated,
-  _handleProposalCreated
+  _handleProposalCreated,
+  handleMembershipContractAnnounced
 } from '../../src/packages/token/token-voting';
-import {VOTING_MODES} from '../../src/utils/constants';
+import {
+  VOTING_MODES,
+  WRAPPED_ERC20_INTERFACE
+} from '../../src/utils/constants';
 import {
   DAO_TOKEN_ADDRESS,
   STRING_DATA,
@@ -19,11 +23,14 @@ import {
 
 import {createDummyActions} from '../utils';
 import {
+  ExtendedERC20Contract,
+  ExtendedERC20WrapperContract,
   ExtendedTokenVotingPlugin,
   ExtendedTokenVotingProposal,
   ExtendedTokenVotingVote,
   ExtendedTokenVotingVoter
 } from '../helpers/extended-schema';
+import {getSupportsInterface} from '../dao/utils';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -214,6 +221,34 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
 
   // checks
   tokenVotingPlugin.assertEntity();
+
+  clearStore();
+});
+
+test('Run TokenVoting (handleMembershipContractAnnounced) with a wrapped token and a mocke event', () => {
+  // create entities
+  let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+  let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
+  let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
+  // mock support interface
+  getSupportsInterface(erc20WrappedContract.id, WRAPPED_ERC20_INTERFACE, true);
+  getSupportsInterface(erc20WrappedContract.id, '00000000', false);
+  // save entities
+  tokenVotingPlugin.token = erc20WrappedContract.id;
+  tokenVotingPlugin.buildOrUpdate();
+  erc20Contract.buildOrUpdate();
+  erc20WrappedContract.buildOrUpdate();
+
+  // create event
+  let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
+
+  // handle event
+  handleMembershipContractAnnounced(event);
+
+  // assert
+  tokenVotingPlugin.assertEntity();
+  erc20Contract.assertEntity();
+  erc20WrappedContract.assertEntity();
 
   clearStore();
 });
