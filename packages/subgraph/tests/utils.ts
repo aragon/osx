@@ -56,7 +56,7 @@ export function createWrappedTokenCalls(
 ): void {
   createTokenCalls(contractAddress, name, symbol, null, totalSupply);
   createMockGetter(
-    underlyingTokenAddress,
+    contractAddress,
     'underlying',
     'underlying():(address)',
     [ethereum.Value.fromAddress(Address.fromString(underlyingTokenAddress))]

@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, Value, ethereum, log} from '@graphprotocol/graph-ts';
 import {
   ERC20Balance,
   ERC20Contract,

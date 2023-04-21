@@ -1,4 +1,10 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
+import {
+  assert,
+  beforeAll,
+  clearStore,
+  describe,
+  test
+} from 'matchstick-as/assembly/index';
 import {bigInt, BigInt} from '@graphprotocol/graph-ts';
 
 import {
@@ -18,10 +24,20 @@ import {
   VOTING_MODE,
   ONE,
   ZERO,
-  TWO
+  TWO,
+  ERC20_AMOUNT_HALF,
+  ERC20_AMOUNT_FULL,
+  WRAPPED_CONTRACT_ADDRESS,
+  CONTRACT_ADDRESS
 } from '../constants';
 
-import {createDummyActions} from '../utils';
+import {
+  createDummyActions,
+  createTokenCalls,
+  createWrappedTokenCalls
+} from '../utils';
+import {
+} from './utils';
 import {
   ExtendedERC20Contract,
   ExtendedERC20WrapperContract,
@@ -30,7 +46,7 @@ import {
   ExtendedTokenVotingVote,
   ExtendedTokenVotingVoter
 } from '../helpers/extended-schema';
-import {getSupportsInterface} from '../dao/utils';
+import {getBalanceOf, getSupportsInterface} from '../dao/utils';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -224,31 +240,87 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
 
   clearStore();
 });
+describe('handleMembershipContractAnnounced', () => {
+  beforeAll(() => {
+    // mock get balance
+    getBalanceOf(CONTRACT_ADDRESS, CONTRACT_ADDRESS, ERC20_AMOUNT_HALF);
+    getBalanceOf(
+      WRAPPED_CONTRACT_ADDRESS,
+      WRAPPED_CONTRACT_ADDRESS,
+      ERC20_AMOUNT_HALF
+    );
+    // create token calls
+    createTokenCalls(
+      CONTRACT_ADDRESS,
+      'Test Token',
+      'TT',
+      '18',
+      ERC20_AMOUNT_FULL
+    );
+    createWrappedTokenCalls(
+      WRAPPED_CONTRACT_ADDRESS,
+      'Wrapped Test Token',
+      'WTT',
+      CONTRACT_ADDRESS,
+      ERC20_AMOUNT_FULL
+    );
+    // mock supported interface of the wrapped governance token
+    getSupportsInterface(CONTRACT_ADDRESS, WRAPPED_ERC20_INTERFACE, false);
+    getSupportsInterface(CONTRACT_ADDRESS, '00000000', false);
+    getSupportsInterface(
+      WRAPPED_CONTRACT_ADDRESS,
+      WRAPPED_ERC20_INTERFACE,
+      true
+    );
+    getSupportsInterface(WRAPPED_CONTRACT_ADDRESS, '00000000', false);
+  });
+  test('it should create an erc20 and assing its address to the tokenVotingPlugin', () => {
+    // create entities
+    let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+    let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
 
-test('Run TokenVoting (handleMembershipContractAnnounced) with a wrapped token and a mocke event', () => {
-  // create entities
-  let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
-  let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
-  let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
-  // mock support interface
-  getSupportsInterface(erc20WrappedContract.id, WRAPPED_ERC20_INTERFACE, true);
-  getSupportsInterface(erc20WrappedContract.id, '00000000', false);
-  // save entities
-  tokenVotingPlugin.token = erc20WrappedContract.id;
-  tokenVotingPlugin.buildOrUpdate();
-  erc20Contract.buildOrUpdate();
-  erc20WrappedContract.buildOrUpdate();
+    tokenVotingPlugin.token = CONTRACT_ADDRESS.toLowerCase();
+    tokenVotingPlugin.buildOrUpdate();
 
-  // create event
-  let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
+    getBalanceOf(CONTRACT_ADDRESS, CONTRACT_ADDRESS, ERC20_AMOUNT_HALF);
+    createTokenCalls(
+      CONTRACT_ADDRESS,
+      'Test Token',
+      'TT',
+      '18',
+      ERC20_AMOUNT_FULL
+    );
 
-  // handle event
-  handleMembershipContractAnnounced(event);
+    let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
 
-  // assert
-  tokenVotingPlugin.assertEntity();
-  erc20Contract.assertEntity();
-  erc20WrappedContract.assertEntity();
+    // handle event
+    handleMembershipContractAnnounced(event);
 
-  clearStore();
+    // assert
+    tokenVotingPlugin.assertEntity();
+    erc20Contract.assertEntity();
+
+    clearStore();
+  });
+  test('it should create an erc20Wrapped and assign an erc20 as the underlying token and assign the erc20Wrapped address to the tokenVotingPlugin', () => {
+    // create entities
+    let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+    let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
+    let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
+
+    tokenVotingPlugin.token = WRAPPED_CONTRACT_ADDRESS.toLowerCase();
+    tokenVotingPlugin.buildOrUpdate();
+
+    let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
+
+    // handle event
+    handleMembershipContractAnnounced(event);
+
+    // assert
+    tokenVotingPlugin.assertEntity();
+    erc20Contract.assertEntity();
+    erc20WrappedContract.assertEntity();
+
+    clearStore();
+  });
 });
