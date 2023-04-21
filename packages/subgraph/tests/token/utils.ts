@@ -25,6 +25,10 @@ import {
   ALLOW_FAILURE_MAP
 } from '../constants';
 import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
+import {
+  DelegateChanged,
+  DelegateVotesChanged
+} from '../../generated/templates/GovernanceERC20/GovernanceERC20';
 
 // events
 
@@ -186,6 +190,70 @@ export function createNewVotingSettingsUpdatedEvent(
   return newVotingSettingsUpdatedEvent;
 }
 
+export function createNewDelegateChangedEvent(
+  delegator: string,
+  fromDelegate: string,
+  toDelegate: string,
+  contractAddress: string
+): DelegateChanged {
+  let newDelegateChangedEvent = changetype<DelegateChanged>(newMockEvent());
+
+  newDelegateChangedEvent.address = Address.fromString(contractAddress);
+  newDelegateChangedEvent.parameters = [];
+
+  let delegatorParam = new ethereum.EventParam(
+    'delegator',
+    ethereum.Value.fromAddress(Address.fromString(delegator))
+  );
+  let fromDelegateParam = new ethereum.EventParam(
+    'fromDelegate',
+    ethereum.Value.fromAddress(Address.fromString(fromDelegate))
+  );
+  let toDelegateParam = new ethereum.EventParam(
+    'toDelegate',
+    ethereum.Value.fromAddress(Address.fromString(toDelegate))
+  );
+
+  newDelegateChangedEvent.parameters.push(delegatorParam);
+  newDelegateChangedEvent.parameters.push(fromDelegateParam);
+  newDelegateChangedEvent.parameters.push(toDelegateParam);
+
+  return newDelegateChangedEvent;
+}
+
+export function createNewDelegateVotesChangedEvent(
+  delegate: string,
+  previousBalance: string,
+  newBalance: string,
+  contractAddress: string
+): DelegateVotesChanged {
+  let newDelegateVotesChangedEvent = changetype<DelegateVotesChanged>(
+    newMockEvent()
+  );
+
+  newDelegateVotesChangedEvent.address = Address.fromString(contractAddress);
+  newDelegateVotesChangedEvent.parameters = [];
+
+  let delegateParam = new ethereum.EventParam(
+    'delegate',
+    ethereum.Value.fromAddress(Address.fromString(delegate))
+  );
+  let previousBalanceParam = new ethereum.EventParam(
+    'previousBalance',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(previousBalance))
+  );
+  let newBalanceParam = new ethereum.EventParam(
+    'newBalance',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(newBalance))
+  );
+
+  newDelegateVotesChangedEvent.parameters.push(delegateParam);
+  newDelegateVotesChangedEvent.parameters.push(previousBalanceParam);
+  newDelegateVotesChangedEvent.parameters.push(newBalanceParam);
+
+  return newDelegateVotesChangedEvent;
+}
+
 // calls
 
 export function getProposalCountCall(
@@ -293,6 +361,9 @@ export function createTokenVotingMember(
   user.address = Address.fromString(address);
   user.plugin = plugin; // uses other plugin address to make sure that the code reuses the entity
   user.balance = BigInt.fromString(balance);
+
+  user.delegatee = fromUserId;
+  user.votingPower = BigInt.zero();
   user.save();
 
   return fromUserId;
