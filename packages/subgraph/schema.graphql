@@ -363,7 +363,7 @@ type TokenVotingMember @entity {
   delegatee: TokenVotingMember!
   votingPower: BigInt
   # we assume token owners and/or delegatees are members
-  delegatees: [TokenVotingMember!]! @derivedFrom(field: "delegatee")
+  delegators: [TokenVotingMember!]! @derivedFrom(field: "delegatee")
 }
 
 type TokenVotingVoter @entity {
