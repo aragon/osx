@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, Value, ethereum, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, Value, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC20Balance,
   ERC20Contract,
@@ -8,26 +8,30 @@ import {
 import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
 import {GovernanceWrappedERC20} from '../../../generated/templates/GovernanceWrappedERC20/GovernanceWrappedERC20';
 import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
-import { supportsInterface } from '../erc165';
+import {supportsInterface} from '../erc165';
 
 export function supportsERC20Wrapped(token: Address): bool {
   // Double check that it's ERC721 by calling supportsInterface checks.
   let erc20Wrapped = GovernanceWrappedERC20.bind(token);
   let introspection_12cdd3ac = supportsInterface(erc20Wrapped, '12cdd3ac'); // GovernanceWrappedERC20
-  let introspection_00000000 = supportsInterface(erc20Wrapped, '00000000', false);
-  return (
-    introspection_12cdd3ac && introspection_00000000
+  let introspection_00000000 = supportsInterface(
+    erc20Wrapped,
+    '00000000',
+    false
   );
+  return introspection_12cdd3ac && introspection_00000000;
 }
 
-export function fetchWrappedERC20(address: Address): ERC20WrapperContract | null{
+export function fetchWrappedERC20(
+  address: Address
+): ERC20WrapperContract | null {
   let wrappedErc20 = GovernanceWrappedERC20.bind(address);
   // try load entry
   let contract = ERC20WrapperContract.load(address.toHexString());
   if (contract != null) {
     return contract;
   }
-  
+
   contract = new ERC20WrapperContract(address.toHexString());
 
   let try_name = wrappedErc20.try_name();
@@ -40,16 +44,16 @@ export function fetchWrappedERC20(address: Address): ERC20WrapperContract | null
     return null;
   }
   // get and save the underliying contract
-  let underlyingContract = fetchERC20(underlying.value)
-  if (!underlyingContract){
-    return null
+  let underlyingContract = fetchERC20(underlying.value);
+  if (!underlyingContract) {
+    return null;
   }
   // set params and save
   contract.name = try_name.reverted ? '' : try_name.value;
   contract.symbol = try_symbol.reverted ? '' : try_symbol.value;
-  contract.underlyingToken = underlyingContract.id
+  contract.underlyingToken = underlyingContract.id;
   contract.save();
-  return contract
+  return contract;
 }
 
 export function fetchERC20(address: Address): ERC20Contract | null {
