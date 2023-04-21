@@ -16,7 +16,7 @@ import {IERC20MintableUpgradeable} from "../IERC20MintableUpgradeable.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
-/// @notice An [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
+/// @notice An [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
 contract GovernanceERC20 is
     IERC20MintableUpgradeable,
     Initializable,
@@ -44,7 +44,7 @@ contract GovernanceERC20 is
     /// @notice Calls the initialize function.
     /// @param _dao The managing DAO.
     /// @param _name The name of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
-    /// @param _symbol The symbol fo the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
+    /// @param _symbol The symbol of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
     /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
     constructor(
         IDAO _dao,
@@ -58,7 +58,7 @@ contract GovernanceERC20 is
     /// @notice Initializes the contract and mints tokens to a list of receivers.
     /// @param _dao The managing DAO.
     /// @param _name The name of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
-    /// @param _symbol The symbol fo the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
+    /// @param _symbol The symbol of the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token.
     /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
     function initialize(
         IDAO _dao,

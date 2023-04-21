@@ -16,7 +16,7 @@ import {Admin} from "./Admin.sol";
 contract AdminSetup is PluginSetup {
     using Clones for address;
 
-    /// @notice The address of `Admin` plugin logic contract to be cloned.
+    /// @notice The address of the `Admin` plugin logic contract to be cloned.
     address private immutable implementation_;
 
     /// @notice Thrown if the admin address is zero.
@@ -33,7 +33,7 @@ contract AdminSetup is PluginSetup {
         address _dao,
         bytes calldata _data
     ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
+        // Decode `_data` to extract the params needed for cloning and initializing the `Admin` plugin.
         address admin = abi.decode(_data, (address));
 
         if (admin == address(0)) {
@@ -50,7 +50,7 @@ contract AdminSetup is PluginSetup {
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
-        // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
+        // Grant `ADMIN_EXECUTE_PERMISSION` of the plugin to the admin.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,

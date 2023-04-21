@@ -9,7 +9,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @notice The interface of majority voting plugin.
 interface IMajorityVoting {
     /// @notice Vote options that a voter can chose from.
-    /// @param None The default option state of a voter indicating the absence of from the vote. This option neither influences support nor participation.
+    /// @param None The default option state of a voter indicating the absence from the vote. This option neither influences support nor participation.
     /// @param Abstain This option does not influence the support but counts towards participation.
     /// @param Yes This option increases the support and counts towards participation.
     /// @param No This option decreases the support and counts towards participation.
@@ -52,7 +52,7 @@ interface IMajorityVoting {
 
     /// @notice Checks if the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote is greater or equal than the minimum participation value.
     /// @param _proposalId The ID of the proposal.
-    /// @return Returns `true` if the participation is greater than the minimum particpation and `false` otherwise.
+    /// @return Returns `true` if the participation is greater than the minimum participation and `false` otherwise.
     function isMinParticipationReached(uint256 _proposalId) external view returns (bool);
 
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote

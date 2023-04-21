@@ -12,6 +12,6 @@ interface IPlugin {
         Constructable
     }
 
-    /// @notice returns the plugin's type
+    /// @notice Returns the plugin's type
     function pluginType() external view returns (PluginType);
 }

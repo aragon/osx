@@ -13,20 +13,20 @@ contract CounterV2 is PluginUUPSUpgradeable {
     /// @notice The ID of the permission required to call the `multiply` function.
     bytes32 public constant MULTIPLY_PERMISSION_ID = keccak256("MULTIPLY_PERMISSION");
 
-    /// @notice A counter varaible.
+    /// @notice A counter variable.
     uint256 public count;
 
     /// @notice A helper contract associated with the plugin.
     MultiplyHelper public multiplyHelper;
 
-    /// @notice A new varaible added in V2.
+    /// @notice A new variable added in V2.
     /// @dev By appending a new variable, the existing storage gets modified.
     uint256 public newVariable;
 
     /// @notice Initializes the plugin.
     /// @param _dao The contract of the associated DAO.
     /// @param _multiplyHelper The helper contract associated with the plugin to multiply numbers.
-    /// @param _count The inital value of the counter.
+    /// @param _count The initial value of the counter.
     /// @param _newVariable The new variable that was added with V2.
     /// @dev This only gets called for daos that install it for the first time. The initializer modifier protects it from being called a second time for old proxies.
     function initialize(
@@ -54,7 +54,7 @@ contract CounterV2 is PluginUUPSUpgradeable {
     }
 
     /// @notice Multiplies the count with a number.
-    /// @param _a The number to multiply the coun with.
+    /// @param _a The number to multiply the count with.
     function multiply(uint256 _a) public view auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
         return multiplyHelper.multiply(count, _a);
     }
@@ -65,6 +65,6 @@ contract CounterV2 is PluginUUPSUpgradeable {
         //dao.execute(...)
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[47] private __gap;
 }

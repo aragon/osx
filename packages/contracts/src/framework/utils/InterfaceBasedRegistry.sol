@@ -21,7 +21,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID that the target contracts being registered must support.
     bytes4 public targetInterfaceId;
 
-    /// @notice The mapping containing the registry entries returning true for registererd contract addresses.
+    /// @notice The mapping containing the registry entries returning true for registered contract addresses.
     mapping(address => bool) public entries;
 
     /// @notice Thrown if the contract is already registered.
@@ -32,7 +32,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @param registrant The address of the contract to be registered.
     error ContractInterfaceInvalid(address registrant);
 
-    /// @notice Thrown if the contract do not support ERC165.
+    /// @notice Thrown if the contract does not support ERC165.
     /// @param registrant The address of the contract.
     error ContractERC165SupportInvalid(address registrant);
 
@@ -49,7 +49,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
         targetInterfaceId = _targetInterfaceId;
     }
 
-    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_REGISTRY_PERMISSION_ID` permission.
     function _authorizeUpgrade(
         address
@@ -71,6 +71,6 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
         entries[_registrant] = true;
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[48] private __gap;
 }

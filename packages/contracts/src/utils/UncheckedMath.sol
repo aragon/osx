@@ -12,7 +12,7 @@ function _uncheckedIncrement(uint256 i) pure returns (uint256) {
     return i;
 }
 
-/// @notice Add two unsigned integers without checking the result for overflow errors (using safe math).
+/// @notice Adds two unsigned integers without checking the result for overflow errors (using safe math).
 /// @param a The first summand.
 /// @param b The second summand.
 /// @return The sum.

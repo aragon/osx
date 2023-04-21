@@ -98,7 +98,7 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
     /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
@@ -112,7 +112,7 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier if the referenced condition permits it.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
     /// @param _condition The `PermissionCondition` that will be asked for authorization on calls connected to the specified permission identifier.
@@ -190,7 +190,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
@@ -214,7 +214,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `grant` method of the permission manager.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
@@ -222,7 +222,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the internal `_grant` method of the permission manager.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @param _condition An address either resolving to a `PermissionCondition` contract address or being the `ALLOW_FLAG` address (`address(2)`).
@@ -275,7 +275,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @dev Note, that revoking permissions with `_who` or `_where` equal to `ANY_ADDR` does not revoke other permissions with specific `_who` and `_where` addresses that might have been granted in parallel.
@@ -289,7 +289,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice Checks if a caller is granted permissions on a target contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
@@ -335,7 +335,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
-    /// @param _where The address of the target contract for which `_who` recieves permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @return The permission hash.
@@ -347,10 +347,10 @@ abstract contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _permissionId));
     }
 
-    /// @notice Decides if the granting permissionId is restricted when `_who = ANY_ADDR` or `_where = ANY_ADDR`.
+    /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
     /// @param _permissionId The permission identifier.
     /// @return Whether or not the permission is restricted.
-    /// @dev By default, every permission is unrestricted and it is the derived contract's responsibility to override it. Note, that the `ROOT_PERMISSION_ID` is included not required to be set it again.
+    /// @dev By default, every permission is unrestricted and it is the derived contract's responsibility to override it. Note, that the `ROOT_PERMISSION_ID` is included and not required to be set it again.
     function isPermissionRestrictedForAnyAddr(
         bytes32 _permissionId
     ) internal view virtual returns (bool) {
@@ -358,6 +358,6 @@ abstract contract PermissionManager is Initializable {
         return false;
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[49] private __gap;
 }

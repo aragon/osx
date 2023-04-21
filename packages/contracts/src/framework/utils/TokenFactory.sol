@@ -71,7 +71,7 @@ contract TokenFactory {
 
     /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token depending on the address used in the `TokenConfig` provided.
     /// @param _managingDao The address of the DAO managing the token.
-    /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be create, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an [ERC-20](https://eips.ethereum.org/EIPS/eip-20)-compatible contract, a wrapped governance token is created.
+    /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be created, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an [ERC-20](https://eips.ethereum.org/EIPS/eip-20)-compatible contract, a wrapped governance token is created.
     /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
     /// @return The created `ERC20VotesUpgradeable` compatible token contract.
     /// @return The created `MerkleMinter` contract used to mint the `ERC20VotesUpgradeable` tokens or `address(0)` if an existing token was provided.
@@ -130,7 +130,7 @@ contract TokenFactory {
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
-        // Grant the managing DAO permission to directly mint tokens to an receiving address.
+        // Grant the managing DAO permission to directly mint tokens to a receiving address.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 
         // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.

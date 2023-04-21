@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../core/permission/PermissionManager.sol";
 
 contract PermissionManagerTest is PermissionManager {
-    // Restricted permissionIds that shouldn't be allowed to grant for who = ANY_ADDR or where = ANY_ADDR
+    // Restricted permissionIds that shouldn't be allowed to grant for who == ANY_ADDR or where == ANY_ADDR
     bytes32 public constant TEST_PERMISSION_1_ID = keccak256("TEST_PERMISSION_1");
     bytes32 public constant TEST_PERMISSION_2_ID = keccak256("TEST_PERMISSION_2");
 
