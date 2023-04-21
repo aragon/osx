@@ -170,10 +170,10 @@ Here, the permission condition will only allow the call if the PoH registry conf
 In another use-case, we might want to make sure that the `sendCoins` function can only be called if the ETH price in USD is above a certain threshold:
 
 <!-- prettier-ignore -->
-```solidity title="PriceOracle.sol"
+```solidity title="PriceOracleCondition.sol"
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
-contract PriceOracle is IPermissionCondition {
+contract PriceOracleCondition is IPermissionCondition {
   AggregatorV3Interface internal priceFeed;
 
   // Network: Goerli
