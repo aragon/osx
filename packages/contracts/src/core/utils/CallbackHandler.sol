@@ -21,12 +21,13 @@ abstract contract CallbackHandler {
     /// @notice Emitted when `_handleCallback` is called.
     /// @param sender Who called the callback.
     /// @param sig The function signature.
-    /// @param data The calldata for the function signature.
+    /// @param data The calldata.
     event CallbackReceived(address sender, bytes4 indexed sig, bytes data);
 
     /// @notice Handles callbacks to adaptively support ERC standards.
     /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
     /// @param _callbackSelector The function selector of the callback function.
+    /// @param _data The calldata.
     /// @return The magic number registered for the function selector triggering the fallback.
     function _handleCallback(
         bytes4 _callbackSelector,
