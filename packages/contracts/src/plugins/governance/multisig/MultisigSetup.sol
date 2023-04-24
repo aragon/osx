@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity ^0.8.8;
+pragma solidity 0.8.17;
 
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {DAO} from "../../../core/dao/DAO.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier:    AGPL-3.0-or-later
 
-pragma solidity ^0.8.8;
+pragma solidity 0.8.17;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";

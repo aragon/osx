@@ -24,7 +24,7 @@ To instantiate your implementation contract via Solidity's `new` keyword, you in
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity ^0.8.8;
+pragma solidity 0.8.17;
 
 import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
@@ -57,7 +57,7 @@ To deploy your implementation contract via the [minimal clones pattern (ERC-1167
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity ^0.8.8;
+pragma solidity 0.8.17;
 
 import {PluginCloneable, IDAO} from '@aragon/osx/core/plugin/PluginCloneable.sol';
 

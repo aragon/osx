@@ -12,6 +12,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
   - [ ] Check that the owner of the plugin domain is the deployer
 - [ ] Run `yarn` in the repository root to install the dependencies
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
+  - [ ] Check that the compiler version in `hardhat.config.ts` is set to at least `0.8.17` and on the [known solidity bugs page](https://docs.soliditylang.org/en/latest/bugs.html) that no relevant vulnerabilities exist that are fixed in later versions. If so, consider updating.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
 - [ ] Run `yarn deploy --network hardhat --reset` to make sure the deploy scripts work
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key
