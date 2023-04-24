@@ -230,7 +230,7 @@ export function createTokenVotingProposalEntityState(
   let tokenVotingProposal = new TokenVotingProposal(entityID);
   tokenVotingProposal.dao = Address.fromString(dao).toHexString();
   tokenVotingProposal.plugin = Address.fromString(pkg).toHexString();
-  tokenVotingProposal.pluginProposalId = BigInt.fromString(proposalId);
+  tokenVotingProposal.pluginProposalId = BigInt.fromString(pluginProposalId);
   tokenVotingProposal.creator = Address.fromString(creator);
 
   tokenVotingProposal.open = open;

@@ -305,7 +305,7 @@ export function createMultisigProposalEntityState(
   let multisigProposal = new MultisigProposal(entityID);
   multisigProposal.dao = Address.fromString(dao).toHexString();
   multisigProposal.plugin = Address.fromString(plugin).toHexString();
-  multisigProposal.pluginProposalId = BigInt.fromString(proposalId);
+  multisigProposal.pluginProposalId = BigInt.fromString(pluginProposalId);
   multisigProposal.creator = Address.fromString(creator);
   multisigProposal.startDate = BigInt.fromString(startDate);
   multisigProposal.endDate = BigInt.fromString(endDate);
