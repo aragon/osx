@@ -9,17 +9,18 @@ import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
 import {GovernanceWrappedERC20} from '../../../generated/templates/GovernanceWrappedERC20/GovernanceWrappedERC20';
 import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
 import {supportsInterface} from '../erc165';
+import { WRAPPED_ERC20_INTERFACE } from '../constants';
 
 export function supportsERC20Wrapped(token: Address): bool {
-  // Double check that it's ERC721 by calling supportsInterface checks.
+  // Double check that it's ERC20Wrapped by calling supportsInterface checks.
   let erc20Wrapped = GovernanceWrappedERC20.bind(token);
-  let introspection_12cdd3ac = supportsInterface(erc20Wrapped, '12cdd3ac'); // GovernanceWrappedERC20
+  let introspection_wrapped_erc20 = supportsInterface(erc20Wrapped, WRAPPED_ERC20_INTERFACE); // GovernanceWrappedERC20
   let introspection_00000000 = supportsInterface(
     erc20Wrapped,
     '00000000',
     false
   );
-  return introspection_12cdd3ac && introspection_00000000;
+  return introspection_wrapped_erc20 && introspection_00000000;
 }
 
 export function fetchWrappedERC20(
