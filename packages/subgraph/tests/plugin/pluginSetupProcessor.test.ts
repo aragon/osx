@@ -30,10 +30,7 @@ import {
 import {assert, clearStore, test} from 'matchstick-as';
 import {PluginPreparation} from '../../generated/schema';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {
-  createDaoEntityState,
-  getSupportsInterface
-} from '../../tests/dao/utils';
+import {getSupportsInterface} from '../../tests/dao/utils';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,

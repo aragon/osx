@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added `delegatee`, `votingPower` and `delegators` to the `TokenVotingMember`.
+
 ### Changed
 
 - Supports now multiple `DAORegistries`, `PluginRepoRegistries` and `PluginSetupProcessors` as datasources.

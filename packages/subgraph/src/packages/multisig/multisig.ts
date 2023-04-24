@@ -1,4 +1,4 @@
-import {dataSource, store, BigInt} from '@graphprotocol/graph-ts';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,

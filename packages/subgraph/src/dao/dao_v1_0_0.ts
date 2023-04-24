@@ -17,7 +17,6 @@ import {
   ContractPermissionId,
   Permission,
   StandardCallback,
-  Action,
   TransactionActionsProposal
 } from '../../generated/schema';
 
