@@ -73,7 +73,8 @@ import {
   createCallbackReceivedEvent,
   createNewDepositedEvent,
   createNewNativeTokenDepositedEvent,
-  getBalanceOf
+  getBalanceOf,
+  getSupportsInterface
 } from '../dao/utils';
 import {
   createNewDelegateChangedEvent,
@@ -91,7 +92,8 @@ import {
 import {
   createGetProposalCall,
   createTotalVotingPowerCall,
-  createTokenCalls
+  createTokenCalls,
+  createWrappedTokenCalls
 } from '../utils';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
@@ -161,12 +163,44 @@ class ERC721TransferMethods extends ERC721Transfer {
 
 // ERC20Contract
 class ERC20WrapperContractMethods extends ERC20WrapperContract {
-  withDefaultValues(): ERC20WrapperContractMethods{
+  withDefaultValues(): ERC20WrapperContractMethods {
     this.id = Address.fromHexString(WRAPPED_CONTRACT_ADDRESS).toHexString();
-    this.name = 'Wrapped Test Token'
-    this.symbol = 'WTT'
-    this.underlyingToken = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
-    return this
+    this.name = 'Wrapped Test Token';
+    this.symbol = 'WTT';
+    this.underlyingToken = Address.fromHexString(
+      DAO_TOKEN_ADDRESS
+    ).toHexString();
+    return this;
+  }
+  // calls
+  mockCall_createTokenCalls(totalSupply: string | null = null): void {
+    if (!this.name) {
+      throw new Error('Name is null');
+    }
+
+    if (!this.symbol) {
+      throw new Error('Symbol is null');
+    }
+
+    if (!this.underlyingToken) {
+      throw new Error('Underlying token is null');
+    }
+
+    createWrappedTokenCalls(
+      this.id,
+      this.name as string,
+      this.symbol as string,
+      this.underlyingToken,
+      totalSupply
+    );
+  }
+
+  mockCall_supportsInterface(interfaceId: string, value: boolean): void {
+    getSupportsInterface(this.id, interfaceId, value);
+  }
+
+  mockCall_balanceOf(account: string, amount: string): void {
+    getBalanceOf(this.id, account, amount);
   }
 }
 
@@ -196,6 +230,10 @@ class ERC20ContractMethods extends ERC20Contract {
       this.decimals.toString(),
       totalSupply
     );
+  }
+
+  mockCall_supportsInterface(interfaceId: string, value: boolean): void {
+    getSupportsInterface(this.id, interfaceId, value);
   }
 
   mockCall_balanceOf(account: string, amount: string): void {
@@ -564,16 +602,16 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     return event;
   }
 
-  createEvent_MembershipContractAnnounced():MembershipContractAnnounced{
+  createEvent_MembershipContractAnnounced(): MembershipContractAnnounced {
     if (this.token === null) {
-      throw new Error('Token is null')
+      throw new Error('Token is null');
     }
     let event = createNewMembershipContractAnnouncedEvent(
       this.token as string,
       this.pluginAddress.toHexString()
-    )
+    );
 
-    return event
+    return event;
   }
 }
 

@@ -241,55 +241,18 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   clearStore();
 });
 describe('handleMembershipContractAnnounced', () => {
-  beforeAll(() => {
-    // mock get balance
-    getBalanceOf(CONTRACT_ADDRESS, CONTRACT_ADDRESS, ERC20_AMOUNT_HALF);
-    getBalanceOf(
-      WRAPPED_CONTRACT_ADDRESS,
-      WRAPPED_CONTRACT_ADDRESS,
-      ERC20_AMOUNT_HALF
-    );
-    // create token calls
-    createTokenCalls(
-      CONTRACT_ADDRESS,
-      'Test Token',
-      'TT',
-      '18',
-      ERC20_AMOUNT_FULL
-    );
-    createWrappedTokenCalls(
-      WRAPPED_CONTRACT_ADDRESS,
-      'Wrapped Test Token',
-      'WTT',
-      CONTRACT_ADDRESS,
-      ERC20_AMOUNT_FULL
-    );
-    // mock supported interface of the wrapped governance token
-    getSupportsInterface(CONTRACT_ADDRESS, WRAPPED_ERC20_INTERFACE, false);
-    getSupportsInterface(CONTRACT_ADDRESS, '00000000', false);
-    getSupportsInterface(
-      WRAPPED_CONTRACT_ADDRESS,
-      WRAPPED_ERC20_INTERFACE,
-      true
-    );
-    getSupportsInterface(WRAPPED_CONTRACT_ADDRESS, '00000000', false);
-  });
-  test('it should create an erc20 and assing its address to the tokenVotingPlugin', () => {
+  beforeAll(() => {});
+  test('it should create an erc20 and assign its address to the tokenVotingPlugin', () => {
     // create entities
     let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
     let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
+    erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface('00000000', false);
 
-    tokenVotingPlugin.token = CONTRACT_ADDRESS.toLowerCase();
+    tokenVotingPlugin.token = erc20Contract.id;
     tokenVotingPlugin.buildOrUpdate();
-
-    getBalanceOf(CONTRACT_ADDRESS, CONTRACT_ADDRESS, ERC20_AMOUNT_HALF);
-    createTokenCalls(
-      CONTRACT_ADDRESS,
-      'Test Token',
-      'TT',
-      '18',
-      ERC20_AMOUNT_FULL
-    );
 
     let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
 
@@ -307,8 +270,23 @@ describe('handleMembershipContractAnnounced', () => {
     let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
     let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
     let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
+    erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface('00000000', false);
 
-    tokenVotingPlugin.token = WRAPPED_CONTRACT_ADDRESS.toLowerCase();
+    erc20WrappedContract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
+    erc20WrappedContract.mockCall_balanceOf(
+      erc20WrappedContract.id,
+      ERC20_AMOUNT_FULL
+    );
+    erc20WrappedContract.mockCall_supportsInterface(
+      WRAPPED_ERC20_INTERFACE,
+      true
+    );
+    erc20WrappedContract.mockCall_supportsInterface('00000000', false);
+
+    tokenVotingPlugin.token = erc20WrappedContract.id;
     tokenVotingPlugin.buildOrUpdate();
 
     let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
