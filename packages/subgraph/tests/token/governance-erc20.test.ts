@@ -273,8 +273,6 @@ describe('Governance ERC20', () => {
 
       handleDelegateVotesChanged(event);
 
-      logStore();
-
       // assert
       // expected changes
       member.votingPower = BigInt.fromString(newBalance);
