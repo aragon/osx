@@ -288,6 +288,7 @@ describe('handleMembershipContractAnnounced', () => {
 
     tokenVotingPlugin.token = erc20WrappedContract.id;
     tokenVotingPlugin.buildOrUpdate();
+    tokenVotingPlugin.assertEntity();
 
     let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
 
