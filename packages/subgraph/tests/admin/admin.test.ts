@@ -8,7 +8,7 @@ import {
   ADDRESS_TWO,
   DAO_ADDRESS,
   STRING_DATA,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   CONTRACT_ADDRESS,
   START_DATE,
   ALLOW_FAILURE_MAP,
@@ -41,7 +41,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // create event
   let actions = createDummyActions(ADDRESS_TWO, actionValue, actionData);
   let event = createNewProposalCreatedEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     START_DATE,
@@ -56,7 +56,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
 
   let entityID = getProposalId(
     Address.fromString(CONTRACT_ADDRESS),
-    BigInt.fromString(PROPOSAL_ID)
+    BigInt.fromString(PLUGIN_PROPOSAL_ID)
   );
 
   // checks
@@ -67,7 +67,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
     'AdminProposal',
     entityID,
     'pluginProposalId',
-    PROPOSAL_ID
+    PLUGIN_PROPOSAL_ID
   );
   assert.fieldEquals('AdminProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('AdminProposal', entityID, 'metadata', STRING_DATA);
@@ -90,7 +90,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // check actions
   for (let index = 0; index < actions.length; index++) {
     const actionId =
-      CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + index.toString();
+      CONTRACT_ADDRESS + '_' + PLUGIN_PROPOSAL_ID + '_' + index.toString();
     const actionEntity = Action.load(actionId);
     if (actionEntity) {
       assert.fieldEquals('Action', actionId, 'id', actionId);
@@ -98,7 +98,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
       assert.fieldEquals('Action', actionId, 'value', actionValue);
       assert.fieldEquals('Action', actionId, 'data', actionData);
       assert.fieldEquals('Action', actionId, 'dao', DAO_ADDRESS);
-      assert.fieldEquals('Action', actionId, 'proposal', PROPOSAL_ID);
+      assert.fieldEquals('Action', actionId, 'proposal', PLUGIN_PROPOSAL_ID);
     }
   }
 
@@ -115,7 +115,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
 
   let entityID = getProposalId(
     Address.fromString(CONTRACT_ADDRESS),
-    BigInt.fromString(PROPOSAL_ID)
+    BigInt.fromString(PLUGIN_PROPOSAL_ID)
   );
 
   let administratorAddress = Address.fromString(ADDRESS_ONE);
@@ -123,7 +123,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   let adminProposal = new AdminProposal(entityID);
   adminProposal.dao = DAO_ADDRESS;
   adminProposal.plugin = pluginId;
-  adminProposal.pluginProposalId = BigInt.fromString(PROPOSAL_ID);
+  adminProposal.pluginProposalId = BigInt.fromString(PLUGIN_PROPOSAL_ID);
   adminProposal.creator = administratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
@@ -144,7 +144,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   action.save();
 
   // create event
-  let event = createProposalExecutedEvent(PROPOSAL_ID, CONTRACT_ADDRESS);
+  let event = createProposalExecutedEvent(PLUGIN_PROPOSAL_ID, CONTRACT_ADDRESS);
 
   // handle event
   handleProposalExecuted(event);

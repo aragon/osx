@@ -17,7 +17,7 @@ import {
   CONTRACT_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   SNAPSHOT_BLOCK,
   ONE,
   TWO,
@@ -51,7 +51,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     false,
 
     // ProposalParameters
@@ -70,7 +70,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
 
   // create event
   let event = createNewProposalCreatedEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     END_DATE,
@@ -85,7 +85,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
 
   let entityID = getProposalId(
     Address.fromString(CONTRACT_ADDRESS),
-    BigInt.fromString(PROPOSAL_ID)
+    BigInt.fromString(PLUGIN_PROPOSAL_ID)
   );
 
   let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
@@ -98,7 +98,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     'MultisigProposal',
     entityID,
     'pluginProposalId',
-    PROPOSAL_ID
+    PLUGIN_PROPOSAL_ID
   );
   assert.fieldEquals('MultisigProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'startDate', START_DATE);
@@ -155,7 +155,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     false,
 
     // ProposalParameters
@@ -173,7 +173,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 
   // create event
   let event = createNewApprovedEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     CONTRACT_ADDRESS
   );
@@ -225,7 +225,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     false,
 
     // ProposalParameters
@@ -243,7 +243,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 
   // create event
   let event2 = createNewApprovedEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_TWO,
     CONTRACT_ADDRESS
   );

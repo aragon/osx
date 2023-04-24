@@ -33,7 +33,7 @@ import {
   END_DATE,
   MIN_VOTING_POWER,
   PROPOSAL_ENTITY_ID,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   SNAPSHOT_BLOCK,
   START_DATE,
   SUPPORT_THRESHOLD,
@@ -86,7 +86,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
 
     this.dao = DAO_ADDRESS;
     this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
-    this.pluginProposalId = BigInt.fromString(PROPOSAL_ID);
+    this.pluginProposalId = BigInt.fromString(PLUGIN_PROPOSAL_ID);
     this.creator = Address.fromHexString(ADDRESS_ONE);
 
     this.open = true;
