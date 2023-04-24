@@ -176,13 +176,9 @@ class ERC20WrapperContractMethods extends ERC20WrapperContract {
   mockCall_createTokenCalls(totalSupply: string | null = null): void {
     if (!this.name) {
       throw new Error('Name is null');
-    }
-
-    if (!this.symbol) {
+    } else if (!this.symbol) {
       throw new Error('Symbol is null');
-    }
-
-    if (!this.underlyingToken) {
+    } else if (!this.underlyingToken) {
       throw new Error('Underlying token is null');
     }
 
