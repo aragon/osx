@@ -105,7 +105,7 @@ abstract contract MajorityVotingBase is
     /// @notice The different voting modes available.
     /// @param Standard In standard mode, early execution and vote replacement are disabled.
     /// @param EarlyExecution In early execution mode, a proposal can be executed early before the end date if the vote outcome cannot mathematically change by more voters voting.
-    /// @param VoteReplacment In vote replacement mode, voters can change their vote multiple times and only the latest vote option is tallied.
+    /// @param VoteReplacement In vote replacement mode, voters can change their vote multiple times and only the latest vote option is tallied.
     enum VotingMode {
         Standard,
         EarlyExecution,
@@ -363,7 +363,7 @@ abstract contract MajorityVotingBase is
         return votingSettings.minDuration;
     }
 
-    /// @notice Returns the minimum voting power required to create a proposa stored in the voting settings.
+    /// @notice Returns the minimum voting power required to create a proposal stored in the voting settings.
     /// @return The minimum voting power required to create a proposal.
     function minProposerVotingPower() public view virtual returns (uint256) {
         return votingSettings.minProposerVotingPower;
@@ -589,6 +589,6 @@ abstract contract MajorityVotingBase is
         }
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[47] private __gap;
 }

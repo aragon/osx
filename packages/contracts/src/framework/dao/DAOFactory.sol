@@ -131,7 +131,7 @@ contract DAOFactory {
             applyInstallationPermissionID
         );
 
-        // Revoke Temporarly `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implecitly granted to this `DaoFactory`
+        // Revoke Temporarly `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implicitly granted to this `DaoFactory`
         // at the create dao step `address(this)` being the initial owner of the new created DAO.
         createdDao.revoke(address(createdDao), address(this), rootPermissionID);
     }

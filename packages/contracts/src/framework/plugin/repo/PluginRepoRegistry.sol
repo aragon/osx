@@ -10,7 +10,7 @@ import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepoRegistry
 /// @author Aragon Association - 2022-2023
-/// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
+/// @notice This contract maintains an address-based registry of plugin repositories in the Aragon App DAO framework.
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
@@ -68,6 +68,6 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
         emit PluginRepoRegistered(subdomain, pluginRepo);
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[49] private __gap;
 }

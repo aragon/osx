@@ -20,7 +20,7 @@ contract CounterV2PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
-    // MultiplyHelper doesn't change. so dev decides to pass the old one.
+    // MultiplyHelper doesn't change, so the developer decides to pass the old one.
     constructor(MultiplyHelper _helper) {
         multiplyHelperBase = _helper;
         counterBase = new CounterV2();

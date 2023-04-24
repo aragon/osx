@@ -16,7 +16,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
     AddresslistVoting private immutable addresslistVotingBase;
 
-    /// @notice The contract constructor, that deployes the `AddresslistVoting` plugin logic contract.
+    /// @notice The contract constructor, that deploys the `AddresslistVoting` plugin logic contract.
     constructor() {
         addresslistVotingBase = new AddresslistVoting();
     }
@@ -46,7 +46,7 @@ contract AddresslistVotingSetup is PluginSetup {
             memory permissions = new PermissionLib.MultiTargetPermission[](4);
 
         // Set permissions to be granted.
-        // Grant the list of prmissions of the plugin to the DAO.
+        // Grant the list of permissions of the plugin to the DAO.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,

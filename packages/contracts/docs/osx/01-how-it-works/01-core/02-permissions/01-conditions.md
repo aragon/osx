@@ -11,7 +11,7 @@ This contract must implement the `IPermissionCondition` interface.
 interface IPermissionCondition {
   /// @notice This method is used to check if a call is permitted.
   /// @param _where The address of the target contract.
-  /// @param _who The address (EOA or contract) for which the permission are checked.
+  /// @param _who The address (EOA or contract) for which the permissions are checked.
   /// @param _permissionId The permission identifier.
   /// @param _data Optional data passed to the `PermissionCondition` implementation.
   /// @return allowed Returns true if the call is permitted.
@@ -170,10 +170,10 @@ Here, the permission condition will only allow the call if the PoH registry conf
 In another use-case, we might want to make sure that the `sendCoins` function can only be called if the ETH price in USD is above a certain threshold:
 
 <!-- prettier-ignore -->
-```solidity title="PriceOracle.sol"
+```solidity title="PriceOracleCondition.sol"
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
-contract PriceOracle is IPermissionCondition {
+contract PriceOracleCondition is IPermissionCondition {
   AggregatorV3Interface internal priceFeed;
 
   // Network: Goerli

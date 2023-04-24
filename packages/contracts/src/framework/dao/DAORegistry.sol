@@ -9,7 +9,7 @@ import {isSubdomainValid} from "../utils/RegistryUtils.sol";
 
 /// @title Register your unique DAO subdomain
 /// @author Aragon Association - 2022-2023
-/// @notice This contract provides the possiblity to register a DAO.
+/// @notice This contract provides the possibility to register a DAO.
 contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
@@ -69,6 +69,6 @@ contract DAORegistry is InterfaceBasedRegistry {
         emit DAORegistered(daoAddr, creator, subdomain);
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[49] private __gap;
 }

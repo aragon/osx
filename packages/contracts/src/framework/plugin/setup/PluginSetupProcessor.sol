@@ -151,7 +151,7 @@ contract PluginSetupProcessor {
     /// @notice Thrown if a plugin repository does not exist on the plugin repo registry.
     error PluginRepoNonexistent();
 
-    /// @notice Thrown if a plugin setup was already prepared inidcated by the prepared setup ID.
+    /// @notice Thrown if a plugin setup was already prepared indicated by the prepared setup ID.
     /// @param preparedSetupId The prepared setup ID.
     error SetupAlreadyPrepared(bytes32 preparedSetupId);
 
@@ -545,7 +545,7 @@ contract PluginSetupProcessor {
     }
 
     /// @notice Prepares the uninstallation of a plugin.
-    /// @param _dao The address of the installing DAO.
+    /// @param _dao The address of the uninstalling DAO.
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
     /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
@@ -606,7 +606,7 @@ contract PluginSetupProcessor {
 
     /// @notice Applies the permissions of a prepared uninstallation to a DAO.
     /// @param _dao The address of the DAO.
-    /// @param _dao The address of the installing DAO.
+    /// @param _dao The address of the uninstalling DAO.
     /// @param _params The struct containing the parameters for the `applyUninstallation` function.
     /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
     function applyUninstallation(
