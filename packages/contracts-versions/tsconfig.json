@@ -10,6 +10,6 @@
     "resolveJsonModule": true,
     "rootDir": "../../"
   },
-  "include": ["./npm", "/types"],
+  "include": ["./npm", "/build"],
   "files": ["./npm/index.ts"]
 }

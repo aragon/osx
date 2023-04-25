@@ -25,14 +25,10 @@ async function buildContracts(commit) {
 async function generateTypechain(commit, versionName) {
   try {
     const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destTypechain = path.join(
-      contractVersionsDir,
-      versionName,
-      'contracts'
-    );
+    const destTypechain = path.join(contractVersionsDir, versionName, 'types');
 
     await exec(
-      `find ${srcArtifacts} -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target ethers-v5 --out-dir ${destTypechain}`,
+      `find ${srcArtifacts} -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ${destTypechain}`,
       {cwd: contractsDir}
     );
   } catch (error) {

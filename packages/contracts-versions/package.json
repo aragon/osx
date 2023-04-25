@@ -9,14 +9,14 @@
     "build": "yarn build:contracts && yarn build:npm"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.0",
-    "@typechain/ethers-v5": "^10.2.0",
-    "@types/node": "^18.16.0",
-    "fs-extra": "^11.1.1",
-    "rollup": "^3.21.0",
-    "rollup-plugin-typescript2": "^0.34.1",
-    "tslib": "^2.5.0",
-    "typechain": "^8.1.1",
-    "typescript": "^5.0.4"
+    "@rollup/plugin-typescript": "^8.3.1",
+    "@typechain/ethers-v5": "^10.0.0",
+    "rollup": "^2.70.1",
+    "rollup-plugin-dts": "^4.2.0",
+    "typechain": "^8.0.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "ethers": "^5.6.2"
   }
 }
