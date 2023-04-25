@@ -1,16 +1,10 @@
-import typescript from 'rollup-plugin-typescript2';
+import json from 'rollup-plugin-json';
 
 export default {
-  input: './npm/index.ts',
-  output: [
-    {
-      file: './dist/index.js',
-      format: 'cjs',
-    },
-    {
-      file: './dist/index.esm.js',
-      format: 'esm',
-    },
-  ],
-  plugins: [typescript()],
+  input: 'index.js',
+  output: {
+    dir: 'dist',
+    format: 'cjs',
+  },
+  plugins: [json()],
 };

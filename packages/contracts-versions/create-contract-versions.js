@@ -24,23 +24,14 @@ async function buildContracts(commit) {
 
 async function copyContracts(commit, versionName) {
   try {
-    console.log(`Copying artifacts`);
-    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destArtifacts = path.join(
-      contractVersionsDir,
-      versionName,
-      'artifacts'
-    );
-    await fs.copy(srcArtifacts, destArtifacts);
-
-    console.log(`Copying contracts`);
-    const srcContracts = path.join(contractsDir, 'src');
-    const destContracts = path.join(
+    console.log(`Copying typechain`);
+    const srcTypechain = path.join(contractsDir, 'typechain');
+    const destTypechain = path.join(
       contractVersionsDir,
       versionName,
       'contracts'
     );
-    await fs.copy(srcContracts, destContracts);
+    await fs.copy(srcTypechain, destTypechain);
 
     console.log(`Copying active_contracts.json`);
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
