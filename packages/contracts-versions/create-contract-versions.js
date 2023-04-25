@@ -3,7 +3,8 @@ const path = require('path');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
-const contractsDir = path.join(__dirname, '../contracts');
+const monorepoRoot = path.join(__dirname, '..');
+const contractsDir = path.join(monorepoRoot, 'contracts');
 const contractVersionsDir = path.join(__dirname, 'dist');
 const commitHashes = require('./commit_hashes.json');
 
@@ -31,7 +32,7 @@ async function copyContracts(commit, versionName) {
     );
     await fs.copy(srcArtifacts, destArtifacts);
 
-    const srcContracts = path.join(contractsDir, 'contracts');
+    const srcContracts = path.join(contractsDir, 'src');
     const destContracts = path.join(
       contractVersionsDir,
       versionName,
@@ -41,7 +42,7 @@ async function copyContracts(commit, versionName) {
       filter: src => src.endsWith('.sol'),
     });
 
-    const srcActiveContracts = path.join(contractsDir, 'active_contracts.json');
+    const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
     const destActiveContracts = path.join(
       contractVersionsDir,
       versionName,
