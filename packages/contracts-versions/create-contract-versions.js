@@ -5,7 +5,7 @@ const exec = util.promisify(require('child_process').exec);
 
 const monorepoRoot = path.join(__dirname, '../..');
 const contractsDir = path.join(monorepoRoot, 'packages/contracts');
-const contractVersionsDir = path.join(__dirname, 'dist');
+const contractVersionsDir = path.join(__dirname, 'build');
 const commitHashes = require('./commit_hashes.json');
 
 async function getCurrentBranch() {
@@ -22,17 +22,26 @@ async function buildContracts(commit) {
   }
 }
 
-async function copyContracts(commit, versionName) {
+async function generateTypechain(commit, versionName) {
   try {
-    console.log(`Copying typechain`);
-    const srcTypechain = path.join(contractsDir, 'typechain');
+    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
     const destTypechain = path.join(
       contractVersionsDir,
       versionName,
       'contracts'
     );
-    await fs.copy(srcTypechain, destTypechain);
 
+    await exec(
+      `find ${srcArtifacts} -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target ethers-v5 --out-dir ${destTypechain}`,
+      {cwd: contractsDir}
+    );
+  } catch (error) {
+    console.error('Error generating TypeChain output:', error);
+  }
+}
+
+async function copyActiveContracts(versionName) {
+  try {
     console.log(`Copying active_contracts.json`);
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
     const destActiveContracts = path.join(
@@ -42,7 +51,7 @@ async function copyContracts(commit, versionName) {
     );
     await fs.copy(srcActiveContracts, destActiveContracts);
   } catch (error) {
-    console.error('Error copying contracts:', error);
+    console.error('Error copying active_contracts.json:', error);
   }
 }
 
@@ -54,7 +63,8 @@ async function createVersions() {
       `Building contracts for version: ${version.name}, with commit: ${version.commit}`
     );
     await buildContracts(version.commit);
-    await copyContracts(version.commit, version.name);
+    await generateTypechain(version.commit, version.name);
+    await copyActiveContracts(version.name);
   }
 
   // Return to the original branch

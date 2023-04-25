@@ -9,10 +9,12 @@
     "build": "yarn build:contracts && yarn build:npm"
   },
   "devDependencies": {
+    "@typechain/ethers-v5": "^10.2.0",
     "@types/node": "^18.16.0",
     "fs-extra": "^11.1.1",
     "rollup": "^3.21.0",
     "rollup-plugin-typescript2": "^0.34.1",
+    "typechain": "^8.1.1",
     "typescript": "^5.0.4"
   }
 }
