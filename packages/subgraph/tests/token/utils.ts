@@ -253,6 +253,7 @@ export function createNewDelegateVotesChangedEvent(
   newDelegateVotesChangedEvent.parameters.push(newBalanceParam);
 
   return newDelegateVotesChangedEvent;
+}
 export function createNewMembershipContractAnnouncedEvent(
   definingContract: string,
   contractAddress: string

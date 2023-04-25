@@ -77,11 +77,11 @@ import {
   getSupportsInterface
 } from '../dao/utils';
 import {
-  createNewDelegateChangedEvent,
-  createNewDelegateVotesChangedEvent,
   WRAPPED_CONTRACT_ADDRESS
 } from '../constants';
 import {
+  createNewDelegateChangedEvent,
+  createNewDelegateVotesChangedEvent,
   createNewMembershipContractAnnouncedEvent,
   createNewProposalCreatedEvent,
   createNewProposalExecutedEvent,
