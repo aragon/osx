@@ -24,6 +24,7 @@ async function buildContracts(commit) {
 
 async function copyContracts(commit, versionName) {
   try {
+    console.log(`Copying artifacts`);
     const srcArtifacts = path.join(contractsDir, 'artifacts/src');
     const destArtifacts = path.join(
       contractVersionsDir,
@@ -32,8 +33,8 @@ async function copyContracts(commit, versionName) {
     );
     await fs.copy(srcArtifacts, destArtifacts);
 
+    console.log(`Copying contracts`);
     const srcContracts = path.join(contractsDir, 'src');
-    console.log('copy contracts = ', srcContracts);
     const destContracts = path.join(
       contractVersionsDir,
       versionName,
@@ -41,6 +42,7 @@ async function copyContracts(commit, versionName) {
     );
     await fs.copy(srcContracts, destContracts);
 
+    console.log(`Copying active_contracts.json`);
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
     const destActiveContracts = path.join(
       contractVersionsDir,
@@ -57,6 +59,9 @@ async function createVersions() {
   const currentBranch = await getCurrentBranch();
 
   for (const version of commitHashes.versions) {
+    console.log(
+      `Building contracts for version: ${version.name}, with commit: ${version.commit}`
+    );
     await buildContracts(version.commit);
     await copyContracts(version.commit, version.name);
   }
