@@ -4,8 +4,13 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 const contractsDir = path.join(__dirname, '../contracts');
-const contractVersionsDir = __dirname;
+const contractVersionsDir = path.join(__dirname, 'dist');
 const commitHashes = require('./commit_hashes.json');
+
+async function getCurrentBranch() {
+  const {stdout} = await exec('git branch --show-current', {cwd: contractsDir});
+  return stdout.trim();
+}
 
 async function buildContracts(commit) {
   try {
@@ -49,13 +54,15 @@ async function copyContracts(commit, versionName) {
 }
 
 async function createVersions() {
+  const currentBranch = await getCurrentBranch();
+
   for (const version of commitHashes.versions) {
     await buildContracts(version.commit);
     await copyContracts(version.commit, version.name);
   }
 
   // Return to the original branch
-  await exec('git checkout HEAD', {cwd: contractsDir});
+  await exec(`git checkout ${currentBranch}`, {cwd: contractsDir});
 }
 
 createVersions();
