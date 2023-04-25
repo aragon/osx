@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ES2018",
-    "moduleResolution": "node",
+    "target": "es2018",
+    "module": "esnext",
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "declaration": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "rootDir": "../../"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["./npm", "/types"],
+  "files": ["./npm/index.ts"]
 }
