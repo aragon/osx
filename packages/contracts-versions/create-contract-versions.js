@@ -23,7 +23,7 @@ async function buildContracts(commit) {
 
 async function copyContracts(commit, versionName) {
   try {
-    const srcArtifacts = path.join(contractsDir, 'artifacts');
+    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
     const destArtifacts = path.join(
       contractVersionsDir,
       versionName,
