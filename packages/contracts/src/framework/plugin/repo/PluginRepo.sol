@@ -252,7 +252,7 @@ contract PluginRepo is
         return keccak256(abi.encodePacked(_tag.release, _tag.build));
     }
 
-    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_REPO_PERMISSION_ID` permission.
     function _authorizeUpgrade(
         address

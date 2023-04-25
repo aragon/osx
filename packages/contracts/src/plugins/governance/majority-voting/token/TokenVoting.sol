@@ -13,7 +13,7 @@ import {IMajorityVoting} from "../IMajorityVoting.sol";
 
 /// @title TokenVoting
 /// @author Aragon Association - 2021-2023
-/// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
+/// @notice The majority voting implementation using an [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is IMembership, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
@@ -22,7 +22,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
     bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
         this.initialize.selector ^ this.getVotingToken.selector;
 
-    /// @notice An [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible contract referencing the token being used for voting.
+    /// @notice An [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible contract referencing the token being used for voting.
     IVotesUpgradeable private votingToken;
 
     /// @notice Thrown if the voting power is zero

@@ -8,7 +8,6 @@ import {
   PluginRelease
 } from '../../generated/schema';
 import {getPluginVersionId} from './utils';
-import {log} from '@graphprotocol/graph-ts';
 
 export function handleVersionCreated(event: VersionCreated): void {
   // PluginSetup

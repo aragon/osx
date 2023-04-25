@@ -96,8 +96,8 @@ contract DAO is
     /// @param actual The actual native token amount deposited.
     error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
 
-    /// @notice Emitted when a new DAO uri is set.
-    /// @param daoURI The new uri.
+    /// @notice Emitted when a new DAO URI is set.
+    /// @param daoURI The new URI.
     event NewURI(string daoURI);
 
     /// @notice A modifier to protect the `execute()` function against reentrancy.
@@ -126,6 +126,7 @@ contract DAO is
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO.
     /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission.
     /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions.
+    /// @param daoURI_ The DAO URI required to support [ERC-4824](https://eips.ethereum.org/EIPS/eip-4824).
     function initialize(
         bytes calldata _metadata,
         address _initialOwner,
@@ -158,7 +159,7 @@ contract DAO is
             _permissionId == REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     }
 
-    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_DAO_PERMISSION_ID) {}
 
@@ -230,7 +231,7 @@ contract DAO is
             } else {
                 // Check if the call failed.
                 if (!success) {
-                    // Make sure that the action call did not fail because 63/64 of `gasleft()` was insufficient to execute the external call `.to.call` (see https://eips.ethereum.org/EIPS/eip-150).
+                    // Make sure that the action call did not fail because 63/64 of `gasleft()` was insufficient to execute the external call `.to.call` (see [ERC-150](https://eips.ethereum.org/EIPS/eip-150)).
                     // In specific scenarios, i.e. proposal execution where the last action in the action array is allowed to fail, the account calling `execute` could force-fail this action by setting a gas limit
                     // where 63/64 is insufficient causing the `.to.call` to fail, but where the remaining 1/64 gas are sufficient to successfully finish the `execute` call.
                     if (gasAfter < gasBefore / 64) {
@@ -303,8 +304,8 @@ contract DAO is
     }
 
     /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.
-    /// @dev This call is bound by the gas limitations for `send`/`transfer` calls introduced by EIP-2929.
-    /// Gas cost increases in future hard forks might break this function. As an alternative, EIP-2930-type transactions using access lists can be employed.
+    /// @dev This call is bound by the gas limitations for `send`/`transfer` calls introduced by [ERC-2929](https://eips.ethereum.org/EIPS/eip-2929).
+    /// Gas cost increases in future hard forks might break this function. As an alternative, [ERC-2930](https://eips.ethereum.org/EIPS/eip-2930)-type transactions using access lists can be employed.
     receive() external payable {
         emit NativeTokenDeposited(msg.sender, msg.value);
     }
@@ -331,7 +332,7 @@ contract DAO is
         emit TrustedForwarderSet(_trustedForwarder);
     }
 
-    /// @notice Registers the ERC721/ERC1155 interfaces and callbacks.
+    /// @notice Registers the [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) interfaces and callbacks.
     function _registerTokenInterfaces() private {
         _registerInterface(type(IERC721ReceiverUpgradeable).interfaceId);
         _registerInterface(type(IERC1155ReceiverUpgradeable).interfaceId);
@@ -366,20 +367,20 @@ contract DAO is
         return _daoURI;
     }
 
-    /// @notice Updates the set DAO uri to a new value.
-    /// @param newDaoURI The new DAO uri to be set.
+    /// @notice Updates the set DAO URI to a new value.
+    /// @param newDaoURI The new DAO URI to be set.
     function setDaoURI(string calldata newDaoURI) external auth(SET_METADATA_PERMISSION_ID) {
         _setDaoURI(newDaoURI);
     }
 
-    /// @notice Sets the new DAO uri and emits the associated event.
-    /// @param daoURI_ The new DAO uri.
+    /// @notice Sets the new [ERC-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO URI and emits the associated event.
+    /// @param daoURI_ The new DAO URI.
     function _setDaoURI(string calldata daoURI_) internal {
         _daoURI = daoURI_;
 
         emit NewURI(daoURI_);
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[46] private __gap;
 }

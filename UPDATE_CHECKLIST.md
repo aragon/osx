@@ -31,7 +31,7 @@ If the deployer **is not** allowed to create a new proposal in the managing DAOs
 - [ ] Verify the transaction to include the necessary actions
 - [ ] Take this file and send it to a party that can create a proposal and let them create it
 
-If the deplyoer **is** allowed to create a proposal
+If the deployer **is** allowed to create a proposal
 
 - [ ] Verify that the created proposal includes all necessary actions
 
@@ -54,6 +54,8 @@ If the deplyoer **is** allowed to create a proposal
 - [ ] Check that the permissions are set correctly for the framework to function
 
 ### Packages
+
+Wait until the managing DAO has made the necessary changes and then:
 
 - [ ] Publish a new version of `@aragon/osx-artifacts` (`./packages/contracts`) to NPM
 - [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts-ethers`) to NPM

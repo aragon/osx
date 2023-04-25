@@ -6,7 +6,7 @@ import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginRepo} from "../repo/PluginRepo.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 
-/// @notice The struct containin a reference to a plugin setup by specifying the containing plugin repository and the associated version tag.
+/// @notice The struct containing a reference to a plugin setup by specifying the containing plugin repository and the associated version tag.
 /// @param versionTag The tag associated with the plugin setup version.
 /// @param pluginSetupRepo The plugin setup repository.
 struct PluginSetupRef {

@@ -9,12 +9,12 @@ import {PluginRepo} from "./PluginRepo.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022-2023
-/// @notice This contract creates `PluginRepo` proxies and registers them on an `PluginRepoRegistry` contract.
+/// @notice This contract creates `PluginRepo` proxies and registers them on a `PluginRepoRegistry` contract.
 contract PluginRepoFactory {
     /// @notice The Aragon plugin registry contract.
     PluginRepoRegistry public pluginRepoRegistry;
 
-    /// @notice The address of the `PluginRepo` base contract.
+    /// @notice The address of the `PluginRepo` base contract to proxy to..
     address public pluginRepoBase;
 
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.

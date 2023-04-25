@@ -7,7 +7,7 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 
 import "./IProposal.sol";
 
-/// @title ProposalUgradeable
+/// @title ProposalUpgradeable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract containing the traits and internal functionality to create and execute proposals that can be inherited by upgradeable DAO plugins.
 abstract contract ProposalUpgradeable is IProposal, ERC165Upgradeable {
@@ -36,7 +36,7 @@ abstract contract ProposalUpgradeable is IProposal, ERC165Upgradeable {
     }
 
     /// @notice Internal function to create a proposal.
-    /// @param _metadata The the proposal metadata.
+    /// @param _metadata The proposal metadata.
     /// @param _startDate The start date of the proposal in seconds.
     /// @param _endDate The end date of the proposal in seconds.
     /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
@@ -79,6 +79,6 @@ abstract contract ProposalUpgradeable is IProposal, ERC165Upgradeable {
         emit ProposalExecuted({proposalId: _proposalId});
     }
 
-    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[49] private __gap;
 }

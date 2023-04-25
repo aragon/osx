@@ -21,7 +21,7 @@ The Aragon OSx DAO framework is structured as follows:
 The foundation of the Aragon OSx protocol is the **code layer** constituted by the core and framework related contracts.
 The [core contracts](./01-core/index.md) provide the core primitives intended to be used by users and implemented by developers of the DAO framework.
 The [framework contracts](./02-framework/index.md) provide the infrastructure to easily create and manage your DAOs and plugins easy.
-Both are built on top of external dependencies, most notably the [OpenZepplin](https://www.openzeppelin.com/contracts) and the [Ethereum Name Service (ENS)](https://docs.ens.domains/) contracts.
+Both are built on top of external dependencies, most notably the [OpenZeppelin](https://www.openzeppelin.com/contracts) and the [Ethereum Name Service (ENS)](https://docs.ens.domains/) contracts.
 
 The core and framework contracts are free to use, and no additional fees are charged.
 

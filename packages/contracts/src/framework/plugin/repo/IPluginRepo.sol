@@ -6,7 +6,7 @@ pragma solidity 0.8.17;
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for a plugin repository.
 interface IPluginRepo {
-    /// @notice Update the metadata for release with content `@fromHex(_releaseMetadata)`.
+    /// @notice Updates the metadata for release with content `@fromHex(_releaseMetadata)`.
     /// @param _release The release number.
     /// @param _releaseMetadata The release metadata URI.
     function updateReleaseMetadata(uint8 _release, bytes calldata _releaseMetadata) external;

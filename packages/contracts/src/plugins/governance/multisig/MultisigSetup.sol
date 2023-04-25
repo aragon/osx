@@ -15,7 +15,7 @@ contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
     Multisig private immutable multisigBase;
 
-    /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
+    /// @notice The contract constructor, that deploys the `Multisig` plugin logic contract.
     constructor() {
         multisigBase = new Multisig();
     }
@@ -42,7 +42,7 @@ contract MultisigSetup is PluginSetup {
             memory permissions = new PermissionLib.MultiTargetPermission[](3);
 
         // Set permissions to be granted.
-        // Grant the list of prmissions of the plugin to the DAO.
+        // Grant the list of permissions of the plugin to the DAO.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,

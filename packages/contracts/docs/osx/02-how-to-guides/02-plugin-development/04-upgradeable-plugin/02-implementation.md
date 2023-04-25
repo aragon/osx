@@ -84,7 +84,7 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 
 </details>
 
-Builds that you publish don't necessarily need to introduce new storage varaibles of your contracts don't necessarily need to change the storage.
+Builds that you publish don't necessarily need to introduce new storage variables of your contracts don't necessarily need to change the storage.
 
 #### Build 3: Changes Affecting the Bytecode
 

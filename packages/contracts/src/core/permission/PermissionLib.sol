@@ -29,9 +29,9 @@ library PermissionLib {
         bytes32 permissionId;
     }
 
-    /// @notice A struct containing the information for a permission to be applied on multiple target contracts, optionally, with a conditon.
+    /// @notice A struct containing the information for a permission to be applied on multiple target contracts, optionally, with a condition.
     /// @param operation The permission operation type.
-    /// @param where The address of the target contract for which `who` recieves permission.
+    /// @param where The address of the target contract for which `who` receives permission.
     /// @param who The address (EOA or contract) receiving the permission.
     /// @param condition The `PermissionCondition` that will be asked for authorization on calls connected to the specified permission identifier.
     /// @param permissionId The permission identifier.

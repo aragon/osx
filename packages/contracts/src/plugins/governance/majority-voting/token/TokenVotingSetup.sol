@@ -53,11 +53,11 @@ contract TokenVotingSetup is PluginSetup {
     /// @param token The token address
     error TokenNotERC20(address token);
 
-    /// @notice Thrown if passed helpers array is of worng length.
+    /// @notice Thrown if passed helpers array is of wrong length.
     /// @param length The array length of passed helpers.
     error WrongHelpersArrayLength(uint256 length);
 
-    /// @notice The contract constructor, that deployes the bases.
+    /// @notice The contract constructor, that deploys the bases.
     constructor() {
         governanceERC20Base = address(
             new GovernanceERC20(
@@ -152,7 +152,7 @@ contract TokenVotingSetup is PluginSetup {
             );
 
         // Set plugin permissions to be granted.
-        // Grant the list of prmissions of the plugin to the DAO.
+        // Grant the list of permissions of the plugin to the DAO.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
