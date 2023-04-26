@@ -1,6 +1,5 @@
 import {
   assert,
-  beforeAll,
   clearStore,
   describe,
   test
@@ -228,7 +227,6 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   clearStore();
 });
 describe('handleMembershipContractAnnounced', () => {
-  beforeAll(() => {});
   test('it should create an erc20 and assign its address to the tokenVotingPlugin', () => {
     // create entities
     let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
