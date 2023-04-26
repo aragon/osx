@@ -22,21 +22,7 @@ async function buildContracts(commit) {
   }
 }
 
-async function generateTypechain(commit, versionName) {
-  try {
-    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destTypechain = path.join(contractVersionsDir, versionName, 'types');
-
-    await exec(
-      `find ${srcArtifacts} -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ${destTypechain}`,
-      {cwd: contractsDir}
-    );
-  } catch (error) {
-    console.error('Error generating TypeChain output:', error);
-  }
-}
-
-async function copyActiveContracts(versionName) {
+async function copyActiveContracts(commit, versionName) {
   try {
     console.log(`Copying active_contracts.json`);
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
@@ -47,7 +33,26 @@ async function copyActiveContracts(versionName) {
     );
     await fs.copy(srcActiveContracts, destActiveContracts);
   } catch (error) {
-    console.error('Error copying active_contracts.json:', error);
+    console.error('Error copying active contracts:', error);
+  }
+}
+
+async function generateTypechain(src, dest) {
+  try {
+    // Find all the .json files, excluding the .dbg.json files, in all subdirectories
+    const {stdout} = await exec(
+      `find "${src}" -name '*.json' -type f -not -path '*.dbg.json'`
+    );
+    const jsonFiles = stdout
+      .trim()
+      .split('\n')
+      .map(file => `"${file}"`)
+      .join(' ');
+
+    // Run typechain for all .json files at once
+    await exec(`typechain --target ethers-v5 --out-dir "${dest}" ${jsonFiles}`);
+  } catch (error) {
+    console.error('Error generating TypeChain output:', error);
   }
 }
 
@@ -59,8 +64,11 @@ async function createVersions() {
       `Building contracts for version: ${version.name}, with commit: ${version.commit}`
     );
     await buildContracts(version.commit);
-    await generateTypechain(version.commit, version.name);
-    await copyActiveContracts(version.name);
+    await copyActiveContracts(version.commit, version.name);
+
+    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
+    const destTypechain = path.join(contractVersionsDir, version.name, 'types');
+    await generateTypechain(srcArtifacts, destTypechain);
   }
 
   // Return to the original branch

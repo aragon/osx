@@ -6,25 +6,21 @@ export default [
   {
     input: 'npm/index.ts',
     plugins: [typescript({project: './tsconfig.json'}), json()],
-    output: [
-      {
-        file: 'dist/bundle-cjs.js',
-        format: 'cjs',
-      },
-      {
-        file: 'dist/bundle-esm.js',
-        format: 'es',
-      },
-    ],
+    output: {
+      dir: 'dist',
+      entryFileNames: '[name]-[format].js',
+      format: 'esm',
+      exports: 'named',
+      chunkFileNames: 'chunks/[name]-[hash].js',
+    },
   },
   {
     input: 'npm/index.ts',
     plugins: [dts()],
-    output: [
-      {
-        file: 'dist/bundle.d.ts',
-        format: 'es',
-      },
-    ],
+    output: {
+      dir: 'dist',
+      entryFileNames: 'bundle.d.ts',
+      format: 'es',
+    },
   },
 ];
