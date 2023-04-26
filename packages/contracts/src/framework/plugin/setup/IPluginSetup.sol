@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
@@ -40,7 +40,7 @@ interface IPluginSetup {
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
     /// @param _currentBuild The build number of the plugin to update from.
-    /// @param _payload The relevant data necessary for the `prepareUpdate`. see above.
+    /// @param _payload The relevant data necessary for the `prepareUpdate`. See above.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
     /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareUpdate(
@@ -51,7 +51,7 @@ interface IPluginSetup {
 
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.
-    /// @param _payload The relevant data necessary for the `prepareUninstallation`. see above.
+    /// @param _payload The relevant data necessary for the `prepareUninstallation`. See above.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     function prepareUninstallation(
         address _dao,

@@ -85,7 +85,7 @@ contract Multisig is
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
 
-    /// @notice Thrown if a approver is not allowed to cast an approve. This can be because the proposal
+    /// @notice Thrown if an approver is not allowed to cast an approve. This can be because the proposal
     /// - is not open,
     /// - was executed, or
     /// - the approver is not on the address list
@@ -102,7 +102,7 @@ contract Multisig is
     /// @param actual The actual value.
     error MinApprovalsOutOfBounds(uint16 limit, uint16 actual);
 
-    /// @notice Thrown if the addresslist length is out of bounds.
+    /// @notice Thrown if the address list length is out of bounds.
     /// @param limit The limit value.
     /// @param actual The actual value.
     error AddresslistLengthOutOfBounds(uint16 limit, uint256 actual);
@@ -112,7 +112,7 @@ contract Multisig is
     /// @param actual The actual value.
     error DateOutOfBounds(uint64 limit, uint64 actual);
 
-    /// @notice Emitted when an proposal is approve by an approver.
+    /// @notice Emitted when a proposal is approve by an approver.
     /// @param proposalId The ID of the proposal.
     /// @param approver The approver casting the approve.
     event Approved(uint256 indexed proposalId, address indexed approver);

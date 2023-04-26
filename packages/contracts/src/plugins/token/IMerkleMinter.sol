@@ -23,14 +23,14 @@ interface IMerkleMinter {
         bytes context
     );
 
-    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
+    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token being distributed.
     function token() external returns (IERC20MintableUpgradeable);
 
     /// @notice The address of the `MerkleDistributor` to clone from.
     function distributorBase() external returns (IMerkleDistributor);
 
-    /// @notice changes the base distributor address
-    /// @param _distributorBase the address of base distributor
+    /// @notice changes the base distributor address.
+    /// @param _distributorBase The address of the base distributor
     function changeDistributorBase(IMerkleDistributor _distributorBase) external;
 
     /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributes them using a `MerkleDistributor`.

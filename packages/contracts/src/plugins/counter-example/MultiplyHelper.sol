@@ -12,7 +12,7 @@ contract MultiplyHelper is PluginUUPSUpgradeable {
     bytes32 public constant MULTIPLY_PERMISSION_ID = keccak256("MULTIPLY_PERMISSION");
 
     /// @notice Multiplies the count with a number.
-    /// @param _a The number to multiply the coun with.
+    /// @param _a The number to multiply the count with.
     function multiply(
         uint256 _a,
         uint256 _b

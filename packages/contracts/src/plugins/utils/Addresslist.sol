@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
 
@@ -8,7 +8,7 @@ import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 
 /// @title Addresslist
 /// @author Aragon Association - 2021-2023
-/// @notice The majority voting implementation using an list of member addresses.
+/// @notice The majority voting implementation using a list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 abstract contract Addresslist {
     using CheckpointsUpgradeable for CheckpointsUpgradeable.History;

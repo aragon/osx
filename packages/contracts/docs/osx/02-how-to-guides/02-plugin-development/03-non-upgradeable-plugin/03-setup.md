@@ -117,7 +117,7 @@ function prepareInstallation(
   address _dao,
   bytes calldata _data
 ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-  // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
+  // Decode `_data` to extract the params needed for cloning and initializing the `Admin` plugin.
   address admin = abi.decode(_data, (address));
 
   if (admin == address(0)) {
@@ -134,7 +134,7 @@ function prepareInstallation(
   PermissionLib.MultiTargetPermission[]
     memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
-  // Grant the `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
+  // Grant the `ADMIN_EXECUTE_PERMISSION` of the plugin to the admin.
   permissions[0] = PermissionLib.MultiTargetPermission({
     operation: PermissionLib.Operation.Grant,
     where: plugin,
@@ -158,7 +158,7 @@ function prepareInstallation(
 
 </details>
 
-At the top of the function, we first decode the `admin` address from the `_data` provided and check, that it is not accidentally set to `address(0)`. In the next step, we clone the plugin contract using [OpenZepplin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) and initialize it with the `admin` address. For this to work, we had to include the following three code lines at the top of the file:
+At the top of the function, we first decode the `admin` address from the `_data` provided and check, that it is not accidentally set to `address(0)`. In the next step, we clone the plugin contract using [OpenZeppelin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) and initialize it with the `admin` address. For this to work, we had to include the following three code lines at the top of the file:
 
 <details>
 <summary><code>SimpleAdminSetup</code>: Adding the <code>Clones</code> library and the <code>error AdminAddressInvalid</code></summary>
@@ -181,7 +181,7 @@ contract SimpleAdminSetup is PluginSetup {
 
 Finally, we construct an array of permission operations requesting two permissions to be granted that is returned by the function. First, we request the `ADMIN_EXECUTE_PERMISSION_ID` permission for the `admin` (`who`) address on the `plugin` (`where`). Second, we request the `EXECUTE_PERMISSION_ID` permission for the freshly deployed `plugin` (`who`) on the `_dao` (`where`). We don't add conditions to the permissions, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
 
-The first line, `using Clones for address;`, allows us to call OpenZepplin `Clones` library to clone contracts deployed at an address.
+The first line, `using Clones for address;`, allows us to call OpenZeppelin `Clones` library to clone contracts deployed at an address.
 The second line introduces a custom error being thrown if the admin address specified is the zero address.
 
 ### Implementing the `prepareUninstallation` function
@@ -262,7 +262,7 @@ contract SimpleAdminSetup is PluginSetup {
     address _dao,
     bytes calldata _data
   ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-    // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
+    // Decode `_data` to extract the params needed for cloning and initializing the `Admin` plugin.
     address admin = abi.decode(_data, (address));
 
     if (admin == address(0)) {
@@ -279,7 +279,7 @@ contract SimpleAdminSetup is PluginSetup {
     PermissionLib.MultiTargetPermission[]
       memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
-    // Grant the `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
+    // Grant the `ADMIN_EXECUTE_PERMISSION` of the plugin to the admin.
     permissions[0] = PermissionLib.MultiTargetPermission({
       operation: PermissionLib.Operation.Grant,
       where: plugin,

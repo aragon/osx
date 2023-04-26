@@ -10,11 +10,11 @@ import {IDAO} from "../../core/dao/IDAO.sol";
 interface IMerkleDistributor {
     /// @notice Emitted when tokens are claimed from the distributor.
     /// @param index The index in the balance tree that was claimed.
-    /// @param to The address to which the tokens are send.
+    /// @param to The address to which the tokens are sent.
     /// @param amount The claimed amount.
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
-    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
+    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token being distributed.
     function token() external returns (IERC20Upgradeable);
 
     /// @notice The merkle root of the balance tree storing the claims.

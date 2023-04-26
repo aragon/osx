@@ -45,7 +45,7 @@ This concatenated information is then stored as `keccak256` hashes inside a mapp
 mapping(bytes32 => address) internal permissionsHashed;
 ```
 
-Here, the `bytes32` keys are the permission hashes and the `address` values are either zero-address flags, such as `ALLOW_FLAG = address(0)` and `UNSET_FLAG = address(2)` indicating if the permission is set, or an actual address pointing to a `PermissionCondition` contract, which is discussed in the next section of this guide.
+Here, the `bytes32` keys are the permission hashes and the `address` values are either zero-address flags, such as `ALLOW_FLAG = address(2)` and `UNSET_FLAG = address(0)` indicating if the permission is set, or an actual address pointing to a `PermissionCondition` contract, which is discussed in the next section of this guide.
 
 ### Authorization Modifiers
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -36,7 +36,7 @@ abstract contract Proposal is IProposal, ERC165 {
     }
 
     /// @notice Internal function to create a proposal.
-    /// @param _metadata The the proposal metadata.
+    /// @param _metadata The proposal metadata.
     /// @param _startDate The start date of the proposal in seconds.
     /// @param _endDate The end date of the proposal in seconds.
     /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.

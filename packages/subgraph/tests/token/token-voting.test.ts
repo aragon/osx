@@ -1,11 +1,5 @@
-import {
-  assert,
-  clearStore,
-  log,
-  logStore,
-  test
-} from 'matchstick-as/assembly/index';
-import {Address, bigInt, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
+import {bigInt, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   handleVoteCast,
@@ -13,45 +7,17 @@ import {
   handleVotingSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/token/token-voting';
-import {TokenVotingPlugin} from '../../generated/schema';
-import {VOTER_OPTIONS, VOTING_MODES} from '../../src/utils/constants';
+import {VOTING_MODES} from '../../src/utils/constants';
 import {
-  ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
-  CONTRACT_ADDRESS,
   STRING_DATA,
-  DAO_ADDRESS,
-  PLUGIN_PROPOSAL_ID,
   VOTING_MODE,
-  SUPPORT_THRESHOLD,
-  MIN_PARTICIPATION,
-  MIN_VOTING_POWER,
-  MIN_DURATION,
-  MIN_PROPOSER_VOTING_POWER,
-  START_DATE,
-  END_DATE,
-  SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER,
-  ALLOW_FAILURE_MAP,
-  ADDRESS_TWO,
-  PROPOSAL_ENTITY_ID,
   ONE,
   ZERO,
   TWO
 } from '../constants';
 
-import {
-  createDummyActions,
-  createGetProposalCall,
-  createTotalVotingPowerCall
-} from '../utils';
-import {
-  createNewVoteCastEvent,
-  createNewProposalExecutedEvent,
-  createNewProposalCreatedEvent,
-  createNewVotingSettingsUpdatedEvent,
-  getProposalCountCall
-} from './utils';
+import {createDummyActions} from '../utils';
 import {
   ExtendedTokenVotingPlugin,
   ExtendedTokenVotingProposal,

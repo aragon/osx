@@ -93,13 +93,13 @@ describe('Core: PermissionManager', function () {
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
 
-    it('reverts if both `_who = ANY_ADDR` and `_where == ANY_ADDR', async () => {
+    it('reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR', async () => {
       await expect(
         pm.grant(ANY_ADDR, ANY_ADDR, ROOT_PERMISSION_ID)
       ).to.be.revertedWithCustomError(pm, 'AnyAddressDisallowedForWhoAndWhere');
     });
 
-    it('reverts if permissionId is restricted and `_who = ANY_ADDR` or `_where = ANY_ADDR`', async () => {
+    it('reverts if permissionId is restricted and `_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
       for (let i = 0; i < RESTRICTED_PERMISSIONS_FOR_ANY_ADDR.length; i++) {
         await expect(
           pm.grant(pm.address, ANY_ADDR, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[i])
@@ -116,7 +116,7 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    it('reverts if permissionId is not restricted and`_who = ANY_ADDR` or `_where = ANY_ADDR` and condition is not present', async () => {
+    it('reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR` and condition is not present', async () => {
       await expect(
         pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID)
       ).to.be.revertedWithCustomError(pm, 'ConditionNotPresentForAnyAddress');
@@ -188,7 +188,7 @@ describe('Core: PermissionManager', function () {
       ).to.emit(pm, 'Granted');
     });
 
-    it('should emit Granted when condition is present and `who = ANY_ADDR` or `where = ANY_ADDR`', async () => {
+    it('should emit Granted when condition is present and `who == ANY_ADDR` or `where == ANY_ADDR`', async () => {
       await expect(
         pm.grantWithCondition(
           pm.address,
@@ -255,7 +255,7 @@ describe('Core: PermissionManager', function () {
         );
     });
 
-    it('should revert when condition is not present for `who = ANY_ADDR` or `where = ANY_ADDR` and permissionId is not restricted', async () => {
+    it('should revert when condition is not present for `who == ANY_ADDR` or `where == ANY_ADDR` and permissionId is not restricted', async () => {
       await expect(
         pm.grantWithCondition(
           pm.address,

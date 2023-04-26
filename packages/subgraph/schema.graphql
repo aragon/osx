@@ -358,6 +358,12 @@ type TokenVotingMember @entity {
   address: Bytes!
   balance: BigInt!
   plugin: TokenVotingPlugin!
+
+  # delegates
+  delegatee: TokenVotingMember!
+  votingPower: BigInt
+  # we assume token owners and/or delegatees are members
+  delegators: [TokenVotingMember!]! @derivedFrom(field: "delegatee")
 }
 
 type TokenVotingVoter @entity {

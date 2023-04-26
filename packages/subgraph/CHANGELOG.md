@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added `delegatee`, `votingPower` and `delegators` to the `TokenVotingMember`.
+
 ### Changed
 
 - BREAKING: Changed attribute of `proposalId` in all proposal entities to `pluginProposalId`
