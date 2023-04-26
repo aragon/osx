@@ -6,13 +6,22 @@ export default [
   {
     input: 'npm/index.ts',
     plugins: [typescript({project: './tsconfig.json'}), json()],
-    output: {
-      dir: 'dist',
-      entryFileNames: '[name]-[format].js',
-      format: 'esm',
-      exports: 'named',
-      chunkFileNames: 'chunks/[name]-[hash].js',
-    },
+    output: [
+      {
+        dir: 'dist',
+        entryFileNames: 'index-esm.js',
+        format: 'esm',
+        exports: 'named',
+        chunkFileNames: 'chunks/[name]-[hash].js',
+      },
+      {
+        dir: 'dist',
+        entryFileNames: 'index-cjs.js',
+        format: 'cjs',
+        exports: 'named',
+        chunkFileNames: 'chunks/[name]-[hash].js',
+      },
+    ],
   },
   {
     input: 'npm/index.ts',
