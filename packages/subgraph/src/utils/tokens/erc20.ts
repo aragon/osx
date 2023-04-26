@@ -6,7 +6,7 @@ import {
   ERC20WrapperContract
 } from '../../../generated/schema';
 import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
-import {GovernanceWrappedERC20} from '../../../generated/templates/GovernanceWrappedERC20/GovernanceWrappedERC20';
+import {GovernanceWrappedERC20} from '../../../generated/templates/TokenVoting/GovernanceWrappedERC20';
 import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
 import {supportsInterface} from '../erc165';
 import {WRAPPED_ERC20_INTERFACE} from '../constants';
