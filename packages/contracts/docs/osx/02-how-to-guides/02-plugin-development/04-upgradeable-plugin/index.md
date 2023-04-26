@@ -1,21 +1,22 @@
 ---
-title: Upgradeable Plugins
+title: What are Upgradeable Plugins?
 ---
 
-## Developing a Upgradeable Plugin
+## Developing an Upgradeable Plugin
 
-As outlined in the previous section about the different [plugin types](../02-plugin-types.md), upgradeable contracts offer advantages because you can cheaply change or fix the logic of your contract without losing the storage of your contract.
-The drawbacks are that
+Upgradeable contracts offer advantages because you can cheaply change or fix the logic of your contract without losing the storage of your contract. If you want to review plugin types in depth, check out our [guide on plugin types here](../02-plugin-types.md).
 
-- there are plenty of ways to make a mistake
-- the changeable logic poses a new attack surface
+The drawbacks however, are that:
 
-In any case, writing an upgradeable contract is an advanced topic. This also applies to writing upgradeable Aragon OSx plugins although we abstracted most of the complications of the upgrade process away for you.
+- there are plenty of ways to make a mistake, and
+- the changeable logic poses a new attack surface.
 
-### Prerequisites
+Although we've abstracted mot of the complications of the upgrade process away fro you through our Upgradeable Base Template, please know that writing an upgradeable contract is an advanced topic.
+
+## Prerequisites
 
 - You have read about the different [plugin types](../02-plugin-types.md) and decided to develop an upgradeable plugin being deployed via the [UUPS pattern (ERC-1822)](https://eips.ethereum.org/EIPS/eip-1822).
-- You know how to write [non-upgradeable plugin](../03-non-upgradeable-plugin/index.md)
+- You know how to write [non-upgradeable plugin](../03-non-upgradeable-plugin/index.md).
 - You know about the difficulties and pitfalls of ["Writing Upgradeable Contracts"](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable) that come with
   - modifiying the storage layout
   - initialization
