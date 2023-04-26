@@ -77,9 +77,6 @@ import {
   getSupportsInterface
 } from '../dao/utils';
 import {
-  WRAPPED_CONTRACT_ADDRESS
-} from '../constants';
-import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
   createNewMembershipContractAnnouncedEvent,
@@ -164,7 +161,7 @@ class ERC721TransferMethods extends ERC721Transfer {
 // ERC20Contract
 class ERC20WrapperContractMethods extends ERC20WrapperContract {
   withDefaultValues(): ERC20WrapperContractMethods {
-    this.id = Address.fromHexString(WRAPPED_CONTRACT_ADDRESS).toHexString();
+    this.id = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
     this.name = 'Wrapped Test Token';
     this.symbol = 'WTT';
     this.underlyingToken = Address.fromHexString(

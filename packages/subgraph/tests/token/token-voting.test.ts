@@ -14,10 +14,7 @@ import {
   _handleProposalCreated,
   handleMembershipContractAnnounced
 } from '../../src/packages/token/token-voting';
-import {
-  VOTING_MODES,
-  WRAPPED_ERC20_INTERFACE
-} from '../../src/utils/constants';
+import {VOTING_MODES, WRAPPED_ERC20_INTERFACE} from '../../src/utils/constants';
 import {
   DAO_TOKEN_ADDRESS,
   STRING_DATA,
@@ -25,19 +22,10 @@ import {
   ONE,
   ZERO,
   TWO,
-  ERC20_AMOUNT_HALF,
-  ERC20_AMOUNT_FULL,
-  WRAPPED_CONTRACT_ADDRESS,
-  CONTRACT_ADDRESS
+  ERC20_AMOUNT_FULL
 } from '../constants';
 
-import {
-  createDummyActions,
-  createTokenCalls,
-  createWrappedTokenCalls
-} from '../utils';
-import {
-} from './utils';
+import {createDummyActions} from '../utils';
 import {
   ExtendedERC20Contract,
   ExtendedERC20WrapperContract,
@@ -46,7 +34,6 @@ import {
   ExtendedTokenVotingVote,
   ExtendedTokenVotingVoter
 } from '../helpers/extended-schema';
-import {getBalanceOf, getSupportsInterface} from '../dao/utils';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
