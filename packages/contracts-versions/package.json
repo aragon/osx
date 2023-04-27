@@ -25,10 +25,10 @@
   "homepage": "https://github.com/aragon/osx#readme",
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.3.1",
-    "@typechain/ethers-v5": "^10.0.0",
+    "@typechain/ethers-v5": "^10.2.0",
     "rollup": "^2.70.1",
     "rollup-plugin-dts": "^4.2.0",
-    "typechain": "^8.0.0",
+    "typechain": "^8.1.1",
     "typescript": "^4.4.4"
   },
   "dependencies": {
