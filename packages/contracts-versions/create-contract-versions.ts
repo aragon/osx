@@ -13,7 +13,7 @@ async function getCurrentBranch() {
   return stdout.trim();
 }
 
-async function buildContracts(commit) {
+async function buildContracts(commit: string) {
   try {
     await exec(`git checkout ${commit}`, {cwd: contractsDir});
     await exec('yarn build', {cwd: contractsDir});
@@ -22,7 +22,7 @@ async function buildContracts(commit) {
   }
 }
 
-async function copyActiveContracts(commit, versionName) {
+async function copyActiveContracts(commit: string, versionName: string) {
   try {
     console.log(`Copying active_contracts.json`);
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
@@ -37,7 +37,7 @@ async function copyActiveContracts(commit, versionName) {
   }
 }
 
-async function generateTypechain(src, dest) {
+async function generateTypechain(src: string, dest: string) {
   try {
     // Find all the .json files, excluding the .dbg.json files, in all subdirectories
     const {stdout} = await exec(
@@ -46,7 +46,7 @@ async function generateTypechain(src, dest) {
     const jsonFiles = stdout
       .trim()
       .split('\n')
-      .map(file => `"${file}"`)
+      .map((file: string) => `"${file}"`) // Added type annotation here
       .join(' ');
 
     // Run typechain for all .json files at once
