@@ -1,16 +1,7 @@
 {
-  "versions": [
-    {
-      "name": "v0.7.0_alpha",
-      "commit": "9b912728c315f983af8c4bfd1f8d07021996563f"
-    },
-    {
-      "name": "v1.0.0_mainnet_goerli",
-      "commit": "c2b9d23a96654e81f22fbf91e6f334ef26a370af"
-    },
-    {
-      "name": "v1.0.0_mumbai",
-      "commit": "9485d97301611cfc78faa4bd00eb54abb6dd2d5e"
-    }
-  ]
+  "versions": {
+    "v0.7.0_alpha": "9b912728c315f983af8c4bfd1f8d07021996563f",
+    "v1.0.0_mainnet_goerli": "c2b9d23a96654e81f22fbf91e6f334ef26a370af",
+    "v1.0.0_mumbai": "9485d97301611cfc78faa4bd00eb54abb6dd2d5e"
+  }
 }

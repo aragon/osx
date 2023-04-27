@@ -59,15 +59,18 @@ async function generateTypechain(src: string, dest: string) {
 async function createVersions() {
   const currentBranch = await getCurrentBranch();
 
-  for (const version of commitHashes.versions) {
+  for (const version in commitHashes.versions) {
+    const versionCommit = commitHashes.versions[version] as string;
+    const versionName = version;
+
     console.log(
-      `Building contracts for version: ${version.name}, with commit: ${version.commit}`
+      `Building contracts for version: ${versionName}, with commit: ${versionCommit}`
     );
-    await buildContracts(version.commit);
-    await copyActiveContracts(version.commit, version.name);
+    await buildContracts(versionCommit);
+    await copyActiveContracts(versionCommit, versionName);
 
     const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destTypechain = path.join(contractVersionsDir, version.name, 'types');
+    const destTypechain = path.join(contractVersionsDir, versionName, 'types');
     await generateTypechain(srcArtifacts, destTypechain);
   }
 
