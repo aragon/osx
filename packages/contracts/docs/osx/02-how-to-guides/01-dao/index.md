@@ -19,4 +19,3 @@ In this section, we'll go through how to operate and maintain your DAO:
 - [How to manage a DAO's plugins](./03-managing-plugins/index.md)
 - [How to upgrade your DAO to a future Aragon OSx Releases](./03-protocol-upgrades.md)
 
-<!-- TO-DO: make sure the links here lead to the right sections -->

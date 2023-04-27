@@ -1,49 +1,13 @@
 ---
-title: How-to Guides
+title: Aragon OSx How To Guides!
 ---
 
-## Using the Aragon OSx Protocol
+## Welcome to the Aragon OSx How To Guides!
 
-With a few lines of code, the Aragon OSx protocol allows you to add functionality to your DAO by writing and installing plugins
+The Aragon OSx Protocol is a DAO framework, enabling users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
 
-<details>
-<summary>Example: A Plugin For Claiming Tokens</summary>
+With a few lines of code, the Aragon OSx protocol allows developers to extend the functionality of DAOs through the installation and uninstallation of plugins. Plugins are smart contracts which perform actions on behalf of the DAO thanks to being granted permissions.
 
-```solidity
-contract TokenFaucet is Plugin {
-    TestToken private immutable token;
+[**Get started building on Aragon OSx here!**](./02-plugin-development/index.md)
 
-    constructor(IDAO _dao, TestToken _token) Plugin(_dao) {
-        token = _token
-    }
-
-    function claim() auth(MINT_PERMISSION_ID) external {
-        token.mint({to: msg.sender, amount: 5});
-    }
-}
-```
-
-</details>
-
-and effortlessly manage their permissions and conditions in your DAO
-
-<details>
-<summary>Example: Granting a Conditional Permission</summary>
-
-```solidity
-grantWithCondition({
-    where: myTestToken,
-    who: myTokenFaucetPlugin,
-    permissionId: MINT_PERMISSION_ID,
-    condition: myCondition
-});
-```
-
-</details>
-
-In this practice-focussed part of the documentation, we show you how to
-
-- [Operate your DAO](./01-dao/index.md)
-- [Develop your own Plugin](./02-plugin-development/index.md)
-
-using the Aragon OSx protocol.
+<!-- TODO: will add section here referring to plugins that have already been deployed for devs to get some inspo -->

@@ -10,7 +10,7 @@ You can install, uninstall or update any plugin into your DAO. If you want to di
 
 Before diving deeper into this guide, make sure that you understand [permissions](../../../01-how-it-works/01-core/02-permissions/index.md) and know about the [DAO executor](../../../01-how-it-works/01-core/01-dao/index.md).
 
-#### How to Create a DAO with Plugins
+#### Every DAO needs at least one functioning governance plugin
 
 When you create your DAO, you must **install at least one functioning governance plugin** (meaning one plugin having the `EXECUTION_PERMISSION`) so your have a mechanism of executing actions on behalf of your DAO.
 This is crucial because otherwise nobody can operate the DAO and it would become incapacitated right after it was created. You would have spent gas for nothing.
