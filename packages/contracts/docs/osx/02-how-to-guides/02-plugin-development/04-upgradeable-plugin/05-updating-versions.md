@@ -228,6 +228,7 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
   }
 }
 ```
+
 </details>
 
 With each new build implementation, we will need to udate the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function with the latest version we've deployed.

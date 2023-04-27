@@ -47,7 +47,9 @@ Then, you'll want to import the Aragon OSx contracts inside your Solidity projec
 ```bash
 yarn add @aragon/osx
 ```
+
 or
+
 ```bash
 npm install @aragon/osx
 ```
@@ -58,7 +60,7 @@ Now that we have OSx within our project, we can start developing our plugin impl
 
 We'll create a Greeter Plugin which returns a "Hello World!" string when calling on `greet()`.
 
-In order to do this, we'll create a `GreeterPlugin.sol` file. This is where all  of our plugin logic will live.
+In order to do this, we'll create a `GreeterPlugin.sol` file. This is where all of our plugin logic will live.
 
 ```bash
 mkdir contracts && cd contracts
@@ -66,6 +68,7 @@ touch GreeterPlugin.sol
 ```
 
 Inside the `GreeterPlugin.sol`, we want to:
+
 - Pass the DAO the plugin will be using within the constructor. This will enable us to install a Plugin into a DAO.
 - Add the greeter function.
 
@@ -144,29 +147,30 @@ mkdir scripts && touch scripts/deploy.cjs
 Inside that file, we will add our deploy script.
 
 ```js
-const hre = require("hardhat");
+const hre = require('hardhat');
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
 
-  console.log("Deploying contracts with the account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  console.log('Deploying contracts with the account:', deployer.address);
+  console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  const getGreeterSetup = await hre.ethers.getContractFactory("GreeterSetup");
+  const getGreeterSetup = await hre.ethers.getContractFactory('GreeterSetup');
   const GreeterSetup = await getGreeterSetup.deploy();
 
-  console.log("GreeterSetup address:", GreeterSetup.address);
+  console.log('GreeterSetup address:', GreeterSetup.address);
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
     process.exit(1);
-});
+  });
 ```
 
 On the terminal, we should then see something like this:
+
 ```bash
 Deploying contracts with the account: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 Account balance: 10000000000000000000000
@@ -176,6 +180,7 @@ GreeterSetup address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 ### Publish the Plugin to the Aragon protocol
 
 <!-- TODO: Provide the steps for devs to do this. Should it be done directly from Etherscan as of now? -->
+
 Lastly, we can call the [`createPluginRepoWithFirstVersion` function from Aragon's `PluginRepoFactory`](../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md) passing it the address of your deployed `GreeterSetup` contract and the first version of your Plugin will be published into the protocol!
 
 We can do this directly off of calling the function on Etherscan ([make sure to get the right scan and contract address based on your network](https://github.com/aragon/osx/blob/develop/active_contracts.json)) or through locally calling on the method from your project using Ethers.
@@ -199,5 +204,6 @@ But first, let's have a look at:
 - [different plugin deployment types](./02-plugin-types.md)
 
 And if you want to add additional versions to it, check out our guides on:
+
 - [How to publish a plugin](./07-publication/01-publication-process.md)
 - [How to manage plugin versioning](./07-publication/02-versioning.md)

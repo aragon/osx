@@ -4,3 +4,5 @@ cache
 coverage*
 gasReporterOutput.json
 Releases.md
+*.d.ts
+typechain*

@@ -16,19 +16,20 @@ Every plugin in Aragon can have future versions, so when publishing a plugin to 
 
 To publish a plugin we will use Aragon's `PluginRepoFactory` contract - in charge of creating `PluginRepo` instances. We'll call on its `createPluginRepoWithFirstVersion` function, which will [create the first version of a plugin](https://github.com/aragon/core/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepoFactory.sol#L48) and add that new `PluginRepo` address into the `PluginRepoRegistry` containing all available plugins.
 
-You can find all of the addresses of `PluginRepoFactory` contracts by network [here]((../../../../../../../active_contracts.json)).
+You can find all of the addresses of `PluginRepoFactory` contracts by network [here](<(../../../../../../../active_contracts.json)>).
 
 Having that said, there's a few ways to do it:
 
 #### Option A: Etherscan
 
-Go directly to Etherscan and search for the address of the `PluginRepoFactory` as found in [this list]((../../../../../../../active_contracts.json)).
+Go directly to Etherscan and search for the address of the `PluginRepoFactory` as found in [this list](<(../../../../../../../active_contracts.json)>).
 
 Then, go to the "Write Contract" tab and add the attributes requested to call on the `createPluginRepoWithFirstVersion` function. Make sure you "Connect your Wallet" before hitting "Write" and signing the transaction.
 
 ![Etherscan](https://res.cloudinary.com/dacofvu8m/image/upload/v1682466427/Screen_Shot_2023-04-25_at_19.46.58_nlo9p1.png)
 
 For some context:
+
 - `subdomain`: The subdomain name of your plugin. Whatever you write here should be hyphenated (i.e. `my-plugin`) and should be unique.
 - `pluginSetupAddress`: The address of your deployed Plugin Setup contract (i.e. `0x3018f7712b77744A31277511609238399f0A26h8`).
 - `maintainer`: The address owner of that plugin (i.e. `0x87789071456774411227751100h89g899fg6679`).
@@ -64,11 +65,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get the plugin factory address
   let pluginRepoFactoryAddr: string;
-  if (
-    network.name === 'localhost' ||
-    network.name === 'hardhat' ||
-    network.name === 'coverage'
-  ) {
+  if (network.name === 'localhost' || network.name === 'hardhat' || network.name === 'coverage') {
     const hardhatForkNetwork = process.env.HARDHAT_FORK_NETWORK
       ? process.env.HARDHAT_FORK_NETWORK
       : 'mainnet';
@@ -78,8 +75,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       `Using the ${hardhatForkNetwork} PluginRepoFactory address (${pluginRepoFactoryAddr}) for deployment testing on network ${network.name}`
     );
   } else {
-    pluginRepoFactoryAddr =
-      osxContracts[networkNameMapping[network.name]].PluginRepoFactory;
+    pluginRepoFactoryAddr = osxContracts[networkNameMapping[network.name]].PluginRepoFactory;
 
     console.log(
       `Using the ${
@@ -88,20 +84,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  const pluginRepoFactory = PluginRepoFactory__factory.connect(
-    pluginRepoFactoryAddr,
-    deployer
-  );
+  const pluginRepoFactory = PluginRepoFactory__factory.connect(pluginRepoFactoryAddr, deployer);
 
   // Upload the metadata
   const releaseMetadataURI = `ipfs://${await uploadToIPFS(
     JSON.stringify(releaseMetadata1),
     false
   )}`;
-  const buildMetadataURI = `ipfs://${await uploadToIPFS(
-    JSON.stringify(buildMetadata1),
-    false
-  )}`;
+  const buildMetadataURI = `ipfs://${await uploadToIPFS(JSON.stringify(buildMetadata1), false)}`;
 
   console.log(`Uploaded metadata of release 1: ${releaseMetadataURI}`);
   console.log(`Uploaded metadata of build 1: ${buildMetadataURI}`);
@@ -128,14 +118,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error('Failed to get PluginRepoRegistered event log');
   }
 
-  const pluginRepo = PluginRepo__factory.connect(
-    eventLog.args.pluginRepo,
-    deployer
-  );
+  const pluginRepo = PluginRepo__factory.connect(eventLog.args.pluginRepo, deployer);
 
-  console.log(
-    `"${pluginName}" PluginRepo deployed at: ${pluginRepo.address} with `
-  );
+  console.log(`"${pluginName}" PluginRepo deployed at: ${pluginRepo.address} with `);
 
   addDeployedContract(network.name, 'PluginRepo', pluginRepo.address);
   addDeployedContract(network.name, pluginSetupContractName, setupR1B1.address);
@@ -145,10 +130,8 @@ export default func;
 func.tags = ['SimpleStoragePluginRepo', 'PublishSimpleStorageR1B2'];
 ```
 
-
 ### 3. Publishing subsequent builds
 
 When publishing subsquent builds, you want to use the `createVersion` function in the `PluginRepo` contract ([check out the function's source code here](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L128)).
-
 
 Similar as above, you can publish the new version on Etherscan directly or through a publishing script.

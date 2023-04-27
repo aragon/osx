@@ -5,6 +5,7 @@ title: How to manage the plugins installed in the DAO
 ## Managing the Plugins within your DAO
 
 <!-- TODO This page needs improvements -->
+
 You can install, uninstall or update any plugin into your DAO. If you want to dive deeper into plugins, check out [how plugins work here](../../../01-how-it-works/01-core/03-plugins/01-plugin-details.md).
 
 Before diving deeper into this guide, make sure that you understand [permissions](../../../01-how-it-works/01-core/02-permissions/index.md) and know about the [DAO executor](../../../01-how-it-works/01-core/01-dao/index.md).
@@ -18,7 +19,7 @@ This is crucial because otherwise nobody can operate the DAO and it would become
 If you create your DAO through the [Aragon App](https://app.aragon.org) or the [Aragon SDK](https://devs.aragon.org/docs/sdk), this will be checked and you will be warned in case you have not selected a suitable Aragon plugin.
 :::
 
-Although the easiest (and recommended) way to create your DAO is through the [Aragon App](https://app.aragon.org) or the [Aragon SDK](https://devs.aragon.org/docs/sdk), you can also do it directly from the protocol through calling on the [`createDAO` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/dao/DAOFactory.sol#L63) from the `DAOFactory` contract and passing it the calldata `DAOSettings` for your DAO as well as  the `PluginSettings` array referencing the plugins and the settings to be installed upon DAO creation.
+Although the easiest (and recommended) way to create your DAO is through the [Aragon App](https://app.aragon.org) or the [Aragon SDK](https://devs.aragon.org/docs/sdk), you can also do it directly from the protocol through calling on the [`createDAO` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/dao/DAOFactory.sol#L63) from the `DAOFactory` contract and passing it the calldata `DAOSettings` for your DAO as well as the `PluginSettings` array referencing the plugins and the settings to be installed upon DAO creation.
 
 <!-- TODO: Let's add a code example here on how the call to this function would look -->
 
@@ -32,7 +33,6 @@ Here, it is very important that you **maintain at least one functioning governan
 - update or upgrade the plugin or otherwise change the internal plugin settings
 
 so that they cannot create proposals and execute actions on the DAO anymore. Accordingly, DAOs must review proposals requesting to change the governance setup with utmost care before voting for them. In the next section, we explain how to review a proposal properly and what to pay attention too.
-
 
 <!-- Make a separate section about the DAO executor -->
 

@@ -10,14 +10,14 @@ The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allo
 
 The Aragon OSx protocol architecture is composed of two key sections:
 
-- __Core contracts__: the primitives the end user will interact with. It is composed of 3 parts:
-    - **DAO contract:** the main contract of our protocol. It holds a DAO's assets and possible actions.
-    - **Permissions**: govern interactions between the plugins, DAOs, and any other address - allowing them (or not) to execute actions on behalf of and within the DAO.
-    - **Plugins**: base templates of plugins.
-- __Framework contracts__: in charge of creating and registering each deployed DAO or plugin. It contains:
-    - **DAO and Plugin Repository Factories**: creates DAOs or plugins.
-    - **DAO and Plugin Registries**: registers into our protocol those DAOs or plugins.
-    - **Plugin Setup Processor:** installs and uninstalls plugins into DAOs.
+- **Core contracts**: the primitives the end user will interact with. It is composed of 3 parts:
+  - **DAO contract:** the main contract of our protocol. It holds a DAO's assets and possible actions.
+  - **Permissions**: govern interactions between the plugins, DAOs, and any other address - allowing them (or not) to execute actions on behalf of and within the DAO.
+  - **Plugins**: base templates of plugins.
+- **Framework contracts**: in charge of creating and registering each deployed DAO or plugin. It contains:
+  - **DAO and Plugin Repository Factories**: creates DAOs or plugins.
+  - **DAO and Plugin Registries**: registers into our protocol those DAOs or plugins.
+  - **Plugin Setup Processor:** installs and uninstalls plugins into DAOs.
 
 Through permissions and plugins, DAO builders are able to build and customize their DAO to suit their needs.
 
