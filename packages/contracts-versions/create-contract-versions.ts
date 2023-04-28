@@ -70,7 +70,11 @@ async function createVersions() {
     await copyActiveContracts(versionCommit, versionName);
 
     const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destTypechain = path.join(contractVersionsDir, versionName, 'types');
+    const destTypechain = path.join(
+      contractVersionsDir,
+      versionName,
+      'typechain'
+    );
     await generateTypechain(srcArtifacts, destTypechain);
   }
 
