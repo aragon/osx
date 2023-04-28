@@ -3,16 +3,13 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO__factory} from '../../typechain';
-
-import {v1_0_0_active_contracts, v1_0_0_typechain} from '@aragon/osx-versions';
+import {v1_0_0_typechain} from '@aragon/osx-versions';
 
 import {daoExampleURI} from '../test-utils/dao';
-
 import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
-import {ContractFactory} from 'ethers';
 
 let signers: SignerWithAddress[];
 let DaoV1_0_0: v1_0_0_typechain.DAO__factory;
