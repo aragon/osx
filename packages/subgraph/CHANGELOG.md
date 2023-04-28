@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- BREAKING: Changed attribute of `proposalId` in all proposal entities to `pluginProposalId`
 - Supports now multiple `DAORegistries`, `PluginRepoRegistries` and `PluginSetupProcessors` as datasources.
 - Splits `DAO` into multiple versions.
 - Fixes typing issues in tests and subgraph manifest.

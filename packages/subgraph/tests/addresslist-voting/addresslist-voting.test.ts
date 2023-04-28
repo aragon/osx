@@ -21,7 +21,7 @@ import {
   CONTRACT_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
@@ -66,7 +66,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     true,
     false,
 
@@ -95,7 +95,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
 
   // create event
   let event = createNewProposalCreatedEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     END_DATE,
@@ -132,8 +132,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   assert.fieldEquals(
     'AddresslistVotingProposal',
     PROPOSAL_ENTITY_ID,
-    'proposalId',
-    PROPOSAL_ID
+    'pluginProposalId',
+    PLUGIN_PROPOSAL_ID
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
@@ -234,7 +234,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     true,
     false,
 
@@ -263,7 +263,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event = createNewVoteCastEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     '2', // yes
     '1', // votingPower
@@ -313,7 +313,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   // create calls 2
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     true,
     false,
 
@@ -334,7 +334,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event2 = createNewVoteCastEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     '3', // No
     '1', // votingPower
@@ -360,7 +360,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   // create calls 3
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     true,
     false,
 
@@ -381,7 +381,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event3 = createNewVoteCastEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_TWO,
     '2', // yes
     '1', // votingPower
@@ -419,7 +419,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     true,
     false,
 
@@ -442,7 +442,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
 
   // create event
   let event = createNewVoteCastEvent(
-    PROPOSAL_ID,
+    PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     '0', // none
     '1', // votingPower

@@ -53,7 +53,7 @@ import {
   END_DATE,
   MIN_VOTING_POWER,
   PROPOSAL_ENTITY_ID,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   SNAPSHOT_BLOCK,
   START_DATE,
   SUPPORT_THRESHOLD,
@@ -391,7 +391,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
 
     this.dao = DAO_ADDRESS;
     this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
-    this.proposalId = BigInt.fromString(PROPOSAL_ID);
+    this.pluginProposalId = BigInt.fromString(PLUGIN_PROPOSAL_ID);
     this.creator = Address.fromHexString(ADDRESS_ONE);
 
     this.open = true;
@@ -426,7 +426,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     } else {
       createGetProposalCall(
         this.plugin,
-        this.proposalId.toString(),
+        this.pluginProposalId.toString(),
         this.open,
         this.executed,
         this.votingMode,
@@ -458,7 +458,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     description: string = STRING_DATA
   ): ProposalCreated {
     let event = createNewProposalCreatedEvent(
-      this.proposalId.toString(),
+      this.pluginProposalId.toString(),
       this.creator.toHexString(),
       this.startDate.toString(),
       this.endDate.toString(),
@@ -485,7 +485,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     let voteOption = VOTE_OPTIONS.get(voterVoteOption) as string;
 
     let event = createNewVoteCastEvent(
-      this.proposalId.toString(),
+      this.pluginProposalId.toString(),
       voter,
       voteOption,
       voterVotingPower,
@@ -496,7 +496,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
 
   createEvent_ProposalExecuted(): ProposalExecuted {
     let event = createNewProposalExecutedEvent(
-      this.proposalId.toString(),
+      this.pluginProposalId.toString(),
       this.plugin
     );
     return event;
