@@ -2,7 +2,10 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO__factory, DAOV100, DAOV100__factory} from '../../typechain';
+import {DAO__factory} from '../../typechain';
+
+import {v1_0_0} from '@aragon/osx-versions';
+import {ethers} from 'ethers';
 
 import {daoExampleURI} from '../test-utils/dao';
 
