@@ -80,6 +80,27 @@ async function createVersions() {
 
   // Return to the original branch
   await exec(`git checkout ${currentBranch}`, {cwd: contractsDir});
+
+  // Generate npm/index.ts file
+  const exports: string[] = [];
+  for (const version in commitHashes.versions) {
+    const versionName = version;
+    exports.push(
+      `export * as ${versionName}_typechain from '../build/${versionName}/typechain';`
+    );
+    exports.push(
+      `import * as ${versionName}_active_contracts from '../build/${versionName}/active_contracts.json';`
+    );
+  }
+  exports.push(
+    `export { ${Object.keys(commitHashes.versions)
+      .map(versionName => `${versionName}_active_contracts`)
+      .join(', ')} };`
+  );
+  await fs.writeFile(
+    path.join(__dirname, 'npm', 'index.ts'),
+    exports.join('\n')
+  );
 }
 
 createVersions();
