@@ -5,45 +5,38 @@ A package to manage different contract versions and provide easy access to their
 ## Installation
 
 ```bash
-npm install contracts-versions
+npm install @aragon/osx-versions
 ```
 
 or
 
 ```bash
-yarn add contracts-versions
+yarn add @aragon/osx-versions
 ```
 
 ## Usage
 
 ```javascript
-import versions from 'contracts-versions';
+// import specific version
+import {v0_7_0_alpha_active_contracts, v0_7_0_alpha_typechain} from '@aragon/osx-versions';
 
-// Access specific contract version
-const v0_7_0_alpha = versions.v0_7_0_alpha;
-
-// Get the types for a specific version
-v0_7_0_alpha.types().then(types => {
-  // Use types here
-});
-
-// Get the active contracts for a specific version
-v0_7_0_alpha.active_contracts().then(activeContracts => {
-  // Use active contracts here
-});
+const typechain = v0_7_0_alpha_typechain;
+const idao: v0_7_0_alpha_typechain.IDAO = typechain.IDAO__factory.connect(
+  ethers.constants.AddressZero,
+  ethers.providers.getDefaultProvider()
+);
 ```
 
 ## Adding new contract versions
 
 1. Update `commit_hashes.json` with the new version name and the associated commit hash.
-2. Run the `create-contract-versions.js` script to build and generate the new version:
+2. Run the `create-contract-versions.ts` script to build and generate the new version:
 
 ```bash
 yarn build:contracts
 ```
 
-3. Add the new version to the `versions` object in `npm/index.ts`.
-4. Run the Rollup build process:
+3. Run the Rollup build process:
 
 ```bash
 yarn build:npm
