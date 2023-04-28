@@ -1,15 +1,27 @@
-import versions from '@aragon/osx-versions';
+import {
+  v1_0_0_mainnet_goerli_active_contracts,
+  v1_0_0_mainnet_goerli_typechain,
+} from '@aragon/osx-versions';
+import {ethers} from 'ethers';
 
 describe('contract-versions', () => {
   it('should get typechain for a specific version', async () => {
-    const v0_7_0_alpha = versions.v0_7_0_alpha;
-    const types = await v0_7_0_alpha.typechain();
-    expect(types).toBeDefined();
+    const typechain = v1_0_0_mainnet_goerli_typechain;
+    expect(typechain).toBeDefined();
   });
 
   it('should get active contracts for a specific version', async () => {
-    const v0_7_0_alpha = versions.v0_7_0_alpha;
-    const activeContracts = await v0_7_0_alpha.active_contracts();
+    const activeContracts = v1_0_0_mainnet_goerli_active_contracts;
     expect(activeContracts).toBeDefined();
+  });
+
+  it('should exported the types properly for a specific version', async () => {
+    const typechain = v1_0_0_mainnet_goerli_typechain;
+    const idao: v1_0_0_mainnet_goerli_typechain.IDAO =
+      typechain.IDAO__factory.connect(
+        ethers.constants.AddressZero,
+        ethers.providers.getDefaultProvider()
+      );
+    expect(idao).toBeDefined();
   });
 });
