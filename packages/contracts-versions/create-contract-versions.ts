@@ -86,10 +86,10 @@ async function createVersions() {
   for (const version in commitHashes.versions) {
     const versionName = version;
     exports.push(
-      `export * as ${versionName}_typechain from '../build/${versionName}/typechain';`
+      `export * as ${versionName}_typechain from 'build/${versionName}/typechain';`
     );
     exports.push(
-      `import * as ${versionName}_active_contracts from '../build/${versionName}/active_contracts.json';`
+      `import * as ${versionName}_active_contracts from 'build/${versionName}/active_contracts.json';`
     );
   }
   exports.push(
@@ -97,10 +97,7 @@ async function createVersions() {
       .map(versionName => `${versionName}_active_contracts`)
       .join(', ')} };`
   );
-  await fs.writeFile(
-    path.join(__dirname, 'npm', 'index.ts'),
-    exports.join('\n')
-  );
+  await fs.writeFile(path.join(__dirname, 'index.ts'), exports.join('\n'));
 }
 
 createVersions();
