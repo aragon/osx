@@ -4,7 +4,7 @@ import json from '@rollup/plugin-json';
 
 export default [
   {
-    input: 'npm/index.ts',
+    input: 'index.ts',
     plugins: [typescript({project: './tsconfig.json'}), json()],
     output: [
       {
@@ -24,7 +24,7 @@ export default [
     ],
   },
   {
-    input: 'npm/index.ts',
+    input: 'index.ts',
     plugins: [dts(), json()],
     output: {
       dir: 'dist',
