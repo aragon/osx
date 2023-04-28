@@ -26,7 +26,7 @@ export function supportsERC20Wrapped(token: Address): bool {
     '00000000',
     false
   );
-  return introspection_wrapped_erc20 && introspection_00000000;
+  return introspection_00000000;
 }
 
 export function fetchWrappedERC20(
