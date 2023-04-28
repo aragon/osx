@@ -28,6 +28,8 @@ jobs:
         run: yarn run formatting:check
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
+      - name: Compile legacy contracts
+        run: cd ../contracts-versions/ && yarn build
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true
