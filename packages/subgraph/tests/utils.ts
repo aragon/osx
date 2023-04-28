@@ -47,6 +47,22 @@ export function createTokenCalls(
   }
 }
 
+export function createWrappedTokenCalls(
+  contractAddress: string,
+  name: string,
+  symbol: string,
+  underlyingTokenAddress: string,
+  totalSupply: string | null
+): void {
+  createTokenCalls(contractAddress, name, symbol, null, totalSupply);
+  createMockGetter(
+    contractAddress,
+    'underlying',
+    'underlying():(address)',
+    [ethereum.Value.fromAddress(Address.fromString(underlyingTokenAddress))]
+  );
+}
+
 export function createDummyActions(
   address: string,
   value: string,

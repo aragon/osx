@@ -1,24 +1,33 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
+import {
+  assert,
+  clearStore,
+  describe,
+  test
+} from 'matchstick-as/assembly/index';
 import {bigInt, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   handleVoteCast,
   handleProposalExecuted,
   handleVotingSettingsUpdated,
-  _handleProposalCreated
+  _handleProposalCreated,
+  handleMembershipContractAnnounced
 } from '../../src/packages/token/token-voting';
-import {VOTING_MODES} from '../../src/utils/constants';
+import {VOTING_MODES, WRAPPED_ERC20_INTERFACE} from '../../src/utils/constants';
 import {
   DAO_TOKEN_ADDRESS,
   STRING_DATA,
   VOTING_MODE,
   ONE,
   ZERO,
-  TWO
+  TWO,
+  ERC20_AMOUNT_FULL
 } from '../constants';
 
 import {createDummyActions} from '../utils';
 import {
+  ExtendedERC20Contract,
+  ExtendedERC20WrapperContract,
   ExtendedTokenVotingPlugin,
   ExtendedTokenVotingProposal,
   ExtendedTokenVotingVote,
@@ -216,4 +225,66 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   tokenVotingPlugin.assertEntity();
 
   clearStore();
+});
+describe('handleMembershipContractAnnounced', () => {
+  test('it should create an erc20 and assign its address to the tokenVotingPlugin', () => {
+    // create entities
+    let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+    let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
+    erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface('00000000', false);
+
+    tokenVotingPlugin.token = erc20Contract.id;
+    tokenVotingPlugin.buildOrUpdate();
+
+    let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
+
+    // handle event
+    handleMembershipContractAnnounced(event);
+
+    // assert
+    tokenVotingPlugin.assertEntity();
+    erc20Contract.assertEntity();
+
+    clearStore();
+  });
+  test('it should create an erc20Wrapped and assign an erc20 as the underlying token and assign the erc20Wrapped address to the tokenVotingPlugin', () => {
+    // create entities
+    let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
+    let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
+    let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
+    erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
+    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface('00000000', false);
+
+    erc20WrappedContract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
+    erc20WrappedContract.mockCall_balanceOf(
+      erc20WrappedContract.id,
+      ERC20_AMOUNT_FULL
+    );
+    erc20WrappedContract.mockCall_supportsInterface(
+      WRAPPED_ERC20_INTERFACE,
+      true
+    );
+    erc20WrappedContract.mockCall_supportsInterface('00000000', false);
+
+    tokenVotingPlugin.token = erc20WrappedContract.id;
+    tokenVotingPlugin.buildOrUpdate();
+    tokenVotingPlugin.assertEntity();
+
+    let event = tokenVotingPlugin.createEvent_MembershipContractAnnounced();
+
+    // handle event
+    handleMembershipContractAnnounced(event);
+
+    // assert
+    tokenVotingPlugin.assertEntity();
+    erc20Contract.assertEntity();
+    erc20WrappedContract.assertEntity();
+
+    clearStore();
+  });
 });

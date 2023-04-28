@@ -5,7 +5,8 @@ import {
   VotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  ProposalExecuted
+  ProposalExecuted,
+  MembershipContractAnnounced
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
 import {
@@ -252,6 +253,26 @@ export function createNewDelegateVotesChangedEvent(
   newDelegateVotesChangedEvent.parameters.push(newBalanceParam);
 
   return newDelegateVotesChangedEvent;
+}
+export function createNewMembershipContractAnnouncedEvent(
+  definingContract: string,
+  contractAddress: string
+): MembershipContractAnnounced {
+  let newMembershipContractAnnounced = changetype<MembershipContractAnnounced>(
+    newMockEvent()
+  );
+
+  newMembershipContractAnnounced.address = Address.fromString(contractAddress);
+  newMembershipContractAnnounced.parameters = [];
+
+  let definingContractParam = new ethereum.EventParam(
+    'definingContract',
+    ethereum.Value.fromAddress(Address.fromString(definingContract))
+  );
+
+  newMembershipContractAnnounced.parameters.push(definingContractParam);
+
+  return newMembershipContractAnnounced;
 }
 
 // calls
