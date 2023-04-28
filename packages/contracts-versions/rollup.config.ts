@@ -25,7 +25,7 @@ export default [
   },
   {
     input: 'npm/index.ts',
-    plugins: [dts()],
+    plugins: [dts(), json()],
     output: {
       dir: 'dist',
       entryFileNames: 'bundle.d.ts',
