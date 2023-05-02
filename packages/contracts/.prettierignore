@@ -4,3 +4,7 @@ cache
 coverage*
 gasReporterOutput.json
 Releases.md
+typechain
+deployments
+.openzeppelin
+deployed_contracts.json
