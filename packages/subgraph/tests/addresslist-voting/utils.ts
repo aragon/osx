@@ -14,7 +14,7 @@ import {
   ADDRESS_ONE,
   DAO_ADDRESS,
   PROPOSAL_ENTITY_ID,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   CONTRACT_ADDRESS,
   VOTING_MODE,
   SUPPORT_THRESHOLD,
@@ -247,7 +247,7 @@ export function createAddresslistVotingProposalEntityState(
   dao: string = DAO_ADDRESS,
   pkg: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
-  proposalId: string = PROPOSAL_ID,
+  pluginProposalId: string = PLUGIN_PROPOSAL_ID,
 
   open: boolean = true,
   executed: boolean = false,
@@ -270,7 +270,7 @@ export function createAddresslistVotingProposalEntityState(
   let addresslistProposal = new AddresslistVotingProposal(entityID);
   addresslistProposal.dao = Address.fromString(dao).toHexString();
   addresslistProposal.plugin = Address.fromString(pkg).toHexString();
-  addresslistProposal.proposalId = BigInt.fromString(proposalId);
+  addresslistProposal.pluginProposalId = BigInt.fromString(pluginProposalId);
   addresslistProposal.creator = Address.fromString(creator);
 
   addresslistProposal.open = open;

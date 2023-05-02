@@ -5,14 +5,15 @@ import {
   VotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  ProposalExecuted
+  ProposalExecuted,
+  MembershipContractAnnounced
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
   PROPOSAL_ENTITY_ID,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   CONTRACT_ADDRESS,
   VOTING_MODE,
   SUPPORT_THRESHOLD,
@@ -253,6 +254,26 @@ export function createNewDelegateVotesChangedEvent(
 
   return newDelegateVotesChangedEvent;
 }
+export function createNewMembershipContractAnnouncedEvent(
+  definingContract: string,
+  contractAddress: string
+): MembershipContractAnnounced {
+  let newMembershipContractAnnounced = changetype<MembershipContractAnnounced>(
+    newMockEvent()
+  );
+
+  newMembershipContractAnnounced.address = Address.fromString(contractAddress);
+  newMembershipContractAnnounced.parameters = [];
+
+  let definingContractParam = new ethereum.EventParam(
+    'definingContract',
+    ethereum.Value.fromAddress(Address.fromString(definingContract))
+  );
+
+  newMembershipContractAnnounced.parameters.push(definingContractParam);
+
+  return newMembershipContractAnnounced;
+}
 
 // calls
 
@@ -276,7 +297,7 @@ export function createTokenVotingProposalEntityState(
   dao: string = DAO_ADDRESS,
   pkg: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
-  proposalId: string = PROPOSAL_ID,
+  pluginProposalId: string = PLUGIN_PROPOSAL_ID,
 
   open: boolean = true,
   executed: boolean = false,
@@ -298,7 +319,7 @@ export function createTokenVotingProposalEntityState(
   let tokenVotingProposal = new TokenVotingProposal(entityID);
   tokenVotingProposal.dao = Address.fromString(dao).toHexString();
   tokenVotingProposal.plugin = Address.fromString(pkg).toHexString();
-  tokenVotingProposal.proposalId = BigInt.fromString(proposalId);
+  tokenVotingProposal.pluginProposalId = BigInt.fromString(pluginProposalId);
   tokenVotingProposal.creator = Address.fromString(creator);
 
   tokenVotingProposal.open = open;

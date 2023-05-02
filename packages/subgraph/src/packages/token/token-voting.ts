@@ -20,7 +20,11 @@ import {
 } from '../../../generated/schema';
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {fetchERC20} from '../../utils/tokens/erc20';
+import {
+  fetchERC20,
+  fetchWrappedERC20,
+  supportsERC20Wrapped
+} from '../../utils/tokens/erc20';
 import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -42,7 +46,7 @@ export function _handleProposalCreated(
   let proposalEntity = new TokenVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.proposalId = pluginProposalId;
+  proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
@@ -248,17 +252,29 @@ export function handleMembershipContractAnnounced(
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
 
   if (packageEntity) {
-    let contract = fetchERC20(token);
-    if (contract) {
-      packageEntity.token = contract.id;
+    let contractAddress: string;
 
-      packageEntity.save();
-
-      // Both GovernanceWrappedERC20/GovernanceERC20 use the `Transfer` event, so
-      // It's safe to create the same type of template for them.
-      let context = new DataSourceContext();
-      context.setString('pluginId', event.address.toHexString());
-      GovernanceERC20.createWithContext(event.params.definingContract, context);
+    if (supportsERC20Wrapped(token)) {
+      let contract = fetchWrappedERC20(token);
+      if (!contract) {
+        return;
+      }
+      contractAddress = contract.id;
+    } else {
+      let contract = fetchERC20(token);
+      if (!contract) {
+        return;
+      }
+      contractAddress = contract.id;
     }
+    packageEntity.token = contractAddress;
+
+    packageEntity.save();
+
+    // Both GovernanceWrappedERC20/GovernanceERC20 use the `Transfer` event, so
+    // It's safe to create the same type of template for them.
+    let context = new DataSourceContext();
+    context.setString('pluginId', event.address.toHexString());
+    GovernanceERC20.createWithContext(event.params.definingContract, context);
   }
 }

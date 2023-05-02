@@ -12,6 +12,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
   - [ ] Check that the owner of the plugin domain is the deployer
 - [ ] Run `yarn` in the repository root to install the dependencies
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
+  - [ ] Check that the compiler version in `hardhat.config.ts` is set to at least `0.8.17` and on the [known solidity bugs page](https://docs.soliditylang.org/en/latest/bugs.html) that no relevant vulnerabilities exist that are fixed in later versions. If the latter is not the case, consider updating the compiler pragmas to a safe version and rolling out fixes for affected contracts.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
 - [ ] Run `yarn deploy --network hardhat --reset` to make sure the deploy scripts work
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key
@@ -43,7 +44,6 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
   - [ ] If it is not try to verfiy it with `npx hardhat verify --network NETWORK ADDRESS CONTRUCTOR-ARGS`. More infos on how to use this command can be found here: [https://hardhat.org/hardhat-runner/docs/guides/verifying](https://hardhat.org/hardhat-runner/docs/guides/verifying)
   - [ ] If it is a proxy try to activate the blockchain explorer's proxy feature
   - [ ] If the proxies are not verified with the `Similar Match Source Code` feature
-    - [ ] Remove `import '@openzeppelin/hardhat-upgrades'` from `packages/contracts/hardhat.config.ts`
     - [ ] Verify one of the proxies
     - [ ] Check if the other proxies are now verified with `Similar Match Source Code`
 

@@ -15,6 +15,7 @@ import {
   NativeBalance,
   NativeTransfer,
   TokenVotingMember,
+  ERC20WrapperContract,
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
@@ -30,6 +31,7 @@ import {
   DelegateVotesChanged
 } from '../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
+  MembershipContractAnnounced,
   ProposalCreated,
   ProposalExecuted,
   VoteCast,
@@ -51,7 +53,7 @@ import {
   END_DATE,
   MIN_VOTING_POWER,
   PROPOSAL_ENTITY_ID,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   SNAPSHOT_BLOCK,
   START_DATE,
   SUPPORT_THRESHOLD,
@@ -71,11 +73,13 @@ import {
   createCallbackReceivedEvent,
   createNewDepositedEvent,
   createNewNativeTokenDepositedEvent,
-  getBalanceOf
+  getBalanceOf,
+  getSupportsInterface
 } from '../dao/utils';
 import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
+  createNewMembershipContractAnnouncedEvent,
   createNewProposalCreatedEvent,
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
@@ -85,7 +89,8 @@ import {
 import {
   createGetProposalCall,
   createTotalVotingPowerCall,
-  createTokenCalls
+  createTokenCalls,
+  createWrappedTokenCalls
 } from '../utils';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
@@ -154,6 +159,44 @@ class ERC721TransferMethods extends ERC721Transfer {
 }
 
 // ERC20Contract
+class ERC20WrapperContractMethods extends ERC20WrapperContract {
+  withDefaultValues(): ERC20WrapperContractMethods {
+    this.id = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
+    this.name = 'Wrapped Test Token';
+    this.symbol = 'WTT';
+    this.underlyingToken = Address.fromHexString(
+      DAO_TOKEN_ADDRESS
+    ).toHexString();
+    return this;
+  }
+  // calls
+  mockCall_createTokenCalls(totalSupply: string | null = null): void {
+    if (!this.name) {
+      throw new Error('Name is null');
+    } else if (!this.symbol) {
+      throw new Error('Symbol is null');
+    } else if (!this.underlyingToken) {
+      throw new Error('Underlying token is null');
+    }
+
+    createWrappedTokenCalls(
+      this.id,
+      this.name as string,
+      this.symbol as string,
+      this.underlyingToken,
+      totalSupply
+    );
+  }
+
+  mockCall_supportsInterface(interfaceId: string, value: boolean): void {
+    getSupportsInterface(this.id, interfaceId, value);
+  }
+
+  mockCall_balanceOf(account: string, amount: string): void {
+    getBalanceOf(this.id, account, amount);
+  }
+}
+
 class ERC20ContractMethods extends ERC20Contract {
   withDefaultValues(): ERC20ContractMethods {
     this.id = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
@@ -180,6 +223,10 @@ class ERC20ContractMethods extends ERC20Contract {
       this.decimals.toString(),
       totalSupply
     );
+  }
+
+  mockCall_supportsInterface(interfaceId: string, value: boolean): void {
+    getSupportsInterface(this.id, interfaceId, value);
   }
 
   mockCall_balanceOf(account: string, amount: string): void {
@@ -344,7 +391,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
 
     this.dao = DAO_ADDRESS;
     this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
-    this.proposalId = BigInt.fromString(PROPOSAL_ID);
+    this.pluginProposalId = BigInt.fromString(PLUGIN_PROPOSAL_ID);
     this.creator = Address.fromHexString(ADDRESS_ONE);
 
     this.open = true;
@@ -379,7 +426,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     } else {
       createGetProposalCall(
         this.plugin,
-        this.proposalId.toString(),
+        this.pluginProposalId.toString(),
         this.open,
         this.executed,
         this.votingMode,
@@ -411,7 +458,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     description: string = STRING_DATA
   ): ProposalCreated {
     let event = createNewProposalCreatedEvent(
-      this.proposalId.toString(),
+      this.pluginProposalId.toString(),
       this.creator.toHexString(),
       this.startDate.toString(),
       this.endDate.toString(),
@@ -438,7 +485,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     let voteOption = VOTE_OPTIONS.get(voterVoteOption) as string;
 
     let event = createNewVoteCastEvent(
-      this.proposalId.toString(),
+      this.pluginProposalId.toString(),
       voter,
       voteOption,
       voterVotingPower,
@@ -449,7 +496,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
 
   createEvent_ProposalExecuted(): ProposalExecuted {
     let event = createNewProposalExecutedEvent(
-      this.proposalId.toString(),
+      this.pluginProposalId.toString(),
       this.plugin
     );
     return event;
@@ -542,6 +589,18 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
       (this.minParticipation as BigInt).toString(),
       (this.minDuration as BigInt).toString(),
       (this.minProposerVotingPower as BigInt).toString(),
+      this.pluginAddress.toHexString()
+    );
+
+    return event;
+  }
+
+  createEvent_MembershipContractAnnounced(): MembershipContractAnnounced {
+    if (this.token === null) {
+      throw new Error('Token is null');
+    }
+    let event = createNewMembershipContractAnnouncedEvent(
+      this.token as string,
       this.pluginAddress.toHexString()
     );
 

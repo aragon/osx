@@ -14,7 +14,7 @@ import {
   ADDRESS_ONE,
   DAO_ADDRESS,
   PROPOSAL_ENTITY_ID,
-  PROPOSAL_ID,
+  PLUGIN_PROPOSAL_ID,
   CONTRACT_ADDRESS,
   SNAPSHOT_BLOCK,
   CREATED_AT,
@@ -289,7 +289,7 @@ export function createMultisigProposalEntityState(
   dao: string = DAO_ADDRESS,
   plugin: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
-  proposalId: string = PROPOSAL_ID,
+  pluginProposalId: string = PLUGIN_PROPOSAL_ID,
   minApprovals: string = TWO,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
@@ -305,7 +305,7 @@ export function createMultisigProposalEntityState(
   let multisigProposal = new MultisigProposal(entityID);
   multisigProposal.dao = Address.fromString(dao).toHexString();
   multisigProposal.plugin = Address.fromString(plugin).toHexString();
-  multisigProposal.proposalId = BigInt.fromString(proposalId);
+  multisigProposal.pluginProposalId = BigInt.fromString(pluginProposalId);
   multisigProposal.creator = Address.fromString(creator);
   multisigProposal.startDate = BigInt.fromString(startDate);
   multisigProposal.endDate = BigInt.fromString(endDate);

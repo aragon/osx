@@ -75,6 +75,7 @@ contract TokenFactory {
     /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
     /// @return The created `ERC20VotesUpgradeable` compatible token contract.
     /// @return The created `MerkleMinter` contract used to mint the `ERC20VotesUpgradeable` tokens or `address(0)` if an existing token was provided.
+    /// @dev  The `MerkleMinter` proxy deployed in this process is cloned as a [minimal proxy (ERC-1167)](https://eips.ethereum.org/EIPS/eip-1167) to save gas and therefore not upgradeable despite being an `PluginUUPSUpgradeable` implementation.
     function createToken(
         DAO _managingDao,
         TokenConfig calldata _tokenConfig,

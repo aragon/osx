@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `allowFailureMap` to `IDAO.Executed` event.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
 
+### Changed
+
+- Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
+
+### Removed
+
 ## v1.2.0
 
 ### Added

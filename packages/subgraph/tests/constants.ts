@@ -18,7 +18,7 @@ export const ONE = '1';
 export const TWO = '2';
 export const THREE = '3';
 
-export const PROPOSAL_ID = ZERO;
+export const PLUGIN_PROPOSAL_ID = ZERO;
 
 export const STRING_DATA = 'Some String Data ...';
 
@@ -67,7 +67,7 @@ export const APPLIED_PLUGIN_SETUP_ID =
 
 export const PROPOSAL_ENTITY_ID = getProposalId(
   Address.fromString(CONTRACT_ADDRESS),
-  BigInt.fromString(PROPOSAL_ID)
+  BigInt.fromString(PLUGIN_PROPOSAL_ID)
 );
 
 export const PLUGIN_ENTITY_ID = Address.fromString(

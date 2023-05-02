@@ -35,7 +35,7 @@ export function _handleProposalCreated(
   let proposalEntity = new AdminProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = pluginId;
-  proposalEntity.proposalId = pluginProposalId;
+  proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = administratorAddress;
   proposalEntity.metadata = metadata;
   proposalEntity.executed = false;

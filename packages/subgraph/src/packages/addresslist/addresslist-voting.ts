@@ -39,7 +39,7 @@ export function _handleProposalCreated(
   let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = pluginAddress.toHexString();
-  proposalEntity.proposalId = pluginProposalId;
+  proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
