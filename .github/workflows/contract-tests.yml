@@ -16,7 +16,11 @@ jobs:
       run:
         working-directory: ${{env.working-directory}}
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
       - name: Install node
         uses: actions/setup-node@v3
         with:
@@ -26,6 +30,8 @@ jobs:
         run: cd ../../ && yarn install --pure-lockfile
       - name: Check formatting
         run: yarn run formatting:check
+      - name: Compile contracts-versions
+        run: cd ../contracts-versions && yarn build
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
       - name: Run Hardhat Tests
