@@ -31,7 +31,7 @@ jobs:
       - name: Compile contracts-versions
         run: cd ../contracts-versions && yarn build
       - name: Remove directories
-        run: rm -rf artifact typechain deployments
+        run: rm -rf artifact cache deployments typechain
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts
