@@ -30,6 +30,8 @@ jobs:
         run: cd ../../ && yarn install --pure-lockfile
       - name: Compile contracts-versions
         run: cd ../contracts-versions && yarn build
+      - name: Remove directories
+        run: rm -rf artifact typechain deployments
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts
