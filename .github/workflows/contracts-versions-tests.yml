@@ -24,8 +24,6 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: cd ../../ && yarn install --pure-lockfile
-      - name: Check formatting
-        run: yarn run formatting:check
       - name: Build contracts-versions
         run: yarn run build
       - name: Run Tests

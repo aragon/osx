@@ -48,4 +48,4 @@ Contributions are welcome! Feel free to open a pull request or create an issue t
 
 ## License
 
-This project is licensed under the AGPL-3.0-or-later License..
+This project is licensed under the AGPL-3.0-or-later License.
