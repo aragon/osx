@@ -1,0 +1,32 @@
+name: Contracts Tests
+on:
+  push:
+    paths:
+      - 'packages/contracts-versions/**'
+      - '.github/workflows/contract-*.yml'
+
+env:
+  working-directory: packages/contracts-versions
+
+jobs:
+  test-hardhat:
+    if: github.actor != 'arabot-1'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{env.working-directory}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          node-version: 16
+      - name: Install dependencies
+        run: cd ../../ && yarn install --pure-lockfile
+      - name: Check formatting
+        run: yarn run formatting:check
+      - name: Build contracts-versions
+        run: yarn run build
+      - name: Run Tests
+        run: yarn run test
