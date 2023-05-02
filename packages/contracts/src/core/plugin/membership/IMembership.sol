@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.8;
 
-import {IDAO} from "../../dao/IDAO.sol";
-
 /// @title IMembership
 /// @author Aragon Association - 2022-2023
 /// @notice An interface to be implemented by DAO plugins that define membership.
