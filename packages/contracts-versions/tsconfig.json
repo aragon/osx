@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "declaration": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "rootDir": "../../",
+    "baseUrl": "./",
+    "paths": {
+      "@aragon/osx-versions": ["node_modules/@aragon/osx-versions"]
+    }
+  },
+  "include": ["/build"],
+  "files": ["./index.ts"]
+}
