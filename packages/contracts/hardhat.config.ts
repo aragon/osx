@@ -97,6 +97,7 @@ const config: HardhatUserConfig = {
     cache: './cache',
     artifacts: './artifacts',
     deploy: './deploy',
+    imports: '../contracts-versions',
   },
   docgen: {
     outputDir: 'docs/osx/03-reference-guide',
