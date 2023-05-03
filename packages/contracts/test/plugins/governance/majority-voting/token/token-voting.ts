@@ -489,6 +489,36 @@ describe('TokenVoting', function () {
         .withArgs(earliestEndDate, tooEarlyEndDate);
     });
 
+    it('sets the start date to now and end date to now + minDuration if 0 is provided as an input', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+      const startDate = 0; // now
+      const endDate = 0; // startDate + minDuration
+
+      const creationTx = await voting.createProposal(
+        dummyMetadata,
+        [],
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+
+      const currentTime = (
+        await ethers.provider.getBlock((await creationTx.wait()).blockNumber)
+      ).timestamp;
+      const proposalData = await voting.getProposal(id);
+
+      expect(proposalData.parameters.startDate).to.eq(currentTime);
+      expect(proposalData.parameters.endDate).to.eq(
+        currentTime + votingSettings.minDuration
+      );
+    });
+
     it('ceils the `minVotingPower` value if it has a remainder', async () => {
       votingSettings.minParticipation = pctToRatio(30).add(1); // 30.0001 %
 
