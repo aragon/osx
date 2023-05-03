@@ -32,10 +32,10 @@ jobs:
         run: cd ../contracts-versions && yarn build
       - name: Remove directories
         run: rm -rf artifact cache deployments typechain
+      - name: Install dependencies
+        run: cd ../../ && yarn install --pure-lockfile
       - name: Check formatting
         run: yarn run formatting:check
-      - name: List contents of node_modules/@aragon/osx-versions
-        run: ls -R ../../node_modules/@aragon/osx-versions
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
       - name: Run Hardhat Tests
