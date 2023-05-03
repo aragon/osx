@@ -92,6 +92,8 @@ contract TokenVoting is IMembership, MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
+        (_startDate, _endDate) = _validateProposalDates(_startDate, _endDate);
+
         proposalId = _createProposal({
             _creator: _msgSender(),
             _metadata: _metadata,
@@ -104,10 +106,8 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
-            _startDate,
-            _endDate
-        );
+        proposal_.parameters.startDate = _startDate;
+        proposal_.parameters.endDate = _endDate;
         proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
