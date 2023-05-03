@@ -6,7 +6,7 @@ import {DAO__factory} from '../../typechain';
 import {
   v1_0_0_mainnet_goerli_typechain,
   v1_0_0_mumbai_typechain,
-} from '@aragon/osx-versions';
+} from '../../../contracts-versions';
 
 import {daoExampleURI} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
