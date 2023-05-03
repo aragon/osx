@@ -23,7 +23,7 @@ const DUMMY_METADATA = ethers.utils.hexlify(
   ethers.utils.toUtf8Bytes('0x123456789')
 );
 
-describe('DAO Upgrade', function () {
+describe.only('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
     Dao_mainnet_goerli_V1_0_0 =

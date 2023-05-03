@@ -36,8 +36,6 @@ jobs:
         run: yarn run formatting:check
       - name: List contents of node_modules/@aragon/osx-versions
         run: ls -R ../../node_modules/@aragon/osx-versions
-      - name: Set NODE_PATH
-        run: echo 'NODE_PATH=$NODE_PATH:../contracts-versions' >> $GITHUB_ENV
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
       - name: Run Hardhat Tests
