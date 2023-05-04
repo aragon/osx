@@ -32,8 +32,6 @@ jobs:
         run: cd ../contracts-versions && yarn build
       - name: Remove directories
         run: rm -rf artifact cache deployments typechain
-      - name: Install dependencies
-        run: cd ../../ && yarn install --pure-lockfile
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts

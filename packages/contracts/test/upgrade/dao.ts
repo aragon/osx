@@ -3,16 +3,17 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO__factory} from '../../typechain';
-import {
-  v1_0_0_mainnet_goerli_typechain,
-  v1_0_0_mumbai_typechain,
-} from '../../../contracts-versions';
+// import {
+//   v1_0_0_mainnet_goerli_typechain,
+//   v1_0_0_mumbai_typechain,
+// } from '@aragon/osx-versions';
 
 import {daoExampleURI} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
+import {ContractFactory} from 'ethers';
 
 let signers: SignerWithAddress[];
 let Dao_mainnet_goerli_V1_0_0: v1_0_0_mainnet_goerli_typechain.DAO__factory;
@@ -22,6 +23,11 @@ let DaoCurrent: DAO__factory;
 const DUMMY_METADATA = ethers.utils.hexlify(
   ethers.utils.toUtf8Bytes('0x123456789')
 );
+
+import {
+  v1_0_0_mainnet_goerli_typechain,
+  v1_0_0_mumbai_typechain,
+} from '@aragon/osx-versions';
 
 describe.only('DAO Upgrade', function () {
   before(async function () {
@@ -34,9 +40,16 @@ describe.only('DAO Upgrade', function () {
   });
 
   it('upgrades mainnet/goerli v1.0.0 to v1.1.0', async () => {
-    const proxy = await deployWithProxy<v1_0_0_mainnet_goerli_typechain.DAO>(
-      Dao_mainnet_goerli_V1_0_0
+    // even this do not seems to work
+    const contractFactory = new ContractFactory(
+      v1_0_0_mainnet_goerli_typechain.DAO__factory.createInterface(),
+      v1_0_0_mainnet_goerli_typechain.DAO__factory.bytecode,
+      signers[0]
     );
+
+    console.log('dao factory == ', contractFactory);
+
+    const proxy = await deployWithProxy<any>(contractFactory);
     await proxy.initialize(
       DUMMY_METADATA,
       signers[0].address,
