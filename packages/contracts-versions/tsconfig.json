@@ -8,12 +8,9 @@
     "declaration": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "rootDir": "../../",
-    "baseUrl": "./",
-    "paths": {
-      "@aragon/osx-versions": ["node_modules/@aragon/osx-versions"]
-    }
+    "rootDir": "./",
+    "baseUrl": "./"
   },
   "include": ["/build"],
-  "files": ["./index.ts"]
+  "files": ["./npm/index.ts"]
 }
