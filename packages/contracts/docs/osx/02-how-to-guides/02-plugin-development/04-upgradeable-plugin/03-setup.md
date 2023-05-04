@@ -43,6 +43,7 @@ In order for the Plugin to be easily installed into the DAO, we need to define t
 Hence, we will create a `prepareInstallation()` function, as well as a `prepareUninstallation()` function. These are the functions the `PluginSetupProcessor.sol` (the contract in charge of installing plugins into the DAO) will use.
 
 The `prepareInstallation()` function takes in two parameters:
+
 1. the `DAO` it should prepare the installation for, and
 2. the `_data` parameter containing all the information needed for this function to work properly, in this case, the number we want to store.
 
@@ -128,66 +129,65 @@ Once you're done with your Plugin Setup contract, we'll need to deploy it so we 
 Firstly, we'll make sure our preferred network is well setup within our `hardhat.config.js` file, which should look something like:
 
 ```js
-import "@nomicfoundation/hardhat-toolbox";
+import '@nomicfoundation/hardhat-toolbox';
 
 // To find your Alchemy key, go to https://dashboard.alchemy.com/. Infure or any other provider would work here as well.
-const goerliAlchemyKey = "add-your-own-alchemy-key";
+const goerliAlchemyKey = 'add-your-own-alchemy-key';
 // To find a private key, go to your wallet of choice and export a private key. Remember this must be kept secret at all times.
-const privateKeyGoerli = "add-your-account-private-key";
+const privateKeyGoerli = 'add-your-account-private-key';
 
 module.exports = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: 'hardhat',
   networks: {
-    hardhat: {
-    },
+    hardhat: {},
     goerli: {
       url: `https://eth-goerli.g.alchemy.com/v2/${goerliAlchemyKey}`,
-      accounts: [privateKeyGoerli]
-    }
+      accounts: [privateKeyGoerli],
+    },
   },
   solidity: {
-    version: "0.8.17",
+    version: '0.8.17',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
+    sources: './contracts',
+    tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
   },
   mocha: {
-    timeout: 40000
-  }
+    timeout: 40000,
+  },
 };
 ```
 
 Then, create a `scripts/deploy.js` file and add a simple deploy script. We'll only be deploying the PluginSetup contract, since this should deploy the Plugin contract within its constructor.
 
 ```js
-import { ethers } from "hardhat";
+import {ethers} from 'hardhat';
 
 async function main() {
   const [deployer] = await ethers.getSigners();
 
-  console.log("Deploying contracts with the account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  console.log('Deploying contracts with the account:', deployer.address);
+  console.log('Account balance:', (await deployer.getBalance()).toString());
 
-  const getSimpleStorageSetup = await ethers.getContractFactory("SimpleStorageSetup");
+  const getSimpleStorageSetup = await ethers.getContractFactory('SimpleStorageSetup');
   const SimpleStorageSetup = await SimpleStorageSetup.deploy();
 
   await SimpleStorageSetup.deployed();
 
-  console.log("SimpleStorageSetup address:", SimpleStorageSetup.address);
+  console.log('SimpleStorageSetup address:', SimpleStorageSetup.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
+main().catch(error => {
   console.error(error);
   process.exitCode = 1;
 });

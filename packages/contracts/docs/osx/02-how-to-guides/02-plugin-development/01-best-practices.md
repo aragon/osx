@@ -12,7 +12,7 @@ title: Before starting
 - Write plugins implementations that need minimal permissions on the DAO.
 - Write `PluginSetup` contracts that remove all permissions on uninstallation that they requested during installation or updates.
 - Plan the lifecycle of your plugin (need for upgrades).
-- Follow our [versioning guidelines](../02-plugin-development/07-publication/02-versioning.md).
+- Follow our [versioning guidelines](../02-plugin-development/07-publication/01-versioning.md).
 
 ### DON'Ts ✋
 

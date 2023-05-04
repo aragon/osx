@@ -13,13 +13,14 @@ However, for the `execute` call to work, the address calling the function (the `
 Usually, the `EXECUTE_PERMISSION` is granted to the governance plugin of the DAO so that only the approved decisions by the DAO are executed. For example, we'd grant the `EXECUTE_PERMISSION` to the address of the Multisig Plugin, so that when a transaction is approved by the required members of the multisig, the plugin is able to call the `execute` function and execute the action on behalf of the DAO.
 
 To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `PermissionManager`'s [`grant` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/permission/PermissionManager.sol#L105) and pass it 4 parameters:
+
 - `where`: the address of the contract containing the function `who` wants access to
 - `who`: the address (EOA or contract) receiving the permission
 - `permissionId`: the permission identifier the caller needs to have in order to be able to execute the action
 - `condition`: the condition that will be asked before authorizing the call to happen
 
 :::caution
-You don't want to grant  `EXECUTE_PERMISSION` to any random address, since this gives the address access to execute any action on behalf of the DAO. We recommend you only grant `EXECUTE_PERMISSION` to governance plugins to ensure the safety of your assets.
+You don't want to grant `EXECUTE_PERMISSION` to any random address, since this gives the address access to execute any action on behalf of the DAO. We recommend you only grant `EXECUTE_PERMISSION` to governance plugins to ensure the safety of your assets.
 :::
 
 ## Examples
@@ -66,7 +67,6 @@ function exampleGrant(DAO dao, address _where, address _who, bytes32 _permission
 :::caution
 Granting the `ROOT_PERMISSION_ID` permission to other contracts then the `DAO` contract is dangerous and considered as an anti-pattern.
 :::
-
 
 ### Sending Native Tokens
 

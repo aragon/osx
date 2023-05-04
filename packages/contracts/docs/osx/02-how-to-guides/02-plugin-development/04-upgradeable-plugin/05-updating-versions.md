@@ -1,8 +1,8 @@
 ---
-title: How to update an Upgradeable Plugin
+title: How to upgrade an Upgradeable Plugin
 ---
 
-## How to update an Upgradeable Plugin
+## How to upgrade an Upgradeable Plugin
 
 Updating an Upgradeable plugin means we want to direct the implementation of our functionality to a new build, rather than the existing one.
 
@@ -11,9 +11,6 @@ In this tutorial, we will go through how to update an Upgradeable plugin and eac
 ### 1. Create the new build implementation contract
 
 Firstly, you want to create the new build implementation contract the plugin should use. You can read more about how to do this in ["How to create a subsequent build implementation to an Upgradeable Plugin" guide](./04-subsequent-builds.md).
-
-<details>
-<summary><code>Subsequent build example</code></summary>
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -55,9 +52,7 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 }
 ```
 
-</details>
-
-### 2. Create a new Plugin Setup contract
+### 2. Write a new Plugin Setup contract
 
 In order to do update a plugin, we need a `prepareUpdate()` function in our Plugin Setup contract which points the functionality to a new build, as we described in the ["How to create a subsequent build implementation to an Upgradeable Plugin" guide](./04-subsequent-builds.md). The `prepareUpdate()` function must transition the plugin from the old build state into the new one so that it ends up having the same permissions (and helpers) as if it had been freshly installed.
 
@@ -151,7 +146,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
 }
 ```
 
-The key thing about this Plugin Setup contract is its `prepareUpdate()` function. The function only contains a condition checking from which build number the update is transitioning to build 1. Here, it is the build number 0 as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of intializing the storage that was added in this build.
+The key thing about to review in this new Plugin Setup contract is its `prepareUpdate()` function. The function only contains a condition checking from which build number the update is transitioning to build 1. Here, it is the build number 0 as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of intializing the storage that was added in this build.
 
 ### 3. Future builds
 
@@ -228,6 +223,7 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
   }
 }
 ```
+
 </details>
 
 With each new build implementation, we will need to udate the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function with the latest version we've deployed.

@@ -110,12 +110,13 @@ Next, we will add the implementation for the `prepareInstallation` and `prepareU
 ### 4. Implementing the `prepareInstallation()` function
 
 The `prepareInstallation()` function should take in two parameters:
+
 1. the `DAO` it prepares the installation for, and
 2. the `_data` parameter containing all the information needed for this function to work properly, in this case, the address we want to set as admin of our DAO.
 
 Hence, the first thing we should do when working on the `prepareInsallation()` function is decode the information from the `_data` parameter. We also want to check that the address is not accidentally set to `address(0)`, which would freeze the DAO forever.
 
- ```solidity
+```solidity
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 
 contract SimpleAdminSetup is PluginSetup {
@@ -129,9 +130,9 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
- Then, we will use [OpenZepplin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) to clone our Plugin contract and initialize it with the `admin` address. The first line, `using Clones for address;`, allows us to call OpenZepplin `Clones` library to clone contracts deployed at an address.
+Then, we will use [OpenZepplin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) to clone our Plugin contract and initialize it with the `admin` address. The first line, `using Clones for address;`, allows us to call OpenZepplin `Clones` library to clone contracts deployed at an address.
 
- The second line introduces a custom error being thrown if the admin address specified is the zero address.
+The second line introduces a custom error being thrown if the admin address specified is the zero address.
 
 ```solidity
 function prepareInstallation(
@@ -178,6 +179,7 @@ function prepareInstallation(
 ```
 
 Finally, we construct an array of permission operations requesting two permissions to be granted that is returned by the function.
+
 - First, we request the `ADMIN_EXECUTE_PERMISSION_ID` permission for the `admin` (`who`) address on the `plugin` (`where`).
 - Second, we request the `EXECUTE_PERMISSION_ID` permission for the freshly deployed `plugin` (`who`) on the `_dao` (`where`). We don't add conditions to the permissions in this case, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
 

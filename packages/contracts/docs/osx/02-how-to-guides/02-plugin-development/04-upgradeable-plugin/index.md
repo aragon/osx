@@ -2,7 +2,7 @@
 title: What are Upgradeable Plugins?
 ---
 
-## Developing an Upgradeable Plugin
+# How to develop an Upgradeable Plugin
 
 Upgradeable contracts offer advantages because you can cheaply change or fix the logic of your contract without losing the storage of your contract. If you want to review plugin types in depth, check out our [guide on plugin types here](../02-plugin-types.md).
 
@@ -22,3 +22,12 @@ Although we've abstracted mot of the complications of the upgrade process away f
   - initialization
   - inheritance
   - leaving storage gaps
+
+Up next, check out our guides on:
+
+1. [How to initialize an Upgradeable Plugins](./01-initialization.md)
+2. [How to build the implementation of an Upgradeable Plugin](./02-implementation.md)
+3. [How to build and deploy a Plugin Setup contract for an Upgradeable Plugin](./03-setup.md)
+4. [How to create a subsequent build implementation to an Upgradeable Plugin](./04-subsequent-builds.md)
+5. [How to upgrade an Upgradeable Plugin](./05-updating-versions.md)
+6. [How to publish my plugin into the Aragon OSx protocol](../07-publication/index.md)
