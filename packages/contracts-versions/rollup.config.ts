@@ -1,12 +1,16 @@
 import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
 import json from '@rollup/plugin-json';
-import {join} from 'path';
+import copy from 'rollup-plugin-copy';
 
 export default [
   {
     input: 'npm/index.ts',
-    plugins: [typescript({project: './tsconfig.json'}), json()],
+    plugins: [
+      typescript({project: './tsconfig.json'}),
+      json(),
+      copy({targets: [{src: 'build/*', dest: 'dist/build'}]}),
+    ],
     output: [
       {
         dir: 'dist',
