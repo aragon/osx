@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Fixed ordering bug in the `createProposal` function used by the `TokenVoting` and `AddresslistVoting` implementations resulting emitting the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
 
 ### Removed
