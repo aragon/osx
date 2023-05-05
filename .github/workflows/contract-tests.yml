@@ -34,8 +34,6 @@ jobs:
         run: rm -rf artifact cache deployments typechain
       - name: Check formatting
         run: yarn run formatting:check
-      - name: Create symlink to contracts-versions
-        run: ln -s ../contracts-versions ../../node_modules/@aragon/osx-versions
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
       - name: Run Hardhat Tests
