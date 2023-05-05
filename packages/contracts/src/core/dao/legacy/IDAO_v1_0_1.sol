@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.17;
 
-/// @title IDAO v1.0.0
+/// @title IDAO v1.0.1
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
-interface IDAO_v1_0_0 {
+interface IDAO_v1_0_1 {
     /// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
     /// @param to The address to call.
     /// @param value The native token value to be sent with the call.

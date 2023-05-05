@@ -4,8 +4,8 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO__factory,
-  DAOV100,
-  DAOV100__factory,
+  DAOV101,
+  DAOV101__factory,
   DAOV130Alpha,
   DAOV130Alpha__factory,
 } from '../../typechain';
@@ -17,7 +17,7 @@ import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 
 let signers: SignerWithAddress[];
-let Dao_v1_0_0: DAOV100__factory;
+let Dao_v1_0_1: DAOV101__factory;
 let Dao_v1_3_0_alpha: DAOV130Alpha__factory;
 let DaoCurrent: DAO__factory;
 
@@ -28,14 +28,14 @@ const DUMMY_METADATA = ethers.utils.hexlify(
 describe('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
-    Dao_v1_0_0 = new DAOV100__factory(signers[0]);
+    Dao_v1_0_1 = new DAOV101__factory(signers[0]);
     Dao_v1_3_0_alpha = new DAOV130Alpha__factory(signers[0]);
 
     DaoCurrent = new DAO__factory(signers[0]);
   });
 
-  it('upgrades v1.0.0 to v1.3.0', async () => {
-    const proxy = await deployWithProxy<DAOV100>(Dao_v1_0_0);
+  it('upgrades v1.0.1 to v1.3.0', async () => {
+    const proxy = await deployWithProxy<DAOV101>(Dao_v1_0_1);
     await proxy.initialize(
       DUMMY_METADATA,
       signers[0].address,
@@ -71,7 +71,7 @@ describe('DAO Upgrade', function () {
 
     // Check the emitted implementation.
     const emittedImplementation = (
-      await findEventTopicLog(upgradeTx, Dao_v1_0_0.interface, 'Upgraded')
+      await findEventTopicLog(upgradeTx, Dao_v1_0_1.interface, 'Upgraded')
     ).args.implementation;
     expect(emittedImplementation).to.equal(newImplementation.address);
 
@@ -79,7 +79,7 @@ describe('DAO Upgrade', function () {
     expect(await proxy.callStatic.daoURI()).to.equal(daoExampleURI);
   });
 
-  it('upgrades v1.0.0-alpha (mumbai pre-release) to v1.1.0', async () => {
+  it('upgrades v1.3.0-alpha (mumbai pre-release) to v1.3.0', async () => {
     const proxy = await deployWithProxy<DAOV130Alpha>(Dao_v1_3_0_alpha);
     await proxy.initialize(
       DUMMY_METADATA,

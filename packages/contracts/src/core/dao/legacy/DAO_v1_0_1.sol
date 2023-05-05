@@ -17,18 +17,18 @@ import {PermissionManager} from "../../permission/PermissionManager.sol";
 import {CallbackHandler} from "../../utils/CallbackHandler.sol";
 import {hasBit, flipBit} from "../../utils/BitMap.sol";
 import {IEIP4824} from "../IEIP4824.sol";
-import {IDAO_v1_0_0} from "./IDAO_v1_0_0.sol";
+import {IDAO_v1_0_1} from "./IDAO_v1_0_1.sol";
 
-/// @title DAO v1.0.0
+/// @title DAO v1.0.1
 /// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO_v1_0_0 is
+contract DAO_v1_0_1 is
     IEIP4824,
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
-    IDAO_v1_0_0,
+    IDAO_v1_0_1,
     UUPSUpgradeable,
     PermissionManager,
     CallbackHandler
