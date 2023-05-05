@@ -4,9 +4,10 @@
   "pluginSetupABI": {
     "prepareInstallation": [
       "tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings",
-      "address[] members"
+      "tuple(address addr, string name, string symbol) tokenSettings",
+      "tuple(address[] receivers, uint256[] amounts) mintSettings"
     ],
-    "prepareUpdate": [],
-    "prepareUninstallation": []
+    "prepareUpdate": [""],
+    "prepareUninstallation": [""]
   }
 }

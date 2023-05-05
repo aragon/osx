@@ -7,7 +7,7 @@
       "tuple(address addr, string name, string symbol) tokenSettings",
       "tuple(address[] receivers, uint256[] amounts) mintSettings"
     ],
-    "prepareUpdate": [""],
-    "prepareUninstallation": [""]
+    "prepareUpdate": [],
+    "prepareUninstallation": []
   }
 }
