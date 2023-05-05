@@ -17,7 +17,7 @@ import {PermissionManager} from "../../permission/PermissionManager.sol";
 import {CallbackHandler} from "../../utils/CallbackHandler.sol";
 import {hasBit, flipBit} from "../../utils/BitMap.sol";
 import {IEIP4824} from "../IEIP4824.sol";
-import {IDAO} from "../IDAO.sol";
+import {IDAO_v1_3_0_alpha} from "./IDAO_v1_3_0_alpha.sol";
 
 /// @title DAO v1.3.0-alpha (mumbai pre-release)
 /// @author Aragon Association - 2021-2023
@@ -28,7 +28,7 @@ contract DAO_v1_3_0_alpha is
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
-    IDAO,
+    IDAO_v1_3_0_alpha,
     UUPSUpgradeable,
     PermissionManager,
     CallbackHandler
@@ -135,7 +135,7 @@ contract DAO_v1_3_0_alpha is
     ) external initializer {
         _reentrancyStatus = _NOT_ENTERED;
 
-        _registerInterface(type(IDAO).interfaceId);
+        _registerInterface(type(IDAO_v1_3_0_alpha).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
         _registerTokenInterfaces();
@@ -163,19 +163,19 @@ contract DAO_v1_3_0_alpha is
     /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_DAO_PERMISSION_ID) {}
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function setTrustedForwarder(
         address _newTrustedForwarder
     ) external override auth(SET_TRUSTED_FORWARDER_PERMISSION_ID) {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function getTrustedForwarder() external view virtual override returns (address) {
         return trustedForwarder;
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function hasPermission(
         address _where,
         address _who,
@@ -185,14 +185,14 @@ contract DAO_v1_3_0_alpha is
         return isGranted(_where, _who, _permissionId, _data);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function setMetadata(
         bytes calldata _metadata
     ) external override auth(SET_METADATA_PERMISSION_ID) {
         _setMetadata(_metadata);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function execute(
         bytes32 _callId,
         Action[] calldata _actions,
@@ -260,7 +260,7 @@ contract DAO_v1_3_0_alpha is
         });
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function deposit(
         address _token,
         uint256 _amount,
@@ -281,7 +281,7 @@ contract DAO_v1_3_0_alpha is
         emit Deposited(msg.sender, _token, _amount, _reference);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function setSignatureValidator(
         address _signatureValidator
     ) external override auth(SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
@@ -290,11 +290,11 @@ contract DAO_v1_3_0_alpha is
         emit SignatureValidatorSet({signatureValidator: _signatureValidator});
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function isValidSignature(
         bytes32 _hash,
         bytes memory _signature
-    ) external view override(IDAO, IERC1271) returns (bytes4) {
+    ) external view override(IDAO_v1_3_0_alpha, IERC1271) returns (bytes4) {
         if (address(signatureValidator) == address(0)) {
             // Return the invalid magic number
             return bytes4(0);
@@ -351,7 +351,7 @@ contract DAO_v1_3_0_alpha is
         );
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IDAO_v1_3_0_alpha
     function registerStandardCallback(
         bytes4 _interfaceId,
         bytes4 _callbackSelector,

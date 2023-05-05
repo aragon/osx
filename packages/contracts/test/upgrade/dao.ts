@@ -31,7 +31,7 @@ describe('DAO Upgrade', function () {
     Dao_v1_0_1 = new DAOV101__factory(signers[0]);
     Dao_v1_3_0_alpha = new DAOV130Alpha__factory(signers[0]);
 
-    DaoCurrent = new DAO__factory(signers[0]);
+    DaoCurrent = new DAO__factory(signers[0]); // 1.3.0
   });
 
   it('upgrades v1.0.1 to v1.3.0', async () => {
