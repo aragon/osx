@@ -6,8 +6,8 @@ import {
   DAO__factory,
   DAOV100,
   DAOV100__factory,
-  DAOV110Alpha,
-  DAOV110Alpha__factory,
+  DAOV130Alpha,
+  DAOV130Alpha__factory,
 } from '../../typechain';
 
 import {daoExampleURI} from '../test-utils/dao';
@@ -18,7 +18,7 @@ import {readImplementationValueFromSlot} from '../../utils/storage';
 
 let signers: SignerWithAddress[];
 let Dao_v1_0_0: DAOV100__factory;
-let Dao_v1_1_0_alpha: DAOV110Alpha__factory;
+let Dao_v1_3_0_alpha: DAOV130Alpha__factory;
 let DaoCurrent: DAO__factory;
 
 const DUMMY_METADATA = ethers.utils.hexlify(
@@ -29,12 +29,12 @@ describe('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
     Dao_v1_0_0 = new DAOV100__factory(signers[0]);
-    Dao_v1_1_0_alpha = new DAOV110Alpha__factory(signers[0]);
+    Dao_v1_3_0_alpha = new DAOV130Alpha__factory(signers[0]);
 
     DaoCurrent = new DAO__factory(signers[0]);
   });
 
-  it('upgrades v1.0.0 to v1.1.0', async () => {
+  it('upgrades v1.0.0 to v1.3.0', async () => {
     const proxy = await deployWithProxy<DAOV100>(Dao_v1_0_0);
     await proxy.initialize(
       DUMMY_METADATA,
@@ -80,7 +80,7 @@ describe('DAO Upgrade', function () {
   });
 
   it('upgrades v1.0.0-alpha (mumbai pre-release) to v1.1.0', async () => {
-    const proxy = await deployWithProxy<DAOV110Alpha>(Dao_v1_1_0_alpha);
+    const proxy = await deployWithProxy<DAOV130Alpha>(Dao_v1_3_0_alpha);
     await proxy.initialize(
       DUMMY_METADATA,
       signers[0].address,
@@ -116,7 +116,7 @@ describe('DAO Upgrade', function () {
 
     // Check the emitted implementation.
     const emittedImplementation = (
-      await findEventTopicLog(upgradeTx, Dao_v1_1_0_alpha.interface, 'Upgraded')
+      await findEventTopicLog(upgradeTx, Dao_v1_3_0_alpha.interface, 'Upgraded')
     ).args.implementation;
     expect(emittedImplementation).to.equal(newImplementation.address);
 

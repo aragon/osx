@@ -19,11 +19,11 @@ import {hasBit, flipBit} from "../../utils/BitMap.sol";
 import {IEIP4824} from "../IEIP4824.sol";
 import {IDAO} from "../IDAO.sol";
 
-/// @title DAO v1.1.0-alpha (mumbai pre-release)
+/// @title DAO v1.3.0-alpha (mumbai pre-release)
 /// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO_v1_1_0_alpha is
+contract DAO_v1_3_0_alpha is
     IEIP4824,
     Initializable,
     IERC1271,
