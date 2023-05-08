@@ -3,24 +3,23 @@ import {defaultAbiCoder} from 'ethers/lib/utils';
 
 import {IMPLEMENTATION_SLOT} from '../test/test-utils/uups-upgradeable';
 
-export async function readImplementationValuesFromSlot(
+export function readImplementationValuesFromSlot(
   contractAddresses: string[]
 ): Promise<string[]> {
-  const implementationValues: string[] = await Promise.all(
-    contractAddresses.map(async contractAddress => {
-      return readImplementationValueFromSlot(contractAddress);
-    })
+  return Promise.all(
+    contractAddresses.map(contractAddress =>
+      readImplementationValueFromSlot(contractAddress)
+    )
   );
-
-  return implementationValues;
 }
 
-export async function readImplementationValueFromSlot(
+export function readImplementationValueFromSlot(
   contractAddress: string
 ): Promise<string> {
-  const encoded = await ethers.provider.getStorageAt(
+  return ethers.provider.getStorageAt(
     contractAddress,
     IMPLEMENTATION_SLOT
+  ).then((encoded) => 
+    defaultAbiCoder.decode(['address'], encoded)[0]
   );
-  return defaultAbiCoder.decode(['address'], encoded)[0];
 }
