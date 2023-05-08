@@ -3,10 +3,6 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO__factory} from '../../typechain';
-// import {
-//   v1_0_0_mainnet_goerli_typechain,
-//   v1_0_0_mumbai_typechain,
-// } from '@aragon/osx-versions';
 
 import {daoExampleURI} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
@@ -16,27 +12,23 @@ import {readImplementationValueFromSlot} from '../../utils/storage';
 import {ContractFactory} from 'ethers';
 
 let signers: SignerWithAddress[];
-let Dao_mainnet_goerli_V1_0_0: v1_0_0_mainnet_goerli_typechain.DAO__factory;
-let Dao_mumbai_V1_0_0: v1_0_0_mumbai_typechain.DAO__factory;
+let DaoV101: v1_0_1_typechain.DAO__factory;
+let DaoV120: v1_2_0_typechain.DAO__factory;
 let DaoCurrent: DAO__factory;
 
 const DUMMY_METADATA = ethers.utils.hexlify(
   ethers.utils.toUtf8Bytes('0x123456789')
 );
 
-import {
-  v1_0_0_mainnet_goerli_typechain,
-  v1_0_0_mumbai_typechain,
-} from '@aragon/osx-versions';
+import {v1_0_1_typechain, v1_2_0_typechain} from '@aragon/osx-versions';
 
-import DAO100 from '../../artifacts/@aragon/osx-versions/dist/build/v1_0_0_mainnet_goerli/contracts/core/dao/DAO.sol/DAO.json';
+import DAO100 from '../../artifacts/@aragon/osx-versions/dist/build/v1_0_1/contracts/core/dao/DAO.sol/DAO.json';
 
 describe.only('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
-    Dao_mainnet_goerli_V1_0_0 =
-      new v1_0_0_mainnet_goerli_typechain.DAO__factory(signers[0]);
-    Dao_mumbai_V1_0_0 = new v1_0_0_mumbai_typechain.DAO__factory(signers[0]);
+    DaoV101 = new v1_0_1_typechain.DAO__factory(signers[0]);
+    DaoV120 = new v1_2_0_typechain.DAO__factory(signers[0]);
 
     DaoCurrent = new DAO__factory(signers[0]);
   });
@@ -58,9 +50,7 @@ describe.only('DAO Upgrade', function () {
       signers[0]
     );
 
-    const proxy = await deployWithProxy<v1_0_0_mainnet_goerli_typechain.DAO>(
-      contractFactory
-    );
+    const proxy = await deployWithProxy<v1_0_1_typechain.DAO>(contractFactory);
     await proxy.initialize(
       DUMMY_METADATA,
       signers[0].address,
@@ -96,11 +86,7 @@ describe.only('DAO Upgrade', function () {
 
     // Check the emitted implementation.
     const emittedImplementation = (
-      await findEventTopicLog(
-        upgradeTx,
-        Dao_mainnet_goerli_V1_0_0.interface,
-        'Upgraded'
-      )
+      await findEventTopicLog(upgradeTx, DaoV101.interface, 'Upgraded')
     ).args.implementation;
     expect(emittedImplementation).to.equal(newImplementation.address);
 
@@ -109,7 +95,7 @@ describe.only('DAO Upgrade', function () {
   });
 
   it('upgrades mumbai v1.0.0 to v1.1.0', async () => {
-    const proxy = await deployWithProxy<v1_0_0_mumbai_typechain.DAO>(
+    const proxy = await deployWithProxy<v1_2_0_typechain.DAO>(
       Dao_mumbai_V1_0_0
     );
     await proxy.initialize(
