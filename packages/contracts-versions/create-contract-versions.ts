@@ -6,7 +6,7 @@ const exec = util.promisify(require('child_process').exec);
 
 const monorepoRoot = path.join(__dirname, '../..');
 const contractsDir = path.join(monorepoRoot, 'packages/contracts');
-const contractVersionsDir = path.join(__dirname, 'build');
+const contractVersionsDir = path.join(__dirname, 'versions');
 const commitHashes = require('./commit_hashes.json');
 
 async function getCurrentBranch() {
@@ -50,25 +50,6 @@ async function copyActiveContracts(versionName: string) {
   }
 }
 
-async function generateTypechain(src: string, dest: string) {
-  try {
-    // Find all the .json files, excluding the .dbg.json files, in all subdirectories
-    const {stdout} = await exec(
-      `find "${src}" -name '*.json' -type f -not -path '*.dbg.json'`
-    );
-    const jsonFiles = stdout
-      .trim()
-      .split('\n')
-      .map((file: string) => `"${file}"`) // Added type annotation here
-      .join(' ');
-
-    // Run typechain for all .json files at once
-    await exec(`typechain --target ethers-v5 --out-dir "${dest}" ${jsonFiles}`);
-  } catch (error) {
-    console.error('Error generating TypeChain output:', error);
-  }
-}
-
 async function createVersions() {
   const currentBranch = await getCurrentBranch();
 
@@ -81,14 +62,6 @@ async function createVersions() {
     );
     await buildContracts(versionCommit);
     await copyActiveContracts(versionName);
-
-    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destTypechain = path.join(
-      contractVersionsDir,
-      versionName,
-      'typechain'
-    );
-    await generateTypechain(srcArtifacts, destTypechain);
   }
 
   // Return to the original branch
@@ -99,10 +72,7 @@ async function createVersions() {
   for (const version in commitHashes.versions) {
     const versionName = version;
     exports.push(
-      `export * as ${versionName}_typechain from '../build/${versionName}/typechain';`
-    );
-    exports.push(
-      `import * as ${versionName}_active_contracts from '../build/${versionName}/active_contracts.json';`
+      `import * as ${versionName}_active_contracts from '../versions/${versionName}/active_contracts.json';`
     );
   }
   exports.push(

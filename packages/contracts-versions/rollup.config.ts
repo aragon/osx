@@ -10,7 +10,22 @@ export default [
       typescript({project: './tsconfig.json'}),
       json(),
       copy({
-        targets: [{src: 'build/*', dest: 'dist/build'}],
+        targets: [
+          {
+            src: 'versions/**/active_contracts.json',
+            dest: 'dist/versions',
+            rename: (name, extension, fullPath) => {
+              if (fullPath) {
+                const matchResult = fullPath.match(/versions\/(.+?)\//);
+                if (matchResult) {
+                  const versionName = matchResult[1];
+                  return `${versionName}/active_contracts.json`;
+                }
+              }
+              return name;
+            },
+          },
+        ],
       }),
     ],
     output: [
