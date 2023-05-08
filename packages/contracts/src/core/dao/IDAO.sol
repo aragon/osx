@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-/// @title IDAO v1.1.0
+/// @title IDAO
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
 interface IDAO {
