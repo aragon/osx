@@ -16,10 +16,7 @@ export function readImplementationValuesFromSlot(
 export function readImplementationValueFromSlot(
   contractAddress: string
 ): Promise<string> {
-  return ethers.provider.getStorageAt(
-    contractAddress,
-    IMPLEMENTATION_SLOT
-  ).then((encoded) => 
-    defaultAbiCoder.decode(['address'], encoded)[0]
-  );
+  return ethers.provider
+    .getStorageAt(contractAddress, IMPLEMENTATION_SLOT)
+    .then(encoded => defaultAbiCoder.decode(['address'], encoded)[0]);
 }
