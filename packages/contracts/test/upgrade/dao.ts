@@ -29,6 +29,8 @@ import {
   v1_0_0_mumbai_typechain,
 } from '@aragon/osx-versions';
 
+import DAO100 from '../../artifacts/@aragon/osx-versions/dist/build/v1_0_0_mainnet_goerli/contracts/core/dao/DAO.sol/DAO.json';
+
 describe.only('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
@@ -41,15 +43,24 @@ describe.only('DAO Upgrade', function () {
 
   it('upgrades mainnet/goerli v1.0.0 to v1.1.0', async () => {
     // even this do not seems to work
+    // const contractFactory = new ContractFactory(
+    //   v1_0_0_mainnet_goerli_typechain.DAO__factory.createInterface(),
+    //   v1_0_0_mainnet_goerli_typechain.DAO__factory.bytecode,
+    //   signers[0]
+    // );
+
+    // console.log('dao factory == ', contractFactory);
+
+    const iface = new ethers.utils.Interface(DAO100.abi);
     const contractFactory = new ContractFactory(
-      v1_0_0_mainnet_goerli_typechain.DAO__factory.createInterface(),
-      v1_0_0_mainnet_goerli_typechain.DAO__factory.bytecode,
+      iface,
+      DAO100.bytecode,
       signers[0]
     );
 
-    console.log('dao factory == ', contractFactory);
-
-    const proxy = await deployWithProxy<any>(contractFactory);
+    const proxy = await deployWithProxy<v1_0_0_mainnet_goerli_typechain.DAO>(
+      contractFactory
+    );
     await proxy.initialize(
       DUMMY_METADATA,
       signers[0].address,

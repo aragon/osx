@@ -11,6 +11,5 @@
     "rootDir": "./",
     "baseUrl": "./"
   },
-  "include": ["/build"],
-  "files": ["./npm/index.ts"]
+  "include": ["./build", "./build/**/contracts", "./npm", "./npm/index.ts"]
 }

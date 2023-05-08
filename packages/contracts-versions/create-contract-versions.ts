@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const glob = require('glob');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
@@ -22,8 +23,17 @@ async function buildContracts(commit: string) {
   }
 }
 
-async function copyActiveContracts(commit: string, versionName: string) {
+async function copyActiveContracts(versionName: string) {
   try {
+    console.log(`Copying contracts source code`);
+    const srcContracts = path.join(contractsDir, 'src');
+    const destContracts = path.join(
+      contractVersionsDir,
+      versionName,
+      'contracts'
+    );
+    await fs.copy(srcContracts, destContracts);
+
     console.log(`Copying active_contracts.json`);
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
     const destActiveContracts = path.join(
@@ -33,7 +43,10 @@ async function copyActiveContracts(commit: string, versionName: string) {
     );
     await fs.copy(srcActiveContracts, destActiveContracts);
   } catch (error) {
-    console.error('Error copying active contracts:', error);
+    console.error(
+      'Error copying contracts source code and active contracts:',
+      error
+    );
   }
 }
 
@@ -67,7 +80,7 @@ async function createVersions() {
       `Building contracts for version: ${versionName}, with commit: ${versionCommit}`
     );
     await buildContracts(versionCommit);
-    await copyActiveContracts(versionCommit, versionName);
+    await copyActiveContracts(versionName);
 
     const srcArtifacts = path.join(contractsDir, 'artifacts/src');
     const destTypechain = path.join(

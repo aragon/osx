@@ -1,6 +1,6 @@
 {
   "versions": {
-    "v1_0_0_mainnet_goerli": "c2b9d23a96654e81f22fbf91e6f334ef26a370af",
-    "v1_0_0_mumbai": "9485d97301611cfc78faa4bd00eb54abb6dd2d5e"
+    "v1_0_1": "c2b9d23a96654e81f22fbf91e6f334ef26a370af",
+    "v1_2_0": "9485d97301611cfc78faa4bd00eb54abb6dd2d5e"
   }
 }

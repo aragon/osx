@@ -9,7 +9,9 @@ export default [
     plugins: [
       typescript({project: './tsconfig.json'}),
       json(),
-      copy({targets: [{src: 'build/*', dest: 'dist/build'}]}),
+      copy({
+        targets: [{src: 'build/*', dest: 'dist/build'}],
+      }),
     ],
     output: [
       {
