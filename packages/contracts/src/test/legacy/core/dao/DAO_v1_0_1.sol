@@ -13,10 +13,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import {PermissionManager} from "../../permission/PermissionManager.sol";
-import {CallbackHandler} from "../../utils/CallbackHandler.sol";
-import {hasBit, flipBit} from "../../utils/BitMap.sol";
-import {IEIP4824} from "../IEIP4824.sol";
+import {PermissionManager} from "../../../../core/permission/PermissionManager.sol";
+import {CallbackHandler} from "../../../../core/utils/CallbackHandler.sol";
+import {hasBit, flipBit} from "../../../../core/utils/BitMap.sol";
+import {IEIP4824} from "../../../../core/dao/IEIP4824.sol";
 import {IDAO_v1_0_1} from "./IDAO_v1_0_1.sol";
 
 /// @title DAO v1.0.1
