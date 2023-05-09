@@ -279,29 +279,37 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      await setBalances([
-        {receiver: signers[0].address, amount: 1},
-        {receiver: signers[1].address, amount: 0},
-      ]);
+      await setBalances([{receiver: signers[0].address, amount: 1}]);
+      expect(await governanceErc20Mock.balanceOf(signers[0].address)).to.eq(1);
+      expect(await governanceErc20Mock.balanceOf(signers[1].address)).to.eq(0);
+
+      expect(await governanceErc20Mock.getVotes(signers[0].address)).to.eq(1);
+      expect(await governanceErc20Mock.getVotes(signers[1].address)).to.eq(0);
 
       expect(await voting.isMember(signers[0].address)).to.be.true;
       expect(await voting.isMember(signers[1].address)).to.be.false;
     });
 
-    it('returns true if the account currently owns at least one token', async () => {
+    it('returns true if the account currently has one at least one token delegated to her/him', async () => {
       await voting.initialize(
         dao.address,
         votingSettings,
         governanceErc20Mock.address
       );
 
-      await setBalances([
-        {receiver: signers[0].address, amount: 1},
-        {receiver: signers[1].address, amount: 0},
-      ]);
+      await setBalances([{receiver: signers[0].address, amount: 1}]);
+      expect(await governanceErc20Mock.balanceOf(signers[0].address)).to.eq(1);
+      expect(await governanceErc20Mock.balanceOf(signers[1].address)).to.eq(0);
+
+      await governanceErc20Mock
+        .connect(signers[0])
+        .delegate(signers[1].address);
+
+      expect(await governanceErc20Mock.getVotes(signers[0].address)).to.eq(0);
+      expect(await governanceErc20Mock.getVotes(signers[1].address)).to.eq(1);
 
       expect(await voting.isMember(signers[0].address)).to.be.true;
-      expect(await voting.isMember(signers[1].address)).to.be.false;
+      expect(await voting.isMember(signers[1].address)).to.be.true;
     });
   });
 

@@ -150,7 +150,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
     function isMember(address _account) external view returns (bool) {
         // A member must own or least one token or have at least one token delegated to her/him.
         return
-            IERC20Upgradeable(address(votingToken)).balanceOf(_msgSender()) > 0 ||
+            IERC20Upgradeable(address(votingToken)).balanceOf(_account) > 0 ||
             votingToken.getVotes(_account) > 0;
     }
 
