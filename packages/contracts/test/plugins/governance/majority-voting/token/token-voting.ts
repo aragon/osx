@@ -287,6 +287,22 @@ describe('TokenVoting', function () {
       expect(await voting.isMember(signers[0].address)).to.be.true;
       expect(await voting.isMember(signers[1].address)).to.be.false;
     });
+
+    it('returns true if the account currently owns at least one token', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await setBalances([
+        {receiver: signers[0].address, amount: 1},
+        {receiver: signers[1].address, amount: 0},
+      ]);
+
+      expect(await voting.isMember(signers[0].address)).to.be.true;
+      expect(await voting.isMember(signers[1].address)).to.be.false;
+    });
   });
 
   describe('Proposal creation', async () => {
@@ -295,78 +311,126 @@ describe('TokenVoting', function () {
       await setTotalSupply(1);
     });
 
-    it('reverts if the user is not allowed to create a proposal', async () => {
-      votingSettings.minProposerVotingPower = 1;
+    context('minProposerVotingPower == 0', async () => {
+      beforeEach(async () => {
+        votingSettings.minProposerVotingPower = 0;
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+      });
 
-      await voting.initialize(
-        dao.address,
-        votingSettings,
-        governanceErc20Mock.address
-      );
+      it('creates a proposal if `_msgSender` owns no tokens and has not tokens delegated to her/him in the current block', async () => {
+        await setBalances([
+          {
+            receiver: signers[1].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
 
-      await expect(
-        voting
-          .connect(signers[9])
-          .createProposal(
-            dummyMetadata,
-            [],
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-      )
-        .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
-        .withArgs(signers[9].address);
-
-      await expect(
-        voting.createProposal(
-          dummyMetadata,
-          [],
-          0,
-          startDate,
-          endDate,
-          VoteOption.None,
-          false
-        )
-      ).not.to.be.reverted;
+        await expect(
+          voting
+            .connect(signers[1])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        ).to.not.be.reverted;
+      });
     });
 
-    it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
-      votingSettings.minProposerVotingPower = 123;
+    context('minProposerVotingPower > 0', async () => {
+      beforeEach(async () => {
+        votingSettings.minProposerVotingPower = 123;
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+      });
 
-      await setBalances([
-        {
-          receiver: signers[1].address,
-          amount: votingSettings.minProposerVotingPower,
-        },
-      ]);
+      it('reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block', async () => {
+        await setBalances([
+          {
+            receiver: signers[1].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
 
-      await voting.initialize(
-        dao.address,
-        votingSettings,
-        governanceErc20Mock.address
-      );
+        await expect(
+          voting
+            .connect(signers[0])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[0].address);
 
-      await expect(
-        voting
+        await expect(
+          voting
+            .connect(signers[1])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        ).not.to.be.reverted;
+      });
+
+      it('reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block', async () => {
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
+
+        await ethers.provider.send('evm_setAutomine', [false]);
+        const expectedSnapshotBlockNumber = (
+          await ethers.provider.getBlock('latest')
+        ).number;
+
+        // Transaction 1: Transfer the tokens from signers[0] to signers[1]
+        const tx1 = await governanceErc20Mock
           .connect(signers[0])
-          .createProposal(
-            dummyMetadata,
-            [],
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-      )
-        .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
-        .withArgs(signers[0].address);
+          .transfer(signers[1].address, votingSettings.minProposerVotingPower);
 
-      await expect(
-        voting
+        // Transaction 2: Expect the proposal creation to fail for signers[0] because he transferred the tokens in transaction 1
+        await expect(
+          voting
+            .connect(signers[0])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[0].address);
+
+        // Transaction 3: Create the proposal as signers[1]
+        const tx3 = await voting
           .connect(signers[1])
           .createProposal(
             dummyMetadata,
@@ -376,8 +440,232 @@ describe('TokenVoting', function () {
             endDate,
             VoteOption.None,
             false
-          )
-      ).not.to.be.reverted;
+          );
+
+        // Check the balances before the block is mined
+        expect(
+          await governanceErc20Mock.balanceOf(signers[0].address)
+        ).to.equal(votingSettings.minProposerVotingPower);
+        expect(
+          await governanceErc20Mock.balanceOf(signers[1].address)
+        ).to.equal(0);
+
+        // Mine the block
+        await ethers.provider.send('evm_mine', []);
+        const minedBlockNumber = (await ethers.provider.getBlock('latest'))
+          .number;
+
+        // Expect all transaction receipts to be in the same block after the snapshot block.
+        expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
+        expect((await tx3.wait()).blockNumber).to.equal(minedBlockNumber);
+        expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
+
+        // Expect the balances to have changed
+        expect(
+          await governanceErc20Mock.balanceOf(signers[0].address)
+        ).to.equal(0);
+        expect(
+          await governanceErc20Mock.balanceOf(signers[1].address)
+        ).to.equal(votingSettings.minProposerVotingPower);
+
+        // Check the `ProposalCreatedEvent` for the creator and proposalId
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx3,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
+        expect(event.args.creator).to.equal(signers[1].address);
+
+        // Check that the snapshot block stored in the proposal struct
+        const proposal = await voting.getProposal(id);
+        expect(proposal.parameters.snapshotBlock).to.equal(
+          expectedSnapshotBlockNumber
+        );
+
+        await ethers.provider.send('evm_setAutomine', [true]);
+      });
+
+      it('creates a proposal if `_msgSender` owns enough tokens  in the current block', async () => {
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
+
+        // Check that signers[2] who has no balance and is not a delegatee can NOT create a proposal
+        await expect(
+          voting
+            .connect(signers[2])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[2].address);
+
+        // Check that signers[0] who has enough balance can create a proposal
+        await expect(
+          voting
+            .connect(signers[0])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        ).not.to.be.reverted;
+      });
+
+      it('creates a proposal if `_msgSender` owns enough tokens and has delegated them to someone else in the current block', async () => {
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
+
+        // delegate from signers[0] to signers[1]
+        await governanceErc20Mock
+          .connect(signers[0])
+          .delegate(signers[1].address);
+
+        // Check that signers[2] who has a zero balance and is not a delegatee can NOT create a proposal
+        await expect(
+          voting
+            .connect(signers[2])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[2].address);
+
+        await expect(
+          voting
+            .connect(signers[0])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        ).to.not.be.reverted;
+      });
+
+      it('creates a proposal if `_msgSender` owns no tokens but has enough tokens delegated to her/him in the current block', async () => {
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
+
+        // delegate from signers[0] to signers[1]
+        await governanceErc20Mock
+          .connect(signers[0])
+          .delegate(signers[1].address);
+
+        // Check that signers[2] who has a zero balance and is not a delegatee can NOT create a proposal
+        await expect(
+          voting
+            .connect(signers[2])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[2].address);
+
+        await expect(
+          voting
+            .connect(signers[1])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        ).not.to.be.reverted;
+      });
+
+      it('reverts if `_msgSender` doesn not own enough tokens herself/himself and has not tokens delegated to her/him in the current block', async () => {
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: 1,
+          },
+          {
+            receiver: signers[1].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ]);
+
+        // Check that signers[0] who has not enough tokens cannot create a proposal
+        await expect(
+          voting
+            .connect(signers[2])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[2].address);
+
+        // Check that signers[0] delegating to signers[1] does not let him create a proposal
+        await governanceErc20Mock
+          .connect(signers[0])
+          .delegate(signers[1].address);
+
+        await expect(
+          voting
+            .connect(signers[0])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[0].address);
+      });
     });
 
     it('reverts if the total token supply is 0', async () => {
