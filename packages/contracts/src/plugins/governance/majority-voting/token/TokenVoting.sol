@@ -4,16 +4,13 @@ pragma solidity 0.8.17;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import {IMembership} from "../../../../core/plugin/membership/IMembership.sol";
 import {IDAO} from "../../../../core/dao/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";
-
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 
 /// @title TokenVoting
 /// @author Aragon Association - 2021-2023
