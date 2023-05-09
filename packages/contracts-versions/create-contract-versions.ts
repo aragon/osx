@@ -9,6 +9,15 @@ const contractsDir = path.join(monorepoRoot, 'packages/contracts');
 const contractVersionsDir = path.join(__dirname, 'versions');
 const commitHashes = require('./commit_hashes.json');
 
+async function checkForUncommittedChanges() {
+  const {stdout} = await exec('git status --porcelain', {cwd: contractsDir});
+  if (stdout.trim()) {
+    throw new Error(
+      'There are uncommitted changes. Please commit or stash them before running this script.'
+    );
+  }
+}
+
 async function getCurrentBranch() {
   const {stdout} = await exec('git branch --show-current', {cwd: contractsDir});
   return stdout.trim();
@@ -23,7 +32,7 @@ async function buildContracts(commit: string) {
   }
 }
 
-async function copyActiveContracts(versionName: string) {
+async function copyContracts(versionName: string) {
   try {
     console.log(`Copying contracts source code`);
     const srcContracts = path.join(contractsDir, 'src');
@@ -51,6 +60,8 @@ async function copyActiveContracts(versionName: string) {
 }
 
 async function createVersions() {
+  await checkForUncommittedChanges();
+
   const currentBranch = await getCurrentBranch();
 
   for (const version in commitHashes.versions) {
@@ -61,7 +72,7 @@ async function createVersions() {
       `Building contracts for version: ${versionName}, with commit: ${versionCommit}`
     );
     await buildContracts(versionCommit);
-    await copyActiveContracts(versionName);
+    await copyContracts(versionName);
   }
 
   // Return to the original branch

@@ -12,5 +12,5 @@
     "baseUrl": "./"
   },
   "include": ["./build", "./build/**/contracts", "./npm"],
-  "files": ["./index.ts"]
+  "files": ["./npm/index.ts"]
 }
