@@ -153,8 +153,8 @@ contract TokenVoting is IMembership, MajorityVotingBase {
     function isMember(address _account) external view returns (bool) {
         //
         return
-            votingToken.getVotes(_account) > 0 ||
-            votingToken.getVotes(votingToken.delegates(_account)) > 0;
+            IERC20Upgradeable(address(votingToken)).balanceOf(_msgSender()) > 0 ||
+            votingToken.getVotes(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase
