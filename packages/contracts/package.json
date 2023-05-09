@@ -16,6 +16,7 @@
     "build": "hardhat compile",
     "build:npm": "rollup --config rollup.config.ts",
     "build:contracts-versions": "cd ../contracts-versions && yarn build",
+    "postinstall": "yarn build:contracts-versions",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",

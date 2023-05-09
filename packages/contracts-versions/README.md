@@ -27,7 +27,7 @@ const mumbaiActiveContracts = v1_2_0_active_contracts.mumbai;
 
 Import a specific contract source code from a specific version:
 
-```javascript
+```solidity
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -36,14 +36,14 @@ pragma solidity 0.8.17;
 // import legacy contracts from a specific version
 import {DAO} from '@aragon/osx-versions/versions/v1_0_1/contracts/core/dao/DAO.sol';
 
-.....
+// .....
 ```
 
 ### Generate typechain
 
 To generate TypeChain if needed:
 
-```javascript
+```console
 find <path-to>/artifacts/@aragon/osx-versions/versions/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir <path-to>/typechain/osx-versions/versions/"
 ```
 
