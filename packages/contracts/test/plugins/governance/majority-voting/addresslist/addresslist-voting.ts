@@ -360,7 +360,7 @@ describe('AddresslistVoting', function () {
       expect((await tx4.wait()).blockNumber).to.equal(minedBlockNumber);
       expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
 
-      // Expect the listed member to have changed
+      // Expect the listed members to have changed
       expect(await voting.isListed(signers[0].address)).to.equal(false);
       expect(await voting.isListed(signers[1].address)).to.equal(true);
 
