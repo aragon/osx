@@ -11,6 +11,10 @@ import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";
 
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+
 /// @title TokenVoting
 /// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using an [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
@@ -77,19 +81,31 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
+        // Check that either `_msgSender` owns enough tokens or has enough voting power from being a delegatee.
+        {
+            uint256 minProposerVotingPower_ = minProposerVotingPower();
+
+            if (minProposerVotingPower_ != 0) {
+                // Because of the `TokenVotingSetup`, we can assume here that `votingToken` is an [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+                if (
+                    IERC20Upgradeable(address(votingToken)).balanceOf(_msgSender()) <
+                    minProposerVotingPower_ &&
+                    votingToken.getVotes(_msgSender()) < minProposerVotingPower_
+                ) {
+                    revert ProposalCreationForbidden(_msgSender());
+                }
+            }
+        }
+
         uint256 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number - 1;
+            snapshotBlock = block.number - 1; // The snapshot block must be mined already to protocet the transaction against backrunning vote changes.
         }
 
         uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
 
         if (totalVotingPower_ == 0) {
             revert NoVotingPower();
-        }
-
-        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
-            revert ProposalCreationForbidden(_msgSender());
         }
 
         proposalId = _createProposal({
@@ -135,8 +151,10 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @inheritdoc IMembership
     function isMember(address _account) external view returns (bool) {
-        /// whatever condition
-        return votingToken.getVotes(_account) > 0;
+        //
+        return
+            votingToken.getVotes(_account) > 0 ||
+            votingToken.getVotes(votingToken.delegates(_account)) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase
