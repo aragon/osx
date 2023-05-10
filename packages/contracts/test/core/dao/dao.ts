@@ -41,6 +41,9 @@ const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
 const MAX_ACTIONS = 256;
 
+const OZ_INITIALIZED_SLOT_POSITION = 0;
+const REENTRANCY_STATUS_SLOT_POSITION = 304;
+
 const EVENTS = {
   MetadataSet: 'MetadataSet',
   TrustedForwarderSet: 'TrustedForwarderSet',
@@ -189,6 +192,30 @@ describe('DAO', function () {
       expect(
         await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
       ).to.equal(true);
+    });
+
+    it('sets OZs `_initialized` at storage slot [0] to 2', async () => {
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            dao.address,
+            OZ_INITIALIZED_SLOT_POSITION,
+            'latest'
+          )
+        ).toNumber()
+      ).to.equal(2);
+    });
+
+    it('sets the `_reentrancyStatus` at storage slot [304] to `_NOT_ENTERED = 1`', async () => {
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            dao.address,
+            REENTRANCY_STATUS_SLOT_POSITION,
+            'latest'
+          )
+        ).toNumber()
+      ).to.equal(1);
     });
   });
 

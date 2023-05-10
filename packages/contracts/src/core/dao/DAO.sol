@@ -95,6 +95,9 @@ contract DAO is
     /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
 
+    /// @notice Thrown if an upgrade is not supported from a specific protocol version .
+    error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
+
     /// @notice Thrown if there is a mismatch between the expected and actually deposited amount of native tokens.
     /// @param expected The expected native token amount.
     /// @param actual The actual native token amount deposited.
@@ -151,9 +154,19 @@ contract DAO is
         __PermissionManager_init(_initialOwner);
     }
 
-    /// @notice Initializes the DAO after the upgrade from v1.0.0 by setting the newly added reentrancy variable to `_NOT_ENTERED`.
-    function initializeFromV1_0_0() external reinitializer(2) {
-        _reentrancyStatus = _NOT_ENTERED;
+    /// @notice Initializes the DAO after an upgrade from a previous version.
+    /// @param previousProtocolVersion The protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
+    function initializeUpgradeFrom(
+        uint8[3] calldata previousProtocolVersion
+    ) external reinitializer(2) {
+        if (previousProtocolVersion[0] != 1) {
+            revert ProtocolVersionUpgradeNotSupported(previousProtocolVersion);
+        }
+
+        // All version before v1.3.0 must initialize the newly added `_reentrancyStatus`.
+        if (previousProtocolVersion[1] < 3) {
+            _reentrancyStatus = _NOT_ENTERED;
+        }
     }
 
     /// @inheritdoc PermissionManager
