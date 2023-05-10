@@ -103,7 +103,7 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-As you can see, we have a constructor storing the implementation contract instantiated via the `new` method in the private immutable variable `implementation` to save gas and a `implementation` function to return it.
+As you can see, we have a constructor storing the implementation contract instantiated via the `new` method in the private immutable variable `implementation` to save gas and a `implementation` function to retrieve it.
 
 Next, we will add the implementation for the `prepareInstallation` and `prepareUninstallation` functions.
 
@@ -178,10 +178,10 @@ function prepareInstallation(
 }
 ```
 
-Finally, we construct an array of permission operations requesting two permissions to be granted that is returned by the function.
+Finally, we construct and return an array with the permissions that we need for our plugin to work properly.
 
-- First, we request the `ADMIN_EXECUTE_PERMISSION_ID` permission for the `admin` (`who`) address on the `plugin` (`where`).
-- Second, we request the `EXECUTE_PERMISSION_ID` permission for the freshly deployed `plugin` (`who`) on the `_dao` (`where`). We don't add conditions to the permissions in this case, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
+- First, we request the `admin` address can use `ADMIN_EXECUTE_PERMISSION_ID` permission on the `plugin`.
+- Second, we request that our newly deployed plugin can use the `EXECUTE_PERMISSION_ID` permission on the `_dao`. We don't add conditions to the permissions in this case, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
 
 ### 5. Implementing the `prepareUninstallation()` function
 
@@ -327,7 +327,7 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-Once done, our plugin is ready to be published on the Aragon plugin registry. With the address of the `SimpleAdminSetup` contract, we're ready for creating our `PluginRepo`, the plugin's repository where all plugin versions will live. Check out our how to guides on [publishing your plugin here](../07-publication/index.md).
+Once done, our plugin is ready to be published on the Aragon plugin registry. With the address of the `SimpleAdminSetup` contract, we are ready for creating our `PluginRepo`, the plugin's repository where all plugin versions will live. Check out our how to guides on [publishing your plugin here](../07-publication/index.md).
 
 ### In the future: Subsequent Builds
 

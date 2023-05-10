@@ -6,7 +6,7 @@ title: How to initialize Non-Upgradeable Plugins
 
 Every plugin should receive and store the address of the DAO it is associated with upon initialization. This is how the plugin will be able to interact with the DAO that has installed it.
 
-In addition, your plugin implementation might want to introduce other storage variables that should be initialized immediately after the contract was created. For example, in the `SimpleAdmin` plugin example, we want to store the `admin` address.
+In addition, your plugin implementation might want to introduce other storage variables that should be initialized immediately after the contract was created. For example, in the `SimpleAdmin` plugin example (which sets one address as the full admin of the DAO), we'd want to store the `admin` address.
 
 ```solidity
 contract SimpleAdmin is Plugin {
@@ -16,14 +16,14 @@ contract SimpleAdmin is Plugin {
 
 How we set up the plugin's `initialize()` function depends on the plugin type selected. To review plugin types in depth, check out our [guide here](../02-plugin-types.md).
 
-Additionally, how we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, there's two ways in which we can deploy our plugin:
+Additionally, the way we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, there's two ways in which we can deploy our plugin:
 
 - Deployment via Solidity's `new` keyword, OR
 - Deployment via the Minimal Proxy Pattern
 
 ### Option A: Deployment via Solidity's `new` Keyword
 
-To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template we've created.
+To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template Aragon created. You can find it [here](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/plugin/Plugin.sol).
 
 In this case, the compiler will force you to write a `constructor` function calling the `Plugin` parent `constructor` and provide it with a contract of type `IDAO`. Inside the constructor, you might want to initialize the storage variables that you have added yourself, such as the `admin` address in the example below.
 
@@ -46,7 +46,7 @@ contract SimpleAdmin is Plugin {
 ```
 
 :::note
-We used Solidity's `immutable` keyword so that the admin variable can never be changed. Immutable variables can only be initialized in the constructor.
+The `admin` variable is set as `immutable` so that it can never be changed. Immutable variables can only be initialized in the constructor.
 :::
 
 This type of constructor implementation stores the `IDAO _dao` reference in the right place. If your plugin is deployed often, which we could expect, we can [save significant amounts of gas by deployment through using the minimal proxy pattern](https://blog.openzeppelin.com/workshop-recap-cheap-contract-deployment-through-clones/).

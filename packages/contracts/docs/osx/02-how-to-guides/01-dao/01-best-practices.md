@@ -6,7 +6,7 @@ title: Best Practices
 
 ### DOs 👌
 
-- Make sure that at least one address (typically a governance plugin) has `EXECUTE_PERMISSION_ID` permission so that something can always execute on behalf of the DAO.
+- Make sure that at least one address (typically a governance plugin) has `EXECUTE_PERMISSION_ID` permission so that something can be execute on behalf of the DAO.
 - Check every proposal asking to install, update, or uninstall a plugin with utmost care and review. Installation means granting an external contract permissions, so you want to be extra careful about:
   - the implementation contract
   - the setup contract

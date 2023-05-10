@@ -1,5 +1,5 @@
 ---
-title: How to build a Non-Upgradeable Plugin
+title: How to build a Non-Upgradeable Plugin contract
 ---
 
 ## Writing the Implementation Logic for your Plugin
@@ -40,7 +40,7 @@ Setting this permission is key because it ensures only signers who have been gra
 
 ### 2. Add the logic implementation
 
-Now that we've created the permission, we'll use it to protect the implementation. We want to make sure only the authorized callers holding the `ADMIN_EXECUTE_PERMISSION`, can use the function.
+Now that we have created the permission, we will use it to protect the implementation. We want to make sure only the authorized callers holding the `ADMIN_EXECUTE_PERMISSION`, can use the function.
 
 Because we have initialized the [`PluginClonable` base contract](../../../03-reference-guide/core/plugin/PluginCloneable.md), we can now use its features, i.e., the [`auth` modifier](../../../03-reference-guide/core/plugin/dao-authorizable/DaoAuthorizable.md#internal-modifier-auth) provided through the `DaoAuthorizable` base class. The `auth('ADMIN_EXECUTE_PERMISSION')` returns an error if the address calling on the function has not been granted that permission, effectively protecting from malicious use cases.
 
@@ -70,7 +70,7 @@ contract SimpleAdmin is PluginCloneable {
 ```
 
 :::note
-In this example, we're building a governance plugin. To increase its capabilities and provide some standardization into the protocol, we recommend completing the governance plugin by [implementing the `IProposal` and `IMembership` interfaces](../05-governance-plugins/index.md).
+In this example, we are building a governance plugin. To increase its capabilities and provide some standardization into the protocol, we recommend completing the governance plugin by [implementing the `IProposal` and `IMembership` interfaces](../05-governance-plugins/index.md).
 Optionally, you can also allow certain actions to fail by using [the failure map feature of the DAO executor](../../../01-how-it-works/01-core/01-dao/01-actions.md#allowing-for-failure).
 :::
 

@@ -12,7 +12,7 @@ Some observations:
 
 - Simpler to create, deploy, and manage.
 - Instantiation is done via the `new` keyword or deployed via the [minimal proxy pattern (ERC-1167)](https://eips.ethereum.org/EIPS/eip-1167)
-- The storage is contained within versions. So if your plugin is dependent on state information from previous versions, you won't have access to it directly in upcoming versions, since every version is a blank new slate. If this is a requirement for your project, we recommend you deploy an [Upgradeable Plugin](../04-upgradeable-plugin/index.md).
+- The storage is contained within versions. So if your plugin is dependent on state information from previous versions, you won't have access to it directly in upcoming versions, since every version is a blank new state. If this is a requirement for your project, we recommend you deploy an [Upgradeable Plugin](../04-upgradeable-plugin/index.md).
 
 Before moving on with the Guides, make sure you've read our documentation on [Choosing the Best Type for Your Plugin](../02-plugin-types.md) to make sure you're selecting the right type of contract for your Plugin.
 

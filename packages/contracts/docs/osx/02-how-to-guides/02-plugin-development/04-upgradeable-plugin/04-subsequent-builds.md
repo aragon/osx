@@ -12,7 +12,7 @@ In this how to guide, we'll go through how we can create these builds for our pl
 
 Make sure you have at least one build already deployed and published into the Aragon protocol. Make sure to check out our [publishing guide](../07-publication/index.md) to ensure this step is done.
 
-### 3. Create a build implementation modifying storage
+### 2. Create a build implementation modifying storage
 
 In this second build, we want to change certain sections of our existing plugin implementation - we want to update the storage of our plugin with new values. In this specific case, we will add a second storage variable `address public account;`. Additional to the `initializeFromBuild2` function, we also want to add a second setter function `storeAccount` that uses the same permission as `storeNumber`.
 
