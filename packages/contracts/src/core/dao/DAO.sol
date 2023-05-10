@@ -13,6 +13,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
+import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
 import {hasBit, flipBit} from "../utils/BitMap.sol";
@@ -31,7 +32,8 @@ contract DAO is
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
-    CallbackHandler
+    CallbackHandler,
+    ProtocolVersion
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
@@ -112,6 +114,7 @@ contract DAO is
         string calldata daoURI_
     ) external initializer {
         _registerInterface(type(IDAO).interfaceId);
+        _registerInterface(type(ProtocolVersion).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
         _registerTokenInterfaces();
