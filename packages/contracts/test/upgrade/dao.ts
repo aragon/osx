@@ -18,7 +18,7 @@ import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 
 let signers: SignerWithAddress[];
-let Dao_v1_0_1: DAOV101__factory;
+let Dao_v1_0_0: DAOV101__factory;
 let Dao_v1_2_0: DAOV120__factory;
 let DaoCurrent: DAO__factory;
 
@@ -41,7 +41,7 @@ const FORWARDER_2 = `0x${'2'.repeat(40)}`;
 describe.only('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
-    Dao_v1_0_1 = new DAOV101__factory(signers[0]);
+    Dao_v1_0_0 = new DAOV101__factory(signers[0]);
     Dao_v1_2_0 = new DAOV120__factory(signers[0]);
 
     DaoCurrent = new DAO__factory(signers[0]); // 1.3.0
@@ -50,9 +50,9 @@ describe.only('DAO Upgrade', function () {
     daoCurrentImplementaion = await DaoCurrent.deploy();
   });
 
-  context(`v1.0.1 to v1.3.0`, function () {
+  context(`v1.0.0 to v1.3.0`, function () {
     beforeEach(async function () {
-      daoV101Proxy = await deployWithProxy<DAOV101>(Dao_v1_0_1);
+      daoV101Proxy = await deployWithProxy<DAOV101>(Dao_v1_0_0);
       await daoV101Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -60,7 +60,7 @@ describe.only('DAO Upgrade', function () {
         daoExampleURI
       );
 
-      // Store the v1.0.1 implementation
+      // Store the v1.0.0 implementation
       daoV101Implementation = await readImplementationValueFromSlot(
         daoV101Proxy.address
       );
@@ -90,7 +90,7 @@ describe.only('DAO Upgrade', function () {
 
       // Check the emitted implementation.
       const emittedImplementation = (
-        await findEventTopicLog(upgradeTx, Dao_v1_0_1.interface, 'Upgraded')
+        await findEventTopicLog(upgradeTx, Dao_v1_0_0.interface, 'Upgraded')
       ).args.implementation;
       expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
 
