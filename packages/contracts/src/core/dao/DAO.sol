@@ -136,7 +136,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external initializer {
+    ) external reinitializer(2) {
         _reentrancyStatus = _NOT_ENTERED;
 
         _registerInterface(type(IDAO).interfaceId);
@@ -148,6 +148,10 @@ contract DAO is
         _setTrustedForwarder(_trustedForwarder);
         _setDaoURI(daoURI_);
         __PermissionManager_init(_initialOwner);
+    }
+
+    function initializeFromV1_0_0() external reinitializer(2) {
+        _reentrancyStatus = _NOT_ENTERED;
     }
 
     /// @inheritdoc PermissionManager
