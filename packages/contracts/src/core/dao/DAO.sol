@@ -76,7 +76,7 @@ contract DAO is
     string private _daoURI;
 
     /// @notice The state variable for the reentrancy guard of the `execute` function.
-    /// @dev The variable can of value `_NOT_ENTERED = 1` or `_ENTERED = 2` in usage and shoud be initialized to `_NOT_ENTERED`. However, leaving it uninitialized (with a default value of 0) does not pose a risk since the variable will be set to `_NOT_ENTERED` after the first usage.
+    /// @dev The variable can of value `_NOT_ENTERED = 1` or `_ENTERED = 2` in usage and shoud be initialized with `_NOT_ENTERED`.
     uint256 private _reentrancyStatus;
 
     /// @notice Thrown if a call is reentrant.
@@ -150,6 +150,7 @@ contract DAO is
         __PermissionManager_init(_initialOwner);
     }
 
+    /// @notice Initializes the DAO after the upgrade from v1.0.0 by setting the newly added reentrancy variable to `_NOT_ENTERED`.
     function initializeFromV1_0_0() external reinitializer(2) {
         _reentrancyStatus = _NOT_ENTERED;
     }
