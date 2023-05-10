@@ -11,7 +11,7 @@ import {
   DAOV120__factory,
 } from '../../typechain';
 
-import {daoExampleURI} from '../test-utils/dao';
+import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
@@ -35,7 +35,10 @@ const DUMMY_METADATA = ethers.utils.hexlify(
   ethers.utils.toUtf8Bytes('0x123456789')
 );
 
-describe('DAO Upgrade', function () {
+const FORWARDER_1 = `0x${'1'.repeat(40)}`;
+const FORWARDER_2 = `0x${'2'.repeat(40)}`;
+
+describe.only('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
     Dao_v1_0_1 = new DAOV101__factory(signers[0]);
@@ -136,6 +139,72 @@ describe('DAO Upgrade', function () {
         )
       ).to.be.true;
     });
+
+    it('executes actions after the upgrade', async () => {
+      await daoV101Proxy.grant(
+        daoV101Proxy.address,
+        signers[0].address,
+        ethers.utils.id('EXECUTE_PERMISSION')
+      );
+
+      // We use the `setTrustedForwarder` to test execution and must give permission to the DAO (executor) to call it.
+      await daoV101Proxy.grant(
+        daoV101Proxy.address,
+        daoV101Proxy.address,
+        ethers.utils.id('SET_TRUSTED_FORWARDER_PERMISSION')
+      );
+
+      // Create an action to set forwarder1
+      const forwarderChangeAction1 = {
+        to: daoV101Proxy.address,
+        data: daoV101Proxy.interface.encodeFunctionData('setTrustedForwarder', [
+          FORWARDER_1,
+        ]),
+        value: 0,
+      };
+
+      // Execute and check in the event that the forwarder1 has been set.
+      await expect(
+        daoV101Proxy.execute(ZERO_BYTES32, [forwarderChangeAction1], 0)
+      )
+        .to.emit(daoV101Proxy, 'TrustedForwarderSet')
+        .withArgs(FORWARDER_1);
+
+      // Check that the storage variable now forwarder 1.
+      expect(await daoV101Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
+
+      // Upgrade to the new implementation
+      await daoV101Proxy.upgradeTo(daoCurrentImplementaion.address);
+
+      // Check that the stored implementatio has changed.
+      const implementationAfterUpgrade = await readImplementationValueFromSlot(
+        daoV101Proxy.address
+      );
+      expect(implementationAfterUpgrade).to.equal(
+        daoCurrentImplementaion.address
+      );
+      expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
+
+      // Check that the old forwarder is still unchanged.
+      expect(await daoV101Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
+
+      // Create an action to change the forwarder to a new address.
+      const testAction = {
+        to: daoV101Proxy.address,
+        data: daoV101Proxy.interface.encodeFunctionData('setTrustedForwarder', [
+          FORWARDER_2,
+        ]),
+        value: 0,
+      };
+
+      // Execute and check in the event that the forwarder1 has been set.
+      await expect(daoV101Proxy.execute(ZERO_BYTES32, [testAction], 0))
+        .to.emit(daoV101Proxy, 'TrustedForwarderSet')
+        .withArgs(FORWARDER_2);
+
+      // Check that the storage variable is now forwarder 2.
+      expect(await daoV101Proxy.getTrustedForwarder()).to.equal(FORWARDER_2);
+    });
   });
 
   context(`v1.2.0 to v1.3.0`, function () {
@@ -226,6 +295,72 @@ describe('DAO Upgrade', function () {
           EMPTY_DATA
         )
       ).to.be.true;
+    });
+
+    it('executes actions after the upgrade', async () => {
+      await daoV120Proxy.grant(
+        daoV120Proxy.address,
+        signers[0].address,
+        ethers.utils.id('EXECUTE_PERMISSION')
+      );
+
+      // We use the `setTrustedForwarder` to test execution and must give permission to the DAO (executor) to call it.
+      await daoV120Proxy.grant(
+        daoV120Proxy.address,
+        daoV120Proxy.address,
+        ethers.utils.id('SET_TRUSTED_FORWARDER_PERMISSION')
+      );
+
+      // Create an action to set forwarder1
+      const forwarderChangeAction1 = {
+        to: daoV120Proxy.address,
+        data: daoV120Proxy.interface.encodeFunctionData('setTrustedForwarder', [
+          FORWARDER_1,
+        ]),
+        value: 0,
+      };
+
+      // Execute and check in the event that the forwarder1 has been set.
+      await expect(
+        daoV120Proxy.execute(ZERO_BYTES32, [forwarderChangeAction1], 0)
+      )
+        .to.emit(daoV120Proxy, 'TrustedForwarderSet')
+        .withArgs(FORWARDER_1);
+
+      // Check that the storage variable now forwarder 1.
+      expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
+
+      // Upgrade to the new implementation
+      await daoV120Proxy.upgradeTo(daoCurrentImplementaion.address);
+
+      // Check that the stored implementatio has changed.
+      const implementationAfterUpgrade = await readImplementationValueFromSlot(
+        daoV120Proxy.address
+      );
+      expect(implementationAfterUpgrade).to.equal(
+        daoCurrentImplementaion.address
+      );
+      expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
+
+      // Check that the old forwarder is still unchanged.
+      expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
+
+      // Create an action to change the forwarder to a new address.
+      const testAction = {
+        to: daoV120Proxy.address,
+        data: daoV120Proxy.interface.encodeFunctionData('setTrustedForwarder', [
+          FORWARDER_2,
+        ]),
+        value: 0,
+      };
+
+      // Execute and check in the event that the forwarder1 has been set.
+      await expect(daoV120Proxy.execute(ZERO_BYTES32, [testAction], 0))
+        .to.emit(daoV120Proxy, 'TrustedForwarderSet')
+        .withArgs(FORWARDER_2);
+
+      // Check that the storage variable is now forwarder 2.
+      expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_2);
     });
   });
 });
