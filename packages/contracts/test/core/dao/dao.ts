@@ -311,7 +311,7 @@ describe('DAO', function () {
       // Create  an action array with an normal action and an reentrant action.
       const actions = [data.succeedAction, reentrantAction];
 
-      // Expect the second, reentrant action to fail.
+      // Expect the execution of the reentrant action (second action) to fail.
       await expect(dao.execute(ZERO_BYTES32, actions, 0))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(1);
