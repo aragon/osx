@@ -60,7 +60,10 @@ contract DAO is
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
+    /// @notice The first out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was not entered.
     uint256 private constant _NOT_ENTERED = 1;
+
+    /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
     uint256 private constant _ENTERED = 2;
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
@@ -73,6 +76,7 @@ contract DAO is
     string private _daoURI;
 
     /// @notice The state variable for the reentrancy guard of the `execute` function.
+    /// @dev The variable can of value `_NOT_ENTERED = 1` or `_ENTERED = 2` in usage and shoud be initialized to `_NOT_ENTERED`. However, leaving it uninitialized (with a default value of 0) does not pose a risk since the variable will be set to `_NOT_ENTERED` after the first usage.
     uint256 private _reentrancyStatus;
 
     /// @notice Thrown if a call is reentrant.
@@ -100,8 +104,8 @@ contract DAO is
     /// @param daoURI The new URI.
     event NewURI(string daoURI);
 
-    /// @notice A modifier to protect the `execute()` function against reentrancy.
-    /// @dev If this is used multiple times, private `_beforeNonReentrant()` and `_afterNonReentrant()` functions should be created to prevent code duplication.
+    /// @notice A modifier to protect a function from calling itself, directly or indirectly (reentrancy).
+    /// @dev Currently, this modifier is only applied to the `execute()` function. If this is used multiple times, private `_beforeNonReentrant()` and `_afterNonReentrant()` functions should be created to prevent code duplication.
     modifier nonReentrant() {
         if (_reentrancyStatus == _ENTERED) {
             revert ReentrantCall();
