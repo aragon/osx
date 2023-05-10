@@ -19,7 +19,7 @@
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
-    "prepublishOnly": "yarn build && yarn build:npm",
+    "prepublishOnly": "ts-node scripts/create-tag.ts && yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "formatting:check": "prettier '**/*.{json,sol,ts,js,md}' -c",
     "formatting:write": "prettier '**/*.{json,sol,ts,js,md}' --write"
