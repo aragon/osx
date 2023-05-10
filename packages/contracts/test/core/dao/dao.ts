@@ -9,6 +9,7 @@ import {
   TestERC721,
   IERC1271__factory,
   GasConsumer__factory,
+  DAO__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -78,13 +79,14 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
+  let DAO: DAO__factory;
 
   beforeEach(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await deployWithProxy(DAO);
+    DAO = new DAO__factory(signers[0]);
+    dao = await deployWithProxy<DAO>(DAO);
     await dao.initialize(
       dummyMetadata1,
       ownerAddress,
@@ -199,8 +201,7 @@ describe('DAO', function () {
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
             dao.address,
-            OZ_INITIALIZED_SLOT_POSITION,
-            'latest'
+            OZ_INITIALIZED_SLOT_POSITION
           )
         ).toNumber()
       ).to.equal(2);
@@ -211,11 +212,60 @@ describe('DAO', function () {
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
             dao.address,
-            REENTRANCY_STATUS_SLOT_POSITION,
-            'latest'
+            REENTRANCY_STATUS_SLOT_POSITION
           )
         ).toNumber()
       ).to.equal(1);
+    });
+  });
+
+  describe('initializeUpgradeFrom', async () => {
+    it('reverts if trying to release from a previous major release', async () => {
+      const testDao = await deployWithProxy<DAO>(DAO);
+
+      await expect(testDao.initializeUpgradeFrom([0, 1, 0]))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([0, 1, 0]);
+    });
+
+    it('initializes upgrades for versions < 1.3.0', async () => {
+      // Create an unitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      // Expect the contract to be uninitialized  with `_initialized = 0`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+
+      // Call `initializeUpgradeFrom` with the previous version 1.3.0 which is not supported.
+      await expect(uninitializedDao.initializeUpgradeFrom([1, 3, 0]))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([1, 3, 0]);
+
+      // Call `initializeUpgradeFrom` with the previous version 1.2.0.
+      await expect(uninitializedDao.initializeUpgradeFrom([1, 2, 0])).to.not.be
+        .reverted;
+
+      // Expect the contract to be initialized with `_initialized = 2`
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
     });
   });
 

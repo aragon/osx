@@ -95,13 +95,13 @@ contract DAO is
     /// @notice Thrown if the deposit amount is zero.
     error ZeroAmount();
 
-    /// @notice Thrown if an upgrade is not supported from a specific protocol version .
-    error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
-
     /// @notice Thrown if there is a mismatch between the expected and actually deposited amount of native tokens.
     /// @param expected The expected native token amount.
     /// @param actual The actual native token amount deposited.
     error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
+
+    /// @notice Thrown if an upgrade is not supported from a specific protocol version .
+    error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
 
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
@@ -159,7 +159,7 @@ contract DAO is
     function initializeUpgradeFrom(
         uint8[3] calldata previousProtocolVersion
     ) external reinitializer(2) {
-        if (previousProtocolVersion[0] != 1) {
+        if (previousProtocolVersion[0] != 1 || previousProtocolVersion[1] >= 3) {
             revert ProtocolVersionUpgradeNotSupported(previousProtocolVersion);
         }
 
