@@ -123,6 +123,7 @@ contract DAO is
     }
 
     /// @notice Initializes the DAO by
+    /// - setting the reentrancy status variable to `_NOT_ENTERED`
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - setting the trusted forwarder for meta transactions
     /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).

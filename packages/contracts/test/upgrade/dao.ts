@@ -1,12 +1,13 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+//import {upgrades} from 'hardhat';
 
 import {
   DAO,
   DAO__factory,
-  DAOV101,
-  DAOV101__factory,
+  DAOV100,
+  DAOV100__factory,
   DAOV120,
   DAOV120__factory,
 } from '../../typechain';
@@ -18,11 +19,11 @@ import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 
 let signers: SignerWithAddress[];
-let Dao_v1_0_0: DAOV101__factory;
+let Dao_v1_0_0: DAOV100__factory;
 let Dao_v1_2_0: DAOV120__factory;
 let DaoCurrent: DAO__factory;
 
-let daoV101Proxy: DAOV101;
+let daoV100Proxy: DAOV100;
 let daoV120Proxy: DAOV120;
 
 let daoV101Implementation: string;
@@ -38,13 +39,20 @@ const DUMMY_METADATA = ethers.utils.hexlify(
 const FORWARDER_1 = `0x${'1'.repeat(40)}`;
 const FORWARDER_2 = `0x${'2'.repeat(40)}`;
 
+let initializeFromV1_0_0_calldata: string;
+
 describe.only('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
-    Dao_v1_0_0 = new DAOV101__factory(signers[0]);
+    Dao_v1_0_0 = new DAOV100__factory(signers[0]);
     Dao_v1_2_0 = new DAOV120__factory(signers[0]);
 
     DaoCurrent = new DAO__factory(signers[0]); // 1.3.0
+
+    initializeFromV1_0_0_calldata = DaoCurrent.interface.encodeFunctionData(
+      'initializeFromV1_0_0',
+      []
+    );
 
     // Deploy the v1.3.0 implementation
     daoCurrentImplementaion = await DaoCurrent.deploy();
@@ -52,8 +60,8 @@ describe.only('DAO Upgrade', function () {
 
   context(`v1.0.0 to v1.3.0`, function () {
     beforeEach(async function () {
-      daoV101Proxy = await deployWithProxy<DAOV101>(Dao_v1_0_0);
-      await daoV101Proxy.initialize(
+      daoV100Proxy = await deployWithProxy<DAOV100>(Dao_v1_0_0);
+      await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
         ethers.constants.AddressZero,
@@ -62,26 +70,27 @@ describe.only('DAO Upgrade', function () {
 
       // Store the v1.0.0 implementation
       daoV101Implementation = await readImplementationValueFromSlot(
-        daoV101Proxy.address
+        daoV100Proxy.address
       );
 
       // Grant the upgrade permission
-      await daoV101Proxy.grant(
-        daoV101Proxy.address,
+      await daoV100Proxy.grant(
+        daoV100Proxy.address,
         signers[0].address,
         UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
       );
     });
 
     it('does not corrupt the DAO storage', async () => {
-      // Upgrade to the new implementation
-      const upgradeTx = await daoV101Proxy.upgradeTo(
-        daoCurrentImplementaion.address
+      // Upgrade and call initializeFromV1_0_0
+      const upgradeTx = await daoV100Proxy.upgradeToAndCall(
+        daoCurrentImplementaion.address,
+        initializeFromV1_0_0_calldata
       );
 
       // Check the stored implementation.
       const implementationAfterUpgrade = await readImplementationValueFromSlot(
-        daoV101Proxy.address
+        daoV100Proxy.address
       );
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
@@ -95,27 +104,30 @@ describe.only('DAO Upgrade', function () {
       expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
 
       // Check that storage is not corrupted.
-      expect(await daoV101Proxy.callStatic.daoURI()).to.equal(daoExampleURI);
+      expect(await daoV100Proxy.callStatic.daoURI()).to.equal(daoExampleURI);
     });
 
     it('does not corrupt permissions', async () => {
-      await daoV101Proxy.grant(
-        daoV101Proxy.address,
+      await daoV100Proxy.grant(
+        daoV100Proxy.address,
         signers[0].address,
         ethers.utils.id('EXECUTE_PERMISSION')
       );
-      await daoV101Proxy.grant(
-        daoV101Proxy.address,
+      await daoV100Proxy.grant(
+        daoV100Proxy.address,
         signers[0].address,
         ethers.utils.id('ROOT_PERMISSION')
       );
 
-      // Upgrade to the new implementation
-      await daoV101Proxy.upgradeTo(daoCurrentImplementaion.address);
+      // Upgrade and call initializeFromV1_0_0
+      await daoV100Proxy.upgradeToAndCall(
+        daoCurrentImplementaion.address,
+        initializeFromV1_0_0_calldata
+      );
 
       // Check the stored implementation.
       const implementationAfterUpgrade = await readImplementationValueFromSlot(
-        daoV101Proxy.address
+        daoV100Proxy.address
       );
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
@@ -123,16 +135,16 @@ describe.only('DAO Upgrade', function () {
       expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
 
       expect(
-        await daoV101Proxy.hasPermission(
-          daoV101Proxy.address,
+        await daoV100Proxy.hasPermission(
+          daoV100Proxy.address,
           signers[0].address,
           ethers.utils.id('EXECUTE_PERMISSION'),
           EMPTY_DATA
         )
       ).to.be.true;
       expect(
-        await daoV101Proxy.hasPermission(
-          daoV101Proxy.address,
+        await daoV100Proxy.hasPermission(
+          daoV100Proxy.address,
           signers[0].address,
           ethers.utils.id('ROOT_PERMISSION'),
           EMPTY_DATA
@@ -141,23 +153,23 @@ describe.only('DAO Upgrade', function () {
     });
 
     it('executes actions after the upgrade', async () => {
-      await daoV101Proxy.grant(
-        daoV101Proxy.address,
+      await daoV100Proxy.grant(
+        daoV100Proxy.address,
         signers[0].address,
         ethers.utils.id('EXECUTE_PERMISSION')
       );
 
       // We use the `setTrustedForwarder` to test execution and must give permission to the DAO (executor) to call it.
-      await daoV101Proxy.grant(
-        daoV101Proxy.address,
-        daoV101Proxy.address,
+      await daoV100Proxy.grant(
+        daoV100Proxy.address,
+        daoV100Proxy.address,
         ethers.utils.id('SET_TRUSTED_FORWARDER_PERMISSION')
       );
 
       // Create an action to set forwarder1
       const forwarderChangeAction1 = {
-        to: daoV101Proxy.address,
-        data: daoV101Proxy.interface.encodeFunctionData('setTrustedForwarder', [
+        to: daoV100Proxy.address,
+        data: daoV100Proxy.interface.encodeFunctionData('setTrustedForwarder', [
           FORWARDER_1,
         ]),
         value: 0,
@@ -165,20 +177,23 @@ describe.only('DAO Upgrade', function () {
 
       // Execute and check in the event that the forwarder1 has been set.
       await expect(
-        daoV101Proxy.execute(ZERO_BYTES32, [forwarderChangeAction1], 0)
+        daoV100Proxy.execute(ZERO_BYTES32, [forwarderChangeAction1], 0)
       )
-        .to.emit(daoV101Proxy, 'TrustedForwarderSet')
+        .to.emit(daoV100Proxy, 'TrustedForwarderSet')
         .withArgs(FORWARDER_1);
 
       // Check that the storage variable now forwarder 1.
-      expect(await daoV101Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
+      expect(await daoV100Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
 
-      // Upgrade to the new implementation
-      await daoV101Proxy.upgradeTo(daoCurrentImplementaion.address);
+      // Upgrade and call initializeFromV1_0_0
+      await daoV100Proxy.upgradeToAndCall(
+        daoCurrentImplementaion.address,
+        initializeFromV1_0_0_calldata
+      );
 
       // Check that the stored implementatio has changed.
       const implementationAfterUpgrade = await readImplementationValueFromSlot(
-        daoV101Proxy.address
+        daoV100Proxy.address
       );
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
@@ -186,24 +201,24 @@ describe.only('DAO Upgrade', function () {
       expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
 
       // Check that the old forwarder is still unchanged.
-      expect(await daoV101Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
+      expect(await daoV100Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
 
       // Create an action to change the forwarder to a new address.
       const testAction = {
-        to: daoV101Proxy.address,
-        data: daoV101Proxy.interface.encodeFunctionData('setTrustedForwarder', [
+        to: daoV100Proxy.address,
+        data: daoV100Proxy.interface.encodeFunctionData('setTrustedForwarder', [
           FORWARDER_2,
         ]),
         value: 0,
       };
 
       // Execute and check in the event that the forwarder1 has been set.
-      await expect(daoV101Proxy.execute(ZERO_BYTES32, [testAction], 0))
-        .to.emit(daoV101Proxy, 'TrustedForwarderSet')
+      await expect(daoV100Proxy.execute(ZERO_BYTES32, [testAction], 0))
+        .to.emit(daoV100Proxy, 'TrustedForwarderSet')
         .withArgs(FORWARDER_2);
 
       // Check that the storage variable is now forwarder 2.
-      expect(await daoV101Proxy.getTrustedForwarder()).to.equal(FORWARDER_2);
+      expect(await daoV100Proxy.getTrustedForwarder()).to.equal(FORWARDER_2);
     });
   });
 
@@ -231,9 +246,10 @@ describe.only('DAO Upgrade', function () {
     });
 
     it('does not corrupt the DAO storage', async () => {
-      // Upgrade to the new implementation
-      const upgradeTx = await daoV120Proxy.upgradeTo(
-        daoCurrentImplementaion.address
+      // Upgrade and call initializeFromV1_0_0
+      const upgradeTx = await daoV120Proxy.upgradeToAndCall(
+        daoCurrentImplementaion.address,
+        initializeFromV1_0_0_calldata
       );
 
       // Check the stored implementation.
@@ -267,8 +283,11 @@ describe.only('DAO Upgrade', function () {
         ethers.utils.id('ROOT_PERMISSION')
       );
 
-      // Upgrade to the new implementation
-      await daoV120Proxy.upgradeTo(daoCurrentImplementaion.address);
+      // Upgrade and call initializeFromV1_0_0
+      await daoV120Proxy.upgradeToAndCall(
+        daoCurrentImplementaion.address,
+        initializeFromV1_0_0_calldata
+      );
 
       // Check the stored implementation.
       const implementationAfterUpgrade = await readImplementationValueFromSlot(
@@ -330,8 +349,11 @@ describe.only('DAO Upgrade', function () {
       // Check that the storage variable now forwarder 1.
       expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
 
-      // Upgrade to the new implementation
-      await daoV120Proxy.upgradeTo(daoCurrentImplementaion.address);
+      // Upgrade and call initializeFromV1_0_0
+      await daoV120Proxy.upgradeToAndCall(
+        daoCurrentImplementaion.address,
+        initializeFromV1_0_0_calldata
+      );
 
       // Check that the stored implementatio has changed.
       const implementationAfterUpgrade = await readImplementationValueFromSlot(
