@@ -8,7 +8,7 @@ DAOs are decentralized autonomous organizations. They are a group of people mana
 
 DAOs manage assets through collective decision-making mechanisms.
 
-In Aragon OSx, DAOs are a treasury and a permission management system -  all other functionality is enabled through "capsule of opt-in functionality allowing the DAO to work in custom ways". These are called Plugins.
+In Aragon OSx, DAOs are a treasury and a permission management system - all other functionality is enabled through "capsule of opt-in functionality allowing the DAO to work in custom ways". These are called Plugins.
 
 Plugins are smart contracts which extend the functionality of what the DAO can do. They are able to execute actions on behalf of the DAO through permissions the DAO grants or revokes them.
 
