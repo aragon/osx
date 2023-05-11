@@ -16,7 +16,7 @@ import {Contract, ContractFactory} from 'ethers';
 let signers: SignerWithAddress[];
 let Dao_v1_0_0: ContractFactory;
 let Dao_v1_2_0: ContractFactory;
-let DaoCurrent: ContractFactory; //DAO__factory;
+let DaoCurrent: ContractFactory;
 
 let daoV100Proxy: Contract;
 let daoV120Proxy: Contract;
@@ -37,11 +37,14 @@ const FORWARDER_2 = `0x${'2'.repeat(40)}`;
 describe('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
+
+    // We don't use the typchain here but directly grab the artifacts. This will be changed in an upcoming PR again.
     Dao_v1_0_0 = new ContractFactory(
       new ethers.utils.Interface(DAO100.abi),
       DAO100.bytecode,
       signers[0]
     );
+
     Dao_v1_2_0 = new ContractFactory(
       new ethers.utils.Interface(DAO120.abi),
       DAO100.bytecode,
@@ -53,7 +56,6 @@ describe('DAO Upgrade', function () {
       DAOCurrent.bytecode,
       signers[0]
     );
-    //DaoCurrent = new DAO__factory(signers[0]); // 1.3.0
 
     // Deploy the v1.3.0 implementation
     daoCurrentImplementaion = await DaoCurrent.deploy();
