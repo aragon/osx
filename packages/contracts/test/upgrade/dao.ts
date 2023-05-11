@@ -1,34 +1,29 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {v1_2_0_active_contracts} from '../../../contracts-versions/
 
-import {
-  DAO,
-  DAO__factory,
-  DAOV100,
-  DAOV100__factory,
-  DAOV120,
-  DAOV120__factory,
-} from '../../typechain';
+import DAO100 from '../../artifacts/@aragon/osx-versions/versions/v1_0_0/contracts/core/dao/DAO.sol/DAO.json';
+import DAO120 from '../../artifacts/@aragon/osx-versions/versions/v1_2_0/contracts/core/dao/DAO.sol/DAO.json';
+import DAOCurrent from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
 
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
+import {Contract, ContractFactory} from 'ethers';
 
 let signers: SignerWithAddress[];
-let Dao_v1_0_0: DAOV100__factory;
-let Dao_v1_2_0: DAOV120__factory;
-let DaoCurrent: DAO__factory;
+let Dao_v1_0_0: ContractFactory;
+let Dao_v1_2_0: ContractFactory;
+let DaoCurrent: ContractFactory; //DAO__factory;
 
-let daoV100Proxy: DAOV100;
-let daoV120Proxy: DAOV120;
+let daoV100Proxy: Contract;
+let daoV120Proxy: Contract;
 
 let daoV101Implementation: string;
 let daoV120Implementation: string;
-let daoCurrentImplementaion: DAO;
+let daoCurrentImplementaion: Contract;
 
 const EMPTY_DATA = '0x';
 
@@ -42,10 +37,23 @@ const FORWARDER_2 = `0x${'2'.repeat(40)}`;
 describe('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
-    Dao_v1_0_0 = new DAOV100__factory(signers[0]);
-    Dao_v1_2_0 = new DAOV120__factory(signers[0]);
+    Dao_v1_0_0 = new ContractFactory(
+      new ethers.utils.Interface(DAO100.abi),
+      DAO100.bytecode,
+      signers[0]
+    );
+    Dao_v1_2_0 = new ContractFactory(
+      new ethers.utils.Interface(DAO120.abi),
+      DAO100.bytecode,
+      signers[0]
+    );
 
-    DaoCurrent = new DAO__factory(signers[0]); // 1.3.0
+    DaoCurrent = new ContractFactory(
+      new ethers.utils.Interface(DAOCurrent.abi),
+      DAOCurrent.bytecode,
+      signers[0]
+    );
+    //DaoCurrent = new DAO__factory(signers[0]); // 1.3.0
 
     // Deploy the v1.3.0 implementation
     daoCurrentImplementaion = await DaoCurrent.deploy();
@@ -53,7 +61,7 @@ describe('DAO Upgrade', function () {
 
   context(`v1.0.0 to v1.3.0`, function () {
     beforeEach(async function () {
-      daoV100Proxy = await deployWithProxy<DAOV100>(Dao_v1_0_0);
+      daoV100Proxy = await deployWithProxy(Dao_v1_0_0);
       await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -223,7 +231,7 @@ describe('DAO Upgrade', function () {
 
   context(`v1.2.0 to v1.3.0`, function () {
     beforeEach(async function () {
-      daoV120Proxy = await deployWithProxy<DAOV120>(Dao_v1_2_0);
+      daoV120Proxy = await deployWithProxy(Dao_v1_2_0);
       await daoV120Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,

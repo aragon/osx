@@ -221,9 +221,9 @@ describe('DAO', function () {
 
   describe('initializeUpgradeFrom', async () => {
     it('reverts if trying to release from a previous major release', async () => {
-      const testDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
-      await expect(testDao.initializeUpgradeFrom([0, 1, 0]))
+      await expect(uninitializedDao.initializeUpgradeFrom([0, 1, 0]))
         .to.be.revertedWithCustomError(
           dao,
           'ProtocolVersionUpgradeNotSupported'
