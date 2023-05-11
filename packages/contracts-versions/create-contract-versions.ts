@@ -1,12 +1,22 @@
 const fs = require('fs-extra');
 const path = require('path');
+const glob = require('glob');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
 const monorepoRoot = path.join(__dirname, '../..');
 const contractsDir = path.join(monorepoRoot, 'packages/contracts');
-const contractVersionsDir = path.join(__dirname, 'build');
+const contractVersionsDir = path.join(__dirname, 'versions');
 const commitHashes = require('./commit_hashes.json');
+
+async function checkForUncommittedChanges() {
+  const {stdout} = await exec('git status --porcelain', {cwd: contractsDir});
+  if (stdout.trim()) {
+    throw new Error(
+      'There are uncommitted changes. Please commit or stash them before running this script.'
+    );
+  }
+}
 
 async function getCurrentBranch() {
   const {stdout} = await exec('git branch --show-current', {cwd: contractsDir});
@@ -22,41 +32,40 @@ async function buildContracts(commit: string) {
   }
 }
 
-async function copyActiveContracts(commit: string, versionName: string) {
+async function copyContracts(versionName: string) {
   try {
-    console.log(`Copying active_contracts.json`);
+    const srcContracts = path.join(contractsDir, 'src');
+    const destContracts = path.join(
+      contractVersionsDir,
+      versionName,
+      'contracts'
+    );
+
+    console.log(`Copying contracts from ${srcContracts} to ${destContracts}`);
+
+    await fs.copy(srcContracts, destContracts);
+
     const srcActiveContracts = path.join(monorepoRoot, 'active_contracts.json');
     const destActiveContracts = path.join(
       contractVersionsDir,
       versionName,
       'active_contracts.json'
     );
+
+    console.log(`Copying active_contracts.json to ${destActiveContracts}`);
+
     await fs.copy(srcActiveContracts, destActiveContracts);
   } catch (error) {
-    console.error('Error copying active contracts:', error);
-  }
-}
-
-async function generateTypechain(src: string, dest: string) {
-  try {
-    // Find all the .json files, excluding the .dbg.json files, in all subdirectories
-    const {stdout} = await exec(
-      `find "${src}" -name '*.json' -type f -not -path '*.dbg.json'`
+    console.error(
+      'Error copying contracts source code and active contracts:',
+      error
     );
-    const jsonFiles = stdout
-      .trim()
-      .split('\n')
-      .map((file: string) => `"${file}"`) // Added type annotation here
-      .join(' ');
-
-    // Run typechain for all .json files at once
-    await exec(`typechain --target ethers-v5 --out-dir "${dest}" ${jsonFiles}`);
-  } catch (error) {
-    console.error('Error generating TypeChain output:', error);
   }
 }
 
 async function createVersions() {
+  await checkForUncommittedChanges();
+
   const currentBranch = await getCurrentBranch();
 
   for (const version in commitHashes.versions) {
@@ -67,15 +76,7 @@ async function createVersions() {
       `Building contracts for version: ${versionName}, with commit: ${versionCommit}`
     );
     await buildContracts(versionCommit);
-    await copyActiveContracts(versionCommit, versionName);
-
-    const srcArtifacts = path.join(contractsDir, 'artifacts/src');
-    const destTypechain = path.join(
-      contractVersionsDir,
-      versionName,
-      'typechain'
-    );
-    await generateTypechain(srcArtifacts, destTypechain);
+    await copyContracts(versionName);
   }
 
   // Return to the original branch
@@ -86,10 +87,7 @@ async function createVersions() {
   for (const version in commitHashes.versions) {
     const versionName = version;
     exports.push(
-      `export * as ${versionName}_typechain from 'build/${versionName}/typechain';`
-    );
-    exports.push(
-      `import * as ${versionName}_active_contracts from 'build/${versionName}/active_contracts.json';`
+      `import * as ${versionName}_active_contracts from '../versions/${versionName}/active_contracts.json';`
     );
   }
   exports.push(
@@ -97,7 +95,10 @@ async function createVersions() {
       .map(versionName => `${versionName}_active_contracts`)
       .join(', ')} };`
   );
-  await fs.writeFile(path.join(__dirname, 'index.ts'), exports.join('\n'));
+
+  const npmDir = path.join(__dirname, 'npm');
+  await fs.ensureDir(npmDir);
+  await fs.writeFile(path.join(npmDir, 'index.ts'), exports.join('\n'));
 }
 
 createVersions();
