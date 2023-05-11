@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-//import {upgrades} from 'hardhat';
+import {v1_2_0_active_contracts} from '../../../contracts-versions/
 
 import {
   DAO,
