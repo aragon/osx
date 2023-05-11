@@ -163,7 +163,7 @@ contract DAO is
             revert ProtocolVersionUpgradeNotSupported(previousProtocolVersion);
         }
 
-        // All version before v1.3.0 must initialize the newly added `_reentrancyStatus`.
+        // All versions before v1.3.0 must initialize the newly added `_reentrancyStatus`.
         if (previousProtocolVersion[1] < 3) {
             _reentrancyStatus = _NOT_ENTERED;
         }
