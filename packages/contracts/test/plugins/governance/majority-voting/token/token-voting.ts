@@ -333,7 +333,7 @@ describe('TokenVoting', function () {
         await setBalances([
           {
             receiver: signers[1].address,
-            amount: votingSettings.minProposerVotingPower,
+            amount: votingSettings.minProposerVotingPower, // equals 0
           },
         ]);
 
