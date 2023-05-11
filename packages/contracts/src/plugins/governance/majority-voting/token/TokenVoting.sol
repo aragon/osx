@@ -96,7 +96,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
         uint256 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number - 1; // The snapshot block must be mined already to protocet the transaction against backrunning vote changes.
+            snapshotBlock = block.number - 1; // The snapshot block must be mined already to protect the transaction against backrunning vote changes.
         }
 
         uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
