@@ -85,9 +85,9 @@ contract TokenVoting is IMembership, MajorityVotingBase {
             if (minProposerVotingPower_ != 0) {
                 // Because of the checks in `TokenVotingSetup`, we can assume that `votingToken` is an [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
                 if (
+                    votingToken.getVotes(_msgSender()) < minProposerVotingPower_ &&
                     IERC20Upgradeable(address(votingToken)).balanceOf(_msgSender()) <
-                    minProposerVotingPower_ &&
-                    votingToken.getVotes(_msgSender()) < minProposerVotingPower_
+                    minProposerVotingPower_
                 ) {
                     revert ProposalCreationForbidden(_msgSender());
                 }
@@ -150,8 +150,8 @@ contract TokenVoting is IMembership, MajorityVotingBase {
     function isMember(address _account) external view returns (bool) {
         // A member must own or least one token or have at least one token delegated to her/him.
         return
-            IERC20Upgradeable(address(votingToken)).balanceOf(_account) > 0 ||
-            votingToken.getVotes(_account) > 0;
+            votingToken.getVotes(_account) > 0 ||
+            IERC20Upgradeable(address(votingToken)).balanceOf(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase
