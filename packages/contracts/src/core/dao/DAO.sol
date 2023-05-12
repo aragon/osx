@@ -155,16 +155,14 @@ contract DAO is
     }
 
     /// @notice Initializes the DAO after an upgrade from a previous version.
-    /// @param previousProtocolVersion The protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
-    function initializeUpgradeFrom(
-        uint8[3] calldata previousProtocolVersion
-    ) external reinitializer(2) {
-        if (previousProtocolVersion[0] != 1 || previousProtocolVersion[1] >= 3) {
-            revert ProtocolVersionUpgradeNotSupported(previousProtocolVersion);
+    /// @param _protocolVersion The protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
+    function initializeUpgradeFrom(uint8[3] calldata _protocolVersion) external reinitializer(2) {
+        if (_protocolVersion[0] != 1 || _protocolVersion[1] >= 3) {
+            revert ProtocolVersionUpgradeNotSupported(_protocolVersion);
         }
 
         // All versions before v1.3.0 must initialize the newly added `_reentrancyStatus`.
-        if (previousProtocolVersion[1] < 3) {
+        if (_protocolVersion[1] < 3) {
             _reentrancyStatus = _NOT_ENTERED;
         }
     }
