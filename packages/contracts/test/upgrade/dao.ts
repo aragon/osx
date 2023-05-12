@@ -2,28 +2,33 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import DAO100 from '../../artifacts/@aragon/osx-versions/versions/v1_0_0/contracts/core/dao/DAO.sol/DAO.json';
-import DAO120 from '../../artifacts/@aragon/osx-versions/versions/v1_2_0/contracts/core/dao/DAO.sol/DAO.json';
-import DAOCurrent from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import {
+  DAO as DAO_V1_0_0,
+  DAO__factory as DAO_V1_0_0__factory,
+} from '../../typechain/osx-versions/v1_0_0/contracts/core/dao/DAO.sol';
+import {
+  DAO as DAO_V1_2_0,
+  DAO__factory as DAO_V1_2_0__factory,
+} from '../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
+import {DAO, DAO__factory} from '../../typechain';
 
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
-import {Contract, ContractFactory} from 'ethers';
 
 let signers: SignerWithAddress[];
-let Dao_v1_0_0: ContractFactory;
-let Dao_v1_2_0: ContractFactory;
-let DaoCurrent: ContractFactory;
+let DAO_V1_0_0: DAO_V1_0_0__factory;
+let DAO_V1_2_0: DAO_V1_2_0__factory;
+let DAO_Current: DAO__factory;
 
-let daoV100Proxy: Contract;
-let daoV120Proxy: Contract;
+let daoV100Proxy: DAO_V1_0_0;
+let daoV120Proxy: DAO_V1_2_0;
 
 let daoV100Implementation: string;
 let daoV120Implementation: string;
-let daoCurrentImplementaion: Contract;
+let daoCurrentImplementaion: DAO;
 
 const EMPTY_DATA = '0x';
 
@@ -39,31 +44,17 @@ describe('DAO Upgrade', function () {
     signers = await ethers.getSigners();
 
     // We don't use the typchain here but directly grab the artifacts. This will be changed in an upcoming PR again.
-    Dao_v1_0_0 = new ContractFactory(
-      new ethers.utils.Interface(DAO100.abi),
-      DAO100.bytecode,
-      signers[0]
-    );
-
-    Dao_v1_2_0 = new ContractFactory(
-      new ethers.utils.Interface(DAO120.abi),
-      DAO100.bytecode,
-      signers[0]
-    );
-
-    DaoCurrent = new ContractFactory(
-      new ethers.utils.Interface(DAOCurrent.abi),
-      DAOCurrent.bytecode,
-      signers[0]
-    );
+    DAO_V1_0_0 = new DAO_V1_0_0__factory(signers[0]);
+    DAO_V1_2_0 = new DAO_V1_2_0__factory(signers[0]);
+    DAO_Current = new DAO__factory(signers[0]);
 
     // Deploy the v1.3.0 implementation
-    daoCurrentImplementaion = await DaoCurrent.deploy();
+    daoCurrentImplementaion = await DAO_Current.deploy();
   });
 
   context(`v1.0.0 to v1.3.0`, function () {
     beforeEach(async function () {
-      daoV100Proxy = await deployWithProxy(Dao_v1_0_0);
+      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_V1_0_0);
       await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -88,8 +79,9 @@ describe('DAO Upgrade', function () {
       // Upgrade and call `initializeUpgradeFrom`.
       const upgradeTx = await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DaoCurrent.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
           [1, 0, 0],
+          EMPTY_DATA,
         ])
       );
 
@@ -104,7 +96,7 @@ describe('DAO Upgrade', function () {
 
       // Check the emitted implementation.
       const emittedImplementation = (
-        await findEventTopicLog(upgradeTx, Dao_v1_0_0.interface, 'Upgraded')
+        await findEventTopicLog(upgradeTx, DAO_V1_0_0.interface, 'Upgraded')
       ).args.implementation;
       expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
 
@@ -127,8 +119,9 @@ describe('DAO Upgrade', function () {
       // Upgrade and call `initializeUpgradeFrom`.
       await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DaoCurrent.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
           [1, 0, 0],
+          EMPTY_DATA,
         ])
       );
 
@@ -195,8 +188,9 @@ describe('DAO Upgrade', function () {
       // Upgrade and call `initializeUpgradeFrom`.
       await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DaoCurrent.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
           [1, 0, 0],
+          EMPTY_DATA,
         ])
       );
 
@@ -233,7 +227,7 @@ describe('DAO Upgrade', function () {
 
   context(`v1.2.0 to v1.3.0`, function () {
     beforeEach(async function () {
-      daoV120Proxy = await deployWithProxy(Dao_v1_2_0);
+      daoV120Proxy = await deployWithProxy(DAO_V1_2_0);
       await daoV120Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -258,8 +252,9 @@ describe('DAO Upgrade', function () {
       // Upgrade and call `initializeUpgradeFrom`.
       const upgradeTx = await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DaoCurrent.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
           [1, 2, 0],
+          EMPTY_DATA,
         ])
       );
 
@@ -274,7 +269,7 @@ describe('DAO Upgrade', function () {
 
       // Check the emitted implementation.
       const emittedImplementation = (
-        await findEventTopicLog(upgradeTx, Dao_v1_2_0.interface, 'Upgraded')
+        await findEventTopicLog(upgradeTx, DAO_V1_2_0.interface, 'Upgraded')
       ).args.implementation;
       expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
 
@@ -297,8 +292,9 @@ describe('DAO Upgrade', function () {
       // Upgrade and call `initializeUpgradeFrom`.
       await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DaoCurrent.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
           [1, 2, 0],
+          EMPTY_DATA,
         ])
       );
 
@@ -365,8 +361,9 @@ describe('DAO Upgrade', function () {
       // Upgrade and call `initializeUpgradeFrom`.
       await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DaoCurrent.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
           [1, 2, 0],
+          EMPTY_DATA,
         ])
       );
 
