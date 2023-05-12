@@ -51,6 +51,8 @@ const MAX_ACTIONS = 256;
 const OZ_INITIALIZED_SLOT_POSITION = 0;
 const REENTRANCY_STATUS_SLOT_POSITION = 304;
 
+const EMPTY_DATA = '0x';
+
 const EVENTS = {
   MetadataSet: 'MetadataSet',
   TrustedForwarderSet: 'TrustedForwarderSet',
@@ -229,7 +231,9 @@ describe('DAO', function () {
     it('reverts if trying to upgrade from a previous major release', async () => {
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
-      await expect(uninitializedDao.initializeUpgradeFrom([0, 1, 0]))
+      await expect(
+        uninitializedDao.initializeUpgradeFrom([0, 1, 0], EMPTY_DATA)
+      )
         .to.be.revertedWithCustomError(
           dao,
           'ProtocolVersionUpgradeNotSupported'
@@ -240,7 +244,9 @@ describe('DAO', function () {
     it('reverts if trying to upgrade to the same version', async () => {
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
-      await expect(uninitializedDao.initializeUpgradeFrom([1, 3, 0]))
+      await expect(
+        uninitializedDao.initializeUpgradeFrom([1, 3, 0], EMPTY_DATA)
+      )
         .to.be.revertedWithCustomError(
           dao,
           'ProtocolVersionUpgradeNotSupported'
@@ -263,7 +269,9 @@ describe('DAO', function () {
       ).to.equal(0);
 
       // Call `initializeUpgradeFrom` with the previous version 1.3.0 which is not supported.
-      await expect(uninitializedDao.initializeUpgradeFrom([1, 3, 0]))
+      await expect(
+        uninitializedDao.initializeUpgradeFrom([1, 3, 0], EMPTY_DATA)
+      )
         .to.be.revertedWithCustomError(
           dao,
           'ProtocolVersionUpgradeNotSupported'
@@ -271,8 +279,9 @@ describe('DAO', function () {
         .withArgs([1, 3, 0]);
 
       // Call `initializeUpgradeFrom` with the previous version 1.2.0.
-      await expect(uninitializedDao.initializeUpgradeFrom([1, 2, 0])).to.not.be
-        .reverted;
+      await expect(
+        uninitializedDao.initializeUpgradeFrom([1, 2, 0], EMPTY_DATA)
+      ).to.not.be.reverted;
 
       // Expect the contract to be initialized with `_initialized = 2`
       expect(
