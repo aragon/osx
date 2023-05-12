@@ -5,9 +5,8 @@ import {AddresslistVotingSetup__factory} from '../../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding addresslist voting setup deployment.\n`);
-  const [deployer] = await hre.ethers.getSigners();
-
-  const {deployments, network} = hre;
+  const {deployments, network, ethers} = hre;
+  const [deployer] = await ethers.getSigners();
 
   const AddresslistVotingSetupDeployment = await deployments.get(
     'AddresslistVotingSetup'

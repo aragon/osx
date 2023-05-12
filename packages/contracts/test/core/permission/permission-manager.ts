@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   PermissionManagerTest,
   PermissionConditionMock,
+  PermissionManagerTest__factory,
 } from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -44,17 +45,18 @@ interface MultiTargetPermission {
 
 describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
+  let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
   let otherSigner: SignerWithAddress;
 
   before(async () => {
-    const signers = await ethers.getSigners();
+    signers = await ethers.getSigners();
     ownerSigner = signers[0];
     otherSigner = signers[1];
   });
 
   beforeEach(async () => {
-    const PM = await ethers.getContractFactory('PermissionManagerTest');
+    const PM = new PermissionManagerTest__factory(signers[0]);
     pm = await PM.deploy();
     await pm.init(ownerSigner.address);
   });
@@ -67,7 +69,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should emit Granted', async () => {
-      const PM = await ethers.getContractFactory('PermissionManagerTest');
+      const PM = new PermissionManagerTest__factory(ownerSigner);
       pm = await PM.deploy();
       await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
     });

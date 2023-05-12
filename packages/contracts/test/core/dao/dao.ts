@@ -10,6 +10,15 @@ import {
   IERC1271__factory,
   GasConsumer__factory,
   DAO__factory,
+  ERC1271Mock__factory,
+  TestERC20__factory,
+  TestERC1155__factory,
+  TestERC721__factory,
+  IERC1155,
+  IERC1155Receiver,
+  IERC1155Receiver__factory,
+  IERC721Receiver,
+  IERC721Receiver__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -600,7 +609,7 @@ describe('DAO', function () {
         let erc20Token: TestERC20;
 
         beforeEach(async () => {
-          const TestERC20 = await ethers.getContractFactory('TestERC20');
+          const TestERC20 = new TestERC20__factory(signers[0]);
           erc20Token = await TestERC20.deploy('name', 'symbol', 0);
         });
 
@@ -640,7 +649,7 @@ describe('DAO', function () {
         let erc721Token: TestERC721;
 
         beforeEach(async () => {
-          const TestERC721 = await ethers.getContractFactory('TestERC721');
+          const TestERC721 = new TestERC721__factory(signers[0]);
           erc721Token = await TestERC721.deploy('name', 'symbol');
         });
 
@@ -683,7 +692,7 @@ describe('DAO', function () {
         let erc1155Token: TestERC1155;
 
         beforeEach(async () => {
-          const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+          const TestERC1155 = new TestERC1155__factory(signers[0]);
           erc1155Token = await TestERC1155.deploy('URI');
         });
 
@@ -744,14 +753,14 @@ describe('DAO', function () {
     let erc1155Token: TestERC1155;
 
     beforeEach(async () => {
-      const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+      const TestERC1155 = new TestERC1155__factory(signers[0]);
       erc1155Token = await TestERC1155.deploy('URI');
 
-      const TestERC721 = await ethers.getContractFactory('TestERC721');
+      const TestERC721 = new TestERC721__factory(signers[0]);
       erc721Token = await TestERC721.deploy('name', 'symbol');
 
-      erc721Token.mint(ownerAddress, 1);
-      erc1155Token.mint(ownerAddress, 1, 2);
+      await erc721Token.mint(ownerAddress, 1);
+      await erc1155Token.mint(ownerAddress, 1, 2);
     });
 
     it('reverts if erc721 callback is not registered', async () => {
@@ -771,9 +780,9 @@ describe('DAO', function () {
     });
 
     it('successfully transfers erc721 into the dao and emits the correct callback received event', async () => {
-      const ABI = ['function onERC721Received(address,address,uint256,bytes)'];
-      const iface = new ethers.utils.Interface(ABI);
-      const encoded = iface.encodeFunctionData('onERC721Received', [
+      const IERC721 = IERC721Receiver__factory.createInterface();
+
+      const encoded = IERC721.encodeFunctionData('onERC721Received', [
         ownerAddress,
         ownerAddress,
         1,
@@ -823,27 +832,19 @@ describe('DAO', function () {
     });
 
     it('successfully transfers erc1155 into the dao', async () => {
+      const IERC1155 = IERC1155Receiver__factory.createInterface();
+
       // encode onERC1155Received call
-      const erc1155ReceivedEncoded = new ethers.utils.Interface([
-        'function onERC1155Received(address,address,uint256,uint256,bytes)',
-      ]).encodeFunctionData('onERC1155Received', [
-        ownerAddress,
-        ownerAddress,
-        1,
-        1,
-        '0x',
-      ]);
+      const erc1155ReceivedEncoded = IERC1155.encodeFunctionData(
+        'onERC1155Received',
+        [ownerAddress, ownerAddress, 1, 1, '0x']
+      );
 
       // encode onERC1155BatchReceived call
-      const erc1155BatchReceivedEncoded = new ethers.utils.Interface([
-        'function onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)',
-      ]).encodeFunctionData('onERC1155BatchReceived', [
-        ownerAddress,
-        ownerAddress,
-        [1],
-        [1],
-        '0x',
-      ]);
+      const erc1155BatchReceivedEncoded = IERC1155.encodeFunctionData(
+        'onERC1155BatchReceived',
+        [ownerAddress, ownerAddress, [1], [1], '0x']
+      );
 
       await expect(
         erc1155Token.safeTransferFrom(ownerAddress, dao.address, 1, 1, '0x')
@@ -877,7 +878,7 @@ describe('DAO', function () {
     let token: TestERC20;
 
     beforeEach(async () => {
-      const TestERC20 = await ethers.getContractFactory('TestERC20');
+      const TestERC20 = new TestERC20__factory(signers[0]);
       token = await TestERC20.deploy('name', 'symbol', 0);
     });
 
@@ -1091,7 +1092,7 @@ describe('DAO', function () {
     });
 
     it('should return the validators response', async () => {
-      const ERC1271MockFactory = await ethers.getContractFactory('ERC1271Mock');
+      const ERC1271MockFactory = new ERC1271Mock__factory(signers[0]);
       const erc1271Mock = await ERC1271MockFactory.deploy();
 
       await dao.setSignatureValidator(erc1271Mock.address);

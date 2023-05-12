@@ -4,6 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {Operation} from '../../../utils/types';
 import {getContractAddress, managePermissions, Permission} from '../../helpers';
 import {PluginRepo__factory} from '../../../typechain';
+import {DAO__factory} from '../../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);
@@ -21,9 +22,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
-  const managingDaoContract = await ethers.getContractAt(
-    'DAO',
-    managingDAOAddress
+  const managingDaoContract = DAO__factory.connect(
+    managingDAOAddress,
+    deployer
   );
 
   // Grant `REGISTER_DAO_PERMISSION` to `Deployer`.

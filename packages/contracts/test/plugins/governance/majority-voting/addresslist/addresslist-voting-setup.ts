@@ -2,7 +2,11 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AddresslistVotingSetup} from '../../../../../typechain';
+import {
+  AddresslistVotingSetup,
+  AddresslistVotingSetup__factory,
+  AddresslistVoting__factory,
+} from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {Operation} from '../../../../../utils/types';
@@ -41,7 +45,7 @@ describe('AddresslistVotingSetup', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    targetDao = await deployNewDAO(signers[0].address);
+    targetDao = await deployNewDAO(signers[0]);
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
@@ -52,8 +56,8 @@ describe('AddresslistVotingSetup', function () {
     };
     defaultMembers = [signers[0].address];
 
-    const AddresslistVotingSetup = await ethers.getContractFactory(
-      'AddresslistVotingSetup'
+    const AddresslistVotingSetup = new AddresslistVotingSetup__factory(
+      signers[0]
     );
     addresslistVotingSetup = await AddresslistVotingSetup.deploy();
 
@@ -71,7 +75,7 @@ describe('AddresslistVotingSetup', function () {
   });
 
   it('creates address list voting base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('AddresslistVoting');
+    const factory = new AddresslistVoting__factory(signers[0]);
     const addresslistVotingContract = factory.attach(implementationAddress);
 
     expect(
@@ -171,9 +175,9 @@ describe('AddresslistVotingSetup', function () {
         defaultData
       );
 
-      const factory = await ethers.getContractFactory('AddresslistVoting');
-      const addresslistVotingContract = factory.attach(
-        anticipatedPluginAddress
+      const addresslistVotingContract = AddresslistVoting__factory.connect(
+        anticipatedPluginAddress,
+        signers[0]
       );
       const latestBlock = await ethers.provider.getBlock('latest');
 

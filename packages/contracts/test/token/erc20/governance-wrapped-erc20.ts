@@ -46,10 +46,8 @@ describe('GovernanceWrappedERC20', function () {
   before(async () => {
     signers = await ethers.getSigners();
 
-    TestERC20 = await ethers.getContractFactory('TestERC20');
-    GovernanceWrappedERC20 = await ethers.getContractFactory(
-      'GovernanceWrappedERC20'
-    );
+    TestERC20 = new TestERC20__factory(signers[0]);
+    GovernanceWrappedERC20 = new GovernanceWrappedERC20__factory(signers[0]);
     defaultBalances = [
       {account: signers[0].address, amount: 123},
       {account: signers[1].address, amount: 456},
@@ -105,9 +103,9 @@ describe('GovernanceWrappedERC20', function () {
 
     it('should return modified decimals', async () => {
       const defaultDecimals = await erc20.decimals();
-      erc20.setDecimals(5);
+      await erc20.setDecimals(5);
       expect(await governanceToken.decimals()).to.eq(5);
-      erc20.setDecimals(defaultDecimals);
+      await erc20.setDecimals(defaultDecimals);
     });
   });
 

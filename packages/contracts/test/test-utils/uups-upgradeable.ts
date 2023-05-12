@@ -3,6 +3,7 @@ import {expect} from 'chai';
 import {Contract} from 'ethers';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
+import {PluginUUPSUpgradeableV1Mock__factory} from '../../typechain';
 
 // See https://eips.ethereum.org/EIPS/eip-1967
 export const IMPLEMENTATION_SLOT =
@@ -34,9 +35,8 @@ export function shouldUpgradeCorrectly(
 
   describe('UUPS Upgradeability Test', async () => {
     before(async () => {
-      const factory = await ethers.getContractFactory(
-        'PluginUUPSUpgradeableV1Mock'
-      );
+      const signers = await ethers.getSigners();
+      const factory = new PluginUUPSUpgradeableV1Mock__factory(signers[0]);
       uupsCompatibleBase = (await factory.deploy()).address;
     });
 
@@ -45,7 +45,7 @@ export function shouldUpgradeCorrectly(
       const connect = contract.connect(user);
       const tx1 = connect.upgradeTo(ethers.constants.AddressZero);
       const tx2 = connect.upgradeToAndCall(ethers.constants.AddressZero, '0x');
-      if (upgradeRevertPermissionMessage == 'DaoUnauthorized') {
+      if (upgradeRevertPermissionMessage === 'DaoUnauthorized') {
         await expect(tx1)
           .to.be.revertedWithCustomError(
             contract,
