@@ -20,7 +20,7 @@ import {
   handleDelegateVotesChanged,
   handleTransfer
 } from '../../src/packages/token/governance-erc20';
-import {BigInt, DataSourceContext, log} from '@graphprotocol/graph-ts';
+import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 
 describe('Governance ERC20', () => {
