@@ -163,14 +163,13 @@ contract DAO is
     ) external reinitializer(2) {
         _initData; // Silences the unused function parameter warning.
 
+        // Check that the version the contract is upgrading from is < v1.3.0.
         if (_protocolVersion[0] != 1 || _protocolVersion[1] >= 3) {
             revert ProtocolVersionUpgradeNotSupported(_protocolVersion);
         }
 
-        // All versions before v1.3.0 must initialize the newly added `_reentrancyStatus`.
-        if (_protocolVersion[1] < 3) {
-            _reentrancyStatus = _NOT_ENTERED;
-        }
+        // Initialize `_reentrancyStatus` that was added in the current version (v1.3.0).
+        _reentrancyStatus = _NOT_ENTERED;
     }
 
     /// @inheritdoc PermissionManager
