@@ -219,15 +219,18 @@ contract Multisig is
         uint64 _startDate,
         uint64 _endDate
     ) external returns (uint256 proposalId) {
-        uint64 snapshotBlock = block.number.toUint64() - 1;
+        if (multisigSettings.onlyListed && !isListed(_msgSender())) {
+            revert ProposalCreationForbidden(_msgSender());
+        }
+
+        uint64 snapshotBlock;
+        unchecked {
+            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
+        }
 
         // Revert if the settings have been changed in the same block as this proposal should be created in.
         // This prevents a malicious party from voting with previous addresses and the new settings.
         if (lastMultisigSettingsChange > snapshotBlock) {
-            revert ProposalCreationForbidden(_msgSender());
-        }
-
-        if (multisigSettings.onlyListed && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
