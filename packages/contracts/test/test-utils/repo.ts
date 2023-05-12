@@ -7,6 +7,7 @@ import {
   PluginUUPSUpgradeableSetupV1Mock,
   PluginRepo__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
+  PluginRepoRegistry__factory,
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {getMergedABI} from '../../utils/abi';
@@ -58,11 +59,10 @@ export async function deployPluginRepoFactory(
 
 export async function deployPluginRepoRegistry(
   managingDao: any,
-  ensSubdomainRegistrar: any
+  ensSubdomainRegistrar: any,
+  signer: SignerWithAddress
 ): Promise<PluginRepoRegistry> {
-  const PluginRepoRegistry = await ethers.getContractFactory(
-    'PluginRepoRegistry'
-  );
+  const PluginRepoRegistry = new PluginRepoRegistry__factory(signer);
 
   let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
     PluginRepoRegistry

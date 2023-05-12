@@ -15,6 +15,7 @@ import {OZ_ERRORS} from '../../../test-utils/error';
 import {toBytes32} from '../../../test-utils/voting';
 import {
   AdminCloneFactory,
+  AdminCloneFactory__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IPlugin__factory,
@@ -70,9 +71,7 @@ describe('Admin', function () {
 
     dao = await deployNewDAO(signers[0]);
 
-    const AdminCloneFactory = await ethers.getContractFactory(
-      'AdminCloneFactory'
-    );
+    const AdminCloneFactory = new AdminCloneFactory__factory(signers[0]);
     adminCloneFactory = await AdminCloneFactory.deploy();
   });
 

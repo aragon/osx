@@ -6,13 +6,18 @@ import {Deployment} from 'hardhat-deploy/dist/types';
 import {
   DAO,
   DAORegistry,
+  DAORegistry__factory,
   DAO__factory,
   ENSSubdomainRegistrar,
+  ENSSubdomainRegistrar__factory,
   Multisig,
+  Multisig__factory,
   PluginRepoRegistry,
+  PluginRepoRegistry__factory,
 } from '../../typechain';
 
 import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 async function deployAll() {
   await deployments.fixture();
@@ -22,6 +27,7 @@ const IMPLEMENTATION_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
 
 describe('Managing DAO', function () {
+  let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
   let managingDao: DAO;
@@ -73,6 +79,8 @@ describe('Managing DAO', function () {
   }
 
   before(async () => {
+    signers = await ethers.getSigners();
+
     // deployment should be empty
     expect(await deployments.all()).to.be.empty;
 
@@ -81,23 +89,23 @@ describe('Managing DAO', function () {
 
     // ManagingDAO
     managingDaoDeployment = await deployments.get('DAO');
-    managingDao = await ethers.getContractAt(
-      'src/core/dao/DAO.sol:DAO',
-      managingDaoDeployment.address
+    managingDao = DAO__factory.connect(
+      managingDaoDeployment.address,
+      signers[0]
     );
 
     // DAORegistry
     daoRegistryDeployment = await deployments.get('DAORegistry');
-    daoRegistry = await ethers.getContractAt(
-      'DAORegistry',
-      daoRegistryDeployment.address
+    daoRegistry = DAORegistry__factory.connect(
+      daoRegistryDeployment.address,
+      signers[0]
     );
 
     // PluginRepoRegistry
     pluginRepoRegistryDeployment = await deployments.get('PluginRepoRegistry');
-    pluginRepoRegistry = await ethers.getContractAt(
-      'PluginRepoRegistry',
-      pluginRepoRegistryDeployment.address
+    pluginRepoRegistry = PluginRepoRegistry__factory.connect(
+      pluginRepoRegistryDeployment.address,
+      signers[0]
     );
 
     // ENSSubdomainRegistrar
@@ -106,22 +114,22 @@ describe('Managing DAO', function () {
       await deployments.get('Plugin_ENSSubdomainRegistrar'),
     ];
     ensSubdomainRegistrars = [
-      await ethers.getContractAt(
-        'ENSSubdomainRegistrar',
-        ensSubdomainRegistrarDeployments[0].address
+      ENSSubdomainRegistrar__factory.connect(
+        ensSubdomainRegistrarDeployments[0].address,
+        signers[0]
       ),
-      await ethers.getContractAt(
-        'ENSSubdomainRegistrar',
-        ensSubdomainRegistrarDeployments[1].address
+      ENSSubdomainRegistrar__factory.connect(
+        ensSubdomainRegistrarDeployments[1].address,
+        signers[0]
       ),
     ];
 
     const {deployer} = await getNamedAccounts();
     ownerAddress = deployer;
 
-    multisig = await ethers.getContractAt(
-      'Multisig',
-      hre.managingDAOMultisigPluginAddress
+    multisig = Multisig__factory.connect(
+      hre.managingDAOMultisigPluginAddress,
+      signers[0]
     );
   });
 

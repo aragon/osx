@@ -7,18 +7,20 @@ import {
   getContractAddress,
   managePermissions,
 } from '../../helpers';
+import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nSetting ManagingDao permissions.');
   const {ethers} = hre;
+  const [deployer] = await ethers.getSigners();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
-  const managingDaoContract = await ethers.getContractAt(
-    'src/core/dao/DAO.sol:DAO',
-    managingDAOAddress
+  const managingDaoContract = DAO__factory.connect(
+    managingDAOAddress,
+    deployer
   );
 
   // Set all the permission needed for a DAO to operate normally as if it was created via DAOFactory.

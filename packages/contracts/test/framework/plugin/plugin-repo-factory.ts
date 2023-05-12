@@ -14,6 +14,7 @@ import {
   DAO,
   PluginRepoFactory,
   PluginRepoFactory__factory,
+  PluginRepo__factory,
 } from '../../../typechain';
 import {getMergedABI} from '../../../utils/abi';
 
@@ -80,7 +81,8 @@ describe('PluginRepoFactory: ', function () {
     // deploy and initialize PluginRepoRegistry
     pluginRepoRegistry = await deployPluginRepoRegistry(
       managingDao,
-      ensSubdomainRegistrar
+      ensSubdomainRegistrar,
+      signers[0]
     );
 
     // deploy PluginRepoFactory
@@ -145,7 +147,7 @@ describe('PluginRepoFactory: ', function () {
       const expectedRepoAddress = await getExpectedRepoAddress(
         pluginRepoFactory.address
       );
-      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      const PluginRepo = new PluginRepo__factory(signers[0]);
       const pluginRepo = PluginRepo.attach(expectedRepoAddress);
 
       let tx = await pluginRepoFactory.createPluginRepo(
@@ -236,7 +238,7 @@ describe('PluginRepoFactory: ', function () {
       const expectedRepoAddress = await getExpectedRepoAddress(
         pluginRepoFactory.address
       );
-      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      const PluginRepo = new PluginRepo__factory(signers[0]);
       const pluginRepo = PluginRepo.attach(expectedRepoAddress);
 
       let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(

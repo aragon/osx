@@ -7,6 +7,8 @@ import {
   DAO,
   IDAO__factory,
   InterfaceBasedRegistryMock,
+  InterfaceBasedRegistryMock__factory,
+  PluginRepo__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {getInterfaceID} from '../../test-utils/interfaces';
@@ -32,8 +34,8 @@ describe('InterfaceBasedRegistry', function () {
   });
 
   beforeEach(async () => {
-    const InterfaceBasedRegistryMock = await ethers.getContractFactory(
-      'InterfaceBasedRegistryMock'
+    const InterfaceBasedRegistryMock = new InterfaceBasedRegistryMock__factory(
+      signers[0]
     );
 
     interfaceBasedRegistryMock = await deployWithProxy(
@@ -68,7 +70,7 @@ describe('InterfaceBasedRegistry', function () {
 
     it('fail to register if the interface is not supported', async () => {
       // Use the `PluginRepo` contract for testing purposes here, because the interface differs from the `DAO` interface
-      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      const PluginRepo = new PluginRepo__factory(signers[0]);
       let contractNotBeingADao = await PluginRepo.deploy();
 
       await expect(

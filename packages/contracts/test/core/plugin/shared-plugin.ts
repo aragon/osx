@@ -2,7 +2,13 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {TestSharedPlugin, TestIdGatingCondition, DAO} from '../../../typechain';
+import {
+  TestSharedPlugin,
+  TestIdGatingCondition,
+  DAO,
+  TestIdGatingCondition__factory,
+  TestSharedPlugin__factory,
+} from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
 
@@ -29,9 +35,7 @@ describe('SharedPlugin', function () {
     dao2 = await deployNewDAO(signers[0]);
 
     // Deploy the `TestSharedPlugin`
-    const TestSharedPlugin = await ethers.getContractFactory(
-      'TestSharedPlugin'
-    );
+    const TestSharedPlugin = new TestSharedPlugin__factory(signers[0]);
     testPlugin = await deployWithProxy(TestSharedPlugin);
     await testPlugin.initialize(managingDao.address);
 
@@ -65,9 +69,7 @@ describe('SharedPlugin', function () {
       const allowedId = 0;
 
       // Deploy `TestIdGatingCondition` and set the allowed ID in the constructor
-      const Condition = await ethers.getContractFactory(
-        'TestIdGatingCondition'
-      );
+      const Condition = new TestIdGatingCondition__factory(signers[0]);
       condition = await Condition.deploy(allowedId);
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
@@ -93,9 +95,7 @@ describe('SharedPlugin', function () {
       const nonExistingId = 1;
 
       // Deploy the condition and set the allowed ID
-      const Condition = await ethers.getContractFactory(
-        'TestIdGatingCondition'
-      );
+      const Condition = new TestIdGatingCondition__factory(signers[0]);
       condition = await Condition.deploy(allowedId);
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
@@ -131,9 +131,7 @@ describe('SharedPlugin', function () {
       const allowedId = 1;
       const existingButNotAllowedId = 0;
 
-      const Condition = await ethers.getContractFactory(
-        'TestIdGatingCondition'
-      );
+      const Condition = new TestIdGatingCondition__factory(signers[0]);
       condition = await Condition.deploy(allowedId);
 
       // Grants signers[0] the permission to do ID gated actions on `testPlugin` via `condition`
@@ -172,9 +170,7 @@ describe('SharedPlugin', function () {
       // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      const Condition = await ethers.getContractFactory(
-        'TestIdGatingCondition'
-      );
+      const Condition = new TestIdGatingCondition__factory(signers[0]);
       condition = await Condition.deploy(allowedId);
 
       // Create ID-gated object associated with `dao1`
@@ -191,9 +187,7 @@ describe('SharedPlugin', function () {
       // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      const Condition = await ethers.getContractFactory(
-        'TestIdGatingCondition'
-      );
+      const Condition = new TestIdGatingCondition__factory(signers[0]);
       condition = await Condition.deploy(allowedId);
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
@@ -218,9 +212,7 @@ describe('SharedPlugin', function () {
       // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      const Condition = await ethers.getContractFactory(
-        'TestIdGatingCondition'
-      );
+      const Condition = new TestIdGatingCondition__factory(signers[0]);
       condition = await Condition.deploy(allowedId);
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition

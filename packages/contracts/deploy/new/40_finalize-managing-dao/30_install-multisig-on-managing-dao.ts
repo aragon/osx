@@ -6,9 +6,14 @@ import {findEvent} from '../../../utils/event';
 import {checkPermission, getContractAddress} from '../../helpers';
 import {Operation} from '../../../utils/types';
 import {hashHelpers} from '../../../utils/psp';
-import {MultisigSetup__factory, Multisig__factory} from '../../../typechain';
+import {
+  MultisigSetup__factory,
+  Multisig__factory,
+  PluginSetupProcessor__factory,
+} from '../../../typechain';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {DAO__factory} from '../../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
@@ -41,18 +46,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
-  const managingDaoContract = await ethers.getContractAt(
-    'src/core/dao/DAO.sol:DAO',
-    managingDAOAddress
+  const managingDaoContract = DAO__factory.connect(
+    managingDAOAddress,
+    deployer
   );
 
   // Get `PluginSetupProcessor` address.
   const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
 
   // Get `PluginSetupProcessor` contract.
-  const pspContract = await ethers.getContractAt(
-    'PluginSetupProcessor',
-    pspAddress
+  const pspContract = PluginSetupProcessor__factory.connect(
+    pspAddress,
+    deployer
   );
 
   // Install multisig build 2

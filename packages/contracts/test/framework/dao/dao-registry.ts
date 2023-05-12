@@ -2,7 +2,12 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
-import {DAO, DAORegistry, ENSSubdomainRegistrar} from '../../../typechain';
+import {
+  DAO,
+  DAORegistry,
+  DAORegistry__factory,
+  ENSSubdomainRegistrar,
+} from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -52,7 +57,7 @@ describe('DAORegistry', function () {
     targetDao = await deployNewDAO(signers[0]);
 
     // DAO Registry
-    const Registry = await ethers.getContractFactory('DAORegistry');
+    const Registry = new DAORegistry__factory(signers[0]);
 
     daoRegistry = await deployWithProxy(Registry);
 

@@ -12,6 +12,8 @@ import {
   IERC165Upgradeable__factory,
   IPlugin__factory,
   IMerkleDistributor__factory,
+  TestERC20__factory,
+  MerkleDistributor__factory,
 } from '../../../../typechain';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
@@ -38,12 +40,10 @@ describe('MerkleDistributor', function () {
     // create a DAO
     dao = await deployNewDAO(signers[0]);
 
-    const TestERC20 = await ethers.getContractFactory('TestERC20');
+    const TestERC20 = new TestERC20__factory(signers[0]);
     token = await TestERC20.deploy('FOO', 'FOO', 0); // mint 0 FOO tokens
 
-    const MerkleDistributor = await ethers.getContractFactory(
-      'MerkleDistributor'
-    );
+    const MerkleDistributor = new MerkleDistributor__factory(signers[0]);
     distributor = await deployWithProxy(MerkleDistributor);
   });
 

@@ -38,7 +38,8 @@ export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
 }
 
 export async function getActions() {
-  const ActionExecuteFactory = await ethers.getContractFactory('ActionExecute');
+  const signers = await ethers.getSigners();
+  const ActionExecuteFactory = new ActionExecute__factory(signers[0]);
   let ActionExecute = await ActionExecuteFactory.deploy();
   const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
 

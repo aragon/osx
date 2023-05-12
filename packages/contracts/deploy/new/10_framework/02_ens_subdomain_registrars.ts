@@ -1,19 +1,18 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DAO} from '../../../typechain';
+import {DAO, ENSRegistry__factory} from '../../../typechain';
 import {getContractAddress, getENSAddress} from '../../helpers';
+import {DAO__factory} from '../../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts, ethers, network} = hre;
+  const {deployments, ethers, network} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+
+  const [deployer] = await ethers.getSigners();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
-  const managingDAO: DAO = await ethers.getContractAt(
-    'src/core/dao/DAO.sol:DAO',
-    managingDAOAddress
-  );
+  const managingDAO = DAO__factory.connect(managingDAOAddress, deployer);
 
   const ensRegistryAddress = await getENSAddress(hre);
 
@@ -30,11 +29,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('DAO_ENSSubdomainRegistrar', {
     contract: 'ENSSubdomainRegistrar',
-    from: deployer,
+    from: deployer.address,
     args: [],
     log: true,
     proxy: {
-      owner: deployer,
+      owner: deployer.address,
       proxyContract: 'ERC1967Proxy',
       proxyArgs: ['{implementation}', '{data}'],
       execute: {
@@ -54,11 +53,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('Plugin_ENSSubdomainRegistrar', {
     contract: 'ENSSubdomainRegistrar',
-    from: deployer,
+    from: deployer.address,
     args: [],
     log: true,
     proxy: {
-      owner: deployer,
+      owner: deployer.address,
       proxyContract: 'ERC1967Proxy',
       proxyArgs: ['{implementation}', '{data}'],
       execute: {
@@ -76,9 +75,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    ensRegistryAddress,
+    deployer
   );
 
   const daoRegistrarTX =
@@ -93,7 +92,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   const deployerTX =
     await ensRegistryContract.populateTransaction.setApprovalForAll(
-      deployer,
+      deployer.address,
       true
     );
 

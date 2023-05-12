@@ -66,10 +66,10 @@ describe('MultisigSetup', function () {
       [[signers[0].address], Object.values(defaultMultisigSettings)]
     );
 
-    const MultisigSetup = await ethers.getContractFactory('MultisigSetup');
+    const MultisigSetup = new MultisigSetup__factory(signers[0]);
     multisigSetup = await MultisigSetup.deploy();
 
-    MultisigFactory = await ethers.getContractFactory('Multisig');
+    MultisigFactory = new Multisig__factory(signers[0]);
 
     implementationAddress = await multisigSetup.implementation();
   });
@@ -79,7 +79,7 @@ describe('MultisigSetup', function () {
   });
 
   it('creates multisig base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('Multisig');
+    const factory = new Multisig__factory(signers[0]);
     const multisigContract = factory.attach(implementationAddress);
 
     expect(
@@ -255,7 +255,7 @@ describe('MultisigSetup', function () {
 
       await multisigSetup.prepareInstallation(daoAddress, minimum_data);
 
-      const factory = await ethers.getContractFactory('Multisig');
+      const factory = new Multisig__factory(signers[0]);
       const multisigContract = factory.attach(anticipatedPluginAddress);
 
       expect(await multisigContract.dao()).to.eq(daoAddress);

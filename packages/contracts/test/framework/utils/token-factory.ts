@@ -3,7 +3,9 @@ import {ethers} from 'hardhat';
 import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
 
 import {
+  ActionExecute__factory,
   DAO,
+  ERC20Upgradeable__factory,
   GovernanceERC20,
   GovernanceERC20__factory,
   GovernanceWrappedERC20,
@@ -18,6 +20,7 @@ import {
   TokenCreatedEvent,
   WrappedTokenEvent,
 } from '../../../typechain/TokenFactory';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 chai.use(smock.matchers);
 
@@ -38,10 +41,15 @@ interface MintConfig {
 const zeroAddr = ethers.constants.AddressZero;
 
 describe('Core: TokenFactory', () => {
+  let signers: SignerWithAddress[];
   let tokenFactory: MockContract<TokenFactory>;
   let governanceBase: MockContract<GovernanceERC20>;
   let governanceWrappedBase: MockContract<GovernanceWrappedERC20>;
   let merkleMinterBase: MockContract<MerkleMinter>;
+
+  before(async () => {
+    signers = await ethers.getSigners();
+  });
 
   beforeEach(async () => {
     const GovernanceBaseFactory = await smock.mock<GovernanceERC20__factory>(
@@ -93,9 +101,8 @@ describe('Core: TokenFactory', () => {
 
     it('should fail if token addr is no ERC20 contract', async () => {
       // NOTE that any contract that don't contain `balanceOf` is enough to use.
-      const dummyContractFactory = await ethers.getContractFactory(
-        'ActionExecute'
-      );
+      const dummyContractFactory = new ActionExecute__factory(signers[0]);
+
       const dummyContract = await dummyContractFactory.deploy();
       const config: TokenConfig = {
         addr: dummyContract.address,
@@ -161,7 +168,7 @@ describe('Core: TokenFactory', () => {
       );
 
       const event = await findEvent<WrappedTokenEvent>(tx, 'WrappedToken');
-      const factory = await ethers.getContractFactory('GovernanceWrappedERC20');
+      const factory = new GovernanceWrappedERC20__factory(signers[0]);
       const wrappedToken = factory.attach(event.args.token);
 
       expect(await wrappedToken.underlying()).to.equal(erc20Contract.address);
@@ -259,9 +266,10 @@ describe('Core: TokenFactory', () => {
       );
 
       const event = await findEvent<TokenCreatedEvent>(tx, 'TokenCreated');
-      const erc20Contract = await ethers.getContractAt(
-        'ERC20Upgradeable',
-        event.args.token
+
+      const erc20Contract = ERC20Upgradeable__factory.connect(
+        event.args.token,
+        signers[0]
       );
 
       for (const i in mintConfig.receivers) {

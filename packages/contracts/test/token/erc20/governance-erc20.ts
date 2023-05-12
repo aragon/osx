@@ -39,7 +39,7 @@ describe('GovernanceERC20', function () {
   before(async () => {
     signers = await ethers.getSigners();
     dao = await deployNewDAO(signers[0]);
-    GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
+    GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
 
     from = signers[0];
     to = signers[1];

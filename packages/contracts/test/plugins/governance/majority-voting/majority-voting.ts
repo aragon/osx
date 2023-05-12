@@ -10,6 +10,7 @@ import {
   IProposal__factory,
   IMajorityVoting__factory,
   DAO__factory,
+  MajorityVotingMock__factory,
 } from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
 import {
@@ -64,9 +65,7 @@ describe('MajorityVotingMock', function () {
       minProposerVotingPower: 0,
     };
 
-    const MajorityVotingBase = await ethers.getContractFactory(
-      'MajorityVotingMock'
-    );
+    const MajorityVotingBase = new MajorityVotingMock__factory(signers[0]);
 
     votingBase = await deployWithProxy(MajorityVotingBase);
     await dao.grant(

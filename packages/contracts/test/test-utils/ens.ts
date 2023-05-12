@@ -9,18 +9,21 @@ import {
   ENSRegistry,
   PublicResolver,
 } from '../../../typechain';
+import {
+  ENSRegistry__factory,
+  ENSSubdomainRegistrar__factory,
+  PublicResolver__factory,
+} from '../../typechain';
 
 export async function deployENSSubdomainRegistrar(
   owner: SignerWithAddress,
   managingDao: DAO,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
-  const ENSRegistryFactory = await ethers.getContractFactory('ENSRegistry');
+  const ENSRegistryFactory = new ENSRegistry__factory(owner);
   const ensRegistry = await ENSRegistryFactory.connect(owner).deploy();
 
-  const PublicResolverFactory = await ethers.getContractFactory(
-    'PublicResolver'
-  );
+  const PublicResolverFactory = new PublicResolver__factory(owner);
   const publicResolver = await PublicResolverFactory.connect(owner).deploy(
     ensRegistry.address,
     owner.address
@@ -47,9 +50,7 @@ export async function deployENSSubdomainRegistrar(
     );
   }
 
-  const ENSSubdomainRegistrar = await ethers.getContractFactory(
-    'ENSSubdomainRegistrar'
-  );
+  const ENSSubdomainRegistrar = new ENSSubdomainRegistrar__factory(owner);
 
   // Deploy the ENS and approve the subdomain registrar
   const ensSubdomainRegistrar = await deployWithProxy<ENSSubdomainRegistrar>(

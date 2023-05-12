@@ -10,6 +10,7 @@ import {
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
   PlaceholderSetup__factory,
+  TestPlugin__factory,
 } from '../../../typechain';
 import {
   deployMockPluginSetup,
@@ -106,9 +107,7 @@ describe('PluginRepo', function () {
       );
 
       // If a contract is passed, but doesn't have `supportsInterface` signature described in the contract.
-      const randomContract = await (
-        await ethers.getContractFactory('TestPlugin')
-      ).deploy();
+      const randomContract = await new TestPlugin__factory(signers[0]).deploy();
       await expect(
         pluginRepo.createVersion(
           1,
