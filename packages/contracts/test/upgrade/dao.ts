@@ -76,10 +76,10 @@ describe('DAO Upgrade', function () {
     });
 
     it('does not corrupt the DAO storage', async () => {
-      // Upgrade and call `initializeUpgradeFrom`.
+      // Upgrade and call `initializeFrom`.
       const upgradeTx = await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeFrom', [
           [1, 0, 0],
           EMPTY_DATA,
         ])
@@ -116,10 +116,10 @@ describe('DAO Upgrade', function () {
         ethers.utils.id('ROOT_PERMISSION')
       );
 
-      // Upgrade and call `initializeUpgradeFrom`.
+      // Upgrade and call `initializeFrom`.
       await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeFrom', [
           [1, 0, 0],
           EMPTY_DATA,
         ])
@@ -185,10 +185,10 @@ describe('DAO Upgrade', function () {
       // Check that the storage variable now forwarder 1.
       expect(await daoV100Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
 
-      // Upgrade and call `initializeUpgradeFrom`.
+      // Upgrade and call `initializeFrom`.
       await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeFrom', [
           [1, 0, 0],
           EMPTY_DATA,
         ])
@@ -249,10 +249,10 @@ describe('DAO Upgrade', function () {
     });
 
     it('does not corrupt the DAO storage', async () => {
-      // Upgrade and call `initializeUpgradeFrom`.
+      // Upgrade and call `initializeFrom`.
       const upgradeTx = await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeFrom', [
           [1, 2, 0],
           EMPTY_DATA,
         ])
@@ -289,10 +289,10 @@ describe('DAO Upgrade', function () {
         ethers.utils.id('ROOT_PERMISSION')
       );
 
-      // Upgrade and call `initializeUpgradeFrom`.
+      // Upgrade and call `initializeFrom`.
       await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeFrom', [
           [1, 2, 0],
           EMPTY_DATA,
         ])
@@ -358,10 +358,10 @@ describe('DAO Upgrade', function () {
       // Check that the storage variable now forwarder 1.
       expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
 
-      // Upgrade and call `initializeUpgradeFrom`.
+      // Upgrade and call `initializeFrom`.
       await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
-        DAO_Current.interface.encodeFunctionData('initializeUpgradeFrom', [
+        DAO_Current.interface.encodeFunctionData('initializeFrom', [
           [1, 2, 0],
           EMPTY_DATA,
         ])

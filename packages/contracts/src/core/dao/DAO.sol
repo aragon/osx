@@ -157,7 +157,7 @@ contract DAO is
     /// @notice Initializes the DAO after an upgrade from a previous version.
     /// @param _protocolVersion The protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
     /// @param _initData The initialization data to be passed to via `upgradeToAndCall` (see [ERC-1967](https://docs.openzeppelin.com/contracts/4.x/api/proxy#ERC1967Upgrade)).
-    function initializeUpgradeFrom(
+    function initializeFrom(
         uint8[3] calldata _protocolVersion,
         bytes calldata _initData
     ) external reinitializer(2) {
