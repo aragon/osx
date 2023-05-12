@@ -776,8 +776,13 @@ describe('Multisig', function () {
     });
 
     it('should revert if startDate is < than now', async () => {
-      const timeStamp = (await getTime()) + 500;
-      await setTimeForNextBlock(timeStamp);
+      // set next block time & mine a block with this time.
+      const nextBlockTime = (await getTime()) + 500;
+      await ethers.provider.send('evm_mine', [nextBlockTime]);
+      // set next block's timestamp
+      const nextTimeStamp = nextBlockTime + 500;
+      await setTimeForNextBlock(nextTimeStamp);
+
       await expect(
         multisig.createProposal(
           dummyMetadata,
@@ -790,12 +795,16 @@ describe('Multisig', function () {
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(timeStamp, 5);
+        .withArgs(nextTimeStamp, 5);
     });
 
     it('should revert if endDate is < than startDate', async () => {
-      const timeStamp = (await getTime()) + 500;
-      await setTimeForNextBlock(timeStamp);
+      // set next block time & mine a block with this time.
+      const nextBlockTime = (await getTime()) + 500;
+      await ethers.provider.send('evm_mine', [nextBlockTime]);
+      // set next block's timestamp
+      const nextTimeStamp = nextBlockTime + 500;
+      await setTimeForNextBlock(nextTimeStamp);
       await expect(
         multisig.createProposal(
           dummyMetadata,
@@ -808,7 +817,7 @@ describe('Multisig', function () {
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(timeStamp, 5);
+        .withArgs(nextTimeStamp, 5);
     });
   });
 

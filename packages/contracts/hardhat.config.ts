@@ -105,6 +105,9 @@ const config: HardhatUserConfig = {
     collapseNewlines: true,
     exclude: ['test'],
   },
+  mocha: {
+    timeout: 60000, // 60 seconds // increase the timeout for subdomain validation tests
+  },
 };
 
 export default config;

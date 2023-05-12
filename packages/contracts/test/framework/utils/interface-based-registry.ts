@@ -47,7 +47,7 @@ describe('InterfaceBasedRegistry', function () {
     );
 
     // grant REGISTER_PERMISSION_ID to registrer
-    dao.grant(
+    await dao.grant(
       interfaceBasedRegistryMock.address,
       ownerAddress,
       REGISTER_PERMISSION_ID
@@ -82,7 +82,7 @@ describe('InterfaceBasedRegistry', function () {
     });
 
     it('fail to register if the sender lacks the required permissionId', async () => {
-      dao.revoke(
+      await dao.revoke(
         interfaceBasedRegistryMock.address,
         ownerAddress,
         REGISTER_PERMISSION_ID
