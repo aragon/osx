@@ -35,7 +35,7 @@ contract SimpleAdmin is PluginCloneable {
 
 ### 2. How to initialize the Plugin Setup contract
 
-Each `PluginSetup` contract is deployed only once and we will publish a separate `PluginSetup` contract for each version. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
+Each `PluginSetup` contract is deployed only once and we will publish a separate `PluginSetup` instance for each version. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later

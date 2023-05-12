@@ -58,15 +58,15 @@ Here we use the selector of the [`grant` function](../../03-reference-guide/core
 
 If the caller possesses the [`ROOT_PERMISSION_ID` permission](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) on the DAO contract, the call becomes simpler and cheaper:
 
+:::caution
+Granting the `ROOT_PERMISSION_ID` permission to other contracts other than the `DAO` contract is dangerous and considered as an anti-pattern.
+:::
+
 ```solidity
-function exampleGrant(DAO dao, address _where, address _who, bytes32 _permissionId) {
+function exampleGrantFunction(DAO dao, address _where, address _who, bytes32 _permissionId) {
   dao.grant(_where, _who, _permissionId); // For this to work, the `msg.sender` needs the `ROOT_PERMISSION_ID`
 }
 ```
-
-:::caution
-Granting the `ROOT_PERMISSION_ID` permission to other contracts then the `DAO` contract is dangerous and considered as an anti-pattern.
-:::
 
 ### Sending Native Tokens
 
@@ -87,7 +87,7 @@ function exampleNativeTokenTransfer(IDAO dao, bytes32 _callId, address _receiver
 
 ### Calling a Function from an External Contract
 
-Imagine that you want to call an external function, let's say in an `Calculator` contract that adds two numbers for you. The corresponding `Action` and `execute` function call look as follows:
+Imagine that you want to call an external function, let's say in a `Calculator` contract that adds two numbers for you. The corresponding `Action` and `execute` function call look as follows:
 
 ```solidity
 contract ICalculator {

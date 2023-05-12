@@ -14,7 +14,7 @@ contract SimpleAdmin is Plugin {
 }
 ```
 
-How we set up the plugin's `initialize()` function depends on the plugin type selected. To review plugin types in depth, check out our [guide here](../02-plugin-types.md).
+The way we set up the plugin's `initialize()` function depends on the plugin type selected. To review plugin types in depth, check out our [guide here](../02-plugin-types.md).
 
 Additionally, the way we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, there's two ways in which we can deploy our plugin:
 
