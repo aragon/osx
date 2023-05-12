@@ -95,7 +95,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
         uint64 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already. This transaction could be backrun to change the votes.
+            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
         }
 
         proposalId = _createProposal({
