@@ -1,4 +1,4 @@
-import {Address, BigInt, dataSource, log, store} from '@graphprotocol/graph-ts';
+import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 import {TokenVotingMember} from '../../../generated/schema';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';

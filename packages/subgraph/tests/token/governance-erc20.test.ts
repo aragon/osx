@@ -6,7 +6,6 @@ import {
   dataSourceMock,
   test,
   describe,
-  logStore
 } from 'matchstick-as';
 import {
   ADDRESS_ONE,
