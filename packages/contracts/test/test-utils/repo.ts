@@ -5,25 +5,28 @@ import {
   PluginRepoFactory,
   PluginRepo,
   PluginUUPSUpgradeableSetupV1Mock,
-} from '../../../typechain';
+  PluginRepo__factory,
+  PluginUUPSUpgradeableSetupV1Mock__factory,
+} from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {getMergedABI} from '../../utils/abi';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-export async function deployMockPluginSetup(): Promise<PluginUUPSUpgradeableSetupV1Mock> {
-  const PluginSetupMock = await ethers.getContractFactory(
-    'PluginUUPSUpgradeableSetupV1Mock'
-  );
+export async function deployMockPluginSetup(
+  signer: SignerWithAddress
+): Promise<PluginUUPSUpgradeableSetupV1Mock> {
+  const PluginSetupMock = new PluginUUPSUpgradeableSetupV1Mock__factory(signer);
   const pluginSetupMockContract = await PluginSetupMock.deploy();
 
   return pluginSetupMockContract;
 }
 
 export async function deployNewPluginRepo(
-  ownerAddress: any
+  maintainer: SignerWithAddress
 ): Promise<PluginRepo> {
-  const PluginRepo = await ethers.getContractFactory('PluginRepo');
+  const PluginRepo = new PluginRepo__factory(maintainer);
   const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
-  await newPluginRepo.initialize(ownerAddress);
+  await newPluginRepo.initialize(maintainer.address);
 
   return newPluginRepo;
 }

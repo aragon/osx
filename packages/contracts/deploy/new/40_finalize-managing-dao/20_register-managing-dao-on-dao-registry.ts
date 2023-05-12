@@ -58,7 +58,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Set Metadata for the Managing DAO
   const managingDaoContract = await ethers.getContractAt(
-    'DAO',
+    'src/core/dao/DAO.sol:DAO',
     managingDAOAddress
   );
 

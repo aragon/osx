@@ -24,10 +24,9 @@ describe('SharedPlugin', function () {
     ownerAddress = await signers[0].getAddress();
 
     // Deploy the managing DAO and two other DAOs
-    const DAO = await ethers.getContractFactory('DAO');
-    managingDao = await deployNewDAO(ownerAddress);
-    dao1 = await deployNewDAO(ownerAddress);
-    dao2 = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
+    dao1 = await deployNewDAO(signers[0]);
+    dao2 = await deployNewDAO(signers[0]);
 
     // Deploy the `TestSharedPlugin`
     const TestSharedPlugin = await ethers.getContractFactory(

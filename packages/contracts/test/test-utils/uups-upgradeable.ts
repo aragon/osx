@@ -40,7 +40,7 @@ export function shouldUpgradeCorrectly(
       const connect = contract.connect(user);
       const tx1 = connect.upgradeTo(ethers.constants.AddressZero);
       const tx2 = connect.upgradeToAndCall(ethers.constants.AddressZero, '0x');
-      if (upgradeRevertPermissionMessage == 'DaoUnauthorized') {
+      if (upgradeRevertPermissionMessage === 'DaoUnauthorized') {
         await expect(tx1)
           .to.be.revertedWithCustomError(
             contract,

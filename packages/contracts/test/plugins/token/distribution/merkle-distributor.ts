@@ -36,8 +36,7 @@ describe('MerkleDistributor', function () {
     wallet1 = await signers[1].getAddress();
 
     // create a DAO
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await deployNewDAO(wallet0);
+    dao = await deployNewDAO(signers[0]);
 
     const TestERC20 = await ethers.getContractFactory('TestERC20');
     token = await TestERC20.deploy('FOO', 'FOO', 0); // mint 0 FOO tokens

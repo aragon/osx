@@ -37,10 +37,10 @@ describe('PluginRepo', function () {
 
   beforeEach(async function () {
     // deploy a pluginRepo and initialize
-    pluginRepo = await deployNewPluginRepo(ownerAddress);
+    pluginRepo = await deployNewPluginRepo(signers[0]);
 
     // deploy pluging factory mock
-    pluginSetupMock = await deployMockPluginSetup();
+    pluginSetupMock = await deployMockPluginSetup(signers[0]);
 
     this.upgrade = {
       contract: pluginRepo,
@@ -163,8 +163,8 @@ describe('PluginRepo', function () {
     });
 
     it('fails if the same plugin setup exists in another release', async () => {
-      const pluginSetup_1 = await deployMockPluginSetup();
-      const pluginSetup_2 = await deployMockPluginSetup();
+      const pluginSetup_1 = await deployMockPluginSetup(signers[0]);
+      const pluginSetup_2 = await deployMockPluginSetup(signers[0]);
 
       // create release 1
       await pluginRepo.createVersion(
@@ -272,7 +272,7 @@ describe('PluginRepo', function () {
 
       // don't repeat the same plugin setup in the 2nd release
       // otherwise it will revert.
-      const pluginSetupMock_2 = await deployMockPluginSetup();
+      const pluginSetupMock_2 = await deployMockPluginSetup(signers[0]);
 
       await expect(
         pluginRepo.createVersion(
@@ -421,8 +421,8 @@ describe('PluginRepo', function () {
 
     beforeEach(async () => {
       pluginSetup_R1_B1 = pluginSetupMock;
-      pluginSetup_R1_B2 = await deployMockPluginSetup();
-      pluginSetup_R2_B1 = await deployMockPluginSetup();
+      pluginSetup_R1_B2 = await deployMockPluginSetup(signers[0]);
+      pluginSetup_R2_B1 = await deployMockPluginSetup(signers[0]);
 
       await pluginRepo.createVersion(
         1,

@@ -1,5 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import {ArtifactData, DeployFunction} from 'hardhat-deploy/types';
+
+import daoArtifactJson from '../../../artifacts/src/core/dao/DAO.sol/DAO.json';
 /** NOTE:
  * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */
@@ -23,7 +25,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     daoURI: '0x',
   };
 
+  const daoArtifactData = daoArtifactJson as ArtifactData;
+
   await deploy('DAO', {
+    contract: daoArtifactData,
     from: deployer,
     args: [],
     log: true,

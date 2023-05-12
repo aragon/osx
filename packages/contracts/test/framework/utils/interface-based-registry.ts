@@ -28,7 +28,7 @@ describe('InterfaceBasedRegistry', function () {
     ownerAddress = await signers[0].getAddress();
 
     // DAO
-    dao = await deployNewDAO(ownerAddress);
+    dao = await deployNewDAO(signers[0]);
   });
 
   beforeEach(async () => {

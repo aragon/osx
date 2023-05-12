@@ -41,7 +41,7 @@ describe('AddresslistVotingSetup', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    targetDao = await deployNewDAO(signers[0].address);
+    targetDao = await deployNewDAO(signers[0]);
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,

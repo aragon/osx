@@ -164,7 +164,7 @@ describe('DAOFactory: ', function () {
       // @ts-ignore
       hre,
       'DAOFactory',
-      ['DAORegistry', 'PluginSetupProcessor', 'DAO']
+      ['DAORegistry', 'PluginSetupProcessor', 'src/core/dao/DAO.sol:DAO']
     );
 
     mergedABI = abi;
@@ -173,7 +173,7 @@ describe('DAOFactory: ', function () {
 
   beforeEach(async function () {
     // Managing DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -292,7 +292,7 @@ describe('DAOFactory: ', function () {
   it('creates a dao and initializes with correct args', async () => {
     const dao = await getAnticipatedAddress(daoFactory.address);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     expect(await daoFactory.createDao(daoSettings, [pluginInstallationData]))
@@ -361,7 +361,7 @@ describe('DAOFactory: ', function () {
     ]);
     const {dao, permissions} = await extractInfoFromCreateDaoTx(tx);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     for (let i = 0; i < permissions.length; i++) {
@@ -383,7 +383,7 @@ describe('DAOFactory: ', function () {
     ]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     await expect(tx)
@@ -437,7 +437,7 @@ describe('DAOFactory: ', function () {
     ]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     // Check that events were emitted.
@@ -592,7 +592,7 @@ describe('DAOFactory: ', function () {
         const adminFactory = await ethers.getContractFactory('Admin');
         adminPlugin = adminFactory.attach(event.args.plugin);
 
-        const daoFactory = await ethers.getContractFactory('DAO');
+        const daoFactory = new DAO__factory(signers[0]);
         dao = daoFactory.attach(event.args.dao);
       }
     });

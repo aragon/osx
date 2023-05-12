@@ -51,7 +51,7 @@ describe('MerkleMinter', function () {
     totalAmount = amount0.add(amount1);
 
     // create a DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
     token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV', {

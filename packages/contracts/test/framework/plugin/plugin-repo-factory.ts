@@ -68,7 +68,7 @@ describe('PluginRepoFactory: ', function () {
 
   beforeEach(async function () {
     // DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -232,7 +232,7 @@ describe('PluginRepoFactory: ', function () {
 
     it('creates new pluginRepo with correct permissions', async () => {
       const pluginRepoSubdomain = 'my-plugin-repo';
-      const pluginSetupMock = await deployMockPluginSetup();
+      const pluginSetupMock = await deployMockPluginSetup(signers[0]);
       const expectedRepoAddress = await getExpectedRepoAddress(
         pluginRepoFactory.address
       );

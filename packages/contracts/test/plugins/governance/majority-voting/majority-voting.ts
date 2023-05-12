@@ -9,6 +9,7 @@ import {
   IPlugin__factory,
   IProposal__factory,
   IMajorityVoting__factory,
+  DAO__factory,
 } from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
 import {
@@ -44,7 +45,7 @@ describe('MajorityVotingMock', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = await ethers.getContractFactory('DAO');
+    const DAO = new DAO__factory(signers[0]);
     dao = await deployWithProxy(DAO);
     await dao.initialize(
       '0x',

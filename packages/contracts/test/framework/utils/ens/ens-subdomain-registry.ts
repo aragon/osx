@@ -26,17 +26,16 @@ async function setupENS(
 ): Promise<[ENSRegistry, PublicResolver, DAO, ENSSubdomainRegistrar]> {
   const ENSRegistry = await ethers.getContractFactory('ENSRegistry');
   const PublicResolver = await ethers.getContractFactory('PublicResolver');
-  const DAO = await ethers.getContractFactory('DAO');
   const ENSSubdomainRegistrar = await ethers.getContractFactory(
     'ENSSubdomainRegistrar'
   );
 
   // Deploy the ENSRegistry
-  let ens = await ENSRegistry.connect(owner).deploy();
+  const ens = await ENSRegistry.connect(owner).deploy();
   await ens.deployed();
 
   // Deploy the Resolver
-  let resolver = await PublicResolver.connect(owner).deploy(
+  const resolver = await PublicResolver.connect(owner).deploy(
     ens.address,
     ethers.constants.AddressZero
   );
@@ -44,10 +43,10 @@ async function setupENS(
   await setupResolver(ens, resolver, owner);
 
   // Deploy the managing DAO
-  let dao = await deployNewDAO(await owner.getAddress());
+  const dao = await deployNewDAO(owner);
 
   // Deploy the registrar
-  let registrar = await deployWithProxy<ENSSubdomainRegistrar>(
+  const registrar = await deployWithProxy<ENSSubdomainRegistrar>(
     ENSSubdomainRegistrar
   );
 

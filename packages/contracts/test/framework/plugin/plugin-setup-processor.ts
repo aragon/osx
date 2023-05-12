@@ -192,7 +192,7 @@ describe('Plugin Setup Processor', function () {
     setupCV2 = await SetupC2.deploy();
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // Deploy ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -275,7 +275,7 @@ describe('Plugin Setup Processor', function () {
 
   beforeEach(async function () {
     // Target DAO to be used as an example DAO
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0]);
 
     // Grant
     await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);

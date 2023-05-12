@@ -54,7 +54,7 @@ describe('Admin', function () {
       // @ts-ignore
       hre,
       'Admin',
-      ['DAO']
+      ['src/core/dao/DAO.sol:DAO']
     ));
 
     dummyActions = [
@@ -68,7 +68,7 @@ describe('Admin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(ownerAddress);
+    dao = await deployNewDAO(signers[0]);
 
     const AdminCloneFactory = await ethers.getContractFactory(
       'AdminCloneFactory'

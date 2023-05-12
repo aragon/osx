@@ -7,6 +7,7 @@ import {
   PluginRepo,
   ENSSubdomainRegistrar,
   PluginRepoRegistry,
+  PluginRepoRegistry__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployNewPluginRepo} from '../../test-utils/repo';
@@ -46,7 +47,7 @@ describe('PluginRepoRegistry', function () {
 
   beforeEach(async function () {
     // DAO
-    managingDAO = await deployNewDAO(ownerAddress);
+    managingDAO = await deployNewDAO(signers[0]);
 
     // ENS subdomain Registry
     ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -56,10 +57,10 @@ describe('PluginRepoRegistry', function () {
     );
 
     // deploy and initialize PluginRepoRegistry
-    const PluginRepoRegistry = await ethers.getContractFactory(
-      'PluginRepoRegistry'
+    const PluginRepoRegistry = new PluginRepoRegistry__factory(signers[0]);
+    pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
+      PluginRepoRegistry
     );
-    pluginRepoRegistry = await deployWithProxy(PluginRepoRegistry);
 
     await pluginRepoRegistry.initialize(
       managingDAO.address,
@@ -67,17 +68,17 @@ describe('PluginRepoRegistry', function () {
     );
 
     // deploy a pluginRepo and initialize
-    pluginRepo = await deployNewPluginRepo(ownerAddress);
+    pluginRepo = await deployNewPluginRepo(signers[0]);
 
-    // grant REGISTER_PERMISSION_ID to registrer
-    managingDAO.grant(
+    // grant REGISTER_PLUGIN_REPO_PERMISSION_ID to ownerAddress
+    await managingDAO.grant(
       pluginRepoRegistry.address,
       ownerAddress,
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
-    // grant REGISTER_PERMISSION_ID to registrer
-    managingDAO.grant(
+    // grant REGISTER_ENS_SUBDOMAIN_PERMISSION_ID to pluginRepoRegistry
+    await managingDAO.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
@@ -129,7 +130,7 @@ describe('PluginRepoRegistry', function () {
     );
 
     // deploy a pluginRepo
-    const newPluginRepo = await deployNewPluginRepo(ownerAddress);
+    const newPluginRepo = await deployNewPluginRepo(signers[0]);
 
     await expect(
       pluginRepoRegistry.registerPluginRepo(
@@ -187,7 +188,7 @@ describe('PluginRepoRegistry', function () {
       // loop through the ascii table
       for (let i = 0; i < 127; i++) {
         // deploy a pluginRepo and initialize
-        const newPluginRepo = await deployNewPluginRepo(ownerAddress);
+        const newPluginRepo = await deployNewPluginRepo(signers[0]);
 
         // replace the 10th char in the baseSubdomain
         const subdomainName =
@@ -227,7 +228,7 @@ describe('PluginRepoRegistry', function () {
       // loop through the ascii table
       for (let i = 0; i < 127; i++) {
         // deploy a pluginRepo and initialize
-        const newPluginRepo = await deployNewPluginRepo(ownerAddress);
+        const newPluginRepo = await deployNewPluginRepo(signers[0]);
 
         // replace the 40th char in the baseSubdomain
         const subdomainName =

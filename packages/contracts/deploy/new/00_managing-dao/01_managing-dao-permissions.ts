@@ -1,6 +1,8 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+
 import {Operation} from '../../../utils/types';
+
 import {getContractAddress, managePermissions} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -13,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get `DAO` contract.
   const managingDaoContract = await ethers.getContractAt(
-    'DAO',
+    'src/core/dao/DAO.sol:DAO',
     managingDAOAddress
   );
 

@@ -85,7 +85,7 @@ describe('Core: TokenFactory', () => {
     let dao: FakeContract<DAO>;
 
     beforeEach(async () => {
-      dao = await smock.fake<DAO>('DAO');
+      dao = await smock.fake<DAO>('src/core/dao/DAO.sol:DAO');
       dao.isGranted.returns(true);
       dao.hasPermission.returns(true);
       dao.grant.returns();

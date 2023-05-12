@@ -9,6 +9,7 @@ import {
   TestERC721,
   IERC1271__factory,
   GasConsumer__factory,
+  DAO__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -80,7 +81,7 @@ describe('DAO', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = await ethers.getContractFactory('DAO');
+    const DAO = new DAO__factory(signers[0]);
     dao = await deployWithProxy(DAO);
     await dao.initialize(
       dummyMetadata1,

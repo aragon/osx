@@ -29,7 +29,7 @@ describe('AdminSetup', function () {
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0]);
 
     minimum_data = abiCoder.encode(
       metadata.pluginSetupABI.prepareInstallation,

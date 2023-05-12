@@ -12,6 +12,8 @@ import {
   PluginRepoRegistry,
 } from '../../typechain';
 
+import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+
 async function deployAll() {
   await deployments.fixture();
 }
@@ -80,7 +82,7 @@ describe('Managing DAO', function () {
     // ManagingDAO
     managingDaoDeployment = await deployments.get('DAO');
     managingDao = await ethers.getContractAt(
-      'DAO',
+      'src/core/dao/DAO.sol:DAO',
       managingDaoDeployment.address
     );
 
@@ -130,7 +132,7 @@ describe('Managing DAO', function () {
   it('should be able to upgrade `ManagingDAO` itself', async function () {
     // deploy a new dao implementation.
     await deployments.deploy('DAOv2', {
-      contract: 'DAO',
+      contract: daoArtifactData,
       from: ownerAddress,
       args: [],
       log: true,

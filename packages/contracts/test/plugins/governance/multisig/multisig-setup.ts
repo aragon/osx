@@ -54,7 +54,7 @@ describe('MultisigSetup', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    targetDao = await deployNewDAO(signers[0].address);
+    targetDao = await deployNewDAO(signers[0]);
 
     defaultMultisigSettings = {
       onlyListed: true,
@@ -341,7 +341,7 @@ describe('MultisigSetup', function () {
 
     before(async () => {
       [owner] = await ethers.getSigners();
-      managingDAO = await deployNewDAO(owner.address);
+      managingDAO = await deployNewDAO(owner);
 
       // Create the PluginRepo
       const pluginRepoFactory = new PluginRepo__factory(owner);
@@ -391,7 +391,7 @@ describe('MultisigSetup', function () {
       let helpers: string[];
 
       before(async () => {
-        dao = await deployNewDAO(owner.address);
+        dao = await deployNewDAO(owner);
         // grant the owner full permission for plugins
         await dao.applySingleTargetPermissions(psp.address, [
           {
@@ -517,7 +517,7 @@ describe('MultisigSetup', function () {
 
     describe('Release 1 Build 2', () => {
       before(async () => {
-        dao = await deployNewDAO(owner.address);
+        dao = await deployNewDAO(owner);
         // grant the owner full permission for plugins
         await dao.applySingleTargetPermissions(psp.address, [
           {

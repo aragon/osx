@@ -25,7 +25,7 @@ describe('TestParameterScopingCondition', function () {
     ownerAddress = await signers[0].getAddress();
 
     // create a DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // Deploy the component
     const TestPlugin = await ethers.getContractFactory('TestPlugin');
