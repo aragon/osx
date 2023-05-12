@@ -1,4 +1,4 @@
-import {Address, BigInt, dataSource} from '@graphprotocol/graph-ts';
+import {Address, BigInt, dataSource, log, store} from '@graphprotocol/graph-ts';
 
 import {TokenVotingMember} from '../../../generated/schema';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
@@ -79,8 +79,15 @@ export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
 
   if (event.params.delegate != Address.zero()) {
     let member = getOrCreateMember(event.params.delegate, pluginId);
-    // Assign the cumulative delegated votes to this member from all their delegators.
-    member.votingPower = event.params.newBalance;
-    member.save();
+    if (
+      member.balance.le(BigInt.zero()) &&
+      event.params.newBalance.le(BigInt.zero())
+    ) {
+      store.remove('TokenVotingMember', member.id);
+    } else {
+      // Assign the cumulative delegated votes to this member from all their delegators.
+      member.votingPower = event.params.newBalance;
+      member.save();
+    }
   }
 }
