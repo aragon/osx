@@ -14,10 +14,7 @@ import {
   TestERC20__factory,
   TestERC1155__factory,
   TestERC721__factory,
-  IERC1155,
-  IERC1155Receiver,
   IERC1155Receiver__factory,
-  IERC721Receiver,
   IERC721Receiver__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
