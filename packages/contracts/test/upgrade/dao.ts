@@ -21,7 +21,7 @@ let DaoCurrent: ContractFactory;
 let daoV100Proxy: Contract;
 let daoV120Proxy: Contract;
 
-let daoV101Implementation: string;
+let daoV100Implementation: string;
 let daoV120Implementation: string;
 let daoCurrentImplementaion: Contract;
 
@@ -72,7 +72,7 @@ describe('DAO Upgrade', function () {
       );
 
       // Store the v1.0.0 implementation
-      daoV101Implementation = await readImplementationValueFromSlot(
+      daoV100Implementation = await readImplementationValueFromSlot(
         daoV100Proxy.address
       );
 
@@ -100,7 +100,7 @@ describe('DAO Upgrade', function () {
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
       );
-      expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
+      expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
       // Check the emitted implementation.
       const emittedImplementation = (
@@ -139,7 +139,7 @@ describe('DAO Upgrade', function () {
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
       );
-      expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
+      expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
       expect(
         await daoV100Proxy.hasPermission(
@@ -207,7 +207,7 @@ describe('DAO Upgrade', function () {
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
       );
-      expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
+      expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
       // Check that the old forwarder is still unchanged.
       expect(await daoV100Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
@@ -377,7 +377,7 @@ describe('DAO Upgrade', function () {
       expect(implementationAfterUpgrade).to.equal(
         daoCurrentImplementaion.address
       );
-      expect(implementationAfterUpgrade).to.not.equal(daoV101Implementation);
+      expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
       // Check that the old forwarder is still unchanged.
       expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_1);
