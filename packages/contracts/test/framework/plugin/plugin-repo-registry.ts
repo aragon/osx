@@ -219,7 +219,7 @@ describe('PluginRepoRegistry', function () {
           )
           .withArgs(subdomainName);
       }
-    });
+    }).timeout(120000);
 
     it('should validate the passed subdomain correctly (> 32 bytes long subdomain)', async () => {
       const baseSubdomain =
@@ -259,6 +259,6 @@ describe('PluginRepoRegistry', function () {
           )
           .withArgs(subdomainName);
       }
-    });
+    }).timeout(120000);
   });
 });

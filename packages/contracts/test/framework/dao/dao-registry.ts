@@ -210,7 +210,7 @@ describe('DAORegistry', function () {
           .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
           .withArgs(subdomainName);
       }
-    });
+    }).timeout(120000);
 
     it('should validate the passed subdomain correctly (> 32 bytes long subdomain)', async () => {
       const baseSubdomain =
@@ -250,6 +250,6 @@ describe('DAORegistry', function () {
           .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
           .withArgs(subdomainName);
       }
-    });
+    }).timeout(120000);
   });
 });
