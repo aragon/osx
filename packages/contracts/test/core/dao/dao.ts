@@ -220,7 +220,7 @@ describe('DAO', function () {
   });
 
   describe('initializeUpgradeFrom', async () => {
-    it('reverts if trying to release from a previous major release', async () => {
+    it('reverts if trying to upgrade from a previous major release', async () => {
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
       await expect(uninitializedDao.initializeUpgradeFrom([0, 1, 0]))
@@ -229,6 +229,17 @@ describe('DAO', function () {
           'ProtocolVersionUpgradeNotSupported'
         )
         .withArgs([0, 1, 0]);
+    });
+
+    it('reverts if trying to upgrade to the same version', async () => {
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      await expect(uninitializedDao.initializeUpgradeFrom([1, 3, 0]))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([1, 3, 0]);
     });
 
     it('initializes upgrades for versions < 1.3.0', async () => {
