@@ -72,31 +72,33 @@ npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 
 ## Testing
 
-The Aragon OSX-versions allows you to work with previous versions of the contracts. These versions are available in the contracts-versions/ directory. For a detailed explanation of each contract version and its build, please refer to the README.md [here](https://github.com/aragon/osx/blob/develop/packages/contracts/README.md).
+The `@aragon/osx-versions` package allows you to work with previous versions of the contracts. The solidity source files of these versions are available in the `packages/contracts-versions/versions` directory after the package was built. For a details please refer to the [packages/contracts-versions/README.md](https://github.com/aragon/osx/blob/develop/packages/contracts-versions/README.md).
 
-If you want to import and test a contract from a previous version, you must first import the contract into contracts/src/tests/osx-versions/Migration.sol. This step is necessary for the contract to be compiled.
+If you want to import and test a contract from a previous version, you must first import the contract into `contracts/src/tests/osx-versions/Migration.sol`. This step is necessary for the contract to be compiled.
 
 ```solidity
 // contracts/src/tests/osx-versions/Migration.sol
 
-import '../../contracts-versions/{version}/{path_to_contract}.sol';
+import '../../contracts-versions/{version-name}/{path_to_contract}.sol';
 
-// Replace {version} with the version number of the contract, and {path_to_contract} with the actual path to the contract.
+// Replace {version-name} with the version number of the contract, and {path_to_contract} with the actual path to the contract.
 ```
 
-After successfully compiling the contract, TypeChain typings will be automatically generated and placed in the typechain/osx-versions/ directory. This will allow you to interact with the contract in a type-safe manner in your tests.
+After successful contract compilation, TypeChain typings will be automatically generated and placed in the `typechain/osx-versions/{version-name}` directory. This will allow you to interact with the contract in a type-safe manner in your tests.
 
-```javascript
-// Example of usage in a test
-import {ethers} from 'hardhat';
-import {ContractName} from '../../../typechain/osx-versions/{version}/{path to ContractName}';
-import {ContractName__factory} from '../../../typechain/osx-versions/{version}/{path to ContractName__factory}';
+```ts
+// Generic example of usage in a test
+
+...
+
+import {ContractName} from '../../../typechain/osx-versions/{version-name}/{path to ContractName}';
+import {ContractName__factory} from '../../../typechain/osx-versions/{version-name}/{path to ContractName__factory}';
 
 describe('ContractName Test', function () {
   let contractName: ContractName;
 
   beforeEach(async function () {
-    const signers = ethers.getSigners();
+    const signers = await ethers.getSigners();
     const ContractNameFactory = new ContractName__factory(signers[0]);
     contractName = await ContractNameFactory.deploy();
   });
@@ -106,9 +108,40 @@ describe('ContractName Test', function () {
     expect(result).to.equal(something);
   });
 });
+
+...
+
 ```
 
 Please replace 'ContractName' with the actual name of your contract, and follow the same for the other placeholders (someFunction, something). This is an illustrative example, the actual test case will depend on the specific methods and functionality of your contract.
+
+```ts
+// Example of usage in a test
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {deployWithProxy} from '../../test-utils/proxy';
+import {
+  DAO as DAO_V1_3_0,
+  DAO__factory as DAO_V1_3_0__factory,
+} from '../../typechain/osx-versions/v1_3_0/contracts/core/dao/DAO.sol';
+
+describe('Legacy Test Example', function () {
+  let signers: SignerWithAddress[];
+  let daoV1_3_0: DAO_V1_3_0;
+
+  before(async function () {
+    signers = await ethers.getSigners();
+    const factory = new DAO_V1_3_0__factory(signers[0]);
+    daoV1_3_0 = await DAO_V1_3_0.deployWithProxy<DAO_V1_3_0>(factory);
+  });
+
+  it('should be version 1.3.0', async function () {
+    const result = await daoV1_3_0.protocolVersion();
+    expect(result).to.equal([1, 3, 0]);
+  });
+});
+```
 
 # Performance optimizations
 

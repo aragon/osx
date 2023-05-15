@@ -3,20 +3,19 @@
 pragma solidity 0.8.17;
 
 /*
- * Migrations.sol
+ * @title Migration
  *
- * This is a helper contract to manage and run the migrations of the Aragon OSX Protocol contracts.
- * It serves as a centralized point of control for importing different versions of contracts, which
- * is particularly useful for testing and development purposes.
+ * @dev This contract serves as a collection of imports from different versions of Aragon OSx contracts.
+ * It facilitates testing and interaction with contracts from various versions of Aragon OSx.
  *
- * In this file, we import different versions of a contract. This allows us to test how our system
- * behaves with each of these versions, and ensure backward compatibility with older versions.
+ * Each imported contract is aliased as `<contract-name>_<versions_name>` for clarity and to avoid
+ * name collisions when the same contract is imported from different versions. This aliasing is only
+ * necessary in the context of this Migration.sol file to differentiate between contract versions.
  *
- * The contracts from the specified versions are imported and aliased as <contract-name>_<versions_name>,
- * making them easy to reference in our tests and migration scripts.
- *
- * After importing a contract here, the contract will be compiled and TypeChain typings will be generated,
- * enabling type-safe interactions with the contract in our tests.
+ * After a contract is imported here and the project is compiled, an associated artifact will be
+ * generated inside artifacts/@aragon/osx-versions/versions/{version-name}/*,
+ * and TypeChain typings will be generated inside typechain/osx-version/{version-name}/* for type-safe interactions with the contract
+ * in our tests.
  *
  */
 
