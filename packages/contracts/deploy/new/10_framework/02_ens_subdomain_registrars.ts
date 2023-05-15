@@ -1,8 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DAO, ENSRegistry__factory} from '../../../typechain';
+import {DAO__factory, ENSRegistry__factory} from '../../../typechain';
 import {getContractAddress, getENSAddress} from '../../helpers';
-import {DAO__factory} from '../../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers, network} = hre;

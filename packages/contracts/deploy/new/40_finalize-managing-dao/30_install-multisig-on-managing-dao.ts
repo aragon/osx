@@ -7,13 +7,13 @@ import {checkPermission, getContractAddress} from '../../helpers';
 import {Operation} from '../../../utils/types';
 import {hashHelpers} from '../../../utils/psp';
 import {
+  DAO__factory,
   MultisigSetup__factory,
   Multisig__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
-import {DAO__factory} from '../../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
