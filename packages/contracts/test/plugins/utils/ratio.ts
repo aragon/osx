@@ -8,7 +8,8 @@ describe('Ratio', function () {
   let ratio: RatioTest;
 
   before(async () => {
-    const RatioTest = new RatioTest__factory((await ethers.getSigners())[0]);
+    const signers = await ethers.getSigners();
+    const RatioTest = new RatioTest__factory(signers[0]);
     ratio = await RatioTest.deploy();
   });
 

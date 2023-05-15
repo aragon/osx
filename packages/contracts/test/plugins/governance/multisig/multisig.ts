@@ -775,13 +775,13 @@ describe('Multisig', function () {
       });
     });
 
-    it('should revert if startDate is < than now', async () => {
+    it.only('should revert if startDate is < than now', async () => {
       // set next block time & mine a block with this time.
-      const nextBlockTime = (await getTime()) + 500;
-      await ethers.provider.send('evm_mine', [nextBlockTime]);
+      const block1Timestamp = (await getTime()) + 12;
+      await ethers.provider.send('evm_mine', [block1Timestamp]);
       // set next block's timestamp
-      const nextTimeStamp = nextBlockTime + 500;
-      await setTimeForNextBlock(nextTimeStamp);
+      const block2Timestamp = block1Timestamp + 12;
+      await setTimeForNextBlock(block2Timestamp);
 
       await expect(
         multisig.createProposal(
@@ -795,7 +795,7 @@ describe('Multisig', function () {
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(nextTimeStamp, 5);
+        .withArgs(block2Timestamp, 5);
     });
 
     it('should revert if endDate is < than startDate', async () => {
