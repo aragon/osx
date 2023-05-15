@@ -5,7 +5,6 @@ title: Best Practices
 ## Some Advice When Operating your DAO
 
 ### DOs 👌
-
 - Make sure that at least one address (typically a governance plugin) has `EXECUTE_PERMISSION_ID` permission so that something can be executed on behalf of the DAO.
 - Check every proposal asking to install, update, or uninstall a plugin with utmost care and review. Installation means granting an external contract permissions to do things on behalf of your DAO, so you want to be extra careful about:
   - the implementation contract
@@ -14,7 +13,6 @@ title: Best Practices
   - the permissions being granted/revoked
 
 ### DON'Ts ✋
-
 - Incapacitate your DAO by revoking all `EXECUTE_PERMISSION`. This means your DAO will be blocked and any assets you hold may be locked in forever. This can happen through:
   - uninstalling your last governance plugin.
   - applying an update to your last governance plugin.
