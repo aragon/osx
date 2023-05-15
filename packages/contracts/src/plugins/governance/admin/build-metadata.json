@@ -13,7 +13,7 @@
         }
       ],
       "prepareUninstallation": {
-        "description": "The information required for the uninstallation of build 1.",
+        "description": "No input is required for the uninstallation.",
         "inputs": []
       }
     }

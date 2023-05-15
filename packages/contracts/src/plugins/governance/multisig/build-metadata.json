@@ -34,16 +34,16 @@
       ],
       "prepareUpdate": {
         "1": {
-          "description": "The information required for the update from build 1 to build 3.",
+          "description": "No input is required for the update.",
           "inputs": []
         },
         "2": {
-          "description": "The information required for the update from build 2 to build 3.",
+          "description": "No input is required for the update.",
           "inputs": []
         }
       },
       "prepareUninstallation": {
-        "description": "The information required for the uninstallation of build 3.",
+        "description": "No input is required for the uninstallation.",
         "inputs": []
       }
     }
