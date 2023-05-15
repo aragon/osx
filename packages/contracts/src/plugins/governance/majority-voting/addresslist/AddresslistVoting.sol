@@ -89,13 +89,13 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock;
-        unchecked {
-            snapshotBlock = block.number.toUint64() - 1;
+        if (minProposerVotingPower() != 0 && !isListed(_msgSender())) {
+            revert ProposalCreationForbidden(_msgSender());
         }
 
-        if (minProposerVotingPower() != 0 && !isListedAtBlock(_msgSender(), snapshotBlock)) {
-            revert ProposalCreationForbidden(_msgSender());
+        uint64 snapshotBlock;
+        unchecked {
+            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
         }
 
         (_startDate, _endDate) = _validateProposalDates(_startDate, _endDate);

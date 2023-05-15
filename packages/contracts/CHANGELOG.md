@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fixed ordering bug in the `createProposal` function used by the `TokenVoting` and `AddresslistVoting` implementations resulting emitting the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
+- Changed the `createProposal` functions in `Multisig` to allow creating proposals when the `_msgSender()` is listed in the current block.
+- Changed the `createProposal` functions in `AddresslistVoting` to allow creating proposals when the `_msgSender()` is listed in the current block.
+- Changed the `createProposal` functions in `TokenVoting` to allow creating proposals when the `_msgSender()` owns more tokens at least `minProposerVotingPower()` tokens in the current block.
+- Changed the `isMember` function in the `TokenVoting` plugin to also take delegators of the token into account.
 - Fixed and clarified the NatSpec comments according to the Code4rena audit suggestions.
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
 
