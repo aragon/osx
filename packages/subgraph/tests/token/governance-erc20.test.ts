@@ -318,7 +318,7 @@ describe('Governance ERC20', () => {
       // member two should be deleted because it has no balance or voting power
       assert.notInStore(
         'TokenVotingMember',
-        memberTwoAddress.concat('_').concat(ADDRESS_SIX)
+        memberTwo.id
       );
       assert.entityCount('TokenVotingMember', 1);
     });
