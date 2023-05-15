@@ -775,7 +775,7 @@ describe('Multisig', function () {
       });
     });
 
-    it.only('should revert if startDate is < than now', async () => {
+    it('should revert if startDate is < than now', async () => {
       // set next block time & mine a block with this time.
       const block1Timestamp = (await getTime()) + 12;
       await ethers.provider.send('evm_mine', [block1Timestamp]);
