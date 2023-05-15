@@ -28,7 +28,7 @@ import {
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../../utils/psp';
-import {getMetadataTypes} from '../../utils/build-metadata';
+import {getNamedTypesFromABI} from '../../utils/build-metadata';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -63,7 +63,7 @@ describe.only('MultisigSetup', function () {
     };
 
     minimum_data = abiCoder.encode(
-      getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
+      getNamedTypesFromABI(metadata.pluginSetupABI.prepareInstallation.inputs),
       [[signers[0].address], Object.values(defaultMultisigSettings)]
     );
 
@@ -112,7 +112,9 @@ describe.only('MultisigSetup', function () {
       const noMembers: string[] = [];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
+        getNamedTypesFromABI(
+          metadata.pluginSetupABI.prepareInstallation.inputs
+        ),
         [noMembers, defaultMultisigSettings]
       );
 
@@ -144,7 +146,9 @@ describe.only('MultisigSetup', function () {
       const members = [signers[0].address];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
+        getNamedTypesFromABI(
+          metadata.pluginSetupABI.prepareInstallation.inputs
+        ),
         [members, multisigSettings]
       );
 
@@ -175,7 +179,9 @@ describe.only('MultisigSetup', function () {
       const members = [signers[0].address];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
+        getNamedTypesFromABI(
+          metadata.pluginSetupABI.prepareInstallation.inputs
+        ),
         [members, multisigSettings]
       );
 

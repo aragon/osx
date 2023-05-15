@@ -15,7 +15,7 @@ import {
   ONE_HOUR,
 } from '../../../../test-utils/voting';
 import {tokenVotingInterface} from './token-voting';
-import {getMetadataTypes} from '../../../utils/build-metadata';
+import {getNamedTypesFromABI} from '../../../utils/build-metadata';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -26,7 +26,7 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-const prepareInstallationDataTypes = getMetadataTypes(
+const prepareInstallationDataTypes = getNamedTypesFromABI(
   metadata.pluginSetupABI.prepareInstallation.inputs
 );
 

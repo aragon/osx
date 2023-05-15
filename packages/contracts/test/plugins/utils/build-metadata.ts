@@ -1,9 +1,9 @@
-export function getMetadataTypes(inputs: any): string[] {
+export function getNamedTypesFromABI(inputs: any): string[] {
   const types: string[] = [];
 
   for (const input of inputs) {
     if (input.type === 'tuple') {
-      let tupleResult = getMetadataTypes(input.components).join(', ');
+      let tupleResult = getNamedTypesFromABI(input.components).join(', ');
       types.push(`tuple(${tupleResult})`);
     } else if (input.type.endsWith('[]')) {
       const baseType = input.type.slice(0, -2);
