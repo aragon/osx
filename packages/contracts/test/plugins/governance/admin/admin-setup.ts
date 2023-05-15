@@ -7,6 +7,7 @@ import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 import {adminInterface} from './admin';
+import {getMetadataTypes} from '../../utils/build-metadata';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -32,7 +33,7 @@ describe('AdminSetup', function () {
     targetDao = await deployNewDAO(ownerAddress);
 
     minimum_data = abiCoder.encode(
-      metadata.pluginSetupABI.prepareInstallation,
+      getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
       [ownerAddress]
     );
 
@@ -77,7 +78,7 @@ describe('AdminSetup', function () {
 
     it('reverts if encoded address in `_data` is zero', async () => {
       const dataWithAddressZero = abiCoder.encode(
-        metadata.pluginSetupABI.prepareInstallation,
+        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
         [AddressZero]
       );
 

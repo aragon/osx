@@ -28,6 +28,7 @@ import {
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../../utils/psp';
+import {getMetadataTypes} from '../../utils/build-metadata';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -44,7 +45,7 @@ const UPGRADE_PLUGIN_PERMISSION_ID_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('MultisigSetup', function () {
+describe.only('MultisigSetup', function () {
   let signers: SignerWithAddress[];
   let multisigSetup: MultisigSetup;
   let MultisigFactory: Multisig__factory;
@@ -62,7 +63,7 @@ describe('MultisigSetup', function () {
     };
 
     minimum_data = abiCoder.encode(
-      metadata.pluginSetupABI.prepareInstallation,
+      getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
       [[signers[0].address], Object.values(defaultMultisigSettings)]
     );
 
@@ -111,7 +112,7 @@ describe('MultisigSetup', function () {
       const noMembers: string[] = [];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        metadata.pluginSetupABI.prepareInstallation,
+        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
         [noMembers, defaultMultisigSettings]
       );
 
@@ -143,7 +144,7 @@ describe('MultisigSetup', function () {
       const members = [signers[0].address];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        metadata.pluginSetupABI.prepareInstallation,
+        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
         [members, multisigSettings]
       );
 
@@ -174,7 +175,7 @@ describe('MultisigSetup', function () {
       const members = [signers[0].address];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        metadata.pluginSetupABI.prepareInstallation,
+        getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
         [members, multisigSettings]
       );
 

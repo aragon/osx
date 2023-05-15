@@ -14,6 +14,7 @@ import {
 } from '../../../../test-utils/voting';
 import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 import {addresslistVotingInterface} from './addresslist-voting';
+import {getMetadataTypes} from '../../../utils/build-metadata';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -59,10 +60,10 @@ describe('AddresslistVotingSetup', function () {
 
     implementationAddress = await addresslistVotingSetup.implementation();
 
-    defaultData = abiCoder.encode(metadata.pluginSetupABI.prepareInstallation, [
-      Object.values(defaultVotingSettings),
-      defaultMembers,
-    ]);
+    defaultData = abiCoder.encode(
+      getMetadataTypes(metadata.pluginSetupABI.prepareInstallation.inputs),
+      [Object.values(defaultVotingSettings), defaultMembers]
+    );
   });
 
   it('does not support the empty interface', async () => {
