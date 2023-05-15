@@ -39,13 +39,13 @@
             }
           ],
           "internalType": "struct MajorityVotingBase.VotingSettings",
-          "name": "_votingSettings",
+          "name": "votingSettings",
           "type": "tuple",
           "description": "The majority voting settings that will be applied as parameters on proposal creation."
         },
         {
           "internalType": "address[]",
-          "name": "_members",
+          "name": "members",
           "type": "address[]",
           "description": "The addresses of the initial members to be added."
         }

@@ -39,7 +39,7 @@
             }
           ],
           "internalType": "struct MajorityVotingBase.VotingSettings",
-          "name": "_votingSettings",
+          "name": "votingSettings",
           "type": "tuple",
           "description": "The majority voting settings that will be applied as parameters on proposal creation."
         },
@@ -85,7 +85,7 @@
             }
           ],
           "internalType": "struct GovernanceERC20.MintSettings",
-          "name": "_mintSettings",
+          "name": "mintSettings",
           "type": "tuple",
           "description": "The token mint settings struct containing the `receivers` and `amounts`."
         }
