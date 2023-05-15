@@ -228,7 +228,7 @@ describe('DAO', function () {
   });
 
   describe('initializeFrom', async () => {
-    it('reverts if trying to upgrade from a previous major release', async () => {
+    it('reverts if trying to upgrade from a different major release', async () => {
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
       await expect(uninitializedDao.initializeFrom([0, 1, 0], EMPTY_DATA))
