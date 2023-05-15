@@ -80,8 +80,8 @@ export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
   if (event.params.delegate != Address.zero()) {
     let member = getOrCreateMember(event.params.delegate, pluginId);
     if (
-      member.balance.le(BigInt.zero()) &&
-      event.params.newBalance.le(BigInt.zero())
+      member.balance.equals(BigInt.zero()) &&
+      event.params.newBalance.equals(BigInt.zero())
     ) {
       store.remove('TokenVotingMember', member.id);
     } else {
