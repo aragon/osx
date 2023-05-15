@@ -70,6 +70,46 @@ Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_
 npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 ```
 
+## Testing
+
+The Aragon OSX-versions allows you to work with previous versions of the contracts. These versions are available in the contracts-versions/ directory. For a detailed explanation of each contract version and its build, please refer to the README.md [here](https://github.com/aragon/osx/blob/develop/packages/contracts/README.md).
+
+If you want to import and test a contract from a previous version, you must first import the contract into contracts/src/tests/osx-versions/Migration.sol. This step is necessary for the contract to be compiled.
+
+```solidity
+// contracts/src/tests/osx-versions/Migration.sol
+
+import '../../contracts-versions/{version}/{path_to_contract}.sol';
+
+// Replace {version} with the version number of the contract, and {path_to_contract} with the actual path to the contract.
+```
+
+After successfully compiling the contract, TypeChain typings will be automatically generated and placed in the typechain/osx-versions/ directory. This will allow you to interact with the contract in a type-safe manner in your tests.
+
+```javascript
+// Example of usage in a test
+import {ethers} from 'hardhat';
+import {ContractName} from '../../../typechain/osx-versions/{version}/{path to ContractName}';
+import {ContractName__factory} from '../../../typechain/osx-versions/{version}/{path to ContractName__factory}';
+
+describe('ContractName Test', function () {
+  let contractName: ContractName;
+
+  beforeEach(async function () {
+    const signers = ethers.getSigners();
+    const ContractNameFactory = new ContractName__factory(signers[0]);
+    contractName = await ContractNameFactory.deploy();
+  });
+
+  it('Should do something', async function () {
+    const result = await contractName.someFunction();
+    expect(result).to.equal(something);
+  });
+});
+```
+
+Please replace 'ContractName' with the actual name of your contract, and follow the same for the other placeholders (someFunction, something). This is an illustrative example, the actual test case will depend on the specific methods and functionality of your contract.
+
 # Performance optimizations
 
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
