@@ -45,7 +45,7 @@ const UPGRADE_PLUGIN_PERMISSION_ID_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe.only('MultisigSetup', function () {
+describe('MultisigSetup', function () {
   let signers: SignerWithAddress[];
   let multisigSetup: MultisigSetup;
   let MultisigFactory: Multisig__factory;
