@@ -1,5 +1,5 @@
 {
-  "ui": "",
+  "ui": {},
   "change": "- The ability to create a proposal now depends on the membership status of the current instead of the snapshot block.",
   "pluginSetupABI": {
     "prepareInstallation": {
