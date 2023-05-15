@@ -53,8 +53,8 @@ contract Multisig is
     }
 
     /// @notice A container for the plugin settings.
-    /// @param onlyListed Whether only listed addresses can create a proposal.
-    /// @param minApprovals The minimum approvals parameter.
+    /// @param onlyListed Whether only listed addresses can create a proposal or not.
+    /// @param minApprovals The minimal number of approvals required for a proposal to pass.
     struct MultisigSettings {
         bool onlyListed;
         uint16 minApprovals;
@@ -125,6 +125,7 @@ contract Multisig is
     /// @notice Initializes Release 1, Build 2.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _members The addresses of the initial members to be added.
     /// @param _multisigSettings The multisig settings.
     function initialize(
         IDAO _dao,

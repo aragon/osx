@@ -1,9 +1,21 @@
 {
   "ui": "",
-  "change": "",
+  "change": "This is the first build of the first release.",
   "pluginSetupABI": {
-    "prepareInstallation": ["address admin"],
-    "prepareUpdate": [""],
-    "prepareUninstallation": [""]
+    "prepareInstallation": {
+      "description": "The information required for the installation of build 1.",
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address",
+          "description": "The address of the admin account receiving the `EXECUTE_PERMISSION_ID` permission."
+        }
+      ],
+      "prepareUninstallation": {
+        "description": "The information required for the uninstallation of build 1.",
+        "inputs": []
+      }
+    }
   }
 }
