@@ -91,20 +91,20 @@ After successful contract compilation, TypeChain typings will be automatically g
 
 ...
 
-import {ContractName} from '../../../typechain/osx-versions/{version-name}/{path to ContractName}';
-import {ContractName__factory} from '../../../typechain/osx-versions/{version-name}/{path to ContractName__factory}';
+import {MyContract} from '../../../typechain/osx-versions/{version-name}/{path to MyContract}';
+import {myContract__factory} from '../../../typechain/osx-versions/{version-name}/{path to myContract__factory}';
 
-describe('ContractName Test', function () {
-  let contractName: ContractName;
+describe('MyContract Test', function () {
+  let myContract: MyContract;
 
   beforeEach(async function () {
     const signers = await ethers.getSigners();
-    const ContractNameFactory = new ContractName__factory(signers[0]);
-    contractName = await ContractNameFactory.deploy();
+    const myContractFactory = new myContract__factory(signers[0]);
+    myContract = await myContractFactory.deploy();
   });
 
   it('Should do something', async function () {
-    const result = await contractName.someFunction();
+    const result = await myContract.someFunction();
     expect(result).to.equal(something);
   });
 });
@@ -113,7 +113,7 @@ describe('ContractName Test', function () {
 
 ```
 
-Please replace 'ContractName' with the actual name of your contract, and follow the same for the other placeholders (someFunction, something). This is an illustrative example, the actual test case will depend on the specific methods and functionality of your contract.
+Please replace 'MyContract' with the actual name of your contract, and follow the same for the other placeholders (someFunction, something). This is an illustrative example, the actual test case will depend on the specific methods and functionality of your contract.
 
 ```ts
 // Example of usage in a test
