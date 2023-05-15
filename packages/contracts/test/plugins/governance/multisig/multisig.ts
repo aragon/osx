@@ -667,7 +667,7 @@ describe('Multisig', function () {
         const tx1 = await multisig.addAddresses([signers[1].address]);
         const tx2 = await multisig.removeAddresses([signers[0].address]);
 
-        // Transaction 3: Expect the proposal creation to fail for signers[0] because he transferred the tokens in transaction 1
+        // Transaction 3: Expect the proposal creation to fail for signers[0] because he was removed as a member in transaction 2.
         await expect(
           multisig
             .connect(signers[0])
