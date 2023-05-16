@@ -203,12 +203,14 @@ contract Multisig is
         _updateMultisigSettings(_multisigSettings);
     }
 
-    /// @notice Creates a new majority voting proposal.
+    /// @notice Creates a new multisig proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     /// @param _approveProposal If `true`, the sender will approve the proposal.
     /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
+    /// @param _startDate The start date of the proposal.
+    /// @param _endDate The end date of the proposal.
     /// @return proposalId The ID of the proposal.
     function createProposal(
         bytes calldata _metadata,
@@ -219,15 +221,18 @@ contract Multisig is
         uint64 _startDate,
         uint64 _endDate
     ) external returns (uint256 proposalId) {
-        uint64 snapshotBlock = block.number.toUint64() - 1;
+        if (multisigSettings.onlyListed && !isListed(_msgSender())) {
+            revert ProposalCreationForbidden(_msgSender());
+        }
+
+        uint64 snapshotBlock;
+        unchecked {
+            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
+        }
 
         // Revert if the settings have been changed in the same block as this proposal should be created in.
         // This prevents a malicious party from voting with previous addresses and the new settings.
         if (lastMultisigSettingsChange > snapshotBlock) {
-            revert ProposalCreationForbidden(_msgSender());
-        }
-
-        if (multisigSettings.onlyListed && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 

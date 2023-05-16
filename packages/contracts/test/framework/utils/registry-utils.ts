@@ -1,14 +1,18 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {RegistryUtils} from '../../../typechain';
+import {RegistryUtils, RegistryUtils__factory} from '../../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 describe('RegistryUtils', () => {
   let registryUtilsContract: RegistryUtils;
+  let signers: SignerWithAddress[];
+
+  before(async () => {
+    signers = await ethers.getSigners();
+  });
 
   beforeEach(async () => {
-    const RegistryUtilsFactory = await ethers.getContractFactory(
-      'RegistryUtils'
-    );
+    const RegistryUtilsFactory = new RegistryUtils__factory(signers[0]);
     registryUtilsContract = await RegistryUtilsFactory.deploy();
   });
 

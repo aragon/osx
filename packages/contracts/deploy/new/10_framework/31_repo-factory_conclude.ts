@@ -5,8 +5,8 @@ import {PluginRepoFactory__factory} from '../../../typechain';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding Plugin Repo Registry deployment.\n`);
 
-  const [deployer] = await hre.ethers.getSigners();
-  const {deployments} = hre;
+  const {deployments, ethers} = hre;
+  const [deployer] = await ethers.getSigners();
 
   const pluginRepoFactoryDeployment = await deployments.get(
     'PluginRepoFactory'

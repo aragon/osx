@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AddresslistMock} from '../../../typechain';
+import {AddresslistMock, AddresslistMock__factory} from '../../../typechain';
 
 describe('AddresslistMock', function () {
   let signers: SignerWithAddress[];
@@ -13,7 +13,7 @@ describe('AddresslistMock', function () {
   });
 
   beforeEach(async () => {
-    const AddresslistMock = await ethers.getContractFactory('AddresslistMock');
+    const AddresslistMock = new AddresslistMock__factory(signers[0]);
     addresslist = await AddresslistMock.deploy();
   });
 
@@ -103,7 +103,7 @@ describe('AddresslistMock', function () {
 
   context('isListed', function () {
     it('returns `true` if the address is listed', async () => {
-      addresslist.addAddresses([signers[0].address]);
+      await addresslist.addAddresses([signers[0].address]);
       await ethers.provider.send('evm_mine', []);
 
       expect(await addresslist.isListed(signers[0].address)).to.equal(true);

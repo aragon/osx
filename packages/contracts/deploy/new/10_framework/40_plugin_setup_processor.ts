@@ -4,9 +4,9 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {getContractAddress} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   // Get `PluginRepoRegistry` address.
   const pluginRepoRegistryAddress = await getContractAddress(
@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('PluginSetupProcessor', {
-    from: deployer,
+    from: deployer.address,
     args: [pluginRepoRegistryAddress],
     log: true,
   });

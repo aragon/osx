@@ -7,6 +7,8 @@ import {
   DAO,
   IDAO__factory,
   InterfaceBasedRegistryMock,
+  InterfaceBasedRegistryMock__factory,
+  PluginRepo__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {getInterfaceID} from '../../test-utils/interfaces';
@@ -28,12 +30,12 @@ describe('InterfaceBasedRegistry', function () {
     ownerAddress = await signers[0].getAddress();
 
     // DAO
-    dao = await deployNewDAO(ownerAddress);
+    dao = await deployNewDAO(signers[0]);
   });
 
   beforeEach(async () => {
-    const InterfaceBasedRegistryMock = await ethers.getContractFactory(
-      'InterfaceBasedRegistryMock'
+    const InterfaceBasedRegistryMock = new InterfaceBasedRegistryMock__factory(
+      signers[0]
     );
 
     interfaceBasedRegistryMock = await deployWithProxy(
@@ -47,7 +49,7 @@ describe('InterfaceBasedRegistry', function () {
     );
 
     // grant REGISTER_PERMISSION_ID to registrer
-    dao.grant(
+    await dao.grant(
       interfaceBasedRegistryMock.address,
       ownerAddress,
       REGISTER_PERMISSION_ID
@@ -68,7 +70,7 @@ describe('InterfaceBasedRegistry', function () {
 
     it('fail to register if the interface is not supported', async () => {
       // Use the `PluginRepo` contract for testing purposes here, because the interface differs from the `DAO` interface
-      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      const PluginRepo = new PluginRepo__factory(signers[0]);
       let contractNotBeingADao = await PluginRepo.deploy();
 
       await expect(
@@ -82,7 +84,7 @@ describe('InterfaceBasedRegistry', function () {
     });
 
     it('fail to register if the sender lacks the required permissionId', async () => {
-      dao.revoke(
+      await dao.revoke(
         interfaceBasedRegistryMock.address,
         ownerAddress,
         REGISTER_PERMISSION_ID

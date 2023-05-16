@@ -1,14 +1,15 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {RatioTest} from '../../../typechain';
+import {RatioTest, RatioTest__factory} from '../../../typechain';
 import {pctToRatio, RATIO_BASE} from '../../test-utils/voting';
 
 describe('Ratio', function () {
   let ratio: RatioTest;
 
   before(async () => {
-    const RatioTest = await ethers.getContractFactory('RatioTest');
+    const signers = await ethers.getSigners();
+    const RatioTest = new RatioTest__factory(signers[0]);
     ratio = await RatioTest.deploy();
   });
 

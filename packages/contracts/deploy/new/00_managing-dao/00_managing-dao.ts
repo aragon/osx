@@ -1,5 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import {ArtifactData, DeployFunction} from 'hardhat-deploy/types';
+
+import daoArtifactJson from '../../../artifacts/src/core/dao/DAO.sol/DAO.json';
 /** NOTE:
  * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */
@@ -7,28 +9,31 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nDeploying ManagingDao.`);
 
-  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   console.log(
-    `ManagingDAO will be owned by the (Deployer: ${deployer}) temporarily, while the entire framework is getting deployed.` +
+    `ManagingDAO will be owned by the (Deployer: ${deployer.address}) temporarily, while the entire framework is getting deployed.` +
       ` At the final step when Multisig is available, it will be installed on managingDAO and all roles for the Deployer will be revoked.`
   );
 
   const initializeParams = {
     metadata: '0x',
-    initialOwner: deployer,
+    initialOwner: deployer.address,
     trustedForwarder: ethers.constants.AddressZero,
     daoURI: '0x',
   };
 
+  const daoArtifactData = daoArtifactJson as ArtifactData;
+
   await deploy('DAO', {
-    from: deployer,
+    contract: daoArtifactData,
+    from: deployer.address,
     args: [],
     log: true,
     proxy: {
-      owner: deployer,
+      owner: deployer.address,
       proxyContract: 'ERC1967Proxy',
       proxyArgs: ['{implementation}', '{data}'],
       execute: {

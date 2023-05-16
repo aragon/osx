@@ -2,6 +2,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract} from 'ethers';
 import {ethers} from 'hardhat';
+import {PluginUUPSUpgradeableV1Mock__factory} from '../../typechain';
 
 /// Used as a common test suite to test upgradeability of the contracts.
 /// Presumes that `upgrade` object is set on `this` inside the actual test file.
@@ -29,9 +30,8 @@ export function shouldUpgradeCorrectly(
 
   describe('UUPS Upgradeability Test', async () => {
     before(async () => {
-      const factory = await ethers.getContractFactory(
-        'PluginUUPSUpgradeableV1Mock'
-      );
+      const signers = await ethers.getSigners();
+      const factory = new PluginUUPSUpgradeableV1Mock__factory(signers[0]);
       uupsCompatibleBase = (await factory.deploy()).address;
     });
 
@@ -40,7 +40,7 @@ export function shouldUpgradeCorrectly(
       const connect = contract.connect(user);
       const tx1 = connect.upgradeTo(ethers.constants.AddressZero);
       const tx2 = connect.upgradeToAndCall(ethers.constants.AddressZero, '0x');
-      if (upgradeRevertPermissionMessage == 'DaoUnauthorized') {
+      if (upgradeRevertPermissionMessage === 'DaoUnauthorized') {
         await expect(tx1)
           .to.be.revertedWithCustomError(
             contract,

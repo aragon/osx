@@ -76,7 +76,7 @@ describe('AddresslistVoting', function () {
         // @ts-ignore
         hre,
         'AddresslistVoting',
-        ['DAO']
+        ['src/core/dao/DAO.sol:DAO']
       ));
 
     dummyActions = [
@@ -90,7 +90,7 @@ describe('AddresslistVoting', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(signers[0].address);
+    dao = await deployNewDAO(signers[0]);
   });
 
   beforeEach(async function () {
@@ -295,6 +295,90 @@ describe('AddresslistVoting', function () {
           .connect(signers[0])
           .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
       ).not.to.be.reverted;
+    });
+
+    it('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
+      votingSettings.minProposerVotingPower = 1;
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        [signers[0].address] // signers[0] is listed
+      );
+
+      await ethers.provider.send('evm_setAutomine', [false]);
+      const expectedSnapshotBlockNumber = (
+        await ethers.provider.getBlock('latest')
+      ).number;
+
+      // Transaction 1 & 2: Add signers[1] and remove signers[0]
+      const tx1 = await voting.addAddresses([signers[1].address]);
+      const tx2 = await voting.removeAddresses([signers[0].address]);
+
+      // Transaction 3: Expect the proposal creation to fail for signers[0] because he was removed as a member in transaction 2.
+      await expect(
+        voting
+          .connect(signers[0])
+          .createProposal(
+            dummyMetadata,
+            [],
+            0,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+      )
+        .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+        .withArgs(signers[0].address);
+
+      // Transaction 4: Create the proposal as signers[1]
+      const tx4 = await voting
+        .connect(signers[1])
+        .createProposal(
+          dummyMetadata,
+          [],
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+
+      // Check the listed members before the block is mined
+      expect(await voting.isListed(signers[0].address)).to.equal(true);
+      expect(await voting.isListed(signers[1].address)).to.equal(false);
+
+      // Mine the block
+      await ethers.provider.send('evm_mine', []);
+      const minedBlockNumber = (await ethers.provider.getBlock('latest'))
+        .number;
+
+      // Expect all transaction receipts to be in the same block after the snapshot block.
+      expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
+      expect((await tx2.wait()).blockNumber).to.equal(minedBlockNumber);
+      expect((await tx4.wait()).blockNumber).to.equal(minedBlockNumber);
+      expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
+
+      // Expect the listed members to have changed
+      expect(await voting.isListed(signers[0].address)).to.equal(false);
+      expect(await voting.isListed(signers[1].address)).to.equal(true);
+
+      // Check the `ProposalCreatedEvent` for the creator and proposalId
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx4,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
+      expect(event.args.creator).to.equal(signers[1].address);
+
+      // Check that the snapshot block stored in the proposal struct
+      const proposal = await voting.getProposal(id);
+      expect(proposal.parameters.snapshotBlock).to.equal(
+        expectedSnapshotBlockNumber
+      );
+
+      await ethers.provider.send('evm_setAutomine', [true]);
     });
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
