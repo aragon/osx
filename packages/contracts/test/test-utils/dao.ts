@@ -6,8 +6,10 @@ import {
   TestERC721__factory,
   GovernanceERC20__factory,
   TestERC1155__factory,
+  DAO__factory,
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -21,13 +23,13 @@ export const TOKEN_INTERFACE_IDS = {
   erc1155InterfaceId: '0x4e2312e0',
 };
 
-export async function deployNewDAO(ownerAddress: string): Promise<DAO> {
-  const DAO = await ethers.getContractFactory('DAO');
-  let dao = await deployWithProxy<DAO>(DAO);
+export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
+  const DAO = new DAO__factory(signer);
+  const dao = await deployWithProxy<DAO>(DAO);
 
   await dao.initialize(
     '0x00',
-    ownerAddress,
+    signer.address,
     ethers.constants.AddressZero,
     daoExampleURI
   );
@@ -36,7 +38,8 @@ export async function deployNewDAO(ownerAddress: string): Promise<DAO> {
 }
 
 export async function getActions() {
-  const ActionExecuteFactory = await ethers.getContractFactory('ActionExecute');
+  const signers = await ethers.getSigners();
+  const ActionExecuteFactory = new ActionExecute__factory(signers[0]);
   let ActionExecute = await ActionExecuteFactory.deploy();
   const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
 

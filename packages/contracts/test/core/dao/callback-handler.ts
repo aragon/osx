@@ -3,7 +3,10 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {defaultAbiCoder, hexDataSlice, id} from 'ethers/lib/utils';
 
-import {CallbackHandlerMockHelper} from '../../../typechain';
+import {
+  CallbackHandlerMockHelper,
+  CallbackHandlerMockHelper__factory,
+} from '../../../typechain';
 
 const EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
@@ -22,8 +25,8 @@ describe('CallbackHandler', function () {
   beforeEach(async () => {
     signers = await ethers.getSigners();
     owner = await signers[0].getAddress();
-    const CallbackHandlerHelper = await ethers.getContractFactory(
-      'CallbackHandlerMockHelper'
+    const CallbackHandlerHelper = new CallbackHandlerMockHelper__factory(
+      signers[0]
     );
 
     callbackHandlerMockHelper = await CallbackHandlerHelper.deploy();

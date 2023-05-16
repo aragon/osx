@@ -27,6 +27,8 @@ import {
   PluginCloneableSetupV1MockBad__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginCloneableSetupV1Mock__factory,
+  PluginRepo__factory,
+  PluginUUPSUpgradeable__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -143,9 +145,9 @@ describe('Plugin Setup Processor', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    PluginUV1 = await ethers.getContractFactory('PluginUUPSUpgradeableV1Mock');
-    PluginUV2 = await ethers.getContractFactory('PluginUUPSUpgradeableV2Mock');
-    PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
+    PluginUV1 = new PluginUUPSUpgradeableV1Mock__factory(signers[0]);
+    PluginUV2 = new PluginUUPSUpgradeableV2Mock__factory(signers[0]);
+    PluginUV3 = new PluginUUPSUpgradeableV3Mock__factory(signers[0]);
 
     // Deploy PluginUUPSUpgradeableSetupMock
 
@@ -192,7 +194,7 @@ describe('Plugin Setup Processor', function () {
     setupCV2 = await SetupC2.deploy();
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // Deploy ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -204,7 +206,8 @@ describe('Plugin Setup Processor', function () {
     // Deploy Plugin Repo Registry
     pluginRepoRegistry = await deployPluginRepoRegistry(
       managingDao,
-      ensSubdomainRegistrar
+      ensSubdomainRegistrar,
+      signers[0]
     );
 
     // Deploy Plugin Repo Factory
@@ -246,7 +249,7 @@ describe('Plugin Setup Processor', function () {
       tx,
       EVENTS.PluginRepoRegistered
     );
-    const PluginRepo = await ethers.getContractFactory('PluginRepo');
+    const PluginRepo = new PluginRepo__factory(signers[0]);
     repoU = PluginRepo.attach(event.args.pluginRepo);
 
     // Add setups
@@ -275,7 +278,7 @@ describe('Plugin Setup Processor', function () {
 
   beforeEach(async function () {
     // Target DAO to be used as an example DAO
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0]);
 
     // Grant
     await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);
@@ -2535,7 +2538,9 @@ async function updateAndValidatePluginUpdate(
     data
   );
 
-  const PluginRepoFactory = await ethers.getContractFactory('PluginRepo');
+  const signers = await ethers.getSigners();
+
+  const PluginRepoFactory = new PluginRepo__factory(signers[0]);
   const repo = PluginRepoFactory.attach(pluginRepo);
 
   const currentVersion = await repo['getVersion((uint8,uint16))']({
@@ -2547,8 +2552,8 @@ async function updateAndValidatePluginUpdate(
     build: newVersionTag[1],
   });
 
-  const PluginSetupFactory = await ethers.getContractFactory(
-    'PluginUUPSUpgradeableSetupV1Mock'
+  const PluginSetupFactory = new PluginUUPSUpgradeableSetupV1Mock__factory(
+    signers[0]
   );
 
   const currentPluginSetup = PluginSetupFactory.attach(
@@ -2565,10 +2570,11 @@ async function updateAndValidatePluginUpdate(
   const newImpl = await newPluginSetup.implementation();
 
   if (currentImpl != newImpl) {
-    const proxyContract = await ethers.getContractAt(
-      'PluginUUPSUpgradeable',
-      proxy
+    const proxyContract = PluginUUPSUpgradeable__factory.connect(
+      proxy,
+      signers[0]
     );
+
     expect(await proxyContract.implementation()).to.equal(newImpl);
   }
 }

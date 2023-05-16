@@ -4,9 +4,9 @@ import {DAOFactory__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding DAOFactory deployment.\n`);
-  const [deployer] = await hre.ethers.getSigners();
+  const {deployments, ethers} = hre;
 
-  const {deployments} = hre;
+  const [deployer] = await ethers.getSigners();
 
   const DAOFactoryDeployment = await deployments.get('DAOFactory');
   const daoFactory = DAOFactory__factory.connect(

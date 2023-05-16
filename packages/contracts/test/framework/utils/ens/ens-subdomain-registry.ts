@@ -8,6 +8,9 @@ import {
   DAO,
   PublicResolver,
   ENSRegistry,
+  ENSRegistry__factory,
+  PublicResolver__factory,
+  ENSSubdomainRegistrar__factory,
 } from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
@@ -24,19 +27,16 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 async function setupENS(
   owner: SignerWithAddress
 ): Promise<[ENSRegistry, PublicResolver, DAO, ENSSubdomainRegistrar]> {
-  const ENSRegistry = await ethers.getContractFactory('ENSRegistry');
-  const PublicResolver = await ethers.getContractFactory('PublicResolver');
-  const DAO = await ethers.getContractFactory('DAO');
-  const ENSSubdomainRegistrar = await ethers.getContractFactory(
-    'ENSSubdomainRegistrar'
-  );
+  const ENSRegistry = new ENSRegistry__factory(owner);
+  const PublicResolver = new PublicResolver__factory(owner);
+  const ENSSubdomainRegistrar = new ENSSubdomainRegistrar__factory(owner);
 
   // Deploy the ENSRegistry
-  let ens = await ENSRegistry.connect(owner).deploy();
+  const ens = await ENSRegistry.deploy();
   await ens.deployed();
 
   // Deploy the Resolver
-  let resolver = await PublicResolver.connect(owner).deploy(
+  const resolver = await PublicResolver.deploy(
     ens.address,
     ethers.constants.AddressZero
   );
@@ -44,10 +44,10 @@ async function setupENS(
   await setupResolver(ens, resolver, owner);
 
   // Deploy the managing DAO
-  let dao = await deployNewDAO(await owner.getAddress());
+  const dao = await deployNewDAO(owner);
 
   // Deploy the registrar
-  let registrar = await deployWithProxy<ENSSubdomainRegistrar>(
+  const registrar = await deployWithProxy<ENSSubdomainRegistrar>(
     ENSSubdomainRegistrar
   );
 
@@ -96,9 +96,11 @@ describe('ENSSubdomainRegistrar', function () {
     );
   }
 
-  beforeEach(async function () {
+  before(async function () {
     signers = await ethers.getSigners();
+  });
 
+  beforeEach(async function () {
     [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
 
     this.upgrade = {
@@ -110,7 +112,7 @@ describe('ENSSubdomainRegistrar', function () {
 
   describe('Upgrade', () => {
     beforeEach(async function () {
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
+      await registerSubdomainHelper('test', '', signers[0], registrar.address);
       this.upgrade = {
         contract: registrar,
         dao: managingDao,
@@ -146,7 +148,7 @@ describe('ENSSubdomainRegistrar', function () {
   describe('Registrar is the domain owner but not approved', () => {
     beforeEach(async () => {
       // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
+      await registerSubdomainHelper('test', '', signers[0], registrar.address);
     });
 
     it('initializes correctly', async () => {
@@ -161,10 +163,15 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('reverts if the registrar do not have the ownership of the domain node', async () => {
       // Register the parent domain 'test2' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test2', '', signers[0], signers[0].address);
+      await registerSubdomainHelper(
+        'test2',
+        '',
+        signers[0],
+        signers[0].address
+      );
 
       // Initialize the registrar with the 'test' domain
-      registrar.initialize(
+      await registrar.initialize(
         managingDao.address,
         ens.address,
         ensDomainHash('test2')
@@ -187,7 +194,7 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('reverts if the ownership of the domain node is removed from the registrar', async () => {
       // Initialize the registrar with the 'test' domain
-      registrar.initialize(
+      await registrar.initialize(
         managingDao.address,
         ens.address,
         ensDomainHash('test')
@@ -228,7 +235,7 @@ describe('ENSSubdomainRegistrar', function () {
   describe('Registrar is not the domain owner but it is approved', () => {
     beforeEach(async () => {
       // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the signers[0] the owner
-      registerSubdomainHelper('test', '', signers[0], signers[0].address);
+      await registerSubdomainHelper('test', '', signers[0], signers[0].address);
 
       // Approve the subdomain registrar contract address to operate for signers[0] (who owns 'test')
       await ens.connect(signers[0]).setApprovalForAll(registrar.address, true);
@@ -332,7 +339,7 @@ describe('ENSSubdomainRegistrar', function () {
     describe('After registrar initialization', () => {
       beforeEach(async () => {
         // Initialize the registrar with the 'test' domain
-        registrar.initialize(
+        await registrar.initialize(
           managingDao.address,
           ens.address,
           ensDomainHash('test')

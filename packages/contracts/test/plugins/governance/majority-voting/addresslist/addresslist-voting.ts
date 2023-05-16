@@ -76,7 +76,7 @@ describe('AddresslistVoting', function () {
         // @ts-ignore
         hre,
         'AddresslistVoting',
-        ['DAO']
+        ['src/core/dao/DAO.sol:DAO']
       ));
 
     dummyActions = [
@@ -90,7 +90,7 @@ describe('AddresslistVoting', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(signers[0].address);
+    dao = await deployNewDAO(signers[0]);
   });
 
   beforeEach(async function () {

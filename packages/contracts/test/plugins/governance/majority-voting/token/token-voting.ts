@@ -80,7 +80,7 @@ describe('TokenVoting', function () {
         // @ts-ignore
         hre,
         'TokenVoting',
-        ['DAO']
+        ['src/core/dao/DAO.sol:DAO']
       ));
 
     dummyActions = [
@@ -95,7 +95,7 @@ describe('TokenVoting', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(signers[0].address);
+    dao = await deployNewDAO(signers[0]);
   });
 
   beforeEach(async function () {
@@ -107,9 +107,7 @@ describe('TokenVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    GovernanceERC20Mock = await ethers.getContractFactory(
-      'GovernanceERC20Mock'
-    );
+    GovernanceERC20Mock = new GovernanceERC20Mock__factory(signers[0]);
     governanceErc20Mock = await GovernanceERC20Mock.deploy(
       dao.address,
       'GOV',

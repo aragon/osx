@@ -3,19 +3,21 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 import {Operation} from '../../../utils/types';
 import {checkPermission, getContractAddress} from '../../helpers';
+import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');
 
-  const {getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers} = hre;
+  const [deployer] = await ethers.getSigners();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
   // Get `DAO` contract.
-  const managingDaoContract = await ethers.getContractAt(
-    'DAO',
-    managingDAOAddress
+
+  const managingDaoContract = DAO__factory.connect(
+    managingDAOAddress,
+    (await ethers.getSigners())[0]
   );
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
@@ -26,14 +28,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await checkPermission(managingDaoContract, {
     operation: Operation.Revoke,
     where: {name: 'DAORegistry', address: daoRegistryAddress},
-    who: {name: 'Deployer', address: deployer},
+    who: {name: 'Deployer', address: deployer.address},
     permission: 'REGISTER_DAO_PERMISSION',
   });
 
   await checkPermission(managingDaoContract, {
     operation: Operation.Revoke,
     where: {name: 'PluginSetupProcessor', address: pspAddress},
-    who: {name: 'Deployer', address: deployer},
+    who: {name: 'Deployer', address: deployer.address},
     permission: 'APPLY_INSTALLATION_PERMISSION',
   });
 
@@ -47,14 +49,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await checkPermission(managingDaoContract, {
     operation: Operation.Revoke,
     where: {name: 'ManagingDAO', address: managingDAOAddress},
-    who: {name: 'Deployer', address: deployer},
+    who: {name: 'Deployer', address: deployer.address},
     permission: 'ROOT_PERMISSION',
   });
 
   await checkPermission(managingDaoContract, {
     operation: Operation.Revoke,
     where: {name: 'ManagingDAO', address: managingDAOAddress},
-    who: {name: 'Deployer', address: deployer},
+    who: {name: 'Deployer', address: deployer.address},
     permission: 'EXECUTE_PERMISSION',
   });
 
