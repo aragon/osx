@@ -163,8 +163,12 @@ contract DAO is
     ) external reinitializer(2) {
         _initData; // Silences the unused function parameter warning.
 
-        // Check that the version the contract is upgrading from is < v1.3.0.
-        if (_protocolVersion[0] != 1 || _protocolVersion[1] >= 3) {
+        // Check that the contract is not upgrading from a different major release.
+        if (_protocolVersion[0] != 1) {
+            revert ProtocolVersionUpgradeNotSupported(_protocolVersion);
+        }
+        // Check that the contract is not downgrading from a newer or the same minor release.
+        if (_protocolVersion[1] >= 3) {
             revert ProtocolVersionUpgradeNotSupported(_protocolVersion);
         }
 
