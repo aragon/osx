@@ -19,6 +19,8 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Compile contracts-versions
+        run: yarn run build:contracts-versions
       - name: Generate Docs
         run: yarn run docgen
         working-directory: packages/contracts/
