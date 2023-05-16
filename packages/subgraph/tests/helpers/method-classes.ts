@@ -306,7 +306,7 @@ class NativeBalanceMethods extends NativeBalance {
 // DAO
 class DaoMethods extends Dao {
   withDefaultValues(): DaoMethods {
-    this.id = Address.fromHexString(DAO_ADDRESS).toHexString();
+    this.id = DAO_ADDRESS;
     this.subdomain = '';
     this.creator = Address.fromHexString(ADDRESS_ONE);
     this.metadata = STRING_DATA;
