@@ -12,10 +12,31 @@ import {
   TrustedForwarderSet,
   SignatureValidatorSet,
   StandardCallbackRegistered,
-  CallbackReceived
+  CallbackReceived,
+  NewURI
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 
 // events
+
+export function createNewURIEvent(
+  newURI: string,
+  contractAddress: string
+): NewURI {
+  let newNewURIEvent = changetype<NewURI>(newMockEvent());
+
+  newNewURIEvent.address = Address.fromString(contractAddress);
+
+  newNewURIEvent.parameters = [];
+
+  let daoURIParam = new ethereum.EventParam(
+    'daoURI',
+    ethereum.Value.fromString(newURI)
+  );
+
+  newNewURIEvent.parameters.push(daoURIParam);
+
+  return newNewURIEvent;
+}
 
 export function createNewMetadataSetEvent(
   metadata: string,
