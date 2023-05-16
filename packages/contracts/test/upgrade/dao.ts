@@ -110,11 +110,6 @@ describe('DAO Upgrade', function () {
         signers[0].address,
         ethers.utils.id('EXECUTE_PERMISSION')
       );
-      await daoV100Proxy.grant(
-        daoV100Proxy.address,
-        signers[0].address,
-        ethers.utils.id('ROOT_PERMISSION')
-      );
 
       // Upgrade and call `initializeFrom`.
       await daoV100Proxy.upgradeToAndCall(
@@ -282,11 +277,6 @@ describe('DAO Upgrade', function () {
         daoV120Proxy.address,
         signers[0].address,
         ethers.utils.id('EXECUTE_PERMISSION')
-      );
-      await daoV120Proxy.grant(
-        daoV120Proxy.address,
-        signers[0].address,
-        ethers.utils.id('ROOT_PERMISSION')
       );
 
       // Upgrade and call `initializeFrom`.
