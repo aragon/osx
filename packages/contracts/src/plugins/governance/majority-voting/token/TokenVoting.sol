@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import {IMembership} from "../../../../core/plugin/membership/IMembership.sol";
 import {IDAO} from "../../../../core/dao/IDAO.sol";
@@ -77,19 +78,31 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
+        // Check that either `_msgSender` owns enough tokens or has enough voting power from being a delegatee.
+        {
+            uint256 minProposerVotingPower_ = minProposerVotingPower();
+
+            if (minProposerVotingPower_ != 0) {
+                // Because of the checks in `TokenVotingSetup`, we can assume that `votingToken` is an [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+                if (
+                    votingToken.getVotes(_msgSender()) < minProposerVotingPower_ &&
+                    IERC20Upgradeable(address(votingToken)).balanceOf(_msgSender()) <
+                    minProposerVotingPower_
+                ) {
+                    revert ProposalCreationForbidden(_msgSender());
+                }
+            }
+        }
+
         uint256 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number - 1;
+            snapshotBlock = block.number - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
         }
 
         uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
 
         if (totalVotingPower_ == 0) {
             revert NoVotingPower();
-        }
-
-        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
-            revert ProposalCreationForbidden(_msgSender());
         }
 
         proposalId = _createProposal({
@@ -135,8 +148,10 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @inheritdoc IMembership
     function isMember(address _account) external view returns (bool) {
-        /// whatever condition
-        return votingToken.getVotes(_account) > 0;
+        // A member must own or least one token or have at least one token delegated to her/him.
+        return
+            votingToken.getVotes(_account) > 0 ||
+            IERC20Upgradeable(address(votingToken)).balanceOf(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase
