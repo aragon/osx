@@ -111,6 +111,34 @@ describe('DAO Upgrade', function () {
         ethers.utils.id('EXECUTE_PERMISSION')
       );
 
+      // Check that permissions are granted before the upgrade
+      expect(
+        await daoV100Proxy.hasPermission(
+          daoV100Proxy.address,
+          signers[0].address,
+          ethers.utils.id('EXECUTE_PERMISSION'),
+          EMPTY_DATA
+        )
+      ).to.be.true;
+      expect(
+        await daoV100Proxy.hasPermission(
+          daoV100Proxy.address,
+          signers[0].address,
+          ethers.utils.id('ROOT_PERMISSION'),
+          EMPTY_DATA
+        )
+      ).to.be.true;
+
+      // Check that a arbitrary permission is not granted.
+      expect(
+        await daoV100Proxy.hasPermission(
+          daoV100Proxy.address,
+          signers[0].address,
+          ethers.utils.id('NOT_GRANTED'),
+          EMPTY_DATA
+        )
+      ).to.be.false;
+
       // Upgrade and call `initializeFrom`.
       await daoV100Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
@@ -129,6 +157,7 @@ describe('DAO Upgrade', function () {
       );
       expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
+      // Check that the permissions are still granted.
       expect(
         await daoV100Proxy.hasPermission(
           daoV100Proxy.address,
@@ -145,6 +174,16 @@ describe('DAO Upgrade', function () {
           EMPTY_DATA
         )
       ).to.be.true;
+
+      // Check that a the arbitrary permission is still not granted.
+      expect(
+        await daoV100Proxy.hasPermission(
+          daoV100Proxy.address,
+          signers[0].address,
+          ethers.utils.id('NOT_GRANTED'),
+          EMPTY_DATA
+        )
+      ).to.be.false;
     });
 
     it('executes actions after the upgrade', async () => {
@@ -279,6 +318,34 @@ describe('DAO Upgrade', function () {
         ethers.utils.id('EXECUTE_PERMISSION')
       );
 
+      // Check that permissions are granted before the upgrade
+      expect(
+        await daoV120Proxy.hasPermission(
+          daoV120Proxy.address,
+          signers[0].address,
+          ethers.utils.id('EXECUTE_PERMISSION'),
+          EMPTY_DATA
+        )
+      ).to.be.true;
+      expect(
+        await daoV120Proxy.hasPermission(
+          daoV120Proxy.address,
+          signers[0].address,
+          ethers.utils.id('ROOT_PERMISSION'),
+          EMPTY_DATA
+        )
+      ).to.be.true;
+
+      // Check that a arbitrary permission is not granted.
+      expect(
+        await daoV120Proxy.hasPermission(
+          daoV120Proxy.address,
+          signers[0].address,
+          ethers.utils.id('NOT_GRANTED'),
+          EMPTY_DATA
+        )
+      ).to.be.false;
+
       // Upgrade and call `initializeFrom`.
       await daoV120Proxy.upgradeToAndCall(
         daoCurrentImplementaion.address,
@@ -297,6 +364,7 @@ describe('DAO Upgrade', function () {
       );
       expect(implementationAfterUpgrade).to.not.equal(daoV120Implementation);
 
+      // Check that the permissions are still granted.
       expect(
         await daoV120Proxy.hasPermission(
           daoV120Proxy.address,
@@ -313,6 +381,16 @@ describe('DAO Upgrade', function () {
           EMPTY_DATA
         )
       ).to.be.true;
+
+      // Check that a the arbitrary permission is still not granted.
+      expect(
+        await daoV120Proxy.hasPermission(
+          daoV120Proxy.address,
+          signers[0].address,
+          ethers.utils.id('NOT_GRANTED'),
+          EMPTY_DATA
+        )
+      ).to.be.false;
     });
 
     it('executes actions after the upgrade', async () => {
