@@ -6,7 +6,7 @@ on:
     branches:
       - develop
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 
 jobs:
   update_docs:
