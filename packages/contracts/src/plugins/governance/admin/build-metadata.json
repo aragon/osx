@@ -1,7 +1,7 @@
 {
   "ui": {},
   "change": "This is the first build of the first release.",
-  "pluginSetupABI": {
+  "pluginSetup": {
     "prepareInstallation": {
       "description": "The information required for the installation of build 1.",
       "inputs": [

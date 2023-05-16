@@ -33,7 +33,7 @@ describe('AdminSetup', function () {
     targetDao = await deployNewDAO(ownerAddress);
 
     minimum_data = abiCoder.encode(
-      getNamedTypesFromABI(metadata.pluginSetupABI.prepareInstallation.inputs),
+      getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
       [ownerAddress]
     );
 
@@ -78,9 +78,7 @@ describe('AdminSetup', function () {
 
     it('reverts if encoded address in `_data` is zero', async () => {
       const dataWithAddressZero = abiCoder.encode(
-        getNamedTypesFromABI(
-          metadata.pluginSetupABI.prepareInstallation.inputs
-        ),
+        getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
         [AddressZero]
       );
 

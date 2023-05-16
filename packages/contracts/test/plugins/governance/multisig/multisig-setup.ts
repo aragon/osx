@@ -63,7 +63,7 @@ describe('MultisigSetup', function () {
     };
 
     minimum_data = abiCoder.encode(
-      getNamedTypesFromABI(metadata.pluginSetupABI.prepareInstallation.inputs),
+      getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
       [[signers[0].address], Object.values(defaultMultisigSettings)]
     );
 
@@ -112,9 +112,7 @@ describe('MultisigSetup', function () {
       const noMembers: string[] = [];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        getNamedTypesFromABI(
-          metadata.pluginSetupABI.prepareInstallation.inputs
-        ),
+        getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
         [noMembers, defaultMultisigSettings]
       );
 
@@ -146,9 +144,7 @@ describe('MultisigSetup', function () {
       const members = [signers[0].address];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        getNamedTypesFromABI(
-          metadata.pluginSetupABI.prepareInstallation.inputs
-        ),
+        getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
         [members, multisigSettings]
       );
 
@@ -179,9 +175,7 @@ describe('MultisigSetup', function () {
       const members = [signers[0].address];
 
       const wrongPrepareInstallationData = abiCoder.encode(
-        getNamedTypesFromABI(
-          metadata.pluginSetupABI.prepareInstallation.inputs
-        ),
+        getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
         [members, multisigSettings]
       );
 

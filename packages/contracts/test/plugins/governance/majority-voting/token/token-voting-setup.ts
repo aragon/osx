@@ -27,7 +27,7 @@ const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
 const prepareInstallationDataTypes = getNamedTypesFromABI(
-  metadata.pluginSetupABI.prepareInstallation.inputs
+  metadata.pluginSetup.prepareInstallation.inputs
 );
 
 const tokenName = 'name';

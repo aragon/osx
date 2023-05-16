@@ -61,7 +61,7 @@ describe('AddresslistVotingSetup', function () {
     implementationAddress = await addresslistVotingSetup.implementation();
 
     defaultData = abiCoder.encode(
-      getNamedTypesFromABI(metadata.pluginSetupABI.prepareInstallation.inputs),
+      getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
       [Object.values(defaultVotingSettings), defaultMembers]
     );
   });

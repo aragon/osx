@@ -70,7 +70,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Prepare multisig plugin for managingDAO
   const data = ethers.utils.defaultAbiCoder.encode(
     getNamedTypesFromABI(
-      buildMetadataJson.pluginSetupABI.prepareInstallation.inputs
+      buildMetadataJson.pluginSetup.prepareInstallation.inputs
     ),
     [approvers, [listedOnly, minApprovals]]
   );
