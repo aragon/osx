@@ -3,7 +3,7 @@
   "change": "- The ability to create a proposal now depends on the membership status of the current instead of the snapshot block.",
   "pluginSetup": {
     "prepareInstallation": {
-      "description": "The information required for the installation of build 2.",
+      "description": "The information required for the installation.",
       "inputs": [
         {
           "components": [

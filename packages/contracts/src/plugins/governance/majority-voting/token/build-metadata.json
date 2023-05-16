@@ -3,7 +3,7 @@
   "change": "- The `ProposalCreated` event is now emitted with the correct start and end date if 0 is used as an input parameter.\n- The ability to create a proposal now depends on the membership status of the current instead of the snapshot block.",
   "pluginSetup": {
     "prepareInstallation": {
-      "description": "The information required for the installation of build 2.",
+      "description": "The information required for the installation.",
       "inputs": [
         {
           "components": [
