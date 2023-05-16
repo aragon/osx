@@ -154,22 +154,22 @@ contract DAO is
         __PermissionManager_init(_initialOwner);
     }
 
-    /// @notice Initializes the DAO after an upgrade from a previous version.
-    /// @param _protocolVersion The protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
+    /// @notice Initializes the DAO after an upgrade from a previous protocol version.
+    /// @param _previousProtocolVersion The semantic protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
     /// @param _initData The initialization data to be passed to via `upgradeToAndCall` (see [ERC-1967](https://docs.openzeppelin.com/contracts/4.x/api/proxy#ERC1967Upgrade)).
     function initializeFrom(
-        uint8[3] calldata _protocolVersion,
+        uint8[3] calldata _previousProtocolVersion,
         bytes calldata _initData
     ) external reinitializer(2) {
         _initData; // Silences the unused function parameter warning.
 
         // Check that the contract is not upgrading from a different major release.
-        if (_protocolVersion[0] != 1) {
-            revert ProtocolVersionUpgradeNotSupported(_protocolVersion);
+        if (_previousProtocolVersion[0] != 1) {
+            revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
         }
         // Check that the contract is not downgrading from a newer or the same minor release.
-        if (_protocolVersion[1] >= 3) {
-            revert ProtocolVersionUpgradeNotSupported(_protocolVersion);
+        if (_previousProtocolVersion[1] >= 3) {
+            revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
         }
 
         // Initialize `_reentrancyStatus` that was added in the current version (v1.3.0).
