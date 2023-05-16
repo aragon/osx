@@ -15,6 +15,7 @@ import {OZ_ERRORS} from '../../../test-utils/error';
 import {toBytes32} from '../../../test-utils/voting';
 import {
   AdminCloneFactory,
+  AdminCloneFactory__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IPlugin__factory,
@@ -54,7 +55,7 @@ describe('Admin', function () {
       // @ts-ignore
       hre,
       'Admin',
-      ['DAO']
+      ['src/core/dao/DAO.sol:DAO']
     ));
 
     dummyActions = [
@@ -68,11 +69,9 @@ describe('Admin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(ownerAddress);
+    dao = await deployNewDAO(signers[0]);
 
-    const AdminCloneFactory = await ethers.getContractFactory(
-      'AdminCloneFactory'
-    );
+    const AdminCloneFactory = new AdminCloneFactory__factory(signers[0]);
     adminCloneFactory = await AdminCloneFactory.deploy();
   });
 

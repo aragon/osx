@@ -5,12 +5,12 @@ import {uploadToIPFS} from '../../../helpers';
 import placeholderBuildMetadata from '../../../../src/plugins/placeholder-version/build-metadata.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   await deploy('PlaceholderSetup', {
-    from: deployer,
+    from: deployer.address,
     args: [],
     log: true,
   });

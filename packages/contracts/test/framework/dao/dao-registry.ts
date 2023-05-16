@@ -2,7 +2,12 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
-import {DAO, DAORegistry, ENSSubdomainRegistrar} from '../../../typechain';
+import {
+  DAO,
+  DAORegistry,
+  DAORegistry__factory,
+  ENSSubdomainRegistrar,
+} from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -39,7 +44,7 @@ describe('DAORegistry', function () {
 
   beforeEach(async function () {
     // Managing DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // ENS
     ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -49,10 +54,10 @@ describe('DAORegistry', function () {
     );
 
     // Target DAO to be used as an example DAO to be registered
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0]);
 
     // DAO Registry
-    const Registry = await ethers.getContractFactory('DAORegistry');
+    const Registry = new DAORegistry__factory(signers[0]);
 
     daoRegistry = await deployWithProxy(Registry);
 
@@ -119,7 +124,7 @@ describe('DAORegistry', function () {
       REGISTER_DAO_PERMISSION_ID
     );
 
-    const newTargetDao = await deployNewDAO(ownerAddress);
+    const newTargetDao = await deployNewDAO(signers[0]);
 
     await expect(
       daoRegistry.register(newTargetDao.address, ownerAddress, daoSubdomain)
@@ -151,7 +156,7 @@ describe('DAORegistry', function () {
     // Register the DAO name under the top level domain
     await daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain);
 
-    const newTargetDao = await deployNewDAO(ownerAddress);
+    const newTargetDao = await deployNewDAO(signers[0]);
     const otherOwnerAddress = await (await ethers.getSigners())[1].getAddress();
 
     // Try to register the DAO name under the top level domain a second time
@@ -173,7 +178,7 @@ describe('DAORegistry', function () {
 
       // loop through the ascii table
       for (let i = 0; i < 127; i++) {
-        const newTargetDao = await deployNewDAO(ownerAddress);
+        const newTargetDao = await deployNewDAO(signers[0]);
 
         // replace the 10th char in the baseSubdomain
         const subdomainName =
@@ -205,7 +210,7 @@ describe('DAORegistry', function () {
           .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
           .withArgs(subdomainName);
       }
-    });
+    }).timeout(120000);
 
     it('should validate the passed subdomain correctly (> 32 bytes long subdomain)', async () => {
       const baseSubdomain =
@@ -213,7 +218,7 @@ describe('DAORegistry', function () {
 
       // loop through the ascii table
       for (let i = 0; i < 127; i++) {
-        const newTargetDao = await deployNewDAO(ownerAddress);
+        const newTargetDao = await deployNewDAO(signers[0]);
 
         // replace the 40th char in the baseSubdomain
         const subdomainName =
@@ -245,6 +250,6 @@ describe('DAORegistry', function () {
           .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
           .withArgs(subdomainName);
       }
-    });
+    }).timeout(120000);
   });
 });

@@ -6,6 +6,8 @@ import {
   TestParameterScopingPermissionCondition,
   TestPlugin,
   DAO,
+  TestPlugin__factory,
+  TestParameterScopingPermissionCondition__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
@@ -25,18 +27,18 @@ describe('TestParameterScopingCondition', function () {
     ownerAddress = await signers[0].getAddress();
 
     // create a DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // Deploy the component
-    const TestPlugin = await ethers.getContractFactory('TestPlugin');
+    const TestPlugin = new TestPlugin__factory(signers[0]);
 
     testPlugin = await deployWithProxy(TestPlugin);
     await testPlugin.initialize(managingDao.address);
 
     // Deploy the condition
-    const ParameterCondition = await ethers.getContractFactory(
-      'TestParameterScopingPermissionCondition'
-    );
+    const ParameterCondition =
+      new TestParameterScopingPermissionCondition__factory(signers[0]);
+
     parameterCondition = await ParameterCondition.deploy();
 
     // Give signers[0] the `DO_SOMETHING_PERMISSION_ID` on the TestPlugin

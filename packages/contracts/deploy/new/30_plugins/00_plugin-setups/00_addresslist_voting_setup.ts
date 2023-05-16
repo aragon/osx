@@ -4,12 +4,12 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nDeploying plugins.`);
 
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   await deploy('AddresslistVotingSetup', {
-    from: deployer,
+    from: deployer.address,
     args: [],
     log: true,
   });
