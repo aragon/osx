@@ -14,7 +14,7 @@ import {
 } from '../../../../test-utils/voting';
 import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 import {addresslistVotingInterface} from './addresslist-voting';
-import {getNamedTypesFromABI} from '../../../utils/build-metadata';
+import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -61,7 +61,9 @@ describe('AddresslistVotingSetup', function () {
     implementationAddress = await addresslistVotingSetup.implementation();
 
     defaultData = abiCoder.encode(
-      getNamedTypesFromABI(metadata.pluginSetup.prepareInstallation.inputs),
+      getNamedTypesFromMetadata(
+        metadata.pluginSetup.prepareInstallation.inputs
+      ),
       [Object.values(defaultVotingSettings), defaultMembers]
     );
   });
