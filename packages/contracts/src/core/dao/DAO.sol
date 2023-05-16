@@ -167,13 +167,11 @@ contract DAO is
         if (_previousProtocolVersion[0] != 1) {
             revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
         }
-        // Check that the contract is not downgrading from a newer or the same minor release.
-        if (_previousProtocolVersion[1] >= 3) {
-            revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
-        }
 
-        // Initialize `_reentrancyStatus` that was added in the current version (v1.3.0).
-        _reentrancyStatus = _NOT_ENTERED;
+        // Initialize `_reentrancyStatus` that was added in v1.3.0
+        if (_previousProtocolVersion[1] <= 2) {
+            _reentrancyStatus = _NOT_ENTERED;
+        }
     }
 
     /// @inheritdoc PermissionManager
