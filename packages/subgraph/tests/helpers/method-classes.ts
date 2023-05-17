@@ -24,7 +24,8 @@ import {
 import {
   CallbackReceived,
   Deposited,
-  NativeTokenDeposited
+  NativeTokenDeposited,
+  NewURI
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   DelegateChanged,
@@ -73,6 +74,7 @@ import {
   createCallbackReceivedEvent,
   createNewDepositedEvent,
   createNewNativeTokenDepositedEvent,
+  createNewURIEvent,
   getBalanceOf,
   getSupportsInterface
 } from '../dao/utils';
@@ -308,6 +310,7 @@ class DaoMethods extends Dao {
     this.subdomain = '';
     this.creator = Address.fromHexString(ADDRESS_ONE);
     this.metadata = STRING_DATA;
+    this.daoURI = STRING_DATA;
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.token = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
     this.trustedForwarder = Address.fromHexString(ADDRESS_TWO);
@@ -365,6 +368,12 @@ class DaoMethods extends Dao {
       this.token as string,
       functionData
     );
+
+    return event;
+  }
+
+  createEvent_NewURI(newURI: string): NewURI {
+    let event = createNewURIEvent(newURI, this.id);
 
     return event;
   }
