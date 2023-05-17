@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {defaultAbiCoder} from 'ethers/lib/utils';
+import {readImplementationValuesFromSlot} from '../../utils/storage';
 
 import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {Deployment} from 'hardhat-deploy/dist/types';
@@ -23,9 +23,6 @@ async function deployAll() {
   await deployments.fixture();
 }
 
-const IMPLEMENTATION_SLOT =
-  '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
-
 describe('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
@@ -38,22 +35,6 @@ describe('Managing DAO', function () {
   let pluginRepoRegistry: PluginRepoRegistry;
   let ensSubdomainRegistrarDeployments: Deployment[];
   let ensSubdomainRegistrars: ENSSubdomainRegistrar[];
-
-  async function readImplementationValueFromSlot(
-    contractAddresses: string[]
-  ): Promise<string[]> {
-    const implementationValues: string[] = await Promise.all(
-      contractAddresses.map(async contractAddress => {
-        const encoded = await ethers.provider.getStorageAt(
-          contractAddress,
-          IMPLEMENTATION_SLOT
-        );
-        return defaultAbiCoder.decode(['address'], encoded)[0];
-      })
-    );
-
-    return implementationValues;
-  }
 
   async function createUpgradeProposal(
     contractAddress: string[],
@@ -154,7 +135,7 @@ describe('Managing DAO', function () {
     // check new implementation is deferent from the one on the ManagingDao.
     // read from slot
     let implementationAddress = (
-      await readImplementationValueFromSlot([managingDao.address])
+      await readImplementationValuesFromSlot([managingDao.address])
     )[0];
 
     expect(managingDaoV2Deployment.address).not.equal(implementationAddress);
@@ -167,7 +148,7 @@ describe('Managing DAO', function () {
 
     // re-read from slot
     implementationAddress = (
-      await readImplementationValueFromSlot([managingDao.address])
+      await readImplementationValuesFromSlot([managingDao.address])
     )[0];
 
     expect(managingDaoV2Deployment.address).to.be.equal(implementationAddress);
@@ -192,7 +173,7 @@ describe('Managing DAO', function () {
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
     let implementationAddress = (
-      await readImplementationValueFromSlot([daoRegistry.address])
+      await readImplementationValuesFromSlot([daoRegistry.address])
     )[0];
 
     expect(daoRegistryV2Deployment.address).not.equal(implementationAddress);
@@ -205,7 +186,7 @@ describe('Managing DAO', function () {
 
     // re-read from slot
     implementationAddress = (
-      await readImplementationValueFromSlot([daoRegistry.address])
+      await readImplementationValuesFromSlot([daoRegistry.address])
     )[0];
 
     expect(daoRegistryV2Deployment.address).to.be.equal(implementationAddress);
@@ -232,7 +213,7 @@ describe('Managing DAO', function () {
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
     let implementationAddress = (
-      await readImplementationValueFromSlot([pluginRepoRegistry.address])
+      await readImplementationValuesFromSlot([pluginRepoRegistry.address])
     )[0];
 
     expect(pluginRepoRegistryV2Deployment.address).not.equal(
@@ -247,7 +228,7 @@ describe('Managing DAO', function () {
 
     // re-read from slot
     implementationAddress = (
-      await readImplementationValueFromSlot([pluginRepoRegistry.address])
+      await readImplementationValuesFromSlot([pluginRepoRegistry.address])
     )[0];
 
     expect(pluginRepoRegistryV2Deployment.address).to.be.equal(
@@ -275,7 +256,7 @@ describe('Managing DAO', function () {
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
-    let implementationValues = await readImplementationValueFromSlot([
+    let implementationValues = await readImplementationValuesFromSlot([
       ensSubdomainRegistrars[0].address,
       ensSubdomainRegistrars[1].address,
     ]);
@@ -294,7 +275,7 @@ describe('Managing DAO', function () {
     );
 
     // re-read from slot
-    implementationValues = await readImplementationValueFromSlot([
+    implementationValues = await readImplementationValuesFromSlot([
       ensSubdomainRegistrars[0].address,
       ensSubdomainRegistrars[1].address,
     ]);
@@ -325,7 +306,7 @@ describe('Managing DAO', function () {
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
-    let implementationValues = await readImplementationValueFromSlot([
+    let implementationValues = await readImplementationValuesFromSlot([
       hre.aragonPluginRepos['token-voting'],
       hre.aragonPluginRepos['address-list-voting'],
       hre.aragonPluginRepos['admin'],
@@ -346,7 +327,7 @@ describe('Managing DAO', function () {
     );
 
     // re-read from slot
-    implementationValues = await readImplementationValueFromSlot([
+    implementationValues = await readImplementationValuesFromSlot([
       hre.aragonPluginRepos['token-voting'],
       hre.aragonPluginRepos['address-list-voting'],
       hre.aragonPluginRepos['admin'],

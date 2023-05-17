@@ -14,10 +14,7 @@ import {
   TestERC20__factory,
   TestERC1155__factory,
   TestERC721__factory,
-  IERC1155,
-  IERC1155Receiver,
   IERC1155Receiver__factory,
-  IERC721Receiver,
   IERC721Receiver__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
@@ -51,6 +48,11 @@ const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
 const MAX_ACTIONS = 256;
 
+const OZ_INITIALIZED_SLOT_POSITION = 0;
+const REENTRANCY_STATUS_SLOT_POSITION = 304;
+
+const EMPTY_DATA = '0x';
+
 const EVENTS = {
   MetadataSet: 'MetadataSet',
   TrustedForwarderSet: 'TrustedForwarderSet',
@@ -65,7 +67,7 @@ const EVENTS = {
   CallbackReceived: 'CallbackReceived',
 };
 
-const PERMISSION_IDS = {
+export const PERMISSION_IDS = {
   UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
@@ -85,12 +87,13 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
+  let DAO: DAO__factory;
 
   beforeEach(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = new DAO__factory(signers[0]);
+    DAO = new DAO__factory(signers[0]);
     dao = await deployWithProxy<DAO>(DAO);
     await dao.initialize(
       dummyMetadata1,
@@ -200,6 +203,89 @@ describe('DAO', function () {
         await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
       ).to.equal(true);
     });
+
+    it('sets OZs `_initialized` at storage slot [0] to 2', async () => {
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            dao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
+    });
+
+    it('sets the `_reentrancyStatus` at storage slot [304] to `_NOT_ENTERED = 1`', async () => {
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            dao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(1);
+    });
+  });
+
+  describe('initializeFrom', async () => {
+    it('reverts if trying to upgrade from a different major release', async () => {
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      await expect(uninitializedDao.initializeFrom([0, 1, 0], EMPTY_DATA))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([0, 1, 0]);
+    });
+
+    it('reverts if trying to upgrade to the same version', async () => {
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([1, 3, 0]);
+    });
+
+    it('initializes upgrades for versions < 1.3.0', async () => {
+      // Create an unitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      // Expect the contract to be uninitialized  with `_initialized = 0`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+
+      // Call `initializeFrom` with the previous version 1.3.0 which is not supported.
+      await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([1, 3, 0]);
+
+      // Call `initializeFrom` with the previous version 1.2.0.
+      await expect(uninitializedDao.initializeFrom([1, 2, 0], EMPTY_DATA)).to
+        .not.be.reverted;
+
+      // Expect the contract to be initialized with `_initialized = 2`
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
+    });
   });
 
   describe('setTrustedForwarder:', async () => {
@@ -299,6 +385,34 @@ describe('DAO', function () {
         .withArgs(0);
     });
 
+    it('reverts on re-entrant actions', async () => {
+      // Grant DAO execute permission on itself.
+      await dao.grant(
+        dao.address,
+        dao.address,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      );
+
+      // Create a reentrant action calling `dao.execute` again.
+      const reentrantAction = {
+        to: dao.address,
+        data: dao.interface.encodeFunctionData('execute', [
+          ZERO_BYTES32,
+          [data.succeedAction],
+          0,
+        ]),
+        value: 0,
+      };
+
+      // Create  an action array with an normal action and an reentrant action.
+      const actions = [data.succeedAction, reentrantAction];
+
+      // Expect the execution of the reentrant action (second action) to fail.
+      await expect(dao.execute(ZERO_BYTES32, actions, 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(1);
+    });
+
     it('succeeds if action is failable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = flipBit(0, num);
@@ -386,10 +500,11 @@ describe('DAO', function () {
       expect(event.args.allowFailureMap).to.equal(0);
     });
 
-    it('reverts if failure is allowed but not enough gas is provided', async () => {
+    it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
       let gasConsumer = await GasConsumer.deploy();
 
+      // Prepare an action array calling `consumeGas` twenty times.
       const gasConsumingAction = {
         to: gasConsumer.address,
         data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
@@ -403,15 +518,51 @@ describe('DAO', function () {
         ZERO_BYTES32,
         [gasConsumingAction],
         allowFailureMap
-      ); // exact gas required: 495453
+      );
 
-      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
+      // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(800),
+          gasLimit: expectedGas.sub(3000),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
+      // Provide enough gas so that the entire call passes.
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas,
+        })
+      ).to.not.be.reverted;
+    });
+
+    it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
+      const GasConsumer = new GasConsumer__factory(signers[0]);
+      let gasConsumer = await GasConsumer.deploy();
+
+      // Prepare an action array calling `consumeGas` one times.
+      const gasConsumingAction = {
+        to: gasConsumer.address,
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [1]),
+        value: 0,
+      };
+
+      let allowFailureMap = ethers.BigNumber.from(0);
+      allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
+
+      const expectedGas = await dao.estimateGas.execute(
+        ZERO_BYTES32,
+        [gasConsumingAction],
+        allowFailureMap
+      );
+
+      // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas.sub(10000),
+        })
+      ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
+
+      // Provide enough gas so that the entire call passes.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
           gasLimit: expectedGas,
