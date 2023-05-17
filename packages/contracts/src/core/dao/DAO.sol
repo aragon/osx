@@ -67,16 +67,19 @@ contract DAO is
     uint256 private constant _ENTERED = 2;
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+    /// @dev Added in v1.0.0.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
+    /// @dev Added in v1.0.0.
     address private trustedForwarder;
 
     /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO URI.
+    /// @dev Added in v1.0.0.
     string private _daoURI;
 
     /// @notice The state variable for the reentrancy guard of the `execute` function.
-    /// @dev The variable can of value `_NOT_ENTERED = 1` or `_ENTERED = 2` in usage and shoud be initialized with `_NOT_ENTERED`.
+    /// @dev Added in v1.3.0. The variable can be of value `_NOT_ENTERED = 1` or `_ENTERED = 2` in usage and is initialized with `_NOT_ENTERED`.
     uint256 private _reentrancyStatus;
 
     /// @notice Thrown if a call is reentrant.
@@ -141,7 +144,7 @@ contract DAO is
         address _trustedForwarder,
         string calldata daoURI_
     ) external reinitializer(2) {
-        _reentrancyStatus = _NOT_ENTERED;
+        _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
@@ -168,7 +171,7 @@ contract DAO is
             revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
         }
 
-        // Initialize `_reentrancyStatus` that was added in v1.3.0
+        // Initialize `_reentrancyStatus` that was added in v1.3.0.
         if (_previousProtocolVersion[1] <= 2) {
             _reentrancyStatus = _NOT_ENTERED;
         }
