@@ -12,7 +12,8 @@
     "build:contracts": "ts-node create-contract-versions.ts",
     "build:npm": "rollup --config rollup.config.ts",
     "build": "yarn build:contracts && yarn build:npm",
-    "test": "jest"
+    "test": "jest",
+    "clean": "rm -rf dist npm versions "
   },
   "repository": {
     "type": "git",
