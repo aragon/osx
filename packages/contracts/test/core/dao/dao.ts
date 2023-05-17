@@ -239,22 +239,11 @@ describe('DAO', function () {
         .withArgs([0, 1, 0]);
     });
 
-    it('reverts if trying to upgrade to the same version', async () => {
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
-
-      await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA))
-        .to.be.revertedWithCustomError(
-          dao,
-          'ProtocolVersionUpgradeNotSupported'
-        )
-        .withArgs([1, 3, 0]);
-    });
-
-    it('initializes upgrades for versions < 1.3.0', async () => {
+    it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
       // Create an unitialized DAO.
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
-      // Expect the contract to be uninitialized  with `_initialized = 0`.
+      // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -263,20 +252,20 @@ describe('DAO', function () {
           )
         ).toNumber()
       ).to.equal(0);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
 
-      // Call `initializeFrom` with the previous version 1.3.0 which is not supported.
-      await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA))
-        .to.be.revertedWithCustomError(
-          dao,
-          'ProtocolVersionUpgradeNotSupported'
-        )
-        .withArgs([1, 3, 0]);
-
-      // Call `initializeFrom` with the previous version 1.2.0.
+      // Call `initializeFrom` with version 1.2.0.
       await expect(uninitializedDao.initializeFrom([1, 2, 0], EMPTY_DATA)).to
         .not.be.reverted;
 
-      // Expect the contract to be initialized with `_initialized = 2`
+      // Expect the contract to be initialized with `_initialized = 2` and  `_reentrancyStatus = 1`.
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -285,6 +274,59 @@ describe('DAO', function () {
           )
         ).toNumber()
       ).to.equal(2);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(1);
+    });
+
+    it('does not initialize `_reentrancyStatus` for versions >= 1.3.0', async () => {
+      // Create an unitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+
+      // Call `initializeFrom` with version 1.3.0.
+      await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA)).to
+        .not.be.reverted;
+
+      // Expect the contract to be initialized with `_initialized = 2` but `_reentrancyStatus` to remain unchanged.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
     });
   });
 
