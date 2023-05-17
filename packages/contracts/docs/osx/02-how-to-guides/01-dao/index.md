@@ -1,5 +1,5 @@
 ---
-title: How to operate a DAO
+title: How to Operate a DAO
 ---
 
 DAOs are decentralized autonomous organizations. They are a group of people managing on-chain assets through a set of smart contracts.

@@ -1,16 +1,16 @@
 ---
-title: How to execute an action on behalf of the DAO
+title: Executing actions on behalf of the DAO
 ---
 
 ## Using the DAO Executor
 
-Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to [pass any encoded list (or array of actions)](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol#L168) to be executed by the DAO contract itself.
+Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to [pass an array of actions)](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol) to be executed by the DAO contract itself.
 
 However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the [`EXECUTE_PERMISSION`](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract). This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
 
 ## How to grant the Execute Permission
 
-Usually, the `EXECUTE_PERMISSION` is granted to a governance plugin of the DAO so that only the approved proposals can be executed. For example, we'd grant the `EXECUTE_PERMISSION` to the address of the Multisig Plugin, so that when a proposal is approved by the required members of the multisig, the plugin is able to call the `execute` function on the DAO in order to get the actions executed.
+Usually, the `EXECUTE_PERMISSION` is granted to a governance plugin of the DAO so that only the approved proposals can be executed. For example, we'd grant the `EXECUTE_PERMISSION` to the address of the Multisig Plugin. That way, when a proposal is approved by the required members of the multisig, the plugin is able to call the `execute` function on the DAO in order to get the actions executed.
 
 To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `PermissionManager`'s [`grant` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/permission/PermissionManager.sol#L105) and pass it 4 parameters:
 

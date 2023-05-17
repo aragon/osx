@@ -1,5 +1,5 @@
 ---
-title: How to publish a plugin into Aragon's plugin registry
+title: Publishing a plugin into Aragon's plugin registry
 ---
 
 ## How to publish a plugin into Aragon's plugin registry

@@ -1,5 +1,5 @@
 ---
-title: DAO Creation
+title: Creating a DAO
 ---
 
 ## The DAO Creation Process

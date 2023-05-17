@@ -1,58 +1,61 @@
 ---
-title: Setup
+title: The Plugin Contracts
 ---
 
-## The Plugin Setup Process
+## The Smart Contracts Behind Plugins
 
-A DAO can be set up and customized by the **installation**, **update, and** **uninstallation** of plugins.
-In this section you will learn how the plugin setup process and related infrastructure in Aragon OSx works.
+A DAO can be set up and customized by the **installation, update, and uninstallation** of plugins. Plugins are composed of two key contracts:
 
-In order for a plugin to function, associated contracts need to be deployed and gathered, often requiring permissions from the DAO.  
-For example, a governance plugin will need permission to call the `execute` function in the DAO.
+- **Plugin contract:** contains the plugin's implementation logic; everything needed to extend the functionality for DAOs.
+- **Plugin Setup contract:** contains the instructions needed to install, update, and uninstall the plugin into the DAO. This is done through granting or revoking permissions, enabling the DAO to make use of the plugin's functionality.
 
-The required setup logic is written and taken care off by the plugin developer in the `PluginSetup` contract they create and that is associated with each `Plugin` contract version release (see [Developing a Plugin](../index.md)). The `PluginSetup` contract then interacts with the Aragon OSx framework so that installing, updating, and uninstalling a plugin to a DAO through the UI becomes very simple for the DAO end-user.
+![Aragon OSx Plugins](https://res.cloudinary.com/dacofvu8m/image/upload/v1683225098/Screen_Shot_2023-05-04_at_14.31.25_r0qqut.png)
 
-Except for the gas costs required, the installation, update, and uninstallation of plugins is completely free.
+How this works:
 
-### Security Considerations
+- Although a Plugin is composed `Plugin` and `PluginSetup` contracts, the Aragon OSx protocol only knows of the `PluginSetup` contract.
+- Since the `PluginSetup` contract is the one in charge of installing the plugin into a DAO, it is the one also in charge of deploying the Plugin instace specific to that DAO with the parameters set by the DAO in advance. You can review how to build a `PluginSetup` contract [here](../../../../02-how-to-guides/02-plugin-development/index.md).
+- The `PluginSetup` contract then interacts with the Aragon OSx framework so that installing, updating, and uninstalling a plugin to a DAO becomes very simple for the end-user.
+- Publishing a Plugin into the Aragon OSx protocol is done through creating a plugin's first version. This generates a `PluginRepo` instance - registering all plugin versions. You can read more about that [here](../../../../02-how-to-guides/02-plugin-development/07-publication/index.md).
+- Except for the gas costs required, plugins are completely free.
 
-The plugin setup process is **security critical** because permissions are granted to third-party contracts.
+### How does this work?
+
+The `PluginSetup` process is **security critical** because permissions are granted to third-party contracts.
+
 Safety was our top priority in the design and we wanted to make sure that the DAO knows exactly which contracts receive which permissions before processing and making sure that the `PluginSetup` contracts developed by third parties don’t obtain elevated permissions (i.e., the `ROOT_PERMISSION_ID` permission) on the installing DAO during the setup process.
 
-This is why we split the **plugin setup in two steps**:
+This is why we split the `PluginSetup` development in two steps:
 
-1. **Preparation**
-2. **Application**
+1. **Preparation:** Defining and encoding the permissions needed to install, uninstall, or update a plugin
+2. **Application:** Using the encoded functionality to actually perform the action
 
-Each plugin will then require both to run through the DAO's `PluginSetupProcessor` contract, which is part of the Aragon OSx framework.
+The `PluginSetupProcessor` is the Aragon contract in charge of using the `prepareInstallation()` function from your plugin's `PluginSetup` contract and use it to prepare the installation and apply it.
 
-:::note
-Plugins can also be setup manually by calling `PluginSetup` contract and granting permissions directly through the `DAO` contract but won’t be displayed in the UI correctly.
-:::
+### Preparing Installation
 
-In the following, we describe the two steps in detail.
+The preparation of a `PluginSetup` contract proceeds as follows:
 
-### Setup Preparation
+1. A DAO builder selects a plugin to install, uninstall, or update. Depending on the case, the `prepareInstallation`, `prepareUpdate`, or `prepareUninstallation` method in the `PluginSetup` contract is called through the `PluginSetupProcessor` (and creates a unique setup ID).
 
-The preparation of a plugin setup proceeds as follows:
-
-1. A DAO builder selects a plugin with a specific version from the UI to install, uninstall, or update. Depending on the case, the `prepareInstallation`, `prepareUpdate`, or `prepareUninstallation` method in the `PluginSetup` contract associated with that version is called through the `PluginSetupProcessor` (and creates a unique setup ID).
-2. The `PluginSetup` contract deploys all the contracts and gathers addresses and other input arguments required for the plugin setup. This can include:
+2. The `PluginSetup` contract deploys all the contracts and gathers addresses and other input arguments required for the installation/uninstallation/upgrade instructions. This can include:
 
    - deployment of new contracts
    - initialization of new storage variables
    - deprecating/decomissioning outdated (helper) contracts
+   - governance settings or other attributes
    - ...
 
-   Because the addresses of all associated contracts are now known, a static permission list can be emitted, hashed, and stored on-chain
+   Because the addresses of all associated contracts are now known, a static permission list can be emitted, hashed, and stored on-chain.
 
-3. The list containing the required permissions is then proposed as an `Action[]` array for processing in a proposal through a governance plugin of the installing DAO.
+3. Once the Plugin has been prepared for installation, this encoded action is added to the `Action[]` array to be executed when a proposal passes. For a plugin to be installed, it needs to be approved by the governance mechanism of the organization.
 
 :::info
-The governance plugin can be a simple majority vote, an optimistic process or an admin governance plugin that does not involve a waiting period. It can be any governance mechanism existing within the DAO.
+The governance plugin can be a simple majority vote, an optimistic process or an admin governance plugin that does not involve a waiting period. It can be any governance mechanism existing within the DAO which has access to the DAO's `execute` permission.
 :::
 
-This gives the DAO time to see and check which permissions the `PluginSetup` contract request before processing them.
+This gives the DAO members the opportunity to check which permissions the `PluginSetup` contract request before granting/revoking them.
+
 Plugin setup proposals must be carefully examined as they can be a potential security risk if the `PluginSetup` contract comes from an untrusted source. To learn more visit the [Security](./01-security-risk-mitigation.md) section.
 
 <!-- TODO: add a costs sections
@@ -60,13 +63,16 @@ Plugin setup proposals must be carefully examined as they can be a potential sec
 Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.
 -->
 
-### Setup Application
+### Applying the action
 
-After this initial transaction, all contracts and addresses related to the plugin as well as their permissions are known and the DAO can decide if the proposal should be accepted or denied.
-Once the proposal has passed, the actions specified in the `Action[]` array get executed and the prepared plugin setup is processed as follows:
+After this initial preparation transaction, all contracts and addresses related to the plugin, as well as their permissions, are known and the DAO can decide if the proposal should be accepted or denied.
 
-1. The DAO temporarily grants the `ROOT_PERMISSION_ID` permission to the `PluginSetupProcessor`. This is needed so that the processor can modify the DAO's permissions settings to setup the plugin.
-2. The next `Action` calls the `processInstallation`, `processUpdate`, or `processUninstallation` method in the `PluginSetupProcessor` depending on the setup process and with the permission list as an argument. The permission hash is compared with the stored hash to make sure that the permission didn’t change.
+Once the proposal has passed, the actions specified in the `Action[]` array get executed and the prepared `PluginSetup` is used to install the plugin into the DAO.
+
+This is processed as follows:
+
+1. The DAO temporarily grants the `ROOT_PERMISSION_ID` permission to the `PluginSetupProcessor`. This is needed so that the processor can modify the DAO's permissions settings to set up the plugin.
+2. This `Action` calls the `processInstallation`, `processUpdate`, or `processUninstallation` method in the `PluginSetupProcessor`, containing the permissions list as argument. The permission hash is compared with the stored hash to make sure that the permission didn’t change.
    In addition to the above, the update process also upgrades the logic contract to which the proxy points too.
 3. If the hash is valid, the list is processed and `PluginSetupProcessor` conducts the requested sequence of `grant`, `grantWithCondition` and `revoke` calls on the owning DAO.
    Finally, the `PluginSetupProcessor` asks the DAO to revoke the `ROOT_PERMISSION_ID` permission from itself.
@@ -83,8 +89,8 @@ In the next sections, you will learn about how plugins are curated on Aragon's r
 **b.** ![Schematic depiction of the plugin update process.](plugin-update.drawio.svg)
 **c.** ![Schematic depiction of the plugin uninstallation process.](plugin-uninstallation.drawio.svg)
 
-<p class="caption"> 
-   Simplified overview of the two-transaction plugin <b>a.</b> installation, <b>b.</b> update, and <b>c.</b> uninstallation process with the involved contracts as rounded rectangles, interactions between them as arrows, and relations as dashed lines. The first and second transaction are distinguished by numbering as well as solid and dotted lines, respectively. 
+<p class="caption">
+   Simplified overview of the two-transaction plugin <b>a.</b> installation, <b>b.</b> update, and <b>c.</b> uninstallation process with the involved contracts as rounded rectangles, interactions between them as arrows, and relations as dashed lines. The first and second transaction are distinguished by numbering as well as solid and dotted lines, respectively.
 </p>
 
 </div>

@@ -1,8 +1,8 @@
 ---
-title: How to initialize Non-Upgradeable Plugins
+title: Initializing Non-Upgradeable Plugins
 ---
 
-## Initializing Non-Upgradeable Plugins
+## How to Initialize Non-Upgradeable Plugins
 
 Every plugin should receive and store the address of the DAO it is associated with upon initialization. This is how the plugin will be able to interact with the DAO that has installed it.
 

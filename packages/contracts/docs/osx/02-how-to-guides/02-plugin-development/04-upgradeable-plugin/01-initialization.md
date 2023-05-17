@@ -1,8 +1,8 @@
 ---
-title: How to intialize an Upgradeable Plugin
+title: Intializing an Upgradeable Plugin
 ---
 
-## Initializing Upgradeable Plugins
+## How to Initialize Upgradeable Plugins
 
 To deploy your implementation contract via the [UUPS pattern (ERC-1822)](https://eips.ethereum.org/EIPS/eip-1822), you inherit from the `PluginUUPSUpgradeable` contract.
 

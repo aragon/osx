@@ -1,5 +1,5 @@
 ---
-title: Plugin Management
+title: Managing Plugin
 ---
 
 ## Managing Plugins

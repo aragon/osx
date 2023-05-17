@@ -1,8 +1,8 @@
 ---
-title: How to add a new version to your plugin
+title: Adding a new version of your plugin
 ---
 
-## How to add a new version to your plugin
+## How to add a new version of your plugin
 
 The Aragon OSx protocol has an on-chain versioning system built-in, which distinguishes between releases and builds.
 

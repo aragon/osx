@@ -1,8 +1,8 @@
 ---
-title: How to manage the plugins installed in your DAO
+title: Manage the plugins installed in your DAO
 ---
 
-## Managing the Plugins within your DAO
+## How to manage the Plugins within your DAO
 
 <!-- TODO This page needs improvements -->
 
@@ -10,7 +10,7 @@ You can install, uninstall or update any plugin into your DAO. If you want to di
 
 Before diving deeper into this guide, make sure that you understand [permissions](../../../01-how-it-works/01-core/02-permissions/index.md) and know about the [DAO executor](../../../01-how-it-works/01-core/01-dao/index.md).
 
-#### How to Create a DAO with Plugins
+#### How to create a DAO with Plugins
 
 When you create your DAO, you must **install at least one functioning governance plugin** (meaning one plugin having the `EXECUTION_PERMISSION`) so your have a mechanism of executing actions on behalf of your DAO.
 This is crucial because otherwise nobody can operate the DAO and it would become incapacitated right after it was created. You would have spent gas for nothing.
@@ -23,7 +23,7 @@ Although the easiest (and recommended) way to create your DAO is through the [Ar
 
 <!-- TODO: Let's add a code example here on how the call to this function would look -->
 
-#### How to Change a DAO's Governance Setup after a DAO has been created
+#### How to change a DAO's Governance Setup after a DAO has been created
 
 After a DAO is created with at least one plugin installed with `EXECUTE_PERMISSION` on the DAO, it's likely you may want to change change your governance setup later on by [installing, updating, or uninstalling plugins](../../../01-how-it-works/02-framework/02-plugin-management/02-plugin-setup/index.md).
 
@@ -36,7 +36,7 @@ so that they cannot create proposals and execute actions on the DAO anymore. Acc
 
 <!-- Make a separate section about the DAO executor -->
 
-### How to Maintain Execution Permission On The DAO
+### How to maintain Execution Permission on the DAO
 
 A very important thing to consider when operating your DAO is to make sure that you do not lock it - meaning, you allow it into a state where the DAO cannot execute actions anymore.
 

@@ -1,10 +1,12 @@
 ---
-title: How to build an Upgradeable Plugin
+title: Building an Upgradeable Plugin
 ---
 
-## How to build an Upgradeable Plugin
+## How to build an Upgradeable Plugin implementation contract
 
 In this guide, we'll build a `SimpleStorage` Upgradeable plugin which all it does is storing a number.
+
+The Plugin contract is the one containing all the logic we'd like to implement on the DAO.
 
 ### 1. Set up the initialize function
 

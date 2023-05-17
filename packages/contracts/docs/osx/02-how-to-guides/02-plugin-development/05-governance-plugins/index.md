@@ -1,8 +1,8 @@
 ---
-title: How to create Governance Plugins
+title: Building Governance Plugins
 ---
 
-## Governance Plugin
+## How to Build a Governance Plugin
 
 One of the most common use cases for plugins are governance plugins. Governance plugins are plugins DAOs install to help them make decisions.
 

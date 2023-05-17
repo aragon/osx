@@ -1,5 +1,5 @@
 ---
-title: How to choose the best plugin type
+title: Choosing the Plugin Type
 ---
 
 ## Choosing the Base Contract for Your Plugin

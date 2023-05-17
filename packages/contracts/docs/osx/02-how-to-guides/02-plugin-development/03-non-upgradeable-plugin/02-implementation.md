@@ -1,8 +1,8 @@
 ---
-title: How to build a Non-Upgradeable Plugin contract
+title: Building a Non-Upgradeable Plugin contract
 ---
 
-## Writing the Implementation Logic for your Plugin
+## How to Build a Non-Upgradeable Plugin
 
 Once we've initialized our plugin (take a look at our guide on [how to initialize Non-Upgradeable Plugins here](./01-initialization.md)), we can start using the Non-Upgradeable Base Template to perform actions on the DAO.
 

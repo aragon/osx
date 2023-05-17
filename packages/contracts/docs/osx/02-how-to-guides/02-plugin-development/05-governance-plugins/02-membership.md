@@ -8,10 +8,9 @@ title: Membership
 This page is a stub and work in progress
 :::
 
-- introduce members to the DAO upon installation through [the `IMembership` interface](./02-membership.md)
+Introduce members to the DAO upon installation through [the `IMembership` interface](./02-membership.md).
 
-<details>
-<summary><code>interface IMembership</code></summary>
+### Interface IMembership
 
 ```solidity title=
 /// @notice An interface to be implemented by DAO plugins that define membership.
@@ -35,8 +34,6 @@ interface IMembership {
   function isMember(address _account) external view returns (bool);
 }
 ```
-
-</details>
 
 ### Introducing Members directly
 

@@ -1,5 +1,5 @@
 ---
-title: Welcome to our How-to Guides
+title: How-to Guides
 ---
 
 ## Welcome to our How To Guides on Using the Aragon OSx Protocol!
@@ -10,7 +10,7 @@ The organizations that survive the longest are the ones that easily adapt to cha
 
 This is where Plugins come in!
 
-### DAO Plugins!
+### DAO Plugins
 
 DAO Plugins are smart contracts extending the functionality for DAOs
 

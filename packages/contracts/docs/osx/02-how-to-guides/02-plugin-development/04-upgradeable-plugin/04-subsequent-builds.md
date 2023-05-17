@@ -1,8 +1,8 @@
 ---
-title: How to create a subsequent build implementation to an Upgradeable Plugin
+title: Creating Subsequent Builds for Upgradeable Plugins
 ---
 
-## How to create a subsequent build implementation to an Upgradeable Plugin
+## How to create a subsequent build to an Upgradeable Plugin
 
 A build is a new implementation of your Upgradeable Plugin. Upgradeable contracts offer advantages because you can cheaply change or fix the logic of your contract without losing the storage of your contract.
 

@@ -1,8 +1,6 @@
 ---
-title: How to build Non-Upgradeable Plugins
+title: What are Non-Upgradeable Plugins?
 ---
-
-## How to build Non-Upgradeable Plugin
 
 In this section, we guide you through the implementation of building a Non-Upgradeable Plugin.
 

@@ -1,5 +1,5 @@
 ---
-title: How to upgrade an Upgradeable Plugin
+title: Upgrading an Upgradeable Plugin
 ---
 
 ## How to upgrade an Upgradeable Plugin

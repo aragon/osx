@@ -1,10 +1,12 @@
 ---
-title: How to build a Plugin Setup contract for a Non-Upgradeable Plugin
+title: Building a Plugin Setup contract for a Non-Upgradeable Plugin
 ---
 
-## Developing the Setup Contract for Non-upgradeable Contracts
+## What is the Plugin Setup contract?
 
 The Plugin Setup contract is the contract defining the instructions for installing, uninstalling, or upgrading plugins into DAOs. This contract prepares the permission granting or revoking that needs to happen in order for plugins to be able to perform actions on behalf of the DAO.
+
+You need it for the plugin to be installed intto the DAO.
 
 ### 1. Finish the Plugin contract
 
