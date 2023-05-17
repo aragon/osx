@@ -789,6 +789,8 @@ describe('TokenVoting', function () {
         votingSettings,
         governanceErc20Mock.address
       );
+
+      // Create a proposal with zero as an input for `_startDate` and `_endDate`
       const startDate = 0; // now
       const endDate = 0; // startDate + minDuration
 
@@ -809,7 +811,7 @@ describe('TokenVoting', function () {
       const expectedStartDate = currentTime;
       const expectedEndDate = expectedStartDate + votingSettings.minDuration;
 
-      //  heck the state
+      // Check the state
       const proposal = await voting.getProposal(id);
       expect(proposal.parameters.startDate).to.eq(expectedStartDate);
       expect(proposal.parameters.endDate).to.eq(expectedEndDate);

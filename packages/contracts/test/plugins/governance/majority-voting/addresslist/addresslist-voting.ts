@@ -482,6 +482,8 @@ describe('AddresslistVoting', function () {
       await voting.initialize(dao.address, votingSettings, [
         signers[0].address,
       ]);
+
+      // Create a proposal with zero as an input for `_startDate` and `_endDate`
       const startDate = 0; // now
       const endDate = 0; // startDate + minDuration
 
