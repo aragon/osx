@@ -5,8 +5,7 @@ import {
   clearStore,
   dataSourceMock,
   test,
-  describe,
-  logStore
+  describe
 } from 'matchstick-as';
 import {
   ADDRESS_ONE,
@@ -251,8 +250,8 @@ describe('Governance ERC20', () => {
         memberAddress,
         pluginAddress
       );
-
-      let event = member.createEvent_DelegateVotesChanged();
+      member.votingPower = BigInt.fromString('100');
+      let event = member.createEvent_DelegateVotesChanged('100', '0');
 
       handleDelegateVotesChanged(event);
 
@@ -277,6 +276,50 @@ describe('Governance ERC20', () => {
       // expected changes
       member.votingPower = BigInt.fromString(newBalance);
       member.assertEntity();
+      assert.entityCount('TokenVotingMember', 1);
+    });
+
+    test('it should delete a member without voting power or balance', () => {
+      let memberOneAddress = ADDRESS_ONE;
+      let memberTwoAddress = ADDRESS_TWO;
+      let pluginAddress = ADDRESS_SIX;
+      let memberOne = new ExtendedTokenVotingMember().withDefaultValues(
+        memberOneAddress,
+        pluginAddress
+      );
+      let memberTwo = new ExtendedTokenVotingMember().withDefaultValues(
+        memberTwoAddress,
+        pluginAddress
+      );
+      /* member one has 100s token delegated to member two*/
+      memberOne.balance = BigInt.fromString('100');
+      memberOne.votingPower = BigInt.fromString('0');
+      /* member two balance is 0 but has 100 voting power from the delegation of member one */
+      memberTwo.balance = BigInt.fromString('0');
+      memberTwo.votingPower = BigInt.fromString('100');
+      /* member three has 100 tokens and none delegated */
+
+      memberOne.buildOrUpdate();
+      memberTwo.buildOrUpdate();
+
+      assert.entityCount('TokenVotingMember', 2);
+
+      // member one undelegates from member two
+      let eventOne = memberOne.createEvent_DelegateVotesChanged('100');
+      let eventTwo = memberTwo.createEvent_DelegateVotesChanged('0');
+
+      handleDelegateVotesChanged(eventOne);
+      handleDelegateVotesChanged(eventTwo);
+
+      // assert
+      // expected changes
+      memberOne.votingPower = BigInt.fromString('100');
+      memberOne.assertEntity();
+      // member two should be deleted because it has no balance or voting power
+      assert.notInStore(
+        'TokenVotingMember',
+        memberTwo.id
+      );
       assert.entityCount('TokenVotingMember', 1);
     });
   });
