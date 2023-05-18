@@ -40,7 +40,7 @@ const DUMMY_METADATA = ethers.utils.hexlify(
 const FORWARDER_1 = `0x${'1'.repeat(40)}`;
 const FORWARDER_2 = `0x${'2'.repeat(40)}`;
 
-describe.only('DAO Upgrade', function () {
+describe('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
 
@@ -51,178 +51,6 @@ describe.only('DAO Upgrade', function () {
 
     // Deploy the v1.3.0 implementation
     daoCurrentImplementaion = await DAO_Current.deploy();
-  });
-
-  context(`Protocol Version`, function () {
-    beforeEach(async function () {
-      // prepare v1.0.0
-      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_V1_0_0);
-      await daoV100Proxy.initialize(
-        DUMMY_METADATA,
-        signers[0].address,
-        ethers.constants.AddressZero,
-        daoExampleURI
-      );
-
-      // Grant the upgrade permission
-      await daoV100Proxy.grant(
-        daoV100Proxy.address,
-        signers[0].address,
-        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
-      );
-
-      // prepare v1.2.0
-      daoV120Proxy = await deployWithProxy(DAO_V1_2_0);
-      await daoV120Proxy.initialize(
-        DUMMY_METADATA,
-        signers[0].address,
-        ethers.constants.AddressZero,
-        daoExampleURI
-      );
-
-      // Grant the upgrade permission
-      await daoV120Proxy.grant(
-        daoV120Proxy.address,
-        signers[0].address,
-        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
-      );
-    });
-
-    it('fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards', async () => {
-      // deploy the different versions
-      const daoCurrentProxy = await deployWithProxy<DAO>(DAO_Current);
-      await daoCurrentProxy.initialize(
-        DUMMY_METADATA,
-        signers[0].address,
-        ethers.constants.AddressZero,
-        daoExampleURI
-      );
-
-      const protocolVersionSelector = new ethers.utils.Interface(
-        daoCurrentProxy.interface.fragments
-      ).getSighash('protocolVersion');
-
-      // for DAO prior to v1.3.0
-      const daoV100 = ProtocolVersion__factory.connect(
-        daoV100Proxy.address,
-        signers[0]
-      );
-
-      await expect(daoV100.protocolVersion())
-        .to.be.revertedWithCustomError(daoV100Proxy, 'UnkownCallback')
-        .withArgs(protocolVersionSelector, '0x00000000');
-
-      const daoV120 = ProtocolVersion__factory.connect(
-        daoV120Proxy.address,
-        signers[0]
-      );
-
-      await expect(daoV120.protocolVersion())
-        .to.be.revertedWithCustomError(daoV120Proxy, 'UnkownCallback')
-        .withArgs(protocolVersionSelector, '0x00000000');
-
-      // for DAO v1.3.0 onward
-      const daoV130 = ProtocolVersion__factory.connect(
-        daoCurrentProxy.address,
-        signers[0]
-      );
-
-      await expect(daoV130.protocolVersion()).to.not.be.reverted;
-    });
-
-    context('v1.0.0 to v1.3.0', function () {
-      it('supports new protocol version interface after upgrade', async () => {
-        // check that the old version do not support protocol version interface
-        const protocolVersionInterface =
-          ProtocolVersion__factory.createInterface();
-
-        expect(
-          await daoV100Proxy.supportsInterface(
-            getInterfaceID(protocolVersionInterface)
-          )
-        ).to.be.eq(false);
-
-        // Upgrade and call `initializeFrom`.
-        await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
-            EMPTY_DATA,
-          ])
-        );
-
-        // confirm interface is registered.
-        expect(
-          await daoV100Proxy.supportsInterface(
-            getInterfaceID(protocolVersionInterface)
-          )
-        ).to.be.eq(true);
-      });
-
-      it('returns the correct protocol version after upgrade', async () => {
-        // Upgrade and call `initializeFrom`.
-        await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
-            EMPTY_DATA,
-          ])
-        );
-
-        // confirm interface is registered.
-        const daoV130 = new DAO__factory(signers[0]).attach(
-          daoV100Proxy.address
-        );
-        expect(await daoV130.protocolVersion()).to.be.deep.eq([1, 3, 0]);
-      });
-    });
-
-    context('v1.2.0 to v1.3.0', function () {
-      it('supports new protocol version interface after upgrade', async () => {
-        // check that the old version do not support protocol version interface
-        const protocolVersionInterface =
-          ProtocolVersion__factory.createInterface();
-
-        expect(
-          await daoV120Proxy.supportsInterface(
-            getInterfaceID(protocolVersionInterface)
-          )
-        ).to.be.eq(false);
-
-        // Upgrade and call `initializeFrom`.
-        await daoV120Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 2, 0],
-            EMPTY_DATA,
-          ])
-        );
-
-        // confirm interface is registered.
-        expect(
-          await daoV120Proxy.supportsInterface(
-            getInterfaceID(protocolVersionInterface)
-          )
-        ).to.be.eq(true);
-      });
-
-      it('returns the correct protocol version after upgrade', async () => {
-        // Upgrade and call `initializeFrom`.
-        await daoV120Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 2, 0],
-            EMPTY_DATA,
-          ])
-        );
-
-        // confirm interface is registered.
-        const daoV130 = new DAO__factory(signers[0]).attach(
-          daoV120Proxy.address
-        );
-        expect(await daoV130.protocolVersion()).to.be.deep.eq([1, 3, 0]);
-      });
-    });
   });
 
   context(`Re-entrancy`, function () {
@@ -635,6 +463,172 @@ describe.only('DAO Upgrade', function () {
 
         // Check that the storage variable is now forwarder 2.
         expect(await daoV120Proxy.getTrustedForwarder()).to.equal(FORWARDER_2);
+      });
+    });
+  });
+
+  context(`Protocol Version`, function () {
+    beforeEach(async function () {
+      // prepare v1.0.0
+      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_V1_0_0);
+      await daoV100Proxy.initialize(
+        DUMMY_METADATA,
+        signers[0].address,
+        ethers.constants.AddressZero,
+        daoExampleURI
+      );
+
+      // Grant the upgrade permission
+      await daoV100Proxy.grant(
+        daoV100Proxy.address,
+        signers[0].address,
+        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+      );
+
+      // prepare v1.2.0
+      daoV120Proxy = await deployWithProxy(DAO_V1_2_0);
+      await daoV120Proxy.initialize(
+        DUMMY_METADATA,
+        signers[0].address,
+        ethers.constants.AddressZero,
+        daoExampleURI
+      );
+
+      // Grant the upgrade permission
+      await daoV120Proxy.grant(
+        daoV120Proxy.address,
+        signers[0].address,
+        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+      );
+    });
+
+    it('fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards', async () => {
+      // deploy the different versions
+      const daoCurrentProxy = await deployWithProxy<DAO>(DAO_Current);
+      await daoCurrentProxy.initialize(
+        DUMMY_METADATA,
+        signers[0].address,
+        ethers.constants.AddressZero,
+        daoExampleURI
+      );
+
+      const protocolVersionSelector = new ethers.utils.Interface(
+        daoCurrentProxy.interface.fragments
+      ).getSighash('protocolVersion');
+
+      // for DAO prior to v1.3.0
+      const daoV100 = ProtocolVersion__factory.connect(
+        daoV100Proxy.address,
+        signers[0]
+      );
+
+      await expect(daoV100.protocolVersion())
+        .to.be.revertedWithCustomError(daoV100Proxy, 'UnkownCallback')
+        .withArgs(protocolVersionSelector, '0x00000000');
+
+      const daoV120 = ProtocolVersion__factory.connect(
+        daoV120Proxy.address,
+        signers[0]
+      );
+
+      await expect(daoV120.protocolVersion())
+        .to.be.revertedWithCustomError(daoV120Proxy, 'UnkownCallback')
+        .withArgs(protocolVersionSelector, '0x00000000');
+
+      // for DAO v1.3.0 onward
+      const daoV130 = ProtocolVersion__factory.connect(
+        daoCurrentProxy.address,
+        signers[0]
+      );
+
+      await expect(daoV130.protocolVersion()).to.not.be.reverted;
+    });
+
+    context('v1.0.0 to v1.3.0', function () {
+      it('supports new protocol version interface after upgrade', async () => {
+        // check that the old version do not support protocol version interface
+        const protocolVersionInterface =
+          ProtocolVersion__factory.createInterface();
+
+        expect(
+          await daoV100Proxy.supportsInterface(
+            getInterfaceID(protocolVersionInterface)
+          )
+        ).to.be.eq(false);
+
+        // Upgrade and call `initializeFrom`.
+        await daoV100Proxy.upgradeToAndCall(
+          daoCurrentImplementaion.address,
+          DAO_Current.interface.encodeFunctionData('initializeFrom', [
+            [1, 0, 0],
+            EMPTY_DATA,
+          ])
+        );
+
+        // check the interface is registered.
+        expect(
+          await daoV100Proxy.supportsInterface(
+            getInterfaceID(protocolVersionInterface)
+          )
+        ).to.be.eq(true);
+      });
+
+      it('returns the correct protocol version after upgrade', async () => {
+        // Upgrade and call `initializeFrom`.
+        await daoV100Proxy.upgradeToAndCall(
+          daoCurrentImplementaion.address,
+          DAO_Current.interface.encodeFunctionData('initializeFrom', [
+            [1, 0, 0],
+            EMPTY_DATA,
+          ])
+        );
+
+        const daoV130 = DAO_Current.attach(daoV100Proxy.address);
+        expect(await daoV130.protocolVersion()).to.be.deep.eq([1, 3, 0]);
+      });
+    });
+
+    context('v1.2.0 to v1.3.0', function () {
+      it('supports new protocol version interface after upgrade', async () => {
+        // check that the old version do not support protocol version interface
+        const protocolVersionInterface =
+          ProtocolVersion__factory.createInterface();
+
+        expect(
+          await daoV120Proxy.supportsInterface(
+            getInterfaceID(protocolVersionInterface)
+          )
+        ).to.be.eq(false);
+
+        // Upgrade and call `initializeFrom`.
+        await daoV120Proxy.upgradeToAndCall(
+          daoCurrentImplementaion.address,
+          DAO_Current.interface.encodeFunctionData('initializeFrom', [
+            [1, 2, 0],
+            EMPTY_DATA,
+          ])
+        );
+
+        // check the interface is registered.
+        expect(
+          await daoV120Proxy.supportsInterface(
+            getInterfaceID(protocolVersionInterface)
+          )
+        ).to.be.eq(true);
+      });
+
+      it('returns the correct protocol version after upgrade', async () => {
+        // Upgrade and call `initializeFrom`.
+        await daoV120Proxy.upgradeToAndCall(
+          daoCurrentImplementaion.address,
+          DAO_Current.interface.encodeFunctionData('initializeFrom', [
+            [1, 2, 0],
+            EMPTY_DATA,
+          ])
+        );
+
+        const daoV130 = DAO_Current.attach(daoV120Proxy.address);
+        expect(await daoV130.protocolVersion()).to.be.deep.eq([1, 3, 0]);
       });
     });
   });
