@@ -62,14 +62,30 @@ contract DAO is
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
+    /// @notice The first out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was not entered.
+    uint256 private constant _NOT_ENTERED = 1;
+
+    /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
+    uint256 private constant _ENTERED = 2;
+
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+    /// @dev Added in v1.0.0.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
+    /// @dev Added in v1.0.0.
     address private trustedForwarder;
 
     /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO URI.
+    /// @dev Added in v1.0.0.
     string private _daoURI;
+
+    /// @notice The state variable for the reentrancy guard of the `execute` function.
+    /// @dev Added in v1.3.0. The variable can be of value `_NOT_ENTERED = 1` or `_ENTERED = 2` in usage and is initialized with `_NOT_ENTERED`.
+    uint256 private _reentrancyStatus;
+
+    /// @notice Thrown if a call is reentrant.
+    error ReentrantCall();
 
     /// @notice Thrown if the action array length is larger than `MAX_ACTIONS`.
     error TooManyActions();
@@ -89,9 +105,25 @@ contract DAO is
     /// @param actual The actual native token amount deposited.
     error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
 
+    /// @notice Thrown if an upgrade is not supported from a specific protocol version .
+    error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
+
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
     event NewURI(string daoURI);
+
+    /// @notice A modifier to protect a function from calling itself, directly or indirectly (reentrancy).
+    /// @dev Currently, this modifier is only applied to the `execute()` function. If this is used multiple times, private `_beforeNonReentrant()` and `_afterNonReentrant()` functions should be created to prevent code duplication.
+    modifier nonReentrant() {
+        if (_reentrancyStatus == _ENTERED) {
+            revert ReentrantCall();
+        }
+        _reentrancyStatus = _ENTERED;
+
+        _;
+
+        _reentrancyStatus = _NOT_ENTERED;
+    }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
     constructor() {
@@ -99,6 +131,7 @@ contract DAO is
     }
 
     /// @notice Initializes the DAO by
+    /// - setting the reentrancy status variable to `_NOT_ENTERED`
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - setting the trusted forwarder for meta transactions
     /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
@@ -112,7 +145,9 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external initializer {
+    ) external reinitializer(2) {
+        _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
+
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(ProtocolVersion).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
@@ -123,6 +158,26 @@ contract DAO is
         _setTrustedForwarder(_trustedForwarder);
         _setDaoURI(daoURI_);
         __PermissionManager_init(_initialOwner);
+    }
+
+    /// @notice Initializes the DAO after an upgrade from a previous protocol version.
+    /// @param _previousProtocolVersion The semantic protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
+    /// @param _initData The initialization data to be passed to via `upgradeToAndCall` (see [ERC-1967](https://docs.openzeppelin.com/contracts/4.x/api/proxy#ERC1967Upgrade)).
+    function initializeFrom(
+        uint8[3] calldata _previousProtocolVersion,
+        bytes calldata _initData
+    ) external reinitializer(2) {
+        _initData; // Silences the unused function parameter warning.
+
+        // Check that the contract is not upgrading from a different major release.
+        if (_previousProtocolVersion[0] != 1) {
+            revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
+        }
+
+        // Initialize `_reentrancyStatus` that was added in v1.3.0.
+        if (_previousProtocolVersion[1] <= 2) {
+            _reentrancyStatus = _NOT_ENTERED;
+        }
     }
 
     /// @inheritdoc PermissionManager
@@ -179,9 +234,11 @@ contract DAO is
     )
         external
         override
+        nonReentrant
         auth(EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
+        // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
         }
@@ -359,5 +416,5 @@ contract DAO is
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[47] private __gap;
+    uint256[46] private __gap;
 }

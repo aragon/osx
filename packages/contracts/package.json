@@ -25,7 +25,8 @@
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "formatting:check": "prettier '**/*.{json,sol,ts,js,md}' -c",
-    "formatting:write": "prettier '**/*.{json,sol,ts,js,md}' --write"
+    "formatting:write": "prettier '**/*.{json,sol,ts,js,md}' --write",
+    "clean": "rm -rf artifacts cache deployments typechain"
   },
   "repository": {
     "type": "git",

@@ -140,6 +140,8 @@ templates:
           handler: handleStandardCallbackRegistered
         - event: SignatureValidatorSet(address)
           handler: handleSignatureValidatorSet
+        - event: NewURI(string)
+          handler: handleNewURI
   - name: DaoTemplateV1_2_0
     kind: ethereum/contract
     network: {{network}}
