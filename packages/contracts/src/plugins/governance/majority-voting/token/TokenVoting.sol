@@ -105,6 +105,8 @@ contract TokenVoting is IMembership, MajorityVotingBase {
             revert NoVotingPower();
         }
 
+        (_startDate, _endDate) = _validateProposalDates(_startDate, _endDate);
+
         proposalId = _createProposal({
             _creator: _msgSender(),
             _metadata: _metadata,
@@ -117,10 +119,8 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
-            _startDate,
-            _endDate
-        );
+        proposal_.parameters.startDate = _startDate;
+        proposal_.parameters.endDate = _endDate;
         proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
@@ -148,7 +148,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
     /// @inheritdoc IMembership
     function isMember(address _account) external view returns (bool) {
-        // A member must own or least one token or have at least one token delegated to her/him.
+        // A member must own at least one token or have at least one token delegated to her/him.
         return
             votingToken.getVotes(_account) > 0 ||
             IERC20Upgradeable(address(votingToken)).balanceOf(_account) > 0;
