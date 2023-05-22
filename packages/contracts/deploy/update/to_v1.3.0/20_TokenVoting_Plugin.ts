@@ -15,11 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   const TokenVotingSetup = new TokenVotingSetup__factory(deployer);
-
   const deployResult = await TokenVotingSetup.deploy();
-  console.log('HERE HERE', deployResult.address);
-
-  console.log(network.name);
 
   const tokenVotingReleaseCIDPath = await uploadToIPFS(
     JSON.stringify(tokenVotingReleaseMetadata),
