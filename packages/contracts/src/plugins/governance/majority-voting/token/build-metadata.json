@@ -41,7 +41,7 @@
           "internalType": "struct MajorityVotingBase.VotingSettings",
           "name": "votingSettings",
           "type": "tuple",
-          "description": "The majority voting settings that will be applied as parameters on proposal creation."
+          "description": "The voting settings that will be enforced when proposals are created."
         },
         {
           "components": [
