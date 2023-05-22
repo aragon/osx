@@ -1,21 +1,24 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {
-  PluginRepo__factory,
-  AddresslistVotingSetup__factory,
-} from '../../../typechain';
+import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
 
+import addresslistVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol/AddresslistVotingSetup.json';
 import addresslistVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import addresslistVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate AddresslistVoting Plugin');
-  const {ethers, network} = hre;
+  const {deployments, ethers, network} = hre;
+  const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const AddresslistVotingSetup = new AddresslistVotingSetup__factory(deployer);
-  const deployResult = await AddresslistVotingSetup.deploy();
+  const deployResult = await deploy('AddresslistVotingSetup', {
+    contract: addresslistVotingSetupArtifact,
+    from: deployer.address,
+    args: [],
+    log: true,
+  });
 
   const addresslistVotingReleaseCIDPath = await uploadToIPFS(
     JSON.stringify(addresslistVotingReleaseMetadata),

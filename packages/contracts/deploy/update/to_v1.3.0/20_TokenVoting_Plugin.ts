@@ -1,21 +1,24 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {
-  PluginRepo__factory,
-  TokenVotingSetup__factory,
-} from '../../../typechain';
+import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
 
+import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate TokenVoting Plugin');
-  const {ethers, network} = hre;
+  const {deployments, ethers, network} = hre;
+  const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const TokenVotingSetup = new TokenVotingSetup__factory(deployer);
-  const deployResult = await TokenVotingSetup.deploy();
+  const deployResult = await deploy('TokenVotingSetup', {
+    contract: tokenVotingSetupArtifact,
+    from: deployer.address,
+    args: [],
+    log: true,
+  });
 
   const tokenVotingReleaseCIDPath = await uploadToIPFS(
     JSON.stringify(tokenVotingReleaseMetadata),

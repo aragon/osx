@@ -1,18 +1,25 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {MultisigSetup__factory, PluginRepo__factory} from '../../../typechain';
+import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
+
+import multisigSetupArtifact from '../../../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
 
 import multisigReleaseMetadata from '../../../src/plugins/governance/multisig/release-metadata.json';
 import multisigBuildMetadata from '../../../src/plugins/governance/multisig/build-metadata.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate Multisig Plugin');
-  const {ethers, network} = hre;
+  const {deployments, ethers, network} = hre;
+  const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const MultisigSetup = new MultisigSetup__factory(deployer);
-  const deployResult = await MultisigSetup.deploy();
+  const deployResult = await deploy('MultisigSetup', {
+    contract: multisigSetupArtifact,
+    from: deployer.address,
+    args: [],
+    log: true,
+  });
 
   const multisigReleaseCIDPath = await uploadToIPFS(
     JSON.stringify(multisigReleaseMetadata),
