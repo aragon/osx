@@ -1,13 +1,12 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DAO__factory} from '../../../typechain';
+import {DAOFactory__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
 import {getContractAddress} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Updating DAOFactory');
-  const {deployments, ethers} = hre;
-  const {deploy} = deployments;
+  const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
   const managingDAOAddress = await getContractAddress('managingDAO', hre);
@@ -22,13 +21,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Using DAORegistry ${daoRegistryAddress}`);
   console.log(`Using PreviousDAOFactory ${previousDAOFactoryAddress}`);
 
-  const deployResult = await deploy('DAOFactory', {
-    from: deployer.address,
-    args: [daoRegistryAddress, pluginSetupProcessorAddress],
-    log: true,
-  });
+  const DAOFactory = new DAOFactory__factory(deployer);
+  const deployResult = await DAOFactory.deploy(
+    daoRegistryAddress,
+    pluginSetupProcessorAddress
+  );
 
-  const daoInterface = DAO__factory.createInterface();
+  const daoInterface = DAOFactory.interface;
   const calldata = daoInterface.encodeFunctionData(
     'applyMultiTargetPermissions',
     [
