@@ -1,6 +1,9 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {PluginRepo__factory} from '../../../typechain';
+import {
+  PluginRepo__factory,
+  TokenVotingSetup__factory,
+} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
 
 import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
@@ -8,15 +11,15 @@ import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-v
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate TokenVoting Plugin');
-  const {deployments, ethers, network} = hre;
-  const {deploy} = deployments;
+  const {ethers, network} = hre;
   const [deployer] = await ethers.getSigners();
 
-  const deployResult = await deploy('TokenVotingSetup', {
-    from: deployer.address,
-    args: [],
-    log: true,
-  });
+  const TokenVotingSetup = new TokenVotingSetup__factory(deployer);
+
+  const deployResult = await TokenVotingSetup.deploy();
+  console.log('HERE HERE', deployResult.address);
+
+  console.log(network.name);
 
   const tokenVotingReleaseCIDPath = await uploadToIPFS(
     JSON.stringify(tokenVotingReleaseMetadata),
@@ -83,4 +86,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['TokenVotingPlugin'];
+func.tags = ['Update', 'TokenVotingPlugin'];
