@@ -580,7 +580,9 @@ describe('DAOFactory: ', function () {
       ];
 
       let data = ethers.utils.defaultAbiCoder.encode(
-        adminMetadata.pluginSetupABI.prepareInstallation,
+        adminMetadata.pluginSetup.prepareInstallation.inputs.map(
+          arg => `${arg.type} ${arg.name}`
+        ),
         [ownerAddress]
       );
 
