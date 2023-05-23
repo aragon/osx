@@ -77,7 +77,14 @@ export async function getContractAddress(
   contractName: string,
   hre: HardhatRuntimeEnvironment
 ): Promise<string> {
-  const {deployments} = hre;
+  const {deployments, network} = hre;
+
+  let networkName = network.name;
+
+  if (hre.testForkingNetwork) {
+    networkName = hre.testForkingNetwork;
+  }
+
   try {
     const contract = await deployments.get(contractName);
     if (contract) {
@@ -87,7 +94,7 @@ export async function getContractAddress(
 
   const activeContracts = await getActiveContractsJSON();
   try {
-    return activeContracts[hre.network.name][contractName];
+    return activeContracts[networkName][contractName];
   } catch (e) {
     console.error(e);
     return '';

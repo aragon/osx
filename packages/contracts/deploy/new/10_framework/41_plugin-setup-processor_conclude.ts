@@ -11,4 +11,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['PluginSetupProcessor', 'Verify'];
+func.tags = ['PluginSetupProcessor', 'Verify'].concat('New');

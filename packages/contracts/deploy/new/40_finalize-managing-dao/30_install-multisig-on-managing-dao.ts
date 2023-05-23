@@ -142,4 +142,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = ['InstallMultisigOnManagingDAO'];
+func.tags = ['InstallMultisigOnManagingDAO'].concat('New');

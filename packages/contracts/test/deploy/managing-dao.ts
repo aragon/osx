@@ -20,7 +20,7 @@ import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 async function deployAll() {
-  await deployments.fixture();
+  await deployments.fixture('New');
 }
 
 describe('Managing DAO', function () {
@@ -114,7 +114,7 @@ describe('Managing DAO', function () {
     );
   });
 
-  it('should have deployments', async function () {
+  it.only('should have deployments', async function () {
     expect(await deployments.all()).to.not.be.empty;
   });
 

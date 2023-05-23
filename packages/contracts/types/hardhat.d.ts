@@ -13,5 +13,6 @@ declare module 'hardhat/types' {
       data: BytesLike;
       description: string; // Description to be included in proposal metadata
     }[];
+    testForkingNetwork: string;
   }
 }

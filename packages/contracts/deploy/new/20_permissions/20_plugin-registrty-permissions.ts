@@ -49,4 +49,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await managePermissions(managingDaoContract, grantPermissions);
 };
 export default func;
-func.tags = ['Plugin_Registry_Permissions'];
+func.tags = ['Plugin_Registry_Permissions'].concat('New');

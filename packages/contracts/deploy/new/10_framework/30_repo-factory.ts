@@ -21,4 +21,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PluginRepoFactory'];
+func.tags = ['PluginRepoFactory'].concat('New');

@@ -44,4 +44,4 @@ func.tags = [
   'ENSSubdomains',
   'ENSSubdomainRegistrars',
   'Verify',
-];
+].concat('New');

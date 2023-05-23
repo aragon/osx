@@ -201,4 +201,4 @@ func.tags = [
   'PluginRepoFactory',
   'PluginSetupProcessor',
   'DAOFactory',
-];
+].concat('New');

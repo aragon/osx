@@ -29,4 +29,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['MultisigSetup', 'Verify'];
+func.tags = ['MultisigSetup', 'Verify'].concat('New');
