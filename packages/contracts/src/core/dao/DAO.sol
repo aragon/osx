@@ -34,8 +34,7 @@ contract DAO is
     UUPSUpgradeable,
     ProtocolVersion,
     PermissionManager,
-    CallbackHandler,
-    ProtocolVersion
+    CallbackHandler
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
