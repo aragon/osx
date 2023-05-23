@@ -38,7 +38,7 @@ contract TokenVotingSetup is PluginSetup {
     /// @notice The token settings struct.
     /// @param addr The token address. If this is `address(0)`, a new `GovernanceERC20` token is deployed. If not, the existing token is wrapped as an `GovernanceWrappedERC20`.
     /// @param name The token name. This parameter is only relevant if the token address is `address(0)`.
-    /// @param name The token symbol. This parameter is only relevant if the token address is `address(0)`.
+    /// @param symbol The token symbol. This parameter is only relevant if the token address is `address(0)`.
     struct TokenSettings {
         address addr;
         string name;
