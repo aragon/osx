@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {DAO} from "../../core/dao/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
@@ -12,7 +13,6 @@ import {PluginSetupProcessor} from "../plugin/setup/PluginSetupProcessor.sol";
 import {hashHelpers, PluginSetupRef} from "../plugin/setup/PluginSetupProcessorHelpers.sol";
 import {IPluginSetup} from "../plugin/setup/IPluginSetup.sol";
 import {DAORegistry} from "./DAORegistry.sol";
-import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 
 /// @title DAOFactory
 /// @author Aragon Association - 2022-2023
