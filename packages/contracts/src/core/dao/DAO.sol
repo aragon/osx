@@ -13,6 +13,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
+import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
@@ -31,9 +32,9 @@ contract DAO is
     ERC165StorageUpgradeable,
     IDAO,
     UUPSUpgradeable,
+    ProtocolVersion,
     PermissionManager,
-    CallbackHandler,
-    ProtocolVersion
+    CallbackHandler
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
@@ -147,11 +148,11 @@ contract DAO is
         string calldata daoURI_
     ) external reinitializer(2) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
-        _registerInterface(type(ProtocolVersion).interfaceId); // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
+        _registerInterface(type(IProtocolVersion).interfaceId); // added in v1.3.0
         _registerTokenInterfaces();
 
         _setMetadata(_metadata);
@@ -178,7 +179,7 @@ contract DAO is
         // Register Interface `ProtocolVersion` that was added in v1.3.0.
         if (_previousProtocolVersion[1] <= 2) {
             _reentrancyStatus = _NOT_ENTERED;
-            _registerInterface(type(ProtocolVersion).interfaceId);
+            _registerInterface(type(IProtocolVersion).interfaceId);
         }
     }
 

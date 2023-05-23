@@ -4,9 +4,9 @@ pragma solidity ^0.8.8;
 
 /// @title IProtocolVersion
 /// @author Aragon Association - 2022-2023
-/// @notice An interface defining protocol version
+/// @notice An interface defining the semantic OSx protocol version.
 interface IProtocolVersion {
-    /// @notice Retrieves the protocol version.
-    /// @return _version Returns a uint8 array with three elements representing the protocol version.
+    /// @notice Returns the protocol version at which the current contract was built. Use it to check for future upgrades that might be applicable.
+    /// @return _version Returns the semantic OSx protocol version.
     function protocolVersion() external view returns (uint8[3] memory _version);
 }
