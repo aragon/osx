@@ -18,7 +18,7 @@ grant({
 });
 ```
 
-Beyond this fundamental ability, governance plugins usually interact with two interfaces:
+Beyond this fundamental ability, governance plugins usually implement two interfaces:
 
 - [The `IProposal` interface](./01-proposals.md) introducing the **notion of proposals** and how they are created and executed.
 - [The `IMembership` interface](./02-membership.md) introducing the **notion of membership** to the DAO.
