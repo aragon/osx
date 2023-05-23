@@ -4,7 +4,8 @@ pragma solidity 0.8.17;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
+import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {DAO} from "../../core/dao/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
