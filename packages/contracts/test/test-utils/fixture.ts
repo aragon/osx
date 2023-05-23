@@ -21,8 +21,13 @@ export async function initializeFork(
   hre.testForkingNetwork = selectedNetwork;
 }
 
-export async function initializeFixture(selectedUpdate: string) {
-  await deployments.fixture(UPDATE_INFOS[selectedUpdate].tags);
+export async function initializeFixture(tag: string | string[]) {
+  // await deployments.fixture(UPDATE_INFOS[selectedUpdate].tags);
+  const fixture = deployments.createFixture(async () => {
+    await deployments.fixture(tag); // ensure you start from a fresh deployments
+  });
+
+  await fixture();
 }
 
 export async function initForkAndFixture(
@@ -30,5 +35,5 @@ export async function initForkAndFixture(
   selectedUpdate: string
 ): Promise<void> {
   await initializeFork(selectedNetwork, selectedUpdate);
-  await initializeFixture(selectedUpdate);
+  await initializeFixture(UPDATE_INFOS[selectedUpdate].tags);
 }
