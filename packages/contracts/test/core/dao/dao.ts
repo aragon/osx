@@ -4,19 +4,19 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO,
-  TestERC1155,
   TestERC20,
   TestERC721,
-  IERC1271__factory,
+  TestERC1155,
   GasConsumer__factory,
   DAO__factory,
   ERC1271Mock__factory,
   TestERC20__factory,
-  TestERC1155__factory,
   TestERC721__factory,
-  IERC1155Receiver__factory,
+  TestERC1155__factory,
+  IERC165__factory,
   IERC721Receiver__factory,
-  IERC165Upgradeable__factory,
+  IERC1155Receiver__factory,
+  IERC1271__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -331,7 +331,7 @@ describe('DAO', function () {
     });
 
     it('supports the `IERC165` interface', async () => {
-      const iface = IERC165Upgradeable__factory.createInterface();
+      const iface = IERC165__factory.createInterface();
       expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
