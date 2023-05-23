@@ -298,7 +298,7 @@ describe('DAOFactory: ', function () {
       expect(await daoFactory.supportsInterface('0xffffffff')).to.be.false;
     });
 
-    it('supports the `IERC165Upgradeable` interface', async () => {
+    it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
       expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
         .true;
