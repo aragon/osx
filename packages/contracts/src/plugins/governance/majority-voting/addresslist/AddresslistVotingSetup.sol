@@ -46,7 +46,7 @@ contract AddresslistVotingSetup is PluginSetup {
             memory permissions = new PermissionLib.MultiTargetPermission[](4);
 
         // Set permissions to be granted.
-        // Grant the list of prmissions of the plugin to the DAO.
+        // Grant the list of permissions of the plugin to the DAO.
         permissions[0] = PermissionLib.MultiTargetPermission({
             operation: PermissionLib.Operation.Grant,
             where: plugin,

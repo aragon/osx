@@ -50,7 +50,7 @@ contract AdminSetup is PluginSetup {
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
-        // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
+        // Grant `ADMIN_EXECUTE_PERMISSION` of the plugin to the admin.
         permissions[0] = PermissionLib.MultiTargetPermission({
             operation: PermissionLib.Operation.Grant,
             where: plugin,
