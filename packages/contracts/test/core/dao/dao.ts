@@ -330,6 +330,12 @@ describe('DAO', function () {
     });
   });
 
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await dao.protocolVersion()).to.deep.equal([1, 3, 0]);
+    });
+  });
+
   describe('setTrustedForwarder:', async () => {
     it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(

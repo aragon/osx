@@ -305,6 +305,12 @@ describe('DAOFactory: ', function () {
     });
   });
 
+  context('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await daoFactory.protocolVersion()).to.deep.equal([1, 3, 0]);
+    });
+  });
+
   it('reverts if no plugin is provided', async () => {
     await expect(
       daoFactory.createDao(daoSettings, [])
