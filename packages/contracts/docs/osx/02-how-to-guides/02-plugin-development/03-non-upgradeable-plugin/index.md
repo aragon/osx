@@ -21,6 +21,7 @@ We will build a basic `GreeterPlugin` which returns "Hello world!".
 1. Make sure you have Node.js in your computer.
 
 For Mac:
+
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 nvm install 18
@@ -30,6 +31,7 @@ npm install npm --global
 ```
 
 Or for Linux:
+
 ```bash
 sudo apt update
 sudo apt install curl git
@@ -62,10 +64,12 @@ npm i @aragon/osx
 1. Create `GreeterPlugin` contract
 
 Plugins are composed of two key contracts:
+
 - The `Plugin` contract, containing the implementation logic for the Plugin,
 - The `PluginSetup` contract, containing the instructions needed to install or uninstall a Plugin into a DAO.
 
 In this case, we will create the `GreeterPlugin.sol` contract containing the main logic for our plugin - aka returning "Hello world!" when calling on the `greet()` function. Keep in mind, that because we're importing from the `Plugin` base template in this case, we are able to tap into:
+
 - the `auth(PERMISSION_ID)` modifier, which checks whether the account calling on that function has the permission specified in the `auth` parameters.
 - the `dao()` getter function, which returns the DAO instance for the plugin.
 
@@ -81,16 +85,16 @@ Then, inside of the file, add the functionality:
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.17;
 
-import {Plugin, IDAO} from "@aragon/osx/core/plugin/Plugin.sol";
+import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
 contract GreeterPlugin is Plugin {
   // Permissions are what connects everything together. Addresses who have been granted the GREET_PERMISSION will be able to call on functions with the modifier `auth(GREET_PERMISSION_ID)`. These will be granted in the PluginSetup.sol contract up next.
-  bytes32 public constant GREET_PERMISSION_ID = keccak256("GREET_PERMISSION");
+  bytes32 public constant GREET_PERMISSION_ID = keccak256('GREET_PERMISSION');
 
   constructor(IDAO _dao) Plugin(_dao) {}
 
   function greet() external view auth(GREET_PERMISSION_ID) returns (string memory) {
-    return "Hello, world!";
+    return 'Hello, world!';
   }
 }
 ```
@@ -118,14 +122,15 @@ contract GreeterPluginSetup is PluginSetup {
   ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
     plugin = address(new GreeterPlugin(IDAO(_dao)));
 
-    PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](1);
+    PermissionLib.MultiTargetPermission[]
+      memory permissions = new PermissionLib.MultiTargetPermission[](1);
 
     permissions[0] = PermissionLib.MultiTargetPermission({
       operation: PermissionLib.Operation.Grant,
       where: plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: keccak256("GREET_PERMISSION")
+      permissionId: keccak256('GREET_PERMISSION')
     });
 
     preparedSetupData.permissions = permissions;
@@ -142,7 +147,7 @@ contract GreeterPluginSetup is PluginSetup {
       where: _payload.plugin,
       who: _dao,
       condition: PermissionLib.NO_CONDITION,
-      permissionId: keccak256("GREET_PERMISSION")
+      permissionId: keccak256('GREET_PERMISSION')
     });
   }
 
@@ -202,41 +207,40 @@ Now that we know the local deployment works, we will want to deploy our pugin to
 1. Firstly, let's set up the `hardhat.config.js` with Goerli environment attributes (or whichever network you'd like to deploy your plugin to).
 
 ```tsx
-import "@nomicfoundation/hardhat-toolbox";
+import '@nomicfoundation/hardhat-toolbox';
 
 // To find your Alchemy key, go to https://dashboard.alchemy.com/. Infura or any other provider would work here as well.
-const goerliAlchemyKey = "add-your-own-alchemy-key";
+const goerliAlchemyKey = 'add-your-own-alchemy-key';
 // To find a private key, go to your wallet of choice and export a private key. Remember this must be kept secret at all times.
-const privateKeyGoerli = "add-your-account-private-key";
+const privateKeyGoerli = 'add-your-account-private-key';
 
 module.exports = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: 'hardhat',
   networks: {
-    hardhat: {
-    },
+    hardhat: {},
     goerli: {
       url: `https://eth-goerli.g.alchemy.com/v2/${goerliAlchemyKey}`,
-      accounts: [privateKeyGoerli]
-    }
+      accounts: [privateKeyGoerli],
+    },
   },
   solidity: {
-    version: "0.8.17",
+    version: '0.8.17',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
+    sources: './contracts',
+    tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
   },
   mocha: {
-    timeout: 40000
-  }
+    timeout: 40000,
+  },
 };
 ```
 
@@ -289,10 +293,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const pluginRepoFactoryAddr = '0x301868712b77744A3C0E5511609238399f0A2d4d';
 
-  const pluginRepoFactory = PluginRepoFactory__factory.connect(
-    pluginRepoFactoryAddr,
-    deployer
-  );
+  const pluginRepoFactory = PluginRepoFactory__factory.connect(pluginRepoFactoryAddr, deployer);
 
   const pluginName = 'greeter-plugin';
   const pluginSetupContractName = 'GreeterPluginSetup';
@@ -307,7 +308,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     '0x00'
   );
 
-  console.log(`You can find the transaction address which published the ${pluginName} Plugin here: ${tx}`);
+  console.log(
+    `You can find the transaction address which published the ${pluginName} Plugin here: ${tx}`
+  );
 };
 
 export default func;
@@ -324,7 +327,6 @@ npx hardhat run scripts/publish.ts
 Hope this tutorial is useful to get you started developing for Aragon! If you need any additional support or questions, feel free to hop into our [Discord](https://discord.gg/Wpk36QRdMN) and ask away.
 
 Excited to see what you build! 🔥
-
 
 Up next, check out our guides on:
 
