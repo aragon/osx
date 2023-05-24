@@ -37,6 +37,7 @@ import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 chai.use(smock.matchers);
 
@@ -327,6 +328,14 @@ describe('DAO', function () {
           )
         ).toNumber()
       ).to.equal(0);
+    });
+  });
+
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await dao.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
     });
   });
 
