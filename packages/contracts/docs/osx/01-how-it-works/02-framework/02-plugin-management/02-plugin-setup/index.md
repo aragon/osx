@@ -23,14 +23,14 @@ How this works:
 
 The `PluginSetup` process is **security critical** because the permissions it handles are granted to third-party contracts.
 
-Safety was our top priority in the design and we wanted to make sure that the DAO knows exactly which contracts receive which permissions before processing and making sure that the `PluginSetup` contracts developed by third parties don’t obtain elevated permissions (i.e., the `ROOT_PERMISSION_ID` permission) on the installing DAO during the setup process.
+Safety is our top priority in the design and we want to make sure that the DAO knows exactly which contracts receive which permissions before processing and making sure that the `PluginSetup` contracts developed by third parties don’t obtain elevated permissions (i.e., the `ROOT_PERMISSION_ID` permission) on the installing DAO during the setup process.
 
-This is why we split the `PluginSetup` development in two steps:
+This is why we see the installation process in two phases:
 
-1. **Preparation:** Defining and encoding the permissions needed to install, uninstall, or update a plugin
-2. **Application:** Using the encoded functionality to actually perform the action
+1. **Preparation:** Defining and encoding the permissions needed to install, uninstall, or update a plugin. This is the instructions we define within our `PluginSetup` contract, which deploys the plugin implementation contract and helpers, requests permissions to be applied, and stores the configuration of the prepared setup.
+2. **Application:** The granting or revoking of the plugin's requested permissions (based on the preparation step above). This is a priviledge action performed by Aragon's `PluginSetupProcessor` (you can understand it as the "installer"), so that the plugin becomes effectively installed or uninstalled. It gets executed upon proposal approval of a plugin's installation.
 
-The `PluginSetupProcessor` is the Aragon contract in charge of using the `prepareInstallation()` function from your plugin's `PluginSetup` contract and use it to prepare the installation and apply it.
+The `PluginSetupProcessor` is the Aragon contract in charge of using the `prepareInstallation()` function from your plugin's `PluginSetup` contract and use it to prepare the installation and (eventually) apply it once it has been approved by the DAO.
 
 ### Preparing Installation
 
@@ -48,7 +48,7 @@ The preparation of a `PluginSetup` contract proceeds as follows:
 
    Because the addresses of all associated contracts are now known, a static permission list can be emitted, hashed, and stored on-chain.
 
-3. Once the Plugin has been prepared for installation, this encoded action is added to the `Action[]` array to be executed when a proposal passes. For a plugin to be installed, it needs to be approved by the governance mechanism of the organization.
+3. Once the Plugin installation has been prepared, an encoded action to apply the setup is added to the `Action[]` array to be executed when a proposal passes. For a plugin to be installed, it needs to be approved by the governance mechanism (plugin) of the organization.
 
 :::info
 The governance plugin can be a simple majority vote, an optimistic process or an admin governance plugin that does not involve a waiting period. It can be any governance mechanism existing within the DAO which has access to the DAO's `execute` permission.
@@ -63,7 +63,7 @@ Plugin setup proposals must be carefully examined as they can be a potential sec
 Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.
 -->
 
-### Applying the action
+### Applying the installation
 
 After this initial preparation transaction, the addresses and permissions related to the plugin become apparent. The members of a governance plugin with permissions can decide if the installation proposal should be accepted or denied.
 
