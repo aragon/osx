@@ -55,6 +55,7 @@ import {
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -307,7 +308,9 @@ describe('DAOFactory: ', function () {
 
   context('Protocol version', async () => {
     it('returns the current protocol version', async () => {
-      expect(await daoFactory.protocolVersion()).to.deep.equal([1, 3, 0]);
+      expect(await daoFactory.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
     });
   });
 
