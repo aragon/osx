@@ -195,10 +195,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = [
+  'New',
   'ENSSubdomainRegistrar',
   'DAORegistry',
   'PluginRepoRegistry',
   'PluginRepoFactory',
   'PluginSetupProcessor',
   'DAOFactory',
-].concat('New');
+];

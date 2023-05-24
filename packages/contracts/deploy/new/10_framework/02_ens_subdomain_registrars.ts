@@ -120,4 +120,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await tx.wait();
 };
 export default func;
-func.tags = ['ENSSubdomainRegistrars'].concat('New');
+func.tags = ['New', 'ENSSubdomainRegistrars'];

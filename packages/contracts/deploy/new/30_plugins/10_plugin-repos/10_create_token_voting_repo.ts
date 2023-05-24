@@ -51,4 +51,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['CreateTokenVotingRepo'].concat('New');
+func.tags = ['New', 'CreateTokenVotingRepo'];

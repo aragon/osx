@@ -74,4 +74,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await setMetadataTX.wait();
 };
 export default func;
-func.tags = ['RegisterManagingDAO'].concat('New');
+func.tags = ['New', 'RegisterManagingDAO'];

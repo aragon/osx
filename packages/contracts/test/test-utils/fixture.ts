@@ -24,7 +24,7 @@ export async function initializeFork(
   });
 }
 
-export async function initializeFixture(tag: string | string[]) {
+export async function initializeDeploymentFixture(tag: string | string[]) {
   const fixture = deployments.createFixture(async () => {
     await deployments.fixture(tag); // ensure you start from a fresh deployments
   });
@@ -47,5 +47,5 @@ export async function initForkAndFixture(
   };
 
   await initializeFork(forkNetwork, UPDATE_INFOS[osxVersion].forkBlockNumber);
-  await initializeFixture(UPDATE_INFOS[osxVersion].tags);
+  await initializeDeploymentFixture(UPDATE_INFOS[osxVersion].tags);
 }

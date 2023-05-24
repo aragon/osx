@@ -92,7 +92,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = [
+  'New',
   'ENS_Permissions',
   'DAO_Registry_Permissions',
   'Plugin_Registry_Permissions',
-].concat('New');
+];

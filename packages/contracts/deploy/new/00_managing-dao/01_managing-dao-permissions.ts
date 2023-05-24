@@ -31,4 +31,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ]);
 };
 export default func;
-func.tags = ['ManagingDaoPermissions'].concat('New');
+func.tags = ['New', 'ManagingDaoPermissions'];
