@@ -12,7 +12,7 @@ import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
-import {AragonPluginRepos, EHRE} from './utils/types';
+import {AragonPluginRepos, TestingFork} from './utils/types';
 
 dotenv.config();
 
@@ -36,11 +36,15 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
     admin: '',
     multisig: '',
   };
+  const testingFork: TestingFork = {
+    network: '',
+    osxVersion: '',
+  };
   hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];
   hre.managingDAOMultisigPluginAddress = '';
   hre.managingDAOActions = [];
-  hre.testForkingNetwork = '';
+  hre.testingFork = testingFork;
 });
 
 // You need to export an object to set up your config
@@ -67,7 +71,10 @@ const config: HardhatUserConfig = {
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
       gasPrice: 80000000000,
-      deploy: ['./deploy'],
+      deploy:
+        process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined
+          ? ['./deploy']
+          : ['./deploy/new', './deploy/verification'],
     },
     ...networks,
   },

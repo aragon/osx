@@ -1,5 +1,9 @@
 import {BigNumberish, BytesLike} from 'ethers';
-import {AragonPluginRepos, AragonVerifyEntry} from '../utils/types';
+import {
+  AragonPluginRepos,
+  AragonVerifyEntry,
+  TestingFork,
+} from '../utils/types';
 
 declare module 'hardhat/types' {
   interface HardhatRuntimeEnvironment {
@@ -13,6 +17,6 @@ declare module 'hardhat/types' {
       data: BytesLike;
       description: string; // Description to be included in proposal metadata
     }[];
-    testForkingNetwork: string;
+    testingFork: TestingFork;
   }
 }

@@ -4,13 +4,9 @@ import {deployments} from 'hardhat';
 import {initForkAndFixture} from '../test-utils/fixture';
 import {v1_0_0_active_contracts} from '@aragon/osx-versions';
 
-async function forkAndUpdate() {
-  await initForkAndFixture('mainnet', 'v1.2.0');
-}
-
 describe('update/to_v1.2.0', function () {
   before(async () => {
-    await forkAndUpdate();
+    await initForkAndFixture('mainnet', 'v1_2_0', 'v1_0_0');
   });
 
   it('deploys new contracts with new addresses', async function () {

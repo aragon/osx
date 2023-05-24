@@ -81,14 +81,26 @@ export async function getContractAddress(
 
   let networkName = network.name;
 
-  if (hre.testForkingNetwork) {
-    networkName = hre.testForkingNetwork;
+  if (hre.testingFork) {
+    networkName = hre.testingFork.network;
   }
 
   try {
     const contract = await deployments.get(contractName);
     if (contract) {
       return contract.address;
+    }
+  } catch (e) {}
+
+  try {
+    // Try to import the specific active contracts for the given OSx version
+    const osxVersions = require(`@aragon/osx-versions`);
+
+    const activeContractName = `${hre.testingFork.osxVersion}_active_contracts`;
+    const activeContracts = osxVersions[activeContractName];
+
+    if (activeContracts && activeContracts[networkName][contractName]) {
+      return activeContracts[networkName][contractName];
     }
   } catch (e) {}
 

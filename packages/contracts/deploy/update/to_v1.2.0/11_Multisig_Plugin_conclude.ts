@@ -7,4 +7,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   hre.aragonToVerifyContracts.push(await hre.deployments.get('MultisigSetup'));
 };
 export default func;
-func.tags = ['MultisigPlugin', 'Verify'].concat(UPDATE_INFOS['v1.2.0'].tags);
+func.tags = ['MultisigPlugin', 'Verify'].concat(UPDATE_INFOS['v1_2_0'].tags);

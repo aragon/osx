@@ -81,4 +81,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['MultisigPlugin'].concat(UPDATE_INFOS['v1.2.0'].tags);
+func.tags = ['MultisigPlugin'].concat(UPDATE_INFOS['v1_2_0'].tags);

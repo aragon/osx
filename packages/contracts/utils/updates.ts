@@ -1,11 +1,11 @@
 export type UpdateInfo = {
   tags: string | string[];
-  testForkBlockNumber: number;
+  forkBlockNumber: number;
 };
 
 export const UPDATE_INFOS: {[index: string]: UpdateInfo} = {
-  'v1.2.0': {
+  v1_2_0: {
     tags: 'update/to_v1.2.0',
-    testForkBlockNumber: 16722881,
+    forkBlockNumber: 16722881,
   },
 };

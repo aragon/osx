@@ -4,25 +4,27 @@ import networks from '../../networks.json';
 import {UPDATE_INFOS} from '../../utils/updates';
 
 export async function initializeFork(
-  selectedNetwork: string,
-  selectedUpdate: string
+  forkNetwork: string,
+  blockNumber: number
 ): Promise<void> {
+  if (!(networks as any)[forkNetwork]) {
+    throw new Error(`No info found for network '${forkNetwork}'.`);
+  }
+
   await network.provider.request({
     method: 'hardhat_reset',
     params: [
       {
         forking: {
-          jsonRpcUrl: `${(networks as any)[selectedNetwork].url}`,
-          blockNumber: UPDATE_INFOS[selectedUpdate].testForkBlockNumber,
+          jsonRpcUrl: `${(networks as any)[forkNetwork].url}`,
+          blockNumber: blockNumber,
         },
       },
     ],
   });
-  hre.testForkingNetwork = selectedNetwork;
 }
 
 export async function initializeFixture(tag: string | string[]) {
-  // await deployments.fixture(UPDATE_INFOS[selectedUpdate].tags);
   const fixture = deployments.createFixture(async () => {
     await deployments.fixture(tag); // ensure you start from a fresh deployments
   });
@@ -31,9 +33,19 @@ export async function initializeFixture(tag: string | string[]) {
 }
 
 export async function initForkAndFixture(
-  selectedNetwork: string,
-  selectedUpdate: string
+  forkNetwork: string,
+  osxVersion: string,
+  previousOsxVersion: string
 ): Promise<void> {
-  await initializeFork(selectedNetwork, selectedUpdate);
-  await initializeFixture(UPDATE_INFOS[selectedUpdate].tags);
+  if (!UPDATE_INFOS[osxVersion]) {
+    throw new Error(`No update info found for osxVersion '${osxVersion}'.`);
+  }
+
+  hre.testingFork = {
+    network: forkNetwork,
+    osxVersion: previousOsxVersion,
+  };
+
+  await initializeFork(forkNetwork, UPDATE_INFOS[osxVersion].forkBlockNumber);
+  await initializeFixture(UPDATE_INFOS[osxVersion].tags);
 }
