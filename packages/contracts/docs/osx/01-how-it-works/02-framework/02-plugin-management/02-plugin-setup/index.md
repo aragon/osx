@@ -13,15 +13,15 @@ A DAO can be set up and customized by the **installation, update, and uninstalla
 
 How this works:
 
-- Although a Plugin is composed `Plugin` and `PluginSetup` contracts, the Aragon OSx protocol only knows of the `PluginSetup` contract.
-- Since the `PluginSetup` contract is the one in charge of installing the plugin into a DAO, it is the one also in charge of deploying the Plugin instace specific to that DAO with the parameters set by the DAO in advance. You can review how to build a `PluginSetup` contract [here](../../../../02-how-to-guides/02-plugin-development/index.md).
+- Although a Plugin is composed by the `Plugin` and `PluginSetup` contracts, the Aragon OSx protocol only knows of the `PluginSetup` contract.
+- Since the `PluginSetup` contract is the one containing the plugin installation instructions, it is the one in charge of deploying the Plugin instance. Each plugin instance is specific to that DAO, deployed with the parameters defined by the DAO upon installation. You can review how to build a `PluginSetup` contract [here](../../../../02-how-to-guides/02-plugin-development/index.md).
 - The `PluginSetup` contract then interacts with the Aragon OSx framework so that installing, updating, and uninstalling a plugin to a DAO becomes very simple for the end-user.
-- Publishing a Plugin into the Aragon OSx protocol is done through creating a plugin's first version. This generates a `PluginRepo` instance - registering all plugin versions. You can read more about that [here](../../../../02-how-to-guides/02-plugin-development/07-publication/index.md).
-- Except for the gas costs required, plugins are completely free.
+- Publishing a Plugin into the Aragon OSx protocol is done through creating the first version of the plugin's `PluginRepo`. The plugin's `PluginRepo` instance stores all plugin versions. You can read more about that [here](../../../../02-how-to-guides/02-plugin-development/07-publication/index.md).
+- Except for the gas costs required, plugins are completely free, unless decided otherwise by the developer.
 
 ### How does this work?
 
-The `PluginSetup` process is **security critical** because permissions are granted to third-party contracts.
+The `PluginSetup` process is **security critical** because the permissions it handles are granted to third-party contracts.
 
 Safety was our top priority in the design and we wanted to make sure that the DAO knows exactly which contracts receive which permissions before processing and making sure that the `PluginSetup` contracts developed by third parties don’t obtain elevated permissions (i.e., the `ROOT_PERMISSION_ID` permission) on the installing DAO during the setup process.
 
@@ -65,14 +65,14 @@ Optionally, the proposer can also request refunds for the gas spent for the prep
 
 ### Applying the action
 
-After this initial preparation transaction, all contracts and addresses related to the plugin, as well as their permissions, are known and the DAO can decide if the proposal should be accepted or denied.
+After this initial preparation transaction, the addresses and permissions related to the plugin become apparent. The members of a governance plugin with permissions can decide if the installation proposal should be accepted or denied.
 
-Once the proposal has passed, the actions specified in the `Action[]` array get executed and the prepared `PluginSetup` is used to install the plugin into the DAO.
+Once the proposal has passed, the actions specified in the `Action[]` array can get executed and the `applyInstallation()` action is used to complete the installation of the plugin into the DAO.
 
 This is processed as follows:
 
 1. The DAO temporarily grants the `ROOT_PERMISSION_ID` permission to the `PluginSetupProcessor`. This is needed so that the processor can modify the DAO's permissions settings to set up the plugin.
-2. This `Action` calls the `processInstallation`, `processUpdate`, or `processUninstallation` method in the `PluginSetupProcessor`, containing the permissions list as argument. The permission hash is compared with the stored hash to make sure that the permission didn’t change.
+2. This `Action` calls the `applyInstallation`, `applyUpdate`, or `applyUninstallation` method in the `PluginSetupProcessor`, containing the permissions list as argument. The permission hash is compared with the stored hash to make sure that the permission didn’t change.
    In addition to the above, the update process also upgrades the logic contract to which the proxy points too.
 3. If the hash is valid, the list is processed and `PluginSetupProcessor` conducts the requested sequence of `grant`, `grantWithCondition` and `revoke` calls on the owning DAO.
    Finally, the `PluginSetupProcessor` asks the DAO to revoke the `ROOT_PERMISSION_ID` permission from itself.

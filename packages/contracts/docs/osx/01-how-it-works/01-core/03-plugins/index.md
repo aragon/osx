@@ -19,19 +19,15 @@ Plugins can be related to:
 
 ## Understanding Plugins
 
-Plugins exist as instances created from the same base contract by
+Whenever a DAO installs a plugin, an instance of that plugin's base template is deployed using the configuration parameters defined by the DAO. For example, you may want to use a specific token for your DAO's voting process, which means you have to determine this within your plugin's configuration parameters.
 
-- copying
-- cloning
-- create proxy
-
-and **each instance is attached to and managed by exactly one DAO**.
+Each instance of a plugin is installed to a DAO through the granting of permissions. They are usually managed by only one DAO.
 
 :::info
 Lern more about the different [plugin types](../../../02-how-to-guides/02-plugin-development/02-plugin-types.md) in our How-to guide.
 :::
 
-This raises questions on how the DAO manages plugins and who actually owns plugins.
+This raises questions on how the DAO manages plugins and who actually owns plugins..
 
 ### How does the DAO Manage a Plugin?
 

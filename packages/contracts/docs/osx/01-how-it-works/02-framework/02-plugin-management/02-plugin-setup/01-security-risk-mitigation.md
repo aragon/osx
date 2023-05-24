@@ -1,5 +1,5 @@
 ---
-title: Plugin Security & Risks
+title: Plugin Security and Risks
 ---
 
 ## Risks and Their Mitigation
