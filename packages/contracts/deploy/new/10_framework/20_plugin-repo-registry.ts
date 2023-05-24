@@ -3,6 +3,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {getContractAddress} from '../../helpers';
 
+import pluginRepoRegistryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
@@ -18,6 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('PluginRepoRegistry', {
+    contract: pluginRepoRegistryArtifact,
     from: deployer.address,
     args: [],
     log: true,

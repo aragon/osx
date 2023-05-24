@@ -3,6 +3,8 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DAO__factory, ENSRegistry__factory} from '../../../typechain';
 import {getContractAddress, getENSAddress} from '../../helpers';
 
+import ensSubdomainRegistrarArtifact from '../../../artifacts/src/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers, network} = hre;
   const {deploy} = deployments;
@@ -27,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   await deploy('DAO_ENSSubdomainRegistrar', {
-    contract: 'ENSSubdomainRegistrar',
+    contract: ensSubdomainRegistrarArtifact,
     from: deployer.address,
     args: [],
     log: true,
@@ -51,7 +53,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('Plugin_ENSSubdomainRegistrar', {
-    contract: 'ENSSubdomainRegistrar',
+    contract: ensSubdomainRegistrarArtifact,
     from: deployer.address,
     args: [],
     log: true,

@@ -1,7 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-
 import {getContractAddress} from '../../helpers';
+
+import pluginSetupProcessorFactoryArtifact from '../../../artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -15,6 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('PluginSetupProcessor', {
+    contract: pluginSetupProcessorFactoryArtifact,
     from: deployer.address,
     args: [pluginRepoRegistryAddress],
     log: true,
