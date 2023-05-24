@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added and pushed tags to origin for `v1.2.2`, `v1.2.1`, `v1.2.0`, `audit-20230302` and `v1.0.0`.
 - Inherit `ProtocolVersion` and `ERC165` in `DAOFactory`.
 - Inherit `ProtocolVersion` in `DAO`.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
