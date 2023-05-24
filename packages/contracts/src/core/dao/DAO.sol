@@ -148,7 +148,6 @@ contract DAO is
         string calldata daoURI_
     ) external reinitializer(2) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
-        _registerInterface(type(ProtocolVersion).interfaceId); // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
