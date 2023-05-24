@@ -7,6 +7,8 @@ import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/
 import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 
+const TARGET_RELEASE = 1;
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate TokenVoting Plugin');
   const {deployments, ethers, network} = hre;
@@ -49,7 +51,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const tx = await tokenVotingRepo
       .connect(deployer)
       .createVersion(
-        1,
+        TARGET_RELEASE,
         deployResult.address,
         ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingBuildCIDPath}`),
         ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingReleaseCIDPath}`)
@@ -62,7 +64,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const tx = await tokenVotingRepo
     .connect(deployer)
     .populateTransaction.createVersion(
-      1,
+      TARGET_RELEASE,
       deployResult.address,
       ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingBuildCIDPath}`),
       ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingReleaseCIDPath}`)

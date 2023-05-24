@@ -7,6 +7,8 @@ import addresslistVotingSetupArtifact from '../../../artifacts/src/plugins/gover
 import addresslistVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import addresslistVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 
+const TARGET_RELEASE = 1;
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate AddresslistVoting Plugin');
   const {deployments, ethers, network} = hre;
@@ -51,7 +53,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const tx = await addresslistVotingRepo
       .connect(deployer)
       .createVersion(
-        1,
+        TARGET_RELEASE,
         deployResult.address,
         ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingBuildCIDPath}`),
         ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingReleaseCIDPath}`)
@@ -64,7 +66,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const tx = await addresslistVotingRepo
     .connect(deployer)
     .populateTransaction.createVersion(
-      1,
+      TARGET_RELEASE,
       deployResult.address,
       ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingBuildCIDPath}`),
       ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingReleaseCIDPath}`)
