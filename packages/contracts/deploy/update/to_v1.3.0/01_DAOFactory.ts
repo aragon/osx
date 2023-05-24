@@ -2,9 +2,9 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {Operation} from '../../../utils/types';
 import {getContractAddress} from '../../helpers';
+import {DAO__factory} from '../../../typechain';
 
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
-import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Updating DAOFactory');
