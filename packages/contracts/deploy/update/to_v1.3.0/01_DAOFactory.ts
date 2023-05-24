@@ -4,6 +4,7 @@ import {Operation} from '../../../utils/types';
 import {getContractAddress} from '../../helpers';
 
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
+import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Updating DAOFactory');
@@ -30,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  const daoInterface = new ethers.utils.Interface(daoFactoryArtifact.abi);
+  const daoInterface = DAO__factory.createInterface();
   const calldata = daoInterface.encodeFunctionData(
     'applyMultiTargetPermissions',
     [
