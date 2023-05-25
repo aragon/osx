@@ -9,14 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added and pushed tags to origin for `v1.2.2`, `v1.2.1`, `v1.2.0`, `audit-20230302` and `v1.0.0`.
 - Inherit `ProtocolVersion` and `ERC165` in `DAOFactory`.
 - Inherit `ProtocolVersion` in `DAO`.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
-- Added `allowFailureMap` to `IDAO.Executed` event.
 
 ### Changed
 
+- Adapted this changelog to reflect the tags.
 - Fixed logic bug in the `TokenVoting` and `AddresslistVoting` implementations that caused the `createProposal` function to emit the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
 - Changed the `createProposal` functions in `Multisig` to allow creating proposals when the `_msgSender()` is listed in the current block.
 - Changed the `createProposal` functions in `AddresslistVoting` to allow creating proposals when the `_msgSender()` is listed in the current block.
@@ -24,6 +23,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the `isMember` function in the `TokenVoting` plugin to also take delegators of the token into account.
 - Fixed and clarified the NatSpec comments according to the Code4rena audit suggestions.
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
+
+### Removed
+
+## v1.2.2
+
+### Added
+
+- Added `allowFailureMap` to `IDAO.Executed` event.
+
+### Changed
+
+### Removed
+
+## v1.2.1
+
+### Added
+
+### Changed
+
+- Fixed ENS issues.
+- Fix storage corruption.
 
 ### Removed
 
@@ -40,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disallow creating a new proposal in the Multisig plugin in the same block where the settings have been changed.
 - Updates `MultisigSetup` to be used as Release 1 Build 2.
 
-## v1.0.1
+## v1.0.0
 
 ### Added
 
