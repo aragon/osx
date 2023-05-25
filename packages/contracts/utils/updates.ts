@@ -4,8 +4,8 @@ export type UpdateInfo = {
 };
 
 export const UPDATE_INFOS: {[index: string]: UpdateInfo} = {
-  v1_2_0: {
-    tags: 'update/to_v1.2.0',
+  v1_3_0: {
+    tags: 'update/to_v1.3.0',
     forkBlockNumber: 16722881,
   },
 };

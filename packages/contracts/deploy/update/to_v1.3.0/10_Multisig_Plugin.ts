@@ -8,6 +8,7 @@ import multisigSetupArtifact from '../../../artifacts/src/plugins/governance/mul
 import multisigReleaseMetadata from '../../../src/plugins/governance/multisig/release-metadata.json';
 import multisigBuildMetadata from '../../../src/plugins/governance/multisig/build-metadata.json';
 import {UPDATE_INFOS} from '../../../utils/updates';
+import {UPDATE_INFOS} from '../../../utils/updates';
 
 const TARGET_RELEASE = 1;
 
@@ -86,4 +87,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['MultisigPlugin'];
+func.tags = ['MultisigPlugin'].concat(UPDATE_INFOS['v1_3_0'].tags);
