@@ -19,6 +19,7 @@ import {
   IERC1155Receiver__factory,
   IERC1271__factory,
   IEIP4824__factory,
+  IProtocolVersion__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -339,6 +340,11 @@ describe('DAO', function () {
     it('supports the `IDAO` interface', async () => {
       const iface = IDAO__factory.createInterface();
       expect(getInterfaceID(iface)).to.equal('0x9385547e'); // the interfaceID from IDAO v1.0.0
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
