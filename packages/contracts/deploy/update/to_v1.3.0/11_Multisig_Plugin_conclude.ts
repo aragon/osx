@@ -1,7 +1,6 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {UPDATE_INFOS} from '../../../utils/updates';
-import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nConcluding Multisig Plugin Update');

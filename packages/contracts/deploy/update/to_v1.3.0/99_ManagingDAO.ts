@@ -3,7 +3,6 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DAOFactory__factory, DAO__factory} from '../../../typechain';
 import {getContractAddress} from '../../helpers';
 import {UPDATE_INFOS} from '../../../utils/updates';
-import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate ManagingDAO to new implemenation');
