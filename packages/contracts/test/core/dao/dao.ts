@@ -17,6 +17,8 @@ import {
   IERC721Receiver__factory,
   IERC1155Receiver__factory,
   IERC1271__factory,
+  IDAO__factory,
+  IEIP4824__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -38,7 +40,6 @@ import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
-import {IDAO__factory, IEIP4824__factory} from '../../../typechain';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 chai.use(smock.matchers);
