@@ -1,9 +1,11 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DAO__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
 import {getContractAddress} from '../../helpers';
 import {UPDATE_INFOS} from '../../../utils/updates';
+import {DAO__factory} from '../../../typechain';
+
+import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Updating DAOFactory');
@@ -24,6 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Using PreviousDAOFactory ${previousDAOFactoryAddress}`);
 
   const deployResult = await deploy('DAOFactory', {
+    contract: daoFactoryArtifact,
     from: deployer.address,
     args: [daoRegistryAddress, pluginSetupProcessorAddress],
     log: true,

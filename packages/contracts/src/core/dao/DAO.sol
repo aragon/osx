@@ -13,6 +13,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
+import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
 import {hasBit, flipBit} from "../utils/BitMap.sol";
@@ -30,6 +32,7 @@ contract DAO is
     ERC165StorageUpgradeable,
     IDAO,
     UUPSUpgradeable,
+    ProtocolVersion,
     PermissionManager,
     CallbackHandler
 {
@@ -149,6 +152,7 @@ contract DAO is
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
+        _registerInterface(type(IProtocolVersion).interfaceId); // added in v1.3.0
         _registerTokenInterfaces();
 
         _setMetadata(_metadata);
@@ -172,8 +176,10 @@ contract DAO is
         }
 
         // Initialize `_reentrancyStatus` that was added in v1.3.0.
+        // Register Interface `ProtocolVersion` that was added in v1.3.0.
         if (_previousProtocolVersion[1] <= 2) {
             _reentrancyStatus = _NOT_ENTERED;
+            _registerInterface(type(IProtocolVersion).interfaceId);
         }
     }
 

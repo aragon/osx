@@ -14,6 +14,7 @@ import {
 } from '../../../typechain';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {getNamedTypesFromMetadata} from '../../../utils/metadata';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
@@ -73,7 +74,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Prepare multisig plugin for managingDAO
   const data = ethers.utils.defaultAbiCoder.encode(
-    buildMetadataJson.pluginSetupABI.prepareInstallation,
+    getNamedTypesFromMetadata(
+      buildMetadataJson.pluginSetup.prepareInstallation.inputs
+    ),
     [approvers, [listedOnly, minApprovals]]
   );
   const prepareTx = await pspContract.prepareInstallation(managingDAOAddress, {
