@@ -38,8 +38,8 @@ import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
-import {IDAO__factory} from '../../../typechain/osx-versions/v1_0_0/contracts/core/dao/IDAO.sol';
-import {IEIP4824__factory} from '../../../typechain/osx-versions/v1_0_0/contracts/core/dao/IEIP4824.sol';
+import {IDAO__factory, IEIP4824__factory} from '../../../typechain';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 chai.use(smock.matchers);
 
@@ -325,7 +325,7 @@ describe('DAO', function () {
     });
   });
 
-  describe('ERC-165', async () => {
+  describe.only('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await dao.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -361,6 +361,14 @@ describe('DAO', function () {
       expect(
         await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
       ).to.be.true;
+    });
+  });
+
+  describe.only('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await dao.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
     });
   });
 

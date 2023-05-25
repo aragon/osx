@@ -24,6 +24,7 @@ import {
   PluginUUPSUpgradeableSetupV1Mock__factory,
   DAORegistry__factory,
   PluginRepo__factory,
+  IProtocolVersion__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -53,6 +54,8 @@ import {
 } from '../../test-utils/psp/wrappers';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -289,6 +292,26 @@ describe('DAOFactory: ', function () {
       pluginRepoPointer,
       EMPTY_DATA
     );
+  });
+
+  context('ERC-165', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await daoFactory.supportsInterface('0xffffffff')).to.be.false;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+  });
+
+  context('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await daoFactory.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
   });
 
   it('reverts if no plugin is provided', async () => {
