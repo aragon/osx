@@ -4,18 +4,22 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO,
-  TestERC1155,
   TestERC20,
+  TestERC20__factory,
   TestERC721,
-  IERC1271__factory,
+  TestERC721__factory,
+  TestERC1155,
+  TestERC1155__factory,
+  ERC1271Mock__factory,
   GasConsumer__factory,
   DAO__factory,
-  ERC1271Mock__factory,
-  TestERC20__factory,
-  TestERC1155__factory,
-  TestERC721__factory,
-  IERC1155Receiver__factory,
+  IDAO__factory,
+  IERC165__factory,
   IERC721Receiver__factory,
+  IERC1155Receiver__factory,
+  IERC1271__factory,
+  IEIP4824__factory,
+  IProtocolVersion__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -195,14 +199,6 @@ describe('DAO', function () {
       expect(callbacksReturned[2]).to.equal(
         TOKEN_INTERFACE_IDS.erc1155BatchReceivedId + '00'.repeat(28)
       );
-
-      // confirm interfaces are registered.
-      expect(
-        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc721InterfaceId)
-      ).to.equal(true);
-      expect(
-        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
-      ).to.equal(true);
     });
 
     it('sets OZs `_initialized` at storage slot [0] to 2', async () => {
@@ -328,6 +324,50 @@ describe('DAO', function () {
           )
         ).toNumber()
       ).to.equal(0);
+    });
+  });
+
+  describe('ERC-165', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await dao.supportsInterface('0xffffffff')).to.be.false;
+    });
+
+    it('supports the `IERC165` interface', async () => {
+      const iface = IERC165__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IDAO` interface', async () => {
+      const iface = IDAO__factory.createInterface();
+      expect(getInterfaceID(iface)).to.equal('0x9385547e'); // the interfaceID from IDAO v1.0.0
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IERC1271` interface', async () => {
+      const iface = IERC1271__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IEIP4824` interface', async () => {
+      const iface = IEIP4824__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IERC721Receiver` interface', async () => {
+      expect(
+        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
+      ).to.be.true;
+    });
+
+    it('supports the `IERC1155Receiver` interface', async () => {
+      expect(
+        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
+      ).to.be.true;
     });
   });
 
