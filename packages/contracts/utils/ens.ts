@@ -2,6 +2,9 @@ import {ethers} from 'hardhat';
 import {ENSRegistry__factory} from '../typechain';
 import {EHRE} from './types';
 
+import ensRegistryArtifact from '../artifacts/@ensdomains/ens-contracts/contracts/registry/ENSRegistry.sol/ENSRegistry.json';
+import publicResolverArtifact from '../artifacts/@ensdomains/ens-contracts/contracts/resolvers/PublicResolver.sol/PublicResolver.json';
+
 export function ensLabelHash(label: string): string {
   return ethers.utils.id(label);
 }
@@ -17,6 +20,7 @@ export async function setupENS(domains: string[], hre: EHRE): Promise<any> {
 
   // Deploy the ENSRegistry
   await deploy('ENSRegistry', {
+    contract: ensRegistryArtifact,
     from: deployer.address,
     args: [],
     log: true,
@@ -27,6 +31,7 @@ export async function setupENS(domains: string[], hre: EHRE): Promise<any> {
 
   // Deploy the Resolver
   await deploy('PublicResolver', {
+    contract: publicResolverArtifact,
     from: deployer.address,
     args: [ensDeployment.address, ethers.constants.AddressZero],
   });

@@ -1,7 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-
 import {getContractAddress} from '../../helpers';
+
+import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -18,6 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('DAOFactory', {
+    contract: daoFactoryArtifact,
     from: deployer.address,
     args: [daoRegistryAddress, pluginSetupProcessorAddress],
     log: true,
