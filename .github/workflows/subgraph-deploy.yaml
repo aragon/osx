@@ -1,4 +1,8 @@
+# This workflow is triggered when a pull request is closed on the 'develop' or 'main' branches
+# and there is a change to the 'packages/subgraph/package.json' file.
+
 name: Subgraph Deploy
+
 on:
   pull_request:
     types:
@@ -10,6 +14,7 @@ on:
       - 'packages/subgraph/package.json'
 
 jobs:
+  # The prepare job is responsible for preparing the environment and generating outputs for other jobs.
   prepare:
     if: github.actor != 'arabot-1'
     runs-on: ubuntu-latest
@@ -22,6 +27,9 @@ jobs:
         id: prepare
         run: node .github/helpers/subgraph/buildMatrix.js '${{ github.ref }}'
 
+  # The changelog job updates the changelog file in the 'packages/subgraph' directory.
+  # It runs only when a pull request is merged, the actor is not 'arabot-1',
+  # and the pull request has a label that contains 'subgraph:deploy'.
   changelog:
     runs-on: ubuntu-latest
     if: >
@@ -48,6 +56,9 @@ jobs:
           git commit -am "Update changelog in subgraph"
           git push
 
+  # The build-deploy job builds and deploys the subgraph.
+  # It depends on the prepare and changelog jobs to complete successfully,
+  # and the pull request has a label that contains 'subgraph:deploy'.
   build-deploy:
     runs-on: ubuntu-latest
     needs: [prepare, changelog]
