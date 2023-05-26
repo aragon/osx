@@ -27,12 +27,12 @@ Although the easiest (and recommended) way to create your DAO is through the [Ar
 
 After a DAO is created with at least one plugin installed with `EXECUTE_PERMISSION` on the DAO, it's likely you may want to change change your governance setup later on by [installing, updating, or uninstalling plugins](../../../01-how-it-works/02-framework/02-plugin-management/02-plugin-setup/index.md).
 
-Here, it is very important that you **maintain at least one functioning governance plugin** attached to your DAO si that your assets are not locked in the future. In that regard, you want to be careful to not accidentally:
+Here, it is very important that you **maintain at least one functioning governance plugin** (a contract with `EXECUTE_PERMISSION` on the DAO) so that your assets are not locked in the future. In that regard, you want to be careful to not accidentally:
 
-- uninstall every plugin within your DAO
-- update or upgrade the plugin or otherwise change the internal plugin settings
+- uninstall every plugin within your DAO, or
+- update or upgrade the plugin or otherwise change the internal plugin settings.
 
-so that they cannot create proposals and execute actions on the DAO anymore. Accordingly, DAOs must review proposals requesting to change the governance setup with utmost care before voting for them. In the next section, we explain how to review a proposal properly and what to pay attention too.
+If you do that, nobody would be able to create proposals and execute actions on the DAO anymore. Accordingly, DAOs must review proposals requesting to change the governance setup with utmost care before voting for them. In the next section, we explain how to review a proposal properly and what to pay attention too.
 
 <!-- Make a separate section about the DAO executor -->
 

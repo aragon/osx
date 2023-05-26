@@ -17,10 +17,10 @@ To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `Per
 - `where`: the address of the contract containing the function `who` wants access to
 - `who`: the address (EOA or contract) receiving the permission
 - `permissionId`: the permission identifier the caller needs to have in order to be able to execute the action
-- `condition`: the condition that will be asked before authorizing the call to happen
+- `condition`: the address of the condition contract that will be asked (if any) before authorizing the call to happen
 
 :::caution
-You don't want to grant `EXECUTE_PERMISSION` to any random address, since this gives the address access to execute any action on behalf of the DAO. We recommend you only grant `EXECUTE_PERMISSION` to governance plugins to ensure the safety of your assets.
+You probably don't want to grant `EXECUTE_PERMISSION` to any random address, since this gives the address access to execute any action on behalf of the DAO. We recommend you only grant `EXECUTE_PERMISSION` to governance plugins to ensure the safety of your assets. Granting `EXECUTE_PERMISSION` to an externally owned account is considered an anti-pattern.
 :::
 
 ## Examples

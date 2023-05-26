@@ -21,19 +21,19 @@ Plugins can be related to:
 
 Whenever a DAO installs a plugin, an instance of that plugin's base template is deployed using the configuration parameters defined by the DAO. For example, you may want to use a specific token for your DAO's voting process, which means you have to determine this within your plugin's configuration parameters.
 
-Each instance of a plugin is installed to a DAO through the granting of permissions. They are usually managed by only one DAO.
+Each instance of a plugin is installed to a DAO through the granting of permissions.
 
 :::info
 Lern more about the different [plugin types](../../../02-how-to-guides/02-plugin-development/02-plugin-types.md) in our How-to guide.
 :::
 
-This raises questions on how the DAO manages plugins and who actually owns plugins..
+This raises questions on how the DAO manages plugins and who actually owns plugins.
 
 ### How does the DAO Manage a Plugin?
 
-A DAO manages plugins and interactions between them, the DAO contract, and other parties with its. In more detail, its permission manager
+A DAO manages plugins and interactions between them. In more detail, its permission manager:
 
-- controls the plugin setup process (installation, update, uninstallation)
+- enables the plugin installation process through the granting and revoking of permissions for the DAO
 - authorizes calls to plugin functions carrying the `auth` modifier
 - authorizes calls to DAO functions, for example, the `execute` function allowing for acting as the DAO
 

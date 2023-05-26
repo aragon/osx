@@ -41,7 +41,7 @@ It also registers the plugin in the Aragon OSx `PluginRepoRegistry`contract with
 
 Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-puginrepo-contract), it receives:
 
-- A valid ENS `_subdomain` unique name
+- A valid ENS `_subdomain` unique name composed of letters from a-z, all in lower caps, separated by a `-`. For ex: `token-voting-plugin`.
 - The address of the plugin repo maintainer who ends up having the `ROOT_PERMISSION_ID`, `MAINTAINER_PERMISSION_ID`, and `UPGRADE_REPO_PERMISSION_ID` permissions. These permissions enable the maintainer to call the internal `PermissionManager`, the `createVersion` and `updateReleaseMetadata` functions as well as upgrading the plugin contract.
 
 For more details visit the [`PluginRepoFactory` Reference Guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).

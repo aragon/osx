@@ -182,7 +182,7 @@ function prepareInstallation(
 
 Finally, we construct and return an array with the permissions that we need for our plugin to work properly.
 
-- First, we request the `admin` address can use `ADMIN_EXECUTE_PERMISSION_ID` permission on the `plugin`.
+- First, we request granting the `ADMIN_EXECUTE_PERMISSION_ID` to the `admin` address received. This is what gives the address access to use `plugin`'s functionality - in this case, call on the plugin's `execute` function so it can execute actions on behalf of the DAO.
 - Second, we request that our newly deployed plugin can use the `EXECUTE_PERMISSION_ID` permission on the `_dao`. We don't add conditions to the permissions in this case, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
 
 ### 5. Implementing the `prepareUninstallation()` function
