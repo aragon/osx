@@ -4,16 +4,14 @@ import {deployments} from 'hardhat';
 import {initForkAndFixture} from '../test-utils/fixture';
 import {v1_0_0_active_contracts} from '@aragon/osx-versions';
 
-const skipTest =
-  process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined &&
-  process.env.TEST_UPDATE_DEPLOY_SCRIPT !== '';
+const enableTest = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 
 describe('update/to_v1.3.0', function () {
   before(async () => {
     await initForkAndFixture('mainnet', 'v1_3_0', 'v1_0_0');
   });
 
-  if (skipTest) {
+  if (enableTest) {
     it('deploys new contracts with new addresses', async function () {
       const previousDAOFactory = v1_0_0_active_contracts.mainnet.DAOFactory;
       const previousMultisigSetup =

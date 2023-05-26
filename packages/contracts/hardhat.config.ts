@@ -47,6 +47,10 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   hre.testingFork = testingFork;
 });
 
+const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
+
+console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
@@ -71,11 +75,9 @@ const config: HardhatUserConfig = {
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
       gasPrice: 80000000000,
-      deploy:
-        process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined &&
-        process.env.TEST_UPDATE_DEPLOY_SCRIPT !== ''
-          ? ['./deploy']
-          : ['./deploy/new', './deploy/verification'],
+      deploy: ENABLE_DEPLOY_TEST
+        ? ['./deploy']
+        : ['./deploy/new', './deploy/verification'],
     },
     ...networks,
   },
