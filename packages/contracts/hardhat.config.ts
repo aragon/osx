@@ -72,7 +72,8 @@ const config: HardhatUserConfig = {
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
       gasPrice: 80000000000,
       deploy:
-        process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined
+        process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined &&
+        process.env.TEST_UPDATE_DEPLOY_SCRIPT !== ''
           ? ['./deploy']
           : ['./deploy/new', './deploy/verification'],
     },
