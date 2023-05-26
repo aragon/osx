@@ -47,6 +47,7 @@ jobs:
           sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./CHANGELOG.md"
 
       - name: Commit changes
+        id: commit
         run: |
           git fetch
           git pull
