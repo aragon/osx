@@ -31,6 +31,12 @@ You can build and deploy the subgraph using a single `yarn deploy` command:
 yarn deploy
 ```
 
+## Deploy the subgraph via Github actions
+
+- Bump the subgraph version in package.json.
+- Create a PR.
+- Add label `subgraph:deploy`
+
 ## Build only
 
 Generate the `subgraph.yaml` file corresponding to your network:
