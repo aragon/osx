@@ -2169,19 +2169,6 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('updates to V2: fake (was it called)', async () => {
-        await updateAndValidatePluginUpdate(
-          psp,
-          targetDao.address,
-          proxy,
-          currentVersion,
-          [1, 2],
-          pluginRepoPointer[0],
-          helpersUV1,
-          EMPTY_DATA
-        );
-      });
-
       it('updates to V3', async () => {
         await updateAndValidatePluginUpdate(
           psp,
