@@ -19,10 +19,10 @@ echo ''
 echo '> Building manifest file subgraph.yaml'
 ./scripts/build-manifest.sh
 
-# Generate types
+# Build subgraph
 echo ''
-echo '> Generating types'
-graph codegen
+echo '> Building subgraph'
+./scripts/build-subgraph.sh
 
 if [ "$NETWORK_NAME" == 'localhost' ]
 then
@@ -36,6 +36,7 @@ if [ "$STAGING" ]; then
 fi
 echo ''
 echo '> Deploying subgraph: '$FULLNAME
+echo '> Subgraph version: '$SUBGRAPH_VERSION
 
 # Deploy subgraph
 if [ "$LOCAL" ]
