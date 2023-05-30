@@ -18,9 +18,10 @@ import {
 
 import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {initializeDeploymentFixture} from '../test-utils/fixture';
 
 async function deployAll() {
-  await deployments.fixture();
+  await initializeDeploymentFixture('New');
 }
 
 describe('Managing DAO', function () {

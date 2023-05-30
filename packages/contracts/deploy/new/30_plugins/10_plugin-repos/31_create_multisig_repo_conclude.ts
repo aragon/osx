@@ -33,4 +33,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['CreateMultisigRepo', 'Verify'];
+func.tags = ['New', 'CreateMultisigRepo', 'Verify'];

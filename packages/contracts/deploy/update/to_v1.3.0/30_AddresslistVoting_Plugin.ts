@@ -6,6 +6,7 @@ import {getContractAddress, uploadToIPFS} from '../../helpers';
 import addresslistVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol/AddresslistVotingSetup.json';
 import addresslistVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import addresslistVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
+import {UPDATE_INFOS} from '../../../utils/updates';
 
 const TARGET_RELEASE = 1;
 
@@ -89,4 +90,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['Update', 'AddresslistVotingPlugin'];
+func.tags = ['Update', 'AddresslistVotingPlugin'].concat(
+  UPDATE_INFOS['v1_3_0'].tags
+);

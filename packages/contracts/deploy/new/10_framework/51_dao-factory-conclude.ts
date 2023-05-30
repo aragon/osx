@@ -22,4 +22,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['DAOFactory', 'Verify'];
+func.tags = ['New', 'DAOFactory', 'Verify'];

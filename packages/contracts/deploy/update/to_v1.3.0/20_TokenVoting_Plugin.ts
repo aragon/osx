@@ -6,6 +6,7 @@ import {getContractAddress, uploadToIPFS} from '../../helpers';
 import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json';
+import {UPDATE_INFOS} from '../../../utils/updates';
 
 const TARGET_RELEASE = 1;
 
@@ -87,4 +88,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['Update', 'TokenVotingPlugin'];
+func.tags = ['Update', 'TokenVotingPlugin'].concat(UPDATE_INFOS['v1_3_0'].tags);

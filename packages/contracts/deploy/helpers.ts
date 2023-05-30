@@ -77,7 +77,14 @@ export async function getContractAddress(
   contractName: string,
   hre: HardhatRuntimeEnvironment
 ): Promise<string> {
-  const {deployments} = hre;
+  const {deployments, network} = hre;
+
+  let networkName = network.name;
+
+  if (hre.testingFork) {
+    networkName = hre.testingFork.network;
+  }
+
   try {
     const contract = await deployments.get(contractName);
     if (contract) {
@@ -85,9 +92,21 @@ export async function getContractAddress(
     }
   } catch (e) {}
 
+  try {
+    // Try to import the specific active contracts for the given OSx version
+    const osxVersions = require(`@aragon/osx-versions`);
+
+    const activeContractName = `${hre.testingFork.osxVersion}_active_contracts`;
+    const activeContracts = osxVersions[activeContractName];
+
+    if (activeContracts && activeContracts[networkName][contractName]) {
+      return activeContracts[networkName][contractName];
+    }
+  } catch (e) {}
+
   const activeContracts = await getActiveContractsJSON();
   try {
-    return activeContracts[hre.network.name][contractName];
+    return activeContracts[networkName][contractName];
   } catch (e) {
     console.error(e);
     return '';

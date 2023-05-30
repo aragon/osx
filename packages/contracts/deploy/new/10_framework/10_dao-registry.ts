@@ -37,4 +37,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['DAORegistry'];
+func.tags = ['New', 'DAORegistry'];

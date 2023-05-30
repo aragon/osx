@@ -3,6 +3,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {Operation} from '../../../utils/types';
 import {getContractAddress} from '../../helpers';
 import {DAO__factory} from '../../../typechain';
+import {UPDATE_INFOS} from '../../../utils/updates';
 
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
@@ -62,4 +63,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['DAOFactory'];
+func.tags = ['DAOFactory'].concat(UPDATE_INFOS['v1_3_0'].tags);
