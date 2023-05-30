@@ -35,7 +35,7 @@ yarn deploy
 
 - Bump the subgraph version in package.json.
 - Create a PR.
-- Add label `subgraph:deploy`
+- Add label `subgraph:deploy`.
 
 ## Build only
 
