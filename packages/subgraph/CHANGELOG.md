@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added "v" to the version on the github deploy flow.
 - Added handler for `NewURI` event on DAO.
 - Added `delegatee`, `votingPower` and `delegators` to the `TokenVotingMember`.
 
