@@ -13,8 +13,8 @@ import {
   Action,
   ERC721Balance
 } from '../../generated/schema';
-import {Executed} from '../../generated/templates/DaoTemplateV1_2_0/DAO';
-import {handleExecuted} from '../../src/dao/dao_v1_2_0';
+import {Executed} from '../../generated/templates/DaoTemplateV1_3_0/DAO';
+import {handleExecuted} from '../../src/dao/dao_v1_3_0';
 import {
   ERC20_transfer,
   getTransferId,

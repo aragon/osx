@@ -7,8 +7,8 @@ import {
   DAO__factory as DAO_V1_0_0__factory,
 } from '../../typechain/osx-versions/v1_0_0/contracts/core/dao/DAO.sol';
 import {
-  DAO as DAO_V1_2_0,
-  DAO__factory as DAO_V1_2_0__factory,
+  DAO as DAO_V1_3_0,
+  DAO__factory as DAO_V1_3_0__factory,
 } from '../../typechain/osx-versions/v1_2_0/contracts/core/dao/DAO.sol';
 import {DAO, DAO__factory, ProtocolVersion__factory} from '../../typechain';
 
@@ -21,11 +21,11 @@ import {getInterfaceID} from '../test-utils/interfaces';
 
 let signers: SignerWithAddress[];
 let DAO_V1_0_0: DAO_V1_0_0__factory;
-let DAO_V1_2_0: DAO_V1_2_0__factory;
+let DAO_V1_3_0: DAO_V1_3_0__factory;
 let DAO_Current: DAO__factory;
 
 let daoV100Proxy: DAO_V1_0_0;
-let daoV120Proxy: DAO_V1_2_0;
+let daoV120Proxy: DAO_V1_3_0;
 
 let daoV100Implementation: string;
 let daoV120Implementation: string;
@@ -46,7 +46,7 @@ describe('DAO Upgrade', function () {
 
     // We don't use the typchain here but directly grab the artifacts. This will be changed in an upcoming PR again.
     DAO_V1_0_0 = new DAO_V1_0_0__factory(signers[0]);
-    DAO_V1_2_0 = new DAO_V1_2_0__factory(signers[0]);
+    DAO_V1_3_0 = new DAO_V1_3_0__factory(signers[0]);
     DAO_Current = new DAO__factory(signers[0]);
 
     // Deploy the v1.3.0 implementation
@@ -262,7 +262,7 @@ describe('DAO Upgrade', function () {
 
     context(`v1.2.0 to v1.3.0`, function () {
       beforeEach(async function () {
-        daoV120Proxy = await deployWithProxy(DAO_V1_2_0);
+        daoV120Proxy = await deployWithProxy(DAO_V1_3_0);
         await daoV120Proxy.initialize(
           DUMMY_METADATA,
           signers[0].address,
@@ -303,7 +303,7 @@ describe('DAO Upgrade', function () {
 
         // Check the emitted implementation.
         const emittedImplementation = (
-          await findEventTopicLog(upgradeTx, DAO_V1_2_0.interface, 'Upgraded')
+          await findEventTopicLog(upgradeTx, DAO_V1_3_0.interface, 'Upgraded')
         ).args.implementation;
         expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
 
@@ -486,7 +486,7 @@ describe('DAO Upgrade', function () {
       );
 
       // prepare v1.2.0
-      daoV120Proxy = await deployWithProxy(DAO_V1_2_0);
+      daoV120Proxy = await deployWithProxy(DAO_V1_3_0);
       await daoV120Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
