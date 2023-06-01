@@ -20,10 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const upgradeTX = await daoInterface.populateTransaction.upgradeToAndCall(
     daoImplementation,
-    daoInterface.interface.encodeFunctionData('initializeFrom', [
-      [1, 0, 0],
-      '0x',
-    ])
+    daoInterface.interface.encodeFunctionData('initializeFrom', [[1, 0, 0], ''])
   );
 
   if (!upgradeTX.to || !upgradeTX.data) {
