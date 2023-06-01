@@ -59,7 +59,7 @@ export async function uploadToIPFS(
   const client = IPFS.create({
     url: 'https://prod.ipfs.aragon.network/api/v0',
     headers: {
-      'X-API-KEY': 'yRERPRwFAb5ZiV94XvJdgvDKoGEeFerfFsAQ65',
+      'X-API-KEY': 'b477RhECf8s8sdM7XrkLBs2wHc4kCMwpbcFC55Kt',
     },
   });
 
@@ -70,6 +70,7 @@ export async function uploadToIPFS(
 
   const cid = await client.add(metadata);
   await client.pin.add(cid.cid);
+  console.log(`Uploaded to IPFS with cid ${cid.cid}`);
   return cid.path;
 }
 
