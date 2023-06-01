@@ -18,8 +18,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress,
     hre.ethers.provider
   );
-  const upgradeTX = await daoInterface.populateTransaction.upgradeTo(
-    daoImplementation
+  const upgradeTX = await daoInterface.populateTransaction.upgradeToAndCall(
+    daoImplementation,
+    daoInterface.interface.encodeFunctionData('initializeFrom', [
+      [1, 0, 0],
+      '0x',
+    ])
   );
 
   if (!upgradeTX.to || !upgradeTX.data) {
