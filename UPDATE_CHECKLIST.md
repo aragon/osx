@@ -35,6 +35,10 @@ If the deployer **is** allowed to create a proposal
 
 - [ ] Verify that the created proposal includes all necessary actions
 
+If the managing DAO itself **is** upgraded to a new implementation and the `reinitializer(X)` number `X` is incremented
+
+- [ ] Verify that the `initializeFrom(uint8[3] calldata _previousProtocolVersion, bytes calldata _initData) external reinitializer(X)` function is called after the upgrade via `upgradeToAndCall`. Otherwise, the DAO is left un(re)initialized and someone could call `initialize` and define another `initialOwner` getting `ROOT_PERMISSION_ID`.
+
 ### Verfication
 
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
