@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {Operation} from '../../../utils/types';
-import {getContractAddress} from '../../helpers';
+import {getActiveContractAddress} from '../../helpers';
 import {DAO__factory} from '../../../typechain';
 import {UPDATE_INFOS} from '../../../utils/updates';
 
@@ -13,13 +13,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const managingDAOAddress = await getContractAddress('managingDAO', hre);
-  const pluginSetupProcessorAddress = await getContractAddress(
+  const managingDAOAddress = await getActiveContractAddress('managingDAO', hre);
+  const pluginSetupProcessorAddress = await getActiveContractAddress(
     'PluginSetupProcessor',
     hre
   );
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
-  const previousDAOFactoryAddress = await getContractAddress('DAOFactory', hre);
+  const daoRegistryAddress = await getActiveContractAddress('DAORegistry', hre);
+  const previousDAOFactoryAddress = await getActiveContractAddress(
+    'DAOFactory',
+    hre
+  );
   console.log(`Using managingDAO ${managingDAOAddress}`);
   console.log(`Using PluginSetupProcessor ${pluginSetupProcessorAddress}`);
   console.log(`Using DAORegistry ${daoRegistryAddress}`);

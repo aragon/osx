@@ -105,6 +105,26 @@ export async function getContractAddress(
     }
   } catch (e) {}
 
+  return getActiveContractAddressInNetwork(contractName, networkName);
+}
+
+export async function getActiveContractAddress(
+  contractName: string,
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
+  let networkName = hre.network.name;
+
+  if (hre.testingFork.network) {
+    networkName = hre.testingFork.network;
+  }
+
+  return getActiveContractAddressInNetwork(contractName, networkName);
+}
+
+export async function getActiveContractAddressInNetwork(
+  contractName: string,
+  networkName: string
+): Promise<string> {
   const activeContracts = await getActiveContractsJSON();
   try {
     return activeContracts[networkName][contractName];
