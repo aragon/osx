@@ -22,5 +22,5 @@ Task: [ID]()
 - [ ] Any dependent changes have been merged and published in downstream modules.
 - [ ] I ran all tests with success and extended them if necessary.
 - [ ] I have updated the `CHANGELOG.md` file in the root folder.
-- [ ] I have updated the `DEPLOYMENT_CHECKLIST` file in the root folder to reflect.
+- [ ] I have updated the `DEPLOYMENT_CHECKLIST` file in the root folder.
 - [ ] I have updated the `UPDATE_CHECKLIST` file in the root folder.
