@@ -119,7 +119,7 @@ contract PluginRepoFactory {
         pluginRepo = PluginRepo(
             createERC1967Proxy(
                 pluginRepoBase,
-                abi.encodeWithSelector(PluginRepo.initialize.selector, _initialOwner)
+                abi.encodeCall(PluginRepo.initialize, (_initialOwner))
             )
         );
 

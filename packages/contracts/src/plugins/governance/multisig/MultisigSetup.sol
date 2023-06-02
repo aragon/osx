@@ -34,7 +34,7 @@ contract MultisigSetup is PluginSetup {
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             address(multisigBase),
-            abi.encodeWithSelector(Multisig.initialize.selector, _dao, members, multisigSettings)
+            abi.encodeCall(Multisig.initialize, (IDAO(_dao), members, multisigSettings))
         );
 
         // Prepare permissions

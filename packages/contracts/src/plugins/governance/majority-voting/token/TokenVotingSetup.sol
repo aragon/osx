@@ -142,7 +142,10 @@ contract TokenVotingSetup is PluginSetup {
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
-            abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, token)
+            abi.encodeCall(
+                TokenVoting.initialize,
+                (IDAO(_dao), votingSettings, IVotesUpgradeable(token))
+            )
         );
 
         // Prepare permissions
@@ -275,7 +278,7 @@ contract TokenVotingSetup is PluginSetup {
     /// @param token The token address
     function _isERC20(address token) private view returns (bool) {
         (bool success, bytes memory data) = token.staticcall(
-            abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
+            abi.encodeCall(IERC20Upgradeable.balanceOf, (address(this)))
         );
         return success && data.length == 0x20;
     }

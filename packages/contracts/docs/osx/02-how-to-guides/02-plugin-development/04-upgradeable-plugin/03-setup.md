@@ -68,7 +68,7 @@ contract SimpleStorageBuild1Setup is PluginSetup {
 
     plugin = createERC1967Proxy(
       simpleStorageImplementation,
-      abi.encodeWithSelector(SimpleStorageBuild1.initializeBuild1.selector, _dao, number)
+      abi.encodeCall(SimpleStorageBuild1.initializeBuild1, (IDAO(_dao), number))
     );
 
     PermissionLib.MultiTargetPermission[]
@@ -190,7 +190,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
 
     plugin = createERC1967Proxy(
       simpleStorageImplementation,
-      abi.encodeWithSelector(SimpleStorageBuild2.initializeBuild2.selector, _dao, _number, _account)
+      abi.encodeCall(SimpleStorageBuild2.initializeBuild2, (IDAO(_dao), _number, _account))
     );
 
     PermissionLib.MultiTargetPermission[]
@@ -222,10 +222,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
 
     if (_currentBuild == 1) {
       address _account = abi.decode(_payload.data, (address));
-      initData = abi.encodeWithSelector(
-        SimpleStorageBuild2.initializeFromBuild1.selector,
-        _account
-      );
+      initData = abi.encodeCall(SimpleStorageBuild2.initializeFromBuild1, _account);
     }
   }
 
@@ -360,7 +357,7 @@ contract SimpleStorageBuild3Setup is PluginSetup {
 
     plugin = createERC1967Proxy(
       simpleStorageImplementation,
-      abi.encodeWithSelector(SimpleStorageBuild3.initializeBuild3.selector, _dao, _number, _account)
+      abi.encodeCall(SimpleStorageBuild3.initializeBuild3, (IDAO(_dao), _number, _account))
     );
 
     PermissionLib.MultiTargetPermission[]
@@ -394,12 +391,9 @@ contract SimpleStorageBuild3Setup is PluginSetup {
   {
     if (_currentBuild == 1) {
       address _account = abi.decode(_payload.data, (address));
-      initData = abi.encodeWithSelector(
-        SimpleStorageBuild3.initializeFromBuild1.selector,
-        _account
-      );
+      initData = abi.encodeCall(SimpleStorageBuild3.initializeFromBuild1, (_account));
     } else if (_currentBuild == 2) {
-      initData = abi.encodeWithSelector(SimpleStorageBuild3.initializeFromBuild2.selector);
+      initData = abi.encodeCall(SimpleStorageBuild3.initializeFromBuild2, ());
     }
 
     PermissionLib.MultiTargetPermission[]

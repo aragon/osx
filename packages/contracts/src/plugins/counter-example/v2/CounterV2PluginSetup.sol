@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
+import {IDAO} from "../../../core/dao/IDAO.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {IPluginSetup} from "../../../framework/plugin/setup/IPluginSetup.sol";
 import {PluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
@@ -37,7 +38,10 @@ contract CounterV2PluginSetup is PluginSetup {
         returns (address plugin, PreparedSetupData memory preparedSetupData)
     {
         // Decode the parameters from the UI
-        (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
+        (address _multiplyHelper, uint256 _num, uint256 _newVariable) = abi.decode(
+            _data,
+            (address, uint256, uint256)
+        );
 
         address multiplyHelper = _multiplyHelper;
 
@@ -45,11 +49,9 @@ contract CounterV2PluginSetup is PluginSetup {
             multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));
         }
 
-        bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("initialize(address,address,uint256)")),
-            _dao,
-            multiplyHelper,
-            _num
+        bytes memory initData = abi.encodeCall(
+            CounterV2.initialize,
+            (IDAO(_dao), MultiplyHelper(multiplyHelper), _num, _newVariable)
         );
 
         PermissionLib.MultiTargetPermission[]
@@ -112,10 +114,7 @@ contract CounterV2PluginSetup is PluginSetup {
 
         if (_currentBuild == 1) {
             (_newVariable) = abi.decode(_payload.data, (uint256));
-            initData = abi.encodeWithSelector(
-                bytes4(keccak256("setNewVariable(uint256)")),
-                _newVariable
-            );
+            initData = abi.encodeCall(CounterV2.setNewVariable, (_newVariable));
         }
 
         PermissionLib.MultiTargetPermission[]

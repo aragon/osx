@@ -87,7 +87,7 @@ contract TokenFactory {
         if (token != address(0)) {
             // Validate if token is ERC20
             bytes memory data = token.functionStaticCall(
-                abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
+                abi.encodeCall(IERC20Upgradeable.balanceOf, (address(this)))
             );
 
             if (data.length != 0x20) {

@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
+import {IDAO} from "../../../core/dao/IDAO.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {IPluginSetup} from "../../../framework/plugin/setup/IPluginSetup.sol";
 import {PluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
@@ -44,11 +45,9 @@ contract CounterV1PluginSetup is PluginSetup {
             multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));
         }
 
-        bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("initialize(address,address,uint256)")),
-            _dao,
-            multiplyHelper,
-            _num
+        bytes memory initData = abi.encodeCall(
+            CounterV1.initialize,
+            (IDAO(_dao), MultiplyHelper(multiplyHelper), _num)
         );
 
         PermissionLib.MultiTargetPermission[]
