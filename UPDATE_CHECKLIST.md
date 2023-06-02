@@ -91,10 +91,12 @@ if the new contracts **aren't** published:
 - [ ] Test the new deployed subgraph with the frontend team
 - [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
 
-
 ## Version tasks
+
 ### v1.3.0
+
 #### Pre-Update
+
 Nothing to do.
 
 #### After-Update
@@ -102,9 +104,9 @@ Nothing to do.
 Wait until the managing DAO has made the necessary changes and then:
 
 - [ ] Verify that the managingDAO implementation has been updated
-- [ ] Verify that the managingDAO is reinitialized to version 2
+- [ ] Verify that the managingDAO is reinitialized to `_initialized = 2`
 - [ ] Verify that the old DAOFactory has no permissions on the DAORegistry
-- [ ] Verify that the new DAOFactory has register permission on the DAORegistry
+- [ ] Verify that the new DAOFactory has the `REGISTER_DAO_PERMISSION_ID` permission on the DAORegistry
 - [ ] Verify that Release 1 Build 2 of the multisig plugin has been created
 - [ ] Verify that Release 1 Build 2 of the token voting plugin has been created
 - [ ] Verify that Release 1 Build 2 of the addresslist voting plugin has been created
