@@ -4,6 +4,13 @@ This checklist is seen as a guide to update the existing deployment.
 
 ## Pre-Update
 
+- [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
+- [ ] Check that all contracts that undergo an upgrade and
+  - [ ] require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective method with an incremented `renitializer(X)` number
+  - [ ] have new storage added to them
+    - [ ] decrement the storage gap correctly
+    - [ ] do not corrupt pre-existing storage
+    - [ ] initialize the storage correctly
 - [ ] Make sure that the `deploy` property in `packages/contracts/networks.json` points to the correct update
 - [ ] Run `yarn` in the repository root to install the dependencies
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
@@ -11,6 +18,12 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Copy the managing DAO multisig env variables from `packages/subgraph/.env-example` into `packages/subgraph/.env`
+
+### v1.3.0 specific
+
+- [ ] Double-check that the change to `IDAO` (addition of `allowFailureMap` to the `IDAO.Executed` event) does not change break its recognition by ERC-165 and thus compatibility.
+- [ ] Confirm that the reinitialization of `DAO` is done correctly.
+- [ ] Confirm that **no** reinitialization of `TokenVoting`, `AddresslistVoting`, `Multisig` is required.
 
 ## Update
 
