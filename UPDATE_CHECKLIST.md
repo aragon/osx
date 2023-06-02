@@ -4,6 +4,7 @@ This checklist is seen as a guide to update the existing deployment.
 
 ## Pre-Update
 
+- [ ] Make sure you are using Node v16
 - [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
 - [ ] Check that all contracts that undergo an upgrade and
   - [ ] require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective method with an incremented `renitializer(X)` number

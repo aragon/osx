@@ -4,6 +4,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 
 ## Pre-Deployment
 
+- [ ] Make sure you are using Node v16 
 - [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
 - [ ] Choose an ENS domain for DAOs
 - [ ] Choose an ENS domain for plugins
