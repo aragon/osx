@@ -162,6 +162,37 @@ The labels also indicate how the npm packages will be bumped to the next version
 | release:minor | minor bump for `@aragon/osx` and `@aragon/osx-ethers` |
 | release:major | major bump for `@aragon/osx` and `@aragon/osx-ethers` |
 
+### Publishing protocol upgrades
+
+**Testnets**
+
+1. Merge `develop` into `main`
+2. Deploy the new contracts version to the testnets
+3. Update the `active_contracts.json` file on `main`
+4. Create a **draft** prerelease (e.g. `1.3.0-rc0`) on GitHub
+5. Wait for the managing DAO to approve on the testnets
+6. Update the NPM package version
+   - Create a PR to `main` with the release labels
+7. Unmark the Release as a draft and deploy the NPM packages
+
+**Fixes during Testing**
+
+1. Branch out from `main`
+2. Fix in in merged out branch
+3. Merge back into `main`
+4. Merge `main` back to `develop`
+5. Follow the `Testnets` release steps with `rc0` increment (e.g rc0 → rc1 or rc1 → rc2)
+
+**Mainnets**
+
+1. Deploy the new contracts version to both mainnets and testnets
+2. Update the `active_contracts.json` file on `main`
+3. Create a **draft** release (e.g. `1.3.0`) on GitHub
+4. Wait for the managing DAO to approve on mainnets and testnets
+5. Update the NPM package version
+   - Create a PR to `main` with the release labels
+6. Unmark the Release as a draft and deploy the NPM packages
+
 ## Pull request commands
 
 Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.
