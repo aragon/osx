@@ -18,18 +18,15 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Copy the managing DAO multisig env variables from `packages/subgraph/.env-example` into `packages/subgraph/.env`
-
-### v1.3.0 specific
-
-- [ ] Double-check that the change to `IDAO` (addition of `allowFailureMap` to the `IDAO.Executed` event) does not change break its recognition by ERC-165 and thus compatibility.
-- [ ] Confirm that the reinitialization of `DAO` is done correctly.
-- [ ] Confirm that **no** reinitialization of `TokenVoting`, `AddresslistVoting`, `Multisig` is required.
+- [ ] Follow the version specific tasks in the section `Version tasks` 
 
 ## Update
 
 To update run `yarn deploy --network NETWORK` in `packages/contracts` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `yarn deploy --network mainnet`).
 
 ## After-Update
+
+- [ ] Follow the version specific tasks in the section `Version tasks` 
 
 ### Configuration updates
 
@@ -47,10 +44,6 @@ If the deployer **is not** allowed to create a new proposal in the managing DAOs
 If the deployer **is** allowed to create a proposal
 
 - [ ] Verify that the created proposal includes all necessary actions
-
-If the managing DAO itself **is** upgraded to a new implementation and the `reinitializer(X)` number `X` is incremented
-
-- [ ] Verify that the `initializeFrom(uint8[3] calldata _previousProtocolVersion, bytes calldata _initData) external reinitializer(X)` function is called after the upgrade via `upgradeToAndCall`. Otherwise, the DAO is left un(re)initialized and someone could call `initialize` and define another `initialOwner` getting `ROOT_PERMISSION_ID`.
 
 ### Verfication
 
@@ -97,3 +90,21 @@ if the new contracts **aren't** published:
 - [ ] Run `yarn deploy` in `packages/subgraph` to deploy the subgraph
 - [ ] Test the new deployed subgraph with the frontend team
 - [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
+
+
+## Version tasks
+### v1.3.0
+#### Pre-Update
+Nothing to do.
+
+#### After-Update
+
+Wait until the managing DAO has made the necessary changes and then:
+
+- [ ] Verify that the managingDAO implementation has been updated
+- [ ] Verify that the managingDAO is reinitialized to version 2
+- [ ] Verify that the old DAOFactory has no permissions on the DAORegistry
+- [ ] Verify that the new DAOFactory has register permission on the DAORegistry
+- [ ] Verify that Release 1 Build 2 of the multisig plugin has been created
+- [ ] Verify that Release 1 Build 2 of the token voting plugin has been created
+- [ ] Verify that Release 1 Build 2 of the addresslist voting plugin has been created
