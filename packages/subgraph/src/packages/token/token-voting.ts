@@ -40,19 +40,18 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
+  let pluginAddress = event.address;
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
+  let proposalId = getProposalId(pluginAddress, pluginProposalId);
 
   let proposalEntity = new TokenVotingProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = event.address.toHexString();
+  proposalEntity.plugin = pluginAddress.toHexString();
   proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
-  proposalEntity.startDate = event.params.startDate;
-  proposalEntity.endDate = event.params.endDate;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
   proposalEntity.potentiallyExecutable = false;
 
@@ -69,6 +68,11 @@ export function _handleProposalCreated(
     proposalEntity.supportThreshold = parameters.supportThreshold;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
     proposalEntity.minVotingPower = parameters.minVotingPower;
+
+    // Get the dates from `parameters` returned from `getProposal()`,
+    // so all the dates are correct in both build 1 & 2
+    proposalEntity.startDate = parameters.startDate;
+    proposalEntity.endDate = parameters.endDate;
 
     // Tally
     let tally = proposal.value.value3;
