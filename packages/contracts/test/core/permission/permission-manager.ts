@@ -567,6 +567,20 @@ describe('Core: PermissionManager', function () {
       }
     });
 
+    it('reverts for `Operation.GrantWithCondition` ', async () => {
+      const signers = await ethers.getSigners();
+      const bulkItems: SingleTargetPermission[] = [
+        {
+          operation: Operation.GrantWithCondition,
+          who: signers[1].address,
+          permissionId: ADMIN_PERMISSION_ID,
+        },
+      ];
+      await expect(
+        pm.applySingleTargetPermissions(pm.address, bulkItems)
+      ).to.be.revertedWithCustomError(pm, 'GrantWithConditionNotSupported');
+    });
+
     it('should handle bulk mixed', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
