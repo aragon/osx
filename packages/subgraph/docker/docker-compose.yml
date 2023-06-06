@@ -11,7 +11,7 @@ services:
     depends_on:
       - ipfs
       - postgres
-      - ganache
+      # - ganache
     extra_hosts:
       - host.docker.internal:host-gateway
     environment:
@@ -48,13 +48,13 @@ services:
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-  ganache:
-    image: trufflesuite/ganache-cli
-    ports:
-      - '8545:8545'
-    command:
-      [
-        'ganache-cli',
-        '-h',
-        '0.0.0.0',
-      ]
+  # ganache:
+  #   image: trufflesuite/ganache-cli
+  #   ports:
+  #     - '8545:8545'
+  #   command:
+  #     [
+  #       'ganache-cli',
+  #       '-h',
+  #       '0.0.0.0',
+  #     ]
