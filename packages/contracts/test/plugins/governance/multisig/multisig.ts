@@ -13,6 +13,7 @@ import {
   IProposal__factory,
   Multisig,
   PluginUUPSUpgradeable__factory,
+  ProposalUpgradeable__factory,
 } from '../../../../typechain';
 import {
   findEvent,
@@ -271,14 +272,24 @@ describe('Multisig', function () {
       ).to.be.true;
     });
 
-    it('supports the `Multisig` interface', async () => {
+    it('NOT supports the `PluginUUPSUpgradeable` interface', async () => {
       const pluginUUPSUpgradeableInterface =
         PluginUUPSUpgradeable__factory.createInterface();
       expect(
         await multisig.supportsInterface(
           getInterfaceID(pluginUUPSUpgradeableInterface)
         )
-      ).to.be.true;
+      ).to.be.false;
+    });
+
+    it('NOT supports the `ProposalUpgradeable` interface', async () => {
+      const proposalUpgradeableInterface =
+        ProposalUpgradeable__factory.createInterface();
+      expect(
+        await multisig.supportsInterface(
+          getInterfaceID(proposalUpgradeableInterface)
+        )
+      ).to.be.false;
     });
   });
 
