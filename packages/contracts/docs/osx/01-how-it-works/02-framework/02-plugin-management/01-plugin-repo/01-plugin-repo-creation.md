@@ -42,7 +42,7 @@ function createPluginRepoWithFirstVersion(
 
 which creates a `PluginRepo` with the first release and first build (`v1.1`) inside and registers it in the Aragon OSx `PluginRepoRegistry`contract with an [ENS subdomain](../../03-ens-names.md) under the`plugin.dao.eth` domain managed by Aragon.
 
-Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-puginrepo-contract), it receives
+Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-pluginrepo-contract), it receives
 
 - A valid ENS `_subdomain` name under that isn't already taken
 - The address of the plugin repo maintainer who ends up having the `ROOT_PERMISSION_ID`, `MAINTAINER_PERMISSION_ID`, and `UPGRADE_REPO_PERMISSION_ID` permission allowing to call the internal `PermissionManager`, the `createVersion` and `updateReleaseMetadata` functions as well as upgrading the contract.
