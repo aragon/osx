@@ -11,23 +11,14 @@ jobs:
     name: A job to check user's permission level
     steps:
       - name: Check user permission (write)
-        id: checkw
-        uses: scherermichael-oss/action-has-permission@master
+        id: check-write
+        uses: actions-cool/check-user-permission@v2
         with:
-          required-permission: write
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check user permission (maintain)
-        id: checkm
-        uses: scherermichael-oss/action-has-permission@master
-        with:
-          required-permission: maintain
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          require: 'write'
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Abort
-        if: steps.checkw.outputs.has-permission != '1' && steps.checkm.outputs.has-permission != '1' 
+        if: steps.check-write.outputs.check-result == 'false'
         run: exit 1
-        
   mythx_partial:
     needs: [check_user_permission]
     runs-on: ubuntu-latest
