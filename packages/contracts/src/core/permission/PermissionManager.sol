@@ -128,9 +128,6 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         PermissionConditionBase _condition
     ) external virtual auth(ROOT_PERMISSION_ID) {
-        if (_condition.supportsInterface(type(IPermissionCondition).interfaceId)) {
-            revert ConditionInvalid(_condition);
-        }
         _grantWithCondition(_where, _who, _permissionId, _condition);
     }
 
@@ -261,7 +258,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         PermissionConditionBase _condition
     ) internal virtual {
-        if (!address(_condition).isContract()) {
+        if (!_condition.supportsInterface(type(IPermissionCondition).interfaceId)) {
             revert ConditionInvalid(_condition);
         }
 
