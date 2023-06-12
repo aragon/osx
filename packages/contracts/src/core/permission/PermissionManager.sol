@@ -261,8 +261,10 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (_where == ANY_ADDR || _who == ANY_ADDR) {
-            bool isRestricted = isPermissionRestrictedForAnyAddr(_permissionId);
-            if (_permissionId == ROOT_PERMISSION_ID || isRestricted) {
+            if (
+                _permissionId == ROOT_PERMISSION_ID ||
+                isPermissionRestrictedForAnyAddr(_permissionId)
+            ) {
                 revert PermissionsForAnyAddressDisallowed();
             }
         }
