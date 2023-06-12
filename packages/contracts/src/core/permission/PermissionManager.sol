@@ -236,8 +236,6 @@ abstract contract PermissionManager is Initializable {
             permissionsHashed[permHash] = ALLOW_FLAG;
 
             emit Granted(_permissionId, msg.sender, _where, _who, IPermissionCondition(ALLOW_FLAG));
-        } else {
-            // TODO https://aragonassociation.atlassian.net/browse/OS-159
         }
     }
 
