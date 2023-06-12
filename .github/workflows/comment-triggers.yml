@@ -27,6 +27,7 @@ jobs:
       - name: Abort
         if: steps.checkw.outputs.has-permission != '1' && steps.checkm.outputs.has-permission != '1' 
         run: exit 1
+        
   mythx_partial:
     needs: [check_user_permission]
     runs-on: ubuntu-latest
