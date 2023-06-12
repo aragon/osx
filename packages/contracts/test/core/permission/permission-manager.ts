@@ -173,7 +173,7 @@ describe('Core: PermissionManager', function () {
       ).deploy();
     });
 
-    it('reverts if the condition address does not support `IPermissionCondition`', async () => {
+    it('reverts if the condition address is not a contract', async () => {
       await expect(
         pm.grantWithCondition(
           pm.address,
