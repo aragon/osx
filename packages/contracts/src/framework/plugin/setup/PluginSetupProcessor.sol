@@ -693,7 +693,7 @@ contract PluginSetupProcessor {
         }
     }
 
-    /// @notice Checks if a caller has the permission to apply a setup.
+    /// @notice Checks if a caller can apply a setup. The caller can be either the DAO to which the plugin setup is applied to or another account to which the DAO has granted the respective permission.
     /// @param _dao The address of the applying DAO.
     /// @param _permissionId The permission ID.
     function _canApply(address _dao, bytes32 _permissionId) private view {
