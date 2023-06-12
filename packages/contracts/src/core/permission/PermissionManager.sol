@@ -218,10 +218,11 @@ abstract contract PermissionManager is Initializable {
         _grant(address(this), _initialOwner, ROOT_PERMISSION_ID);
     }
 
-    /// @notice This method is used in the public `grant` method of the permission manager.
+    /// @notice This method is used in the external `grant` method of the permission manager.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
+    /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
         if (_where == ANY_ADDR || _who == ANY_ADDR) {
             revert AnyAddressDisallowedForWhoAndWhere();
@@ -239,7 +240,7 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice This method is used in the internal `_grant` method of the permission manager.
+    /// @notice This method is used in the external `grantWithCondition` method of the permission manager.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
