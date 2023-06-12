@@ -101,7 +101,7 @@ describe('Core: PermissionManager', function () {
     it('reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR', async () => {
       await expect(
         pm.grant(ANY_ADDR, ANY_ADDR, ROOT_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'AnyAddressDisallowedForWhoAndWhere');
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
     it('reverts if permissionId is restricted and `_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
@@ -121,14 +121,14 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    it('reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR` and condition is not present', async () => {
+    it('reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
       await expect(
         pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'ConditionNotPresentForAnyAddress');
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
 
       await expect(
         pm.grant(ANY_ADDR, pm.address, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'ConditionNotPresentForAnyAddress');
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
     it('should emit Granted', async () => {
@@ -468,20 +468,25 @@ describe('Core: PermissionManager', function () {
 
     it('should grant with condition', async () => {
       const signers = await ethers.getSigners();
+
+      const conditionMock2 = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.GrantWithCondition,
           where: signers[1].address,
           who: signers[0].address,
-          condition: signers[3].address,
+          condition: conditionMock.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.GrantWithCondition,
           where: signers[2].address,
           who: signers[0].address,
-          condition: signers[4].address,
+          condition: conditionMock2.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];

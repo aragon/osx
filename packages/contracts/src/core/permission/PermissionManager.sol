@@ -225,7 +225,7 @@ abstract contract PermissionManager is Initializable {
     /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
         if (_where == ANY_ADDR || _who == ANY_ADDR) {
-            revert AnyAddressDisallowedForWhoAndWhere();
+            revert PermissionsForAnyAddressDisallowed();
         }
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
