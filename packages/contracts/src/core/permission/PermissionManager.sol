@@ -66,13 +66,13 @@ abstract contract PermissionManager is Initializable {
     /// @param here The address of the context in which the permission is granted.
     /// @param where The address of the target contract for which `_who` receives permission.
     /// @param who The address (EOA or contract) receiving the permission.
-    /// @param condition The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionCondition` to be used.
+    /// @param condition The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionConditionBase` contract implementation to be used.
     event Granted(
         bytes32 indexed permissionId,
         address indexed here,
         address where,
         address indexed who,
-        PermissionConditionBase condition
+        address condition
     );
 
     /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `_who` for the contract `_where`.
@@ -236,13 +236,7 @@ abstract contract PermissionManager is Initializable {
         if (currentFlag == UNSET_FLAG) {
             permissionsHashed[permHash] = ALLOW_FLAG;
 
-            emit Granted(
-                _permissionId,
-                msg.sender,
-                _where,
-                _who,
-                PermissionConditionBase(ALLOW_FLAG)
-            );
+            emit Granted(_permissionId, msg.sender, _where, _who, ALLOW_FLAG);
         }
     }
 
@@ -284,7 +278,7 @@ abstract contract PermissionManager is Initializable {
         if (currentCondition == UNSET_FLAG) {
             permissionsHashed[permHash] = newCondition;
 
-            emit Granted(_permissionId, msg.sender, _where, _who, _condition);
+            emit Granted(_permissionId, msg.sender, _where, _who, newCondition);
         } else if (currentCondition != newCondition) {
             // Revert if `permHash` is already granted, but uses a different condition.
             // If we don't revert, we either should:
