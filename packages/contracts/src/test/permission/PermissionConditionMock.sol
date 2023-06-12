@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.17;
 
-import "../../core/permission/IPermissionCondition.sol";
+import "../../core/permission/PermissionConditionBase.sol";
 
-contract PermissionConditionMock is IPermissionCondition {
+contract PermissionConditionMock is PermissionConditionBase {
     bool internal _hasPermissionsResult = true;
 
     function isGranted(

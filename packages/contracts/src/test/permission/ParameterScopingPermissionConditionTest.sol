@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.17;
 
-import {IPermissionCondition} from "../../core/permission/IPermissionCondition.sol";
+import {PermissionConditionBase} from "../../core/permission/PermissionConditionBase.sol";
 import {TestPlugin} from "../plugin/PluginTest.sol";
 
-contract TestParameterScopingPermissionCondition is IPermissionCondition {
+contract TestParameterScopingPermissionCondition is PermissionConditionBase {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestPlugin.addPermissioned.selector;
 
     function getSelector(bytes memory _data) public pure returns (bytes4 sig) {
