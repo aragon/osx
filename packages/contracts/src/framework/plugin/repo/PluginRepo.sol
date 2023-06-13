@@ -267,7 +267,6 @@ contract PluginRepo is
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPluginRepo).interfaceId ||
-            _interfaceId == type(UUPSUpgradeable).interfaceId ||
             _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }

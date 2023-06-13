@@ -14,6 +14,7 @@ import {
   IERC165__factory,
   IPluginRepo__factory,
   IProtocolVersion__factory,
+  UUPSUpgradeable__factory,
 } from '../../../typechain';
 
 import {
