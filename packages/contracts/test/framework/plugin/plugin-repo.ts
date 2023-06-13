@@ -11,7 +11,11 @@ import {
   PluginUUPSUpgradeableSetupV1Mock,
   PlaceholderSetup__factory,
   TestPlugin__factory,
+  IERC165__factory,
+  IPluginRepo__factory,
+  IProtocolVersion__factory,
 } from '../../../typechain';
+
 import {
   deployMockPluginSetup,
   deployNewPluginRepo,
@@ -19,6 +23,8 @@ import {
 import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32} from '../../test-utils/dao';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -72,6 +78,39 @@ describe('PluginRepo', function () {
         )
       ).to.be.true;
     }
+  });
+
+  describe('ERC-165', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await pluginRepo.supportsInterface('0xffffffff')).to.be.false;
+    });
+
+    it('supports the `IERC165` interface', async () => {
+      const iface = IERC165__factory.createInterface();
+      expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IPluginRepo` interface', async () => {
+      const iface = IPluginRepo__factory.createInterface();
+      expect(getInterfaceID(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
+      expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+  });
+
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await pluginRepo.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
   });
 
   describe('CreateVersion: ', async () => {
