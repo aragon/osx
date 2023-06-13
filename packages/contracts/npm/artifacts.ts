@@ -15,20 +15,40 @@ import * as DAORegistry from '../artifacts/src/framework/dao/DAORegistry.sol/DAO
 import * as TokenFactory from '../artifacts/src/framework/utils/TokenFactory.sol/TokenFactory.json';
 
 //// plugin
+///// repo
 import * as PluginRepo from '../artifacts/src/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
 import * as PluginRepoFactory from '../artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
 import * as PluginRepoRegistry from '../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 
+///// setup
+import * as PluginSetupProcessor from '../artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
+
 // plugins
-import * as TokenVoting from '../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
+//// governance
+////// admin
+import * as Admin from '../artifacts/src/plugins/governance/admin/Admin.sol/Admin.json';
+import * as AdminSetup from '../artifacts/src/plugins/governance/admin/AdminSetup.sol/AdminSetup.json';
+
+////// majority-voting
+//////// addresslist
 import * as AddresslistVoting from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
-import * as Admin from '../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
-import * as Multisig from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
+import * as AddresslistVotingSetup from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol/AddresslistVotingSetup.json';
+
+//////// TokenVoting
+import * as TokenVoting from '../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
+import * as TokenVotingSetup from '../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
+
+////// Multisig
+import * as Multisig from '../artifacts/src/plugins/governance/multisig/Multisig.sol/Multisig.json';
+import * as MultisigSetup from '../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
+
+//// token
 import * as MerkleMinter from '../artifacts/src/plugins/token/MerkleMinter.sol/MerkleMinter.json';
 import * as MerkleDistributor from '../artifacts/src/plugins/token/MerkleDistributor.sol/MerkleDistributor.json';
 
 // token
-//// governance
+//// ERC20
+////// governance
 import * as GovernanceERC20 from '../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
 import * as GovernanceWrappedERC20 from '../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 
@@ -45,10 +65,16 @@ export default {
   PluginRepoFactory,
   PluginRepoRegistry,
 
-  TokenVoting,
-  AddresslistVoting,
+  PluginSetupProcessor,
+
   Admin,
+  AdminSetup,
+  AddresslistVoting,
+  AddresslistVotingSetup,
+  TokenVoting,
+  TokenVotingSetup,
   Multisig,
+  MultisigSetup,
 
   MerkleMinter,
   MerkleDistributor,
