@@ -9,7 +9,7 @@ import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
-    '\nPrepare upgrade action of the "address-list-voting-repo" PluginRepo for the managing DAO'
+    '\nUpgrade the `address-list-voting-repo` PluginRepo to the new implementation'
   );
 
   const pluginRepoFactoryAddress = await getContractAddress(

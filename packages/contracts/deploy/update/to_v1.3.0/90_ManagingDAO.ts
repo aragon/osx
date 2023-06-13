@@ -5,7 +5,7 @@ import {getContractAddress} from '../../helpers';
 import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nUpgrade ManagingDAO to new implemenation');
+  console.log('\nUpgrade the managing DAO to new implemenation');
 
   const daoFactoryAddress = await getContractAddress('DAOFactory', hre);
   const newDaoImplementation = await DAOFactory__factory.connect(

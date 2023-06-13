@@ -9,7 +9,7 @@ import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
-    '\nPrepare upgrade action of the "multisig-repo" PluginRepo for the managing DAO'
+    '\nUpgrade the `multisig-repo` PluginRepo to the new implementation'
   );
 
   const pluginRepoFactoryAddress = await getContractAddress(
