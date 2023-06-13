@@ -22,7 +22,7 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Follow the version specific tasks in the section `Version tasks`
 - [ ] If new plugin builds are released
   - [ ] Double-check that the build-metadata was updated correctly for the UI to work correctly
-  - [ ] If the plugin is used by the managing DAO and is security relevant, it must be applied immediately
+  - [ ] If the plugin is used by the managing DAO and the new build includes security relevant changes it must be applied immediately
 
 ## Update
 
