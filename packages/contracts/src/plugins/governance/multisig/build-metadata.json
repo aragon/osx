@@ -1,6 +1,6 @@
 {
   "ui": {},
-  "change": "- The ability to create a proposal now depends on the membership status of the current instead of the snapshot block.",
+  "change": "- The ability to create a proposal now depends on the membership status of the current instead of the snapshot block.\n- Added a check ensuring that the initial member list cannot overflow.",
   "pluginSetup": {
     "prepareInstallation": {
       "description": "The information required for the installation.",
