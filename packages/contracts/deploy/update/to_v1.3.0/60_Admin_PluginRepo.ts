@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,
-    description: `Upgrading the admin-repo implementation contract to ${newPluginRepoImplementation}`,
+    description: `Upgrade the "admin-repo" PluginRepo (${adminPluginRepo}) to the new implementation (${newPluginRepoImplementation})`,
   });
 };
 export default func;

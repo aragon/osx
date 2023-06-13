@@ -62,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: managingDAOAddress,
     value: 0,
     data: calldata,
-    description: `Moves permission (REGISTER_PLUGIN_REPO_PERMISSION) from old PluginRepoFactory ${previousPluginRepoFactoryAddress} to new PluginRepoFactory ${deployResult.address} on PluginRepoRegistry ${pluginRepoRegistryAddress}`,
+    description: `Moves the REGISTER_PLUGIN_REPO_PERMISSION permission on the PluginRepoRegistry (${pluginRepoRegistryAddress}) from the old to the new PluginRepoFactory (${previousPluginRepoFactoryAddress} -> ${deployResult.address}).`,
   });
 };
 export default func;
