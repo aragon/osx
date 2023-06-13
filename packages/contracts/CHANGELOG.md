@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed unnecessary ERC-165 check for `type(UUPSUpgradeable).interfaceId` from `supportsInterface` in `PluginRepo`.
+
 ## v1.2.0
 
 ### Added
