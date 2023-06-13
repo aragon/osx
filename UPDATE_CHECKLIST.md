@@ -7,7 +7,8 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Make sure you are using Node v16
 - [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
 - [ ] Check that all contracts that undergo an upgrade and
-  - [ ] require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective method with an incremented `renitializer(X)` number
+  - [ ] do require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective initialization method with an incremented `renitializer(X)` number
+  - [ ] do NOT require reinitialzation are upgraded via `upgradeTo` and keep the same `renitializer(X)` number in the respective initialization methods
   - [ ] have new storage added to them
     - [ ] decrement the storage gap correctly
     - [ ] do not corrupt pre-existing storage
@@ -19,7 +20,7 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Copy the managing DAO multisig env variables from `packages/subgraph/.env-example` into `packages/subgraph/.env`
-- [ ] Follow the version specific tasks in the section `Version tasks` 
+- [ ] Follow the version specific tasks in the section `Version tasks`
 
 ## Update
 
@@ -27,7 +28,7 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ## After-Update
 
-- [ ] Follow the version specific tasks in the section `Version tasks` 
+- [ ] Follow the version specific tasks in the section `Version tasks`
 
 ### Configuration updates
 
@@ -104,10 +105,19 @@ Nothing to do.
 
 Wait until the managing DAO has made the necessary changes and then:
 
-- [ ] Verify that the managingDAO implementation has been updated
-- [ ] Verify that the managingDAO is reinitialized to `_initialized = 2`
-- [ ] Verify that the old DAOFactory has no permissions on the DAORegistry
-- [ ] Verify that the new DAOFactory has the `REGISTER_DAO_PERMISSION_ID` permission on the DAORegistry
-- [ ] Verify that Release 1 Build 2 of the multisig plugin has been created
-- [ ] Verify that Release 1 Build 2 of the token voting plugin has been created
-- [ ] Verify that Release 1 Build 2 of the addresslist voting plugin has been created
+- [ ] Verify that the `DAO` base contract in the `DAOFactory`
+- [ ] Verify that the managing DAO implementation has been updated to the new implementation
+- [ ] Verify that the managing DAO is reinitialized to `_initialized = 2`
+- [ ] Verify that the old `DAOFactory` has no permissions on the `DAORegistry`
+- [ ] Verify that the new `DAOFactory` has the `REGISTER_DAO_PERMISSION_ID` permission on the `DAORegistry`
+- [ ] Verify that the `PluginRepo` base contract in the PluginRepoFactory has been updated
+- [ ] Verify that all `PluginRepo`s controlled by the managing DAO have been updated to the new implementationare AND still initialized with `_initialized = 1`
+  - [ ] 'multisig-repo'
+  - [ ] 'admin-repo'
+  - [ ] 'token-voting-repo'
+  - [ ] 'address-list-voting-repo'
+- [ ] Verify that the old `PluginRepoFactory` has no permissions on the `PluginRepoRegistry`
+- [ ] Verify that the new `PluginRepoFactory` has the `REGISTER_PLUGIN_REPO_PERMISSION_ID` permission on the `PluginRepoRegistry`
+- [ ] Verify that Release 1 Build 2 of the `Multisig` plugin has been created
+- [ ] Verify that Release 1 Build 2 of the `TokenVoting` plugin has been created
+- [ ] Verify that Release 1 Build 2 of the `AddresslistVoting` plugin has been created
