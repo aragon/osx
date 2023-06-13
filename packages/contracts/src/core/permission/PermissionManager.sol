@@ -252,6 +252,10 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         PermissionConditionBase _condition
     ) internal virtual {
+        if (!address(_condition).isContract()) {
+            revert ConditionInvalid(_condition);
+        }
+
         if (!_condition.supportsInterface(type(IPermissionCondition).interfaceId)) {
             revert ConditionInvalid(_condition);
         }
