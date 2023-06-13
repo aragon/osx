@@ -5,12 +5,14 @@ import {getContractAddress} from '../../helpers';
 import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nConcluding DAOFactory update');
+  console.log('\nConcluding DAOFactory upgrade');
   const {deployments, ethers} = hre;
   const [deployer] = await ethers.getSigners();
+
   const daoFactoryAddress = await getContractAddress('DAOFactory', hre);
   const daoFactory = DAOFactory__factory.connect(daoFactoryAddress, deployer);
   const daoBase = await daoFactory.callStatic.daoBase();
+
   hre.aragonToVerifyContracts.push(await deployments.get('DAOFactory'));
   hre.aragonToVerifyContracts.push({
     address: daoBase,
