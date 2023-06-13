@@ -8,7 +8,7 @@ import {Operation} from '../../../utils/types';
 import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nUpgrading PluginRepoFactory');
+  console.log('\nUpdating PluginRepoFactory');
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();

@@ -8,7 +8,7 @@ import {UPDATE_INFOS} from '../../../utils/updates';
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nUpgrading DAOFactory');
+  console.log('\nUpdating DAOFactory');
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();

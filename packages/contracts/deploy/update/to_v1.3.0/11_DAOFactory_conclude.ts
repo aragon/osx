@@ -5,7 +5,7 @@ import {getContractAddress} from '../../helpers';
 import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nConcluding DAOFactory upgrade');
+  console.log('\nConcluding DAOFactory update');
   const {deployments, ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
