@@ -36,7 +36,7 @@ contract SimpleStorageBuild1 is PluginUUPSUpgradeable {
 
 ### 2. Add the `prepareInstallation()` and `prepareUninstallation()` functions
 
-Each `PluginSetup` contract is deployed only once and each plugin version will have its own `PluginSetup` contract. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
+Each `PluginSetup` contract is deployed only once and each plugin version will have its own `PluginSetup` contract deployed. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
 
 In order for the Plugin to be easily installed into the DAO, we need to define the instructions for the plugin to work effectively. We have to tell the DAO's Permission Manager which permissions it needs to grant or revoke.
 
@@ -45,7 +45,7 @@ Hence, we will create a `prepareInstallation()` function, as well as a `prepareU
 The `prepareInstallation()` function takes in two parameters:
 
 1. the `DAO` it should prepare the installation for, and
-2. the `_data` parameter containing all the information needed for this function to work properly, in this case, the number we want to store.
+2. the `_data` parameter containing all the information needed for this function to work properly, encoded as a `bytes memory`. In this case, we get the number we want to store.
 
 Hence, the first thing we should do when working on the `prepareInsallation()` function is decode the information from the `_data` parameter.
 Similarly, the `prepareUninstallation()` function takes in a `payload`.
@@ -122,7 +122,7 @@ As you can see, we have a constructor storing the implementation contract instan
 Specifically important for this type of plugin is the `prepareUpdate()` function. Since we don't know the parameters we will require when updating the plugin to the next version, we can't add the `prepareUpdate()` function just yet. However, keep in mind that we will need to deploy new Plugin Setup contracts in subsequent builds to add in the `prepareUpdate()` function with each build requirements. We see this in depth in the ["How to update an Upgradeable Plugin" section](./05-updating-versions.md).
 :::
 
-### 3. Deployment and publishing
+### 3. Deployment
 
 Once you're done with your Plugin Setup contract, we'll need to deploy it so we can publish it into the Aragon OSx protocol. You can deploy your contract with a basic deployment script.
 
@@ -199,4 +199,6 @@ Finally, run this in your terminal to execute the command:
 npx hardhat run scripts/deploy.ts
 ```
 
-Once done, our plugin is ready to be published on the Aragon plugin registry. With the address of the `SimpleAdminSetup` contract deployed, we're ready for creating our `PluginRepo`, the plugin's repository where all plugin versions will live. Check out our how to guides on [publishing your plugin here](../07-publication/index.md).
+### 4. Publishing the Plugin to the Aragon OSx Protocol
+
+Once done, our plugin is ready to be published on the Aragon plugin registry. With the address of the `SimpleAdminSetup` contract deployed, we're almost ready for creating our `PluginRepo`, the plugin's repository where all plugin versions will live. Check out our how to guides on [publishing your plugin here](../07-publication/index.md).

@@ -14,7 +14,7 @@ Before moving on with the Guide, make sure you've read our documentation on [Cho
 
 ## Building a Non-Upgradeble Plugin
 
-We will build a basic `GreeterPlugin` which returns "Hello world!".
+We will build a plugin which returns "Hello world!" and the amount of times the function has been called.
 
 ### 1. Setup
 
@@ -71,7 +71,7 @@ Plugins are composed of two key contracts:
 In this case, we will create the `GreeterPlugin.sol` contract containing the main logic for our plugin - aka returning "Hello world!" when calling on the `greet()` function. Keep in mind, that because we're importing from the `Plugin` base template in this case, we are able to tap into:
 
 - the `auth(PERMISSION_ID)` modifier, which checks whether the account calling on that function has the permission specified in the `auth` parameters.
-- the `dao()` getter function, which returns the DAO instance for the plugin.
+- the `dao()` getter function, which returns the DAO instance to which the plugin permissions are bound.
 
 First, in your terminal, create the `GreeterPlugin.sol` contract:
 
@@ -91,10 +91,21 @@ contract GreeterPlugin is Plugin {
   // Permissions are what connects everything together. Addresses who have been granted the GREET_PERMISSION will be able to call on functions with the modifier `auth(GREET_PERMISSION_ID)`. These will be granted in the PluginSetup.sol contract up next.
   bytes32 public constant GREET_PERMISSION_ID = keccak256('GREET_PERMISSION');
 
+  uint256 public amountOfTimes = 0;
+
   constructor(IDAO _dao) Plugin(_dao) {}
 
-  function greet() external view auth(GREET_PERMISSION_ID) returns (string memory) {
-    return 'Hello, world!';
+  function greet() external auth(GREET_PERMISSION_ID) returns (string memory greeter) {
+    greeter = string.concat(
+      'Hello world! This function has been called ',
+      Strings.toString(amountOfTimes),
+      ' times.'
+    );
+    amountOfTimes += 1;
+  }
+
+  function _amountOftimes() external view returns (uint256) {
+    return amountOfTimes;
   }
 }
 ```
@@ -254,9 +265,9 @@ npx hardhat run --network goerli scripts/deploy.ts
 
 Now that the plugin is deployed on Goerli, we can publish it into the Aragon OSx Protocol so any DAO can install it!
 
-Publishing a plugin into Aragon OSx means creating a `PluginRepo` instance containing the plugin's first version. As developers can deploy more versions of the plugin moving forward, publishing a new version means adding a new `PluginSetup` contract into the this `PluginRepo` will contain all plugin versions
+Publishing a plugin into Aragon OSx means creating a `PluginRepo` instance containing the plugin's first version. As developers can deploy more versions of the plugin moving forward, publishing a new version means adding a new `PluginSetup` contract into their plugin's `PluginRepo` contract. This is where all plugin versions will be stored and what Aragon's plugin installer will use to fetch the `latestVersion` and install it into DAO's.
 
-You can do that through a few different ways:
+You can publish the plugin into Aragon's protocol through a few different ways:
 
 #### a) Etherscan
 
@@ -304,8 +315,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     pluginName,
     pluginSetupContract.address,
     deployer.address,
-    '0x00',
-    '0x00'
+    '0x00', // releaseMetadata: the hex representation of the CID containing your plugin's metadata - so the description, name, author, any UI, etc
+    '0x00' // buildMetadata: same as above but for each build, rather than release
   );
 
   console.log(
@@ -321,6 +332,8 @@ In order to run the script and finalize the publishing, run this in your termina
 ```bash
 npx hardhat run scripts/publish.ts
 ```
+
+To publish new versions in the future,
 
 ## Conclusion
 

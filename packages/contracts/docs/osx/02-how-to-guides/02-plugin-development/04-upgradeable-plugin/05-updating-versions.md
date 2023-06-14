@@ -6,11 +6,11 @@ title: Upgrading an Upgradeable Plugin
 
 Updating an Upgradeable plugin means we want to direct the implementation of our functionality to a new build, rather than the existing one.
 
-In this tutorial, we will go through how to update an Upgradeable plugin and each component needed.
+In this tutorial, we will go through how to update the version of an Upgradeable plugin and each component needed.
 
 ### 1. Create the new build implementation contract
 
-Firstly, you want to create the new build implementation contract the plugin should use. You can read more about how to do this in ["How to create a subsequent build implementation to an Upgradeable Plugin" guide](./04-subsequent-builds.md).
+Firstly, you want to create the new build implementation contract the plugin should use. You can read more about how to do this in the ["How to create a subsequent build implementation to an Upgradeable Plugin" guide](./04-subsequent-builds.md).
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -146,11 +146,11 @@ contract SimpleStorageBuild2Setup is PluginSetup {
 }
 ```
 
-The key thing about to review in this new Plugin Setup contract is its `prepareUpdate()` function. The function only contains a condition checking from which build number the update is transitioning to build 1. Here, it is the build number 0 as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of intializing the storage that was added in this build.
+The key thing to review in this new Plugin Setup contract is its `prepareUpdate()` function. The function only contains a condition checking from which build number the update is transitioning to build `2`. Here, it is the build number `1` as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of intializing the storage that was added in this build.
 
 ### 3. Future builds
 
-For each build we add, we will need to add a `prepareUpdate()` function with the parameters needed to update the implementation.
+For each build we add, we will need to add a `prepareUpdate()` function with any parameters needed to update to that implementation.
 
 In this third build, for example, we are modifying the bytecode of the plugin.
 
@@ -226,7 +226,7 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
 
 </details>
 
-With each new build implementation, we will need to udate the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function with the latest version we've deployed.
+With each new build implementation, we will need to udate the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function to support any new features that need to be set up.
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later

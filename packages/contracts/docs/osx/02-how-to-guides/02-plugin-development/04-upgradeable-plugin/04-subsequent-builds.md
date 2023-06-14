@@ -1,10 +1,15 @@
 ---
-title: Creating Subsequent Builds for Upgradeable Plugins
+title: Subsequent Builds for Upgradeable Plugins
 ---
 
 ## How to create a subsequent build to an Upgradeable Plugin
 
 A build is a new implementation of your Upgradeable Plugin. Upgradeable contracts offer advantages because you can cheaply change or fix the logic of your contract without losing the storage of your contract.
+
+The Aragon OSx protocol has an on-chain versioning system built-in, which distinguishes between releases and builds.
+
+- **Releases** contain breaking changes, which are incompatible with preexisting installations. Updates to a different release are not possible. Instead, you must install the new plugin release and uninstall the old one.
+- **Builds** are minor/patch versions within a release, and they are meant for compatible upgrades only (adding a feature or fixing a bug without changing anything else).
 
 In this how to guide, we'll go through how we can create these builds for our plugins. Specifically, we'll showcase two specific types of builds - one that modifies the storage of the plugins, another one which modifies its bytecode. Both are possible and can be implemented within the same build implementation as well.
 
@@ -12,9 +17,9 @@ In this how to guide, we'll go through how we can create these builds for our pl
 
 Make sure you have at least one build already deployed and published into the Aragon protocol. Make sure to check out our [publishing guide](../07-publication/index.md) to ensure this step is done.
 
-### 2. Create a build implementation modifying storage
+### 2. Create a new build implementation
 
-In this second build, we want to change certain sections of our existing plugin implementation - we want to update the storage of our plugin with new values. In this specific case, we will add a second storage variable `address public account;`. Additional to the `initializeFromBuild2` function, we also want to add a second setter function `storeAccount` that uses the same permission as `storeNumber`.
+In this second build implementation we want to update the functionality of our plugin - in this case, we want to update the storage of our plugin with new values. Specifically, we will add a second storage variable `address public account;`. Additional to the `initializeFromBuild2` function, we also want to add a second setter function `storeAccount` that uses the same permission as `storeNumber`.
 
 As you can see, we're still inheritting from the `PluginUUPSUpgradeable` contract and simply overriding some implementation from the previous build. The idea is that when someone upgrades the plugin and calls on these functions, they'll use this new upgraded implementation, rather than the older one.
 
@@ -56,6 +61,10 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 ```
 
 Builds that you publish don't necessarily need to introduce new storage varaibles of your contracts and don't necessarily need to change the storage. To read more about Upgradeability, check out [OpenZeppelin's UUPSUpgradeability implementation here](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable).
+
+:::note
+Note that because these contracts are Upgradeable, keeping storage gaps `uint256 [50] __gap;` in dependencies is a must in order to avoid storage corruption. To learn more about storage gaps, review OpenZeppelin's documentation [here](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#storage-gaps).
+:::
 
 ### 3. Alternatively, a build implementation modifying bytecode
 

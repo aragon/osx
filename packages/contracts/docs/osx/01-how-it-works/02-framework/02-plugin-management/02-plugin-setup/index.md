@@ -19,11 +19,11 @@ How this works:
 - Publishing a Plugin into the Aragon OSx protocol is done through creating the first version of the plugin's `PluginRepo`. The plugin's `PluginRepo` instance stores all plugin versions. You can read more about that [here](../../../../02-how-to-guides/02-plugin-development/07-publication/index.md).
 - Except for the gas costs required, plugins are completely free to install, unless decided otherwise by the developer.
 
-### How does this work?
+### How are Plugins installed in DAOs?
 
-The `PluginSetup` process is **security critical** because the permissions it handles are granted to third-party contracts.
+The `PluginSetup` processing is **security critical** because the permissions it handles are granted to third-party contracts.
 
-Safety is our top priority in the design of the whole protocol. We want to make sure that the DAO members know exactly what permissions are granted to whom before any processing takes place.
+**Safety is our top priority in the design of the whole protocol.** We want to make sure that the DAO members know exactly what permissions are granted to whom before any processing takes place.
 
 This is why we see the installation process in two phases:
 
@@ -32,7 +32,7 @@ This is why we see the installation process in two phases:
 
 The `PluginSetupProcessor` is the Aragon contract in charge of invoking the `prepareInstallation()` function from your plugin's `PluginSetup` contract and use it to prepare the installation and (eventually) apply it once it has been approved by the DAO.
 
-### Preparing Installation
+#### What happens during the Plugin Preparation?
 
 The preparation of a `PluginSetup` contract proceeds as follows:
 
@@ -40,7 +40,7 @@ The preparation of a `PluginSetup` contract proceeds as follows:
 
 2. The DAO builder defines the parameters and settings that he/she wants for their DAO. Depending on the case, the `prepareInstallation`, `prepareUpdate`, or `prepareUninstallation` method in the `PluginSetup` contract is called through the `PluginSetupProcessor` (and creates a unique setup ID).
 
-3. The `PluginSetup` contract deploys all the contracts and gathers addresses and other input arguments required for the installation/uninstallation/upgrade instructions. This can include:
+3. The [`PluginSetup`](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/setup/PluginSetupProcessor.sol) contract deploys all the contracts and gathers addresses and other input arguments required for the installation/uninstallation/upgrade instructions. This can include:
 
    - deployment of new contracts
    - initialization of new storage variables
@@ -65,7 +65,7 @@ Plugin setup proposals must be carefully examined as they can be a potential sec
 Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.
 -->
 
-### Applying the installation
+#### What happens during the Preparation Application?
 
 After this initial preparation transaction, the addresses and permissions related to the plugin become apparent. The members of a governance plugin with permissions can decide if the installation proposal should be accepted or denied.
 

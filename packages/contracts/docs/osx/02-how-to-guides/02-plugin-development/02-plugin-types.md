@@ -2,7 +2,7 @@
 title: Choosing the Plugin Type
 ---
 
-## Choosing the Base Contract for Your Plugin
+## How to Choose the Base Contract for Your Plugin
 
 Although it is not mandatory to choose one of our interfaces as the base contracts for your plugins, we do offer some options for you to inherit from and speed up development.
 

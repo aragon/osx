@@ -51,5 +51,5 @@ contract MyCoolPlugin is Plugin {
 This documentation is divided into conceptual and practical sections as well as the reference guide.
 
 - Conceptual [How It Works articles](01-how-it-works/index.md) explain the architecture behind our protocol.
-- Practical [How-to Guides](02-how-to-guides/index.md) expalain how to use and leverage our protocol
+- Practical [How-to Guides](02-how-to-guides/index.md) explain how to use and leverage our protocol.
 - The [Reference Guide](03-reference-guide/index.md) generated from the NatSpec comments of the latest `@aragon/osx` release documents each individual Solididty contract, function, and variable.

@@ -36,6 +36,8 @@ contract SimpleStorageBuild1 is PluginUUPSUpgradeable {
   function storeNumber(uint256 _number) external auth(STORE_PERMISSION_ID) {
     number = _number;
   }
+
+  uint256 [50] __gap;
 }
 ```
 
