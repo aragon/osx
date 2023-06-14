@@ -61,6 +61,9 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown for permission grants where `who` and `where` are both `ANY_ADDR`.
     error AnyAddressDisallowedForWhoAndWhere();
 
+    /// @notice Thrown if `Operation.GrantWithCondition` is requested as an operation but the method does not support it.
+    error GrantWithConditionNotSupported();
+
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is granted.
@@ -159,6 +162,8 @@ abstract contract PermissionManager is Initializable {
                 _grant(_where, item.who, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(_where, item.who, item.permissionId);
+            } else if (item.operation == PermissionLib.Operation.GrantWithCondition) {
+                revert GrantWithConditionNotSupported();
             }
 
             unchecked {
