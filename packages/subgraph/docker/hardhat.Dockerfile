@@ -1,14 +1,18 @@
 FROM node:16
 
-RUN ls -l
-RUN mkdir /contracts
-ADD ./contracts /contracts
-ADD ./contracts-versions /contracts-versions
+RUN mkdir /osx
+ADD . /osx
+WORKDIR /osx
 
-WORKDIR /contracts-versions
+RUN apt-get update
+RUN apt-get install -y git
+
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /osx/packages/contracts-versions
 RUN yarn install
 
-WORKDIR /contracts
+WORKDIR /osx/packages/contracts
 RUN yarn install
 
 EXPOSE 8545

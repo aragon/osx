@@ -50,7 +50,7 @@ services:
   #     - ./data/postgres:/var/lib/postgresql/data
   hardhat:
     build:
-      context: ../../
-      dockerfile: subgraph/docker/hardhat.Dockerfile
+      context: ../../../
+      dockerfile: packages/subgraph/docker/hardhat.Dockerfile
     ports:
       - 8545:8545
