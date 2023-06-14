@@ -2,11 +2,21 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 import {checkSetManagingDao, getContractAddress} from '../../helpers';
+import {
+  DAOFactory__factory,
+  DAORegistry__factory,
+  ENSRegistry__factory,
+  ENSSubdomainRegistrar__factory,
+  PluginRepoFactory__factory,
+  PluginRepoRegistry__factory,
+  PluginSetupProcessor__factory,
+} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying framework deployment.');
 
   const {ethers} = hre;
+  const [deployer] = await ethers.getSigners();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
@@ -16,18 +26,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'DAO_ENSSubdomainRegistrar',
     hre
   );
-  const DAOENSSubdomainRegistrar = await ethers.getContractAt(
-    'ENSSubdomainRegistrar',
-    DAOENSSubdomainRegistrarAddress
+  const DAOENSSubdomainRegistrar = ENSSubdomainRegistrar__factory.connect(
+    DAOENSSubdomainRegistrarAddress,
+    deployer
   );
   await checkSetManagingDao(DAOENSSubdomainRegistrar, managingDAOAddress);
   // scope to reuse same const again
   {
     const ensAddr = await DAOENSSubdomainRegistrar.ens();
-    const ensRegistryContract = await ethers.getContractAt(
-      'ENSRegistry',
-      ensAddr
-    );
+    const ensRegistryContract = ENSRegistry__factory.connect(ensAddr, deployer);
     const isApprovedForAll = await ensRegistryContract.isApprovedForAll(
       managingDAOAddress,
       DAOENSSubdomainRegistrarAddress
@@ -54,18 +61,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Plugin_ENSSubdomainRegistrar',
     hre
   );
-  const PluginENSSubdomainRegistrar = await ethers.getContractAt(
-    'ENSSubdomainRegistrar',
-    PluginENSSubdomainRegistrarAddress
+  const PluginENSSubdomainRegistrar = ENSSubdomainRegistrar__factory.connect(
+    PluginENSSubdomainRegistrarAddress,
+    deployer
   );
   await checkSetManagingDao(PluginENSSubdomainRegistrar, managingDAOAddress);
   // scope to reuse same const again
   {
     const ensAddr = await PluginENSSubdomainRegistrar.ens();
-    const ensRegistryContract = await ethers.getContractAt(
-      'ENSRegistry',
-      ensAddr
-    );
+    const ensRegistryContract = ENSRegistry__factory.connect(ensAddr, deployer);
     const isApprovedForAll = await ensRegistryContract.isApprovedForAll(
       managingDAOAddress,
       PluginENSSubdomainRegistrarAddress
@@ -89,9 +93,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // VERIFYING DAO REGISTRY
   const DAORegistryAddress = await getContractAddress('DAORegistry', hre);
-  const DAORegistry = await ethers.getContractAt(
-    'DAORegistry',
-    DAORegistryAddress
+  const DAORegistry = DAORegistry__factory.connect(
+    DAORegistryAddress,
+    deployer
   );
   await checkSetManagingDao(DAORegistry, managingDAOAddress);
   // scope to reuse same const again
@@ -109,9 +113,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginRepoRegistry',
     hre
   );
-  const PluginRepoRegistry = await ethers.getContractAt(
-    'PluginRepoRegistry',
-    PluginRepoRegistryAddress
+  const PluginRepoRegistry = PluginRepoRegistry__factory.connect(
+    PluginRepoRegistryAddress,
+    deployer
   );
   await checkSetManagingDao(PluginRepoRegistry, managingDAOAddress);
   // scope to reuse same const again
@@ -130,9 +134,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginRepoFactory',
     hre
   );
-  const PluginRepoFactory = await ethers.getContractAt(
-    'PluginRepoFactory',
-    PluginRepoFactoryAddress
+  const PluginRepoFactory = PluginRepoFactory__factory.connect(
+    PluginRepoFactoryAddress,
+    deployer
   );
   // scope to reuse same const again
   {
@@ -150,9 +154,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginSetupProcessor',
     hre
   );
-  const PluginSetupProcessor = await ethers.getContractAt(
-    'PluginSetupProcessor',
-    PluginSetupProcessorAddress
+  const PluginSetupProcessor = PluginSetupProcessor__factory.connect(
+    PluginSetupProcessorAddress,
+    deployer
   );
   // scope to reuse same const again
   {
@@ -167,10 +171,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // VERIFYING DAO FACTORY
   const DAOFactoryAddress = await getContractAddress('DAOFactory', hre);
-  const DAOFactory = await ethers.getContractAt(
-    'DAOFactory',
-    DAOFactoryAddress
-  );
+  const DAOFactory = DAOFactory__factory.connect(DAOFactoryAddress, deployer);
   // scope to reuse same const again
   {
     const SetDAORegistryAddress = await DAOFactory.daoRegistry();
@@ -194,6 +195,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = [
+  'New',
   'ENSSubdomainRegistrar',
   'DAORegistry',
   'PluginRepoRegistry',

@@ -6,14 +6,13 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomiclabs/hardhat-etherscan';
-import '@typechain/hardhat';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
-import {AragonPluginRepos, EHRE} from './utils/types';
+import {AragonPluginRepos, TestingFork} from './utils/types';
 
 dotenv.config();
 
@@ -37,11 +36,20 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
     admin: '',
     multisig: '',
   };
+  const testingFork: TestingFork = {
+    network: '',
+    osxVersion: '',
+  };
   hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];
   hre.managingDAOMultisigPluginAddress = '';
   hre.managingDAOActions = [];
+  hre.testingFork = testingFork;
 });
+
+const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
+
+console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -66,8 +74,10 @@ const config: HardhatUserConfig = {
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
-      gasPrice: 8000000000,
-      deploy: ['./deploy/new', './deploy/verification'],
+      gasPrice: 80000000000,
+      deploy: ENABLE_DEPLOY_TEST
+        ? ['./deploy']
+        : ['./deploy/new', './deploy/verification'],
     },
     ...networks,
   },
@@ -105,6 +115,9 @@ const config: HardhatUserConfig = {
     templates: 'docs/templates',
     collapseNewlines: true,
     exclude: ['test'],
+  },
+  mocha: {
+    timeout: 60000, // 60 seconds // increase the timeout for subdomain validation tests
   },
 };
 

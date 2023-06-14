@@ -7,10 +7,11 @@ import {
   registerSubnodeRecord,
   transferSubnodeChain,
 } from '../../helpers';
+import {ENSRegistry__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {ethers, network, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers, network} = hre;
+  const [deployer] = await ethers.getSigners();
 
   // Get ENS subdomains
   const daoDomain =
@@ -23,9 +24,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const ensRegistryAddress = await getENSAddress(hre);
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    ensRegistryAddress,
+    deployer
   );
 
   // Check if domains are owned by the managingDAO
@@ -43,8 +44,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       await getPublicResolverAddress(hre)
     );
   }
-  if (daoDomainOwnerAddress != deployer) {
-    throw new Error(`${daoDomain} is not owned by deployer: ${deployer}.`);
+  if (daoDomainOwnerAddress != deployer.address) {
+    throw new Error(
+      `${daoDomain} is not owned by deployer: ${deployer.address}.`
+    );
   }
 
   let pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
@@ -57,8 +60,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       await getPublicResolverAddress(hre)
     );
   }
-  if (pluginDomainOwnerAddress != deployer) {
-    throw new Error(`${pluginDomain} is not owned by deployer: ${deployer}.`);
+  if (pluginDomainOwnerAddress != deployer.address) {
+    throw new Error(
+      `${pluginDomain} is not owned by deployer: ${deployer.address}.`
+    );
   }
 
   // Registration is now complete. Lets move the ownership of all domains to the managing DAO
@@ -66,15 +71,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await transferSubnodeChain(
     daoDomain,
     managingDAOAddress,
-    deployer,
+    deployer.address,
     await getENSAddress(hre)
   );
   await transferSubnodeChain(
     pluginDomain,
     managingDAOAddress,
-    deployer,
+    deployer.address,
     await getENSAddress(hre)
   );
 };
 export default func;
-func.tags = ['ENSSubdomains'];
+func.tags = ['New', 'ENSSubdomains'];

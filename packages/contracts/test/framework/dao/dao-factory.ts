@@ -18,6 +18,13 @@ import {
   PluginRepo,
   Admin,
   DAO,
+  Admin__factory,
+  AdminSetup__factory,
+  PluginUUPSUpgradeableSetupV2Mock__factory,
+  PluginUUPSUpgradeableSetupV1Mock__factory,
+  DAORegistry__factory,
+  PluginRepo__factory,
+  IProtocolVersion__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -47,6 +54,8 @@ import {
 } from '../../test-utils/psp/wrappers';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -164,7 +173,7 @@ describe('DAOFactory: ', function () {
       // @ts-ignore
       hre,
       'DAOFactory',
-      ['DAORegistry', 'PluginSetupProcessor', 'DAO']
+      ['DAORegistry', 'PluginSetupProcessor', 'src/core/dao/DAO.sol:DAO']
     );
 
     mergedABI = abi;
@@ -173,7 +182,7 @@ describe('DAOFactory: ', function () {
 
   beforeEach(async function () {
     // Managing DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -183,7 +192,7 @@ describe('DAOFactory: ', function () {
     );
 
     // DAO Registry
-    const DAORegistry = await ethers.getContractFactory('DAORegistry');
+    const DAORegistry = new DAORegistry__factory(signers[0]);
     daoRegistry = await deployWithProxy(DAORegistry);
     await daoRegistry.initialize(
       managingDao.address,
@@ -193,7 +202,8 @@ describe('DAOFactory: ', function () {
     // Plugin Repo Registry
     pluginRepoRegistry = await deployPluginRepoRegistry(
       managingDao,
-      ensSubdomainRegistrar
+      ensSubdomainRegistrar,
+      signers[0]
     );
 
     // Plugin Setup Processor
@@ -243,9 +253,8 @@ describe('DAOFactory: ', function () {
 
     // Create and register a plugin on the `PluginRepoRegistry`.
     // PluginSetupV1
-    const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
-      'PluginUUPSUpgradeableSetupV1Mock'
-    );
+    const PluginUUPSUpgradeableSetupV1Mock =
+      new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
     pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
@@ -261,8 +270,10 @@ describe('DAOFactory: ', function () {
     );
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
-    const factory = await ethers.getContractFactory('PluginRepo');
-    pluginRepoMock = factory.attach(pluginSetupMockRepoAddress);
+    pluginRepoMock = PluginRepo__factory.connect(
+      pluginSetupMockRepoAddress,
+      signers[0]
+    );
 
     // default params
     daoSettings = {
@@ -283,6 +294,26 @@ describe('DAOFactory: ', function () {
     );
   });
 
+  context('ERC-165', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await daoFactory.supportsInterface('0xffffffff')).to.be.false;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+  });
+
+  context('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await daoFactory.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
+  });
+
   it('reverts if no plugin is provided', async () => {
     await expect(
       daoFactory.createDao(daoSettings, [])
@@ -292,7 +323,7 @@ describe('DAOFactory: ', function () {
   it('creates a dao and initializes with correct args', async () => {
     const dao = await getAnticipatedAddress(daoFactory.address);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     expect(await daoFactory.createDao(daoSettings, [pluginInstallationData]))
@@ -361,7 +392,7 @@ describe('DAOFactory: ', function () {
     ]);
     const {dao, permissions} = await extractInfoFromCreateDaoTx(tx);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     for (let i = 0; i < permissions.length; i++) {
@@ -383,7 +414,7 @@ describe('DAOFactory: ', function () {
     ]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     await expect(tx)
@@ -437,7 +468,7 @@ describe('DAOFactory: ', function () {
     ]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-    const factory = await ethers.getContractFactory('DAO');
+    const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
     // Check that events were emitted.
@@ -534,9 +565,8 @@ describe('DAOFactory: ', function () {
 
     beforeEach(async () => {
       // create 2nd version of PluginUUPSUpgradeableSetupV1.
-      const PluginUUPSUpgradeableSetupV2Mock = await ethers.getContractFactory(
-        'PluginUUPSUpgradeableSetupV2Mock'
-      );
+      const PluginUUPSUpgradeableSetupV2Mock =
+        new PluginUUPSUpgradeableSetupV2Mock__factory(signers[0]);
       pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
       {
         await pluginRepoMock.createVersion(
@@ -549,9 +579,7 @@ describe('DAOFactory: ', function () {
 
       // Create admin plugin repo so we can install it with dao
       // This will help us execute installation/update calldatas through dao's execute.
-      const AdminPluginSetupFactory = await ethers.getContractFactory(
-        'AdminSetup'
-      );
+      const AdminPluginSetupFactory = new AdminSetup__factory(signers[0]);
       adminPluginSetup = await AdminPluginSetupFactory.deploy();
 
       let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
@@ -575,7 +603,9 @@ describe('DAOFactory: ', function () {
       ];
 
       let data = ethers.utils.defaultAbiCoder.encode(
-        adminMetadata.pluginSetupABI.prepareInstallation,
+        adminMetadata.pluginSetup.prepareInstallation.inputs.map(
+          arg => `${arg.type} ${arg.name}`
+        ),
         [ownerAddress]
       );
 
@@ -589,10 +619,10 @@ describe('DAOFactory: ', function () {
           tx,
           EVENTS.InstallationPrepared
         );
-        const adminFactory = await ethers.getContractFactory('Admin');
+        const adminFactory = new Admin__factory(signers[0]);
         adminPlugin = adminFactory.attach(event.args.plugin);
 
-        const daoFactory = await ethers.getContractFactory('DAO');
+        const daoFactory = new DAO__factory(signers[0]);
         dao = daoFactory.attach(event.args.dao);
       }
     });

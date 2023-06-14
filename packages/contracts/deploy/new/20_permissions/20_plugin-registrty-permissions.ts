@@ -3,17 +3,19 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {Operation} from '../../../utils/types';
 import {getContractAddress, managePermissions} from '../../helpers';
+import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
+  const [deployer] = await ethers.getSigners();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Get `DAO` contract.
-  const managingDaoContract = await ethers.getContractAt(
-    'DAO',
-    managingDAOAddress
+  const managingDaoContract = DAO__factory.connect(
+    managingDAOAddress,
+    deployer
   );
 
   // Get `PluginRepoRegistry` address.
@@ -47,4 +49,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await managePermissions(managingDaoContract, grantPermissions);
 };
 export default func;
-func.tags = ['Plugin_Registry_Permissions'];
+func.tags = ['New', 'Plugin_Registry_Permissions'];

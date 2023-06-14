@@ -8,9 +8,10 @@ import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
 import {Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {PluginRepo__factory} from '../typechain';
+import {ENSRegistry__factory, PluginRepo__factory} from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -56,9 +57,9 @@ export async function uploadToIPFS(
   networkName: string
 ): Promise<string> {
   const client = IPFS.create({
-    url: 'https://ipfs-0.aragon.network/api/v0',
+    url: 'https://prod.ipfs.aragon.network/api/v0',
     headers: {
-      'X-API-KEY': 'yRERPRwFAb5ZiV94XvJdgvDKoGEeFerfFsAQ65',
+      'X-API-KEY': 'b477RhECf8s8sdM7XrkLBs2wHc4kCMwpbcFC55Kt',
     },
   });
 
@@ -69,6 +70,7 @@ export async function uploadToIPFS(
 
   const cid = await client.add(metadata);
   await client.pin.add(cid.cid);
+  console.log(`Uploaded to IPFS with cid ${cid.cid}`);
   return cid.path;
 }
 
@@ -76,7 +78,14 @@ export async function getContractAddress(
   contractName: string,
   hre: HardhatRuntimeEnvironment
 ): Promise<string> {
-  const {deployments} = hre;
+  const {deployments, network} = hre;
+
+  let networkName = network.name;
+
+  if (hre.testingFork.network) {
+    networkName = hre.testingFork.network;
+  }
+
   try {
     const contract = await deployments.get(contractName);
     if (contract) {
@@ -84,9 +93,41 @@ export async function getContractAddress(
     }
   } catch (e) {}
 
+  try {
+    // Try to import the specific active contracts for the given OSx version
+    const osxVersions = require(`@aragon/osx-versions`);
+
+    const activeContractName = `${hre.testingFork.osxVersion}_active_contracts`;
+    const activeContracts = osxVersions[activeContractName];
+
+    if (activeContracts && activeContracts[networkName][contractName]) {
+      return activeContracts[networkName][contractName];
+    }
+  } catch (e) {}
+
+  return getActiveContractAddressInNetwork(contractName, networkName);
+}
+
+export async function getActiveContractAddress(
+  contractName: string,
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
+  let networkName = hre.network.name;
+
+  if (hre.testingFork.network) {
+    networkName = hre.testingFork.network;
+  }
+
+  return getActiveContractAddressInNetwork(contractName, networkName);
+}
+
+export async function getActiveContractAddressInNetwork(
+  contractName: string,
+  networkName: string
+): Promise<string> {
   const activeContracts = await getActiveContractsJSON();
   try {
-    return activeContracts[hre.network.name][contractName];
+    return activeContracts[networkName][contractName];
   } catch (e) {
     console.error(e);
     return '';
@@ -124,12 +165,12 @@ export async function updateActiveContractsJSON(payload: {
 
 export async function detemineDeployerNextAddress(
   index: number,
-  deployer: any
+  deployer: SignerWithAddress
 ): Promise<string> {
   const [owner] = await ethers.getSigners();
   const nonce = await owner.getTransactionCount();
   const futureAddress = ethers.utils.getContractAddress({
-    from: deployer,
+    from: deployer.address,
     nonce: nonce + index,
   });
   return futureAddress;
@@ -140,20 +181,21 @@ export async function createPluginRepo(
   pluginName: string
 ): Promise<void> {
   const {network} = hre;
+  const signers = await ethers.getSigners();
+
   const pluginDomain =
     process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
   if (
     await isENSDomainRegistered(
       `${pluginName}.${pluginDomain}`,
-      await getENSAddress(hre)
+      await getENSAddress(hre),
+      signers[0]
     )
   ) {
     // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
     // Either a frontrun happened or something else. Thus we abort here
     throw new Error(`${pluginName} is already present! Aborting...`);
   }
-
-  const signers = await ethers.getSigners();
 
   const pluginRepoFactoryAddress = await getContractAddress(
     'PluginRepoFactory',
@@ -416,11 +458,12 @@ export async function managePermissions(
 
 export async function isENSDomainRegistered(
   domain: string,
-  ensRegistryAddress: string
+  ensRegistryAddress: string,
+  signer: SignerWithAddress
 ): Promise<boolean> {
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    ensRegistryAddress,
+    signer
   );
 
   return ensRegistryContract.recordExists(ethers.utils.namehash(domain));
@@ -458,7 +501,7 @@ export async function getPublicResolverAddress(
 
 export async function registerSubnodeRecord(
   domain: string,
-  owner: string,
+  owner: SignerWithAddress,
   ensRegistryAddress: string,
   publicResolver: string
 ): Promise<string> {
@@ -466,15 +509,14 @@ export async function registerSubnodeRecord(
   const subdomain = domainSplitted.splice(0, 1)[0];
   const parentDomain = domainSplitted.join('.');
 
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    ensRegistryAddress,
+    owner
   );
-
   const tx = await ensRegistryContract.setSubnodeRecord(
     ethers.utils.namehash(parentDomain),
     ethers.utils.keccak256(ethers.utils.toUtf8Bytes(subdomain)),
-    owner,
+    owner.address,
     publicResolver,
     0
   );
@@ -491,9 +533,11 @@ export async function transferSubnodeRecord(
   const subdomain = domainSplitted.splice(0, 1)[0];
   const parentDomain = domainSplitted.join('.');
 
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
+  const [deployer] = await ethers.getSigners();
+
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    ensRegistryAddress,
+    deployer
   );
 
   const tx = await ensRegistryContract.setSubnodeOwner(
@@ -514,9 +558,11 @@ export async function transferSubnodeChain(
   currentOwner: string,
   ensRegistryAddress: string
 ): Promise<void> {
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
+  const [deployer] = await ethers.getSigners();
+
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    ensRegistryAddress,
+    deployer
   );
 
   const daoDomainSplitted = fullDomain.split('.').reverse();

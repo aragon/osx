@@ -76,7 +76,7 @@ describe('AddresslistVoting', function () {
         // @ts-ignore
         hre,
         'AddresslistVoting',
-        ['DAO']
+        ['src/core/dao/DAO.sol:DAO']
       ));
 
     dummyActions = [
@@ -90,7 +90,7 @@ describe('AddresslistVoting', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(signers[0].address);
+    dao = await deployNewDAO(signers[0]);
   });
 
   beforeEach(async function () {
@@ -476,6 +476,52 @@ describe('AddresslistVoting', function () {
       )
         .to.be.revertedWithCustomError(voting, 'DateOutOfBounds')
         .withArgs(earliestEndDate, tooEarlyEndDate);
+    });
+
+    it('sets the startDate to now and endDate to startDate + minDuration, if 0 is provided as an input', async () => {
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
+
+      // Create a proposal with zero as an input for `_startDate` and `_endDate`
+      const startDate = 0; // now
+      const endDate = 0; // startDate + minDuration
+
+      const creationTx = await voting.createProposal(
+        dummyMetadata,
+        [],
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+
+      const currentTime = (
+        await ethers.provider.getBlock((await creationTx.wait()).blockNumber)
+      ).timestamp;
+
+      const expectedStartDate = currentTime;
+      const expectedEndDate = expectedStartDate + votingSettings.minDuration;
+
+      // Check the state
+      const proposal = await voting.getProposal(id);
+      expect(proposal.parameters.startDate).to.eq(expectedStartDate);
+      expect(proposal.parameters.endDate).to.eq(expectedEndDate);
+
+      // Check the event
+      const event = await findEvent<ProposalCreatedEvent>(
+        creationTx,
+        'ProposalCreated'
+      );
+
+      expect(event.args.proposalId).to.equal(id);
+      expect(event.args.creator).to.equal(signers[0].address);
+      expect(event.args.startDate).to.equal(expectedStartDate);
+      expect(event.args.endDate).to.equal(expectedEndDate);
+      expect(event.args.metadata).to.equal(dummyMetadata);
+      expect(event.args.actions).to.deep.equal([]);
+      expect(event.args.allowFailureMap).to.equal(0);
     });
 
     it('ceils the `minVotingPower` value if it has a remainder', async () => {

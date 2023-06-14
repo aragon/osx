@@ -98,6 +98,8 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
             snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
         }
 
+        (_startDate, _endDate) = _validateProposalDates(_startDate, _endDate);
+
         proposalId = _createProposal({
             _creator: _msgSender(),
             _metadata: _metadata,
@@ -110,10 +112,8 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates({
-            _start: _startDate,
-            _end: _endDate
-        });
+        proposal_.parameters.startDate = _startDate;
+        proposal_.parameters.endDate = _endDate;
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();

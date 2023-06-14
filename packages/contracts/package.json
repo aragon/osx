@@ -12,11 +12,12 @@
     "dist"
   ],
   "scripts": {
+    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/@aragon/*' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
+    "typechain:osx-versions": "ts-node scripts/generate-typechain.ts",
     "test": "hardhat test",
-    "build": "hardhat compile",
+    "build": "hardhat compile && yarn typechain && yarn typechain:osx-versions",
     "build:npm": "rollup --config rollup.config.ts",
     "build:contracts-versions": "cd ../contracts-versions && yarn build",
-    "postinstall": "yarn build:contracts-versions",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
@@ -24,7 +25,8 @@
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "formatting:check": "prettier '**/*.{json,sol,ts,js,md}' -c",
-    "formatting:write": "prettier '**/*.{json,sol,ts,js,md}' --write"
+    "formatting:write": "prettier '**/*.{json,sol,ts,js,md}' --write",
+    "clean": "rm -rf artifacts cache deployments typechain"
   },
   "repository": {
     "type": "git",

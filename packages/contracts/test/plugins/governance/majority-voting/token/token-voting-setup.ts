@@ -2,7 +2,15 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ERC20, TokenVotingSetup} from '../../../../../typechain';
+import {
+  ERC20,
+  ERC20__factory,
+  GovernanceERC20__factory,
+  GovernanceWrappedERC20__factory,
+  TokenVotingSetup,
+  TokenVotingSetup__factory,
+  TokenVoting__factory,
+} from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {Operation} from '../../../../../utils/types';
@@ -15,6 +23,7 @@ import {
   ONE_HOUR,
 } from '../../../../test-utils/voting';
 import {tokenVotingInterface} from './token-voting';
+import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -25,8 +34,9 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-const prepareInstallationDataTypes =
-  metadata.pluginSetupABI.prepareInstallation;
+const prepareInstallationDataTypes = getNamedTypesFromMetadata(
+  metadata.pluginSetup.prepareInstallation.inputs
+);
 
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
@@ -50,7 +60,7 @@ describe('TokenVotingSetup', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    targetDao = await deployNewDAO(signers[0].address);
+    targetDao = await deployNewDAO(signers[0]);
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
@@ -62,14 +72,12 @@ describe('TokenVotingSetup', function () {
     defaultTokenSettings = {addr: AddressZero, name: '', symbol: ''};
     defaultMintSettings = {receivers: [], amounts: []};
 
-    const TokenVotingSetup = await ethers.getContractFactory(
-      'TokenVotingSetup'
-    );
+    const TokenVotingSetup = new TokenVotingSetup__factory(signers[0]);
     tokenVotingSetup = await TokenVotingSetup.deploy();
 
     implementationAddress = await tokenVotingSetup.implementation();
 
-    const ERC20Token = await ethers.getContractFactory('ERC20');
+    const ERC20Token = new ERC20__factory(signers[0]);
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
@@ -84,7 +92,7 @@ describe('TokenVotingSetup', function () {
   });
 
   it('creates token voting base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('TokenVoting');
+    const factory = new TokenVoting__factory(signers[0]);
     const tokenVoting = factory.attach(implementationAddress);
 
     expect(
@@ -127,9 +135,7 @@ describe('TokenVotingSetup', function () {
         nonce,
       });
 
-      const GovernanceERC20 = await ethers.getContractFactory(
-        'GovernanceERC20'
-      );
+      const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
 
       const govToken = GovernanceERC20.attach(anticipatedPluginAddress);
 
@@ -246,8 +252,8 @@ describe('TokenVotingSetup', function () {
 
       await tokenVotingSetup.prepareInstallation(targetDao.address, data);
 
-      const GovernanceWrappedERC20Factory = await ethers.getContractFactory(
-        'GovernanceWrappedERC20'
+      const GovernanceWrappedERC20Factory = new GovernanceWrappedERC20__factory(
+        signers[0]
       );
       const governanceWrappedERC20Contract =
         GovernanceWrappedERC20Factory.attach(anticipatedWrappedTokenAddress);
@@ -265,9 +271,7 @@ describe('TokenVotingSetup', function () {
     });
 
     it('correctly returns plugin, helpers and permissions, when a governance token address is supplied', async () => {
-      const GovernanceERC20 = await ethers.getContractFactory(
-        'GovernanceERC20'
-      );
+      const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
       const governanceERC20 = await GovernanceERC20.deploy(
         targetDao.address,
         'name',
@@ -409,7 +413,7 @@ describe('TokenVotingSetup', function () {
       await tokenVotingSetup.prepareInstallation(daoAddress, data);
 
       // check plugin
-      const PluginFactory = await ethers.getContractFactory('TokenVoting');
+      const PluginFactory = new TokenVoting__factory(signers[0]);
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
       expect(await tokenVoting.dao()).to.be.equal(daoAddress);
@@ -431,9 +435,7 @@ describe('TokenVotingSetup', function () {
       );
 
       // check helpers
-      const GovernanceTokenFactory = await ethers.getContractFactory(
-        'GovernanceERC20'
-      );
+      const GovernanceTokenFactory = new GovernanceERC20__factory(signers[0]);
       const governanceTokenContract = GovernanceTokenFactory.attach(
         anticipatedTokenAddress
       );
@@ -477,11 +479,9 @@ describe('TokenVotingSetup', function () {
 
     it('correctly returns permissions, when the required number of helpers is supplied', async () => {
       const plugin = ethers.Wallet.createRandom().address;
-      const GovernanceERC20 = await ethers.getContractFactory(
-        'GovernanceERC20'
-      );
-      const GovernanceWrappedERC20 = await ethers.getContractFactory(
-        'GovernanceWrappedERC20'
+      const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
+      const GovernanceWrappedERC20 = new GovernanceWrappedERC20__factory(
+        signers[0]
       );
       const governanceERC20 = await GovernanceERC20.deploy(
         targetDao.address,

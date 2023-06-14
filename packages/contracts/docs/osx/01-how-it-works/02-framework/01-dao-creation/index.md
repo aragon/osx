@@ -49,6 +49,7 @@ function register(
 requiring the `REGISTER_DAO_PERMISSION_ID` permission currently held only by the `DAOFactory`.
 
 If the requested ENS `subdomain` name [is valid](../03-ens-names.md) and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
+If the `subdomain` parameter is non-empty (not `""`) and still available, the ENS name will be registered.
 If the registration was successful, the DAO name, contract and creator addresses are emitted in an event.
 
 For more details visit the [`DAORegistry` reference guide entry](../../../03-reference-guide/framework/dao/DAORegistry.md).

@@ -2,6 +2,10 @@
 
 pragma solidity 0.8.17;
 
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+
+import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {DAO} from "../../core/dao/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
@@ -14,7 +18,7 @@ import {DAORegistry} from "./DAORegistry.sol";
 /// @title DAOFactory
 /// @author Aragon Association - 2022-2023
 /// @notice This contract is used to create a DAO.
-contract DAOFactory {
+contract DAOFactory is ERC165, ProtocolVersion {
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
     address public immutable daoBase;
 
@@ -55,6 +59,15 @@ contract DAOFactory {
         pluginSetupProcessor = _pluginSetupProcessor;
 
         daoBase = address(new DAO());
+    }
+
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interface.
+    /// @return Returns `true` if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return
+            _interfaceId == type(IProtocolVersion).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @notice Creates a new DAO, registers it on the  DAO registry, and installs a list of plugins via the plugin setup processor.

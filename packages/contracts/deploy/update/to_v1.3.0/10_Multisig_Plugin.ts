@@ -3,8 +3,13 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
 
+import multisigSetupArtifact from '../../../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
+
 import multisigReleaseMetadata from '../../../src/plugins/governance/multisig/release-metadata.json';
 import multisigBuildMetadata from '../../../src/plugins/governance/multisig/build-metadata.json';
+import {UPDATE_INFOS} from '../../../utils/updates';
+
+const TARGET_RELEASE = 1;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdate Multisig Plugin');
@@ -13,6 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   const deployResult = await deploy('MultisigSetup', {
+    contract: multisigSetupArtifact,
     from: deployer.address,
     args: [],
     log: true,
@@ -44,7 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const tx = await multisigRepo
       .connect(deployer)
       .createVersion(
-        1,
+        TARGET_RELEASE,
         deployResult.address,
         ethers.utils.toUtf8Bytes(`ipfs://${multisigBuildCIDPath}`),
         ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
@@ -57,7 +63,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const tx = await multisigRepo
     .connect(deployer)
     .populateTransaction.createVersion(
-      1,
+      TARGET_RELEASE,
       deployResult.address,
       ethers.utils.toUtf8Bytes(`ipfs://${multisigBuildCIDPath}`),
       ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
@@ -80,4 +86,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['MultisigPlugin'];
+func.tags = ['MultisigPlugin'].concat(UPDATE_INFOS['v1_3_0'].tags);

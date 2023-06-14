@@ -1,12 +1,13 @@
 {
   "name": "@aragon/osx-subgraph",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "The Aragon OSx Subgraph",
   "homepage": "https://github.com/aragon/osx",
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "lint": "eslint . --ext .ts",
     "build:contracts": "cd ../contracts && yarn build",
+    "build:contracts-versions": "cd ../contracts-versions && yarn build",
     "manifest": "scripts/build-manifest.sh",
     "extend:schema": "yarn ts-node tests/schema-extender.ts",
     "build": "scripts/build-subgraph.sh && yarn extend:schema",

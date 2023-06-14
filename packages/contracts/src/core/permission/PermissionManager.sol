@@ -3,6 +3,7 @@
 pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "./IPermissionCondition.sol";
 import "./PermissionLib.sol";
@@ -11,6 +12,8 @@ import "./PermissionLib.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice The abstract permission manager used in a DAO, its associated plugins, and other framework-related components.
 abstract contract PermissionManager is Initializable {
+    using AddressUpgradeable for address;
+
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
@@ -47,14 +50,19 @@ abstract contract PermissionManager is Initializable {
         address newCondition
     );
 
-    /// @notice Thrown for permission grants where `who` or `where` is `ANY_ADDR`, but no condition is present.
-    error ConditionNotPresentForAnyAddress();
+    /// @notice Thrown if an address is not a condition.
+    /// @param condition The address that is not a contract..
+    error ConditionInvalid(IPermissionCondition condition);
 
     /// @notice Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
+
     error PermissionsForAnyAddressDisallowed();
 
     /// @notice Thrown for permission grants where `who` and `where` are both `ANY_ADDR`.
     error AnyAddressDisallowedForWhoAndWhere();
+
+    /// @notice Thrown if `Operation.GrantWithCondition` is requested as an operation but the method does not support it.
+    error GrantWithConditionNotSupported();
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
@@ -154,6 +162,8 @@ abstract contract PermissionManager is Initializable {
                 _grant(_where, item.who, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(_where, item.who, item.permissionId);
+            } else if (item.operation == PermissionLib.Operation.GrantWithCondition) {
+                revert GrantWithConditionNotSupported();
             }
 
             unchecked {
@@ -213,15 +223,29 @@ abstract contract PermissionManager is Initializable {
         _grant(address(this), _initialOwner, ROOT_PERMISSION_ID);
     }
 
-    /// @notice This method is used in the public `grant` method of the permission manager.
+    /// @notice This method is used in the external `grant` method of the permission manager.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
+    /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
-        _grantWithCondition(_where, _who, _permissionId, IPermissionCondition(ALLOW_FLAG));
+        if (_where == ANY_ADDR || _who == ANY_ADDR) {
+            revert PermissionsForAnyAddressDisallowed();
+        }
+
+        bytes32 permHash = permissionHash(_where, _who, _permissionId);
+
+        address currentFlag = permissionsHashed[permHash];
+
+        // Means permHash is not currently set.
+        if (currentFlag == UNSET_FLAG) {
+            permissionsHashed[permHash] = ALLOW_FLAG;
+
+            emit Granted(_permissionId, msg.sender, _where, _who, IPermissionCondition(ALLOW_FLAG));
+        }
     }
 
-    /// @notice This method is used in the internal `_grant` method of the permission manager.
+    /// @notice This method is used in the external `grantWithCondition` method of the permission manager.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
@@ -233,18 +257,20 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         IPermissionCondition _condition
     ) internal virtual {
+        if (!address(_condition).isContract()) {
+            revert ConditionInvalid(_condition);
+        }
+
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
             revert AnyAddressDisallowedForWhoAndWhere();
         }
 
         if (_where == ANY_ADDR || _who == ANY_ADDR) {
-            bool isRestricted = isPermissionRestrictedForAnyAddr(_permissionId);
-            if (_permissionId == ROOT_PERMISSION_ID || isRestricted) {
+            if (
+                _permissionId == ROOT_PERMISSION_ID ||
+                isPermissionRestrictedForAnyAddr(_permissionId)
+            ) {
                 revert PermissionsForAnyAddressDisallowed();
-            }
-
-            if (address(_condition) == ALLOW_FLAG) {
-                revert ConditionNotPresentForAnyAddress();
             }
         }
 

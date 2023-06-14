@@ -28,10 +28,11 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: cd ../../ && yarn install --pure-lockfile
-      - name: Compile contracts-versions
-        run: cd ../contracts-versions && yarn build
-      - name: Remove directories
-        run: rm -rf artifact cache deployments typechain
+      - name: Build the osx-versions NPM package
+        run: yarn build
+        working-directory: packages/contracts-versions/
+      - name: Clean the contracts directory
+        run: yarn clean
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts

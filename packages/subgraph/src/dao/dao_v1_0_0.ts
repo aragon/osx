@@ -1,4 +1,4 @@
-import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes, log, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -10,7 +10,8 @@ import {
   TrustedForwarderSet,
   SignatureValidatorSet,
   StandardCallbackRegistered,
-  CallbackReceived
+  CallbackReceived,
+  NewURI
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   Dao,
@@ -219,4 +220,13 @@ export function handleStandardCallbackRegistered(
   entity.callbackSelector = event.params.callbackSelector;
   entity.magicNumber = event.params.magicNumber;
   entity.save();
+}
+
+export function handleNewURI(event: NewURI): void {
+  let daoId = event.address.toHexString();
+  let entity = Dao.load(daoId);
+  if (entity) {
+    entity.daoURI = event.params.daoURI;
+    entity.save();
+  }
 }

@@ -5,6 +5,8 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   PermissionManagerTest,
   PermissionConditionMock,
+  PermissionManagerTest__factory,
+  PermissionConditionMock__factory,
 } from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -28,6 +30,8 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 const addressZero = ethers.constants.AddressZero;
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
+let conditionMock: PermissionConditionMock;
+
 interface SingleTargetPermission {
   operation: Operation;
   who: string;
@@ -44,17 +48,18 @@ interface MultiTargetPermission {
 
 describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
+  let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
   let otherSigner: SignerWithAddress;
 
   before(async () => {
-    const signers = await ethers.getSigners();
+    signers = await ethers.getSigners();
     ownerSigner = signers[0];
     otherSigner = signers[1];
   });
 
   beforeEach(async () => {
-    const PM = await ethers.getContractFactory('PermissionManagerTest');
+    const PM = new PermissionManagerTest__factory(signers[0]);
     pm = await PM.deploy();
     await pm.init(ownerSigner.address);
   });
@@ -67,7 +72,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should emit Granted', async () => {
-      const PM = await ethers.getContractFactory('PermissionManagerTest');
+      const PM = new PermissionManagerTest__factory(ownerSigner);
       pm = await PM.deploy();
       await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
     });
@@ -96,7 +101,7 @@ describe('Core: PermissionManager', function () {
     it('reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR', async () => {
       await expect(
         pm.grant(ANY_ADDR, ANY_ADDR, ROOT_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'AnyAddressDisallowedForWhoAndWhere');
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
     it('reverts if permissionId is restricted and `_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
@@ -116,14 +121,14 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    it('reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR` and condition is not present', async () => {
+    it('reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
       await expect(
         pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'ConditionNotPresentForAnyAddress');
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
 
       await expect(
         pm.grant(ANY_ADDR, pm.address, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'ConditionNotPresentForAnyAddress');
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
     it('should emit Granted', async () => {
@@ -162,19 +167,38 @@ describe('Core: PermissionManager', function () {
   });
 
   describe('grantWithCondition', () => {
+    before(async () => {
+      conditionMock = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+    });
+
+    it('reverts if the condition address is not a contract', async () => {
+      await expect(
+        pm.grantWithCondition(
+          pm.address,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          ethers.constants.AddressZero
+        )
+      )
+        .to.be.revertedWithCustomError(pm, 'ConditionInvalid')
+        .withArgs(ethers.constants.AddressZero);
+    });
+
     it('should add permission', async () => {
       await pm.grantWithCondition(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
-        ALLOW_FLAG
+        conditionMock.address
       );
       const permission = await pm.getAuthPermission(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID
       );
-      expect(permission).to.be.equal(ALLOW_FLAG);
+      expect(permission).to.be.equal(conditionMock.address);
     });
 
     it('should emit Granted', async () => {
@@ -183,7 +207,7 @@ describe('Core: PermissionManager', function () {
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
-          ALLOW_FLAG
+          conditionMock.address
         )
       ).to.emit(pm, 'Granted');
     });
@@ -194,7 +218,7 @@ describe('Core: PermissionManager', function () {
           pm.address,
           ANY_ADDR,
           ADMIN_PERMISSION_ID,
-          pm.address // not condition, but enough for the call to succeed.
+          conditionMock.address
         )
       ).to.emit(pm, 'Granted');
 
@@ -203,7 +227,7 @@ describe('Core: PermissionManager', function () {
           ANY_ADDR,
           pm.address,
           ADMIN_PERMISSION_ID,
-          pm.address // not condition, but enough for the call to succeed.
+          conditionMock.address
         )
       ).to.emit(pm, 'Granted');
     });
@@ -213,14 +237,14 @@ describe('Core: PermissionManager', function () {
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
-        ALLOW_FLAG
+        conditionMock.address
       );
       await expect(
         pm.grantWithCondition(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
-          ALLOW_FLAG
+          conditionMock.address
         )
       ).to.not.emit(pm, 'Granted');
     });
@@ -230,16 +254,19 @@ describe('Core: PermissionManager', function () {
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
-        ALLOW_FLAG
+        conditionMock.address
       );
 
-      const newCondition = ownerSigner.address; // different address from what we pass in the previous grantWithCondition
+      const newConditionMock = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
       await expect(
         pm.grantWithCondition(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
-          newCondition
+          newConditionMock.address
         )
       )
         .to.be.revertedWithCustomError(
@@ -250,29 +277,17 @@ describe('Core: PermissionManager', function () {
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
-          ALLOW_FLAG,
-          newCondition
+          conditionMock.address,
+          newConditionMock.address
         );
     });
 
-    it('should revert when condition is not present for `who == ANY_ADDR` or `where == ANY_ADDR` and permissionId is not restricted', async () => {
-      await expect(
-        pm.grantWithCondition(
-          pm.address,
-          ANY_ADDR,
-          ADMIN_PERMISSION_ID,
-          ALLOW_FLAG
-        )
-      ).to.be.revertedWithCustomError(pm, 'ConditionNotPresentForAnyAddress');
-    });
-
     it('should set PermissionCondition', async () => {
-      const signers = await ethers.getSigners();
       await pm.grantWithCondition(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
-        signers[2].address
+        conditionMock.address
       );
       expect(
         await pm.getAuthPermission(
@@ -280,7 +295,7 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
-      ).to.be.equal(signers[2].address);
+      ).to.be.equal(conditionMock.address);
     });
 
     it('should not allow grant', async () => {
@@ -291,19 +306,19 @@ describe('Core: PermissionManager', function () {
             pm.address,
             otherSigner.address,
             ADMIN_PERMISSION_ID,
-            ALLOW_FLAG
+            conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
     });
 
-    it('should not allow for non ROOT', async () => {
+    it('reverts if the caller does not have `ROOT_PERMISSION_ID`', async () => {
       await pm.grantWithCondition(
         pm.address,
         ownerSigner.address,
         ADMIN_PERMISSION_ID,
-        ALLOW_FLAG
+        conditionMock.address
       );
       await expect(
         pm
@@ -312,7 +327,7 @@ describe('Core: PermissionManager', function () {
             pm.address,
             otherSigner.address,
             ROOT_PERMISSION_ID,
-            ALLOW_FLAG
+            conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
@@ -453,20 +468,25 @@ describe('Core: PermissionManager', function () {
 
     it('should grant with condition', async () => {
       const signers = await ethers.getSigners();
+
+      const conditionMock2 = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.GrantWithCondition,
           where: signers[1].address,
           who: signers[0].address,
-          condition: signers[3].address,
+          condition: conditionMock.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.GrantWithCondition,
           where: signers[2].address,
           who: signers[0].address,
-          condition: signers[4].address,
+          condition: conditionMock2.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
@@ -563,6 +583,20 @@ describe('Core: PermissionManager', function () {
         );
         expect(permission).to.be.equal(UNSET_FLAG);
       }
+    });
+
+    it('reverts for `Operation.GrantWithCondition` ', async () => {
+      const signers = await ethers.getSigners();
+      const bulkItems: SingleTargetPermission[] = [
+        {
+          operation: Operation.GrantWithCondition,
+          who: signers[1].address,
+          permissionId: ADMIN_PERMISSION_ID,
+        },
+      ];
+      await expect(
+        pm.applySingleTargetPermissions(pm.address, bulkItems)
+      ).to.be.revertedWithCustomError(pm, 'GrantWithConditionNotSupported');
     });
 
     it('should handle bulk mixed', async () => {

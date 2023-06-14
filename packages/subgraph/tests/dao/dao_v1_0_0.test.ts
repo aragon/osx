@@ -17,7 +17,8 @@ import {
   handleTrustedForwarderSet,
   handleSignatureValidatorSet,
   handleStandardCallbackRegistered,
-  handleCallbackReceived
+  handleCallbackReceived,
+  handleNewURI
 } from '../../src/dao/dao_v1_0_0';
 import {
   DAO_ADDRESS,
@@ -122,6 +123,29 @@ function createExecutedEvent(
 
   return event;
 }
+
+test('Run dao (handleNewURI) mappings with mock event', () => {
+  // Create state
+  let dao = new ExtendedDao().withDefaultValues();
+  dao.buildOrUpdate();
+
+  let newDAOURI = 'new-uri';
+
+  // create event
+  const event = dao.createEvent_NewURI(newDAOURI);
+
+  // handle event
+  handleNewURI(event);
+
+  // Checks
+  // Expected changes
+  dao.daoURI = newDAOURI;
+
+  // Assert dao entity
+  dao.assertEntity(true);
+
+  clearStore();
+});
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // Create state

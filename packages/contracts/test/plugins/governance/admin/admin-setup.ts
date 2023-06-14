@@ -2,11 +2,16 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {Operation} from '../../../../utils/types';
-import {AdminSetup} from '../../../../typechain';
+import {
+  AdminSetup,
+  AdminSetup__factory,
+  Admin__factory,
+} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 import {adminInterface} from './admin';
+import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -29,14 +34,16 @@ describe('AdminSetup', function () {
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0]);
 
     minimum_data = abiCoder.encode(
-      metadata.pluginSetupABI.prepareInstallation,
+      getNamedTypesFromMetadata(
+        metadata.pluginSetup.prepareInstallation.inputs
+      ),
       [ownerAddress]
     );
 
-    const AdminSetup = await ethers.getContractFactory('AdminSetup');
+    const AdminSetup = new AdminSetup__factory(signers[0]);
     adminSetup = await AdminSetup.deploy();
 
     implementationAddress = await adminSetup.implementation();
@@ -47,7 +54,7 @@ describe('AdminSetup', function () {
   });
 
   it('creates admin address base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('Admin');
+    const factory = new Admin__factory(signers[0]);
     const adminAddressContract = factory.attach(implementationAddress);
 
     expect(
@@ -77,7 +84,9 @@ describe('AdminSetup', function () {
 
     it('reverts if encoded address in `_data` is zero', async () => {
       const dataWithAddressZero = abiCoder.encode(
-        metadata.pluginSetupABI.prepareInstallation,
+        getNamedTypesFromMetadata(
+          metadata.pluginSetup.prepareInstallation.inputs
+        ),
         [AddressZero]
       );
 
@@ -139,7 +148,7 @@ describe('AdminSetup', function () {
 
       await adminSetup.prepareInstallation(daoAddress, minimum_data);
 
-      const factory = await ethers.getContractFactory('Admin');
+      const factory = new Admin__factory(signers[0]);
       const adminAddressContract = factory.attach(anticipatedPluginAddress);
 
       expect(await adminAddressContract.dao()).to.be.equal(daoAddress);

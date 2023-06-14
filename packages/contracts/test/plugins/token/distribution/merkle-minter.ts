@@ -13,6 +13,9 @@ import {
   IERC165Upgradeable__factory,
   IPlugin__factory,
   IMerkleMinter__factory,
+  MerkleMinter__factory,
+  MerkleDistributor__factory,
+  GovernanceERC20__factory,
 } from '../../../../typechain';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
@@ -51,20 +54,18 @@ describe('MerkleMinter', function () {
     totalAmount = amount0.add(amount1);
 
     // create a DAO
-    managingDao = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(signers[0]);
 
-    const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
+    const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
     token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV', {
       receivers: [],
       amounts: [],
     });
 
-    const MerkleDistributor = await ethers.getContractFactory(
-      'MerkleDistributor'
-    );
+    const MerkleDistributor = new MerkleDistributor__factory(signers[0]);
     distributorBase = await MerkleDistributor.deploy();
 
-    const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
+    const MerkleMinter = new MerkleMinter__factory(signers[0]);
     minter = await deployWithProxy(MerkleMinter);
 
     await minter.initialize(

@@ -8,6 +8,11 @@ import {
   CounterV1PluginSetup,
   CounterV2PluginSetup,
   MultiplyHelper,
+  CounterV2PluginSetup__factory,
+  CounterV1__factory,
+  MultiplyHelper__factory,
+  CounterV1PluginSetup__factory,
+  DAOMock__factory,
 } from '../../../typechain';
 import {Operation} from '../../../utils/types';
 
@@ -36,28 +41,24 @@ describe('CounterPluginSetup(Example)', function () {
     address1 = await signers[1].getAddress();
     address2 = await signers[2].getAddress();
 
-    const DAOMock = await ethers.getContractFactory('DAOMock');
+    const DAOMock = new DAOMock__factory(signers[0]);
     daoMock = await DAOMock.deploy(ownerAddress);
 
-    const CounterV1Setup = await ethers.getContractFactory(
-      'CounterV1PluginSetup'
-    );
+    const CounterV1Setup = new CounterV1PluginSetup__factory(signers[0]);
     counterV1Setup = await CounterV1Setup.deploy();
 
-    const COUNTER_V1 = await ethers.getContractFactory('CounterV1');
-    const counterV1 = COUNTER_V1.attach(
-      await counterV1Setup.multiplyHelperBase()
+    const counterV1 = CounterV1__factory.connect(
+      await counterV1Setup.multiplyHelperBase(),
+      signers[0]
     );
     multiplyPermissionId = await counterV1.MULTIPLY_PERMISSION_ID();
 
     implementationAddress = await counterV1Setup.implementation();
 
-    const MultiplyHelper = await ethers.getContractFactory('MultiplyHelper');
+    const MultiplyHelper = new MultiplyHelper__factory(signers[0]);
     multiplyHelper = await MultiplyHelper.deploy();
 
-    const CounterV2Setup = await ethers.getContractFactory(
-      'CounterV2PluginSetup'
-    );
+    const CounterV2Setup = new CounterV2PluginSetup__factory(signers[0]);
     counterV2Setup = await CounterV2Setup.deploy(multiplyHelper.address);
   });
 

@@ -1,8 +1,11 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DAO__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
-import {getContractAddress} from '../../helpers';
+import {getActiveContractAddress} from '../../helpers';
+import {DAO__factory} from '../../../typechain';
+import {UPDATE_INFOS} from '../../../utils/updates';
+
+import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Updating DAOFactory');
@@ -10,19 +13,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const managingDAOAddress = await getContractAddress('managingDAO', hre);
-  const pluginSetupProcessorAddress = await getContractAddress(
+  const managingDAOAddress = await getActiveContractAddress('managingDAO', hre);
+  const pluginSetupProcessorAddress = await getActiveContractAddress(
     'PluginSetupProcessor',
     hre
   );
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
-  const previousDAOFactoryAddress = await getContractAddress('DAOFactory', hre);
+  const daoRegistryAddress = await getActiveContractAddress('DAORegistry', hre);
+  const previousDAOFactoryAddress = await getActiveContractAddress(
+    'DAOFactory',
+    hre
+  );
   console.log(`Using managingDAO ${managingDAOAddress}`);
   console.log(`Using PluginSetupProcessor ${pluginSetupProcessorAddress}`);
   console.log(`Using DAORegistry ${daoRegistryAddress}`);
   console.log(`Using PreviousDAOFactory ${previousDAOFactoryAddress}`);
 
   const deployResult = await deploy('DAOFactory', {
+    contract: daoFactoryArtifact,
     from: deployer.address,
     args: [daoRegistryAddress, pluginSetupProcessorAddress],
     log: true,
@@ -59,4 +66,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['DAOFactory'];
+func.tags = ['DAOFactory'].concat(UPDATE_INFOS['v1_3_0'].tags);

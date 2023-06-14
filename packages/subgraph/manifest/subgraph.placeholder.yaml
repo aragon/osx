@@ -140,7 +140,9 @@ templates:
           handler: handleStandardCallbackRegistered
         - event: SignatureValidatorSet(address)
           handler: handleSignatureValidatorSet
-  - name: DaoTemplateV1_2_0
+        - event: NewURI(string)
+          handler: handleNewURI
+  - name: DaoTemplateV1_3_0
     kind: ethereum/contract
     network: {{network}}
     source:
@@ -149,7 +151,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/dao/dao_v1_2_0.ts
+      file: ./src/dao/dao_v1_3_0.ts
       entities:
         - Dao
       abis:

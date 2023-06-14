@@ -164,6 +164,7 @@ type Dao @entity {
   id: ID! # use address as id
   subdomain: String
   creator: Bytes!
+  daoURI: String
   metadata: String
   createdAt: BigInt!
   token: ERC20Contract
@@ -177,7 +178,7 @@ type Dao @entity {
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
-  plugins: [IPlugin!]! @derivedFrom(field: "dao") # TODO: Refactor to `PluginInstallation` after the plugins left the Aragon OSx subgraph
+  plugins: [PluginInstallation!]! @derivedFrom(field: "dao")
 }
 
 # Plugins

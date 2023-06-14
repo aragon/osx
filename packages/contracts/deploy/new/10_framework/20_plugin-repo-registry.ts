@@ -3,10 +3,12 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {getContractAddress} from '../../helpers';
 
+import pluginRepoRegistryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
@@ -18,11 +20,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('PluginRepoRegistry', {
-    from: deployer,
+    contract: pluginRepoRegistryArtifact,
+    from: deployer.address,
     args: [],
     log: true,
     proxy: {
-      owner: deployer,
+      owner: deployer.address,
       proxyContract: 'ERC1967Proxy',
       proxyArgs: ['{implementation}', '{data}'],
       execute: {
@@ -36,4 +39,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 // func.runAtTheEnd = true;
-func.tags = ['PluginRepoRegistry'];
+func.tags = ['New', 'PluginRepoRegistry'];

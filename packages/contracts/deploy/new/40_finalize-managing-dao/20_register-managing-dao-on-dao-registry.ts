@@ -8,10 +8,11 @@ import {
   MANAGING_DAO_METADATA,
   uploadToIPFS,
 } from '../../helpers';
+import {DAO__factory, DAORegistry__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {getNamedAccounts, ethers, network} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {ethers, network} = hre;
+  const [deployer] = await ethers.getSigners();
 
   // Get info from .env
   const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
@@ -28,15 +29,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
   // Get `DAORegistry` contract.
-  const daoRegistryContract = await ethers.getContractAt(
-    'DAORegistry',
-    daoRegistryAddress
+  const daoRegistryContract = DAORegistry__factory.connect(
+    daoRegistryAddress,
+    deployer
   );
 
   if (
     await isENSDomainRegistered(
       `${daoSubdomain}.${daoDomain}`,
-      await getENSAddress(hre)
+      await getENSAddress(hre),
+      deployer
     )
   ) {
     // not beeing able to register the managing DAO means that something is not right with the framework deployment used.
@@ -48,7 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Register `managingDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
     managingDAOAddress,
-    deployer,
+    deployer.address,
     daoSubdomain
   );
   await registerTx.wait();
@@ -57,11 +59,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Set Metadata for the Managing DAO
-  const managingDaoContract = await ethers.getContractAt(
-    'DAO',
-    managingDAOAddress
+  const managingDaoContract = DAO__factory.connect(
+    managingDAOAddress,
+    deployer
   );
-
   const metadataCIDPath = await uploadToIPFS(
     JSON.stringify(MANAGING_DAO_METADATA),
     network.name
@@ -73,4 +74,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await setMetadataTX.wait();
 };
 export default func;
-func.tags = ['RegisterManagingDAO'];
+func.tags = ['New', 'RegisterManagingDAO'];

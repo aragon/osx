@@ -1,16 +1,19 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+import tokenVotingSetupArtifact from '../../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   await deploy('TokenVotingSetup', {
-    from: deployer,
+    contract: tokenVotingSetupArtifact,
+    from: deployer.address,
     args: [],
     log: true,
   });
 };
 export default func;
-func.tags = ['TokenVotingSetup'];
+func.tags = ['New', 'TokenVotingSetup'];

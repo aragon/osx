@@ -4,11 +4,22 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO,
-  TestERC1155,
   TestERC20,
+  TestERC20__factory,
   TestERC721,
-  IERC1271__factory,
+  TestERC721__factory,
+  TestERC1155,
+  TestERC1155__factory,
+  ERC1271Mock__factory,
   GasConsumer__factory,
+  DAO__factory,
+  IDAO__factory,
+  IERC165__factory,
+  IERC721Receiver__factory,
+  IERC1155Receiver__factory,
+  IERC1271__factory,
+  IEIP4824__factory,
+  IProtocolVersion__factory,
 } from '../../../typechain';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -30,6 +41,7 @@ import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 chai.use(smock.matchers);
 
@@ -40,6 +52,11 @@ const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
 const MAX_ACTIONS = 256;
+
+const OZ_INITIALIZED_SLOT_POSITION = 0;
+const REENTRANCY_STATUS_SLOT_POSITION = 304;
+
+const EMPTY_DATA = '0x';
 
 const EVENTS = {
   MetadataSet: 'MetadataSet',
@@ -55,7 +72,7 @@ const EVENTS = {
   CallbackReceived: 'CallbackReceived',
 };
 
-const PERMISSION_IDS = {
+export const PERMISSION_IDS = {
   UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
@@ -75,13 +92,14 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
+  let DAO: DAO__factory;
 
   beforeEach(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await deployWithProxy(DAO);
+    DAO = new DAO__factory(signers[0]);
+    dao = await deployWithProxy<DAO>(DAO);
     await dao.initialize(
       dummyMetadata1,
       ownerAddress,
@@ -181,14 +199,183 @@ describe('DAO', function () {
       expect(callbacksReturned[2]).to.equal(
         TOKEN_INTERFACE_IDS.erc1155BatchReceivedId + '00'.repeat(28)
       );
+    });
 
-      // confirm interfaces are registered.
+    it('sets OZs `_initialized` at storage slot [0] to 2', async () => {
       expect(
-        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc721InterfaceId)
-      ).to.equal(true);
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            dao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
+    });
+
+    it('sets the `_reentrancyStatus` at storage slot [304] to `_NOT_ENTERED = 1`', async () => {
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            dao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(1);
+    });
+  });
+
+  describe('initializeFrom', async () => {
+    it('reverts if trying to upgrade from a different major release', async () => {
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      await expect(uninitializedDao.initializeFrom([0, 1, 0], EMPTY_DATA))
+        .to.be.revertedWithCustomError(
+          dao,
+          'ProtocolVersionUpgradeNotSupported'
+        )
+        .withArgs([0, 1, 0]);
+    });
+
+    it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
+      // Create an unitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+
+      // Call `initializeFrom` with version 1.2.0.
+      await expect(uninitializedDao.initializeFrom([1, 2, 0], EMPTY_DATA)).to
+        .not.be.reverted;
+
+      // Expect the contract to be initialized with `_initialized = 2` and  `_reentrancyStatus = 1`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(1);
+    });
+
+    it('does not initialize `_reentrancyStatus` for versions >= 1.3.0', async () => {
+      // Create an unitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+
+      // Call `initializeFrom` with version 1.3.0.
+      await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA)).to
+        .not.be.reverted;
+
+      // Expect the contract to be initialized with `_initialized = 2` but `_reentrancyStatus` to remain unchanged.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(2);
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            REENTRANCY_STATUS_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(0);
+    });
+  });
+
+  describe('ERC-165', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await dao.supportsInterface('0xffffffff')).to.be.false;
+    });
+
+    it('supports the `IERC165` interface', async () => {
+      const iface = IERC165__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IDAO` interface', async () => {
+      const iface = IDAO__factory.createInterface();
+      expect(getInterfaceID(iface)).to.equal('0x9385547e'); // the interfaceID from IDAO v1.0.0
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IERC1271` interface', async () => {
+      const iface = IERC1271__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IEIP4824` interface', async () => {
+      const iface = IEIP4824__factory.createInterface();
+      expect(await dao.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IERC721Receiver` interface', async () => {
       expect(
         await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
-      ).to.equal(true);
+      ).to.be.true;
+    });
+
+    it('supports the `IERC1155Receiver` interface', async () => {
+      expect(
+        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
+      ).to.be.true;
+    });
+  });
+
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await dao.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
     });
   });
 
@@ -289,6 +476,34 @@ describe('DAO', function () {
         .withArgs(0);
     });
 
+    it('reverts on re-entrant actions', async () => {
+      // Grant DAO execute permission on itself.
+      await dao.grant(
+        dao.address,
+        dao.address,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      );
+
+      // Create a reentrant action calling `dao.execute` again.
+      const reentrantAction = {
+        to: dao.address,
+        data: dao.interface.encodeFunctionData('execute', [
+          ZERO_BYTES32,
+          [data.succeedAction],
+          0,
+        ]),
+        value: 0,
+      };
+
+      // Create  an action array with an normal action and an reentrant action.
+      const actions = [data.succeedAction, reentrantAction];
+
+      // Expect the execution of the reentrant action (second action) to fail.
+      await expect(dao.execute(ZERO_BYTES32, actions, 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(1);
+    });
+
     it('succeeds if action is failable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = flipBit(0, num);
@@ -376,10 +591,11 @@ describe('DAO', function () {
       expect(event.args.allowFailureMap).to.equal(0);
     });
 
-    it('reverts if failure is allowed but not enough gas is provided', async () => {
+    it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
       let gasConsumer = await GasConsumer.deploy();
 
+      // Prepare an action array calling `consumeGas` twenty times.
       const gasConsumingAction = {
         to: gasConsumer.address,
         data: GasConsumer.interface.encodeFunctionData('consumeGas', [20]),
@@ -393,15 +609,51 @@ describe('DAO', function () {
         ZERO_BYTES32,
         [gasConsumingAction],
         allowFailureMap
-      ); // exact gas required: 495453
+      );
 
-      // Providing less gas causes the `to.call` of the `gasConsumingAction` to fail, but is still enough for the overall `dao.execute` call to finish successfully.
+      // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(800),
+          gasLimit: expectedGas.sub(3000),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
+      // Provide enough gas so that the entire call passes.
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas,
+        })
+      ).to.not.be.reverted;
+    });
+
+    it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
+      const GasConsumer = new GasConsumer__factory(signers[0]);
+      let gasConsumer = await GasConsumer.deploy();
+
+      // Prepare an action array calling `consumeGas` one times.
+      const gasConsumingAction = {
+        to: gasConsumer.address,
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [1]),
+        value: 0,
+      };
+
+      let allowFailureMap = ethers.BigNumber.from(0);
+      allowFailureMap = flipBit(0, allowFailureMap); // allow the action to fail
+
+      const expectedGas = await dao.estimateGas.execute(
+        ZERO_BYTES32,
+        [gasConsumingAction],
+        allowFailureMap
+      );
+
+      // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
+      await expect(
+        dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
+          gasLimit: expectedGas.sub(10000),
+        })
+      ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
+
+      // Provide enough gas so that the entire call passes.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
           gasLimit: expectedGas,
@@ -447,7 +699,7 @@ describe('DAO', function () {
         let erc20Token: TestERC20;
 
         beforeEach(async () => {
-          const TestERC20 = await ethers.getContractFactory('TestERC20');
+          const TestERC20 = new TestERC20__factory(signers[0]);
           erc20Token = await TestERC20.deploy('name', 'symbol', 0);
         });
 
@@ -487,7 +739,7 @@ describe('DAO', function () {
         let erc721Token: TestERC721;
 
         beforeEach(async () => {
-          const TestERC721 = await ethers.getContractFactory('TestERC721');
+          const TestERC721 = new TestERC721__factory(signers[0]);
           erc721Token = await TestERC721.deploy('name', 'symbol');
         });
 
@@ -530,7 +782,7 @@ describe('DAO', function () {
         let erc1155Token: TestERC1155;
 
         beforeEach(async () => {
-          const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+          const TestERC1155 = new TestERC1155__factory(signers[0]);
           erc1155Token = await TestERC1155.deploy('URI');
         });
 
@@ -591,14 +843,14 @@ describe('DAO', function () {
     let erc1155Token: TestERC1155;
 
     beforeEach(async () => {
-      const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+      const TestERC1155 = new TestERC1155__factory(signers[0]);
       erc1155Token = await TestERC1155.deploy('URI');
 
-      const TestERC721 = await ethers.getContractFactory('TestERC721');
+      const TestERC721 = new TestERC721__factory(signers[0]);
       erc721Token = await TestERC721.deploy('name', 'symbol');
 
-      erc721Token.mint(ownerAddress, 1);
-      erc1155Token.mint(ownerAddress, 1, 2);
+      await erc721Token.mint(ownerAddress, 1);
+      await erc1155Token.mint(ownerAddress, 1, 2);
     });
 
     it('reverts if erc721 callback is not registered', async () => {
@@ -618,9 +870,9 @@ describe('DAO', function () {
     });
 
     it('successfully transfers erc721 into the dao and emits the correct callback received event', async () => {
-      const ABI = ['function onERC721Received(address,address,uint256,bytes)'];
-      const iface = new ethers.utils.Interface(ABI);
-      const encoded = iface.encodeFunctionData('onERC721Received', [
+      const IERC721 = IERC721Receiver__factory.createInterface();
+
+      const encoded = IERC721.encodeFunctionData('onERC721Received', [
         ownerAddress,
         ownerAddress,
         1,
@@ -670,27 +922,19 @@ describe('DAO', function () {
     });
 
     it('successfully transfers erc1155 into the dao', async () => {
+      const IERC1155 = IERC1155Receiver__factory.createInterface();
+
       // encode onERC1155Received call
-      const erc1155ReceivedEncoded = new ethers.utils.Interface([
-        'function onERC1155Received(address,address,uint256,uint256,bytes)',
-      ]).encodeFunctionData('onERC1155Received', [
-        ownerAddress,
-        ownerAddress,
-        1,
-        1,
-        '0x',
-      ]);
+      const erc1155ReceivedEncoded = IERC1155.encodeFunctionData(
+        'onERC1155Received',
+        [ownerAddress, ownerAddress, 1, 1, '0x']
+      );
 
       // encode onERC1155BatchReceived call
-      const erc1155BatchReceivedEncoded = new ethers.utils.Interface([
-        'function onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)',
-      ]).encodeFunctionData('onERC1155BatchReceived', [
-        ownerAddress,
-        ownerAddress,
-        [1],
-        [1],
-        '0x',
-      ]);
+      const erc1155BatchReceivedEncoded = IERC1155.encodeFunctionData(
+        'onERC1155BatchReceived',
+        [ownerAddress, ownerAddress, [1], [1], '0x']
+      );
 
       await expect(
         erc1155Token.safeTransferFrom(ownerAddress, dao.address, 1, 1, '0x')
@@ -724,7 +968,7 @@ describe('DAO', function () {
     let token: TestERC20;
 
     beforeEach(async () => {
-      const TestERC20 = await ethers.getContractFactory('TestERC20');
+      const TestERC20 = new TestERC20__factory(signers[0]);
       token = await TestERC20.deploy('name', 'symbol', 0);
     });
 
@@ -938,7 +1182,7 @@ describe('DAO', function () {
     });
 
     it('should return the validators response', async () => {
-      const ERC1271MockFactory = await ethers.getContractFactory('ERC1271Mock');
+      const ERC1271MockFactory = new ERC1271Mock__factory(signers[0]);
       const erc1271Mock = await ERC1271MockFactory.deploy();
 
       await dao.setSignatureValidator(erc1271Mock.address);

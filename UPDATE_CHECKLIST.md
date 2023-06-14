@@ -4,6 +4,14 @@ This checklist is seen as a guide to update the existing deployment.
 
 ## Pre-Update
 
+- [ ] Make sure you are using Node v16
+- [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
+- [ ] Check that all contracts that undergo an upgrade and
+  - [ ] require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective method with an incremented `renitializer(X)` number
+  - [ ] have new storage added to them
+    - [ ] decrement the storage gap correctly
+    - [ ] do not corrupt pre-existing storage
+    - [ ] initialize the storage correctly
 - [ ] Make sure that the `deploy` property in `packages/contracts/networks.json` points to the correct update
 - [ ] Run `yarn` in the repository root to install the dependencies
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
@@ -11,12 +19,18 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Copy the managing DAO multisig env variables from `packages/subgraph/.env-example` into `packages/subgraph/.env`
+- [ ] Follow the version specific tasks in the section `Version tasks`
+- [ ] If new plugin builds are released
+  - [ ] Double-check that the build-metadata was updated correctly for the UI to work correctly
+  - [ ] If the plugin is used by the managing DAO and the new build includes security relevant changes it must be applied immediately
 
 ## Update
 
 To update run `yarn deploy --network NETWORK` in `packages/contracts` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `yarn deploy --network mainnet`).
 
 ## After-Update
+
+- [ ] Follow the version specific tasks in the section `Version tasks`
 
 ### Configuration updates
 
@@ -80,3 +94,23 @@ if the new contracts **aren't** published:
 - [ ] Run `yarn deploy` in `packages/subgraph` to deploy the subgraph
 - [ ] Test the new deployed subgraph with the frontend team
 - [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
+
+## Version tasks
+
+### v1.3.0
+
+#### Pre-Update
+
+Nothing to do.
+
+#### After-Update
+
+Wait until the managing DAO has made the necessary changes and then:
+
+- [ ] Verify that the managingDAO implementation has been updated
+- [ ] Verify that the managingDAO is reinitialized to `_initialized = 2`
+- [ ] Verify that the old DAOFactory has no permissions on the DAORegistry
+- [ ] Verify that the new DAOFactory has the `REGISTER_DAO_PERMISSION_ID` permission on the DAORegistry
+- [ ] Verify that Release 1 Build 2 of the multisig plugin has been created
+- [ ] Verify that Release 1 Build 2 of the token voting plugin has been created
+- [ ] Verify that Release 1 Build 2 of the addresslist voting plugin has been created

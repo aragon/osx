@@ -1,12 +1,13 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-
 import {getContractAddress} from '../../helpers';
 
+import pluginRepoFactoryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, ethers} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const [deployer] = await ethers.getSigners();
 
   // Get `PluginRepoRegistry` address.
   const pluginRepoRegistryAddress = await getContractAddress(
@@ -15,10 +16,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   await deploy('PluginRepoFactory', {
-    from: deployer,
+    contract: pluginRepoFactoryArtifact,
+    from: deployer.address,
     args: [pluginRepoRegistryAddress],
     log: true,
   });
 };
 export default func;
-func.tags = ['PluginRepoFactory'];
+func.tags = ['New', 'PluginRepoFactory'];
