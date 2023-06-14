@@ -17,8 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Revert with an error if the `grantWithCondition` function in `PermissionManager` is called with a condition address that is not a `IPermissionCondition` implementation.
-- Revert with an error if the `applySingleTargetPermissions` function in `PermissionManager` is called with `PermissionLib.Operation.GrantWithCondition`.
+- Revert with errors (`ConditionNotAContract`, `ConditionInterfacNotSupported`) if the `grantWithCondition` function in `PermissionManager` is called with a condition address that is not a `IPermissionCondition` implementation.
+- Revert with an error (`GrantWithConditionNotSupported`) if the `applySingleTargetPermissions` function in `PermissionManager` is called with `PermissionLib.Operation.GrantWithCondition`.
 - Fixed logic bug in the `TokenVoting` and `AddresslistVoting` implementations that caused the `createProposal` function to emit the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
 - Changed the `createProposal` functions in `Multisig` to allow creating proposals when the `_msgSender()` is listed in the current block.
 - Changed the `createProposal` functions in `AddresslistVoting` to allow creating proposals when the `_msgSender()` is listed in the current block.

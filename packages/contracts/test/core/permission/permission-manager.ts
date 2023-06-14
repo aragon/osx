@@ -183,7 +183,7 @@ describe('Core: PermissionManager', function () {
           ethers.constants.AddressZero
         )
       )
-        .to.be.revertedWithCustomError(pm, 'ConditionInvalid')
+        .to.be.revertedWithCustomError(pm, 'ConditionNotAContract')
         .withArgs(ethers.constants.AddressZero);
     });
 
@@ -200,7 +200,7 @@ describe('Core: PermissionManager', function () {
           nonConditionContract.address
         )
       )
-        .to.be.revertedWithCustomError(pm, 'ConditionInvalid')
+        .to.be.revertedWithCustomError(pm, 'ConditionInterfacNotSupported')
         .withArgs(nonConditionContract.address);
     });
 

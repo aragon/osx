@@ -50,9 +50,13 @@ abstract contract PermissionManager is Initializable {
         address newCondition
     );
 
-    /// @notice Thrown if an address is not a condition.
+    /// @notice Thrown if a condition address is not a contract.
     /// @param condition The address that is not a contract.
-    error ConditionInvalid(PermissionConditionBase condition);
+    error ConditionNotAContract(PermissionConditionBase condition);
+
+    /// @notice Thrown if a condition contract does not support the `IPermissionCondition` interface.
+    /// @param condition The address that is not a contract.
+    error ConditionInterfacNotSupported(PermissionConditionBase condition);
 
     /// @notice Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
 
@@ -258,11 +262,11 @@ abstract contract PermissionManager is Initializable {
         PermissionConditionBase _condition
     ) internal virtual {
         if (!address(_condition).isContract()) {
-            revert ConditionInvalid(_condition);
+            revert ConditionNotAContract(_condition);
         }
 
         if (!_condition.supportsInterface(type(IPermissionCondition).interfaceId)) {
-            revert ConditionInvalid(_condition);
+            revert ConditionInterfacNotSupported(_condition);
         }
 
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
