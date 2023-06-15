@@ -51,7 +51,7 @@ contract TestSharedPlugin is PluginUUPSUpgradeable {
     }
 
     /// @notice Executes something if the `id` parameter is authorized by the DAO associated through `ownedIds`.
-    ///         This is done by asking a `PermissionConditionBase` that must be authorized in the DAO's permission manager via `grantWithCondition` and the `ID_GATED_ACTION_PERMISSION_ID`.
+    ///         This is done by asking a `PermissionCondition` that must be authorized in the DAO's permission manager via `grantWithCondition` and the `ID_GATED_ACTION_PERMISSION_ID`.
     /// @param _id The ID that is associated with a specific DAO
     function idGatedAction(uint256 _id) external sharedAuth(_id, ID_GATED_ACTION_PERMISSION_ID) {
         // do something
