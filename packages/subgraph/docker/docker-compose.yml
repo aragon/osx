@@ -1,5 +1,11 @@
 version: '3'
 services:
+  hardhat:
+      build:
+        context: ../../../
+        dockerfile: packages/subgraph/docker/hardhat.Dockerfile
+      ports:
+        - 8545:8545
   graph-node:
     image: graphprotocol/graph-node
     ports:
@@ -48,9 +54,3 @@ services:
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-  hardhat:
-    build:
-      context: ../../../
-      dockerfile: packages/subgraph/docker/hardhat.Dockerfile
-    ports:
-      - 8545:8545
