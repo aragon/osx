@@ -6,10 +6,10 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 
 import {IPermissionCondition} from "./IPermissionCondition.sol";
 
-/// @title PermissionCondition
-/// @author Aragon Association - 2021-2023
-/// @notice An abstract contract to inherit from and to be be implemented to support more customary permissions depending on on- or off-chain state, e.g., by querying token ownershop or a secondary condition, respectively.
-abstract contract PermissionCondition is ERC165Upgradeable, IPermissionCondition {
+/// @title PermissionConditionUpgradeable
+/// @author Aragon Association - 2023
+/// @notice An abstract contract for upgradeable or cloneable contracts to inherit from and to support customary permissions depending on arbitrary on-chain state.
+abstract contract PermissionConditionUpgradeable is ERC165Upgradeable, IPermissionCondition {
     /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.
