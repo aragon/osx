@@ -173,7 +173,7 @@ In another use-case, we might want to make sure that the `sendCoins` function ca
 ```solidity title="PriceOracleCondition.sol"
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
-contract PriceOracleCondition is PermissionConditionx {
+contract PriceOracleCondition is PermissionCondition {
   AggregatorV3Interface internal priceFeed;
 
   // Network: Goerli
