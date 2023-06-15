@@ -8,7 +8,7 @@ import {UPDATE_INFOS} from '../../../utils/updates';
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('Updating DAOFactory');
+  console.log('\nUpdating DAOFactory');
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
@@ -62,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: managingDAOAddress,
     value: 0,
     data: calldata,
-    description: `Moves perimssion (REGISTER_DAO_PERMISSION) from old DAOFactory ${previousDAOFactoryAddress} to new DAOFactory ${deployResult.address} on DAORegistry ${daoRegistryAddress}`,
+    description: `Moves the REGISTER_DAO_PERMISSION_ID permission on the DAORegistry (${daoRegistryAddress}) from the old to the new DAOFactory (${previousDAOFactoryAddress} -> ${deployResult.address}).`,
   });
 };
 export default func;
