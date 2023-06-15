@@ -9,14 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Inherit `ProtocolVersion` and `ERC165` in `DAOFactory`.
-- Inherit `ProtocolVersion` in `DAO`.
+- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
+- Inherit `ProtocolVersion` and `ERC165` in `DAOFactory` and `PluginRepoFactory`.
+- Inherit `ProtocolVersion` in `DAO` and `PluginRepo`.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
 - Added `allowFailureMap` to `IDAO.Executed` event.
 
 ### Changed
 
-- Revert with an error if the `applySingleTargetPermissions` function in `PermissionManager` is called with `PermissionLib.Operation.GrantWithCondition`.
+- Revert with errors (`ConditionNotAContract`, `ConditionInterfacNotSupported`) if the `grantWithCondition` function in `PermissionManager` is called with a condition address that is not a `IPermissionCondition` implementation.
+- Revert with an error (`GrantWithConditionNotSupported`) if the `applySingleTargetPermissions` function in `PermissionManager` is called with `PermissionLib.Operation.GrantWithCondition`.
 - Fixed logic bug in the `TokenVoting` and `AddresslistVoting` implementations that caused the `createProposal` function to emit the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
 - Changed the `createProposal` functions in `Multisig` to allow creating proposals when the `_msgSender()` is listed in the current block.
 - Changed the `createProposal` functions in `AddresslistVoting` to allow creating proposals when the `_msgSender()` is listed in the current block.
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
 
 ### Removed
+
+- Removed unnecessary ERC-165 check for `type(UUPSUpgradeable).interfaceId` from `supportsInterface` in `PluginRepo`.
 
 ## v1.2.0
 

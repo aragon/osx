@@ -19,6 +19,7 @@ type ERC20WrapperContract implements Token @entity(inmutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
+  decimals: Int!
   underlyingToken: ERC20Contract!
 }
 
