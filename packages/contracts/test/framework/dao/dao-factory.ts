@@ -25,6 +25,7 @@ import {
   DAORegistry__factory,
   PluginRepo__factory,
   IProtocolVersion__factory,
+  IERC165__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -297,6 +298,12 @@ describe('DAOFactory: ', function () {
   context('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await daoFactory.supportsInterface('0xffffffff')).to.be.false;
+    });
+
+    it('supports the `IERC165` interface', async () => {
+      const iface = IERC165__factory.createInterface();
+      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {

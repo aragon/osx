@@ -15,8 +15,12 @@ import {
   PluginRepoFactory,
   PluginRepoFactory__factory,
   PluginRepo__factory,
+  IProtocolVersion__factory,
+  IERC165__factory,
 } from '../../../typechain';
 import {getMergedABI} from '../../../utils/abi';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -109,6 +113,33 @@ describe('PluginRepoFactory: ', function () {
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
+  });
+
+  describe('ERC-165', async () => {
+    it('does not support the empty interface', async () => {
+      expect(await pluginRepoFactory.supportsInterface('0xffffffff')).to.be
+        .false;
+    });
+
+    it('supports the `IERC165` interface', async () => {
+      const iface = IERC165__factory.createInterface();
+      expect(await pluginRepoFactory.supportsInterface(getInterfaceID(iface)))
+        .to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await pluginRepoFactory.supportsInterface(getInterfaceID(iface)))
+        .to.be.true;
+    });
+  });
+
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await pluginRepoFactory.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
   });
 
   describe('CreatePluginRepo', async () => {

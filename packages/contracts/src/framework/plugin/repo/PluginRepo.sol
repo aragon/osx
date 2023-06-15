@@ -8,6 +8,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
+import {IProtocolVersion} from "../../../utils/protocol/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../../../core/permission/PermissionManager.sol";
 import {PluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginSetup} from "../setup/PluginSetup.sol";
@@ -21,6 +23,7 @@ contract PluginRepo is
     ERC165Upgradeable,
     IPluginRepo,
     UUPSUpgradeable,
+    ProtocolVersion,
     PermissionManager
 {
     using AddressUpgradeable for address;
@@ -264,7 +267,7 @@ contract PluginRepo is
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPluginRepo).interfaceId ||
-            _interfaceId == type(UUPSUpgradeable).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 }
