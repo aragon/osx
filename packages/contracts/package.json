@@ -23,7 +23,7 @@
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
     "node": "hardhat node --hostname 0.0.0.0",
-    "dev": "cd ../contracts-versions && yarn build && cd ../contracts && yarn build && yarn node",
+    "dev": "yarn node",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "formatting:check": "prettier '**/*.{json,sol,ts,js,md}' -c",

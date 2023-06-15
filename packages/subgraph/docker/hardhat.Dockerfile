@@ -3,15 +3,13 @@ FROM node:18
 RUN mkdir /osx
 ADD . /osx
 WORKDIR /osx
-
-RUN apt-get update
-RUN apt-get install -y git
+RUN yarn install
 
 WORKDIR /osx/packages/contracts-versions
-RUN yarn install
+RUN yarn build
 
 WORKDIR /osx/packages/contracts
-RUN yarn install
+RUN yarn build
 
 EXPOSE 8545
 
