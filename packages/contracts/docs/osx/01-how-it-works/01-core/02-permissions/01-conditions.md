@@ -5,7 +5,7 @@ title: Conditions
 ## Permission Conditions
 
 Permission conditions relay the decision if an authorized call is permitted to another contract.
-This contract must implement the `IPermissionCondition` interface.
+This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface.
 
 ```solidity title="@aragon/osx/core/permission/IPermissionCondition.sol"
 interface IPermissionCondition {
@@ -84,7 +84,7 @@ Let’s imagine that we want to make sure that `_amount` is not more than `1 ETH
 We can realize this requirement by deploying a `ParameterConstraintCondition` condition.
 
 ```solidity title="ParameterConstraintCondition.sol"
-contract ParameterConstraintCondition is IPermissionCondition {
+contract ParameterConstraintCondition is PermissionCondition {
 	uint256 internal maxValue;
 
 	constructor(uint256 _maxValue) {
@@ -112,7 +112,7 @@ Now, after granting the `SEND_COINS_PERMISSION_ID` permission to `_where` and `_
 In another use-case, we might want to make sure that the `sendCoins` can only be called after a certain date. This would look as following:
 
 ```solidity title="TimeCondition.sol"
-contract TimeCondition is IPermissionCondition {
+contract TimeCondition is PermissionCondition {
   uint256 internal date;
 
   constructor(uint256 _date) {
@@ -143,7 +143,7 @@ interface IProofOfHumanity {
   function isRegistered(address _submissionID) external view returns (bool);
 }
 
-contract ProofOfHumanityCondition is IPermissionCondition {
+contract ProofOfHumanityCondition is PermissionCondition {
   IProofOfHumanity internal registry;
 
   constructor(IProofOfHumanity _registry) {
@@ -173,7 +173,7 @@ In another use-case, we might want to make sure that the `sendCoins` function ca
 ```solidity title="PriceOracleCondition.sol"
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
-contract PriceOracleCondition is IPermissionCondition {
+contract PriceOracleCondition is PermissionCondition {
   AggregatorV3Interface internal priceFeed;
 
   // Network: Goerli

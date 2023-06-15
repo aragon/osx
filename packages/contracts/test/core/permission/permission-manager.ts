@@ -7,6 +7,7 @@ import {
   PermissionConditionMock,
   PermissionManagerTest__factory,
   PermissionConditionMock__factory,
+  TestPlugin__factory,
 } from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -182,8 +183,25 @@ describe('Core: PermissionManager', function () {
           ethers.constants.AddressZero
         )
       )
-        .to.be.revertedWithCustomError(pm, 'ConditionInvalid')
+        .to.be.revertedWithCustomError(pm, 'ConditionNotAContract')
         .withArgs(ethers.constants.AddressZero);
+    });
+
+    it('reverts if the condition contract does not support `IPermissionConditon`', async () => {
+      const nonConditionContract = await new TestPlugin__factory(
+        signers[0]
+      ).deploy();
+
+      await expect(
+        pm.grantWithCondition(
+          pm.address,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          nonConditionContract.address
+        )
+      )
+        .to.be.revertedWithCustomError(pm, 'ConditionInterfacNotSupported')
+        .withArgs(nonConditionContract.address);
     });
 
     it('should add permission', async () => {
