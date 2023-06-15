@@ -5,7 +5,8 @@ pragma solidity ^0.8.8;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
-import "./IPermissionCondition.sol";
+import {IPermissionCondition} from "./IPermissionCondition.sol";
+import {PermissionCondition} from "./PermissionCondition.sol";
 import "./PermissionLib.sol";
 
 /// @title PermissionManager
@@ -50,9 +51,13 @@ abstract contract PermissionManager is Initializable {
         address newCondition
     );
 
-    /// @notice Thrown if an address is not a condition.
-    /// @param condition The address that is not a contract..
-    error ConditionInvalid(IPermissionCondition condition);
+    /// @notice Thrown if a condition address is not a contract.
+    /// @param condition The address that is not a contract.
+    error ConditionNotAContract(IPermissionCondition condition);
+
+    /// @notice Thrown if a condition contract does not support the `IPermissionCondition` interface.
+    /// @param condition The address that is not a contract.
+    error ConditionInterfacNotSupported(IPermissionCondition condition);
 
     /// @notice Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
 
@@ -69,13 +74,13 @@ abstract contract PermissionManager is Initializable {
     /// @param here The address of the context in which the permission is granted.
     /// @param where The address of the target contract for which `_who` receives permission.
     /// @param who The address (EOA or contract) receiving the permission.
-    /// @param condition The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionCondition` to be used.
+    /// @param condition The address `ALLOW_FLAG` for regular permissions or, alternatively, the `IPermissionCondition` contract implementation to be used.
     event Granted(
         bytes32 indexed permissionId,
         address indexed here,
         address where,
         address indexed who,
-        IPermissionCondition condition
+        address condition
     );
 
     /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `_who` for the contract `_where`.
@@ -241,7 +246,7 @@ abstract contract PermissionManager is Initializable {
         if (currentFlag == UNSET_FLAG) {
             permissionsHashed[permHash] = ALLOW_FLAG;
 
-            emit Granted(_permissionId, msg.sender, _where, _who, IPermissionCondition(ALLOW_FLAG));
+            emit Granted(_permissionId, msg.sender, _where, _who, ALLOW_FLAG);
         }
     }
 
@@ -257,8 +262,18 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         IPermissionCondition _condition
     ) internal virtual {
-        if (!address(_condition).isContract()) {
-            revert ConditionInvalid(_condition);
+        address conditionAddr = address(_condition);
+
+        if (!conditionAddr.isContract()) {
+            revert ConditionNotAContract(_condition);
+        }
+
+        if (
+            !PermissionCondition(conditionAddr).supportsInterface(
+                type(IPermissionCondition).interfaceId
+            )
+        ) {
+            revert ConditionInterfacNotSupported(_condition);
         }
 
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
@@ -277,14 +292,13 @@ abstract contract PermissionManager is Initializable {
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
 
         address currentCondition = permissionsHashed[permHash];
-        address newCondition = address(_condition);
 
         // Means permHash is not currently set.
         if (currentCondition == UNSET_FLAG) {
-            permissionsHashed[permHash] = newCondition;
+            permissionsHashed[permHash] = conditionAddr;
 
-            emit Granted(_permissionId, msg.sender, _where, _who, _condition);
-        } else if (currentCondition != newCondition) {
+            emit Granted(_permissionId, msg.sender, _where, _who, conditionAddr);
+        } else if (currentCondition != conditionAddr) {
             // Revert if `permHash` is already granted, but uses a different condition.
             // If we don't revert, we either should:
             //   - allow overriding the condition on the same permission
@@ -295,7 +309,7 @@ abstract contract PermissionManager is Initializable {
                 who: _who,
                 permissionId: _permissionId,
                 currentCondition: currentCondition,
-                newCondition: newCondition
+                newCondition: conditionAddr
             });
         }
     }
