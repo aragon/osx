@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `PermissionConditionBase` to have ERC-165 support for `IPermissionCondition` implementations.
-- Inherit `ProtocolVersion` and `ERC165` in `DAOFactory`.
-- Inherit `ProtocolVersion` in `DAO`.
+- Inherit `ProtocolVersion` and `ERC165` in `DAOFactory` and `PluginRepoFactory`.
+- Inherit `ProtocolVersion` in `DAO` and `PluginRepo`.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
 - Added `allowFailureMap` to `IDAO.Executed` event.
 
@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
 
 ### Removed
+
+- Removed unnecessary ERC-165 check for `type(UUPSUpgradeable).interfaceId` from `supportsInterface` in `PluginRepo`.
 
 ## v1.2.0
 

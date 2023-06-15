@@ -47,6 +47,7 @@ then
 else
     graph deploy $FULLNAME \
         --version-label $SUBGRAPH_VERSION \
+        --ipfs https://ipfs.satsuma.xyz \
         --node https://app.satsuma.xyz/api/subgraphs/deploy \
         --deploy-key $GRAPH_KEY > deploy-output.txt
 
