@@ -97,7 +97,7 @@ Exceptions are, again, the [DAO creation](../../02-framework/01-dao-creation/ind
 
 #### Granting Permission with Conditions
 
-Aragon OSx supports relaying the authorization of a function call to another contract inheriting from the `PermissionConditionBase` interface. This works by granting the permission with the `grantWithCondition` function
+Aragon OSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
 
 ```solidity title="@aragon/osx/core/permission/PermissionManager.sol"
 function grantWithCondition(

@@ -4,13 +4,13 @@ pragma solidity 0.8.17;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import {PermissionConditionBase} from "../../core/permission/PermissionConditionBase.sol";
+import {PermissionCondition} from "../../core/permission/PermissionCondition.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoUnauthorized} from "../../core/utils/auth.sol";
 import {IDAO} from "../../core/dao/IDAO.sol";
 
 /// @notice A test Plugin that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
-/// @dev This is realized by asking a `PermissionConditionBase` that must be authorized in the DAO's permission manager.
+/// @dev This is realized by asking a `PermissionCondition` that must be authorized in the DAO's permission manager.
 contract TestSharedPlugin is PluginUUPSUpgradeable {
     bytes32 public constant ID_GATED_ACTION_PERMISSION_ID = keccak256("ID_GATED_ACTION_PERMISSION");
 
@@ -59,7 +59,7 @@ contract TestSharedPlugin is PluginUUPSUpgradeable {
 }
 
 /// @notice The condition associated with `TestSharedPlugin`
-contract TestIdGatingCondition is PermissionConditionBase {
+contract TestIdGatingCondition is PermissionCondition {
     uint256 public allowedId;
 
     constructor(uint256 _id) {
