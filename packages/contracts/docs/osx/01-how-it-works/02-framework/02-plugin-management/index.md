@@ -1,5 +1,5 @@
 ---
-title: Plugin Management
+title: Managing Plugins
 ---
 
 ## Managing Plugins
@@ -36,13 +36,13 @@ An Aragon OSx Plugin consist of:
   - Release number
   - Build number
 
-A detailed explanation of the [build and release versioning](../../../02-how-to-guides/02-plugin-development/07-publication/02-versioning.md) is found in the How-to sections in our developer portal.
+A detailed explanation of the [build and release versioning](../../../02-how-to-guides/02-plugin-development/07-publication/01-versioning.md) is found in the How-to sections in our developer portal.
 
 <div class="center-column">
 
 ![](./plugin-version.drawio.svg)
 
-<p class="caption"> 
+<p class="caption">
   A schematic depiction of a plugin bundle consisting of a version tag, the plugin setup contract pointing to the plugin implementation contract, and a metadata URI.
 </p>
 

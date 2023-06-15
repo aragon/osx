@@ -1,5 +1,5 @@
 ---
-title: Conditions
+title: Permission Conditions
 ---
 
 ## Permission Conditions

@@ -8,10 +8,9 @@ title: Proposals
 This page is a stub and work in progress
 :::
 
-- create and execute proposals containing actions and a description
+Create and execute proposals containing actions and a description.
 
-<details>
-<summary><code>interface IProposal</code></summary>
+### Interface `IProposal`
 
 ```solidity
 interface IProposal {
@@ -42,5 +41,3 @@ interface IProposal {
   function proposalCount() external view returns (uint256);
 }
 ```
-
-</details>

@@ -1,11 +1,16 @@
 ---
-title: Setup
+title: Building a Plugin Setup contract for a Non-Upgradeable Plugin
 ---
 
-## Developing the Setup Contract for Non-upgradeable Contracts
+## What is the Plugin Setup contract?
 
-<details>
-<summary>The <code>SimpleAdmin</code> Implementation</summary>
+The Plugin Setup contract is the contract defining the instructions for installing, uninstalling, or upgrading plugins into DAOs. This contract prepares the permission granting or revoking that needs to happen in order for plugins to be able to perform actions on behalf of the DAO.
+
+You need it for the plugin to be installed intto the DAO.
+
+### 1. Finish the Plugin contract
+
+Before building your Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple admin pugin which grants one address permission to execute actions on behalf of the DAO.
 
 ```solidity
 contract SimpleAdmin is PluginCloneable {
@@ -30,12 +35,9 @@ contract SimpleAdmin is PluginCloneable {
 }
 ```
 
-</details>
+### 2. How to initialize the Plugin Setup contract
 
-Let's again start with the deployment and initialization. Here, it is simple because each `PluginSetup` contract is deployed only once, which is also the case for upgradeable plugins, where we will publish a separate `PluginSetup` contract for each version. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
-
-<details>
-<summary><code>SimpleAdminSetup</code>: Initializing the <code>PluginSetup</code></summary>
+Each `PluginSetup` contract is deployed only once and we will publish a separate `PluginSetup` instance for each version. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -45,7 +47,7 @@ import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/Plug
 import {SimpleAdmin} from './SimpleAdmin.sol';
 
 contract SimpleAdminSetup is PluginSetup {
-  /// @notice The address of `SimpleAdmin` plugin logic contract to be cloned.
+  /// @notice The address of `SimpleAdmin` plugin contract to be cloned.
   address private immutable simpleAdminImplementation;
 
   /// @notice The constructor setting the `SimpleAdmin` implementation contract to clone from.
@@ -60,12 +62,13 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-</details>
+### 3. Build the Skeleton
 
-The skeleton of our `SimpleAdminSetup` contract inheriting from `PluginSetup` looks as follows:
+In order for the Plugin to be easily installed into the DAO, we need to define the permissions the plugin will need.
 
-<details>
-<summary><code>SimpleAdminSetup</code>: The Sekeleton</summary>
+We will create a `prepareInstallation()` function, as well as a `prepareUninstallation()` function. These are the functions the `PluginSetupProcessor.sol` (the contract in charge of installing plugins into the DAO) will use to prepare the installation/uninstallation of the plugin into the DAO.
+
+For example, a skeleton for our `SimpleAdminSetup` contract inheriting from `PluginSetup` looks as follows:
 
 ```solidity
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
@@ -84,7 +87,7 @@ contract SimpleAdminSetup is PluginSetup {
     address _dao,
     bytes calldata _data
   ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
-    revert('Not implemented.');
+    revert('Not implemented yet.');
   }
 
   /// @inheritdoc IPluginSetup
@@ -92,7 +95,7 @@ contract SimpleAdminSetup is PluginSetup {
     address _dao,
     SetupPayload calldata _payload
   ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-    revert('Not implemented.');
+    revert('Not implemented yet.');
   }
 
   /// @inheritdoc IPluginSetup
@@ -102,15 +105,36 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-</details>
+As you can see, we have a constructor storing the implementation contract instantiated via the `new` method in the private immutable variable `implementation` to save gas and a `implementation` function to retrieve it.
 
-We have a constructor storing the implementation contract instantiated via `new` in the private immutable variable `implementation` to save gas and a `implementation` function to return it.
-Next, we have two external functions, `prepareInstallation` and `prepareUninstallation` that we are going to implement.
+Next, we will add the implementation for the `prepareInstallation` and `prepareUninstallation` functions.
 
-### Implementing the `prepareInstallation` function
+### 4. Implementing the `prepareInstallation()` function
 
-<details>
-<summary><code>SimpleAdminSetup</code>: Implementing the <code>function prepareInstallation</code></summary>
+The `prepareInstallation()` function should take in two parameters:
+
+1. the `DAO` it prepares the installation for, and
+2. the `_data` parameter containing all the information needed for this function to work properly, in this case, the address we want to set as admin of our DAO.
+
+Hence, the first thing we should do when working on the `prepareInsallation()` function is decode the information from the `_data` parameter. We also want to check that the address is not accidentally set to `address(0)`, which would freeze the DAO forever.
+
+```solidity
+import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
+
+contract SimpleAdminSetup is PluginSetup {
+  using Clones for address;
+
+  /// @notice Thrown if the admin address is zero.
+  /// @param admin The admin address.
+  error AdminAddressInvalid(address admin);
+
+  // ...
+}
+```
+
+Then, we will use [OpenZepplin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) to clone our Plugin contract and initialize it with the `admin` address. The first line, `using Clones for address;`, allows us to call OpenZepplin `Clones` library to clone contracts deployed at an address.
+
+The second line introduces a custom error being thrown if the admin address specified is the zero address.
 
 ```solidity
 function prepareInstallation(
@@ -156,42 +180,16 @@ function prepareInstallation(
 }
 ```
 
-</details>
+Finally, we construct and return an array with the permissions that we need for our plugin to work properly.
 
-At the top of the function, we first decode the `admin` address from the `_data` provided and check, that it is not accidentally set to `address(0)`. In the next step, we clone the plugin contract using [OpenZeppelin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) and initialize it with the `admin` address. For this to work, we had to include the following three code lines at the top of the file:
+- First, we request granting the `ADMIN_EXECUTE_PERMISSION_ID` to the `admin` address received. This is what gives the address access to use `plugin`'s functionality - in this case, call on the plugin's `execute` function so it can execute actions on behalf of the DAO.
+- Second, we request that our newly deployed plugin can use the `EXECUTE_PERMISSION_ID` permission on the `_dao`. We don't add conditions to the permissions in this case, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
 
-<details>
-<summary><code>SimpleAdminSetup</code>: Adding the <code>Clones</code> library and the <code>error AdminAddressInvalid</code></summary>
+### 5. Implementing the `prepareUninstallation()` function
 
-```solidity
-import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
-
-contract SimpleAdminSetup is PluginSetup {
-  using Clones for address;
-
-  /// @notice Thrown if the admin address is zero.
-  /// @param admin The admin address.
-  error AdminAddressInvalid(address admin);
-
-  // ...
-}
-```
-
-</details>
-
-Finally, we construct an array of permission operations requesting two permissions to be granted that is returned by the function. First, we request the `ADMIN_EXECUTE_PERMISSION_ID` permission for the `admin` (`who`) address on the `plugin` (`where`). Second, we request the `EXECUTE_PERMISSION_ID` permission for the freshly deployed `plugin` (`who`) on the `_dao` (`where`). We don't add conditions to the permissions, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
-
-The first line, `using Clones for address;`, allows us to call OpenZeppelin `Clones` library to clone contracts deployed at an address.
-The second line introduces a custom error being thrown if the admin address specified is the zero address.
-
-### Implementing the `prepareUninstallation` function
-
-For the uninstallation, we have to make sure two revoke the two permissions that have been granted during the installation.
+For the uninstallation, we have to make sure to revoke the two permissions that have been granted during the installation process.
 First, we revoke the `ADMIN_EXECUTE_PERMISSION_ID` from the `admin` address that we have stored in the implementation contract.
 Second, we revoke the `EXECUTE_PERMISSION_ID` from the `plugin` address that we obtain from the `_payload` calldata.
-
-<details>
-<summary><code>SimpleAdmin</code></summary>
 
 ```solidity
 function prepareUninstallation(
@@ -223,14 +221,9 @@ function prepareUninstallation(
 }
 ```
 
-</details>
+#### 6. Putting Everything Together
 
-#### Putting Everything Together
-
-After putting everything together, we obtain the final `SimpleAdminSetup` contract being ready for publication in a `PluginRepo` and registered in Aragon's `PluginRepoRegistry`.
-
-<details>
-<summary>The Final <code>SimpleAdminSetup</code> Contract</summary>
+Now, it's time to wrap up everything together. You should have a contract that looks like this:
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -336,8 +329,10 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-</details>
+Once done, our plugin is ready to be published on the Aragon plugin registry. With the address of the `SimpleAdminSetup` contract, we are ready for creating our `PluginRepo`, the plugin's repository where all plugin versions will live. Check out our how to guides on [publishing your plugin here](../07-publication/index.md).
 
-### Subsequent Builds
+### In the future: Subsequent Builds
 
-For subsequent builds or releases, you simply write a new implementation and associated setup contract providing an `prepareInstallation` and `prepareUninstallation` function. If a DAO wants to install the new build or release, it must uninstall its current plugin and freshly install the new plugin version, which can happen in the same action array in a governance proposal. However, the plugin storage and event history will be lost since this is a non-upgradeable plugin. If you want to prevent the latter, you can learn how to write an upgradeable plugin in the next section.
+For subsequent builds or releases of your plugin, you'll simply write a new implementation and associated Plugin Setup contract providing a new `prepareInstallation` and `prepareUninstallation` function.
+
+If a DAO wants to install the new build or release, it must uninstall its current plugin and freshly install the new plugin version, which can happen in the same action array in a governance proposal. However, the plugin storage and event history will be lost since this is a non-upgradeable plugin. If you want to prevent the latter, you can learn [how to write an upgradeable plugin here](../03-non-upgradeable-plugin/index.md).
