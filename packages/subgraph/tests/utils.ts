@@ -54,7 +54,7 @@ export function createWrappedTokenCalls(
   underlyingTokenAddress: string,
   totalSupply: string | null
 ): void {
-  createTokenCalls(contractAddress, name, symbol, null, totalSupply);
+  createTokenCalls(contractAddress, name, symbol, "18", totalSupply);
   createMockGetter(
     contractAddress,
     'underlying',
