@@ -114,7 +114,7 @@ Wait until the managing DAO has made the necessary changes and then:
 - [ ] Verify that the old `DAOFactory` has no permissions on the `DAORegistry`
 - [ ] Verify that the new `DAOFactory` has the `REGISTER_DAO_PERMISSION_ID` permission on the `DAORegistry`
 - [ ] Verify that the `PluginRepo` base contract in the `PluginRepoFactory` has been updated
-- [ ] Verify that all `PluginRepo`s controlled by the managing DAO have been updated to the new implementations and are still initialized with `_initialized = 1`
+- [ ] Verify that all `PluginRepo`s controlled by the managing DAO have been updated to the new implementation and are still initialized with `_initialized = 1`
   - [ ] 'multisig-repo'
   - [ ] 'admin-repo'
   - [ ] 'token-voting-repo'
