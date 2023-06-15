@@ -39,6 +39,6 @@ contract SimpleStorageBuild1 is PluginUUPSUpgradeable {
 }
 ```
 
-### 3. Plugin done, Setup contract next!
+### 3. Plugin done, PluginSetup contract next!
 
 Now that we have the logic for the plugin implemented, we'll need to define how this plugin should be installed/uninstalled from a DAO. In the next step, we'll write the `PluginSetup` contract - the one containing the installation, uninstallation, and upgrading instructions for the plugin.
