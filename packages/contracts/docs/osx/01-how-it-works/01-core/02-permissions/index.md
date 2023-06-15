@@ -104,7 +104,7 @@ function grantWithCondition(
   address _where,
   address _who,
   bytes32 _permissionId,
-  PermissionConditionBase _condition
+  PermissionCondition _condition
 ) external auth(_where, ROOT_PERMISSION_ID) {}
 ```
 
