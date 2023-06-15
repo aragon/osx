@@ -14,13 +14,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ).daoBase();
 
   const managingDAOAddress = await getContractAddress('managingDAO', hre);
+
   const daoInterface = DAO__factory.connect(
     managingDAOAddress,
     hre.ethers.provider
   );
   const upgradeTX = await daoInterface.populateTransaction.upgradeToAndCall(
     daoImplementation,
-    daoInterface.interface.encodeFunctionData('initializeFrom', [[1, 0, 0], ''])
+    daoInterface.interface.encodeFunctionData('initializeFrom', [[1, 0, 0], []])
   );
 
   if (!upgradeTX.to || !upgradeTX.data) {
