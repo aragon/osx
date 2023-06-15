@@ -15,9 +15,9 @@ services:
       - '8030:8030'
       - '8040:8040'
     depends_on:
+      - hardhat
       - ipfs
       - postgres
-      # - ganache
     extra_hosts:
       - host.docker.internal:host-gateway
     environment:
