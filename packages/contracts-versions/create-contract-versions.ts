@@ -69,7 +69,7 @@ async function copyContracts(versionName: string) {
 async function createVersions() {
   await checkForUncommittedChanges();
 
-  const currentBranch = await getCurrentTagOrBranch();
+  const currentTagOrBranch = await getCurrentTagOrBranch();
 
   for (const version in commitHashes.versions) {
     const versionCommit = commitHashes.versions[version] as string;
@@ -83,7 +83,7 @@ async function createVersions() {
   }
 
   // Return to the original branch
-  await exec(`git checkout ${currentBranch}`, {cwd: contractsDir});
+  await exec(`git checkout ${currentTagOrBranch}`, {cwd: contractsDir});
 
   // Generate npm/index.ts file
   const exports: string[] = [];
