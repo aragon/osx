@@ -5,13 +5,16 @@ on:
       - 'packages/contracts/**'
       - '.github/workflows/contract-*.yml'
 
+env:
+  working-directory: packages/contracts
+
 jobs:
   test-hardhat:
     if: github.actor != 'arabot-1'
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/contracts
+        working-directory: ${{env.working-directory}}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
