@@ -81,6 +81,7 @@
     "@opengsn/contracts": "2.2.6",
     "@openzeppelin/contracts": "4.8.1",
     "@openzeppelin/contracts-upgradeable": "4.8.1",
-    "osxV101": "npm:@aragon/osx@1.0.1"
+    "osxV101": "npm:@aragon/osx@1.0.1",
+    "osx-ethersV120": "npm:@aragon/osx-ethers@1.2.0"
   }
 }

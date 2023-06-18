@@ -2,7 +2,7 @@ import {expect} from 'chai';
 
 import {deployments} from 'hardhat';
 import {initForkAndFixture} from '../test-utils/fixture';
-import {v1_0_0_active_contracts} from '@aragon/osx-versions';
+import {activeContractsList as v1_2_0_activeContracts} from 'osx-ethersV120';
 
 const enableTest = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 const network = 'mainnet';
@@ -25,9 +25,7 @@ if (enableTest) {
       const allDeployments = await deployments.all();
 
       changedContracts.forEach((contractName: string) => {
-        const previous = (v1_0_0_active_contracts as any)[network][
-          contractName
-        ];
+        const previous = (v1_2_0_activeContracts as any)[network][contractName];
         const current = allDeployments[contractName].address;
 
         expect(previous).to.not.be.empty;
