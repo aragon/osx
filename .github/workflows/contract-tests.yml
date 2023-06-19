@@ -28,6 +28,8 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: cd ../../ && yarn install --pure-lockfile
+      - name: List dependencies
+        run: yarn list
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts
