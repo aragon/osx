@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/osxV101' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
+    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/osxV101/*' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
     "typechain:osx-versions": "ts-node scripts/generate-typechain.ts",
     "test": "hardhat test",
     "build": "hardhat compile && yarn typechain && yarn typechain:osx-versions",
