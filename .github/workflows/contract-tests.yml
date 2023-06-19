@@ -28,8 +28,6 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: cd ../../ && yarn install --pure-lockfile
-      - name: Build the osx-versions NPM package
-        run: yarn build
       - name: Check formatting
         run: yarn run formatting:check
       - name: Compile contracts
