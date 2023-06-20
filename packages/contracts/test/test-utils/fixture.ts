@@ -1,7 +1,12 @@
 import hre, {network, deployments} from 'hardhat';
 
 import networks from '../../networks.json';
-import {UPDATE_INFOS} from '../../utils/updates';
+
+export interface ForkOsxVersion {
+  version: string;
+  activeContracts: any;
+  forkBlockNumber: number;
+}
 
 export async function initializeFork(
   forkNetwork: string,
@@ -32,20 +37,17 @@ export async function initializeDeploymentFixture(tag: string | string[]) {
   await fixture();
 }
 
-export async function initForkAndFixture(
+export async function initForkForOsxVersion(
   forkNetwork: string,
-  osxVersion: string,
-  previousOsxVersion: string
+  osxVersion: ForkOsxVersion
 ): Promise<void> {
-  if (!UPDATE_INFOS[osxVersion]) {
-    throw new Error(`No update info found for osxVersion '${osxVersion}'.`);
-  }
-
+  // Aggregate necessary information to HardhatEnvironment.
   hre.testingFork = {
     network: forkNetwork,
-    osxVersion: previousOsxVersion,
+    osxVersion: osxVersion.version,
+    activeContacts: osxVersion.activeContracts,
   };
 
-  await initializeFork(forkNetwork, UPDATE_INFOS[osxVersion].forkBlockNumber);
-  await initializeDeploymentFixture(UPDATE_INFOS[osxVersion].tags);
+  // Initialize a fork.
+  await initializeFork(forkNetwork, osxVersion.forkBlockNumber);
 }

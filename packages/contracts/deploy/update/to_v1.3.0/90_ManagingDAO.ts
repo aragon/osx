@@ -34,4 +34,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['ManagingDAO'].concat(UPDATE_INFOS['v1_3_0'].tags);
+func.tags = ['ManagingDAO', 'v1.3.0'];

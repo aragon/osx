@@ -28,4 +28,5 @@ export enum Operation {
 export type TestingFork = {
   network: string;
   osxVersion: string;
+  activeContacts: any;
 };
