@@ -2,7 +2,7 @@ import {expect} from 'chai';
 
 import {deployments} from 'hardhat';
 import {initForkAndFixture} from '../test-utils/fixture';
-import {activeContractsList as v1_2_0_activeContracts} from 'osx-ethersV120';
+import {activeContractsList as v1_2_0_activeContracts} from '@aragon/osx-ethers-v1.2.0';
 
 const enableTest = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 const network = 'mainnet';

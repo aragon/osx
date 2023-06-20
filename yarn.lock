@@ -2,6 +2,18 @@
 # yarn lockfile v1
 
 
+"@aragon/osx-ethers-v1.2.0@npm:@aragon/osx-ethers@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.0.tgz#b7e58714394183372ddf25d97cfe326f18ce6f1d"
+  integrity sha512-XI/tJo5NSjOwtcRRXvlfDFRh6YTTSVLYwlbd+4QlBxbTB2WDwS/4lq7rFwnO1bPufCQ4pSqGsTXFR5pwDLS4Ig==
+  dependencies:
+    ethers "^5.6.2"
+
+"@aragon/osx-v1.0.1@npm:@aragon/osx@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.0.1.tgz#b758ba87db93a46a8ddabfaefc99ac8e44c46c78"
+  integrity sha512-TiP5/1AGv/hth+V8PoDVFlwMzmLazYxzp//jiepAZ0WJkx9EnQNYafo+M7+pjAqRPG005liQjmFZNiK6ARLULg==
+
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
@@ -8556,18 +8568,6 @@ os-tmpdir@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=
-
-"osx-ethersV120@npm:@aragon/osx-ethers@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.0.tgz#b7e58714394183372ddf25d97cfe326f18ce6f1d"
-  integrity sha512-XI/tJo5NSjOwtcRRXvlfDFRh6YTTSVLYwlbd+4QlBxbTB2WDwS/4lq7rFwnO1bPufCQ4pSqGsTXFR5pwDLS4Ig==
-  dependencies:
-    ethers "^5.6.2"
-
-"osxV101@npm:@aragon/osx@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.0.1.tgz#b758ba87db93a46a8ddabfaefc99ac8e44c46c78"
-  integrity sha512-TiP5/1AGv/hth+V8PoDVFlwMzmLazYxzp//jiepAZ0WJkx9EnQNYafo+M7+pjAqRPG005liQjmFZNiK6ARLULg==
 
 p-cancelable@^0.3.0:
   version "0.3.0"

@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/osxV101/*' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
+    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/@aragon/osx-v1.0.1/*' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
     "typechain:osx-versions": "ts-node scripts/generate-typechain.ts",
     "test": "hardhat test",
     "build": "hardhat compile && yarn typechain && yarn typechain:osx-versions",
@@ -81,7 +81,7 @@
     "@opengsn/contracts": "2.2.6",
     "@openzeppelin/contracts": "4.8.1",
     "@openzeppelin/contracts-upgradeable": "4.8.1",
-    "osxV101": "npm:@aragon/osx@1.0.1",
-    "osx-ethersV120": "npm:@aragon/osx-ethers@1.2.0"
+    "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
+    "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0"
   }
 }

@@ -19,4 +19,4 @@ pragma solidity 0.8.17;
  *
  */
 
-import {DAO as DAO_v1_0_0} from "osxV101/core/dao/DAO.sol";
+import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";
