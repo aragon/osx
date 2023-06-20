@@ -21,7 +21,9 @@ if (enableTest) {
       };
 
       await initForkForOsxVersion(network, previousOsxVersion);
-      await initializeDeploymentFixture('v1.3.0');
+
+      const updateDeployTags = ['v1.3.0'];
+      await initializeDeploymentFixture(updateDeployTags);
     });
 
     it('deploys new contracts with new addresses', async function () {

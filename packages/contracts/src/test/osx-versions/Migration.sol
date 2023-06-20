@@ -13,7 +13,7 @@ pragma solidity 0.8.17;
  * necessary in the context of this Migration.sol file to differentiate between contract versions.
  *
  * After a contract is imported here and the project is compiled, an associated artifact will be
- * generated inside artifacts/@aragon/osx-versions/versions/{version-name}/*,
+ * generated inside artifacts/@aragon/{version-name}/*,
  * and TypeChain typings will be generated inside typechain/osx-version/{version-name}/* for type-safe interactions with the contract
  * in our tests.
  *
