@@ -6,7 +6,7 @@ title: Manage the plugins installed in your DAO
 
 <!-- TODO This page needs improvements -->
 
-You can install, uninstall or update any plugin into your DAO. If you want to dive deeper into plugins, check out [how plugins work here](../../../01-how-it-works/01-core/03-plugins/01-plugin-details.md).
+You can install, uninstall or update any plugin into your DAO. If you want to dive deeper into plugins, check out [how plugins work here](../../../01-how-it-works/01-core/03-plugins/index.md).
 
 Before diving deeper into this guide, make sure that you understand [permissions](../../../01-how-it-works/01-core/02-permissions/index.md) and know about the [DAO executor](../../../01-how-it-works/01-core/01-dao/index.md).
 

@@ -155,7 +155,7 @@ For each build we add, we will need to add a `prepareUpdate()` function with any
 In this third build, for example, we are modifying the bytecode of the plugin.
 
 <details>
-<summary><code>Third plugin build example, modifying the plugin's bytecode</code></summary>
+<summary>Third plugin build example, modifying the plugin's bytecode</summary>
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -227,6 +227,9 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
 </details>
 
 With each new build implementation, we will need to udate the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function to support any new features that need to be set up.
+
+<details>
+<summary>Third plugin setup example, modifying <code>prepareUpdate</code> function</summary>
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
