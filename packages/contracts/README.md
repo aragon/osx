@@ -117,7 +117,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0_factory,
-} from '@aragon/osx-ethers-v1.2.0/contracts/core/dao/DAO.sol';
+} from '@aragon/osx-ethers-v1.3.0/contracts/core/dao/DAO.sol';
 
 describe('Legacy Test Example', function () {
   let signers: SignerWithAddress[];
