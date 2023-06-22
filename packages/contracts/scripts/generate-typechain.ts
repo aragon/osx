@@ -23,5 +23,5 @@ async function generateTypechain(src: string, dest: string): Promise<void> {
 
 generateTypechain(
   './artifacts/@aragon/osx-v1.0.1/',
-  './typechain/osx-versions/@aragon/osx-v1.0.1/'
+  './typechain/@aragon/osx-v1.0.1/'
 );

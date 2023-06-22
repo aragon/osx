@@ -94,13 +94,13 @@ export async function getContractAddress(
   } catch (e) {}
 
   try {
-    if (!hre.testingFork.osxVersion && !hre.testingFork.activeContacts) {
+    if (!hre.testingFork.osxVersion && !hre.testingFork.activeContracts) {
       console.log('==========================');
       console.log('Warning: osxVersion is not set');
       console.log('==========================');
     }
 
-    const activeContracts = hre.testingFork.activeContacts;
+    const activeContracts = hre.testingFork.activeContracts;
 
     if (activeContracts && activeContracts[networkName][contractName]) {
       return activeContracts[networkName][contractName];
