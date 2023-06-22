@@ -12,10 +12,11 @@
     "dist"
   ],
   "scripts": {
-    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/@aragon/osx-v1.0.1/*' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
-    "typechain:osx-versions": "ts-node scripts/generate-typechain.ts",
+    "typechain:osx": "ts-node scripts/generate-typechain-osx.ts",
+    "typechain:osx-versions": "ts-node scripts/generate-typechain-osx-versions.ts",
+    "typechain": "yarn typechain:osx && yarn typechain:osx-versions",
     "test": "hardhat test",
-    "build": "hardhat compile && yarn typechain && yarn typechain:osx-versions",
+    "build": "hardhat compile && yarn typechain",
     "build:npm": "rollup --config rollup.config.ts",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
