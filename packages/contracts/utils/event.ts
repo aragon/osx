@@ -9,7 +9,7 @@ export async function findEvent<T>(tx: ContractTransaction, eventName: string) {
     throw new Error(`Event ${eventName} not found in TX.`);
   }
 
-  return event as T;
+  return event as unknown as T;
 }
 
 export async function findEventTopicLog(
