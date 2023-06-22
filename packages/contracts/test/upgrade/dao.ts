@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO as DAO_V1_0_0,
   DAO__factory as DAO_V1_0_0__factory,
-} from '../../typechain/osx-versions/@aragon/osx-v1.0.1/core/dao/DAO.sol';
+} from '../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 // import {
 //   DAO as DAO_V1_2_0,
 //   DAO__factory as DAO_V1_2_0__factory,
