@@ -20,7 +20,7 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
-- [ ] Copy the managing DAO multisig env variables from `packages/subgraph/.env-example` into `packages/subgraph/.env`
+- [ ] Copy the managing DAO multisig env variables from `packages/contracts/.env-example` into `packages/contracts/.env`
 - [ ] Follow the version specific tasks in the section `Version tasks`
 - [ ] If new plugin builds are released
   - [ ] Double-check that the build-metadata was updated correctly for the UI to work correctly
