@@ -143,7 +143,3 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 # Releases
 
 Contract releases are tracked in [Releases.md](Releases.md)
-
-```
-
-```
