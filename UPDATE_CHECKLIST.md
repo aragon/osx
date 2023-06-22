@@ -7,14 +7,15 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Make sure you are using Node v16
 - [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
 - [ ] Check that all contracts that undergo an upgrade and
-  - [ ] do require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective initialization method with an incremented `renitializer(X)` number
-  - [ ] do NOT require reinitialzation are upgraded via `upgradeTo` and keep the same `renitializer(X)` number in the respective initialization methods
+  - [ ] do require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective initialization method with an incremented `reinitializer(X)` number
+  - [ ] do NOT require reinitialzation are upgraded via `upgradeTo` and keep the same `reinitializer(X)` number in the respective initialization methods
   - [ ] have new storage added to them
     - [ ] decrement the storage gap correctly
     - [ ] do not corrupt pre-existing storage
     - [ ] initialize the storage correctly
 - [ ] Make sure that the `deploy` property in `packages/contracts/networks.json` points to the correct update
 - [ ] Run `yarn` in the repository root to install the dependencies
+- [ ] Run `yarn run build:contracts-versions` in `packages/contracts` to make sure the contracts compile
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
