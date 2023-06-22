@@ -1,25 +1,28 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {Operation} from '../../../utils/types';
-import {getContractAddress} from '../../helpers';
+import {getActiveContractAddress} from '../../helpers';
 import {DAO__factory} from '../../../typechain';
 import {UPDATE_INFOS} from '../../../utils/updates';
 
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('Updating DAOFactory');
+  console.log('\nUpdating DAOFactory');
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const managingDAOAddress = await getContractAddress('managingDAO', hre);
-  const pluginSetupProcessorAddress = await getContractAddress(
+  const managingDAOAddress = await getActiveContractAddress('managingDAO', hre);
+  const pluginSetupProcessorAddress = await getActiveContractAddress(
     'PluginSetupProcessor',
     hre
   );
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
-  const previousDAOFactoryAddress = await getContractAddress('DAOFactory', hre);
+  const daoRegistryAddress = await getActiveContractAddress('DAORegistry', hre);
+  const previousDAOFactoryAddress = await getActiveContractAddress(
+    'DAOFactory',
+    hre
+  );
   console.log(`Using managingDAO ${managingDAOAddress}`);
   console.log(`Using PluginSetupProcessor ${pluginSetupProcessorAddress}`);
   console.log(`Using DAORegistry ${daoRegistryAddress}`);
@@ -59,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: managingDAOAddress,
     value: 0,
     data: calldata,
-    description: `Moves perimssion (REGISTER_DAO_PERMISSION) from old DAOFactory ${previousDAOFactoryAddress} to new DAOFactory ${deployResult.address} on DAORegistry ${daoRegistryAddress}`,
+    description: `Moves the REGISTER_DAO_PERMISSION_ID permission on the DAORegistry (${daoRegistryAddress}) from the old to the new DAOFactory (${previousDAOFactoryAddress} -> ${deployResult.address}).`,
   });
 };
 export default func;

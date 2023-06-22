@@ -1,15 +1,77 @@
 ---
-title: Executing Actions
+title: Executing actions on behalf of the DAO
 ---
 
 ## Using the DAO Executor
 
-For the `execute` call to work, the `msg.sender` must have the [`EXECUTE_PERMISSION_ID` permission](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) on the DAO contract.
+Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to [pass an array of actions)](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol) to be executed by the DAO contract itself.
+
+However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the [`EXECUTE_PERMISSION`](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract). This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
+
+## How to grant the Execute Permission
+
+Usually, the `EXECUTE_PERMISSION` is granted to a governance plugin of the DAO so that only the approved proposals can be executed. For example, we'd grant the `EXECUTE_PERMISSION` to the address of the Multisig Plugin. That way, when a proposal is approved by the required members of the multisig, the plugin is able to call the `execute` function on the DAO in order to get the actions executed.
+
+To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `PermissionManager`'s [`grant` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/permission/PermissionManager.sol#L105) and pass it 4 parameters:
+
+- `where`: the address of the contract containing the function `who` wants access to
+- `who`: the address (EOA or contract) receiving the permission
+- `permissionId`: the permission identifier the caller needs to have in order to be able to execute the action
+- `condition`: the address of the condition contract that will be asked (if any) before authorizing the call to happen
+
+:::caution
+You probably don't want to grant `EXECUTE_PERMISSION` to any random address, since this gives the address access to execute any action on behalf of the DAO. We recommend you only grant `EXECUTE_PERMISSION` to governance plugins to ensure the safety of your assets. Granting `EXECUTE_PERMISSION` to an externally owned account is considered an anti-pattern.
+:::
+
+## Examples
+
+### Calling a DAO Function
+
+Imagine you want to call an internal function inside the `DAO` contract, for example, to manually [grant or revoke a permission](../../01-how-it-works/01-core/02-permissions/index.md). The corresponding `Action` and `execute` function call look as follows:
+
+```solidity
+function exampleGrantCall(
+  DAO dao,
+  bytes32 _callId,
+  address _where,
+  address _who,
+  bytes32 _permissionId
+) {
+  // Create the action array
+  IDAO.Action[] memory actions = new IDAO.Action[](1);
+  actions[0] = IDAO.Action({
+    to: address(dao),
+    value: 0,
+    data: abi.encodeWithSelector(PermissionManager.grant.selector, _where, _who, _permissionId)
+  });
+
+  // Execute the action array
+  (bytes[] memory execResults, ) = dao.execute({
+    _callId: _callId,
+    _actions: actions,
+    _allowFailureMap: 0
+  });
+}
+```
+
+Here we use the selector of the [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-revoke) must be used.
+
+If the caller possesses the [`ROOT_PERMISSION_ID` permission](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) on the DAO contract, the call becomes simpler and cheaper:
+
+:::caution
+Granting the `ROOT_PERMISSION_ID` permission to other contracts other than the `DAO` contract is dangerous and considered as an anti-pattern.
+:::
+
+```solidity
+function exampleGrantFunction(DAO dao, address _where, address _who, bytes32 _permissionId) {
+  dao.grant(_where, _who, _permissionId); // For this to work, the `msg.sender` needs the `ROOT_PERMISSION_ID`
+}
+```
 
 ### Sending Native Tokens
 
 Send `0.1 ETH` from the DAO treasury to Alice.
-The corresponding `Action` and `execute` function call look as follows:
+The corresponding `Action` and `execute` function call would look as follows:
 
 ```solidity
 function exampleNativeTokenTransfer(IDAO dao, bytes32 _callId, address _receiver) {
@@ -23,9 +85,9 @@ function exampleNativeTokenTransfer(IDAO dao, bytes32 _callId, address _receiver
 }
 ```
 
-### Calling a Function
+### Calling a Function from an External Contract
 
-Imagine that you want to call an external function, let's say in an `Calculator` contract that adds two numbers for you. The corresponding `Action` and `execute` function call look as follows:
+Imagine that you want to call an external function, let's say in a `Calculator` contract that adds two numbers for you. The corresponding `Action` and `execute` function call look as follows:
 
 ```solidity
 contract ICalculator {
@@ -86,46 +148,3 @@ function examplePayableFunctionCall(IDAO dao, bytes32 _callId, IWETH9 _wethToken
   dao.execute({_callId: _callId, _actions: actions, _allowFailureMap: 0});
 }
 ```
-
-### Calling a DAO Function
-
-Imagine that you want to call an internal function inside the `DAO` contract, for example, to manually [grant or revoke a permission](../../01-how-it-works/01-core/02-permissions/index.md). The corresponding `Action` and `execute` function call look as follows:
-
-```solidity
-function exampleGrantCall(
-  DAO dao,
-  bytes32 _callId,
-  address _where,
-  address _who,
-  bytes32 _permissionId
-) {
-  // Create the action array
-  IDAO.Action[] memory actions = new IDAO.Action[](1);
-  actions[0] = IDAO.Action({
-    to: address(dao),
-    value: 0,
-    data: abi.encodeWithSelector(PermissionManager.grant.selector, _where, _who, _permissionId)
-  });
-
-  // Execute the action array
-  (bytes[] memory execResults, ) = dao.execute({
-    _callId: _callId,
-    _actions: actions,
-    _allowFailureMap: 0
-  });
-}
-```
-
-Here we use the selector of [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-grant). To revoke the permission, the selector of [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-revoke) must be used.
-
-If the caller possesses the [`ROOT_PERMISSION_ID` permission](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) on the DAO contract, the call becomes simpler and cheaper:
-
-```solidity
-function exampleGrant(DAO dao, address _where, address _who, bytes32 _permissionId) {
-  dao.grant(_where, _who, _permissionId); // For this to work, the `msg.sender` needs the `ROOT_PERMISSION_ID`
-}
-```
-
-:::caution
-Granting the `ROOT_PERMISSION_ID` permission to other contracts then the `DAO` contract is dangerous and considered as an anti-pattern.
-:::

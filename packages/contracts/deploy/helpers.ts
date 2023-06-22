@@ -57,9 +57,9 @@ export async function uploadToIPFS(
   networkName: string
 ): Promise<string> {
   const client = IPFS.create({
-    url: 'https://ipfs-0.aragon.network/api/v0',
+    url: 'https://prod.ipfs.aragon.network/api/v0',
     headers: {
-      'X-API-KEY': 'yRERPRwFAb5ZiV94XvJdgvDKoGEeFerfFsAQ65',
+      'X-API-KEY': 'b477RhECf8s8sdM7XrkLBs2wHc4kCMwpbcFC55Kt',
     },
   });
 
@@ -70,6 +70,7 @@ export async function uploadToIPFS(
 
   const cid = await client.add(metadata);
   await client.pin.add(cid.cid);
+  console.log(`Uploaded to IPFS with cid ${cid.cid}`);
   return cid.path;
 }
 
@@ -81,7 +82,7 @@ export async function getContractAddress(
 
   let networkName = network.name;
 
-  if (hre.testingFork) {
+  if (hre.testingFork.network) {
     networkName = hre.testingFork.network;
   }
 
@@ -93,6 +94,12 @@ export async function getContractAddress(
   } catch (e) {}
 
   try {
+    if (!hre.testingFork.osxVersion) {
+      console.log('==========================');
+      console.log('Warning: osxVersion is not set');
+      console.log('==========================');
+    }
+
     // Try to import the specific active contracts for the given OSx version
     const osxVersions = require(`@aragon/osx-versions`);
 
@@ -104,6 +111,26 @@ export async function getContractAddress(
     }
   } catch (e) {}
 
+  return getActiveContractAddressInNetwork(contractName, networkName);
+}
+
+export async function getActiveContractAddress(
+  contractName: string,
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
+  let networkName = hre.network.name;
+
+  if (hre.testingFork.network) {
+    networkName = hre.testingFork.network;
+  }
+
+  return getActiveContractAddressInNetwork(contractName, networkName);
+}
+
+export async function getActiveContractAddressInNetwork(
+  contractName: string,
+  networkName: string
+): Promise<string> {
   const activeContracts = await getActiveContractsJSON();
   try {
     return activeContracts[networkName][contractName];

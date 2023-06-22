@@ -3,13 +3,13 @@
     "url": "https://goerli.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": true,
     "chainId": 5,
-    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
+    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
   },
   "mainnet": {
     "url": "https://mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": false,
     "chainId": 1,
-    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
+    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
   },
   "arbitrum": {
     "url": "https://arbitrum-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
@@ -21,13 +21,13 @@
     "isTestnet": false,
     "chainId": 137,
     "feesUrl": "https://gasstation-mainnet.matic.network/v2",
-    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
+    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
   },
   "mumbai": {
-    "url": "https://rpc.ankr.com/polygon_mumbai",
+    "url": "https://polygon-mumbai.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": true,
     "chainId": 80001,
     "feesUrl": "https://gasstation-mumbai.matic.today/v2",
-    "deploy": ["./deploy/update/to_v1.2.0", "./deploy/verification"]
+    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
   }
 }

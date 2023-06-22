@@ -1,15 +1,13 @@
 ---
-title: Repo Creation
+title: Publishing a Plugin
 ---
 
 ## The Plugin Repo Creation Process
 
-To be available for setup in the Aragon OSx framework, a `PluginRepo` must be created. Two framework contracts manage the `PluginRepo` creation process:
+To be available for installation in the Aragon OSx framework, a `PluginRepo` must be created for each plugin. The `PluginRepo` creation process is handled by:
 
-- The [`PluginRepoFactory`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md)
-- The [`PluginRepoRegistry`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md)
-
-and are introduced in the following.
+- The [`PluginRepoFactory`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md): who creates the `PluginRepo` instance for each plugin to hold all plugin versions
+- The [`PluginRepoRegistry`](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md): who registers the Plugin into the Protocol for DAOs to install.
 
 <!-- TODO
 - call `createPluginRepoWithFirstVersion` in `PluginRepoFactory`
@@ -20,8 +18,7 @@ For all subsequent builds and releases, `createVersion` inside the registered `P
 
 ### The `PluginRepoFactory` Contract
 
-The `PluginRepoFactory` is a contract of the Aragon OSx protocol framework infrastructure being called when the first version if a plugin is published.
-It contains the `createPluginRepoWithFirstVersion`,
+The `PluginRepoFactory` is the contract in charge of creating the first version of a plugin. It does this through the `createPluginRepoWithFirstVersion` function which creates a `PluginRepo` instance for the plugin with the first release and first build (`v1.1`).
 
 ```solidity title="@aragon/framework/repo/PluginRepoFactory.sol"
 /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.1`.
@@ -40,22 +37,18 @@ function createPluginRepoWithFirstVersion(
 ) external returns (PluginRepo pluginRepo);
 ```
 
-which creates a `PluginRepo` with the first release and first build (`v1.1`) inside and registers it in the Aragon OSx `PluginRepoRegistry`contract with an [ENS subdomain](../../03-ens-names.md) under the`plugin.dao.eth` domain managed by Aragon.
+It also registers the plugin in the Aragon OSx `PluginRepoRegistry`contract with an [ENS subdomain](../../03-ens-names.md) under the `plugin.dao.eth` domain managed by Aragon.
 
-Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-puginrepo-contract), it receives
+Additional to the information required by the [`createVersion` function discussed earlier](./index.md/#the-pluginrepo-contract), it receives:
 
-- A valid ENS `_subdomain` name under that isn't already taken
-- The address of the plugin repo maintainer who ends up having the `ROOT_PERMISSION_ID`, `MAINTAINER_PERMISSION_ID`, and `UPGRADE_REPO_PERMISSION_ID` permission allowing to call the internal `PermissionManager`, the `createVersion` and `updateReleaseMetadata` functions as well as upgrading the contract.
+- A valid ENS `_subdomain` unique name composed of letters from a-z, all in lower caps, separated by a `-`. For ex: `token-voting-plugin`.
+- The address of the plugin repo maintainer who ends up having the `ROOT_PERMISSION_ID`, `MAINTAINER_PERMISSION_ID`, and `UPGRADE_REPO_PERMISSION_ID` permissions. These permissions enable the maintainer to call the internal `PermissionManager`, the `createVersion` and `updateReleaseMetadata` functions as well as upgrading the plugin contract.
 
-For more details visit the [`PluginRepoFactory` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
+For more details visit the [`PluginRepoFactory` Reference Guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md).
 
 ### The `PluginRepoRegistry` Contract
 
-:::note
-This page is a stub and work in progress.
-:::
-
-The `PluginRepoRegistry` contract is the central contract listing all the plugins managed through the Aragon OSx protocol:
+The `PluginRepoRegistry` contract is the central contract listing all the plugins managed through the Aragon OSx protocol. The `PluginRepoFactory` calls on the `PluginRepoRegistry` to register the plugin in the Aragon OSx protocol.
 
 ```solidity title="@aragon/framework/PluginRepoRegistry.sol"
 /// @notice Registers a plugin repository with a subdomain and address.

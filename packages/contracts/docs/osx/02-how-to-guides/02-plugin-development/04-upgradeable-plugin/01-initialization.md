@@ -1,14 +1,16 @@
 ---
-title: Initialization
+title: Intializing an Upgradeable Plugin
 ---
 
-## Initializing Upgradeable Plugins
+## How to Initialize Upgradeable Plugins
 
 To deploy your implementation contract via the [UUPS pattern (ERC-1822)](https://eips.ethereum.org/EIPS/eip-1822), you inherit from the `PluginUUPSUpgradeable` contract.
-For the same reason you had to [initialize your non-upgradeable `PluginClonable`](./../03-non-upgradeable-plugin/01-initialization.md#deployment-via-the-minimal-proxy-pattern) deployed via the minimal proxy pattern, you must write an `initialize` function for contracts deployed via the UUPS proxy pattern:
 
-<details>
-<summary><code>SimpleStorageBuild1</code> Initialization</summary>
+We must protect it from being set up multiple times by using [OpenZepplin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable). In order to do this, we will call the internal function `__PluginUUPSUpgradeable_init(IDAO _dao)` function available through the `PluginUUPSUpgradeable` base contract to store the `IDAO _dao` reference in the right place.
+
+:::note
+This has to be called - otherwise, anyone else could call the plugin's initialization with whatever params they wanted.
+:::
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -28,11 +30,9 @@ contract SimpleStorageBuild1 is PluginUUPSUpgradeable {
 }
 ```
 
-</details>
-
-To discriminate the initialize functions of different builds, we name it `initializeBuild1` this time. Again, you must protect it from being used multiple times by using [OpenZeppelin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable) and call the internal function `__PluginUUPSUpgradeable_init(IDAO _dao)` available through the `PluginUUPSUpgradeable` base contract storing the `IDAO _dao` reference in the right place.
-
-This becomes more demanding for subsequent builds of your plugin.
+:::note
+Keep in mind that in order to discriminate between the different initialize functions of your different builds, we name the initialize function `initializeBuild1`. This becomes more demanding for subsequent builds of your plugin.
+:::
 
 ### Initializing Subsequent Builds
 
@@ -42,10 +42,7 @@ Since you have chosen to build an upgradeable plugin, you can publish subsequent
 Do not inherit from previous versions as this can mess up the inheritance chain. Instead, write self-contained contracts by simply copying the code or modifying the file in your git repo.
 :::
 
-In our example, we wrote the `SimpleStorageBuild2` and added a new storage variable `address public account;`. Because users can freshly install it or update from build 1, we now have to write two initializer functions: `initializeBuild2` and `initializeFromBuild1`
-
-<details>
-<summary><code>SimpleStorageBuild2</code> Initialization</summary>
+In this example, we wrote a `SimpleStorageBuild2` contract and added a new storage variable `address public account;`. Because users can freshly install the new version or update from build 1, we now have to write two initializer functions: `initializeBuild2` and `initializeFromBuild1` in our Plugin implementation contract.
 
 ```solidity
 /// @title SimpleStorage build 2
@@ -72,9 +69,8 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 }
 ```
 
-</details>
-
 In general, for each version for which you want to support updates from, you have to provide a separate `initializeFromBuildX` function taking care of initializing the storage and transferring the `helpers` and `permissions` of the previous version into the same state as if it had been freshly installed.
+
 Each `initializeBuildX` must be protected with a modifier that allows it to be only called once.
 
 In contrast to build 1, we now must use [OpenZeppelin's `modifier reinitializer(uint8 build)`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable-reinitializer-uint8-) for build 2 instead of `modifier initializer` because it allows us to execute 255 subsequent initializations. More specifically, we used `reinitializer(2)` here for our build 2. Note that we could also have used `function initializeBuild1(IDAO _dao, uint256 _number) external reinitializer(1)` for build 1 because `initializer` and `reinitializer(1)` are equivalent statements. For build 3, we must use `reinitializer(3)`, for build 4 `reinitializer(4)` and so on.

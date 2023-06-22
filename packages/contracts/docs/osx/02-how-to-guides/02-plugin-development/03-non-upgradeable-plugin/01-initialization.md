@@ -1,11 +1,12 @@
 ---
-title: Initialization
+title: Initializing Non-Upgradeable Plugins
 ---
 
-## Initializing Non-upgradeable Plugins
+## How to Initialize Non-Upgradeable Plugins
 
-Let's start from the beginning: Initialization. Every plugin receives and stores the address of the DAO it is associated with.
-In addition, your plugin implementation might introduce other storage variables that need to be initialized immediately after the contract was created. This is also the case for our `SimpleAdmin` plugin example the admin address.
+Every plugin should receive and store the address of the DAO it is associated with upon initialization. This is how the plugin will be able to interact with the DAO that has installed it.
+
+In addition, your plugin implementation might want to introduce other storage variables that should be initialized immediately after the contract was created. For example, in the `SimpleAdmin` plugin example (which sets one address as the full admin of the DAO), we'd want to store the `admin` address.
 
 ```solidity
 contract SimpleAdmin is Plugin {
@@ -13,14 +14,18 @@ contract SimpleAdmin is Plugin {
 }
 ```
 
-The way how this is done depends on the deployment method you selected.
+The way we set up the plugin's `initialize()` function depends on the plugin type selected. To review plugin types in depth, check out our [guide here](../02-plugin-types.md).
 
-### Deployment Through Instantiation via Solidity's `new` Keyword
+Additionally, the way we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, there's two ways in which we can deploy our plugin:
 
-To instantiate your implementation contract via Solidity's `new` keyword, you inherit from the `Plugin` contract. In this case, the compiler forces you to write a `constructor` calling the `Plugin` parent `constructor` and providing it with a contract of type `IDAO`. Inside the constructor, you might want to initialize the storage variables that you have added yourself, such as the `admin` address in the example below:
+- Deployment via Solidity's `new` keyword, OR
+- Deployment via the Minimal Proxy Pattern
 
-<details>
-<summary><code>SimpleAdmin</code> Initialization: <code>new</code> Keyword</summary>
+### Option A: Deployment via Solidity's `new` Keyword
+
+To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template Aragon created. You can find it [here](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/plugin/Plugin.sol).
+
+In this case, the compiler will force you to write a `constructor` function calling the `Plugin` parent `constructor` and provide it with a contract of type `IDAO`. Inside the constructor, you might want to initialize the storage variables that you have added yourself, such as the `admin` address in the example below.
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -40,20 +45,15 @@ contract SimpleAdmin is Plugin {
 }
 ```
 
-</details>
-
 :::note
-We used Solidity's `immutable` keyword so that the admin variable can never be changed. Immutable variables can only be initialized in the constructor.
+The `admin` variable is set as `immutable` so that it can never be changed. Immutable variables can only be initialized in the constructor.
 :::
 
-The `Plugin(_dao)` constructor stores the `IDAO _dao` reference in the right place. If our plugin implementation is deployed often, which we expect, we can [save significant amounts of gas by deployment through the minimal proxy pattern](https://blog.openzeppelin.com/workshop-recap-cheap-contract-deployment-through-clones/).
+This type of constructor implementation stores the `IDAO _dao` reference in the right place. If your plugin is deployed often, which we could expect, we can [save significant amounts of gas by deployment through using the minimal proxy pattern](https://blog.openzeppelin.com/workshop-recap-cheap-contract-deployment-through-clones/).
 
-### Deployment via the Minimal Proxy Pattern
+### Option B: Deployment via the Minimal Proxy Pattern
 
-To deploy your implementation contract via the [minimal clones pattern (ERC-1167)](https://eips.ethereum.org/EIPS/eip-1167), you inherit from the `PluginCloneable` contract introducing the same features as `Plugin`. The only difference is that you now have to remember to write an `initialize` function.
-
-<details>
-<summary><code>SimpleAdmin</code> Initialization: Minimal Proxy Pattern</summary>
+To deploy our plugin via the [minimal clones pattern (ERC-1167)](https://eips.ethereum.org/EIPS/eip-1167), you inherit from the `PluginCloneable` contract introducing the same features as `Plugin`. The only difference is that you now have to remember to write an `initialize` function.
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -74,9 +74,7 @@ contract SimpleAdmin is PluginCloneable {
 }
 ```
 
-</details>
-
-We must protect it from being called multiple times by using [OpenZeppelin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable) and call the internal function `__PluginCloneable_init(IDAO _dao)` available through the `PluginCloneable` base contract to store the `IDAO _dao` reference in the right place.
+We must protect it from being called multiple times by using [OpenZepplin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable) and call the internal function `__PluginCloneable_init(IDAO _dao)` available through the `PluginCloneable` base contract to store the `IDAO _dao` reference in the right place.
 
 :::caution
 If you forget calling `__PluginCloneable_init(_dao)` inside your `initialize` function, your plugin won't be associated with a DAO and cannot use the DAO's `PermissionManager`.

@@ -1,10 +1,15 @@
 ---
-title: Versioning
+title: Adding a new version of your plugin
 ---
 
-## Versioning Your Plugin
+## How to add a new version of your plugin
 
-The Aragon OSx protocol has an on-chain versioning system built-in and distinguishes between releases and builds.
+The Aragon OSx protocol has an on-chain versioning system built-in, which distinguishes between releases and builds.
+
+- **Releases** contain breaking changes, which are incompatible with preexisting installations. Updates to a different release are not possible. Instead, you must install the new plugin release and uninstall the old one.
+- **Builds** are minor/patch versions within a release, and they are meant for compatible upgrades only (adding a feature or fixing a bug without changing anything else).
+
+Builds are particularly important for `UUPSUpgradeable` plugins, whereas a non-upgradeable plugin will work off of only releases.
 
 Given a version tag `RELEASE.BUILD`, we can infer that:
 

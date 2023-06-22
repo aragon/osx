@@ -18,8 +18,11 @@ async function checkForUncommittedChanges() {
   }
 }
 
-async function getCurrentBranch() {
-  const {stdout} = await exec('git branch --show-current', {cwd: contractsDir});
+async function getCurrentTagOrBranch() {
+  const {stdout} = await exec(
+    'git describe --exact-match --tags 2> /dev/null || git branch --show-current',
+    {cwd: contractsDir}
+  );
   return stdout.trim();
 }
 
@@ -66,7 +69,7 @@ async function copyContracts(versionName: string) {
 async function createVersions() {
   await checkForUncommittedChanges();
 
-  const currentBranch = await getCurrentBranch();
+  const currentTagOrBranch = await getCurrentTagOrBranch();
 
   for (const version in commitHashes.versions) {
     const versionCommit = commitHashes.versions[version] as string;
@@ -80,7 +83,7 @@ async function createVersions() {
   }
 
   // Return to the original branch
-  await exec(`git checkout ${currentBranch}`, {cwd: contractsDir});
+  await exec(`git checkout ${currentTagOrBranch}`, {cwd: contractsDir});
 
   // Generate npm/index.ts file
   const exports: string[] = [];

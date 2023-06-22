@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed handling updates from v1.2.0 to v1.3.0
+- Fixed start & end date issue by indexing from `getProposal()` instead of the event.
 - BREAKING: DAO's plugins attribute derive from `PluginInstallation` instead of `IPlugin`.
 - BREAKING: Changed attribute of `proposalId` in all proposal entities to `pluginProposalId`
 - Supports now multiple `DAORegistries`, `PluginRepoRegistries` and `PluginSetupProcessors` as datasources.

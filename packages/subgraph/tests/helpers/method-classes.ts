@@ -166,6 +166,7 @@ class ERC20WrapperContractMethods extends ERC20WrapperContract {
     this.id = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
     this.name = 'Wrapped Test Token';
     this.symbol = 'WTT';
+    this.decimals = 18;
     this.underlyingToken = Address.fromHexString(
       DAO_TOKEN_ADDRESS
     ).toHexString();
