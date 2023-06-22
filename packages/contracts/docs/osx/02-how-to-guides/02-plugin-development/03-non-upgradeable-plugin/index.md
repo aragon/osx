@@ -1,6 +1,8 @@
 ---
-title: Get Started with Non-Upgradeable Plugins
+title: Non-Upgradeable Plugins
 ---
+
+## Get Started with Non-Upgradeable Plugins
 
 A Non-Upgradeable Plugin is a Plugin built on smart contracts that cannot be upgraded. This may or may not be what you want.
 

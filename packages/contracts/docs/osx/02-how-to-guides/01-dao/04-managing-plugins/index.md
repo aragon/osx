@@ -1,5 +1,5 @@
 ---
-title: Manage the plugins installed in your DAO
+title: Manage your DAO's Plugins
 ---
 
 ## How to manage the Plugins within your DAO

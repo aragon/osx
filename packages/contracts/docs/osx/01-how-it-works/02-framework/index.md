@@ -1,8 +1,8 @@
 ---
-title: Framework
+title: Framework - How Everything Connects
 ---
 
-## The Infrastructure Running the Araong OSx Protocol
+## The Infrastructure Running the Aragon OSx Protocol
 
 The Aragon OSx protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
 
@@ -20,7 +20,7 @@ An overview of the involved contracts and their interactions is shown below:
 
 ![](aragon-os-infrastructure-core-overview.drawio.svg)
 
-<p class="caption"> 
+<p class="caption">
   Overview of the framework and core contracts of the Aragon OSx protocol.
 </p>
 

@@ -1,8 +1,8 @@
 ---
-title: Managing Plugins
+title: Plugins
 ---
 
-## Managing Plugins
+## Plugins
 
 As mentioned earlier, plugins built by Aragon and third-party developers can be added and removed from your DAO to adapt it to your needs.
 
