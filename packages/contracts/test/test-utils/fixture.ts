@@ -45,7 +45,7 @@ export async function initForkForOsxVersion(
   hre.testingFork = {
     network: forkNetwork,
     osxVersion: osxVersion.version,
-    activeContacts: osxVersion.activeContracts,
+    activeContracts: osxVersion.activeContracts,
   };
 
   // Initialize a fork.
