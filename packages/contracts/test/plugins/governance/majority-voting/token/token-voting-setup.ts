@@ -5,7 +5,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   ERC20,
   ERC20__factory,
+  GovernanceERC20,
   GovernanceERC20__factory,
+  GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
   TokenVotingSetup,
   TokenVotingSetup__factory,
@@ -54,6 +56,8 @@ const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 describe('TokenVotingSetup', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
+  let governanceERC20Base: GovernanceERC20;
+  let governanceWrappedERC20Base: GovernanceWrappedERC20;
   let implementationAddress: string;
   let targetDao: any;
   let erc20Token: ERC20;
@@ -69,11 +73,39 @@ describe('TokenVotingSetup', function () {
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
-    defaultTokenSettings = {addr: AddressZero, name: '', symbol: ''};
+
+    const emptyName = '';
+    const emptySymbol = '';
+
+    defaultTokenSettings = {
+      addr: AddressZero,
+      name: emptyName,
+      symbol: emptySymbol,
+    };
     defaultMintSettings = {receivers: [], amounts: []};
 
+    const GovernanceERC20Factory = new GovernanceERC20__factory(signers[0]);
+    governanceERC20Base = await GovernanceERC20Factory.deploy(
+      AddressZero,
+      emptyName,
+      emptySymbol,
+      defaultMintSettings
+    );
+
+    const GovernanceWrappedERC20Factory = new GovernanceWrappedERC20__factory(
+      signers[0]
+    );
+    governanceWrappedERC20Base = await GovernanceWrappedERC20Factory.deploy(
+      AddressZero,
+      emptyName,
+      emptySymbol
+    );
+
     const TokenVotingSetup = new TokenVotingSetup__factory(signers[0]);
-    tokenVotingSetup = await TokenVotingSetup.deploy();
+    tokenVotingSetup = await TokenVotingSetup.deploy(
+      governanceERC20Base.address,
+      governanceWrappedERC20Base.address
+    );
 
     implementationAddress = await tokenVotingSetup.implementation();
 
@@ -89,6 +121,15 @@ describe('TokenVotingSetup', function () {
 
   it('does not support the empty interface', async () => {
     expect(await tokenVotingSetup.supportsInterface('0xffffffff')).to.be.false;
+  });
+
+  it('stores the bases provided through the constructor', async () => {
+    expect(await tokenVotingSetup.governanceERC20Base()).to.be.eq(
+      governanceERC20Base.address
+    );
+    expect(await tokenVotingSetup.governanceWrappedERC20Base()).to.be.eq(
+      governanceWrappedERC20Base.address
+    );
   });
 
   it('creates token voting base with the correct interface', async () => {

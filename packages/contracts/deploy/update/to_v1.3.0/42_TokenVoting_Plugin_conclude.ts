@@ -6,6 +6,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nConcluding TokenVoting Plugin Update');
 
   hre.aragonToVerifyContracts.push(
+    await hre.deployments.get('GovernanceERC20')
+  );
+
+  hre.aragonToVerifyContracts.push(
+    await hre.deployments.get('GovernanceWrappedERC20')
+  );
+
+  hre.aragonToVerifyContracts.push(
     await hre.deployments.get('TokenVotingSetup')
   );
 };

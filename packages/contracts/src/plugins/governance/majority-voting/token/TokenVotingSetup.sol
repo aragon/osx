@@ -57,20 +57,16 @@ contract TokenVotingSetup is PluginSetup {
     /// @param length The array length of passed helpers.
     error WrongHelpersArrayLength(uint256 length);
 
-    /// @notice The contract constructor, that deploys the bases.
-    constructor() {
-        governanceERC20Base = address(
-            new GovernanceERC20(
-                IDAO(address(0)),
-                "",
-                "",
-                GovernanceERC20.MintSettings(new address[](0), new uint256[](0))
-            )
-        );
-        governanceWrappedERC20Base = address(
-            new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
-        );
+    /// @notice The contract constructor deploying the plugin implementation contract and receiving the governance token base contracts to clone from.
+    /// @param _governanceERC20Base The base `GovernanceERC20` contract to create clones from.
+    /// @param _governanceWrappedERC20Base The base `GovernanceWrappedERC20` contract to create clones from.
+    constructor(
+        GovernanceERC20 _governanceERC20Base,
+        GovernanceWrappedERC20 _governanceWrappedERC20Base
+    ) {
         tokenVotingBase = new TokenVoting();
+        governanceERC20Base = address(_governanceERC20Base);
+        governanceWrappedERC20Base = address(_governanceWrappedERC20Base);
     }
 
     /// @inheritdoc IPluginSetup

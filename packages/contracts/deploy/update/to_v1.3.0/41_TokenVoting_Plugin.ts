@@ -3,10 +3,13 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
 
+import governanceERC20Artifact from '../../../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
+import governanceWrappedERC20Artifact from '../../../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 import {UPDATE_INFOS} from '../../../utils/updates';
+import {MintSettings} from '../../../test/token/erc20/governance-erc20';
 
 const TARGET_RELEASE = 1;
 
@@ -16,10 +19,41 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
+  const zeroDaoAddress = ethers.constants.AddressZero;
+  const zeroTokenAddress = ethers.constants.AddressZero;
+  const emptyName = '';
+  const emptySymbol = '';
+  const emptyMintSettings: MintSettings = {
+    receivers: [],
+    amounts: [],
+  };
+
+  // Deploy the bases for the TokenVotingSetup
+  const governanceERC20DeployResult = await deploy('GovernanceERC20', {
+    contract: governanceERC20Artifact,
+    from: deployer.address,
+    args: [zeroDaoAddress, emptyName, emptySymbol, emptyMintSettings],
+    log: true,
+  });
+
+  const governanceWrappedERC20DeployResult = await deploy(
+    'GovernanceWrappedERC20',
+    {
+      contract: governanceWrappedERC20Artifact,
+      from: deployer.address,
+      args: [zeroTokenAddress, emptyName, emptySymbol],
+      log: true,
+    }
+  );
+
+  // Deploy the TokenVotingSetup and provide the bases in the constructor
   const deployResult = await deploy('TokenVotingSetup', {
     contract: tokenVotingSetupArtifact,
     from: deployer.address,
-    args: [],
+    args: [
+      governanceERC20DeployResult.address,
+      governanceWrappedERC20DeployResult.address,
+    ],
     log: true,
   });
 
