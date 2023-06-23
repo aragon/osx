@@ -1,30 +1,21 @@
 import {ethers} from 'hardhat';
 
-import {PluginRepoRegistry, PluginSetupProcessor} from '../../../typechain';
-
-import {getMergedABI} from '../../utils/abi';
+import {
+  PluginSetupProcessor__factory,
+  PluginRepoRegistry,
+  PluginSetupProcessor,
+} from '../../typechain';
 
 export async function deployPluginSetupProcessor(
   pluginRepoRegistry: PluginRepoRegistry
 ): Promise<PluginSetupProcessor> {
   let psp: PluginSetupProcessor;
 
-  const {abi, bytecode} = await getMergedABI(
-    // @ts-ignore
-    hre,
-    'PluginSetupProcessor',
-    ['ERC1967Upgrade']
-  );
-
-  const PluginSetupProcessor = new ethers.ContractFactory(
-    abi,
-    bytecode,
+  const PluginSetupProcessor = new PluginSetupProcessor__factory(
     (await ethers.getSigners())[0]
   );
 
-  psp = (await PluginSetupProcessor.deploy(
-    pluginRepoRegistry.address
-  )) as PluginSetupProcessor;
+  psp = await PluginSetupProcessor.deploy(pluginRepoRegistry.address);
 
   return psp;
 }

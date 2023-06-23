@@ -13,6 +13,7 @@ import {
   IPlugin__factory,
   IProposal__factory,
   TokenVoting,
+  TokenVoting__factory,
 } from '../../../../../typechain';
 import {
   findEvent,
@@ -21,7 +22,6 @@ import {
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
-import {getMergedABI} from '../../../../../utils/abi';
 import {
   VoteOption,
   pctToRatio,
@@ -69,19 +69,8 @@ describe('TokenVoting', function () {
   const startOffset = 20;
   const id = 0;
 
-  let mergedAbi: any;
-  let tokenVotingFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
-
-    ({abi: mergedAbi, bytecode: tokenVotingFactoryBytecode} =
-      await getMergedABI(
-        // @ts-ignore
-        hre,
-        'TokenVoting',
-        ['src/core/dao/DAO.sol:DAO']
-      ));
 
     dummyActions = [
       {
@@ -118,11 +107,7 @@ describe('TokenVoting', function () {
       }
     );
 
-    const TokenVotingFactory = new ethers.ContractFactory(
-      mergedAbi,
-      tokenVotingFactoryBytecode,
-      signers[0]
-    );
+    const TokenVotingFactory = new TokenVoting__factory(signers[0]);
 
     voting = await deployWithProxy(TokenVotingFactory);
 

@@ -4,6 +4,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   AddresslistVoting,
+  AddresslistVoting__factory,
   Addresslist__factory,
   DAO,
   IERC165Upgradeable__factory,
@@ -19,7 +20,6 @@ import {
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
-import {getMergedABI} from '../../../../../utils/abi';
 import {
   VoteOption,
   pctToRatio,
@@ -65,19 +65,8 @@ describe('AddresslistVoting', function () {
   const startOffset = 10;
   const id = 0;
 
-  let mergedAbi: any;
-  let addresslistVotingFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
-
-    ({abi: mergedAbi, bytecode: addresslistVotingFactoryBytecode} =
-      await getMergedABI(
-        // @ts-ignore
-        hre,
-        'AddresslistVoting',
-        ['src/core/dao/DAO.sol:DAO']
-      ));
 
     dummyActions = [
       {
@@ -102,11 +91,7 @@ describe('AddresslistVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    const AddresslistVotingFactory = new ethers.ContractFactory(
-      mergedAbi,
-      addresslistVotingFactoryBytecode,
-      signers[0]
-    );
+    const AddresslistVotingFactory = new AddresslistVoting__factory(signers[0]);
 
     voting = await deployWithProxy(AddresslistVotingFactory);
 

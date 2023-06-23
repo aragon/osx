@@ -5,10 +5,13 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
-import {getMergedABI} from '../utils/abi';
 import {Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {ENSRegistry__factory, PluginRepo__factory} from '../typechain';
+import {
+  ENSRegistry__factory,
+  PluginRepoFactory__factory,
+  PluginRepo__factory,
+} from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -208,15 +211,7 @@ export async function createPluginRepo(
     hre
   );
 
-  const {abi, bytecode} = await getMergedABI(hre, 'PluginRepoFactory', [
-    'PluginRepoRegistry',
-  ]);
-
-  const pluginRepoFactoryFactory = new ethers.ContractFactory(
-    abi,
-    bytecode,
-    signers[0]
-  );
+  const pluginRepoFactoryFactory = new PluginRepoFactory__factory(signers[0]);
   const pluginRepoFactoryContract = pluginRepoFactoryFactory.attach(
     pluginRepoFactoryAddress
   );

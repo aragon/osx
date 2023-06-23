@@ -18,7 +18,6 @@ import {
   IProtocolVersion__factory,
   IERC165__factory,
 } from '../../../typechain';
-import {getMergedABI} from '../../../utils/abi';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
@@ -53,22 +52,9 @@ describe('PluginRepoFactory: ', function () {
   let managingDao: DAO;
   let pluginRepoFactory: PluginRepoFactory;
 
-  let mergedABI: any;
-  let pluginRepoFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-
-    const {abi, bytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'PluginRepoFactory',
-      ['PluginRepoRegistry']
-    );
-
-    mergedABI = abi;
-    pluginRepoFactoryBytecode = bytecode;
   });
 
   beforeEach(async function () {
@@ -90,9 +76,7 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // deploy PluginRepoFactory
-    const PluginRepoFactory = new ethers.ContractFactory(
-      mergedABI,
-      pluginRepoFactoryBytecode,
+    const PluginRepoFactory = new PluginRepoFactory__factory(
       signers[0]
     ) as PluginRepoFactory__factory;
 

@@ -37,7 +37,6 @@ import {
 import adminMetadata from '../../../src/plugins/governance/admin/build-metadata.json';
 
 import {findEvent} from '../../../utils/event';
-import {getMergedABI} from '../../../utils/abi';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
@@ -163,22 +162,9 @@ describe('DAOFactory: ', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
 
-  let mergedABI: any;
-  let daoFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-
-    const {abi, bytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'DAOFactory',
-      ['DAORegistry', 'PluginSetupProcessor', 'src/core/dao/DAO.sol:DAO']
-    );
-
-    mergedABI = abi;
-    daoFactoryBytecode = bytecode;
   });
 
   beforeEach(async function () {
@@ -217,9 +203,7 @@ describe('DAOFactory: ', function () {
     );
 
     // Deploy DAO Factory
-    const DAOFactory = new ethers.ContractFactory(
-      mergedABI,
-      daoFactoryBytecode,
+    const DAOFactory = new DAOFactory__factory(
       signers[0]
     ) as DAOFactory__factory;
     daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);

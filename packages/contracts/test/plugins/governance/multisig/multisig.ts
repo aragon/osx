@@ -12,6 +12,7 @@ import {
   IPlugin__factory,
   IProposal__factory,
   Multisig,
+  Multisig__factory,
 } from '../../../../typechain';
 import {
   findEvent,
@@ -20,7 +21,6 @@ import {
   MULTISIG_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../utils/event';
-import {getMergedABI} from '../../../../utils/abi';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {
@@ -76,19 +76,8 @@ describe('Multisig', function () {
 
   const id = 0;
 
-  let mergedAbi: any;
-  let multisigFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
-
-    ({abi: mergedAbi, bytecode: multisigFactoryBytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'Multisig',
-      ['src/core/dao/DAO.sol:DAO']
-    ));
-
     dummyActions = [
       {
         to: signers[0].address,
@@ -109,11 +98,7 @@ describe('Multisig', function () {
       onlyListed: true,
     };
 
-    const MultisigFactory = new ethers.ContractFactory(
-      mergedAbi,
-      multisigFactoryBytecode,
-      signers[0]
-    );
+    const MultisigFactory = new Multisig__factory(signers[0]);
     multisig = await deployWithProxy(MultisigFactory);
 
     dao.grant(

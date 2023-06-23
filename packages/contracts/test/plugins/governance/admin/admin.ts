@@ -2,7 +2,6 @@ import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {getMergedABI} from '../../../../utils/abi';
 import {
   findEvent,
   DAO_EVENTS,
@@ -16,6 +15,7 @@ import {toBytes32} from '../../../test-utils/voting';
 import {
   AdminCloneFactory,
   AdminCloneFactory__factory,
+  Admin__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IPlugin__factory,
@@ -44,19 +44,9 @@ describe('Admin', function () {
   let dummyActions: any;
   let dummyMetadata: string;
 
-  let mergedAbi: any;
-  let adminFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-
-    ({abi: mergedAbi, bytecode: adminFactoryBytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'Admin',
-      ['src/core/dao/DAO.sol:DAO']
-    ));
 
     dummyActions = [
       {
@@ -76,11 +66,7 @@ describe('Admin', function () {
   });
 
   beforeEach(async () => {
-    const AdminFactory = new ethers.ContractFactory(
-      mergedAbi,
-      adminFactoryBytecode,
-      signers[0]
-    );
+    const AdminFactory = new Admin__factory(signers[0]);
 
     const nonce = await ethers.provider.getTransactionCount(
       adminCloneFactory.address
