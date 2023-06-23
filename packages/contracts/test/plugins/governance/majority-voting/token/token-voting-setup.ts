@@ -123,7 +123,7 @@ describe('TokenVotingSetup', function () {
     expect(await tokenVotingSetup.supportsInterface('0xffffffff')).to.be.false;
   });
 
-  it('stores the bases provided throught the constructor', async () => {
+  it('stores the bases provided through the constructor', async () => {
     expect(await tokenVotingSetup.governanceERC20Base()).to.be.eq(
       governanceERC20Base.address
     );
