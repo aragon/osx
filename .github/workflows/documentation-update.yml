@@ -30,17 +30,17 @@ jobs:
         working-directory: packages/contracts/
       - name: Format with prettier
         run: yarn run prettier 'packages/contracts/docs/osx/03-reference-guide/**/*.md' --write
-      - name: Checkout builders-portal
+      - name: Checkout developer-portal
         uses: actions/checkout@v3
         with:
-          repository: aragon/builders-portal
+          repository: aragon/developer-portal
           ref: staging
-          path: builders-portal
+          path: developer-portal
           token: ${{ secrets.ARABOT_PAT }}
-      - name: Remove the docs/osx folder in the builders-portal
-        run: rm -rf $GITHUB_WORKSPACE/builders-portal/docs/osx
-      - name: Copy the docs/osx folder to the builders-portal
-        run: cp -R packages/contracts/docs/osx $GITHUB_WORKSPACE/builders-portal/docs/osx
+      - name: Remove the docs/osx folder in the developer-portal
+        run: rm -rf $GITHUB_WORKSPACE/developer-portal/docs/osx
+      - name: Copy the docs/osx folder to the developer-portal
+        run: cp -R packages/contracts/docs/osx $GITHUB_WORKSPACE/developer-portal/docs/osx
       - name: Get short commit hash
         id: hash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -48,7 +48,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.ARABOT_PAT }}
-          path: builders-portal
+          path: developer-portal
           commit-message: 'Update the Aragon OSx docs by commit ${{ steps.hash.outputs.sha_short }}'
           committer: 'Arabot <arabot-1@users.noreply.github.com>'
           branch: patch/aragon-osx-docs
