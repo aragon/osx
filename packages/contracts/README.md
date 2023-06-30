@@ -70,19 +70,49 @@ Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_
 npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 ```
 
-## Testing
+## Testing with Previous Contract Versions
 
-The `@aragon/osx` and `@aragon/osx-ethers` packages allow you to work with previous versions of the contracts by using npm aliases. This is useful for testing contracts against different versions without having to manage multiple copies of the contracts within the repository.
+The `@aragon/osx` and `@aragon/osx-ethers` packages facilitate working with earlier versions of contracts by utilizing npm aliases. This is advantageous for testing contracts against varying versions without having to maintain multiple instances of the contracts within the repository.
 
-If you want to import and test a contract from a previous version, you can directly import it using the npm alias. For instance:
+Here's a step-by-step guide to import and test a contract from a previous version:
+
+### Step 1: Add the Previous Version as an Alias in package.json
+
+First, add an alias to your `package.json` under the `dependencies` section. This alias points to the specific version of the package you want to use.
+
+For example, to use version 1.0.1 of the `@aragon/osx` package, add the following:
+
+```json
+"dependencies": {
+  "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1"
+}
+```
+
+### Step 2: Install Dependencies
+
+Now, run the yarn install command to install the dependencies:
+
+```sh
+yarn install
+```
+
+### Step 3: Update OSX_VERSION_ALIASES in the Script
+
+Next, you need to inform the typechain generator script about this new alias. Open the script `/scripts/osx-version-aliases.ts` and append the alias name to the `OSX_VERSION_ALIASES` array:
+
+```ts
+export const OSX_VERSION_ALIASES = ['@aragon/osx-v1.0.1/'];
+```
+
+### Step 4: Import the Contract in Your Solidity File
+
+Now, you can import the desired contract using the alias you've set. Replace `{path_to_contract}` with the actual path to the contract within the osx package version you are using (in this example, version 1.0.1).
 
 ```solidity
 import '@aragon/osx-v1.0.1/{path_to_contract}.sol';
 ```
 
-Replace {path_to_contract} with the actual path to the contract within the osx package version 1.0.1.
-
-After successful contract compilation, TypeChain typings can be automatically generated. This will allow you to interact with the contract in a type-safe manner in your tests.
+After successful contract compilation, TypeChain typings will be automatically generated. This will allow you to interact with the contract in a type-safe manner in your tests.
 
 Here is a generic example of usage in a test:
 
