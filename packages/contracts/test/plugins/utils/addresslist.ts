@@ -88,7 +88,11 @@ describe('AddresslistMock', function () {
       ]);
       await ethers.provider.send('evm_mine', []);
 
-      const [rc1, rc2, rc3] = await Promise.all([tx1.wait(), tx2.wait(), tx3.wait()]);
+      const [rc1, rc2, rc3] = await Promise.all([
+        tx1.wait(),
+        tx2.wait(),
+        tx3.wait(),
+      ]);
 
       expect(rc1.blockNumber).to.be.lt(rc2.blockNumber);
       expect(rc2.blockNumber).to.be.lt(rc3.blockNumber);
