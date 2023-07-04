@@ -94,17 +94,13 @@ export async function getContractAddress(
   } catch (e) {}
 
   try {
-    if (!hre.testingFork.osxVersion) {
+    if (!hre.testingFork.osxVersion && !hre.testingFork.activeContracts) {
       console.log('==========================');
       console.log('Warning: osxVersion is not set');
       console.log('==========================');
     }
 
-    // Try to import the specific active contracts for the given OSx version
-    const osxVersions = require(`@aragon/osx-versions`);
-
-    const activeContractName = `${hre.testingFork.osxVersion}_active_contracts`;
-    const activeContracts = osxVersions[activeContractName];
+    const activeContracts = hre.testingFork.activeContracts;
 
     if (activeContracts && activeContracts[networkName][contractName]) {
       return activeContracts[networkName][contractName];

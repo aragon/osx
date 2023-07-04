@@ -13,11 +13,10 @@ pragma solidity 0.8.17;
  * necessary in the context of this Migration.sol file to differentiate between contract versions.
  *
  * After a contract is imported here and the project is compiled, an associated artifact will be
- * generated inside artifacts/@aragon/osx-versions/versions/{version-name}/*,
+ * generated inside artifacts/@aragon/{version-name}/*,
  * and TypeChain typings will be generated inside typechain/osx-version/{version-name}/* for type-safe interactions with the contract
  * in our tests.
  *
  */
 
-import {DAO as DAO_v1_0_0} from "@aragon/osx-versions/versions/v1_0_0/contracts/core/dao/DAO.sol";
-import {DAO as DAO_v1_2_0} from "@aragon/osx-versions/versions/v1_2_0/contracts/core/dao/DAO.sol";
+import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";

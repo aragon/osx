@@ -19,9 +19,6 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      - name: Build the osx-versions NPM package
-        run: yarn build
-        working-directory: packages/contracts-versions/
       - name: Clean the contracts directory
         run: yarn clean
         working-directory: packages/contracts/

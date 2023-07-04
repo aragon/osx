@@ -3,7 +3,6 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {getActiveContractAddress} from '../../helpers';
 import {PluginRepo__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
-import {UPDATE_INFOS} from '../../../utils/updates';
 
 import pluginRepoFactoryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
 
@@ -66,4 +65,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PluginRepoFactory'].concat(UPDATE_INFOS['v1_3_0'].tags);
+func.tags = ['PluginRepoFactory', 'v1.3.0'];
