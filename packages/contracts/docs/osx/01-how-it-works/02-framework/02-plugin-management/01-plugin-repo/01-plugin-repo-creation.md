@@ -58,6 +58,8 @@ function registerPluginRepo(
 string calldata subdomain,
 address pluginRepo
 ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
+  ...
+}
 ```
 
 For more details visit the [`PluginRepoRegistry` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md).
