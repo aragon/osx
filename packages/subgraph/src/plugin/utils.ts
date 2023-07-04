@@ -71,17 +71,15 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
         if (!contract) {
           return;
         }
-        if (contract) {
-          packageEntity.token = contract.id;
-        }
+
+        packageEntity.token = contract.id;
       } else {
         let contract = fetchERC20(tokenAddress);
         if (!contract) {
           return;
         }
-        if (contract) {
-          packageEntity.token = contract.id;
-        }
+
+        packageEntity.token = contract.id;
       }
     }
 
