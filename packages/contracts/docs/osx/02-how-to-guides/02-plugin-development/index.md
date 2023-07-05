@@ -1,8 +1,8 @@
 ---
-title: Get Started with Developing your Plugin
+title: Get Started with your DAO Plugin
 ---
 
-# Plugin Development Quickstart Guide
+## Plugin Development Quickstart Guide
 
 Plugins are how we extend the functionality for DAOs. In Aragon OSx, everything a DAO can do is based on Plugin functionality enabled through permissions.
 

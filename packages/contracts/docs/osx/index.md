@@ -46,6 +46,12 @@ contract MyCoolPlugin is Plugin {
 }
 ```
 
+## Customize your DAO
+
+DAO Plugins are the best way to customize your DAO. These are modular extendable pieces of software which you can install or uninstall from your DAO as it evolves and grows.
+
+To learn more about plugins, check out our guide [here](./02-how-to-guides/02-plugin-development/index.md).
+
 ### Walkthrough
 
 This documentation is divided into conceptual and practical sections as well as the reference guide.

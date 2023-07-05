@@ -1,5 +1,5 @@
 ---
-title: Before starting
+title: Before Starting
 ---
 
 ## Advice for Developing a Plugin

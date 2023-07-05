@@ -1,5 +1,5 @@
 ---
-title: Building Governance Plugins
+title: Governance Plugins
 ---
 
 ## How to Build a Governance Plugin
