@@ -8,7 +8,7 @@ import {
   ENSSubdomainRegistrar,
   ENSRegistry,
   PublicResolver,
-} from '../../../typechain';
+} from '../../typechain';
 import {
   ENSRegistry__factory,
   ENSSubdomainRegistrar__factory,

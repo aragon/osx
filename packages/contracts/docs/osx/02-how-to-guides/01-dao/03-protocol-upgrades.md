@@ -1,5 +1,5 @@
 ---
-title: Upgrade your DAO to future Aragon OSx Protocol Versions
+title: Upgrade your DAO to future Aragon OSx Versions
 ---
 
 ## Upgrading to Future Aragon OSx Protocol Versions

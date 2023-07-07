@@ -1,5 +1,5 @@
 ---
-title: What are Upgradeable Plugins?
+title: Upgradeable Plugins
 ---
 
 ## How to develop an Upgradeable Plugin

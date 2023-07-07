@@ -2,6 +2,7 @@ import {exec} from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import util from 'util';
+import {OSX_VERSION_ALIASES} from './osx-versions-aliases';
 
 const execPromise = util.promisify(exec);
 
@@ -21,7 +22,9 @@ async function generateTypechain(src: string, dest: string): Promise<void> {
   }
 }
 
-generateTypechain(
-  './artifacts/@aragon/osx-versions/versions/',
-  './typechain/osx-versions'
-);
+for (let i = 0; i < OSX_VERSION_ALIASES.length; i++) {
+  generateTypechain(
+    `./artifacts/${OSX_VERSION_ALIASES[i]}`,
+    `./typechain/${OSX_VERSION_ALIASES[i]}`
+  );
+}

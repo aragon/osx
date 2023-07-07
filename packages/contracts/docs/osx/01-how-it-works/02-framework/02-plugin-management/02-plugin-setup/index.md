@@ -1,5 +1,5 @@
 ---
-title: The Plugin Contracts
+title: Installing Plugins
 ---
 
 ## The Smart Contracts Behind Plugins
