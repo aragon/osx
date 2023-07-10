@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Fixed wrong interface for indexing GovernanceWrappedERC20.
+
+## [1.2.0]
+
 ### Added
 
 - Added "v" to the version on the github deploy flow.
 - Added handler for `NewURI` event on DAO.
 - Added `delegatee`, `votingPower` and `delegators` to the `TokenVotingMember`.
+- Added support for indexing GovernanceWrappedERC20 and underlying token.
 
 ### Changed
 

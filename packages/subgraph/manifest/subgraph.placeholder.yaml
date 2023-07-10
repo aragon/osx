@@ -74,6 +74,8 @@ dataSources:
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
         - name: AddresslistVoting
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+        - name: GovernanceWrappedERC20
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
