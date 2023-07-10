@@ -22,6 +22,7 @@
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
+    "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "formatting:check": "prettier '**/*.{json,sol,ts,js,md}' -c",
