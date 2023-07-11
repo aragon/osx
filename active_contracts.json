@@ -1,6 +1,5 @@
 {
   "goerli": {
-    "managingDAOImplemenation": "0x99C83C89C59166f7f766A221D5D0Ee00D37170c3",
     "managingDAO": "0xB76F8d3512497040a96E77141c951a5374F24Eb9",
     "DAO_ENSSubdomainRegistrar_Implementation": "0x394B49Cc32Dc81B8EaCdeb62A6Fa66F31D1D022c",
     "DAO_ENSSubdomainRegistrar": "0xC62820f3E74cC82F89100032Ad7F04682F9EdaE0",
@@ -10,17 +9,19 @@
     "DAORegistry": "0xd51ac19130A73455F8B3b1c26aFea21D6bA88E54",
     "PluginRepoRegistry_Implementation": "0x3861Ef32c1bFcdd53E9AaE4af1C9f47390c17fBf",
     "PluginRepoRegistry": "0x970Eb7Dd57c9F0dc4c5a10c06653d1103946b508",
-    "PluginRepoFactory": "0x301868712b77744A3C0E5511609238399f0A2d4d",
+    "PluginRepoFactory": "0x477EB3b39C92c38B43778266b09471285e0F7808",
     "PluginSetupProcessor": "0xE8B5d8D66a02CD1b9Bd32a4064D7ABa45F51305e",
-    "DAOFactory": "0x16B6c6674fEf5d29C9a49EA68A19944f5a8471D3",
-    "AddresslistVotingSetup": "0x4980e5B4394B326c069A54C9ED0Dee2659227352",
-    "TokenVotingSetup": "0x64B336524ea859ed2133c93e4B18be17f44692eE",
+    "DAOFactory": "0x1E4350A3c9aFbDbd70FA30B9B2350B9E8182449a",
+    "AddresslistVotingSetup": "0x0B295EDeDF122E5A57d0661E1993f617dE1bEDF4",
+    "TokenVotingSetup": "0x23a21113719ADaf2F360408b82E5cF73c3aA8217",
     "AdminSetup": "0x633845bB511DE83EA31b8717614d88fa7b569694",
-    "MultisigSetup": "0xBFd84852C8007Bf148721d2c20F69456F193b201",
+    "MultisigSetup": "0x27469edD65132751aAA4d313d79Ff1b2Fa286380",
     "address-list-voting-repo": "0xbD293e27226EF2b85E84FADCF2d5135AbC52e50A",
     "token-voting-repo": "0xFCc843C48BD44e5dA5976a2f2d85772D59C5959E",
     "admin-repo": "0xF66348E9865bb0f29B889E7c0FE1BCf4acAb5f54",
-    "multisig-repo": "0x92C090cffC592B1bC321aCfAF735057B876375F8"
+    "multisig-repo": "0x92C090cffC592B1bC321aCfAF735057B876375F8",
+    "GovernanceERC20": "0x40d30f08d5F8F1D63FD87309f9e2a6b61EB3dd6D",
+    "GovernanceWrappedERC20": "0xb16d3b1efed5540c5B96DbEDa58860b327CB0D12"
   },
   "mainnet": {
     "managingDAOImplemenation": "0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8",
@@ -46,7 +47,6 @@
     "multisig-repo": "0x8c278e37D0817210E18A7958524b7D0a1fAA6F7b"
   },
   "mumbai": {
-    "managingDAOImplemenation": "0x5E993db91Fd2c713Df1110358396EAc60d54fE66",
     "managingDAO": "0xE1De373E219a0d19a0500e599adb903477bCA0f9",
     "ENSRegistry": "0xD24A78824dF3C29CA03661368e6437b767A5422D",
     "PublicResolver": "0xdbFf6be618180E0FF0d74dd3B6BdC1b5de074273",
@@ -58,17 +58,19 @@
     "DAORegistry": "0x6dD0C8b7F9406206ceAA01B5576D9d46e9298f0E",
     "PluginRepoRegistry_Implementation": "0xab27e29F579C870F66F48F4825A4D294AE540818",
     "PluginRepoRegistry": "0xc796bB1AfEBc56daDF6CAcD2aDa78055e5381971",
-    "PluginRepoFactory": "0xDcC5933bc3567E7798Ff00Ab3413cF5f5801BD41",
+    "PluginRepoFactory": "0x4E7c97ab08c046A8e43571f9839d768ae84492e4",
     "PluginSetupProcessor": "0x9227b311C5cecB416707F1C8B7Ca1b52649AabEc",
-    "DAOFactory": "0x5bDBaAfd90B908058567080513635f560F896918",
-    "AddresslistVotingSetup": "0xD1CE76c26bc20255157C8ef478276eb115eC02a7",
-    "TokenVotingSetup": "0x76D3795Df5acF2e2141557BA1Cf094fd54d4e10C",
+    "DAOFactory": "0xc715336B5E7F10294F36CA09f19A0493070E2eFB",
+    "AddresslistVotingSetup": "0xfDB0E4AADEf463824F10D6a0455acdb50a81B746",
+    "TokenVotingSetup": "0xA8c6C249f4739A4d4d0949550a61de7A4b8FDa16",
     "AdminSetup": "0x40a3EF0f0780e044EbDDEdAa9AB225158f315afd",
-    "MultisigSetup": "0x8b2361C65E898F40372a0DD5E1BfEE9895A676B3",
+    "MultisigSetup": "0x008472798D9818F8BfC08e7966bd9c5d8378FF6f",
     "address-list-voting-repo": "0x71570268A86A80B5cCa3F5e430c2BAa3F4b26278",
     "token-voting-repo": "0xaCa70D8c462940B839DE386BcDD4CACf745632cA",
     "admin-repo": "0x0DF9b15550fF39149e491dDD154b28f587e0cD16",
-    "multisig-repo": "0x2c4690b8be39adAd4F15A69340d5035aC6E53eEF"
+    "multisig-repo": "0x2c4690b8be39adAd4F15A69340d5035aC6E53eEF",
+    "GovernanceERC20": "0x10482C2ba761283f516354c85c40450B52F03AAB",
+    "GovernanceWrappedERC20": "0x861f2138632a2f8aC2B4CeA8A5Ab176543f78f5d"
   },
   "polygon": {
     "AddresslistVotingSetup": "0x622DB36633643E4A4075ecc3A309a4f0B942922a",

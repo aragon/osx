@@ -1,4 +1,3 @@
-import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {TokenVotingSetup__factory} from '../../../../typechain';
 import {setTimeout} from 'timers/promises';
@@ -22,18 +21,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await setTimeout(30000);
   }
 
+  hre.aragonToVerifyContracts.push(
+    await hre.deployments.get('GovernanceERC20')
+  );
+
+  hre.aragonToVerifyContracts.push(
+    await hre.deployments.get('GovernanceWrappedERC20')
+  );
+
   hre.aragonToVerifyContracts.push(TokenVotingSetupDeployment);
   hre.aragonToVerifyContracts.push({
     address: await tokenVotingSetup.implementation(),
     args: [],
-  });
-  hre.aragonToVerifyContracts.push({
-    address: await tokenVotingSetup.governanceERC20Base(),
-    args: [ethers.constants.AddressZero, '', '', [[], []]],
-  });
-  hre.aragonToVerifyContracts.push({
-    address: await tokenVotingSetup.governanceWrappedERC20Base(),
-    args: [ethers.constants.AddressZero, '', ''],
   });
 };
 
