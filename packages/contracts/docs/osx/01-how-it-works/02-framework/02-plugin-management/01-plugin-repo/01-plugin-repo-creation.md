@@ -2,7 +2,7 @@
 title: Publishing a Plugin
 ---
 
-## The Plugin Repo Creation Process
+## Start publishing your Plugin by creating a PluginRepo
 
 To be available for installation in the Aragon OSx framework, a `PluginRepo` must be created for each plugin. The `PluginRepo` creation process is handled by:
 
@@ -58,6 +58,8 @@ function registerPluginRepo(
 string calldata subdomain,
 address pluginRepo
 ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
+  ...
+}
 ```
 
 For more details visit the [`PluginRepoRegistry` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepoRegistry.md).

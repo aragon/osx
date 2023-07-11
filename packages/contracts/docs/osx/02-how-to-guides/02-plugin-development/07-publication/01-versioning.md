@@ -1,5 +1,5 @@
 ---
-title: Adding a new version of your plugin
+title: New Plugin Version
 ---
 
 ## How to add a new version of your plugin

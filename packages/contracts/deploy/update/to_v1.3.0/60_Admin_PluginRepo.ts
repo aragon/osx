@@ -5,7 +5,6 @@ import {
   PluginRepoFactory__factory,
 } from '../../../typechain';
 import {getContractAddress} from '../../helpers';
-import {UPDATE_INFOS} from '../../../utils/updates';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
@@ -42,4 +41,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['AdminPluginRepo'].concat(UPDATE_INFOS['v1_3_0'].tags);
+func.tags = ['AdminPluginRepo', 'v1.3.0'];

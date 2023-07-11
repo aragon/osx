@@ -1,5 +1,17 @@
 ![Aragon](https://res.cloudinary.com/dacofvu8m/image/upload/v1677353961/Aragon%20CodeArena/osx_blue_logo_lqrvkr.png)
 
+<p align="center">
+  <a href="https://aragon.org/">Aragon website</a>
+  •
+  <a href="https://devs.aragon.org/">Developer Portal</a>
+  •
+  <a href="https://aragonproject.typeform.com/to/LngekEhU">Join our Developer Community</a>
+  •
+  <a href="https://aragonproject.typeform.com/dx-contribution">Contribute</a>
+</p>
+
+<br/>
+
 # Aragon OSx Protocol
 
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.

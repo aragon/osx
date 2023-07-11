@@ -42,6 +42,7 @@ echo '> Subgraph version: '$SUBGRAPH_VERSION
 if [ "$LOCAL" ]
 then
     graph deploy $FULLNAME \
+        --version-label $SUBGRAPH_VERSION \
         --ipfs http://localhost:5001 \
         --node http://localhost:8020
 else

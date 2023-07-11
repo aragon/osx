@@ -1,6 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {UPDATE_INFOS} from '../../../utils/updates';
 import {TokenVotingSetup__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -32,4 +31,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   hre.aragonToVerifyContracts.push();
 };
 export default func;
-func.tags = ['TokenVotingPlugin', 'Verify'].concat(UPDATE_INFOS['v1_3_0'].tags);
+func.tags = ['TokenVotingPlugin', 'Verify', 'v1.3.0'];
