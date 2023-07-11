@@ -1,6 +1,5 @@
 {
   "goerli": {
-    "managingDAOImplemenation": "0x99C83C89C59166f7f766A221D5D0Ee00D37170c3",
     "managingDAO": "0xB76F8d3512497040a96E77141c951a5374F24Eb9",
     "DAO_ENSSubdomainRegistrar_Implementation": "0x394B49Cc32Dc81B8EaCdeb62A6Fa66F31D1D022c",
     "DAO_ENSSubdomainRegistrar": "0xC62820f3E74cC82F89100032Ad7F04682F9EdaE0",
@@ -48,7 +47,6 @@
     "multisig-repo": "0x8c278e37D0817210E18A7958524b7D0a1fAA6F7b"
   },
   "mumbai": {
-    "managingDAOImplemenation": "0x5E993db91Fd2c713Df1110358396EAc60d54fE66",
     "managingDAO": "0xE1De373E219a0d19a0500e599adb903477bCA0f9",
     "ENSRegistry": "0xD24A78824dF3C29CA03661368e6437b767A5422D",
     "PublicResolver": "0xdbFf6be618180E0FF0d74dd3B6BdC1b5de074273",
