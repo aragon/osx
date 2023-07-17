@@ -2,6 +2,7 @@ import {DAORegistered} from '../../generated/DAORegistry/DAORegistry';
 import {DaoTemplateV1_0_0, DaoTemplateV1_3_0} from '../../generated/templates';
 import {Dao} from '../../generated/schema';
 import {dataSource} from '@graphprotocol/graph-ts';
+import {getDaoId} from '@aragon/subgraph-commons';
 
 // blocklists of addresses for which we don't index the subdomain.
 // Put the reason next to the address as a comment
@@ -10,7 +11,7 @@ const subdomain_blocklist_mainnet = [
 ];
 
 export function handleDAORegistered(event: DAORegistered): void {
-  let id = event.params.dao.toHexString(); // use dao address as id, because it should not repeat
+  let id = getDaoId(event.params.dao); // use dao address as id, because it should not repeat
   let entity = new Dao(id);
 
   if (!isInSubdomainBlocklist(id)) {

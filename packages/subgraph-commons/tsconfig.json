@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2018",
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "rootDir": "./",
+    "esModuleInterop": true
+  },
+  "include": ["./index.ts", "src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules"]
+}
