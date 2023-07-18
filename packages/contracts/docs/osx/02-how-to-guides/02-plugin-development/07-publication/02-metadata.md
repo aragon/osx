@@ -4,11 +4,11 @@ title: Plugin Metadata
 
 ## Plugin Metadata Specification
 
-The plugin metadata is necessary to allow the App frontend to interact with generic plugins:
+The plugin metadata is necessary to allow the App frontend to interact with any plugins:
 
 - Now: generic setup (installation, update, uninstallation)
   - Allows the frontend to render the necessary fields for the input being required to setup the plugin (e.g., the list of initial members of the Multisig plugin)
-- Future: render an UI in a generic way (buttons, text fields, flows) within the specs of the Open Design System (ODS) (e.g. manage the list of Multisig members or the approval settings)
+- Future: render a UI in a generic way (buttons, text fields, flows) within the specs of the Open Design System (ODS) (e.g. manage the list of Multisig members or the approval settings)
 
 Currently, two kinds of metadata exist:
 
@@ -20,8 +20,8 @@ Currently, two kinds of metadata exist:
 The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the [PluginRepo](../../../01-how-it-works/02-framework/02-plugin-management/01-plugin-repo/index.md) (see also the section about [versioning](../07-publication/01-versioning.md/#)).
 
 The intention is to provide an appealing overview of each releases functionality.
-It can be updated with each call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-createversion) in `IPluginRepo` by the repo maintainer
-It can be replaced at any time with [`updateReleaseMetadata()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-updatereleasemetadata) in `IPluginRepo` by the repo maintainer
+It can be updated with each call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-createversion) in `IPluginRepo` by the repo maintainer.
+It can be replaced at any time with [`updateReleaseMetadata()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-updatereleasemetadata) in `IPluginRepo` by the repo maintainer.
 
 The `release-metadata.json` file consists of the following entries:
 
@@ -46,7 +46,7 @@ The `release-metadata.json` file consists of the following entries:
 The build metadata is a `.json` file stored on IPFS with its IPFS CID published for each build **only once** in the [PluginRepo](../../../01-how-it-works/02-framework/02-plugin-management/01-plugin-repo/index.md) (see also the section about [versioning](../07-publication/01-versioning.md/#)).
 
 The intention is to inform about the changes that were introduced in this build compared to the previous one and give instructions to the App frontend and other users on how to interact with the plugin setup and implementation contract.
-It can be published **only once** with the call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-createversion) in `IPluginRepo` by the repo maintainer
+It can be published **only once** with the call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-createversion) in `IPluginRepo` by the repo maintainer.
 
 | Key         | Type        | Description                                                                                               |
 | ----------- | ----------- | --------------------------------------------------------------------------------------------------------- |
@@ -54,13 +54,13 @@ It can be published **only once** with the call to [`createVersion()`](../../../
 | change      | `string`    | Description of the code and UI changes compared to the previous build of the same release.                |
 | pluginSetup | `object`    | Optional. Contains a series of images advertising the plugins functionality.                              |
 
-Each build metadata contains the following field
+Each build metadata contains the following fields:
 
 - one `"prepareInstallation"` object
 - one `"prepareUninstallation"` object
 - 0 to N `"prepareUpdate"` objects enumerated from 1 to N+1
 
-Each `"prepare..."` object contains
+Each `"prepare..."` object contains:
 
 | Key         | Type       | Description                                                                                                                                                                                                                                    |
 | ----------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
