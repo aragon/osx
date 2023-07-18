@@ -7,6 +7,7 @@ import {
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
+  findEventTopicLog,
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
@@ -20,9 +21,9 @@ import {
   IMembership__factory,
   IPlugin__factory,
   IProposal__factory,
+  DAO__factory,
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
-import {ExecutedEvent} from '../../../../typechain/DAO';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -236,7 +237,11 @@ describe('Admin', function () {
           dummyActions,
           allowFailureMap
         );
-        const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+        const event = await findEventTopicLog(
+          tx,
+          DAO__factory.createInterface(),
+          DAO_EVENTS.EXECUTED
+        );
 
         expect(event.args.actor).to.equal(plugin.address);
         expect(event.args.callId).to.equal(toBytes32(proposalId));
@@ -252,8 +257,12 @@ describe('Admin', function () {
         const proposalId = 1;
 
         const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
-        const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
+        const event = await findEventTopicLog(
+          tx,
+          DAO__factory.createInterface(),
+          DAO_EVENTS.EXECUTED
+        );
         expect(event.args.callId).to.equal(toBytes32(proposalId));
       }
     });
