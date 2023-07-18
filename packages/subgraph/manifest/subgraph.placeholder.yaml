@@ -74,6 +74,8 @@ dataSources:
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
         - name: AddresslistVoting
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+        - name: GovernanceWrappedERC20
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
@@ -157,6 +159,18 @@ templates:
       abis:
         - name: DAO
           file: $ARAGON_OSX_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
+        - name: ERC20
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: ERC721
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC721/ERC721.sol/ERC721.json
+        - name: ERC165
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
+        - name: TokenVoting
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
+        - name: AddresslistVoting
+          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+        - name: CallbackHandler
+          file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
       eventHandlers:
         - event: Executed(indexed address,bytes32,(address,uint256,bytes)[],uint256,uint256,bytes[])
           handler: handleExecuted

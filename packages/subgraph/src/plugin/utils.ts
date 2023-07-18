@@ -31,7 +31,11 @@ import {
   MULTISIG_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
-import {fetchERC20} from '../utils/tokens/erc20';
+import {
+  fetchERC20,
+  fetchWrappedERC20,
+  supportsERC20Wrapped
+} from '../utils/tokens/erc20';
 
 export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(0, 'Grant')
@@ -61,8 +65,20 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     if (!token.reverted) {
-      let contract = fetchERC20(token.value);
-      if (contract) {
+      let tokenAddress = token.value;
+      if (supportsERC20Wrapped(tokenAddress)) {
+        let contract = fetchWrappedERC20(tokenAddress);
+        if (!contract) {
+          return;
+        }
+
+        packageEntity.token = contract.id;
+      } else {
+        let contract = fetchERC20(tokenAddress);
+        if (!contract) {
+          return;
+        }
+
         packageEntity.token = contract.id;
       }
     }

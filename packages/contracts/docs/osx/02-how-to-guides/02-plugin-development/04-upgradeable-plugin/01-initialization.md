@@ -1,5 +1,5 @@
 ---
-title: Intializing an Upgradeable Plugin
+title: Intialization
 ---
 
 ## How to Initialize Upgradeable Plugins

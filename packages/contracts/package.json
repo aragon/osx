@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-artifacts",
-  "version": "1.2.1",
+  "version": "1.3.0-rc0",
   "description": "The Aragon OSx Solidity contracts",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -12,16 +12,17 @@
     "dist"
   ],
   "scripts": {
-    "typechain": "find ./artifacts -name '*.json' -type f -not -path './artifacts/@aragon/*' -not -path './artifacts/build-info/*' | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./typechain",
-    "typechain:osx-versions": "ts-node scripts/generate-typechain.ts",
+    "typechain:osx": "ts-node scripts/generate-typechain-osx.ts",
+    "typechain:osx-versions": "ts-node scripts/generate-typechain-osx-versions.ts",
+    "typechain": "yarn typechain:osx && yarn typechain:osx-versions",
     "test": "hardhat test",
-    "build": "hardhat compile && yarn typechain && yarn typechain:osx-versions",
+    "build": "hardhat compile && yarn typechain",
     "build:npm": "rollup --config rollup.config.ts",
-    "build:contracts-versions": "cd ../contracts-versions && yarn build",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
+    "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "formatting:check": "prettier '**/*.{json,sol,ts,js,md}' -c",
@@ -81,6 +82,8 @@
     "@ensdomains/ens-contracts": "0.0.11",
     "@opengsn/contracts": "2.2.6",
     "@openzeppelin/contracts": "4.8.1",
-    "@openzeppelin/contracts-upgradeable": "4.8.1"
+    "@openzeppelin/contracts-upgradeable": "4.8.1",
+    "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
+    "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0"
   }
 }

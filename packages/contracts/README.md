@@ -70,29 +70,55 @@ Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_
 npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 ```
 
-## Testing
+## Testing with Previous Contract Versions
 
-The `@aragon/osx-versions` package allows you to work with previous versions of the contracts. The solidity source files of these versions are available in the `packages/contracts-versions/versions` directory after the package was built. For a details please refer to the [packages/contracts-versions/README.md](https://github.com/aragon/osx/blob/develop/packages/contracts-versions/README.md).
+The `@aragon/osx` and `@aragon/osx-ethers` packages facilitate working with earlier versions of contracts by utilizing npm aliases. This is advantageous for testing contracts against varying versions without having to maintain multiple instances of the contracts within the repository.
 
-If you want to import and test a contract from a previous version, you must first import the contract into `contracts/src/tests/osx-versions/Migration.sol`. This step is necessary for the contract to be compiled.
+Here's a step-by-step guide to import and test a contract from a previous version:
 
-```solidity
-// contracts/src/tests/osx-versions/Migration.sol
+### Step 1: Add the Previous Version as an Alias in package.json
 
-import '../../contracts-versions/{version-name}/{path_to_contract}.sol';
+First, add an alias to your `package.json` under the `dependencies` section. This alias points to the specific version of the package you want to use.
 
-// Replace {version-name} with the version number of the contract, and {path_to_contract} with the actual path to the contract.
+For example, to use version 1.0.1 of the `@aragon/osx` package, add the following:
+
+```json
+"dependencies": {
+  "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1"
+}
 ```
 
-After successful contract compilation, TypeChain typings will be automatically generated and placed in the `typechain/osx-versions/{version-name}` directory. This will allow you to interact with the contract in a type-safe manner in your tests.
+### Step 2: Install Dependencies
+
+Now, run the yarn install command to install the dependencies:
+
+```sh
+yarn install
+```
+
+### Step 3: Update OSX_VERSION_ALIASES in the Script
+
+Next, you need to inform the typechain generator script about this new alias. Open the script `/scripts/osx-version-aliases.ts` and append the alias name to the `OSX_VERSION_ALIASES` array:
 
 ```ts
-// Generic example of usage in a test
+export const OSX_VERSION_ALIASES = ['@aragon/osx-v1.0.1/'];
+```
 
-...
+### Step 4: Import the Contract in Your Solidity File
 
-import {MyContract} from '../../../typechain/osx-versions/{version-name}/{path to MyContract}';
-import {MyContract__factory} from '../../../typechain/osx-versions/{version-name}/{path to MyContract__factory}';
+Now, you can import the desired contract using the alias you've set. Replace `{path_to_contract}` with the actual path to the contract within the osx package version you are using (in this example, version 1.0.1).
+
+```solidity
+import '@aragon/osx-v1.0.1/{path_to_contract}.sol';
+```
+
+After successful contract compilation, TypeChain typings will be automatically generated. This will allow you to interact with the contract in a type-safe manner in your tests.
+
+Here is a generic example of usage in a test:
+
+```ts
+import {MyContract} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract}';
+import {MyContract____factory} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract__factory}';
 
 describe('MyContract Test', function () {
   let myContract: MyContract;
@@ -108,23 +134,20 @@ describe('MyContract Test', function () {
     expect(result).to.equal(something);
   });
 });
-
-...
-
 ```
 
-Please replace 'MyContract' with the actual name of your contract, and follow the same approach for the other placeholders (someFunction, something). This is an illustrative example, the actual test case will depend on the specific methods and functionality of your contract.
+Please replace 'MyContract' with the actual name of your contract, and follow the same approach for the other placeholders (someFunction, something). This is an illustrative example; the actual test case will depend on the specific methods and functionality of your contract.
+
+Example of usage in a test:
 
 ```ts
-// Example of usage in a test
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   DAO as DAO_V1_3_0,
-  DAO__factory as DAO_V1_3_0__factory,
-} from '../../typechain/osx-versions/v1_3_0/contracts/core/dao/DAO.sol';
+  DAO__factory as DAO_V1_3_0_factory,
+} from '@aragon/osx-ethers-v1.3.0/contracts/core/dao/DAO.sol';
 
 describe('Legacy Test Example', function () {
   let signers: SignerWithAddress[];

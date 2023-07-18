@@ -39,6 +39,7 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   const testingFork: TestingFork = {
     network: '',
     osxVersion: '',
+    activeContracts: {},
   };
   hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];

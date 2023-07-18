@@ -1,5 +1,5 @@
 ---
-title: Reference
+title: Reference Guide
 ---
 
 ## Reference Guide

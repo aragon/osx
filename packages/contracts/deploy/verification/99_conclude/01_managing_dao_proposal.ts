@@ -25,7 +25,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const proposalDescription = hre.managingDAOActions
     .map(action => action.description)
     .join('\n');
-  const cid = await uploadToIPFS(proposalDescription, network.name);
+  const cid = await uploadToIPFS(
+    JSON.stringify({
+      title: 'Framework Upgrade 1.3.0',
+      summary: proposalDescription,
+      resources: [],
+    }),
+    network.name
+  );
 
   if (managingDAOMultisigSettings.onlyListed) {
     if (!(await managingDAOMultisig.callStatic.isMember(deployer.address))) {

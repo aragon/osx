@@ -1,5 +1,5 @@
 ---
-title: Initializing Non-Upgradeable Plugins
+title: Initialization
 ---
 
 ## How to Initialize Non-Upgradeable Plugins

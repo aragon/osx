@@ -1,5 +1,5 @@
 ---
-title: Subsequent Builds for Upgradeable Plugins
+title: Subsequent Builds
 ---
 
 ## How to create a subsequent build to an Upgradeable Plugin
