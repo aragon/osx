@@ -1,4 +1,5 @@
 import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {getDaoId} from '@aragon/subgraph-commons';
 import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
 import {getTransferId, TransferType} from './common';
@@ -33,7 +34,7 @@ export function handleNativeDeposit(
   reference: string,
   event: ethereum.Event
 ): void {
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
 
   let id = getTransferId(event.transaction.hash, event.transactionLogIndex, 0);
 
@@ -69,7 +70,7 @@ export function handleNativeAction(
   actionIndex: number,
   event: ethereum.Event
 ): void {
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
 
   let id = getTransferId(
     event.transaction.hash,

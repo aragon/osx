@@ -1,4 +1,5 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {getDaoId} from '@aragon/subgraph-commons';
 import {
   ERC721Balance,
   ERC721Contract,
@@ -103,7 +104,7 @@ export function handleERC721Received(
   let from = tuple[1].toAddress();
   let tokenId = tuple[2].toBigInt();
 
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
 
   updateERC721Balance(
     daoId,
@@ -173,7 +174,7 @@ export function handleERC721Action(
   let to = tuple[1].toAddress();
   let tokenId = tuple[2].toBigInt();
 
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
 
   let transferId = getTransferId(
     event.transaction.hash,

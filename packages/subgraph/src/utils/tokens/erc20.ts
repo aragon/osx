@@ -1,4 +1,5 @@
 import {Address, BigInt, Bytes, Value, ethereum} from '@graphprotocol/graph-ts';
+import {getDaoId} from '@aragon/subgraph-commons';
 import {
   ERC20Balance,
   ERC20Contract,
@@ -108,7 +109,7 @@ export function updateERC20Balance(
     return;
   }
 
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
   let balanceId = daoId.concat('_').concat(token.toHexString());
 
   let erc20Balance = ERC20Balance.load(balanceId);
@@ -175,7 +176,7 @@ export function handleERC20Action(
     amount = tuple[2].toBigInt();
   }
 
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
 
   let id = getTransferId(
     event.transaction.hash,
@@ -231,7 +232,7 @@ export function handleERC20Deposit(
     return;
   }
 
-  let daoId = dao.toHexString();
+  let daoId = getDaoId(dao);
 
   let id = getTransferId(event.transaction.hash, event.transactionLogIndex, 0);
 
