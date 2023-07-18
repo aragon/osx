@@ -4,16 +4,16 @@ import {Contract} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
 
-import {findEvent} from '../utils/event';
+import {findEvent, findEventTopicLog} from '../utils/event';
 import {Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
 import {
   ENSRegistry__factory,
   PluginRepoFactory__factory,
+  PluginRepoRegistry__factory,
   PluginRepo__factory,
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
-import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
@@ -223,8 +223,9 @@ export async function createPluginRepo(
   );
   await tx.wait();
 
-  const event = await findEvent<PluginRepoRegisteredEvent>(
+  const event = await findEventTopicLog(
     tx,
+    PluginRepoRegistry__factory.createInterface(),
     'PluginRepoRegistered'
   );
   const repoAddress = event.args.pluginRepo;
