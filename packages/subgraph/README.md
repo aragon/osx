@@ -68,15 +68,28 @@ yarn test
 
 You have the option to deploy your subgraph locally, this is how you can do it.
 
-Make sure u set the env variable `<NETWORK_NAME>` to 'localhost'.
+Make sure u set the env variable `<NETWORK_NAME>` to 'localhost' and `<SUBGRAPH_NAME>` to 'aragon/aragon-core'.
 
-to start:
+To update the local manifest after the contracts have been compiled, 
+```console
+yarn updateLocalManifest
+```
+
+To start:
 
 ```console
 yarn start:dev
 ```
 
-to stop:
+When there's changes in the contract's package, run 
+```console
+yarn buildAndStart:dev
+``` 
+to force build the hardhat docker image containing the contracts. 
+
+Ideally in the future, the docker image should be part of the contract's CI/CD flow. Each time a new version of contracts is released, a new docker image should also be released, and the version number should be changed on the docker-compose in the subgraph directory.
+
+To stop:
 
 ```console
 yarn stop:dev

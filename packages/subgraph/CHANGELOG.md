@@ -7,14 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Fixed wrong interface for indexing GovernanceWrappedERC20.
+
+## [1.2.0]
+
 ### Added
 
 - Added "v" to the version on the github deploy flow.
 - Added handler for `NewURI` event on DAO.
 - Added `delegatee`, `votingPower` and `delegators` to the `TokenVotingMember`.
+- Added support for indexing GovernanceWrappedERC20 and underlying token.
 
 ### Changed
 
+- Renamed handling updates from v1.2.0 to v1.3.0
+- Fixed start & end date issue by indexing from `getProposal()` instead of the event.
 - BREAKING: DAO's plugins attribute derive from `PluginInstallation` instead of `IPlugin`.
 - BREAKING: Changed attribute of `proposalId` in all proposal entities to `pluginProposalId`
 - Supports now multiple `DAORegistries`, `PluginRepoRegistries` and `PluginSetupProcessors` as datasources.

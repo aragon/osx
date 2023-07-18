@@ -42,7 +42,7 @@ contract DAORegistry is InterfaceBasedRegistry {
         subdomainRegistrar = _subdomainRegistrar;
     }
 
-    /// @notice Registers a DAO by its address.
+    /// @notice Registers a DAO by its address. If a non-empty subdomain name is provided that is not taken already, the DAO becomes the owner of the ENS name.
     /// @dev A subdomain is unique within the Aragon DAO framework and can get stored here.
     /// @param dao The address of the DAO contract.
     /// @param creator The address of the creator.

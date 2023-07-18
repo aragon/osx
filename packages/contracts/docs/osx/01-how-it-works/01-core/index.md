@@ -1,5 +1,5 @@
 ---
-title: Core
+title: The Smart Contracts behind DAOs
 ---
 
 ## The Contracts Constituting Your DAO
@@ -32,8 +32,8 @@ The following graphic shows how an exemplary DAO setup, where the
 
 ![Schematic depiction of the interaction between the DAO, the PermissionManager, and a Plugin contract.](dao-plugin.drawio.svg)
 
-<p class="caption"> 
-  An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The <code>DAO</code> contract in blue containing the <code>PermissionManager</code> in red, respectively, as well as two <code>Plugin</code> contracts in green. 
+<p class="caption">
+  An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The <code>DAO</code> contract in blue containing the <code>PermissionManager</code> in red, respectively, as well as two <code>Plugin</code> contracts in green.
   Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if a DeFi-related plugin is allowed to invest in a certain, external contract.
 </p>
 

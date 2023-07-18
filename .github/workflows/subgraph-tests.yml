@@ -59,8 +59,6 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: yarn
-      - name: Build contracts-versions
-        run: yarn run build:contracts-versions
       - name: Build contracts
         run: yarn run build:contracts
       - name: Build manifest

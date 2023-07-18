@@ -44,6 +44,7 @@ export function fetchWrappedERC20(
   let try_name = wrappedErc20.try_name();
   let try_symbol = wrappedErc20.try_symbol();
   let totalSupply = wrappedErc20.try_totalSupply();
+  let try_decimals = wrappedErc20.try_decimals();
   // extra checks
   let balanceOf = wrappedErc20.try_balanceOf(address);
   let underlying = wrappedErc20.try_underlying();
@@ -58,6 +59,7 @@ export function fetchWrappedERC20(
   // set params and save
   contract.name = try_name.reverted ? '' : try_name.value;
   contract.symbol = try_symbol.reverted ? '' : try_symbol.value;
+  contract.decimals = try_decimals.reverted ? 18 : try_decimals.value;
   contract.underlyingToken = underlyingContract.id;
   contract.save();
   return contract;

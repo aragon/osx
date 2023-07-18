@@ -49,54 +49,62 @@ describe('AddresslistMock', function () {
 
   context('addresslistLengthAtBlock', function () {
     it('returns the right length after addresses were added', async () => {
-      let tx1 = await addresslist.addAddresses([signers[0].address]);
+      const tx1 = await addresslist.addAddresses([signers[0].address]);
       await ethers.provider.send('evm_mine', []);
 
-      let tx2 = await addresslist.addAddresses([
+      const tx2 = await addresslist.addAddresses([
         signers[1].address,
         signers[2].address,
       ]);
       await ethers.provider.send('evm_mine', []);
 
+      const [rc1, rc2] = await Promise.all([tx1.wait(), tx2.wait()]);
+
       expect(
-        await addresslist.addresslistLengthAtBlock(tx1.blockNumber - 1)
+        await addresslist.addresslistLengthAtBlock(rc1.blockNumber - 1)
       ).to.equal(0);
       expect(
-        await addresslist.addresslistLengthAtBlock(tx1.blockNumber)
+        await addresslist.addresslistLengthAtBlock(rc1.blockNumber)
       ).to.equal(1);
       expect(
-        await addresslist.addresslistLengthAtBlock(tx2.blockNumber)
+        await addresslist.addresslistLengthAtBlock(rc2.blockNumber)
       ).to.equal(3);
     });
 
     it('returns the right length after addresses were removed', async () => {
-      let tx1 = await addresslist.addAddresses([
+      const tx1 = await addresslist.addAddresses([
         signers[0].address,
         signers[1].address,
         signers[2].address,
       ]);
       await ethers.provider.send('evm_mine', []);
 
-      let tx2 = await addresslist.removeAddresses([signers[0].address]);
+      const tx2 = await addresslist.removeAddresses([signers[0].address]);
       await ethers.provider.send('evm_mine', []);
 
-      let tx3 = await addresslist.removeAddresses([
+      const tx3 = await addresslist.removeAddresses([
         signers[1].address,
         signers[2].address,
       ]);
       await ethers.provider.send('evm_mine', []);
 
-      expect(tx1.blockNumber).to.be.lt(tx2.blockNumber);
-      expect(tx2.blockNumber).to.be.lt(tx3.blockNumber);
+      const [rc1, rc2, rc3] = await Promise.all([
+        tx1.wait(),
+        tx2.wait(),
+        tx3.wait(),
+      ]);
+
+      expect(rc1.blockNumber).to.be.lt(rc2.blockNumber);
+      expect(rc2.blockNumber).to.be.lt(rc3.blockNumber);
 
       expect(
-        await addresslist.addresslistLengthAtBlock(tx1.blockNumber)
+        await addresslist.addresslistLengthAtBlock(rc1.blockNumber)
       ).to.equal(3);
       expect(
-        await addresslist.addresslistLengthAtBlock(tx2.blockNumber)
+        await addresslist.addresslistLengthAtBlock(rc2.blockNumber)
       ).to.equal(2);
       expect(
-        await addresslist.addresslistLengthAtBlock(tx3.blockNumber)
+        await addresslist.addresslistLengthAtBlock(rc3.blockNumber)
       ).to.equal(0);
     });
   });
@@ -122,13 +130,15 @@ describe('AddresslistMock', function () {
       let tx2 = await addresslist.removeAddresses([signers[0].address]);
       await ethers.provider.send('evm_mine', []);
 
-      expect(tx1.blockNumber).to.be.lt(tx2.blockNumber);
+      const [rc1, rc2] = await Promise.all([tx1.wait(), tx2.wait()]);
+
+      expect(rc1.blockNumber).to.be.lt(rc2.blockNumber);
 
       expect(
-        await addresslist.isListedAtBlock(signers[0].address, tx1.blockNumber)
+        await addresslist.isListedAtBlock(signers[0].address, rc1.blockNumber)
       ).to.equal(true);
       expect(
-        await addresslist.isListedAtBlock(signers[0].address, tx2.blockNumber)
+        await addresslist.isListedAtBlock(signers[0].address, rc2.blockNumber)
       ).to.equal(false);
     });
 
@@ -136,14 +146,16 @@ describe('AddresslistMock', function () {
       let tx1 = await addresslist.addAddresses([signers[0].address]);
       await ethers.provider.send('evm_mine', []);
 
+      const rc1 = await tx1.wait();
+
       expect(
         await addresslist.isListedAtBlock(
           signers[0].address,
-          tx1.blockNumber - 1
+          rc1.blockNumber - 1
         )
       ).to.equal(false);
       expect(
-        await addresslist.isListedAtBlock(signers[0].address, tx1.blockNumber)
+        await addresslist.isListedAtBlock(signers[0].address, rc1.blockNumber)
       ).to.equal(true);
     });
   });

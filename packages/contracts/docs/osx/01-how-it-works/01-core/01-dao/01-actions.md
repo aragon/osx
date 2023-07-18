@@ -1,5 +1,5 @@
 ---
-title: Advanced Action Execution
+title: Advanced DAO Actions
 ---
 
 ## A Deep Dive into Actions and Execution

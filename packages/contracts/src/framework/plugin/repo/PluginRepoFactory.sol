@@ -2,7 +2,11 @@
 
 pragma solidity 0.8.17;
 
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IProtocolVersion} from "../../../utils/protocol/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {createERC1967Proxy} from "../../../utils/Proxy.sol";
 import {PluginRepoRegistry} from "./PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
@@ -10,7 +14,7 @@ import {PluginRepo} from "./PluginRepo.sol";
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022-2023
 /// @notice This contract creates `PluginRepo` proxies and registers them on a `PluginRepoRegistry` contract.
-contract PluginRepoFactory {
+contract PluginRepoFactory is ERC165, ProtocolVersion {
     /// @notice The Aragon plugin registry contract.
     PluginRepoRegistry public pluginRepoRegistry;
 
@@ -23,6 +27,15 @@ contract PluginRepoFactory {
         pluginRepoRegistry = _pluginRepoRegistry;
 
         pluginRepoBase = address(new PluginRepo());
+    }
+
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interface.
+    /// @return Returns `true` if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return
+            _interfaceId == type(IProtocolVersion).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.

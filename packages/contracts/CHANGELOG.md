@@ -5,20 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## UPCOMING
+## v1.3.0-rc0
 
 ### Added
 
-- Added `initializeFork`, `initializeDeploymentFixture` and `initForkAndFixture` utility functions to `test-utils`.
-- Added `UpdateInfo`, and `TestingFork` types, and extended `HardhatRuntimeEnvironment`.
-- Inherit `ProtocolVersion` and `ERC165` in `DAOFactory`.
-- Inherit `ProtocolVersion` in `DAO`.
+- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
+- Inherit `ProtocolVersion` and `ERC165` in `DAOFactory` and `PluginRepoFactory`.
+- Inherit `ProtocolVersion` in `DAO` and `PluginRepo`.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
 - Added `allowFailureMap` to `IDAO.Executed` event.
+- Added `initializeFrom()` reinitializer to `DAO` contract.
 
 ### Changed
 
-- Extended `getContractAddress` functionality to import addresses from osx-versions if a fork has initiated.
+- Changed `TokenVotingSetup` to receive the `GovernanceERC20` and `GovernanceWrappedERC20` base contracts as constructor arguments to reduce the `initCode` size because of limitations on the Goerli testnet.
+- Revert with errors (`ConditionNotAContract`, `ConditionInterfacNotSupported`) if the `grantWithCondition` function in `PermissionManager` is called with a condition address that is not a `IPermissionCondition` implementation.
+- `_grantWithCondition()` doesn't accept `ALLOW_FLAG` anymore as valid condition input.
+- Revert with an error (`GrantWithConditionNotSupported`) if the `applySingleTargetPermissions` function in `PermissionManager` is called with `PermissionLib.Operation.GrantWithCondition`.
 - Fixed logic bug in the `TokenVoting` and `AddresslistVoting` implementations that caused the `createProposal` function to emit the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
 - Changed the `createProposal` functions in `Multisig` to allow creating proposals when the `_msgSender()` is listed in the current block.
 - Changed the `createProposal` functions in `AddresslistVoting` to allow creating proposals when the `_msgSender()` is listed in the current block.
@@ -28,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
 
 ### Removed
+
+- Removed unnecessary ERC-165 check for `type(UUPSUpgradeable).interfaceId` from `supportsInterface` in `PluginRepo`.
 
 ## v1.2.0
 
