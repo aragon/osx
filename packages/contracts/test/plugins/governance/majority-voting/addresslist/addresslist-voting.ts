@@ -7,6 +7,7 @@ import {
   AddresslistVoting__factory,
   Addresslist__factory,
   DAO,
+  DAO__factory,
   IERC165Upgradeable__factory,
   IMajorityVoting__factory,
   IMembership__factory,
@@ -15,6 +16,7 @@ import {
 } from '../../../../../typechain';
 import {
   findEvent,
+  findEventTopicLog,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
@@ -40,7 +42,6 @@ import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {majorityVotingBaseInterface} from '../majority-voting';
-import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
@@ -1025,7 +1026,11 @@ describe('AddresslistVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Abstain, true);
         {
-          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEventTopicLog(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          );
 
           expect(event.args.actor).to.equal(voting.address);
           expect(event.args.callId).to.equal(toBytes32(id));
