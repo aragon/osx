@@ -21,7 +21,7 @@ export async function findEventTopicLog(
   const topic = iface.getEventTopic(eventName);
   const log = receipt.logs.find(x => x.topics[0] === topic);
   if (!log) {
-    throw new Error(`No logs found for this event ${eventName} topic.`);
+    throw new Error(`No logs found for the topic of event "${eventName}".`);
   }
   return iface.parseLog(log);
 }
