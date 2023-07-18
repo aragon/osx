@@ -5,9 +5,6 @@ import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 
 import {
   PluginSetupProcessor,
-  PluginUUPSUpgradeableV1Mock__factory,
-  PluginUUPSUpgradeableV2Mock__factory,
-  PluginUUPSUpgradeableV3Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginUUPSUpgradeableSetupV2Mock,
@@ -20,21 +17,25 @@ import {
   PluginRepoRegistry,
   PluginRepo,
   DAO,
-  PluginUUPSUpgradeableSetupV2Mock__factory,
+  PluginRepo__factory,
+  PluginRepoRegistry__factory,
+  PluginUUPSUpgradeable__factory,
+  PluginUUPSUpgradeableV1Mock__factory,
+  PluginUUPSUpgradeableV2Mock__factory,
+  PluginUUPSUpgradeableV3Mock__factory,
+  PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginUUPSUpgradeableSetupV1MockBad__factory,
+  PluginUUPSUpgradeableSetupV2Mock__factory,
   PluginUUPSUpgradeableSetupV4Mock__factory,
+  PluginCloneableSetupV1Mock__factory,
   PluginCloneableSetupV2Mock__factory,
   PluginCloneableSetupV1MockBad__factory,
-  PluginUUPSUpgradeableSetupV1Mock__factory,
-  PluginCloneableSetupV1Mock__factory,
-  PluginRepo__factory,
-  PluginUUPSUpgradeable__factory,
 } from '../../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {findEvent} from '../../../utils/event';
+import {findEventTopicLog} from '../../../utils/event';
 import {Operation} from '../../../utils/types';
 
 import {
@@ -82,7 +83,6 @@ import {
   uninstallPlugin,
 } from '../../test-utils/psp/atomic-helpers';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -245,12 +245,13 @@ describe('Plugin Setup Processor', function () {
       buildMetadata
     );
 
-    let event = await findEvent<PluginRepoRegisteredEvent>(
+    const PluginRepoRegisteredEvent1 = await findEventTopicLog(
       tx,
+      PluginRepoRegistry__factory.createInterface(),
       EVENTS.PluginRepoRegistered
     );
     const PluginRepo = new PluginRepo__factory(signers[0]);
-    repoU = PluginRepo.attach(event.args.pluginRepo);
+    repoU = PluginRepo.attach(PluginRepoRegisteredEvent1.args.pluginRepo);
 
     // Add setups
     await repoU.createVersion(1, setupUV2.address, EMPTY_DATA, EMPTY_DATA); // build 2
@@ -267,11 +268,12 @@ describe('Plugin Setup Processor', function () {
       buildMetadata
     );
 
-    event = await findEvent<PluginRepoRegisteredEvent>(
+    const PluginRepoRegisteredEvent2 = await findEventTopicLog(
       tx,
+      PluginRepoRegistry__factory.createInterface(),
       EVENTS.PluginRepoRegistered
     );
-    repoC = PluginRepo.attach(event.args.pluginRepo);
+    repoC = PluginRepo.attach(PluginRepoRegisteredEvent2.args.pluginRepo);
     await repoC.createVersion(1, setupCV1Bad.address, EMPTY_DATA, EMPTY_DATA);
     await repoC.createVersion(1, setupCV2.address, EMPTY_DATA, EMPTY_DATA);
   });
