@@ -6,6 +6,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   Addresslist__factory,
   DAO,
+  DAO__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IMultisig__factory,
@@ -16,6 +17,7 @@ import {
 } from '../../../../typechain';
 import {
   findEvent,
+  findEventTopicLog,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
@@ -1168,21 +1170,33 @@ describe('Multisig', function () {
         // `tryExecution` is turned on but the vote is not decided yet
         let tx = await multisig.connect(signers[1]).approve(id, true);
         await expect(
-          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
-        ).to.rejectedWith('Event Executed not found in TX.');
+          findEventTopicLog(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          )
+        ).to.rejectedWith('No logs found for the topic of event "Executed".');
 
         expect(await multisig.canExecute(id)).to.equal(false);
 
         // `tryExecution` is turned off and the vote is decided
         tx = await multisig.connect(signers[2]).approve(id, false);
         await expect(
-          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
-        ).to.rejectedWith('Event Executed not found in TX.');
+          findEventTopicLog(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          )
+        ).to.rejectedWith('No logs found for the topic of event "Executed".');
 
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
         {
-          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEventTopicLog(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          );
 
           expect(event.args.actor).to.equal(multisig.address);
           expect(event.args.callId).to.equal(toBytes32(id));
