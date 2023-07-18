@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO,
+  DAO__factory,
   GovernanceERC20Mock,
   GovernanceERC20Mock__factory,
   IERC165Upgradeable__factory,
@@ -17,6 +18,7 @@ import {
 } from '../../../../../typechain';
 import {
   findEvent,
+  findEventTopicLog,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
@@ -47,7 +49,6 @@ import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
-import {ExecutedEvent} from '../../../../../typechain/DAO';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -1381,7 +1382,11 @@ describe('TokenVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Yes, true);
         {
-          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEventTopicLog(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          );
 
           expect(event.args.actor).to.equal(voting.address);
           expect(event.args.callId).to.equal(toBytes32(id));
