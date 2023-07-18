@@ -2,7 +2,7 @@ import {DAORegistered} from '../../generated/DAORegistry/DAORegistry';
 import {DaoTemplateV1_0_0, DaoTemplateV1_3_0} from '../../generated/templates';
 import {Dao} from '../../generated/schema';
 import {dataSource} from '@graphprotocol/graph-ts';
-import {getDaoId} from '@aragon/subgraph-commons';
+import {getDaoId} from '@aragon/osx-subgraph-commons';
 
 // blocklists of addresses for which we don't index the subdomain.
 // Put the reason next to the address as a comment

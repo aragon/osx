@@ -1,5 +1,5 @@
 {
-  "name": "@aragon/subgraph-commons",
+  "name": "@aragon/osx-subgraph-commons",
   "version": "1.0.0",
   "description": "The Aragon subgraph-commons package for ID generation and other common utilities for subgraph",
   "module": "index.ts",

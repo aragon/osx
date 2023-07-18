@@ -1,5 +1,5 @@
 import {Bytes, log} from '@graphprotocol/graph-ts';
-import {getDaoId} from '@aragon/subgraph-commons';
+import {getDaoId} from '@aragon/osx-subgraph-commons';
 import {
   InstallationApplied,
   InstallationPrepared,

@@ -1,5 +1,5 @@
 import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
-import {getDaoId} from '@aragon/subgraph-commons';
+import {getDaoId} from '@aragon/osx-subgraph-commons';
 import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
 import {getTransferId, TransferType} from './common';
