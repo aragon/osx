@@ -32,6 +32,7 @@
     "matchstick-as": "^0.5.1",
     "mustache": "^4.2.0",
     "ts-morph": "^17.0.1",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "@aragon/subgraph-commons": "^1.0.0"
   }
 }

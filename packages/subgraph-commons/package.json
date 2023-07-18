@@ -2,10 +2,9 @@
   "name": "@aragon/subgraph-commons",
   "version": "1.0.0",
   "description": "The Aragon subgraph-commons package for ID generation and other common utilities for subgraph",
-  "main": "src/index.ts",
-  "scripts": {
-    "test": ""
-  },
+  "module": "index.ts",
+  "types": "index.ts",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aragon/osx.git"
@@ -16,6 +15,9 @@
     "url": "https://github.com/aragon/osx/issues"
   },
   "homepage": "https://github.com/aragon/osx#readme",
+  "scripts": {
+    "test": ""
+  },
   "devDependencies": {
     "@graphprotocol/graph-ts": "^0.27.0",
     "@types/node": "^18.7.15",

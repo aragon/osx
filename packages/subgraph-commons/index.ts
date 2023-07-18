@@ -1,1 +1,1 @@
-export * from './src/ids';
+export * from './lib';
