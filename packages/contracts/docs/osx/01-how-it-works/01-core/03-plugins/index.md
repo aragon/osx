@@ -29,7 +29,7 @@ Lern more about the different [plugin types](../../../02-how-to-guides/02-plugin
 
 This raises questions on how the DAO manages plugins and who actually owns plugins.
 
-### How does the DAO manage a Plugin?
+### How Does the DAO Manage a Plugin?
 
 A DAO manages plugins and interactions between them. In more detail, its permission manager:
 
