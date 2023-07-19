@@ -2,7 +2,7 @@
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
+import {BigNumber, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -15,11 +15,14 @@ import {
   TestERC20__factory,
   MerkleDistributor__factory,
 } from '../../../../typechain';
+import {MerkleDistributor__factory as MerkleDistributor_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/token/MerkleDistributor.sol';
+
 import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
+import {upgradeManagedContract} from '../../../test-utils/uups-upgradeable';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
@@ -31,11 +34,13 @@ describe('MerkleDistributor', function () {
   let wallet0: string;
   let wallet1: string;
 
-  beforeEach(async function () {
+  before(async function () {
     signers = await ethers.getSigners();
     wallet0 = await signers[0].getAddress();
     wallet1 = await signers[1].getAddress();
+  });
 
+  beforeEach(async function () {
     // create a DAO
     dao = await deployNewDAO(signers[0]);
 
@@ -67,6 +72,34 @@ describe('MerkleDistributor', function () {
       const iface = IMerkleDistributor__factory.createInterface();
       expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
         .true;
+    });
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new MerkleDistributor__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new MerkleDistributor_V1_0_0__factory(signers[0]);
+
+      await upgradeManagedContract(
+        signers[0],
+        signers[1],
+        dao,
+        {
+          dao: dao.address,
+          token: token.address,
+          merkleRoot: ZERO_BYTES32,
+        },
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      );
     });
   });
 
