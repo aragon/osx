@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {Contract} from 'ethers';
+import {Contract, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -15,6 +15,13 @@ import {
   Multisig,
   Multisig__factory,
 } from '../../../../typechain';
+import {Multisig__factory as Multisig_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol';
+import {
+  ApprovedEvent,
+  ProposalExecutedEvent,
+} from '../../../../typechain/Multisig';
+import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
+
 import {
   findEvent,
   findEventTopicLog,
@@ -32,16 +39,10 @@ import {
   timestampIn,
   toBytes32,
 } from '../../../test-utils/voting';
-import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {
-  ApprovedEvent,
-  ProposalExecutedEvent,
-} from '../../../../typechain/Multisig';
-import {ExecutedEvent} from '../../../../typechain/DAO';
-import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
+import {upgradeManagedContract} from '../../../test-utils/uups-upgradeable';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -112,26 +113,6 @@ describe('Multisig', function () {
       multisig.address,
       signers[0].address,
       ethers.utils.id('UPDATE_MULTISIG_SETTINGS_PERMISSION')
-    );
-  });
-
-  describe('Upgrade', () => {
-    beforeEach(async function () {
-      this.upgrade = {
-        contract: multisig,
-        dao: dao,
-        user: signers[8],
-      };
-      await multisig.initialize(
-        dao.address,
-        signers.slice(0, 5).map(s => s.address),
-        multisigSettings
-      );
-    });
-
-    shouldUpgradeCorrectly(
-      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-      'DaoUnauthorized'
     );
   });
 
@@ -207,6 +188,34 @@ describe('Multisig', function () {
       await expect(multisig.initialize(dao.address, members, multisigSettings))
         .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
         .withArgs(65535, members.length);
+    });
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new Multisig__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new Multisig_V1_0_0__factory(signers[0]);
+
+      await upgradeManagedContract(
+        signers[0],
+        signers[1],
+        dao,
+        {
+          dao: dao.address,
+          members: [signers[0].address, signers[1].address, signers[2].address],
+          multisigSettings: multisigSettings,
+        },
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      );
     });
   });
 

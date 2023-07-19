@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {deployWithProxy} from '../../../test-utils/proxy';
 
 import {
   ENSSubdomainRegistrar,
@@ -12,12 +12,15 @@ import {
   PublicResolver__factory,
   ENSSubdomainRegistrar__factory,
 } from '../../../../typechain';
+import {ENSSubdomainRegistrar__factory as ENSSubdomainRegistrar_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol';
+
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {setupResolver} from '../../../test-utils/ens';
-import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
+import {upgradeManagedContract} from '../../../test-utils/uups-upgradeable';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -102,33 +105,6 @@ describe('ENSSubdomainRegistrar', function () {
 
   beforeEach(async function () {
     [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
-
-    this.upgrade = {
-      contract: registrar,
-      dao: managingDao,
-      user: signers[8],
-    };
-  });
-
-  describe('Upgrade', () => {
-    beforeEach(async function () {
-      await registerSubdomainHelper('test', '', signers[0], registrar.address);
-      this.upgrade = {
-        contract: registrar,
-        dao: managingDao,
-        user: signers[8],
-      };
-      await registrar.initialize(
-        managingDao.address,
-        ens.address,
-        ensDomainHash('test')
-      );
-    });
-
-    shouldUpgradeCorrectly(
-      UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
-      'DaoUnauthorized'
-    );
   });
 
   describe('Check the initial ENS state', async () => {
@@ -156,7 +132,7 @@ describe('ENSSubdomainRegistrar', function () {
         await registrar
           .connect(signers[0])
           .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      );
+      ).to.not.be.revertedWithCustomError(registrar, 'InvalidResolver');
     });
 
     postInitializationTests();
@@ -303,6 +279,40 @@ describe('ENSSubdomainRegistrar', function () {
 
   describe('Random signer with no permissions at all', () => {
     expectedReverts();
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new ENSSubdomainRegistrar__factory(signers[0]);
+    });
+
+    beforeEach(async () => {
+      await registerSubdomainHelper('test', '', signers[0], registrar.address);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new ENSSubdomainRegistrar_V1_0_0__factory(
+        signers[0]
+      );
+
+      await upgradeManagedContract(
+        signers[0],
+        signers[1],
+        managingDao,
+        {
+          managingDao: managingDao.address,
+          ens: ens.address,
+          parentDomain: ensDomainHash('test'),
+        },
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID
+      );
+    });
   });
 
   function expectedReverts() {

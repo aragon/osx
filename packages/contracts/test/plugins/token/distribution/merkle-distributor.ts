@@ -19,7 +19,6 @@ import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
@@ -69,22 +68,6 @@ describe('MerkleDistributor', function () {
       expect(await distributor.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
-  });
-
-  describe('Upgrade', () => {
-    beforeEach(async function () {
-      this.upgrade = {
-        contract: distributor,
-        dao: dao,
-        user: signers[8],
-      };
-      await distributor.initialize(dao.address, token.address, ZERO_BYTES32);
-    });
-
-    shouldUpgradeCorrectly(
-      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-      'DaoUnauthorized'
-    );
   });
 
   describe('general', () => {

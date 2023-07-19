@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {ContractFactory} from 'ethers';
 
 import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {
@@ -8,12 +9,14 @@ import {
   DAORegistry__factory,
   ENSSubdomainRegistrar,
 } from '../../../typechain';
+import {DAORegistry__factory as DAORegistry_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol';
+
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../../test-utils/proxy';
-import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {upgradeManagedContract} from '../../test-utils/uups-upgradeable';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -79,18 +82,7 @@ describe('DAORegistry', function () {
       daoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
-
-    this.upgrade = {
-      contract: daoRegistry,
-      dao: managingDao,
-      user: signers[8],
-    };
   });
-
-  shouldUpgradeCorrectly(
-    UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
-    'DaoUnauthorized'
-  );
 
   it('succeeds even if the dao subdomain is empty', async function () {
     await expect(daoRegistry.register(targetDao.address, ownerAddress, '')).to
@@ -251,5 +243,32 @@ describe('DAORegistry', function () {
           .withArgs(subdomainName);
       }
     }).timeout(120000);
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new DAORegistry__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new DAORegistry_V1_0_0__factory(signers[0]);
+
+      await upgradeManagedContract(
+        signers[0],
+        signers[1],
+        managingDao,
+        {
+          dao: managingDao.address,
+          ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+        },
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+      );
+    });
   });
 });

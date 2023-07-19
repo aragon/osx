@@ -1,5 +1,6 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -21,6 +22,9 @@ import {
   IEIP4824__factory,
   IProtocolVersion__factory,
 } from '../../../typechain';
+import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
+
+import {upgradeManagingContract} from '../../test-utils/uups-upgradeable';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
 
@@ -37,7 +41,6 @@ import {OZ_ERRORS} from '../../test-utils/error';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
-import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
@@ -94,10 +97,12 @@ describe('DAO', function () {
   let dao: DAO;
   let DAO: DAO__factory;
 
-  beforeEach(async function () {
+  before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
+  });
 
+  beforeEach(async function () {
     DAO = new DAO__factory(signers[0]);
     dao = await deployWithProxy<DAO>(DAO);
     await dao.initialize(
@@ -140,18 +145,7 @@ describe('DAO', function () {
         PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       ),
     ]);
-
-    this.upgrade = {
-      contract: dao,
-      dao: dao,
-      user: signers[8],
-    };
   });
-
-  shouldUpgradeCorrectly(
-    UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
-    'Unauthorized'
-  );
 
   it('does not support the empty interface', async () => {
     expect(await dao.supportsInterface('0xffffffff')).to.be.false;
@@ -324,6 +318,34 @@ describe('DAO', function () {
           )
         ).toNumber()
       ).to.equal(0);
+    });
+  });
+
+  describe('Upgrades', async () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new DAO__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
+
+      await upgradeManagingContract(
+        signers[0],
+        signers[1],
+        {
+          metadata: dummyMetadata1,
+          initialOwner: signers[0].address,
+          trustedForwarder: dummyAddress1,
+          daoURI: daoExampleURI,
+        },
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+      );
     });
   });
 
@@ -1147,7 +1169,6 @@ describe('DAO', function () {
     });
 
     it('should allow only `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` to set validator', async () => {
-      const signers = await ethers.getSigners();
       await expect(
         dao
           .connect(signers[2])

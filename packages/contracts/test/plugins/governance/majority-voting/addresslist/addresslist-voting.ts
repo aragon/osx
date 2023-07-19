@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -14,6 +15,13 @@ import {
   IPlugin__factory,
   IProposal__factory,
 } from '../../../../../typechain';
+import {AddresslistVoting__factory as AddresslistVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
+import {
+  ProposalCreatedEvent,
+  ProposalExecutedEvent,
+} from '../../../../../typechain/AddresslistVoting';
+import {majorityVotingBaseInterface} from '../majority-voting';
+
 import {
   findEvent,
   findEventTopicLog,
@@ -37,15 +45,10 @@ import {
 } from '../../../../test-utils/voting';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
-import {shouldUpgradeCorrectly} from '../../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {majorityVotingBaseInterface} from '../majority-voting';
-import {
-  ProposalCreatedEvent,
-  ProposalExecutedEvent,
-} from '../../../../../typechain/AddresslistVoting';
+import {upgradeManagedContract} from '../../../../test-utils/uups-upgradeable';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -109,28 +112,6 @@ describe('AddresslistVoting', function () {
       signers[0].address,
       ethers.utils.id('UPDATE_ADDRESSES_PERMISSION')
     );
-
-    this.upgrade = {
-      contract: voting,
-      dao: dao,
-      user: signers[8],
-    };
-  });
-
-  describe('Upgrade', () => {
-    beforeEach(async function () {
-      this.upgrade = {
-        contract: voting,
-        dao: dao,
-        user: signers[8],
-      };
-      await voting.initialize(dao.address, votingSettings, []);
-    });
-
-    shouldUpgradeCorrectly(
-      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-      'DaoUnauthorized'
-    );
   });
 
   describe('initialize: ', async () => {
@@ -140,6 +121,34 @@ describe('AddresslistVoting', function () {
       await expect(
         voting.initialize(dao.address, votingSettings, [])
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new AddresslistVoting__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new AddresslistVoting_V1_0_0__factory(signers[0]);
+
+      await upgradeManagedContract(
+        signers[0],
+        signers[1],
+        dao,
+        {
+          dao: dao.address,
+          votingSettings: votingSettings,
+          members: [signers[0].address, signers[1].address],
+        },
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      );
     });
   });
 

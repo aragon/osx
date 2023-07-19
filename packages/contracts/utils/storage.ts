@@ -3,7 +3,7 @@ import {defaultAbiCoder} from 'ethers/lib/utils';
 
 import {IMPLEMENTATION_SLOT} from '../test/test-utils/uups-upgradeable';
 
-export function readImplementationValuesFromSlot(
+export async function readImplementationValuesFromSlot(
   contractAddresses: string[]
 ): Promise<string[]> {
   return Promise.all(
@@ -13,7 +13,7 @@ export function readImplementationValuesFromSlot(
   );
 }
 
-export function readImplementationValueFromSlot(
+export async function readImplementationValueFromSlot(
   contractAddress: string
 ): Promise<string> {
   return ethers.provider
