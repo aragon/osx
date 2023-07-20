@@ -647,7 +647,7 @@ describe('DAOFactory: ', function () {
         {
           to: dao.address,
           value: 0,
-          data: DAO__factory.createInterface().encodeFunctionData('grant', [
+          data: daoInterface.encodeFunctionData('grant', [
             dao.address,
             psp.address,
             ethers.utils.id('ROOT_PERMISSION'),
