@@ -19,7 +19,7 @@ import {
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 
-import {upgradeManagingContract} from '../../test-utils/uups-upgradeable';
+import {upgradeCheckManagingContract} from '../../test-utils/uups-upgradeable';
 
 import {
   deployMockPluginSetup,
@@ -85,7 +85,7 @@ describe('PluginRepo', function () {
       it('from v1.0.0', async () => {
         legacyContractFactory = new PluginRepo_V1_0_0__factory(signers[0]);
 
-        await upgradeManagingContract(
+        await upgradeCheckManagingContract(
           signers[0],
           signers[1],
           {

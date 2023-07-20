@@ -20,7 +20,7 @@ import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {setupResolver} from '../../../test-utils/ens';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {upgradeManagedContract} from '../../../test-utils/uups-upgradeable';
+import {upgradeCheckManagedContract} from '../../../test-utils/uups-upgradeable';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -298,7 +298,7 @@ describe('ENSSubdomainRegistrar', function () {
         signers[0]
       );
 
-      await upgradeManagedContract(
+      await upgradeCheckManagedContract(
         signers[0],
         signers[1],
         managingDao,

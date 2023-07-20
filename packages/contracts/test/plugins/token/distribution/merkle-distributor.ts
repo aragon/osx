@@ -22,7 +22,7 @@ import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {upgradeManagedContract} from '../../../test-utils/uups-upgradeable';
+import {upgradeCheckManagedContract} from '../../../test-utils/uups-upgradeable';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
@@ -86,7 +86,7 @@ describe('MerkleDistributor', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new MerkleDistributor_V1_0_0__factory(signers[0]);
 
-      await upgradeManagedContract(
+      await upgradeCheckManagedContract(
         signers[0],
         signers[1],
         dao,

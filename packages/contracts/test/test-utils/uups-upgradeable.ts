@@ -8,7 +8,8 @@ import {DAO, PluginRepo} from '../../typechain';
 export const IMPLEMENTATION_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'; // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
 
-export async function upgradeManagedContract(
+// Deploys and upgrades a contract that is managed by a DAO
+export async function upgradeCheckManagedContract(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
   managingDao: DAO,
@@ -30,6 +31,7 @@ export async function upgradeManagedContract(
     }
   );
 
+  // Check that upgrade permission is required
   await expect(
     upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
       unsafeAllow: ['constructor'],
@@ -56,7 +58,8 @@ export async function upgradeManagedContract(
   });
 }
 
-export async function upgradeManagingContract(
+// Deploys and upgrades a contract that has its own permission manager
+export async function upgradeCheckManagingContract(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
   initArgs: any,
@@ -77,6 +80,7 @@ export async function upgradeManagingContract(
     }
   );
 
+  // Check that upgrade permission is required
   await expect(
     upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
       unsafeAllow: ['constructor'],

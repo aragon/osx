@@ -16,7 +16,7 @@ import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {upgradeManagedContract} from '../../test-utils/uups-upgradeable';
+import {upgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -256,7 +256,7 @@ describe('DAORegistry', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new DAORegistry_V1_0_0__factory(signers[0]);
 
-      await upgradeManagedContract(
+      await upgradeCheckManagedContract(
         signers[0],
         signers[1],
         managingDao,

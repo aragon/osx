@@ -24,7 +24,7 @@ import {deployNewDAO} from '../../../test-utils/dao';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {upgradeManagedContract} from '../../../test-utils/uups-upgradeable';
+import {upgradeCheckManagedContract} from '../../../test-utils/uups-upgradeable';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -96,7 +96,7 @@ describe('MerkleMinter', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new MerkleMinter_V1_0_0__factory(signers[0]);
 
-      await upgradeManagedContract(
+      await upgradeCheckManagedContract(
         signers[0],
         signers[1],
         managingDao,

@@ -49,7 +49,7 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
-import {upgradeManagedContract} from '../../../../test-utils/uups-upgradeable';
+import {upgradeCheckManagedContract} from '../../../../test-utils/uups-upgradeable';
 import {majorityVotingBaseInterface} from '../majority-voting';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
@@ -203,7 +203,7 @@ describe('TokenVoting', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new TokenVoting_V1_0_0__factory(signers[0]);
 
-      await upgradeManagedContract(
+      await upgradeCheckManagedContract(
         signers[0],
         signers[1],
         dao,
