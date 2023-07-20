@@ -1,6 +1,7 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   ActionExecute__factory,
@@ -20,7 +21,7 @@ import {
   TokenCreatedEvent,
   WrappedTokenEvent,
 } from '../../../typechain/TokenFactory';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import merkleMinterArtifact from '../../../artifacts/src/plugins/token/MerkleMinter.sol/MerkleMinter.json';
 
 chai.use(smock.matchers);
 
@@ -73,7 +74,7 @@ describe('Core: TokenFactory', () => {
     );
 
     const MerkleMinterBaseFactory = await smock.mock<MerkleMinter__factory>(
-      'MerkleMinter'
+      merkleMinterArtifact
     );
     merkleMinterBase = await MerkleMinterBaseFactory.deploy();
 

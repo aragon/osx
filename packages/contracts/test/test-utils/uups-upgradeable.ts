@@ -2,7 +2,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
 import {upgrades} from 'hardhat';
-import {DAO, PluginRepo} from '../../typechain';
+import {DAO} from '../../typechain';
 
 // See https://eips.ethereum.org/EIPS/eip-1967
 export const IMPLEMENTATION_SLOT =
