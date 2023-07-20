@@ -549,7 +549,7 @@ describe('DAOFactory: ', function () {
 
     // @ts-ignore
     receipt.logs.forEach(log => {
-      if (log.topics[0] == topic) installationAppliedEventCount++;
+      if (log.topics[0] === topic) installationAppliedEventCount++;
     });
 
     expect(installationAppliedEventCount).to.equal(2);
