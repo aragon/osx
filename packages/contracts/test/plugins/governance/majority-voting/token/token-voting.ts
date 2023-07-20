@@ -1392,7 +1392,7 @@ describe('TokenVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Yes, true);
         {
-          const event = await findEventTopicLog(
+          const event = await findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
             DAO_EVENTS.EXECUTED

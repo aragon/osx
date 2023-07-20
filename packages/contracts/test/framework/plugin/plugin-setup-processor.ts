@@ -32,6 +32,7 @@ import {
   PluginCloneableSetupV2Mock__factory,
   PluginCloneableSetupV1MockBad__factory,
 } from '../../../typechain';
+import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
@@ -246,11 +247,12 @@ describe('Plugin Setup Processor', function () {
       buildMetadata
     );
 
-    const PluginRepoRegisteredEvent1 = await findEventTopicLog(
-      tx,
-      PluginRepoRegistry__factory.createInterface(),
-      EVENTS.PluginRepoRegistered
-    );
+    const PluginRepoRegisteredEvent1 =
+      await findEventTopicLog<PluginRepoRegisteredEvent>(
+        tx,
+        PluginRepoRegistry__factory.createInterface(),
+        EVENTS.PluginRepoRegistered
+      );
     const PluginRepo = new PluginRepo__factory(signers[0]);
     repoU = PluginRepo.attach(PluginRepoRegisteredEvent1.args.pluginRepo);
 
@@ -269,11 +271,12 @@ describe('Plugin Setup Processor', function () {
       buildMetadata
     );
 
-    const PluginRepoRegisteredEvent2 = await findEventTopicLog(
-      tx,
-      PluginRepoRegistry__factory.createInterface(),
-      EVENTS.PluginRepoRegistered
-    );
+    const PluginRepoRegisteredEvent2 =
+      await findEventTopicLog<PluginRepoRegisteredEvent>(
+        tx,
+        PluginRepoRegistry__factory.createInterface(),
+        EVENTS.PluginRepoRegistered
+      );
     repoC = PluginRepo.attach(PluginRepoRegisteredEvent2.args.pluginRepo);
     await repoC.createVersion(1, setupCV1Bad.address, EMPTY_DATA, EMPTY_DATA);
     await repoC.createVersion(1, setupCV2.address, EMPTY_DATA, EMPTY_DATA);

@@ -24,6 +24,7 @@ import {
   DAO__factory,
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
+import {ExecutedEvent} from '../../../../typechain/IDAO';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -237,7 +238,8 @@ describe('Admin', function () {
           dummyActions,
           allowFailureMap
         );
-        const event = await findEventTopicLog(
+
+        const event = await findEventTopicLog<ExecutedEvent>(
           tx,
           DAO__factory.createInterface(),
           DAO_EVENTS.EXECUTED
@@ -258,7 +260,7 @@ describe('Admin', function () {
 
         const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
 
-        const event = await findEventTopicLog(
+        const event = await findEventTopicLog<ExecutedEvent>(
           tx,
           DAO__factory.createInterface(),
           DAO_EVENTS.EXECUTED

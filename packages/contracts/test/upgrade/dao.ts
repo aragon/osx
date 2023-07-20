@@ -15,6 +15,7 @@ import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {UpgradedEvent} from '../../typechain/DAO';
 
 let signers: SignerWithAddress[];
 let DAO_old: DAO_V1_0_0__factory;
@@ -89,7 +90,11 @@ describe('DAO Upgrade', function () {
 
         // Check the emitted implementation.
         const emittedImplementation = (
-          await findEventTopicLog(upgradeTx, DAO_old.interface, 'Upgraded')
+          await findEventTopicLog<UpgradedEvent>(
+            upgradeTx,
+            DAO_old.interface,
+            'Upgraded'
+          )
         ).args.implementation;
         expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
 
