@@ -28,6 +28,9 @@ import {
   IERC165__factory,
   PluginRepoRegistry__factory,
 } from '../../../typechain';
+import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
+import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
@@ -110,17 +113,18 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   helpers: any;
   permissions: any;
 }> {
-  const daoRegisteredEvent = await findEventTopicLog(
+  const daoRegisteredEvent = await findEventTopicLog<DAORegisteredEvent>(
     tx,
     DAORegistry__factory.createInterface(),
     EVENTS.DAORegistered
   );
 
-  const installationPreparedEvent = await findEventTopicLog(
-    tx,
-    PluginSetupProcessor__factory.createInterface(),
-    EVENTS.InstallationPrepared
-  );
+  const installationPreparedEvent =
+    await findEventTopicLog<InstallationPreparedEvent>(
+      tx,
+      PluginSetupProcessor__factory.createInterface(),
+      EVENTS.InstallationPrepared
+    );
 
   return {
     dao: daoRegisteredEvent.args.dao,
@@ -247,7 +251,7 @@ describe('DAOFactory: ', function () {
       '0x00',
       '0x00'
     );
-    const event = await findEventTopicLog(
+    const event = await findEventTopicLog<PluginRepoRegisteredEvent>(
       tx,
       PluginRepoRegistry__factory.createInterface(),
       EVENTS.PluginRepoRegistered
@@ -584,11 +588,12 @@ describe('DAOFactory: ', function () {
         '0x11',
         '0x11'
       );
-      const pluginRepoRegisteredEvent = await findEventTopicLog(
-        tx,
-        PluginRepoRegistry__factory.createInterface(),
-        EVENTS.PluginRepoRegistered
-      );
+      const pluginRepoRegisteredEvent =
+        await findEventTopicLog<PluginRepoRegisteredEvent>(
+          tx,
+          PluginRepoRegistry__factory.createInterface(),
+          EVENTS.PluginRepoRegistered
+        );
       adminPluginRepoAddress = pluginRepoRegisteredEvent.args.pluginRepo;
 
       // create dao with admin plugin.
@@ -611,11 +616,12 @@ describe('DAOFactory: ', function () {
       );
       tx = await daoFactory.createDao(daoSettings, [adminPluginInstallation]);
       {
-        const installationPreparedEvent = await findEventTopicLog(
-          tx,
-          PluginSetupProcessor__factory.createInterface(),
-          EVENTS.InstallationPrepared
-        );
+        const installationPreparedEvent =
+          await findEventTopicLog<InstallationPreparedEvent>(
+            tx,
+            PluginSetupProcessor__factory.createInterface(),
+            EVENTS.InstallationPrepared
+          );
 
         const adminFactory = new Admin__factory(signers[0]);
         adminPlugin = adminFactory.attach(

@@ -108,17 +108,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     address: installationPreparedEvent.plugin,
     args: [
       await multisigSetup.implementation(),
-      await Multisig__factory.createInterface().encodeFunctionData(
-        'initialize',
-        [
-          managingDAOAddress,
-          approvers,
-          {
-            onlyListed: listedOnly,
-            minApprovals: minApprovals,
-          },
-        ]
-      ),
+      Multisig__factory.createInterface().encodeFunctionData('initialize', [
+        managingDAOAddress,
+        approvers,
+        {
+          onlyListed: listedOnly,
+          minApprovals: minApprovals,
+        },
+      ]),
     ],
   });
 

@@ -49,6 +49,7 @@ import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
+import {ExecutedEvent} from '../../../../../typechain/IDAO';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -1382,7 +1383,7 @@ describe('TokenVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Yes, true);
         {
-          const event = await findEventTopicLog(
+          const event = await findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
             DAO_EVENTS.EXECUTED

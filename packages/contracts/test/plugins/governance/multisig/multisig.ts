@@ -1170,7 +1170,7 @@ describe('Multisig', function () {
         // `tryExecution` is turned on but the vote is not decided yet
         let tx = await multisig.connect(signers[1]).approve(id, true);
         await expect(
-          findEventTopicLog(
+          findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
             DAO_EVENTS.EXECUTED
@@ -1182,7 +1182,7 @@ describe('Multisig', function () {
         // `tryExecution` is turned off and the vote is decided
         tx = await multisig.connect(signers[2]).approve(id, false);
         await expect(
-          findEventTopicLog(
+          findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
             DAO_EVENTS.EXECUTED
@@ -1192,7 +1192,7 @@ describe('Multisig', function () {
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
         {
-          const event = await findEventTopicLog(
+          const event = await findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
             DAO_EVENTS.EXECUTED
