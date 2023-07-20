@@ -17,6 +17,11 @@ import {
 } from '../../typechain';
 
 import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
+import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
+import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
 
@@ -24,7 +29,7 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Managing DAO', function () {
+describes('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
@@ -157,19 +162,18 @@ describe('Managing DAO', function () {
 
   it('Should be able to upgrade `DaoRegistry`', async function () {
     // deploy a new implementation.
-    await deployments.deploy('DAORegistryV2', {
-      contract: 'DAORegistry',
-      from: ownerAddress,
-      args: [],
-      log: true,
-    });
-
-    const daoRegistryV2Deployment: Deployment = await deployments.get(
-      'DAORegistryV2'
+    const daoRegistry_v1_0_0_Deployment = await deployments.deploy(
+      'DAORegistry_v1_0_0',
+      {
+        contract: daoRegistryArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
     );
 
     // make sure new `DAORegistryV2` deployment is just an implementation and not a proxy
-    expect(daoRegistryV2Deployment.implementation).to.be.equal(undefined);
+    expect(daoRegistry_v1_0_0_Deployment.implementation).to.be.equal(undefined);
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
@@ -177,12 +181,14 @@ describe('Managing DAO', function () {
       await readImplementationValuesFromSlot([daoRegistry.address])
     )[0];
 
-    expect(daoRegistryV2Deployment.address).not.equal(implementationAddress);
+    expect(daoRegistry_v1_0_0_Deployment.address).not.equal(
+      implementationAddress
+    );
 
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
       [daoRegistry.address],
-      daoRegistryV2Deployment.address
+      daoRegistry_v1_0_0_Deployment.address
     );
 
     // re-read from slot
@@ -190,24 +196,25 @@ describe('Managing DAO', function () {
       await readImplementationValuesFromSlot([daoRegistry.address])
     )[0];
 
-    expect(daoRegistryV2Deployment.address).to.be.equal(implementationAddress);
+    expect(daoRegistry_v1_0_0_Deployment.address).to.be.equal(
+      implementationAddress
+    );
   });
 
   it('Should be able to upgrade `PluginRepoRegistry`', async function () {
     // deploy a new implementation.
-    await deployments.deploy('PluginRepoRegistryV2', {
-      contract: 'PluginRepoRegistry',
-      from: ownerAddress,
-      args: [],
-      log: true,
-    });
-
-    const pluginRepoRegistryV2Deployment: Deployment = await deployments.get(
-      'PluginRepoRegistryV2'
+    const pluginRepoRegistry_v1_0_0_Deployment = await deployments.deploy(
+      'PluginRepoRegistry_v1_0_0',
+      {
+        contract: pluginRepoRegistryArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
     );
 
     // make sure new `PluginRepoRegistryV2` deployment is just an implementation and not a proxy
-    expect(pluginRepoRegistryV2Deployment.implementation).to.be.equal(
+    expect(pluginRepoRegistry_v1_0_0_Deployment.implementation).to.be.equal(
       undefined
     );
 
@@ -217,14 +224,14 @@ describe('Managing DAO', function () {
       await readImplementationValuesFromSlot([pluginRepoRegistry.address])
     )[0];
 
-    expect(pluginRepoRegistryV2Deployment.address).not.equal(
+    expect(pluginRepoRegistry_v1_0_0_Deployment.address).not.equal(
       implementationAddress
     );
 
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
       [pluginRepoRegistry.address],
-      pluginRepoRegistryV2Deployment.address
+      pluginRepoRegistry_v1_0_0_Deployment.address
     );
 
     // re-read from slot
@@ -232,26 +239,25 @@ describe('Managing DAO', function () {
       await readImplementationValuesFromSlot([pluginRepoRegistry.address])
     )[0];
 
-    expect(pluginRepoRegistryV2Deployment.address).to.be.equal(
+    expect(pluginRepoRegistry_v1_0_0_Deployment.address).to.be.equal(
       implementationAddress
     );
   });
 
   it('Should be able to upgrade `ENSSubdomainRegistrar`', async function () {
     // deploy a new implementation.
-    await deployments.deploy('ENSSubdomainRegistrarV2', {
-      contract: 'ENSSubdomainRegistrar',
-      from: ownerAddress,
-      args: [],
-      log: true,
-    });
-
-    const ensSubdomainRegistrarV2Deployment: Deployment = await deployments.get(
-      'ENSSubdomainRegistrarV2'
+    const ensSubdomainRegistrar_v1_0_0_Deployment = await deployments.deploy(
+      'ENSSubdomainRegistrar_v1_0_0',
+      {
+        contract: ensSubdomainRegistrarArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
     );
 
     // make sure new `ENSSubdomainRegistrarV2` deployment is just an implementation and not a proxy
-    expect(ensSubdomainRegistrarV2Deployment.implementation).to.be.equal(
+    expect(ensSubdomainRegistrar_v1_0_0_Deployment.implementation).to.be.equal(
       undefined
     );
 
@@ -264,7 +270,7 @@ describe('Managing DAO', function () {
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
-      expect(ensSubdomainRegistrarV2Deployment.address).not.equal(
+      expect(ensSubdomainRegistrar_v1_0_0_Deployment.address).not.equal(
         implementationAddress
       );
     }
@@ -272,7 +278,7 @@ describe('Managing DAO', function () {
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
       ensSubdomainRegistrars.map(ensSR => ensSR.address),
-      ensSubdomainRegistrarV2Deployment.address
+      ensSubdomainRegistrar_v1_0_0_Deployment.address
     );
 
     // re-read from slot
@@ -283,7 +289,7 @@ describe('Managing DAO', function () {
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
-      expect(ensSubdomainRegistrarV2Deployment.address).to.be.equal(
+      expect(ensSubdomainRegistrar_v1_0_0_Deployment.address).to.be.equal(
         implementationAddress
       );
     }
@@ -291,19 +297,18 @@ describe('Managing DAO', function () {
 
   it('Should be able to upgrade `PluginRepo`s', async function () {
     // deploy a new implementation.
-    await deployments.deploy('PluginRepoV2', {
-      contract: 'PluginRepo',
-      from: ownerAddress,
-      args: [],
-      log: true,
-    });
-
-    const pluginRepoV2Deployment: Deployment = await deployments.get(
-      'PluginRepoV2'
+    const PluginRepo_v1_0_0_Deployment = await deployments.deploy(
+      'PluginRepo_v1_0_0',
+      {
+        contract: pluginRepoArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
     );
 
     // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
-    expect(pluginRepoV2Deployment.implementation).to.be.equal(undefined);
+    expect(PluginRepo_v1_0_0_Deployment.implementation).to.be.equal(undefined);
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
@@ -316,7 +321,7 @@ describe('Managing DAO', function () {
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
-      expect(pluginRepoV2Deployment.address).to.not.equal(
+      expect(PluginRepo_v1_0_0_Deployment.address).to.not.equal(
         implementationAddress
       );
     }
@@ -324,7 +329,7 @@ describe('Managing DAO', function () {
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
       Object.values(hre.aragonPluginRepos),
-      pluginRepoV2Deployment.address
+      PluginRepo_v1_0_0_Deployment.address
     );
 
     // re-read from slot
@@ -337,7 +342,9 @@ describe('Managing DAO', function () {
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
-      expect(pluginRepoV2Deployment.address).to.be.equal(implementationAddress);
+      expect(PluginRepo_v1_0_0_Deployment.address).to.be.equal(
+        implementationAddress
+      );
     }
   });
 });
