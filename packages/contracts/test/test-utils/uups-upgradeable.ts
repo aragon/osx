@@ -1,6 +1,6 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ContractFactory} from 'ethers';
+import {Contract, ContractFactory} from 'ethers';
 import {upgrades} from 'hardhat';
 import {DAO} from '../../typechain';
 
@@ -9,7 +9,7 @@ export const IMPLEMENTATION_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'; // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
 
 // Deploys and upgrades a contract that is managed by a DAO
-export async function upgradeCheckManagedContract(
+export async function ozUpgradeCheckManagedContract(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
   managingDao: DAO,
@@ -59,7 +59,7 @@ export async function upgradeCheckManagedContract(
 }
 
 // Deploys and upgrades a contract that has its own permission manager
-export async function upgradeCheckManagingContract(
+export async function ozUpgradeCheckManagingContract(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
   initArgs: any,

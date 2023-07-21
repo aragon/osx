@@ -16,7 +16,7 @@ import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {upgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
+import {ozUpgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',

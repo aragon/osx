@@ -18,7 +18,7 @@ import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {ensDomainHash} from '../../../utils/ens';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {upgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
+import {ozUpgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -267,7 +267,7 @@ describe('PluginRepoRegistry', function () {
         signers[0]
       );
 
-      await upgradeCheckManagedContract(
+      await ozUpgradeCheckManagedContract(
         signers[0],
         signers[1],
         managingDAO,

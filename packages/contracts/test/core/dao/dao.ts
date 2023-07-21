@@ -24,7 +24,7 @@ import {
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 
-import {upgradeCheckManagingContract} from '../../test-utils/uups-upgradeable';
+import {ozUpgradeCheckManagingContract} from '../../test-utils/uups-upgradeable';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
 
@@ -332,7 +332,7 @@ describe('DAO', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
-      await upgradeCheckManagingContract(
+      await ozUpgradeCheckManagingContract(
         signers[0],
         signers[1],
         {

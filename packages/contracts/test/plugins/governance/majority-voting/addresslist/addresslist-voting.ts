@@ -48,7 +48,7 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {upgradeCheckManagedContract} from '../../../../test-utils/uups-upgradeable';
+import {ozUpgradeCheckManagedContract} from '../../../../test-utils/uups-upgradeable';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -135,7 +135,7 @@ describe('AddresslistVoting', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new AddresslistVoting_V1_0_0__factory(signers[0]);
 
-      await upgradeCheckManagedContract(
+      await ozUpgradeCheckManagedContract(
         signers[0],
         signers[1],
         dao,
