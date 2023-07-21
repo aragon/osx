@@ -544,8 +544,6 @@ describe('DAOFactory: ', function () {
     );
 
     let installationAppliedEventCount = 0;
-
-    // @ts-ignore
     receipt.logs.forEach(log => {
       if (log.topics[0] === topic) installationAppliedEventCount++;
     });
