@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO,
+  DAO__factory,
   GovernanceERC20Mock,
   GovernanceERC20Mock__factory,
   IERC165Upgradeable__factory,
@@ -13,15 +14,16 @@ import {
   IPlugin__factory,
   IProposal__factory,
   TokenVoting,
+  TokenVoting__factory,
 } from '../../../../../typechain';
 import {
   findEvent,
+  findEventTopicLog,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
-import {getMergedABI} from '../../../../../utils/abi';
 import {
   VoteOption,
   pctToRatio,
@@ -47,7 +49,7 @@ import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
-import {ExecutedEvent} from '../../../../../typechain/DAO';
+import {ExecutedEvent} from '../../../../../typechain/IDAO';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -69,19 +71,8 @@ describe('TokenVoting', function () {
   const startOffset = 20;
   const id = 0;
 
-  let mergedAbi: any;
-  let tokenVotingFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
-
-    ({abi: mergedAbi, bytecode: tokenVotingFactoryBytecode} =
-      await getMergedABI(
-        // @ts-ignore
-        hre,
-        'TokenVoting',
-        ['src/core/dao/DAO.sol:DAO']
-      ));
 
     dummyActions = [
       {
@@ -118,11 +109,7 @@ describe('TokenVoting', function () {
       }
     );
 
-    const TokenVotingFactory = new ethers.ContractFactory(
-      mergedAbi,
-      tokenVotingFactoryBytecode,
-      signers[0]
-    );
+    const TokenVotingFactory = new TokenVoting__factory(signers[0]);
 
     voting = await deployWithProxy(TokenVotingFactory);
 
@@ -1396,7 +1383,11 @@ describe('TokenVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Yes, true);
         {
-          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEventTopicLog<ExecutedEvent>(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          );
 
           expect(event.args.actor).to.equal(voting.address);
           expect(event.args.callId).to.equal(toBytes32(id));

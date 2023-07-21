@@ -4,8 +4,10 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   AddresslistVoting,
+  AddresslistVoting__factory,
   Addresslist__factory,
   DAO,
+  DAO__factory,
   IERC165Upgradeable__factory,
   IMajorityVoting__factory,
   IMembership__factory,
@@ -14,12 +16,12 @@ import {
 } from '../../../../../typechain';
 import {
   findEvent,
+  findEventTopicLog,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
-import {getMergedABI} from '../../../../../utils/abi';
 import {
   VoteOption,
   pctToRatio,
@@ -40,11 +42,11 @@ import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 import {majorityVotingBaseInterface} from '../majority-voting';
-import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/AddresslistVoting';
+import {ExecutedEvent} from '../../../../../typechain/IDAO';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -65,19 +67,8 @@ describe('AddresslistVoting', function () {
   const startOffset = 10;
   const id = 0;
 
-  let mergedAbi: any;
-  let addresslistVotingFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
-
-    ({abi: mergedAbi, bytecode: addresslistVotingFactoryBytecode} =
-      await getMergedABI(
-        // @ts-ignore
-        hre,
-        'AddresslistVoting',
-        ['src/core/dao/DAO.sol:DAO']
-      ));
 
     dummyActions = [
       {
@@ -102,11 +93,7 @@ describe('AddresslistVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    const AddresslistVotingFactory = new ethers.ContractFactory(
-      mergedAbi,
-      addresslistVotingFactoryBytecode,
-      signers[0]
-    );
+    const AddresslistVotingFactory = new AddresslistVoting__factory(signers[0]);
 
     voting = await deployWithProxy(AddresslistVotingFactory);
 
@@ -1040,7 +1027,11 @@ describe('AddresslistVoting', function () {
           .connect(signers[6])
           .vote(id, VoteOption.Abstain, true);
         {
-          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEventTopicLog<ExecutedEvent>(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          );
 
           expect(event.args.actor).to.equal(voting.address);
           expect(event.args.callId).to.equal(toBytes32(id));
