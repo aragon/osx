@@ -1,10 +1,9 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
-import {ethers, upgrades} from 'hardhat';
-import {DAO, UUPSUpgradeable} from '../../typechain';
+import {upgrades} from 'hardhat';
+import {DAO} from '../../typechain';
 import {readImplementationValueFromSlot} from '../../utils/storage';
-import {CURRENT_PROTOCOL_VERSION} from './protocol-version';
 
 // Deploys and upgrades a contract that is managed by a DAO
 export async function ozUpgradeCheckManagedContract(
