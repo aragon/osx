@@ -4,7 +4,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {keccak256, solidityPack} from 'ethers/lib/utils';
 
 import {
   PluginRepo,
@@ -26,6 +25,7 @@ import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32} from '../../test-utils/dao';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {tagHash} from '../../test-utils/psp/hash-helpers';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -594,7 +594,3 @@ describe('PluginRepo', function () {
     });
   });
 });
-
-function tagHash(release: number, build: number) {
-  return keccak256(solidityPack(['uint8', 'uint16'], [release, build]));
-}
