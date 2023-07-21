@@ -48,6 +48,7 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
+
 import {
   getProtocolVersion,
   ozUpgradeCheckManagedContract,
@@ -162,7 +163,6 @@ describe('AddresslistVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);

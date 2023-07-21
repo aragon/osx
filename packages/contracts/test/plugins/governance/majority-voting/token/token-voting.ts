@@ -230,7 +230,6 @@ describe('TokenVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
