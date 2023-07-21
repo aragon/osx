@@ -97,7 +97,12 @@ export async function ozUpgradeCheckManagingContract(
     proxy.address
   );
   // Check that upgrade permission is required
-  await expect(upgrades.upgradeProxy(proxy, to.connect(upgrader)))
+  await expect(
+    upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    })
+  )
     .to.be.revertedWithCustomError(proxy, 'Unauthorized')
     .withArgs(proxy.address, upgrader.address, upgradePermissionId);
 
