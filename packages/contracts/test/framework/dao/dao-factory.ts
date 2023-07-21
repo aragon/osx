@@ -205,9 +205,7 @@ describe('DAOFactory: ', function () {
     );
 
     // Deploy DAO Factory
-    const DAOFactory = new DAOFactory__factory(
-      signers[0]
-    ) as DAOFactory__factory;
+    const DAOFactory = new DAOFactory__factory(signers[0]);
     daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
 
     // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
@@ -546,8 +544,6 @@ describe('DAOFactory: ', function () {
     );
 
     let installationAppliedEventCount = 0;
-
-    // @ts-ignore
     receipt.logs.forEach(log => {
       if (log.topics[0] === topic) installationAppliedEventCount++;
     });
