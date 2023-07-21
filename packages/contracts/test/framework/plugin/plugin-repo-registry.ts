@@ -18,7 +18,11 @@ import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {ensDomainHash} from '../../../utils/ens';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {ozUpgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagedContract,
+} from '../../test-utils/uups-upgradeable';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -267,19 +271,33 @@ describe('PluginRepoRegistry', function () {
         signers[0]
       );
 
-      await ozUpgradeCheckManagedContract(
-        signers[0],
-        signers[1],
-        managingDAO,
-        {
-          dao: managingDAO.address,
-          ensSubdomainRegistrar: ensSubdomainRegistrar.address,
-        },
-        'initialize',
-        legacyContractFactory,
-        currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagedContract(
+          signers[0],
+          signers[1],
+          managingDAO,
+          {
+            dao: managingDAO.address,
+            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+        );
+
+      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
       );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 });

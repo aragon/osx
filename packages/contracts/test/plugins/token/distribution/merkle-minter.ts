@@ -24,7 +24,11 @@ import {deployNewDAO} from '../../../test-utils/dao';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {ozUpgradeCheckManagedContract} from '../../../test-utils/uups-upgradeable';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagedContract,
+} from '../../../test-utils/uups-upgradeable';
+import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -96,20 +100,33 @@ describe('MerkleMinter', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new MerkleMinter_V1_0_0__factory(signers[0]);
 
-      await ozUpgradeCheckManagedContract(
-        signers[0],
-        signers[1],
-        managingDao,
-        {
-          dao: managingDao.address,
-          token: token.address,
-          merkleDistributor: distributorBase.address,
-        },
-        'initialize',
-        legacyContractFactory,
-        currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagedContract(
+          signers[0],
+          signers[1],
+          managingDao,
+          {
+            dao: managingDao.address,
+            token: token.address,
+            merkleDistributor: distributorBase.address,
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
+      expect(toImplementation).to.equal(fromImplementation); // The build did not change
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
       );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 

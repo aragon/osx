@@ -48,7 +48,11 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {ozUpgradeCheckManagedContract} from '../../../../test-utils/uups-upgradeable';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagedContract,
+} from '../../../../test-utils/uups-upgradeable';
+import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -135,20 +139,33 @@ describe('AddresslistVoting', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new AddresslistVoting_V1_0_0__factory(signers[0]);
 
-      await ozUpgradeCheckManagedContract(
-        signers[0],
-        signers[1],
-        dao,
-        {
-          dao: dao.address,
-          votingSettings: votingSettings,
-          members: [signers[0].address, signers[1].address],
-        },
-        'initialize',
-        legacyContractFactory,
-        currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagedContract(
+          signers[0],
+          signers[1],
+          dao,
+          {
+            dao: dao.address,
+            votingSettings: votingSettings,
+            members: [signers[0].address, signers[1].address],
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
+      expect(toImplementation).to.not.equal(fromImplementation); // The build did change
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
       );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 

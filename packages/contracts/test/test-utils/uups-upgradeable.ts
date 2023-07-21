@@ -1,12 +1,10 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {Contract, ContractFactory} from 'ethers';
-import {upgrades} from 'hardhat';
-import {DAO} from '../../typechain';
-
-// See https://eips.ethereum.org/EIPS/eip-1967
-export const IMPLEMENTATION_SLOT =
-  '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'; // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
+import {Contract, ContractFactory, errors} from 'ethers';
+import {ethers, upgrades} from 'hardhat';
+import {DAO, UUPSUpgradeable} from '../../typechain';
+import {readImplementationValueFromSlot} from '../../utils/storage';
+import {CURRENT_PROTOCOL_VERSION} from './protocol-version';
 
 // Deploys and upgrades a contract that is managed by a DAO
 export async function ozUpgradeCheckManagedContract(
@@ -18,17 +16,16 @@ export async function ozUpgradeCheckManagedContract(
   from: ContractFactory,
   to: ContractFactory,
   upgradePermissionId: string
-) {
+): Promise<{
+  proxy: Contract;
+  fromImplementation: string;
+  toImplementation: string;
+}> {
   // Deploy the proxy
-  const proxy = await upgrades.deployProxy(
+  const {proxy, implementation: fromImplementation} = await deployProxy(
     from.connect(deployer),
-    Object.values(initArgs),
-    {
-      kind: 'uups',
-      initializer: initializerName,
-      unsafeAllow: ['constructor'],
-      constructorArgs: [],
-    }
+    initArgs,
+    initializerName
   );
 
   // Check that upgrade permission is required
@@ -52,10 +49,9 @@ export async function ozUpgradeCheckManagedContract(
     .grant(proxy.address, upgrader.address, upgradePermissionId);
 
   // Upgrade the proxy
-  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
-    unsafeAllow: ['constructor'],
-    constructorArgs: [],
-  });
+  const toImplementation = await upgradeProxy(proxy, to.connect(upgrader));
+
+  return {proxy, fromImplementation, toImplementation};
 }
 
 // Deploys and upgrades a contract that has its own permission manager
@@ -67,17 +63,16 @@ export async function ozUpgradeCheckManagingContract(
   from: ContractFactory,
   to: ContractFactory,
   upgradePermissionId: string
-) {
+): Promise<{
+  proxy: Contract;
+  fromImplementation: string;
+  toImplementation: string;
+}> {
   // Deploy the proxy
-  const proxy = await upgrades.deployProxy(
+  const {proxy, implementation: fromImplementation} = await deployProxy(
     from.connect(deployer),
-    Object.values(initArgs),
-    {
-      kind: 'uups',
-      initializer: initializerName,
-      unsafeAllow: ['constructor'],
-      constructorArgs: [],
-    }
+    initArgs,
+    initializerName
   );
 
   // Check that upgrade permission is required
@@ -96,8 +91,54 @@ export async function ozUpgradeCheckManagingContract(
     .grant(proxy.address, upgrader.address, upgradePermissionId);
 
   // Upgrade the proxy
-  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+  const toImplementation = await upgradeProxy(proxy, to.connect(upgrader));
+
+  return {proxy, fromImplementation, toImplementation};
+}
+
+async function deployProxy(
+  factory: ContractFactory,
+  initArgs: any,
+  initializerName: string
+): Promise<{proxy: Contract; implementation: string}> {
+  let proxy = await upgrades.deployProxy(factory, Object.values(initArgs), {
+    kind: 'uups',
+    initializer: initializerName,
     unsafeAllow: ['constructor'],
     constructorArgs: [],
   });
+
+  const implementation = await readImplementationValueFromSlot(proxy.address);
+
+  return {proxy, implementation};
+}
+
+async function upgradeProxy(
+  proxy: Contract,
+  factory: ContractFactory
+): Promise<string> {
+  proxy = await upgrades.upgradeProxy(proxy.address, factory, {
+    unsafeAllow: ['constructor'],
+    constructorArgs: [],
+  });
+
+  const toImplementation = await readImplementationValueFromSlot(proxy.address);
+  return toImplementation;
+}
+
+export async function getProtocolVersion(
+  contract: Contract
+): Promise<[number, number, number]> {
+  let protocolVersion: [number, number, number];
+  try {
+    contract.interface.getFunction('protocolVersion');
+    protocolVersion = await contract.protocolVersion();
+  } catch (error) {
+    if (error.code === errors.INVALID_ARGUMENT) {
+      protocolVersion = [1, 0, 0];
+    } else {
+      throw error;
+    }
+  }
+  return protocolVersion;
 }

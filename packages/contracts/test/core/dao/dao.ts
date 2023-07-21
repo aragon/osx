@@ -24,7 +24,10 @@ import {
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 
-import {ozUpgradeCheckManagingContract} from '../../test-utils/uups-upgradeable';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagingContract,
+} from '../../test-utils/uups-upgradeable';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
 
@@ -332,20 +335,33 @@ describe('DAO', function () {
     it('from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
-      await ozUpgradeCheckManagingContract(
-        signers[0],
-        signers[1],
-        {
-          metadata: dummyMetadata1,
-          initialOwner: signers[0].address,
-          trustedForwarder: dummyAddress1,
-          daoURI: daoExampleURI,
-        },
-        'initialize',
-        legacyContractFactory,
-        currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagingContract(
+          signers[0],
+          signers[1],
+          {
+            metadata: dummyMetadata1,
+            initialOwner: signers[0].address,
+            trustedForwarder: dummyAddress1,
+            daoURI: daoExampleURI,
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+        );
+      expect(toImplementation).to.not.equal(fromImplementation);
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
       );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
