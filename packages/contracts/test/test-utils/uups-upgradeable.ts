@@ -21,10 +21,19 @@ export async function ozUpgradeCheckManagedContract(
   toImplementation: string;
 }> {
   // Deploy the proxy
-  const {proxy, implementation: fromImplementation} = await deployProxy(
+  let proxy = await upgrades.deployProxy(
     from.connect(deployer),
-    initArgs,
-    initializerName
+    Object.values(initArgs),
+    {
+      kind: 'uups',
+      initializer: initializerName,
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    }
+  );
+
+  const fromImplementation = await readImplementationValueFromSlot(
+    proxy.address
   );
 
   // Check that upgrade permission is required
@@ -48,7 +57,12 @@ export async function ozUpgradeCheckManagedContract(
     .grant(proxy.address, upgrader.address, upgradePermissionId);
 
   // Upgrade the proxy
-  const toImplementation = await upgradeProxy(proxy, to.connect(upgrader));
+  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+    unsafeAllow: ['constructor'],
+    constructorArgs: [],
+  });
+
+  const toImplementation = await readImplementationValueFromSlot(proxy.address);
 
   return {proxy, fromImplementation, toImplementation};
 }
@@ -68,19 +82,22 @@ export async function ozUpgradeCheckManagingContract(
   toImplementation: string;
 }> {
   // Deploy the proxy
-  const {proxy, implementation: fromImplementation} = await deployProxy(
+  let proxy = await upgrades.deployProxy(
     from.connect(deployer),
-    initArgs,
-    initializerName
-  );
-
-  // Check that upgrade permission is required
-  await expect(
-    upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+    Object.values(initArgs),
+    {
+      kind: 'uups',
+      initializer: initializerName,
       unsafeAllow: ['constructor'],
       constructorArgs: [],
-    })
-  )
+    }
+  );
+
+  const fromImplementation = await readImplementationValueFromSlot(
+    proxy.address
+  );
+  // Check that upgrade permission is required
+  await expect(upgrades.upgradeProxy(proxy, to.connect(upgrader)))
     .to.be.revertedWithCustomError(proxy, 'Unauthorized')
     .withArgs(proxy.address, upgrader.address, upgradePermissionId);
 
@@ -90,39 +107,14 @@ export async function ozUpgradeCheckManagingContract(
     .grant(proxy.address, upgrader.address, upgradePermissionId);
 
   // Upgrade the proxy
-  const toImplementation = await upgradeProxy(proxy, to.connect(upgrader));
-
-  return {proxy, fromImplementation, toImplementation};
-}
-
-async function deployProxy(
-  factory: ContractFactory,
-  initArgs: any,
-  initializerName: string
-): Promise<{proxy: Contract; implementation: string}> {
-  let proxy = await upgrades.deployProxy(factory, Object.values(initArgs), {
-    kind: 'uups',
-    initializer: initializerName,
-    unsafeAllow: ['constructor'],
-    constructorArgs: [],
-  });
-
-  const implementation = await readImplementationValueFromSlot(proxy.address);
-
-  return {proxy, implementation};
-}
-
-async function upgradeProxy(
-  proxy: Contract,
-  factory: ContractFactory
-): Promise<string> {
-  proxy = await upgrades.upgradeProxy(proxy.address, factory, {
+  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
     unsafeAllow: ['constructor'],
     constructorArgs: [],
   });
 
   const toImplementation = await readImplementationValueFromSlot(proxy.address);
-  return toImplementation;
+
+  return {proxy, fromImplementation, toImplementation};
 }
 
 export async function getProtocolVersion(
