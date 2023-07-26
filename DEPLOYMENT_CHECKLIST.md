@@ -36,7 +36,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
 - [ ] Update `active_contracts.json` with the new deployed addresses
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
-- [ ] Add the managing DAOs' multisig address to `packages/subgraph/.env-example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
+- [ ] Add the managing DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
 
 ### Verification
 
@@ -58,14 +58,13 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Check if the managing DAO set in the `PluginRepoRegistry`
 - [ ] Check if the `Plugin_ENSSubdomainRegistrar` set in the `PluginRepoRegistry`
 - [ ] Check if the `PluginRepoRegistry` is set in the `PluginRepoFactory`
-- [ ] Check if the managing DAO set in the `PluginSetupProcessor`
 - [ ] Check if the `PluginRepoRegistry` set in the `PluginSetupProcessor`
 - [ ] Check if the `DAORegistry` set in the `DAOFactory`
 - [ ] Check if the `PluginSetupProcessor` set in the `DAOFactory`
 
 ### Permissions
 
-- [ ] Check that the deployer has the ROOT permission on the managing DAO
+- [ ] Check that the deployer has not the ROOT permission on the managing DAO
 - [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry
 - [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry
 - [ ] Check if the `DAORegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `DAO_ENSSubdomainRegistrar`
