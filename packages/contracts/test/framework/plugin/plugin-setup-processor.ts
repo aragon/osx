@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import pluginUUPSUpgradeableArtifact from '../../../artifacts/src/core/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
 
 import {
   PluginSetupProcessor,
@@ -1978,7 +1979,7 @@ describe('Plugin Setup Processor', function () {
 
       beforeEach(async () => {
         // create a fake on the same plugin(proxy) address.
-        fake = await smock.fake('PluginUUPSUpgradeable', {
+        fake = await smock.fake(pluginUUPSUpgradeableArtifact, {
           address: proxy,
         });
 

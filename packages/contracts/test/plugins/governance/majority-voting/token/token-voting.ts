@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
+import {BigNumber, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -16,6 +16,12 @@ import {
   TokenVoting,
   TokenVoting__factory,
 } from '../../../../../typechain';
+import {TokenVoting__factory as TokenVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/token/TokenVoting.sol';
+import {
+  ProposalCreatedEvent,
+  ProposalExecutedEvent,
+} from '../../../../../typechain/TokenVoting';
+
 import {
   findEvent,
   findEventTopicLog,
@@ -40,16 +46,15 @@ import {
 } from '../../../../test-utils/voting';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
-import {shouldUpgradeCorrectly} from '../../../../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {majorityVotingBaseInterface} from '../majority-voting';
+import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
-  ProposalCreatedEvent,
-  ProposalExecutedEvent,
-} from '../../../../../typechain/TokenVoting';
-import {ExecutedEvent} from '../../../../../typechain/IDAO';
+  getProtocolVersion,
+  ozUpgradeCheckManagedContract,
+} from '../../../../test-utils/uups-upgradeable';
+import {majorityVotingBaseInterface} from '../majority-voting';
+import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -123,26 +128,6 @@ describe('TokenVoting', function () {
     );
   });
 
-  describe('Upgrade', () => {
-    beforeEach(async function () {
-      this.upgrade = {
-        contract: voting,
-        dao: dao,
-        user: signers[8],
-      };
-      await voting.initialize(
-        dao.address,
-        votingSettings,
-        governanceErc20Mock.address
-      );
-    });
-
-    shouldUpgradeCorrectly(
-      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-      'DaoUnauthorized'
-    );
-  });
-
   async function setBalances(
     balances: {receiver: string; amount: number | BigNumber}[]
   ) {
@@ -208,6 +193,46 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new TokenVoting__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new TokenVoting_V1_0_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagedContract(
+          signers[0],
+          signers[1],
+          dao,
+          {
+            dao: dao.address,
+            votingSettings: votingSettings,
+            token: governanceErc20Mock.address,
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
+      expect(toImplementation).to.not.equal(fromImplementation); // The build did change
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 

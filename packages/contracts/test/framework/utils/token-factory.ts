@@ -1,6 +1,7 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   ActionExecute__factory,
@@ -15,12 +16,22 @@ import {
   TokenFactory,
   TokenFactory__factory,
 } from '../../../typechain';
+
 import {findEvent} from '../../../utils/event';
 import {
   TokenCreatedEvent,
   WrappedTokenEvent,
 } from '../../../typechain/TokenFactory';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+
+const daoArtifactPath = 'src/core/dao/DAO.sol:DAO';
+const governanceErc20ArtifactPath =
+  'src/token/ERC20/governance/GovernanceERC20.sol:GovernanceERC20';
+const governanceWrappedErc20ArtifactPath =
+  'src/token/ERC20/governance/GovernanceWrappedERC20.sol:GovernanceWrappedERC20';
+const merkleMinterArtifactPath =
+  'src/plugins/token/MerkleMinter.sol:MerkleMinter';
+const tokenFactoryArtifactPath =
+  'src/framework/utils/TokenFactory.sol:TokenFactory';
 
 chai.use(smock.matchers);
 
@@ -53,7 +64,7 @@ describe('Core: TokenFactory', () => {
 
   beforeEach(async () => {
     const GovernanceBaseFactory = await smock.mock<GovernanceERC20__factory>(
-      'GovernanceERC20'
+      governanceErc20ArtifactPath
     );
     governanceBase = await GovernanceBaseFactory.deploy(
       zeroAddr,
@@ -64,7 +75,7 @@ describe('Core: TokenFactory', () => {
 
     const GovernanceWrappedBaseFactory =
       await smock.mock<GovernanceWrappedERC20__factory>(
-        'GovernanceWrappedERC20'
+        governanceWrappedErc20ArtifactPath
       );
     governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(
       zeroAddr,
@@ -73,12 +84,12 @@ describe('Core: TokenFactory', () => {
     );
 
     const MerkleMinterBaseFactory = await smock.mock<MerkleMinter__factory>(
-      'MerkleMinter'
+      merkleMinterArtifactPath
     );
     merkleMinterBase = await MerkleMinterBaseFactory.deploy();
 
     const TokenFactoryFactory = await smock.mock<TokenFactory__factory>(
-      'TokenFactory'
+      tokenFactoryArtifactPath
     );
     tokenFactory = await TokenFactoryFactory.deploy();
 
@@ -93,7 +104,7 @@ describe('Core: TokenFactory', () => {
     let dao: FakeContract<DAO>;
 
     beforeEach(async () => {
-      dao = await smock.fake<DAO>('src/core/dao/DAO.sol:DAO');
+      dao = await smock.fake<DAO>(daoArtifactPath);
       dao.isGranted.returns(true);
       dao.hasPermission.returns(true);
       dao.grant.returns();
@@ -122,7 +133,7 @@ describe('Core: TokenFactory', () => {
 
     it('should fail if token addr contains balanceOf, but returns different type', async () => {
       const erc20Contract = await smock.fake<GovernanceERC20>(
-        'GovernanceERC20'
+        governanceErc20ArtifactPath
       );
 
       erc20Contract.balanceOf.returns(true);
@@ -145,7 +156,7 @@ describe('Core: TokenFactory', () => {
 
     it('should create a GovernanceWrappedERC20 clone', async () => {
       const erc20Contract = await smock.fake<GovernanceERC20>(
-        'GovernanceERC20'
+        governanceErc20ArtifactPath
       );
 
       erc20Contract.balanceOf.returns(2);
@@ -176,7 +187,7 @@ describe('Core: TokenFactory', () => {
 
     it('should return MerkleMinter with 0x0', async () => {
       const erc20Contract = await smock.fake<GovernanceERC20>(
-        'GovernanceERC20'
+        governanceErc20ArtifactPath
       );
 
       erc20Contract.balanceOf.returns(2);

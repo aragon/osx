@@ -2,7 +2,7 @@
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
+import {BigNumber, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -17,12 +17,18 @@ import {
   MerkleDistributor__factory,
   GovernanceERC20__factory,
 } from '../../../../typechain';
+import {MerkleMinter__factory as MerkleMinter_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/token/MerkleMinter.sol';
+
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagedContract,
+} from '../../../test-utils/uups-upgradeable';
+import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -39,10 +45,12 @@ describe('MerkleMinter', function () {
   let merkleRoot: string;
   let totalAmount: BigNumber;
 
-  beforeEach(async function () {
+  before(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
+  });
 
+  beforeEach(async function () {
     const amount0 = BigNumber.from(100);
     const amount1 = BigNumber.from(101);
 
@@ -79,18 +87,48 @@ describe('MerkleMinter', function () {
       MERKLE_MINT_PERMISSION_ID
     );
     await managingDao.grant(token.address, minter.address, MINT_PERMISSION_ID);
-
-    this.upgrade = {
-      contract: minter,
-      dao: managingDao,
-      user: signers[8],
-    };
   });
 
-  shouldUpgradeCorrectly(
-    UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-    'DaoUnauthorized'
-  );
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new MerkleMinter__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new MerkleMinter_V1_0_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagedContract(
+          signers[0],
+          signers[1],
+          managingDao,
+          {
+            dao: managingDao.address,
+            token: token.address,
+            merkleDistributor: distributorBase.address,
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
+      expect(toImplementation).to.equal(fromImplementation); // The build did not change
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+  });
 
   describe('plugin interface: ', async () => {
     it('does not support the empty interface', async () => {
