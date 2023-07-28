@@ -29,5 +29,12 @@
     "chainId": 80001,
     "feesUrl": "https://gasstation-mumbai.matic.today/v2",
     "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
+  },
+  "baseGoerli": {
+    "url": "https://goerli.base.org",
+    "isTestnet": true,
+    "chainId": 84531,
+    "deploy": ["./deploy/new", "./deploy/verification"],
+    "gasPrice": 1500000000
   }
 }
