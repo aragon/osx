@@ -35,13 +35,13 @@
     "isTestnet": false,
     "chainId": 8453,
     "deploy": ["./deploy/new", "./deploy/verification"],
-    "gasPrice": 100000000
+    "gasPrice": 1000000
   },
   "baseGoerli": {
     "url": "https://goerli.base.org",
     "isTestnet": true,
     "chainId": 84531,
     "deploy": ["./deploy/new", "./deploy/verification"],
-    "gasPrice": 1500000000
+    "gasPrice": 1000000
   }
 }
