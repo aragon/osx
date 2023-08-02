@@ -4,26 +4,27 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 
 ## Pre-Deployment
 
-- [x] Make sure you are using Node v16
+- [ ] Make sure you are using Node v16
 - [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
+- [ ] Check that version tags are set correctly in the plugin repo deploy scripts `packages/contracts/deploy/new/30_plugins/10_plugin-repos` to ensure synchronized version numbers across all supported networks.
 - [ ] Choose an ENS domain for DAOs
 - [ ] Choose an ENS domain for plugins
 - [ ] Check if there is an official ENS deployment for the chosen chain and if yes:
   - [ ] Check if there is already an entry for it in `packages/contracts/deploy/helpers.ts`
   - [ ] Check that the owner of the DAO domain is the deployer
   - [ ] Check that the owner of the plugin domain is the deployer
-- [x] Run `yarn` in the repository root to install the dependencies
-- [x] Run `yarn build` in `packages/contracts` to make sure the contracts compile
-  - [x] Check that the compiler version in `hardhat.config.ts` is set to at least `0.8.17` and on the [known solidity bugs page](https://docs.soliditylang.org/en/latest/bugs.html) that no relevant vulnerabilities exist that are fixed in later versions. If the latter is not the case, consider updating the compiler pragmas to a safe version and rolling out fixes for affected contracts.
-- [x] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
-- [x] Run `yarn deploy --deploy-scripts deploy/new --network hardhat --reset` to make sure the deploy scripts work
-- [x] Set `ETH_KEY` in `.env` to the deployers private key
-- [x] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
-- [x] Set the chosen DAO ENS domain (in step 1) to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
-- [x] Set the chosen Plugin ENS domain (in step 2) to `NETWORK_PLUGIN_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_PLUGIN_ENS_DOMAIN`)
-- [x] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
-- [x] Set the multisig members of the managing DAO as a comma (`,`) separated list to `MANAGINGDAO_MULTISIG_APPROVERS` in `.env`
-- [x] Set the amount of minimum approvals the managing DAO needs to `MANAGINGDAO_MULTISIG_MINAPPROVALS` in `.env`
+- [ ] Run `yarn` in the repository root to install the dependencies
+- [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
+  - [ ] Check that the compiler version in `hardhat.config.ts` is set to at least `0.8.17` and on the [known solidity bugs page](https://docs.soliditylang.org/en/latest/bugs.html) that no relevant vulnerabilities exist that are fixed in later versions. If the latter is not the case, consider updating the compiler pragmas to a safe version and rolling out fixes for affected contracts.
+- [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
+- [ ] Run `yarn deploy --deploy-scripts deploy/new --network hardhat --reset` to make sure the deploy scripts work
+- [ ] Set `ETH_KEY` in `.env` to the deployers private key
+- [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
+- [ ] Set the chosen DAO ENS domain (in step 1) to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
+- [ ] Set the chosen Plugin ENS domain (in step 2) to `NETWORK_PLUGIN_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_PLUGIN_ENS_DOMAIN`)
+- [ ] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
+- [ ] Set the multisig members of the managing DAO as a comma (`,`) separated list to `MANAGINGDAO_MULTISIG_APPROVERS` in `.env`
+- [ ] Set the amount of minimum approvals the managing DAO needs to `MANAGINGDAO_MULTISIG_MINAPPROVALS` in `.env`
 
 ## Deployment
 
@@ -33,10 +34,10 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Configuration updates
 
-- [x] Take the addresses from this file `packages/contracts/deployed_contracts.json`
-- [x] Update `active_contracts.json` with the new deployed addresses
-- [x] Update `packages/contracts/Releases.md` with the new deployed addresses
-- [x] Add the managing DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
+- [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
+- [ ] Update `active_contracts.json` with the new deployed addresses
+- [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Add the managing DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
 
 ### Verification
 
@@ -61,6 +62,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Check if the `PluginRepoRegistry` set in the `PluginSetupProcessor`
 - [ ] Check if the `DAORegistry` set in the `DAOFactory`
 - [ ] Check if the `PluginSetupProcessor` set in the `DAOFactory`
+- [ ] Check that the versions (and eventual `PlaceholderSetup` builds) are published correctly in the `token-voting-repo`, `address-list-voting-repo`, `multisig-repo`, and `admin-repo` and are synchronized across all supported networks.
 
 ### Permissions
 
