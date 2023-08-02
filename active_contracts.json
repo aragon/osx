@@ -124,5 +124,33 @@
     "token-voting-repo": "0x05bB93F57Dd2F8Cb1d4F443bb6bB77F32b183a15",
     "admin-repo": "0x6abfe6280B3111E8a232577b2b09E74d89b000a0",
     "multisig-repo": "0x22E2254eE764595bc4A79Ac997AFB251f03ff5Af"
+  },
+  "baseMainnet": {
+    "managingDAO": "0xB93f5Be5900C2d5fBaE8e4F99B46FfB2Db52ee21",
+    "managingDAOImplemenation": "0xF3AaA3372EbBf01b923a4Cc98Cd847126b3D73cA",
+    "ENSRegistry": "0xc4ddBd0472C2688F5d278dAFC02E66EE176C8DE3",
+    "PublicResolver": "0x85138280659cc0cA3f40579E2C8f2713fBAA8878",
+    "DAO_ENSSubdomainRegistrar_Implementation": "0x57bf333951967a0cC0afcD58FC7959Ca0Eae6905",
+    "DAO_ENSSubdomainRegistrar": "0x74b3B3504B5d6D1c6247009c9b1e3D8cFF7bd445",
+    "Plugin_ENSSubdomainRegistrar_Implementation": "0x6115b7F05cCeF2D883AB64c88ba7e4BD1b877215",
+    "Plugin_ENSSubdomainRegistrar": "0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8",
+    "DAORegistry_Implementation": "0xB5146Fd572C669ABC353902e43F47fda4609E38A",
+    "DAORegistry": "0x95D563382BeD5AcB458759EE05b27DF2CB019Cc7",
+    "PluginRepoRegistry_Implementation": "0xCe0B4124dea6105bfB85fB4461c4D39f360E9ef3",
+    "PluginRepoRegistry": "0xE640Da5AD169630555A86D9b6b9C145B4961b1EB",
+    "PluginRepoFactory": "0x308a1DC5020c4B5d992F5543a7236c465997fecB",
+    "PluginSetupProcessor": "0x08633901DdF9cD8e2DC3a073594d0A7DaD6f3f57",
+    "DAOFactory": "0x35B62715459cB60bf6dC17fF8cfe138EA305E7Ee",
+    "AddresslistVotingSetup": "0xddCc39a2a0047Eb47EdF94180452cbaB14d426EF",
+    "GovernanceERC20": "0x5B3B36BdC9470963A2734D6a0d2F6a64C21C159f",
+    "GovernanceWrappedERC20": "0x96E54098317631641703404C06A5afAD89da7373",
+    "TokenVotingSetup": "0xE978942c691e43f65c1B7c7F8f1dc8cDF061B13f",
+    "AdminSetup": "0xA03C2182af8eC460D498108C92E8638a580b94d4",
+    "MultisigSetup": "0x6E924eA5864044D8642385683fFA5AD42FB687f2",
+    "PlaceholderSetup": "0xadAdd899F1096B77B6fE601748be1A7a9ADB714B",
+    "address-list-voting-repo": "0x83a977d564349586936f17D9536b2c5702B4Fe20",
+    "token-voting-repo": "0xFBFbE98845B4E2751a8A004B5A1759e3A278FC68",
+    "admin-repo": "0x86C87Aa7C09a447048adf4197fec7C12eF62A07F",
+    "multisig-repo": "0x2784e9500f8f60C1267e819f216682a88A37d56D"
   }
 }
