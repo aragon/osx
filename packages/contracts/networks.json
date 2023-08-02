@@ -30,6 +30,13 @@
     "feesUrl": "https://gasstation-mumbai.matic.today/v2",
     "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
   },
+  "baseMainnet": {
+    "url": "https://developer-access-mainnet.base.org",
+    "isTestnet": false,
+    "chainId": 8453,
+    "deploy": ["./deploy/new", "./deploy/verification"],
+    "gasPrice": 100000000
+  },
   "baseGoerli": {
     "url": "https://goerli.base.org",
     "isTestnet": true,
