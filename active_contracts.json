@@ -96,7 +96,5 @@
     "token-voting-repo": "0xae67aea0B830ed4504B36670B5Fa70c5C386Bb58",
     "admin-repo": "0x7fF570473d0876db16A59e8F04EE7F17Ab117309",
     "multisig-repo": "0x5A5035E7E8aeff220540F383a9cf8c35929bcF31"
-  },
-  "baseGoerli": {},
-  "baseMainnet": {}
+  }
 }
