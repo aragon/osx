@@ -29,6 +29,10 @@ type ERC721Contract implements Token @entity(immutable: true) {
   symbol: String
 }
 
+type ERC1155Contract implements Token @entity(immutable: true) {
+  id: ID! # use address as id
+}
+
 # Token Balances
 interface TokenBalance {
   id: ID! # dao address + token address
@@ -56,6 +60,24 @@ type ERC721Balance implements TokenBalance @entity {
   token: ERC721Contract!
   dao: Dao!
   tokenIds: [BigInt!]!
+  lastUpdated: BigInt!
+}
+
+type ERC1155Balance implements TokenBalance @entity {
+  id: ID!
+  token: ERC1155Contract!
+  dao: Dao!
+  balances: [ERC1155TokenIdBalance!]!
+  lastUpdated: BigInt!
+}
+
+type ERC1155TokenIdBalance @entity {
+  id: ID!
+  token: ERC1155Contract!
+  tokenId: BigInt!
+  amount: BigInt!
+  metadataUri: String!
+  dao: Dao!
   lastUpdated: BigInt!
 }
 
@@ -96,6 +118,20 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   dao: Dao!
   token: ERC721Contract!
   tokenId: BigInt!
+  from: Bytes!
+  to: Bytes!
+  proposal: IProposal
+  type: TransferType!
+  txHash: Bytes!
+  createdAt: BigInt!
+}
+
+type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
+  id: ID!
+  dao: Dao!
+  token: ERC1155Contract!
+  tokenId: BigInt!
+  amount: BigInt!
   from: Bytes!
   to: Bytes!
   proposal: IProposal

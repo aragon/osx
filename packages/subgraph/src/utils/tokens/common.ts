@@ -8,6 +8,11 @@ export const ERC721_transferFrom = '0x23b872dd';
 export const ERC20_transfer = '0xa9059cbb';
 export const ERC20_transferFrom = '0x23b872dd';
 
+export const onERC1155Received = '0xf23a6e61';
+export const onERC1155BatchReceived = '0xbc197c81';
+export const ERC1155_safeTransferFrom = '0xf242432a';
+export const ERC1155_safeBatchTransferFrom = '0x2eb2c2d6';
+
 export enum TransferType {
   Withdraw,
   Deposit
