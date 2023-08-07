@@ -47,10 +47,10 @@ function createVersion(
 
 The function receives four input arguments:
 
-a) The `_release` number to create the build for. If the release number exists already (e.g., release `1`), it is registered as the latest build (e.g., `1.3` if the previous build was `1.2`). If it is a new release number, the build number is `1` (e.g., `2.1`).
-b) The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](../02-plugin-setup/index.md) this specific version.
-c) The `_buildMetadata` URI pointing to a JSON file containing the UI data, setup data, and change description for this specific version.
-d) The `_releaseMetadata` URI pointing to a JSON file containing the plugin name, description, as well as optional data such as images to be shown in the aragonApp frontend.
+1. The `_release` number to create the build for. If the release number exists already (e.g., release `1`), it is registered as the latest build (e.g., `1.3` if the previous build was `1.2`). If it is a new release number, the build number is `1` (e.g., `2.1`).
+2. The address of `PluginSetup` contract internally referencing the implementation contract (to copy, proxy, or clone from it) and taking care of [installing, updating to, and uninstalling](../02-plugin-setup/index.md) this specific version.
+3. The `_buildMetadata` URI pointing to a JSON file containing the UI data, setup data, and change description for this specific version.
+4. The `_releaseMetadata` URI pointing to a JSON file containing the plugin name, description, as well as optional data such as images to be shown in the aragonApp frontend.
 
 Other functions present in the contract allow you to query previous versions and to update the release metadata. For more details visit the [`PluginRepo` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepo.md).
 

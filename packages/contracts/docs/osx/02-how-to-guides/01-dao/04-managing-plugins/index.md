@@ -40,7 +40,7 @@ If you do that, nobody would be able to create proposals and execute actions on 
 
 A very important thing to consider when operating your DAO is to make sure that you do not lock it - meaning, you allow it into a state where the DAO cannot execute actions anymore.
 
-The accidental loss of the permission to execute actions on your DAO, [the `EXECUTION_PERMISSION_ID`] permission](../../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) this incapacitates your DAO. If this happens, you are not able to withdraw funds or act through the DAO, unless you have the `ROOT_PERMISSION_ID` on the DAO.
+The accidental loss of the permission to execute actions on your DAO ([the `EXECUTION_PERMISSION_ID` permission](../../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract)) incapacitates your DAO. If this happens, you are not able to withdraw funds or act through the DAO, unless you have the `ROOT_PERMISSION_ID` on the DAO.
 
 :::danger
 Do not interact directly with the smart contracts unless you know exactly what you are doing, **especially if this involves granting or revoking permissions**. Instead, use the Aragon App or Aragon SDK for creating and managing your DAO and interacting with the smart contracts.
