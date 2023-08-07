@@ -1,5 +1,5 @@
 ---
-title: Upgrade the Plugin
+title: Upgrade a DAO Plugin
 ---
 
 ## How to upgrade an Upgradeable Plugin

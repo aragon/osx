@@ -1,5 +1,5 @@
 ---
-title: The Plugin Implementation Contract
+title: Plugin Implementation Contract
 ---
 
 ## How to build an Upgradeable Plugin implementation contract
