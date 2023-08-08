@@ -31,6 +31,8 @@ type ERC721Contract implements Token @entity(immutable: true) {
 
 type ERC1155Contract implements Token @entity(immutable: true) {
   id: ID! # use address as id
+  name: String
+  symbol: String
 }
 
 # Token Balances
@@ -67,17 +69,16 @@ type ERC1155Balance implements TokenBalance @entity {
   id: ID!
   token: ERC1155Contract!
   dao: Dao!
-  balances: [ERC1155TokenIdBalance!]!
+  balances: [ERC1155TokenIdBalance!]! @derivedFrom(field: "balance")
+  metadataUri: String!
   lastUpdated: BigInt!
 }
 
 type ERC1155TokenIdBalance @entity {
   id: ID!
-  token: ERC1155Contract!
+  balance: ERC1155Balance!
   tokenId: BigInt!
   amount: BigInt!
-  metadataUri: String!
-  dao: Dao!
   lastUpdated: BigInt!
 }
 

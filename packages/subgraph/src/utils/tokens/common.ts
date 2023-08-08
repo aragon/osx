@@ -21,6 +21,9 @@ export enum TransferType {
 export const DECODE_OFFSET =
   '0x0000000000000000000000000000000000000000000000000000000000000020';
 
+export const ERC165_MAGIC_VALUE = '01ffc9a7';
+export const ERC1155_MAGIC_VALUE = 'd9b67a26';
+
 // Unique ID generation for token transfer entities
 export function getTransferId(
   txHash: Bytes,
@@ -33,4 +36,42 @@ export function getTransferId(
     .concat(logIndex.toString())
     .concat('_')
     .concat(actionIndex.toString());
+}
+
+// Unique ID generation for token balance entities
+export function getBalanceId(daoId: string, token: string): string {
+  return daoId.concat('_').concat(token);
+}
+
+// Unique ID generation for token balance entities
+export function getTokenIdBalanceId(
+  daoId: string,
+  token: string,
+  tokenId: BigInt
+): string {
+  return daoId
+    .concat('_')
+    .concat(token)
+    .concat('_')
+    .concat(tokenId.toString());
+}
+
+// Unique ID generation for ERC1155 transfers
+export function getERC1155TransferId(
+  txHash: Bytes,
+  logIndex: BigInt,
+  actionIndex: number,
+  batchIndex: number
+): string {
+  return (
+    txHash
+      .toHexString()
+      .concat('_')
+      .concat(logIndex.toString())
+      .concat('_')
+      .concat(actionIndex.toString())
+      .concat('_')
+      // add iteration for supporting batch transfers
+      .concat(batchIndex.toString())
+  );
 }

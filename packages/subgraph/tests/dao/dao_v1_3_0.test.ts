@@ -6,7 +6,8 @@ import {
   afterEach,
   clearStore,
   assert,
-  beforeAll
+  beforeAll,
+  log
 } from 'matchstick-as';
 import {
   TransactionActionsProposal,
@@ -22,7 +23,10 @@ import {
   ERC721_transferFrom,
   ERC721_safeTransferFromWithData,
   ERC1155_safeTransferFrom,
-  ERC1155_safeBatchTransferFrom
+  ERC1155_safeBatchTransferFrom,
+  ERC1155_MAGIC_VALUE,
+  getTokenIdBalanceId,
+  getERC1155TransferId
 } from '../../src/utils/tokens/common';
 import {
   DAO_ADDRESS,
@@ -636,19 +640,19 @@ describe('handleExecuted', () => {
       createERC1155TokenCalls(
         DAO_TOKEN_ADDRESS,
         '0',
-        'https://example.org/0.json'
+        'https://example.org/{id}.json'
       );
       createERC1155TokenCalls(
         DAO_TOKEN_ADDRESS,
         '1',
-        'https://example.org/1.json'
+        'https://example.org/{id}.json'
       );
       createERC1155TokenCalls(
         DAO_TOKEN_ADDRESS,
         '2',
-        'https://example.org/2.json'
+        'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, 'd9b67a26', true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_VALUE, true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
     });
     beforeEach(() => {
@@ -678,9 +682,11 @@ describe('handleExecuted', () => {
         handleExecuted(event);
 
         let timestamp = event.block.timestamp;
-        let tokenIdBalanceId = balanceId
-          .concat('_')
-          .concat(transferToken.toString());
+        let tokenIdBalanceId = getTokenIdBalanceId(
+          daoId,
+          tokenId,
+          transferToken
+        );
         // check ERC1155Contract entity
         assert.entityCount('ERC1155Contract', 1);
         let erc1155Contract = new ExtendedERC1155Contract().withDefaultValues();
@@ -703,7 +709,7 @@ describe('handleExecuted', () => {
         // check ERC1155Transfer entity
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
-        let transferId = getTransferId(txHash, logIndex, 0);
+        let transferId = getERC1155TransferId(txHash, logIndex, 0, 0);
         let proposalId = event.params.actor
           .toHexString()
           .concat('_')
@@ -758,11 +764,6 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC1155Contract', 1);
         assert.entityCount('ERC1155Transfer', 2);
         assert.entityCount('ERC1155Balance', 1);
-        // check ERC1155Balance entity
-        let erc1155Balance = new ExtendedERC1155Balance().withDefaultValues();
-        erc1155Balance.balances = erc1155TokenIdBalanceIdArray;
-        erc1155Balance.lastUpdated = event.block.timestamp;
-        erc1155Balance.assertEntity();
         assert.entityCount('ERC1155TokenIdBalance', 2);
       });
     });
@@ -810,7 +811,6 @@ describe('handleExecuted', () => {
         // check ERC1155Balance entity
         assert.entityCount('ERC1155Balance', 1);
         let erc1155Balance = new ExtendedERC1155Balance().withDefaultValues();
-        erc1155Balance.balances = tokenIdBalanceIdArray;
         erc1155Balance.lastUpdated = timestamp;
         erc1155Balance.assertEntity();
         // check ERC1155TokenIdBalance entity
@@ -820,16 +820,13 @@ describe('handleExecuted', () => {
           erc1155TokenIdBalance.id = tokenIdBalanceIdArray[i];
           erc1155TokenIdBalance.tokenId = tokenIds[i];
           erc1155TokenIdBalance.amount = amounts[i];
-          erc1155TokenIdBalance.metadataUri = 'https://example.org/'
-            .concat(tokenIds[i].toString())
-            .concat('.json');
           erc1155TokenIdBalance.lastUpdated = timestamp;
+          erc1155TokenIdBalance.balance = balanceId;
           erc1155TokenIdBalance.assertEntity();
         }
         // check ERC1155Transfer entity
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
-        let transferId = getTransferId(txHash, logIndex, 0);
         let proposalId = event.params.actor
           .toHexString()
           .concat('_')
@@ -840,7 +837,7 @@ describe('handleExecuted', () => {
           .concat(logIndex.toHexString());
         for (let i = 0; i < tokenIds.length; i++) {
           let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
-          erc1155Transfer.id = transferId.concat('_').concat(i.toString());
+          erc1155Transfer.id = getERC1155TransferId(txHash, logIndex, 0, i);
           // appeend index to transferId to make sure it is unique
           erc1155Transfer.amount = amounts[i];
           erc1155Transfer.from = Address.fromHexString(daoId);
@@ -884,21 +881,16 @@ describe('handleExecuted', () => {
         let erc1155TokenIdBalanceIdArray: string[] = [];
         for (let i = 0; i < tokenIds[0].length; i++) {
           erc1155TokenIdBalanceIdArray.push(
-            balanceId.concat('_').concat(tokenIds[0][i].toString())
+            getTokenIdBalanceId(daoId, tokenId, tokenIds[0][i])
           );
         }
-        // check ERC1155Contract entity
+        // check ERC ontract entity
         assert.entityCount('ERC1155Contract', 1);
         let erc1155Contract = new ExtendedERC1155Contract().withDefaultValues();
         erc1155Contract.assertEntity();
         // check ERC1155Balance entity
         assert.entityCount('ERC1155Transfer', 6);
         assert.entityCount('ERC1155Balance', 1);
-        let erc1155Balance = new ExtendedERC1155Balance().withDefaultValues();
-        erc1155Balance.balances = erc1155TokenIdBalanceIdArray;
-        erc1155Balance.lastUpdated = event.block.timestamp;
-        erc1155Balance.assertEntity();
-
         assert.entityCount('ERC1155TokenIdBalance', 3);
       });
     });

@@ -48,7 +48,12 @@ import {
   VOTING_MODES,
   VOTING_MODE_INDEXES
 } from '../../src/utils/constants';
-import {getTransferId} from '../../src/utils/tokens/common';
+import {
+  getBalanceId,
+  getERC1155TransferId,
+  getTokenIdBalanceId,
+  getTransferId
+} from '../../src/utils/tokens/common';
 import {
   ADDRESS_ONE,
   ALLOW_FAILURE_MAP,
@@ -116,11 +121,12 @@ class ERC1155BalanceMethods extends ERC1155Balance {
   withDefaultValues(): ERC1155BalanceMethods {
     let daoId = Address.fromString(DAO_ADDRESS).toHexString();
     let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
-    let balanceId = daoId.concat('_').concat(tokenId);
+    let balanceId = getBalanceId(daoId, tokenId);
 
     this.id = balanceId;
     this.token = tokenId;
     this.dao = daoId;
+    this.metadataUri = 'https://example.org/{id}.json';
     this.lastUpdated = BigInt.zero();
     return this;
   }
@@ -129,14 +135,12 @@ class ERC1155TokenIdBalanceMethods extends ERC1155TokenIdBalance {
   withDefaultValues(): ERC1155TokenIdBalanceMethods {
     let daoId = Address.fromString(DAO_ADDRESS).toHexString();
     let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
-    let balanceId = daoId.concat('_').concat(tokenId);
+    let balanceId = getBalanceId(daoId, tokenId);
 
-    this.id = balanceId.concat('_').concat(BigInt.zero().toString());
+    this.id = getTokenIdBalanceId(daoId, tokenId, BigInt.zero());
     this.amount = BigInt.zero();
-    this.dao = daoId;
-    this.token = tokenId;
+    this.balance = balanceId;
     this.tokenId = BigInt.zero();
-    this.metadataUri = 'https://example.org/0.json';
     this.lastUpdated = BigInt.zero();
     return this;
   }
@@ -144,7 +148,7 @@ class ERC1155TokenIdBalanceMethods extends ERC1155TokenIdBalance {
 
 class ERC1155TransferMethods extends ERC1155Transfer {
   withDefaultValues(
-    id: string = getTransferId(Bytes.empty(), BigInt.zero(), 0)
+    id: string = getERC1155TransferId(Bytes.empty(), BigInt.zero(), 0, 0)
   ): ERC1155TransferMethods {
     this.id = id;
     this.dao = DAO_ADDRESS;
