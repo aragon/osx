@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum, log} from '@graphprotocol/graph-ts';
 import {
   ERC1155Balance,
   ERC1155Contract,
@@ -115,7 +115,9 @@ export function handleERC1155Received(
   }
   let tuple = decoded.toTuple();
   let from = tuple[0].toAddress();
+  log.warning('decoded: {}', [from.toHexString()]);
   let to = tuple[1].toAddress();
+  log.warning('decoded: {}', [to.toHexString()]);
   // in single transfer create a single transfer
   let tokenId = tuple[2].toBigInt();
   let amount = tuple[3].toBigInt();
