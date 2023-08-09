@@ -9,10 +9,10 @@ import {ERC1155} from '../../../generated/templates/DaoTemplateV1_0_0/ERC1155';
 import {supportsInterface} from '../erc165';
 import {
   DECODE_OFFSET,
-  ERC1155_MAGIC_NUMBER,
+  ERC1155_INTERFACE_ID,
   ERC1155_safeBatchTransferFrom,
   ERC1155_safeTransferFrom,
-  ERC165_MAGIC_NUMBER,
+  ERC165_INTERFACE_ID,
   TransferType,
   getBalanceId,
   getERC1155TransferId,
@@ -22,11 +22,11 @@ import {
 export function supportsERC1155(token: Address): bool {
   // Double check that it's ERC1155 by calling supportsInterface checks.
   let erc1155 = ERC1155.bind(token);
-  let introspection_ERC165 = supportsInterface(erc1155, ERC165_MAGIC_NUMBER); // ERC165
-  let introspection_ERC1155 = supportsInterface(erc1155, ERC1155_MAGIC_NUMBER); // ERC1155
-  let introspection_00000000 = supportsInterface(erc1155, '00000000', false);
+  let introspection_ERC165 = supportsInterface(erc1155, ERC165_INTERFACE_ID); // ERC165
+  let introspection_ERC1155 = supportsInterface(erc1155, ERC1155_INTERFACE_ID); // ERC1155
+  let introspection_ffffffff = supportsInterface(erc1155, 'ffffffff', false);
   return (
-    introspection_ERC165 && introspection_ERC1155 && introspection_00000000
+    introspection_ERC165 && introspection_ERC1155 && introspection_ffffffff
   );
 }
 

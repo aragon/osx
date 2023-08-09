@@ -24,7 +24,7 @@ import {
   ERC721_safeTransferFromWithData,
   ERC1155_safeTransferFrom,
   ERC1155_safeBatchTransferFrom,
-  ERC1155_MAGIC_NUMBER,
+  ERC1155_INTERFACE_ID,
   getTokenIdBalanceId,
   getERC1155TransferId
 } from '../../src/utils/tokens/common';
@@ -212,7 +212,7 @@ describe('handleExecuted', () => {
       // Would fail. https://github.com/LimeChain/matchstick/issues/278#issuecomment-1426884510
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', false);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', false);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
 
     describe('ERC20 transfer action', () => {
@@ -428,7 +428,7 @@ describe('handleExecuted', () => {
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
 
     beforeEach(() => {
@@ -652,8 +652,8 @@ describe('handleExecuted', () => {
         '2',
         'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_NUMBER, true);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_INTERFACE_ID, true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
     beforeEach(() => {
       clearStore();

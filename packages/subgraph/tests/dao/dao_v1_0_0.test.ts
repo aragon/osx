@@ -50,7 +50,7 @@ import {
   encodeWithFunctionSelector
 } from './utils';
 import {
-  ERC1155_MAGIC_NUMBER,
+  ERC1155_INTERFACE_ID,
   ERC20_transfer,
   ERC20_transferFrom,
   ERC721_safeTransferFromWithData,
@@ -409,7 +409,7 @@ describe('handleCallbackReceived: ', () => {
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
     test('create entities with correct values', () => {
       let tokenId = BigInt.fromU32(1);
@@ -546,8 +546,8 @@ describe('handleCallbackReceived: ', () => {
         '2',
         'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_NUMBER, true);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_INTERFACE_ID, true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
     beforeEach(() => {
       clearStore();
@@ -671,8 +671,8 @@ describe('handleCallbackReceived: ', () => {
         '2',
         'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_NUMBER, true);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_INTERFACE_ID, true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
     beforeEach(() => {
       clearStore();
@@ -722,7 +722,7 @@ describe('handleCallbackReceived: ', () => {
         let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
         erc1155Transfer.id = getERC1155TransferId(txHash, logIndex, 0, i);
         erc1155Transfer.from = Address.fromString(ADDRESS_THREE);
-        erc1155Transfer.to  = Address.fromString(DAO_ADDRESS);
+        erc1155Transfer.to = Address.fromString(DAO_ADDRESS);
         erc1155Transfer.operator = Address.fromString(ADDRESS_THREE);
         erc1155Transfer.amount = amount[i];
         erc1155Transfer.txHash = txHash;
@@ -936,7 +936,7 @@ describe('handleExecuted', () => {
       // Would fail. https://github.com/LimeChain/matchstick/issues/278#issuecomment-1426884510
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', false);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', false);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
 
     describe('ERC20 transfer action', () => {
@@ -1148,7 +1148,7 @@ describe('handleExecuted', () => {
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
-      getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
     });
 
     beforeEach(() => {

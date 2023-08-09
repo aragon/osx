@@ -21,8 +21,8 @@ export enum TransferType {
 export const DECODE_OFFSET =
   '0x0000000000000000000000000000000000000000000000000000000000000020';
 
-export const ERC165_MAGIC_NUMBER = '01ffc9a7';
-export const ERC1155_MAGIC_NUMBER = 'd9b67a26';
+export const ERC165_INTERFACE_ID = '01ffc9a7';
+export const ERC1155_INTERFACE_ID = 'd9b67a26';
 
 // Unique ID generation for token transfer entities
 export function getTransferId(
