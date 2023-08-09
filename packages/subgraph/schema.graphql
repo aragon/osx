@@ -133,6 +133,7 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   token: ERC1155Contract!
   tokenId: BigInt!
   amount: BigInt!
+  operator: Bytes!
   from: Bytes!
   to: Bytes!
   proposal: IProposal

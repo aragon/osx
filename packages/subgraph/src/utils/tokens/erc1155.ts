@@ -114,10 +114,8 @@ export function handleERC1155Received(
     return;
   }
   let tuple = decoded.toTuple();
-  let from = tuple[0].toAddress();
-  log.warning('decoded: {}', [from.toHexString()]);
-  let to = tuple[1].toAddress();
-  log.warning('decoded: {}', [to.toHexString()]);
+  let operator = tuple[0].toAddress();
+  let from = tuple[1].toAddress();
   // in single transfer create a single transfer
   let tokenId = tuple[2].toBigInt();
   let amount = tuple[3].toBigInt();
@@ -131,8 +129,9 @@ export function handleERC1155Received(
   // create transfer
   createErc1155Transfer(
     transferId,
+    operator,
     from,
-    to,
+    dao, // to field, the to field is going to be always the dao because is the one handling the onERC1155Received callback
     dao,
     token,
     tokenId,
@@ -162,8 +161,8 @@ export function handleERC1155BatchReceived(
     return;
   }
   let tuple = decoded.toTuple();
-  let from = tuple[0].toAddress();
-  let to = tuple[1].toAddress();
+  let operator = tuple[0].toAddress();
+  let from = tuple[1].toAddress();
   let tokenIds = tuple[2].toBigIntArray();
   let amounts = tuple[3].toBigIntArray();
   // in batch transfer iterate over the tokenIds and create a transfer for each
@@ -178,8 +177,9 @@ export function handleERC1155BatchReceived(
     // create transfer
     createErc1155Transfer(
       transferId,
+      operator,
       from,
-      to,
+      dao, // to field, the to field is going to be always the dao because is the one handling the onERC1155Received callback
       dao,
       token,
       tokenIds[i],
@@ -242,6 +242,7 @@ export function handleERC1155Action(
     // create transfer
     createErc1155Transfer(
       transferId,
+      dao, // operator field, the operator is going to be the dao since is the one executing the action
       from,
       to,
       dao,
@@ -268,6 +269,7 @@ export function handleERC1155Action(
       // create transfer
       createErc1155Transfer(
         transferId,
+        dao, // operator field, the operator is going to be the dao since is the one executing the action
         from,
         to,
         dao,
@@ -284,6 +286,7 @@ export function handleERC1155Action(
 
 function createErc1155Transfer(
   transferId: string,
+  operator: Address,
   from: Address,
   to: Address,
   dao: Address,
@@ -298,6 +301,7 @@ function createErc1155Transfer(
   let transfer = new ERC1155Transfer(transferId);
   transfer.from = from;
   transfer.to = to;
+  transfer.operator = operator;
   transfer.dao = dao.toHexString();
   transfer.token = token.toHexString();
   transfer.amount = amount;
