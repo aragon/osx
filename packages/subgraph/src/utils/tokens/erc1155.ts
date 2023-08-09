@@ -205,7 +205,7 @@ export function handleERC1155Action(
   }
 
   let functionSelector = data.toHexString().substring(0, 10);
-  let calldata = data.toHexString().slice(10);
+  let calldata = DECODE_OFFSET + data.toHexString().slice(10);
 
   let decodeABI = '';
 
@@ -216,8 +216,6 @@ export function handleERC1155Action(
   if (functionSelector == ERC1155_safeBatchTransferFrom) {
     decodeABI = '(address,address,uint256[],uint256[],bytes)';
   }
-  // REVIEW
-  // add offset to calldata because the it includes data
   let bytes = Bytes.fromHexString(calldata);
   let decoded = ethereum.decode(decodeABI, bytes);
   if (!decoded) {

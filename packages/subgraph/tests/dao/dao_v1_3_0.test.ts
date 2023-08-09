@@ -675,7 +675,7 @@ describe('handleExecuted', () => {
           [tupleArray],
           [ERC1155_safeTransferFrom],
           '0',
-          false,
+          true,
           [],
           '0'
         );
@@ -748,7 +748,7 @@ describe('handleExecuted', () => {
           tuples,
           [ERC1155_safeTransferFrom, ERC1155_safeTransferFrom],
           '0',
-          false,
+          true,
           [],
           '0'
         );
@@ -790,7 +790,7 @@ describe('handleExecuted', () => {
           [tupleArray],
           [ERC1155_safeBatchTransferFrom],
           '0',
-          false,
+          true,
           [],
           '0'
         );
@@ -873,7 +873,7 @@ describe('handleExecuted', () => {
           tuples,
           [ERC1155_safeBatchTransferFrom, ERC1155_safeBatchTransferFrom],
           '0',
-          false,
+          true,
           [],
           '0'
         );

@@ -557,8 +557,8 @@ describe('handleCallbackReceived: ', () => {
       let amount = BigInt.fromU32(10);
 
       let tupleArray: Array<ethereum.Value> = [
+        ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // operator
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
-        ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)), // to
         ethereum.Value.fromUnsignedBigInt(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigInt(amount), // amount
         ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
@@ -590,6 +590,8 @@ describe('handleCallbackReceived: ', () => {
       let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
       erc1155Transfer.id = transferId;
       erc1155Transfer.from = Address.fromString(ADDRESS_THREE);
+      erc1155Transfer.to = Address.fromString(DAO_ADDRESS);
+      erc1155Transfer.operator = Address.fromString(ADDRESS_THREE);
       erc1155Transfer.amount = amount;
       erc1155Transfer.txHash = txHash;
       erc1155Transfer.createdAt = timestamp;
@@ -612,8 +614,8 @@ describe('handleCallbackReceived: ', () => {
       let amount = BigInt.fromU32(10);
 
       let tupleArray: Array<ethereum.Value> = [
+        ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // operator
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
-        ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)), // to
         ethereum.Value.fromUnsignedBigInt(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigInt(amount), // amount
         ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
@@ -680,8 +682,8 @@ describe('handleCallbackReceived: ', () => {
       let amount = [BigInt.fromU32(10), BigInt.fromU32(20)];
 
       let tupleArray: Array<ethereum.Value> = [
+        ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // operator
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
-        ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)), // to
         ethereum.Value.fromUnsignedBigIntArray(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigIntArray(amount), // amount
         ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
@@ -720,6 +722,8 @@ describe('handleCallbackReceived: ', () => {
         let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
         erc1155Transfer.id = getERC1155TransferId(txHash, logIndex, 0, i);
         erc1155Transfer.from = Address.fromString(ADDRESS_THREE);
+        erc1155Transfer.to  = Address.fromString(DAO_ADDRESS);
+        erc1155Transfer.operator = Address.fromString(ADDRESS_THREE);
         erc1155Transfer.amount = amount[i];
         erc1155Transfer.txHash = txHash;
         erc1155Transfer.createdAt = timestamp;
@@ -748,8 +752,8 @@ describe('handleCallbackReceived: ', () => {
       let amount = [BigInt.fromU32(10), BigInt.fromU32(20)];
 
       let tupleArray: Array<ethereum.Value> = [
+        ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // operator
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
-        ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)), // to
         ethereum.Value.fromUnsignedBigIntArray(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigIntArray(amount), // amount
         ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
