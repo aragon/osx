@@ -8,10 +8,10 @@ export const ERC721_transferFrom = '0x23b872dd';
 export const ERC20_transfer = '0xa9059cbb';
 export const ERC20_transferFrom = '0x23b872dd';
 
-export const onERC1155Received = '0xf23a6e61';
-export const onERC1155BatchReceived = '0xbc197c81';
-export const ERC1155_safeTransferFrom = '0xf242432a';
-export const ERC1155_safeBatchTransferFrom = '0x2eb2c2d6';
+export const onERC1155Received = '0xf23a6e61'; // `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))` (i.e. 0xf23a6e61) if it accepts the transfer.
+export const onERC1155BatchReceived = '0xbc197c81'; // `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))` (i.e. 0xbc197c81) if it accepts the transfer(s).
+export const ERC1155_safeTransferFrom = '0xf242432a'; // `bytes4(keccak256("safeTransferFrom(address,address,uint256,uint256,bytes)"))` (i.e. 0xf242432a).
+export const ERC1155_safeBatchTransferFrom = '0x2eb2c2d6'; // `bytes4(keccak256("safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"))` (i.e. 0x2eb2c2d6).
 
 export enum TransferType {
   Withdraw,
@@ -21,8 +21,8 @@ export enum TransferType {
 export const DECODE_OFFSET =
   '0x0000000000000000000000000000000000000000000000000000000000000020';
 
-export const ERC165_MAGIC_VALUE = '01ffc9a7';
-export const ERC1155_MAGIC_VALUE = 'd9b67a26';
+export const ERC165_MAGIC_NUMBER = '01ffc9a7';
+export const ERC1155_MAGIC_NUMBER = 'd9b67a26';
 
 // Unique ID generation for token transfer entities
 export function getTransferId(

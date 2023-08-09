@@ -50,7 +50,7 @@ import {
   encodeWithFunctionSelector
 } from './utils';
 import {
-  ERC1155_MAGIC_VALUE,
+  ERC1155_MAGIC_NUMBER,
   ERC20_transfer,
   ERC20_transferFrom,
   ERC721_safeTransferFromWithData,
@@ -546,7 +546,7 @@ describe('handleCallbackReceived: ', () => {
         '2',
         'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_VALUE, true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_NUMBER, true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
     });
     beforeEach(() => {
@@ -669,7 +669,7 @@ describe('handleCallbackReceived: ', () => {
         '2',
         'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_VALUE, true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_NUMBER, true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
     });
     beforeEach(() => {

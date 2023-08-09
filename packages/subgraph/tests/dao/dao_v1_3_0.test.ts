@@ -24,7 +24,7 @@ import {
   ERC721_safeTransferFromWithData,
   ERC1155_safeTransferFrom,
   ERC1155_safeBatchTransferFrom,
-  ERC1155_MAGIC_VALUE,
+  ERC1155_MAGIC_NUMBER,
   getTokenIdBalanceId,
   getERC1155TransferId
 } from '../../src/utils/tokens/common';
@@ -652,7 +652,7 @@ describe('handleExecuted', () => {
         '2',
         'https://example.org/{id}.json'
       );
-      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_VALUE, true);
+      getSupportsInterface(DAO_TOKEN_ADDRESS, ERC1155_MAGIC_NUMBER, true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '00000000', false);
     });
     beforeEach(() => {
