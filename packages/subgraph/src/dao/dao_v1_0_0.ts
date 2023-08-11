@@ -1,4 +1,4 @@
-import {BigInt, Bytes, log, store} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
   MetadataSet,
@@ -26,8 +26,16 @@ import {ADDRESS_ZERO} from '../utils/constants';
 import {handleERC721Received} from '../utils/tokens/erc721';
 import {handleERC20Deposit} from '../utils/tokens/erc20';
 import {handleNativeDeposit} from '../utils/tokens/eth';
-import {onERC721Received} from '../utils/tokens/common';
+import {
+  onERC1155BatchReceived,
+  onERC1155Received,
+  onERC721Received
+} from '../utils/tokens/common';
 import {handleAction, updateProposalWithFailureMap} from './utils';
+import {
+  handleERC1155BatchReceived,
+  handleERC1155Received
+} from '../utils/tokens/erc1155';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -48,6 +56,22 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 
   if (functionSig.equals(Bytes.fromHexString(onERC721Received))) {
     handleERC721Received(
+      event.params.sender,
+      event.address,
+      event.params.data,
+      event
+    );
+  }
+  if (functionSig.equals(Bytes.fromHexString(onERC1155Received))) {
+    handleERC1155Received(
+      event.params.sender,
+      event.address,
+      event.params.data,
+      event
+    );
+  }
+  if (functionSig.equals(Bytes.fromHexString(onERC1155BatchReceived))) {
+    handleERC1155BatchReceived(
       event.params.sender,
       event.address,
       event.params.data,

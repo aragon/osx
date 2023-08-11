@@ -18,9 +18,9 @@ function supportsERC721(token: Address): bool {
   let erc721 = ERC721.bind(token);
   let introspection_01ffc9a7 = supportsInterface(erc721, '01ffc9a7'); // ERC165
   let introspection_80ac58cd = supportsInterface(erc721, '80ac58cd'); // ERC721
-  let introspection_00000000 = supportsInterface(erc721, '00000000', false);
+  let introspection_ffffffff = supportsInterface(erc721, 'ffffffff', false);
   return (
-    introspection_01ffc9a7 && introspection_80ac58cd && introspection_00000000
+    introspection_01ffc9a7 && introspection_80ac58cd && introspection_ffffffff
   );
 }
 
