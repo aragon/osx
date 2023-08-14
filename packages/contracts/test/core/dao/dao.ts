@@ -1,5 +1,5 @@
 import chai, {expect} from 'chai';
-import {ethers, upgrades} from 'hardhat';
+import {ethers} from 'hardhat';
 import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -26,9 +26,8 @@ import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/os
 
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagingContract,
-  upgradeCheck,
-  upgradeManagingContractToMock,
+  upgradeToOtherCheck,
+  upgradeToSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -346,8 +345,9 @@ describe('DAO', function () {
     });
 
     it('upgrades to a new implementation', async () => {
-      await upgradeCheck(
+      await upgradeToSelfCheck(
         signers[0],
+        signers[1],
         undefined,
         initArgs,
         'initialize',
@@ -359,16 +359,15 @@ describe('DAO', function () {
     it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagingContract(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
-        );
+      const {fromImplementation, toImplementation} = await upgradeToOtherCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+      );
       expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(

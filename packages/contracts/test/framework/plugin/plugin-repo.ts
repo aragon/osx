@@ -20,9 +20,8 @@ import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typech
 
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagingContract,
-  upgradeCheck,
-  upgradeManagingContractToMock,
+  upgradeToOtherCheck,
+  upgradeToSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 
 import {
@@ -96,8 +95,9 @@ describe('PluginRepo', function () {
       });
 
       it('upgrades to a new implementation', async () => {
-        await upgradeCheck(
+        await upgradeToSelfCheck(
           signers[0],
+          signers[1],
           undefined,
           initArgs,
           'initialize',
@@ -110,7 +110,7 @@ describe('PluginRepo', function () {
         legacyContractFactory = new PluginRepo_V1_0_0__factory(signers[0]);
 
         const {fromImplementation, toImplementation} =
-          await ozUpgradeCheckManagingContract(
+          await upgradeToOtherCheck(
             signers[0],
             signers[1],
             initArgs,

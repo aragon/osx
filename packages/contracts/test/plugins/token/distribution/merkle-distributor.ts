@@ -24,8 +24,8 @@ import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagedContract,
-  upgradeCheck,
+  upgradeToOtherCheck,
+  upgradeToSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -101,8 +101,9 @@ describe('MerkleDistributor', function () {
     });
 
     it('upgrades to a new implementation', async () => {
-      await upgradeCheck(
+      await upgradeToSelfCheck(
         signers[0],
+        signers[1],
         dao,
         initArgs,
         'initialize',
@@ -114,17 +115,16 @@ describe('MerkleDistributor', function () {
     it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new MerkleDistributor_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
-          dao,
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
-        );
+      const {fromImplementation, toImplementation} = await upgradeToOtherCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
       expect(toImplementation).to.equal(fromImplementation); // The build did not change
 
       const fromProtocolVersion = await getProtocolVersion(

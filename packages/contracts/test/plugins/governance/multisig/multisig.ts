@@ -44,10 +44,14 @@ import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagedContract,
-  upgradeCheck,
+  upgradeToOtherCheck,
+  upgradeToSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
+import {ExecutedEvent} from '../../../../typechain/DAO';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -214,8 +218,9 @@ describe('Multisig', function () {
     });
 
     it('upgrades to a new implementation', async () => {
-      await upgradeCheck(
+      await upgradeToSelfCheck(
         signers[0],
+        signers[1],
         dao,
         initArgs,
         'initialize',
@@ -227,20 +232,16 @@ describe('Multisig', function () {
     it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new Multisig_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract({
-          deployer: {
-            deployer: signers[0],
-            upgrader: signers[1],
-            managingDao: dao,
-            initArgs,
-            initializerName: 'initialize',
-            from: legacyContractFactory,
-            to: currentContractFactory,
-            upgradePermissionId:
-              UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-          },
-        });
+      const {fromImplementation, toImplementation} = await upgradeToOtherCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        legacyContractFactory,
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
 
       const fromProtocolVersion = await getProtocolVersion(
