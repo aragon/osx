@@ -52,9 +52,13 @@ import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   getProtocolVersion,
   ozUpgradeCheckManagedContract,
+  upgradeCheck,
 } from '../../../../test-utils/uups-upgradeable';
 import {majorityVotingBaseInterface} from '../majority-voting';
-import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../../test-utils/protocol-version';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -199,29 +203,48 @@ describe('TokenVoting', function () {
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new TokenVoting__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: dao.address,
+        votingSettings: votingSettings,
+        token: governanceErc20Mock.address,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await upgradeCheck(
+        signers[0],
+        dao,
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new TokenVoting_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
-          dao,
-          {
-            dao: dao.address,
-            votingSettings: votingSettings,
-            token: governanceErc20Mock.address,
+        await ozUpgradeCheckManagedContract({
+          deployer: {
+            deployer: signers[0],
+            upgrader: signers[1],
+            managingDao: dao,
+            initArgs,
+            initializerName: 'initialize',
+            from: legacyContractFactory,
+            to: currentContractFactory,
+            upgradePermissionId:
+              UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           },
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
-        );
+        });
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
 
       const fromProtocolVersion = await getProtocolVersion(
@@ -231,7 +254,9 @@ describe('TokenVoting', function () {
         currentContractFactory.attach(toImplementation)
       );
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
       expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });

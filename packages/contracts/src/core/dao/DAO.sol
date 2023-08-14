@@ -127,6 +127,7 @@ contract DAO is
     }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

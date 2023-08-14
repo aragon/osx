@@ -19,8 +19,12 @@ import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   getProtocolVersion,
   ozUpgradeCheckManagedContract,
+  upgradeCheck,
 } from '../../test-utils/uups-upgradeable';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -252,28 +256,47 @@ describe('DAORegistry', function () {
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new DAORegistry__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: managingDao.address,
+        ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await upgradeCheck(
+        signers[0],
+        managingDao,
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new DAORegistry_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
-          managingDao,
-          {
-            dao: managingDao.address,
-            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+        await ozUpgradeCheckManagedContract({
+          deployer: {
+            deployer: signers[0],
+            upgrader: signers[1],
+            managingDao,
+            initArgs,
+            initializerName: 'initialize',
+            from: legacyContractFactory,
+            to: currentContractFactory,
+            upgradePermissionId:
+              UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           },
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
-        );
+        });
 
       expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
 
@@ -285,7 +308,9 @@ describe('DAORegistry', function () {
       );
 
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
       expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });

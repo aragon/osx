@@ -42,6 +42,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     error InvalidResolver(bytes32 node, address resolver);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

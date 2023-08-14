@@ -16,6 +16,7 @@ import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {UpgradedEvent} from '../../typechain/DAO';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
 
 let signers: SignerWithAddress[];
 let DAO_old: DAO_V1_0_0__factory;
@@ -75,7 +76,7 @@ describe('DAO Upgrade', function () {
         const upgradeTx = await daoV100Proxy.upgradeToAndCall(
           daoCurrentImplementaion.address,
           DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -141,7 +142,7 @@ describe('DAO Upgrade', function () {
         await daoV100Proxy.upgradeToAndCall(
           daoCurrentImplementaion.address,
           DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -221,7 +222,7 @@ describe('DAO Upgrade', function () {
         await daoV100Proxy.upgradeToAndCall(
           daoCurrentImplementaion.address,
           DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -326,7 +327,7 @@ describe('DAO Upgrade', function () {
         await daoV100Proxy.upgradeToAndCall(
           daoCurrentImplementaion.address,
           DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -344,7 +345,7 @@ describe('DAO Upgrade', function () {
         await daoV100Proxy.upgradeToAndCall(
           daoCurrentImplementaion.address,
           DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );

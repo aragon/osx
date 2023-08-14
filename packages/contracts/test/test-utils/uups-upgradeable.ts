@@ -2,8 +2,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
 import {upgrades} from 'hardhat';
-import {DAO} from '../../typechain';
+import {DAO, PluginRepo} from '../../typechain';
 import {readImplementationValueFromSlot} from '../../utils/storage';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 
 // Deploys and upgrades a contract that is managed by a DAO
 export async function ozUpgradeCheckManagedContract(
@@ -122,6 +123,61 @@ export async function ozUpgradeCheckManagingContract(
   return {proxy, fromImplementation, toImplementation};
 }
 
+export async function upgradeCheck(
+  deployer: SignerWithAddress,
+  managingContract: DAO | PluginRepo | undefined,
+  initArgs: any,
+  initializerName: string,
+  factory: ContractFactory,
+  upgradePermissionId: string
+) {
+  // Deploy proxy and implementation
+  const proxy = await upgrades.deployProxy(
+    factory.connect(deployer),
+    Object.values(initArgs),
+    {
+      kind: 'uups',
+      initializer: initializerName,
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    }
+  );
+
+  // Deploy a new implementation (the same contract at a different address)
+  const newImpl = await factory.deploy();
+
+  // Grant the upgrade permission
+  const grantArgs: [string, string, string] = [
+    proxy.address,
+    deployer.address,
+    upgradePermissionId,
+  ];
+
+  if (managingContract !== undefined) {
+    // The permission manager is located in a different contract
+    await managingContract.connect(deployer).grant(...grantArgs);
+  } else {
+    // The contract is a permission manager itself
+    await proxy.connect(deployer).grant(...grantArgs);
+  }
+
+  // Confirm that the two implementations are different
+  const fromImplementation = await readImplementationValueFromSlot(
+    proxy.address
+  );
+  const toImplementation = newImpl.address;
+  expect(toImplementation).to.not.equal(fromImplementation);
+
+  // Upgrade from the old to the new implementation
+  await proxy.connect(deployer).upgradeTo(toImplementation);
+
+  // Confirm that the proxy points to the new implementation
+  const implementationAfterUpgrade = await readImplementationValueFromSlot(
+    proxy.address
+  );
+  expect(implementationAfterUpgrade).to.equal(toImplementation);
+}
+
 export async function getProtocolVersion(
   contract: Contract
 ): Promise<[number, number, number]> {
@@ -131,7 +187,7 @@ export async function getProtocolVersion(
     protocolVersion = await contract.protocolVersion();
   } catch (error) {
     if (error.code === errors.INVALID_ARGUMENT) {
-      protocolVersion = [1, 0, 0];
+      protocolVersion = IMPLICIT_INITIAL_PROTOCOL_VERSION;
     } else {
       throw error;
     }
