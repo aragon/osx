@@ -1,8 +1,4 @@
 import {expect} from 'chai';
-import {
-  readImplementationValuesFromSlot,
-  readImplementationValueFromSlot,
-} from '../../utils/storage';
 
 import hre, {ethers, deployments} from 'hardhat';
 import {Deployment} from 'hardhat-deploy/dist/types';
@@ -15,18 +11,16 @@ import {
   ENSSubdomainRegistrar__factory,
   Multisig,
   Multisig__factory,
+  PluginRepo,
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
+  PluginRepo__factory,
 } from '../../typechain';
-
-import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
-import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
-import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
-import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
-import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
 
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
+
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 async function deployAll() {
   await initializeDeploymentFixture('New');
@@ -37,6 +31,7 @@ describe('Managing DAO', function () {
   let deployer: SignerWithAddress;
   let approvers: SignerWithAddress[];
   let minApprovals: number;
+  let listedOnly: boolean;
 
   let managingDaoDeployment: Deployment;
   let managingDao: DAO;
@@ -45,44 +40,17 @@ describe('Managing DAO', function () {
   let daoRegistry: DAORegistry;
   let pluginRepoRegistryDeployment: Deployment;
   let pluginRepoRegistry: PluginRepoRegistry;
-  let ensSubdomainRegistrarDeployments: Deployment[];
-  let ensSubdomainRegistrars: ENSSubdomainRegistrar[];
+  let ensSubdomainRegistrars: {
+    pluginRegistrar: ENSSubdomainRegistrar;
+    daoRegistrar: ENSSubdomainRegistrar;
+  };
 
-  async function createAndExecuteUpgradeProposal(
-    contractAddress: string[],
-    newImplementationAddress: string,
-    approvers: SignerWithAddress[],
-    minApprovals: number
-  ) {
-    // create proposal to upgrade to new implementation
-    const data = DAO__factory.createInterface().encodeFunctionData(
-      'upgradeTo',
-      [newImplementationAddress]
-    );
-    const actions = contractAddress.map(contract => {
-      return {to: contract, value: 0, data: data};
-    });
-
-    const proposalId = await multisig.proposalCount();
-
-    // Create the proposal
-    await multisig.connect(approvers[0]).createProposal(
-      '0x', // metadata
-      actions,
-      0, // allowFailureMap
-      true, // approve proposal
-      true, // execute proposal
-      0, // start date: now
-      Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
-    );
-
-    // Approve the proposal
-    for (let index = 1; index < minApprovals; index++) {
-      await multisig.connect(approvers[index]).approve(proposalId, true);
-    }
-
-    expect((await multisig.getProposal(proposalId)).executed).to.be.true;
-  }
+  let pluginsRepos: {
+    tokenVoting: PluginRepo;
+    addresslistVoting: PluginRepo;
+    admin: PluginRepo;
+    multisig: PluginRepo;
+  };
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -101,6 +69,8 @@ describe('Managing DAO', function () {
     ) {
       throw new Error('Managing DAO Multisig settings not set in .env');
     }
+
+    listedOnly = process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
 
     minApprovals = parseInt(process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS);
 
@@ -147,20 +117,35 @@ describe('Managing DAO', function () {
     );
 
     // ENSSubdomainRegistrar
-    ensSubdomainRegistrarDeployments = [
-      await deployments.get('DAO_ENSSubdomainRegistrar'),
-      await deployments.get('Plugin_ENSSubdomainRegistrar'),
-    ];
-    ensSubdomainRegistrars = [
-      ENSSubdomainRegistrar__factory.connect(
-        ensSubdomainRegistrarDeployments[0].address,
+    ensSubdomainRegistrars = {
+      daoRegistrar: ENSSubdomainRegistrar__factory.connect(
+        (await deployments.get('DAO_ENSSubdomainRegistrar')).address,
         signers[0]
       ),
-      ENSSubdomainRegistrar__factory.connect(
-        ensSubdomainRegistrarDeployments[1].address,
+      pluginRegistrar: ENSSubdomainRegistrar__factory.connect(
+        (await deployments.get('Plugin_ENSSubdomainRegistrar')).address,
         signers[0]
       ),
-    ];
+    };
+
+    pluginsRepos = {
+      tokenVoting: PluginRepo__factory.connect(
+        hre.aragonPluginRepos['token-voting'],
+        signers[0]
+      ),
+      addresslistVoting: PluginRepo__factory.connect(
+        hre.aragonPluginRepos['address-list-voting'],
+        signers[0]
+      ),
+      admin: PluginRepo__factory.connect(
+        hre.aragonPluginRepos['admin'],
+        signers[0]
+      ),
+      multisig: PluginRepo__factory.connect(
+        hre.aragonPluginRepos['multisig'],
+        signers[0]
+      ),
+    };
 
     multisig = Multisig__factory.connect(
       hre.managingDAOMultisigPluginAddress,
@@ -168,241 +153,145 @@ describe('Managing DAO', function () {
     );
   });
 
-  it('should have deployments', async function () {
+  it('has deployments', async function () {
     expect(await deployments.all()).to.not.be.empty;
   });
 
-  it('should be able to upgrade `ManagingDAO` itself', async function () {
-    // deploy a new dao implementation.
-    await deployments.deploy('DAOv2', {
-      contract: daoArtifactData,
-      from: deployer.address,
-      args: [],
-      log: true,
+  it('has the `ROOT_PERMISSION_ID` permission on itself', async function () {
+    expect(
+      await managingDao.hasPermission(
+        managingDao.address,
+        managingDao.address,
+        ethers.utils.id('ROOT_PERMISSION'),
+        []
+      )
+    ).to.be.true;
+  });
+
+  describe('is controlled by a multisig', function () {
+    it('has the `EXECUTE_PERMISSION_ID` permission on the DAO', async function () {
+      expect(
+        await managingDao.hasPermission(
+          managingDao.address,
+          multisig.address,
+          ethers.utils.id('EXECUTE_PERMISSION'),
+          []
+        )
+      ).to.be.true;
     });
 
-    const managingDaoV2Deployment: Deployment = await deployments.get('DAOv2');
+    it('has the correct signers', async function () {
+      expect(await multisig.addresslistLength()).to.equal(approvers.length);
 
-    // make sure new `ManagingDAO` deployment is just an implementation and not a proxy
-    expect(managingDaoV2Deployment.implementation).to.be.equal(undefined);
+      const results = await Promise.all(
+        approvers.map(async approver => multisig.isListed(approver.address))
+      );
+      results.forEach(res => expect(res).to.be.true);
+    });
 
-    // check new implementation is different from the one on the ManagingDao.
-    // read from slot
-    let implementationAddress = await readImplementationValueFromSlot(
-      managingDao.address
-    );
-
-    expect(managingDaoV2Deployment.address).not.equal(implementationAddress);
-
-    // create proposal to upgrade to new implementation
-    await createAndExecuteUpgradeProposal(
-      [managingDao.address],
-      managingDaoV2Deployment.address,
-      approvers,
-      minApprovals
-    );
-
-    // re-read from slot
-    implementationAddress = await readImplementationValueFromSlot(
-      managingDao.address
-    );
-
-    expect(managingDaoV2Deployment.address).to.be.equal(implementationAddress);
+    it('has the correct settings', async function () {
+      const settings = await multisig.multisigSettings();
+      expect(settings.onlyListed).to.equal(listedOnly);
+      expect(settings.minApprovals).to.eq(minApprovals);
+    });
   });
 
-  it('Should be able to upgrade `DaoRegistry`', async function () {
-    // deploy a new implementation.
-    const daoRegistry_v1_0_0_Deployment = await deployments.deploy(
-      'DAORegistry_v1_0_0',
-      {
-        contract: daoRegistryArtifactData,
-        from: deployer.address,
-        args: [],
-        log: true,
-      }
-    );
+  describe('has permission to upgrade', function () {
+    it('itself', async function () {
+      expect(
+        await managingDao.hasPermission(
+          managingDao.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
 
-    // make sure new `DAORegistryV2` deployment is just an implementation and not a proxy
-    expect(daoRegistry_v1_0_0_Deployment.implementation).to.be.equal(undefined);
+    it('DaoRegistry', async function () {
+      expect(
+        await managingDao.hasPermission(
+          daoRegistry.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
 
-    // check new implementation is different from the one on the `DaoRegistry`.
-    // read from slot
-    let implementationAddress = await readImplementationValueFromSlot(
-      daoRegistry.address
-    );
+    it('PluginRepoRegistry', async function () {
+      expect(
+        await managingDao.hasPermission(
+          pluginRepoRegistry.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
 
-    expect(daoRegistry_v1_0_0_Deployment.address).not.equal(
-      implementationAddress
-    );
+    it('DAO_ENSSubdomainRegistrar', async function () {
+      expect(
+        await managingDao.hasPermission(
+          ensSubdomainRegistrars.daoRegistrar.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
+    it('Plugin_ENSSubdomainRegistrar', async function () {
+      expect(
+        await managingDao.hasPermission(
+          ensSubdomainRegistrars.pluginRegistrar.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
 
-    // create proposal to upgrade to new implementation
-    await createAndExecuteUpgradeProposal(
-      [daoRegistry.address],
-      daoRegistry_v1_0_0_Deployment.address,
-      approvers,
-      minApprovals
-    );
+    it('the TokenVoting PluginRepo', async function () {
+      expect(
+        await pluginsRepos.tokenVoting.isGranted(
+          pluginsRepos.tokenVoting.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
 
-    // re-read from slot
-    implementationAddress = await readImplementationValueFromSlot(
-      daoRegistry.address
-    );
+    it('the AddresslistVoting PluginRepo', async function () {
+      expect(
+        await pluginsRepos.addresslistVoting.isGranted(
+          pluginsRepos.addresslistVoting.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
 
-    expect(daoRegistry_v1_0_0_Deployment.address).to.be.equal(
-      implementationAddress
-    );
-  });
-
-  it('Should be able to upgrade `PluginRepoRegistry`', async function () {
-    // deploy a new implementation.
-    const pluginRepoRegistry_v1_0_0_Deployment = await deployments.deploy(
-      'PluginRepoRegistry_v1_0_0',
-      {
-        contract: pluginRepoRegistryArtifactData,
-        from: deployer.address,
-        args: [],
-        log: true,
-      }
-    );
-
-    // make sure new `PluginRepoRegistryV2` deployment is just an implementation and not a proxy
-    expect(pluginRepoRegistry_v1_0_0_Deployment.implementation).to.be.equal(
-      undefined
-    );
-
-    // check new implementation is different from the one on the `DaoRegistry`.
-    // read from slot
-    let implementationAddress = await readImplementationValueFromSlot(
-      pluginRepoRegistry.address
-    );
-
-    expect(pluginRepoRegistry_v1_0_0_Deployment.address).not.equal(
-      implementationAddress
-    );
-
-    // create proposal to upgrade to new implementation
-    await createAndExecuteUpgradeProposal(
-      [pluginRepoRegistry.address],
-      pluginRepoRegistry_v1_0_0_Deployment.address,
-      approvers,
-      minApprovals
-    );
-
-    // re-read from slot
-    implementationAddress = await readImplementationValueFromSlot(
-      pluginRepoRegistry.address
-    );
-
-    expect(pluginRepoRegistry_v1_0_0_Deployment.address).to.be.equal(
-      implementationAddress
-    );
-  });
-
-  it('Should be able to upgrade `ENSSubdomainRegistrar`', async function () {
-    // deploy a new implementation.
-    const ensSubdomainRegistrar_v1_0_0_Deployment = await deployments.deploy(
-      'ENSSubdomainRegistrar_v1_0_0',
-      {
-        contract: ensSubdomainRegistrarArtifactData,
-        from: deployer.address,
-        args: [],
-        log: true,
-      }
-    );
-
-    // make sure new `ENSSubdomainRegistrarV2` deployment is just an implementation and not a proxy
-    expect(ensSubdomainRegistrar_v1_0_0_Deployment.implementation).to.be.equal(
-      undefined
-    );
-
-    // check new implementation is different from the one on the `DaoRegistry`.
-    // read from slot
-    let implementationValues = await readImplementationValuesFromSlot([
-      ensSubdomainRegistrars[0].address,
-      ensSubdomainRegistrars[1].address,
-    ]);
-
-    for (let index = 0; index < implementationValues.length; index++) {
-      const implementationAddress = implementationValues[index];
-      expect(ensSubdomainRegistrar_v1_0_0_Deployment.address).not.equal(
-        implementationAddress
-      );
-    }
-
-    // create proposal to upgrade to new implementation
-    await createAndExecuteUpgradeProposal(
-      ensSubdomainRegistrars.map(ensSR => ensSR.address),
-      ensSubdomainRegistrar_v1_0_0_Deployment.address,
-      approvers,
-      minApprovals
-    );
-
-    // re-read from slot
-    implementationValues = await readImplementationValuesFromSlot([
-      ensSubdomainRegistrars[0].address,
-      ensSubdomainRegistrars[1].address,
-    ]);
-
-    for (let index = 0; index < implementationValues.length; index++) {
-      const implementationAddress = implementationValues[index];
-      expect(ensSubdomainRegistrar_v1_0_0_Deployment.address).to.be.equal(
-        implementationAddress
-      );
-    }
-  });
-
-  it('Should be able to upgrade `PluginRepo`s', async function () {
-    // deploy a new implementation.
-    const PluginRepo_v1_0_0_Deployment = await deployments.deploy(
-      'PluginRepo_v1_0_0',
-      {
-        contract: pluginRepoArtifactData,
-        from: deployer.address,
-        args: [],
-        log: true,
-      }
-    );
-
-    // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
-    expect(PluginRepo_v1_0_0_Deployment.implementation).to.be.equal(undefined);
-
-    // check new implementation is different from the one on the `DaoRegistry`.
-    // read from slot
-    let implementationValues = await readImplementationValuesFromSlot([
-      hre.aragonPluginRepos['token-voting'],
-      hre.aragonPluginRepos['address-list-voting'],
-      hre.aragonPluginRepos['admin'],
-      hre.aragonPluginRepos['multisig'],
-    ]);
-
-    for (let index = 0; index < implementationValues.length; index++) {
-      const implementationAddress = implementationValues[index];
-      expect(PluginRepo_v1_0_0_Deployment.address).to.not.equal(
-        implementationAddress
-      );
-    }
-
-    // create proposal to upgrade to new implementation
-    await createAndExecuteUpgradeProposal(
-      Object.values(hre.aragonPluginRepos),
-      PluginRepo_v1_0_0_Deployment.address,
-      approvers,
-      minApprovals
-    );
-
-    // re-read from slot
-    implementationValues = await readImplementationValuesFromSlot([
-      hre.aragonPluginRepos['token-voting'],
-      hre.aragonPluginRepos['address-list-voting'],
-      hre.aragonPluginRepos['admin'],
-      hre.aragonPluginRepos['multisig'],
-    ]);
-
-    for (let index = 0; index < implementationValues.length; index++) {
-      const implementationAddress = implementationValues[index];
-      expect(PluginRepo_v1_0_0_Deployment.address).to.be.equal(
-        implementationAddress
-      );
-    }
+    it('the Admin PluginRepo', async function () {
+      expect(
+        await pluginsRepos.admin.isGranted(
+          pluginsRepos.admin.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
+    it('the Multisig PluginRepo', async function () {
+      expect(
+        await pluginsRepos.multisig.isGranted(
+          pluginsRepos.multisig.address,
+          managingDao.address,
+          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+          []
+        )
+      ).to.be.true;
+    });
   });
 });
