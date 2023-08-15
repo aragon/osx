@@ -97,59 +97,56 @@ describe('Managing DAO', function () {
 
     // ManagingDAO
     managingDaoDeployment = await deployments.get('DAO');
-    managingDao = DAO__factory.connect(
-      managingDaoDeployment.address,
-      signers[0]
-    );
+    managingDao = DAO__factory.connect(managingDaoDeployment.address, deployer);
 
     // DAORegistry
     daoRegistryDeployment = await deployments.get('DAORegistry');
     daoRegistry = DAORegistry__factory.connect(
       daoRegistryDeployment.address,
-      signers[0]
+      deployer
     );
 
     // PluginRepoRegistry
     pluginRepoRegistryDeployment = await deployments.get('PluginRepoRegistry');
     pluginRepoRegistry = PluginRepoRegistry__factory.connect(
       pluginRepoRegistryDeployment.address,
-      signers[0]
+      deployer
     );
 
     // ENSSubdomainRegistrar
     ensSubdomainRegistrars = {
       daoRegistrar: ENSSubdomainRegistrar__factory.connect(
         (await deployments.get('DAO_ENSSubdomainRegistrar')).address,
-        signers[0]
+        deployer
       ),
       pluginRegistrar: ENSSubdomainRegistrar__factory.connect(
         (await deployments.get('Plugin_ENSSubdomainRegistrar')).address,
-        signers[0]
+        deployer
       ),
     };
 
     pluginsRepos = {
       tokenVoting: PluginRepo__factory.connect(
         hre.aragonPluginRepos['token-voting'],
-        signers[0]
+        deployer
       ),
       addresslistVoting: PluginRepo__factory.connect(
         hre.aragonPluginRepos['address-list-voting'],
-        signers[0]
+        deployer
       ),
       admin: PluginRepo__factory.connect(
         hre.aragonPluginRepos['admin'],
-        signers[0]
+        deployer
       ),
       multisig: PluginRepo__factory.connect(
         hre.aragonPluginRepos['multisig'],
-        signers[0]
+        deployer
       ),
     };
 
     multisig = Multisig__factory.connect(
       hre.managingDAOMultisigPluginAddress,
-      signers[0]
+      deployer
     );
   });
 
