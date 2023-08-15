@@ -27,7 +27,6 @@ async function deployAll() {
 }
 
 describe('Managing DAO', function () {
-  let signers: SignerWithAddress[];
   let deployer: SignerWithAddress;
   let approvers: SignerWithAddress[];
   let minApprovals: number;
@@ -53,8 +52,7 @@ describe('Managing DAO', function () {
   };
 
   before(async () => {
-    signers = await ethers.getSigners();
-    [deployer] = signers;
+    [deployer] = await ethers.getSigners();
 
     // deployment should be empty
     expect(await deployments.all()).to.be.empty;
