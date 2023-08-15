@@ -20,7 +20,12 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
 
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {
+  EXECUTE_PERMISSION_ID,
+  MAINTAINER_PERMISSION_ID,
+  ROOT_PERMISSION_ID,
+  UPGRADE_PERMISSIONS,
+} from '../test-utils/permissions';
 
 async function deployAll() {
   await initializeDeploymentFixture('New');
@@ -157,19 +162,19 @@ describe('Managing DAO', function () {
       await managingDao.hasPermission(
         managingDao.address,
         managingDao.address,
-        ethers.utils.id('ROOT_PERMISSION'),
+        ROOT_PERMISSION_ID,
         []
       )
     ).to.be.true;
   });
 
-  describe('is controlled by a multisig', function () {
+  describe('Associated Multisig Plugin', function () {
     it('has the `EXECUTE_PERMISSION_ID` permission on the DAO', async function () {
       expect(
         await managingDao.hasPermission(
           managingDao.address,
           multisig.address,
-          ethers.utils.id('EXECUTE_PERMISSION'),
+          EXECUTE_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -191,8 +196,8 @@ describe('Managing DAO', function () {
     });
   });
 
-  describe('has permission to upgrade', function () {
-    it('itself', async function () {
+  describe('permissions', function () {
+    it('has permission to upgrade itself', async function () {
       expect(
         await managingDao.hasPermission(
           managingDao.address,
@@ -203,7 +208,7 @@ describe('Managing DAO', function () {
       ).to.be.true;
     });
 
-    it('DaoRegistry', async function () {
+    it('has permission to upgrade DaoRegistry', async function () {
       expect(
         await managingDao.hasPermission(
           daoRegistry.address,
@@ -214,7 +219,7 @@ describe('Managing DAO', function () {
       ).to.be.true;
     });
 
-    it('PluginRepoRegistry', async function () {
+    it('has permission to upgrade PluginRepoRegistry', async function () {
       expect(
         await managingDao.hasPermission(
           pluginRepoRegistry.address,
@@ -225,7 +230,7 @@ describe('Managing DAO', function () {
       ).to.be.true;
     });
 
-    it('DAO_ENSSubdomainRegistrar', async function () {
+    it('has permission to upgrade DAO_ENSSubdomainRegistrar', async function () {
       expect(
         await managingDao.hasPermission(
           ensSubdomainRegistrars.daoRegistrar.address,
@@ -235,7 +240,7 @@ describe('Managing DAO', function () {
         )
       ).to.be.true;
     });
-    it('Plugin_ENSSubdomainRegistrar', async function () {
+    it('has permission to upgrade Plugin_ENSSubdomainRegistrar', async function () {
       expect(
         await managingDao.hasPermission(
           ensSubdomainRegistrars.pluginRegistrar.address,
@@ -246,47 +251,98 @@ describe('Managing DAO', function () {
       ).to.be.true;
     });
 
-    it('the TokenVoting PluginRepo', async function () {
-      expect(
-        await pluginsRepos.tokenVoting.isGranted(
-          pluginsRepos.tokenVoting.address,
-          managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-          []
-        )
-      ).to.be.true;
+    context('Multisig Repo', async function () {
+      it('has permission to upgrade the TokenVoting PluginRepo', async function () {
+        expect(
+          await pluginsRepos.tokenVoting.isGranted(
+            pluginsRepos.tokenVoting.address,
+            managingDao.address,
+            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
+
+      it('has permission to maintain the repo', async function () {
+        expect(
+          await pluginsRepos.tokenVoting.isGranted(
+            pluginsRepos.tokenVoting.address,
+            managingDao.address,
+            MAINTAINER_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
     });
 
-    it('the AddresslistVoting PluginRepo', async function () {
-      expect(
-        await pluginsRepos.addresslistVoting.isGranted(
-          pluginsRepos.addresslistVoting.address,
-          managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-          []
-        )
-      ).to.be.true;
+    context('AddresslistVoting Repo', async function () {
+      it('has permission to upgrade the repo', async function () {
+        expect(
+          await pluginsRepos.addresslistVoting.isGranted(
+            pluginsRepos.addresslistVoting.address,
+            managingDao.address,
+            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
+      it('has permission to maintain the repo', async function () {
+        expect(
+          await pluginsRepos.addresslistVoting.isGranted(
+            pluginsRepos.addresslistVoting.address,
+            managingDao.address,
+            MAINTAINER_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
     });
 
-    it('the Admin PluginRepo', async function () {
-      expect(
-        await pluginsRepos.admin.isGranted(
-          pluginsRepos.admin.address,
-          managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-          []
-        )
-      ).to.be.true;
+    context('Admin Repo', async function () {
+      it('has permission to upgrade the repo', async function () {
+        expect(
+          await pluginsRepos.admin.isGranted(
+            pluginsRepos.admin.address,
+            managingDao.address,
+            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
+      it('has permission to maintain the repo', async function () {
+        expect(
+          await pluginsRepos.admin.isGranted(
+            pluginsRepos.admin.address,
+            managingDao.address,
+            MAINTAINER_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
     });
-    it('the Multisig PluginRepo', async function () {
-      expect(
-        await pluginsRepos.multisig.isGranted(
-          pluginsRepos.multisig.address,
-          managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-          []
-        )
-      ).to.be.true;
+
+    context('Multisig Repo', async function () {
+      it('has permission to upgrade the repo', async function () {
+        expect(
+          await pluginsRepos.multisig.isGranted(
+            pluginsRepos.multisig.address,
+            managingDao.address,
+            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
+
+      it('has permission to maintain the repo', async function () {
+        expect(
+          await pluginsRepos.multisig.isGranted(
+            pluginsRepos.multisig.address,
+            managingDao.address,
+            MAINTAINER_PERMISSION_ID,
+            []
+          )
+        ).to.be.true;
+      });
     });
   });
 });
