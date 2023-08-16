@@ -165,6 +165,8 @@ templates:
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC721
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC721/ERC721.sol/ERC721.json
+        - name: ERC1155
+          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC1155/ERC1155.sol/ERC1155.json
         - name: ERC165
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: TokenVoting
