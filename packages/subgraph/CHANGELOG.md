@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Fixed missing interfaces of ERC20, ERC721, TokenVoting, AddresslistVoting, and CallbackHandler from DAO v1.3.0.
+- Fixed missing interfaces of ERC20, ERC721, TokenVoting, AddresslistVoting, and CallbackHandler from Aragon OSx v1.3.0.
 
 ## [1.2.1]
 
