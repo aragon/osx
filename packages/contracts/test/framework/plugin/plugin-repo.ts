@@ -98,7 +98,6 @@ describe('PluginRepo', function () {
         await upgradeToSelfCheck(
           signers[0],
           signers[1],
-          undefined,
           initArgs,
           'initialize',
           currentContractFactory,

@@ -10,11 +10,11 @@ import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 export async function upgradeToSelfCheck(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
-  managingContract: DAO | PluginRepo | undefined,
   initArgs: any,
   initializerName: string,
   factory: ContractFactory,
-  upgradePermissionId: string
+  upgradePermissionId: string,
+  managingContract?: DAO | PluginRepo | undefined
 ) {
   // Deploy proxy and implementation
   const proxy = await upgrades.deployProxy(

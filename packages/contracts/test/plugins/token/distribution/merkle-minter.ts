@@ -114,11 +114,11 @@ describe('MerkleMinter', function () {
       await upgradeToSelfCheck(
         signers[0],
         signers[1],
-        managingDao,
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        managingDao
       );
     });
 

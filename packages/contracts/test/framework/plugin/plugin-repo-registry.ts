@@ -282,11 +282,11 @@ describe('PluginRepoRegistry', function () {
       await upgradeToSelfCheck(
         signers[0],
         signers[1],
-        managingDAO,
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+        managingDAO
       );
     });
 

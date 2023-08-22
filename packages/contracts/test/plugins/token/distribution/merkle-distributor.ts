@@ -104,11 +104,11 @@ describe('MerkleDistributor', function () {
       await upgradeToSelfCheck(
         signers[0],
         signers[1],
-        dao,
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
       );
     });
 

@@ -312,11 +312,11 @@ describe('ENSSubdomainRegistrar', function () {
       await upgradeToSelfCheck(
         signers[0],
         signers[1],
-        managingDao,
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID
+        UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+        managingDao
       );
     });
 
