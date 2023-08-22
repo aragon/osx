@@ -7,7 +7,7 @@ import {readImplementationValueFromSlot} from '../../utils/storage';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 
 // Deploys a proxy and a new implementation from the same factory and checks that the upgrade works.
-export async function upgradeToSelfCheck(
+export async function deployAndUpgradeSelfCheck(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
   initArgs: any,
@@ -82,7 +82,7 @@ export async function upgradeToSelfCheck(
 }
 
 // Deploys a proxy and a new implementation via two different factories and checks that the upgrade works.
-export async function upgradeToOtherCheck(
+export async function deployAndUpgradeFromToCheck(
   deployer: SignerWithAddress,
   upgrader: SignerWithAddress,
   initArgs: any,

@@ -26,8 +26,8 @@ import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   getProtocolVersion,
-  upgradeToOtherCheck,
-  upgradeToSelfCheck,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -111,7 +111,7 @@ describe('MerkleMinter', function () {
     });
 
     it('upgrades to a new implementation', async () => {
-      await upgradeToSelfCheck(
+      await deployAndUpgradeSelfCheck(
         signers[0],
         signers[1],
         initArgs,
@@ -125,16 +125,17 @@ describe('MerkleMinter', function () {
     it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new MerkleMinter_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} = await upgradeToOtherCheck(
-        signers[0],
-        signers[1],
-        initArgs,
-        'initialize',
-        legacyContractFactory,
-        currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-        managingDao
-      );
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          managingDao
+        );
       expect(toImplementation).to.equal(fromImplementation); // The build did not change
 
       const fromProtocolVersion = await getProtocolVersion(

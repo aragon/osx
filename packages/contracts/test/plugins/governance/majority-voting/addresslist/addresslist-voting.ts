@@ -51,8 +51,8 @@ import {getInterfaceID} from '../../../../test-utils/interfaces';
 
 import {
   getProtocolVersion,
-  upgradeToOtherCheck,
-  upgradeToSelfCheck,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../../../test-utils/uups-upgradeable';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -151,7 +151,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('upgrades to a new implementation', async () => {
-      await upgradeToSelfCheck(
+      await deployAndUpgradeSelfCheck(
         signers[0],
         signers[1],
         initArgs,
@@ -165,17 +165,18 @@ describe('AddresslistVoting', function () {
     it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new AddresslistVoting_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} = await upgradeToOtherCheck(
-        signers[0],
-        signers[1],
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
 
-        initArgs,
-        'initialize',
-        legacyContractFactory,
-        currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-        dao
-      );
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
+        );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
 
       const fromProtocolVersion = await getProtocolVersion(
