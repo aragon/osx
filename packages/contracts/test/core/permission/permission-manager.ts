@@ -21,15 +21,15 @@ const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
   ethers.utils.id('TEST_PERMISSION_2'),
 ];
 
-const UNSET_FLAG = ethers.utils.getAddress(
+export const UNSET_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000000'
 );
-const ALLOW_FLAG = ethers.utils.getAddress(
+export const ALLOW_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000002'
 );
+export const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 const addressZero = ethers.constants.AddressZero;
-const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 let conditionMock: PermissionConditionMock;
 

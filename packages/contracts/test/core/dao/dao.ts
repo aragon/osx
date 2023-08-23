@@ -11,7 +11,6 @@ import {
   TestERC721__factory,
   TestERC1155,
   TestERC1155__factory,
-  ERC1271Mock__factory,
   GasConsumer__factory,
   DAO__factory,
   IDAO__factory,
@@ -21,6 +20,7 @@ import {
   IERC1271__factory,
   IEIP4824__factory,
   IProtocolVersion__factory,
+  PermissionConditionMock__factory,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 
@@ -48,6 +48,7 @@ import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {ANY_ADDR} from '../permission/permission-manager';
 
 chai.use(smock.matchers);
 
@@ -82,8 +83,8 @@ export const PERMISSION_IDS = {
   UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
-  SET_SIGNATURE_VALIDATOR_PERMISSION_ID: ethers.utils.id(
-    'SET_SIGNATURE_VALIDATOR_PERMISSION'
+  VALIDATE_SIGNATURE_PERMISSION_ID: ethers.utils.id(
+    'VALIDATE_SIGNATURE_PERMISSION'
   ),
   SET_TRUSTED_FORWARDER_PERMISSION_ID: ethers.utils.id(
     'SET_TRUSTED_FORWARDER_PERMISSION'
@@ -93,6 +94,9 @@ export const PERMISSION_IDS = {
     'REGISTER_STANDARD_CALLBACK_PERMISSION'
   ),
 };
+
+export const VALID_ERC1271_SIGNATURE = '0x1626ba7e';
+export const INVALID_ERC1271_SIGNATURE = '0xffffffff';
 
 describe('DAO', function () {
   let signers: SignerWithAddress[];
@@ -135,7 +139,7 @@ describe('DAO', function () {
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
+        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
@@ -1178,90 +1182,161 @@ describe('DAO', function () {
       ).to.be.eq(true);
     });
 
-    it('should return 0 if no validator is set', async () => {
+    it('allows caller specific signature validation', async () => {
+      const caller = signers[0];
+      const signer = signers[1];
+
+      const message = 'Hi!';
+      const hash = ethers.utils.hashMessage(message);
+      const goodSignature = await signer.signMessage(message);
+      const badSignature = await signer.signMessage('Bye!');
+      expect(badSignature).to.not.equal(goodSignature);
+
+      // Try to call with caller but caller has no permission
+      expect(await dao.connect(caller).isValidSignature(hash, goodSignature))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs();
+
+      // Grant the permission to validate signatures to the caller unconditionally
+      await dao.grant(
+        dao.address,
+        caller.address,
+        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
+      );
+
+      // The caller can validate signatures now.
+      expect(await dao.connect(caller).isValidSignature(hash, goodSignature)).to
+        .not.be.reverted;
+
+      // Because the caller is allowed unconditionally, the validation is always true.
       expect(
-        await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
-      ).to.be.eq('0x00000000');
+        await dao.connect(caller).isValidSignature(hash, goodSignature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+      expect(
+        await dao.connect(caller).isValidSignature(hash, badSignature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
     });
 
-    it('should allow only `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` to set validator', async () => {
+    it('allows caller specific signature validation', async () => {
+      const caller = signers[0];
+      const signer = signers[1];
+
+      const message = 'Hi!';
+      const hash = ethers.utils.hashMessage(message);
+      const goodSignature = await signer.signMessage(message);
+      const badSignature = await signer.signMessage('Bye!');
+      expect(badSignature).to.not.equal(goodSignature);
+
+      // Try to call with caller but caller has no permission
+      expect(await dao.connect(caller).isValidSignature(hash, goodSignature))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs();
+
+      // Grant the permission to validate signatures to the caller unconditionally
+      await dao.grant(
+        dao.address,
+        caller.address,
+        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
+      );
+
+      // The caller can validate signatures now.
+      expect(await dao.connect(caller).isValidSignature(hash, goodSignature)).to
+        .not.be.reverted;
+
+      // Because the caller is allowed unconditionally, the signature is always valid.
+      expect(
+        await dao.connect(caller).isValidSignature(hash, goodSignature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+      expect(
+        await dao.connect(caller).isValidSignature(hash, badSignature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+    });
+
+    it('allows generic signature validation', async () => {
+      const caller = signers[0];
+      const signer = signers[1];
+      const other = signers[3];
+
+      const message = 'Hi!';
+      const hash = ethers.utils.hashMessage(message);
+      const goodSignature = await signer.signMessage(message);
+      const badSignature = await signer.signMessage('Bye!');
+      expect(badSignature).to.not.equal(goodSignature);
+
+      // Try to call with caller but caller has no permission
+      expect(await dao.connect(caller).isValidSignature(hash, goodSignature))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs();
+
+      const mockCondition = await new PermissionConditionMock__factory(
+        caller
+      ).deploy();
+
+      // Grant the permission to validate signatures to the caller conditionally (granting it unconditionally is not possible in combination with `_who: ANY_ADDR`)
+      await dao.grantWithCondition(
+        dao.address,
+        ANY_ADDR,
+        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+        mockCondition.address
+      );
+
+      // Any contract can validate signatures now.
+      expect(await dao.connect(caller).isValidSignature(hash, goodSignature)).to
+        .not.be.reverted;
+      expect(await dao.connect(other).isValidSignature(hash, goodSignature)).to
+        .not.be.reverted;
+
+      // Because we use a mock condition always returning true, the signature is always valid.
+      expect(
+        await dao.connect(caller).isValidSignature(hash, goodSignature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+      expect(
+        await dao.connect(caller).isValidSignature(hash, badSignature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+    });
+
+    it('should revert if `setSignatureValidator` is called', async () => {
       await expect(
         dao
           .connect(signers[2])
           .setSignatureValidator(ethers.Wallet.createRandom().address)
-      )
+      ).to.be.revertedWithCustomError(dao, 'FunctionDeprecated');
+    });
+  });
+
+  describe('ERC4824 - daoURI', async () => {
+    it('should set a new URI', async () => {
+      const newURI = 'https://new.example.com';
+      expect(await dao.daoURI()).not.to.be.eq(newURI);
+      await dao.setDaoURI(newURI);
+      expect(await dao.daoURI()).to.be.eq(newURI);
+    });
+
+    it('should emit DaoURIUpdated', async () => {
+      const newURI = 'https://new.example.com';
+      await expect(dao.setDaoURI(newURI))
+        .to.emit(dao, DAO_EVENTS.NEW_URI)
+        .withArgs(newURI);
+    });
+
+    it('should revert if the sender lacks the permission to update the URI', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+      );
+
+      await expect(dao.setDaoURI('https://new.example.com'))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
-          dao.address,
-          signers[2].address,
-          PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
-        );
-    });
-
-    it('should set validator and emits event', async () => {
-      const validatorAddress = ethers.Wallet.createRandom().address;
-      const tx = await dao.setSignatureValidator(validatorAddress);
-
-      expect(await dao.signatureValidator()).to.be.eq(validatorAddress);
-
-      await expect(tx)
-        .to.emit(dao, EVENTS.SignatureValidatorSet)
-        .withArgs(validatorAddress);
-    });
-
-    it('should call the signature validator', async () => {
-      const ERC1271MockFactory = await smock.mock('ERC1271Mock');
-      const erc1271Mock = await ERC1271MockFactory.deploy();
-
-      await dao.setSignatureValidator(erc1271Mock.address);
-      await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00');
-      expect(erc1271Mock.isValidSignature).has.been.callCount(1);
-    });
-
-    it('should return the validators response', async () => {
-      const ERC1271MockFactory = new ERC1271Mock__factory(signers[0]);
-      const erc1271Mock = await ERC1271MockFactory.deploy();
-
-      await dao.setSignatureValidator(erc1271Mock.address);
-      expect(
-        await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
-      ).to.be.eq('0x41424344');
-    });
-
-    describe('ERC4824 - daoURI', async () => {
-      it('should set a new URI', async () => {
-        const newURI = 'https://new.example.com';
-        expect(await dao.daoURI()).not.to.be.eq(newURI);
-        await dao.setDaoURI(newURI);
-        expect(await dao.daoURI()).to.be.eq(newURI);
-      });
-
-      it('should emit DaoURIUpdated', async () => {
-        const newURI = 'https://new.example.com';
-        await expect(dao.setDaoURI(newURI))
-          .to.emit(dao, DAO_EVENTS.NEW_URI)
-          .withArgs(newURI);
-      });
-
-      it('should revert if the sender lacks the permission to update the URI', async () => {
-        await dao.revoke(
           dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_METADATA_PERMISSION_ID
         );
+    });
 
-        await expect(dao.setDaoURI('https://new.example.com'))
-          .to.be.revertedWithCustomError(dao, 'Unauthorized')
-          .withArgs(
-            dao.address,
-            ownerAddress,
-            PERMISSION_IDS.SET_METADATA_PERMISSION_ID
-          );
-      });
-
-      it('should return the DAO URI', async () => {
-        expect(await dao.daoURI()).to.be.eq(daoExampleURI);
-      });
+    it('should return the DAO URI', async () => {
+      expect(await dao.daoURI()).to.be.eq(daoExampleURI);
     });
   });
 });
