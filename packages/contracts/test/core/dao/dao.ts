@@ -1182,6 +1182,19 @@ describe('DAO', function () {
       ).to.be.eq(true);
     });
 
+    it('reverts all signatures requests by default', async () => {
+      const caller = signers[0];
+      const signer = signers[1];
+
+      const message = 'Hi!';
+      const hash = ethers.utils.hashMessage(message);
+      const signature = await signer.signMessage(message);
+
+      // The caller can validate signatures now.
+      expect(await dao.connect(caller).isValidSignature(hash, signature)).to.be
+        .reverted;
+    });
+
     it('allows caller specific signature validation', async () => {
       const caller = signers[0];
       const signer = signers[1];
