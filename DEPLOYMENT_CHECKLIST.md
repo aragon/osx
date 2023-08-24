@@ -4,8 +4,9 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 
 ## Pre-Deployment
 
-- [ ] Make sure you are using Node v16 
+- [ ] Make sure you are using Node v16
 - [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
+- [ ] Check that version tags are set correctly in the plugin repo deploy scripts `packages/contracts/deploy/new/30_plugins/10_plugin-repos` to ensure synchronized version numbers across all supported networks.
 - [ ] Choose an ENS domain for DAOs
 - [ ] Choose an ENS domain for plugins
 - [ ] Check if there is an official ENS deployment for the chosen chain and if yes:
@@ -16,7 +17,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
   - [ ] Check that the compiler version in `hardhat.config.ts` is set to at least `0.8.17` and on the [known solidity bugs page](https://docs.soliditylang.org/en/latest/bugs.html) that no relevant vulnerabilities exist that are fixed in later versions. If the latter is not the case, consider updating the compiler pragmas to a safe version and rolling out fixes for affected contracts.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
-- [ ] Run `yarn deploy --network hardhat --reset` to make sure the deploy scripts work
+- [ ] Run `yarn deploy --deploy-scripts deploy/new --network hardhat --reset` to make sure the deploy scripts work
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Set the chosen DAO ENS domain (in step 1) to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
@@ -61,6 +62,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Check if the `PluginRepoRegistry` set in the `PluginSetupProcessor`
 - [ ] Check if the `DAORegistry` set in the `DAOFactory`
 - [ ] Check if the `PluginSetupProcessor` set in the `DAOFactory`
+- [ ] Check that the versions (and eventual `PlaceholderSetup` builds) are published correctly in the `token-voting-repo`, `address-list-voting-repo`, `multisig-repo`, and `admin-repo` and are synchronized across all supported networks.
 
 ### Permissions
 

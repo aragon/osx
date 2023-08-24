@@ -96,9 +96,27 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_KEY || '',
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumTestnet: process.env.ARBISCAN_KEY || '',
+      baseMainnet: process.env.BASESCAN_KEY || '',
       baseGoerli: process.env.BASESCAN_KEY || '',
     },
-    customChains: [],
+    customChains: [
+      {
+        network: 'baseMainnet',
+        chainId: 8453,
+        urls: {
+          apiURL: 'https://api.basescan.org/api',
+          browserURL: 'https://basescan.org',
+        },
+      },
+      {
+        network: 'baseGoerli',
+        chainId: 84531,
+        urls: {
+          apiURL: 'https://api-goerli.basescan.org/api',
+          browserURL: 'https://goerli.basescan.org',
+        },
+      },
+    ],
   },
   namedAccounts: {
     deployer: 0,
