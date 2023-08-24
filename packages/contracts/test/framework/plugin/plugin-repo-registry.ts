@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {ContractFactory} from 'ethers';
 
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
@@ -9,13 +10,19 @@ import {
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
 } from '../../../typechain';
+import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol';
+
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {ensDomainHash} from '../../../utils/ens';
 import {deployWithProxy} from '../../test-utils/proxy';
-import {shouldUpgradeCorrectly} from '../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagedContract,
+} from '../../test-utils/uups-upgradeable';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -83,18 +90,7 @@ describe('PluginRepoRegistry', function () {
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
-
-    this.upgrade = {
-      contract: pluginRepoRegistry,
-      dao: managingDAO,
-      user: signers[8],
-    };
   });
-
-  shouldUpgradeCorrectly(
-    UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
-    'DaoUnauthorized'
-  );
 
   it('successfully sets subdomainregistrar', async () => {
     expect(await pluginRepoRegistry.subdomainRegistrar()).to.equal(
@@ -260,5 +256,48 @@ describe('PluginRepoRegistry', function () {
           .withArgs(subdomainName);
       }
     }).timeout(120000);
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+
+    before(() => {
+      currentContractFactory = new PluginRepoRegistry__factory(signers[0]);
+    });
+
+    it('from v1.0.0', async () => {
+      legacyContractFactory = new PluginRepoRegistry_V1_0_0__factory(
+        signers[0]
+      );
+
+      const {fromImplementation, toImplementation} =
+        await ozUpgradeCheckManagedContract(
+          signers[0],
+          signers[1],
+          managingDAO,
+          {
+            dao: managingDAO.address,
+            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+          },
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+        );
+
+      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
   });
 });

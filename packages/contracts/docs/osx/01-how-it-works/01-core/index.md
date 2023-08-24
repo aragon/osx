@@ -26,8 +26,6 @@ In a nutshell, your Aragon OSx DAO consists of three pieces:
 
 The underlying smart contracts constitute **the core contracts** of the Aragon OSx DAO framework.
 
-The following graphic shows how an exemplary DAO setup, where the
-
 <div class="center-column">
 
 ![Schematic depiction of the interaction between the DAO, the PermissionManager, and a Plugin contract.](dao-plugin.drawio.svg)

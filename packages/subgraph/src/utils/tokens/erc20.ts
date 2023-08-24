@@ -21,12 +21,12 @@ export function supportsERC20Wrapped(token: Address): bool {
   if (!introspection_wrapped_erc20) {
     return false;
   }
-  let introspection_00000000 = supportsInterface(
+  let introspection_ffffffff = supportsInterface(
     erc20Wrapped,
-    '00000000',
+    'ffffffff',
     false
   );
-  return introspection_00000000;
+  return introspection_ffffffff;
 }
 
 export function fetchWrappedERC20(

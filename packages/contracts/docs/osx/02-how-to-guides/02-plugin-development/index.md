@@ -191,7 +191,7 @@ If you want to review how to publish your plugin in more depth, review our [How 
 
 ### Next Steps
 
-Congratulations 🎉! You HAve developed a plugin that every Aragon DAO will be able to use.
+Congratulations 🎉! You have developed a plugin that every Aragon DAO will be able to use.
 
 Currently, it is not doing much. Let's change this by adding additional functionality. You check out our [existing plugins](https://github.com/aragon/osx/tree/develop/packages/contracts/src/plugins) as inspiration.
 

@@ -8,9 +8,9 @@ import {
   PluginRepo__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginRepoRegistry__factory,
+  PluginRepoFactory__factory,
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
-import {getMergedABI} from '../../utils/abi';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 export async function deployMockPluginSetup(
@@ -36,23 +36,12 @@ export async function deployPluginRepoFactory(
   signers: any,
   pluginRepoRegistry: PluginRepoRegistry
 ): Promise<PluginRepoFactory> {
-  const {abi, bytecode} = await getMergedABI(
-    // @ts-ignore
-    hre,
-    'PluginRepoFactory',
-    ['PluginRepoRegistry']
-  );
-
   // PluginRepoFactory
-  const PluginRepoFactory = new ethers.ContractFactory(
-    abi,
-    bytecode,
-    signers[0]
-  );
+  const PluginRepoFactory = new PluginRepoFactory__factory(signers[0]);
 
-  const pluginRepoFactory = (await PluginRepoFactory.deploy(
+  const pluginRepoFactory = await PluginRepoFactory.deploy(
     pluginRepoRegistry.address
-  )) as PluginRepoFactory;
+  );
 
   return pluginRepoFactory;
 }

@@ -19,17 +19,17 @@ In the following, we learn what a plugin consists of.
 
 ### What Does a Plugin Consist Of?
 
-An Aragon OSx Plugin consist of:
+An Aragon OSx Plugin consists of:
 
 - The `PluginSetup` contract
 
-  - referencing the `Plugin` implementation internally and
+  - referencing the `Plugin` implementation internally
   - containing the setup instruction to install, update, and uninstall it to an existing DAO
 
 - A metadata URI pointing to a `JSON` file containing the
 
-- AragonApp frontend information
-- Information needed for the setup ABI
+  - AragonApp frontend information
+  - Information needed for the setup ABI
 
 - A version tag consisting of a
 

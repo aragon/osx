@@ -29,15 +29,13 @@ Lern more about the different [plugin types](../../../02-how-to-guides/02-plugin
 
 This raises questions on how the DAO manages plugins and who actually owns plugins.
 
-### How does the DAO Manage a Plugin?
+### How Does the DAO Manage a Plugin?
 
 A DAO manages plugins and interactions between them. In more detail, its permission manager:
 
 - enables the plugin installation process through the granting and revoking of permissions for the DAO
 - authorizes calls to plugin functions carrying the `auth` modifier
-- authorizes calls to DAO functions, for example, the `execute` function allowing for acting as the DAO
-
-by checking if the caller `hasPermission`.
+- authorizes calls to DAO functions, for example the `execute` function, allowing to act as the DAO
 
 <div class="center-column">
 
