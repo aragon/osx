@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v1.4.0
 
+### Added
+
 ### Changed
 
 - Use the DAOs permission manager functionality and conditions to evaluate signatures.
 
 ### Removed
 
+- Removed unused `ERC1271Mock` contract.
 - Deprecated the `setSignatureValidator` function and `signatureValidator` variable in `DAO`.
 
 ## v1.3.0-rc0
