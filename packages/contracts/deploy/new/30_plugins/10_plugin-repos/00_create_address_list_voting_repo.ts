@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await createPluginRepo(hre, 'address-list-voting');
   await populatePluginRepo(hre, 'address-list-voting', [
     {
-      versionTag: [1, 1],
+      versionTag: [1, 2],
       pluginSetupContract: addresslistVotingSetupContract,
       releaseMetadata: ethers.utils.hexlify(
         ethers.utils.toUtf8Bytes(`ipfs://${addresslistReleaseCIDPath}`)
