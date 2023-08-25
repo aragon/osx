@@ -18,6 +18,7 @@ import {
   GovernanceERC20__factory,
 } from '../../../../typechain';
 import {MerkleMinter__factory as MerkleMinter_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/token/MerkleMinter.sol';
+import {MerkleMinter__factory as MerkleMinter_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleMinter.sol';
 
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
@@ -146,6 +147,36 @@ describe('MerkleMinter', function () {
       );
 
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+
+    it('from v1.3.0', async () => {
+      legacyContractFactory = new MerkleMinter_V1_3_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          managingDao
+        );
+      expect(toImplementation).to.equal(fromImplementation); // The build did not change
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.3.0 to the current version
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
