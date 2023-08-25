@@ -24,9 +24,13 @@ import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagedContract,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
@@ -82,28 +86,45 @@ describe('MerkleDistributor', function () {
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new MerkleDistributor__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: dao.address,
+        token: token.address,
+        merkleRoot: ZERO_BYTES32,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new MerkleDistributor_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
+        await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
-          dao,
-          {
-            dao: dao.address,
-            token: token.address,
-            merkleRoot: ZERO_BYTES32,
-          },
+          initArgs,
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
         );
       expect(toImplementation).to.equal(fromImplementation); // The build did not change
 
@@ -115,7 +136,9 @@ describe('MerkleDistributor', function () {
       );
 
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
       expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
