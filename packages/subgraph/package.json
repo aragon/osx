@@ -29,7 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
     "eslint": "^8.12.0",
-    "matchstick-as": "^0.5.1",
+    "matchstick-as": "^0.5.2",
     "mustache": "^4.2.0",
     "ts-morph": "^17.0.1",
     "typescript": "^4.9.5"
