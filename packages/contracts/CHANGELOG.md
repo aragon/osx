@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the `FunctionDeprecated` error to `DAO`.
+
 ### Changed
 
+- Renamed the `signatureValidator` variable in `DAO` to `__deprecated`.
 - Use the DAOs permission manager functionality to validate signatures.
 
 ### Removed

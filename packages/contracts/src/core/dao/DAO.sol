@@ -69,9 +69,10 @@ contract DAO is
     /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
     uint256 private constant _ENTERED = 2;
 
-    /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
-    /// @dev Added in v1.0.0.
-    IERC1271 public signatureValidator;
+    /// @notice Deprecated variable that is left here to maintain the storage layout.
+    /// @dev Introducedd in v1.0.0. Deprecated in v1.4.0.
+    /// @custom:oz-renamed-from signatureValidator
+    address private __deprecated;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     /// @dev Added in v1.0.0.

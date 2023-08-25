@@ -112,12 +112,6 @@ interface IDAO {
     /// @param forwarder the new forwarder address.
     event TrustedForwarderSet(address forwarder);
 
-    /// @notice Deprecated.
-    function setSignatureValidator(address) external;
-
-    /// @notice Deprecated.
-    event SignatureValidatorSet(address);
-
     /// @notice Checks whether a signature is valid for a provided hash according to [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271).
     /// @param _hash The hash of the data to be signed.
     /// @param _signature The signature byte array associated with `_hash`.
@@ -133,4 +127,8 @@ interface IDAO {
         bytes4 _callbackSelector,
         bytes4 _magicNumber
     ) external;
+
+    /// @notice Deprecated function being left here to not corrupt the IDAO interface ID.
+    /// @dev Introduced in v1.0.0. Deprecated in v1.4.0.
+    function setSignatureValidator(address) external;
 }

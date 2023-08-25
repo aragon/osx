@@ -50,7 +50,7 @@ Currently, externally owned accounts (EOAs) can sign messages with their associa
 An exemplary use case is a decentralized exchange with an off-chain order book, where buy/sell orders are signed messages.
 To accept such a request, both, the external service provider and caller need to follow a standard with which the signed message of the caller can be validated.
 
-By supporting the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) standard, your DAO can validate signatures via its `isValidSignature` function that forwards the call to a signature validator contract. The signature validator can be set with `setSignatureValidator` function.
+By supporting the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) standard, your DAO can validate signatures via its `isValidSignature` function that forwards the call to a signature validator contract.
 
 <!-- Add a subsection explaining how signature validation works -->
 
