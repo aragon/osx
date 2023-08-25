@@ -128,7 +128,7 @@ interface IDAO {
         bytes4 _magicNumber
     ) external;
 
-    /// @notice Deprecated function being left here to not corrupt the IDAO interface ID.
-    /// @dev Introduced in v1.0.0. Deprecated in v1.4.0.
+    /// @notice Removed function being left here to not corrupt the IDAO interface ID. Any call will revert.
+    /// @dev Introduced in v1.0.0. Removed in v1.4.0.
     function setSignatureValidator(address) external;
 }

@@ -69,10 +69,10 @@ contract DAO is
     /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
     uint256 private constant _ENTERED = 2;
 
-    /// @notice Deprecated variable that is left here to maintain the storage layout.
-    /// @dev Introducedd in v1.0.0. Deprecated in v1.4.0.
+    /// @notice Removed variable that is left here to maintain the storage layout.
+    /// @dev Introducedd in v1.0.0. Removed in v1.4.0.
     /// @custom:oz-renamed-from signatureValidator
-    address private __deprecated;
+    address private __removed1;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     /// @dev Added in v1.0.0.
@@ -110,8 +110,8 @@ contract DAO is
     /// @notice Thrown if an upgrade is not supported from a specific protocol version .
     error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
 
-    /// @notice Thrown when a function is deprecated.
-    error FunctionDeprecated();
+    /// @notice Thrown when a function is removed but left to not corrupt the interface ID.
+    error FunctionRemoved();
 
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
@@ -324,7 +324,7 @@ contract DAO is
 
     /// @inheritdoc IDAO
     function setSignatureValidator(address) external pure override {
-        revert FunctionDeprecated();
+        revert FunctionRemoved();
     }
 
     /// @inheritdoc IDAO
