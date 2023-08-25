@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Use the DAOs permission manager functionality and conditions to evaluate signatures.
+- Use the DAOs permission manager functionality to validate signatures.
 
 ### Removed
 
