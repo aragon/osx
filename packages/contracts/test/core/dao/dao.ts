@@ -26,7 +26,8 @@ import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/os
 
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagingContract,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
@@ -47,7 +48,10 @@ import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
 
 chai.use(smock.matchers);
 
@@ -327,24 +331,38 @@ describe('DAO', function () {
   describe('Upgrades', async () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new DAO__factory(signers[0]);
+
+      initArgs = {
+        metadata: dummyMetadata1,
+        initialOwner: signers[0].address,
+        trustedForwarder: dummyAddress1,
+        daoURI: daoExampleURI,
+      };
     });
 
-    it('from v1.0.0', async () => {
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagingContract(
+        await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
-          {
-            metadata: dummyMetadata1,
-            initialOwner: signers[0].address,
-            trustedForwarder: dummyAddress1,
-            daoURI: daoExampleURI,
-          },
+          initArgs,
           'initialize',
           legacyContractFactory,
           currentContractFactory,
@@ -360,7 +378,9 @@ describe('DAO', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });

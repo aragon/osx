@@ -44,9 +44,14 @@ import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagedContract,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
+import {ExecutedEvent} from '../../../../typechain/DAO';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -198,32 +203,45 @@ describe('Multisig', function () {
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new Multisig__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: dao.address,
+        members: [signers[0].address, signers[1].address, signers[2].address],
+        multisigSettings: multisigSettings,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new Multisig_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
+        await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
-          dao,
-          {
-            dao: dao.address,
-            members: [
-              signers[0].address,
-              signers[1].address,
-              signers[2].address,
-            ],
-            multisigSettings: multisigSettings,
-          },
+          initArgs,
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
 
@@ -235,7 +253,9 @@ describe('Multisig', function () {
       );
 
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
       expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
