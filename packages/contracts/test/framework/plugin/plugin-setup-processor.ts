@@ -22,6 +22,7 @@ import {
   PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginUUPSUpgradeableSetupV1MockBad__factory,
   PluginUUPSUpgradeableSetupV2Mock__factory,
+  PluginUUPSUpgradeableSetupV3Mock__factory,
   PluginUUPSUpgradeableSetupV4Mock__factory,
   PluginCloneableSetupV1Mock__factory,
   PluginCloneableSetupV2Mock__factory,
@@ -165,7 +166,7 @@ describe('Plugin Setup Processor', function () {
     );
     setupUV2 = await SetupV2.deploy();
 
-    const SetupV3 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
+    const SetupV3 = await smock.mock<PluginUUPSUpgradeableSetupV3Mock__factory>(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
     setupUV3 = await SetupV3.deploy();
@@ -173,7 +174,7 @@ describe('Plugin Setup Processor', function () {
     const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
       'PluginUUPSUpgradeableSetupV4Mock'
     );
-    setupUV4 = await SetupV4.deploy(await setupUV3.implementation());
+    setupUV4 = await SetupV4.deploy();
 
     // Deploy PluginCloneableSetupMock
     const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(

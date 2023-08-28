@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added an abstract `PluginSetupUpgradeable` base contract.
 - Added `VersionComparisonLib` to compare semantic versioning numbers.
 - Inherit `ProtocolVersion` in `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable`, `PluginSetup`, `PermissionCondition`, `PermissionConditionUpgradeable` `PluginSetupProcessor`, `PluginRepoRegistry`, `DAORegistry`, and `ENSSubdomainRegistrar`.
 - Added the `FunctionDeprecated` error to `DAO`.
 
 ### Changed
 
+- Added a `address public immutable implementation` variable to `PluginSetup` and `PluginSetupUpgradeable` and removed the `implementation()` functions.
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for all files.
 - Improved type safety by using `abi.encodeCall` instead of `abi.encodeWithSelector` and the more explicit bracket syntax for permissions.
 - Bumped OpenZeppelin dependencies to `4.9.3`.

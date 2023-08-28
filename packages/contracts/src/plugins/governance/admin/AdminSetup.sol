@@ -17,17 +17,12 @@ import {Admin} from "./Admin.sol";
 contract AdminSetup is PluginSetup {
     using Clones for address;
 
-    /// @notice The address of the `Admin` plugin logic contract to be cloned.
-    address private immutable implementation_;
-
     /// @notice Thrown if the admin address is zero.
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
 
     /// @notice The constructor setting the `Admin` implementation contract to clone from.
-    constructor() {
-        implementation_ = address(new Admin());
-    }
+    constructor() PluginSetup(address(new Admin())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -42,7 +37,7 @@ contract AdminSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = implementation_.clone();
+        plugin = implementation.clone();
 
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(IDAO(_dao));
@@ -88,10 +83,5 @@ contract AdminSetup is PluginSetup {
             condition: PermissionLib.NO_CONDITION,
             permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         });
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view returns (address) {
-        return implementation_;
     }
 }
