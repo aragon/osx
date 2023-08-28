@@ -24,7 +24,7 @@
     "formatting:write": "prettier '**/*.{json,ts,js}' --write"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.33.1",
+    "@graphprotocol/graph-cli": "0.52.0",
     "@graphprotocol/graph-ts": "^0.27.0",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
