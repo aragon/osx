@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bumped OpenZeppelin dependencies to `4.9.3`.
 - Renamed the `signatureValidator` variable in `DAO` to `__deprecated`.
 - Use the DAOs permission manager functionality to validate signatures.
 
