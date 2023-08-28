@@ -243,8 +243,7 @@ describe('AddresslistVoting', function () {
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
-        .true;
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
