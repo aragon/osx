@@ -6,6 +6,7 @@ import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy as createERC1967} from "../../../utils/Proxy.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
@@ -13,7 +14,7 @@ import {IPluginSetup} from "./IPluginSetup.sol";
 /// @title PluginSetup
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
-abstract contract PluginSetup is ERC165, IPluginSetup {
+abstract contract PluginSetup is ERC165, IPluginSetup, ProtocolVersion {
     /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
@@ -42,6 +43,8 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            _interfaceId == type(IPluginSetup).interfaceId || super.supportsInterface(_interfaceId);
+            _interfaceId == type(IPluginSetup).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 }

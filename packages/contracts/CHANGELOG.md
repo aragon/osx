@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Inherit `ProtocolVersion` in `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable`, `PluginSetup`, `PluginSetupProcessor` `DAORegistry`, `PluginRepoRegistry`, `ENSSubdomainRegistrar`, `GovernanceERC20`, `GovernanceWrappedERC20`.
 - Added the `FunctionDeprecated` error to `DAO`.
 
 ### Changed

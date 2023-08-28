@@ -6,6 +6,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {IERC1822ProxiableUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {IDAO} from "../dao/IDAO.sol";
 import {DaoAuthorizableUpgradeable} from "./dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IPlugin} from "./IPlugin.sol";
@@ -17,7 +18,8 @@ abstract contract PluginUUPSUpgradeable is
     IPlugin,
     ERC165Upgradeable,
     UUPSUpgradeable,
-    DaoAuthorizableUpgradeable
+    DaoAuthorizableUpgradeable,
+    ProtocolVersion
 {
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
@@ -47,6 +49,7 @@ abstract contract PluginUUPSUpgradeable is
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPlugin).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
             _interfaceId == type(IERC1822ProxiableUpgradeable).interfaceId ||
             super.supportsInterface(_interfaceId);
     }

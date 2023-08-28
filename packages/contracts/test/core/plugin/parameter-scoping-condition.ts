@@ -57,7 +57,7 @@ describe('TestParameterScopingCondition', function () {
     ];
   });
 
-  describe('condition conditions:', async () => {
+  describe('Conditions', async () => {
     it('adds if the first parameter is larger than the second', async () => {
       let param1 = 10;
       let param2 = 1;

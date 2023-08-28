@@ -12,6 +12,7 @@ import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/E
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {DaoAuthorizableUpgradeable} from "../../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {IGovernanceWrappedERC20} from "./IGovernanceWrappedERC20.sol";
@@ -29,7 +30,8 @@ contract GovernanceWrappedERC20 is
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
-    ERC20WrapperUpgradeable
+    ERC20WrapperUpgradeable,
+    ProtocolVersion
 {
     /// @notice Calls the initialize function.
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
@@ -63,6 +65,7 @@ contract GovernanceWrappedERC20 is
             _interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
             _interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
             _interfaceId == type(IVotesUpgradeable).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 

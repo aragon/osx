@@ -11,6 +11,7 @@ import {
   IMajorityVoting__factory,
   DAO__factory,
   MajorityVotingMock__factory,
+  IProtocolVersion__factory,
 } from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
 import {
@@ -85,7 +86,7 @@ describe('MajorityVotingMock', function () {
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165 ', async () => {
     it('does not support the empty interface', async () => {
       expect(await votingBase.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -98,6 +99,12 @@ describe('MajorityVotingMock', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });

@@ -4,6 +4,7 @@ pragma solidity ^0.8.8;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {IPermissionCondition} from "./IPermissionCondition.sol";
 
 /// @title PermissionConditionUpgradeable
@@ -16,6 +17,7 @@ abstract contract PermissionConditionUpgradeable is ERC165Upgradeable, IPermissi
     function supportsInterface(bytes4 _interfaceId) public view override returns (bool) {
         return
             _interfaceId == type(IPermissionCondition).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 }

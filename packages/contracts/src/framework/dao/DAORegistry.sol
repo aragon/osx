@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.17;
 
+import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {IDAO} from "../../core/dao/IDAO.sol";
 import {ENSSubdomainRegistrar} from "../utils/ens/ENSSubdomainRegistrar.sol";
 import {InterfaceBasedRegistry} from "../utils/InterfaceBasedRegistry.sol";
@@ -10,7 +11,7 @@ import {isSubdomainValid} from "../utils/RegistryUtils.sol";
 /// @title Register your unique DAO subdomain
 /// @author Aragon Association - 2022-2023
 /// @notice This contract provides the possibility to register a DAO.
-contract DAORegistry is InterfaceBasedRegistry {
+contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 

@@ -325,6 +325,14 @@ describe('Plugin Setup Processor', function () {
     }
   });
 
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await pluginRepo.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
+  });
+
   describe('Installation', function () {
     beforeEach(async () => {
       // Grant necessary permission to `ownerAddress` so it can install plugins on behalf of the DAO.

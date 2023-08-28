@@ -13,6 +13,7 @@ import {
   IMembership__factory,
   IPlugin__factory,
   IProposal__factory,
+  IProtocolVersion__factory,
   TokenVoting,
   TokenVoting__factory,
 } from '../../../../../typechain';
@@ -254,11 +255,11 @@ describe('TokenVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
     it('from v1.3.0', async () => {
@@ -276,7 +277,7 @@ describe('TokenVoting', function () {
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
-      expect(toImplementation).to.equal(fromImplementation);
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -284,15 +285,15 @@ describe('TokenVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.3.0 to the current version
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165 ', async () => {
     it('does not support the empty interface', async () => {
       expect(await voting.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -304,6 +305,11 @@ describe('TokenVoting', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
