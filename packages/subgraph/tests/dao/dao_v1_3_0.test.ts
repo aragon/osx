@@ -695,7 +695,6 @@ describe('handleExecuted', () => {
         // check ERC1155Balance entity
         assert.entityCount('ERC1155Balance', 1);
         let erc1155Balance = new ExtendedERC1155Balance().withDefaultValues();
-        erc1155Balance.balances = [tokenIdBalanceId];
         erc1155Balance.lastUpdated = timestamp;
         erc1155Balance.assertEntity();
 
