@@ -86,7 +86,7 @@ describe('MajorityVotingMock', function () {
     });
   });
 
-  describe('ERC-165 ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await votingBase.supportsInterface('0xffffffff')).to.be.false;
     });
