@@ -10,7 +10,11 @@ import {IPermissionCondition} from "./IPermissionCondition.sol";
 /// @title PermissionConditionUpgradeable
 /// @author Aragon Association - 2023
 /// @notice An abstract contract for upgradeable or cloneable contracts to inherit from and to support customary permissions depending on arbitrary on-chain state.
-abstract contract PermissionConditionUpgradeable is ERC165Upgradeable, IPermissionCondition {
+abstract contract PermissionConditionUpgradeable is
+    ERC165Upgradeable,
+    IPermissionCondition,
+    ProtocolVersion
+{
     /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.
