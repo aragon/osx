@@ -1361,7 +1361,7 @@ describe('DAO', function () {
         dao
           .connect(signers[2])
           .setSignatureValidator(ethers.Wallet.createRandom().address)
-      ).to.be.revertedWithCustomError(dao, 'FunctionDeprecated');
+      ).to.be.revertedWithCustomError(dao, 'FunctionRemoved');
     });
   });
 
