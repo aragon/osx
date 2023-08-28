@@ -10,6 +10,7 @@ import {
 } from '../../../typechain';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {PluginType} from '../../test-utils/psp/types';
 
 describe('PluginCloneable', function () {
   let plugin: PluginCloneableV1Mock;
@@ -17,6 +18,12 @@ describe('PluginCloneable', function () {
   before(async () => {
     const deployer = (await ethers.getSigners())[0];
     plugin = await new PluginCloneableV1Mock__factory(deployer).deploy();
+  });
+
+  describe('Plugin Type', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await plugin.pluginType()).to.equal(PluginType.Cloneable);
+    });
   });
 
   describe('ERC-165', async () => {

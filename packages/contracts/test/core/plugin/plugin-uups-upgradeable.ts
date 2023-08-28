@@ -10,6 +10,7 @@ import {
 } from '../../../typechain';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {PluginType} from '../../test-utils/psp/types';
 
 describe('PluginUUPSUpgradeable', function () {
   let plugin: PluginUUPSUpgradeableV1Mock;
@@ -17,6 +18,12 @@ describe('PluginUUPSUpgradeable', function () {
   before(async () => {
     const deployer = (await ethers.getSigners())[0];
     plugin = await new PluginUUPSUpgradeableV1Mock__factory(deployer).deploy();
+  });
+
+  describe('Plugin Type', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await plugin.pluginType()).to.equal(PluginType.UUPS);
+    });
   });
 
   describe('ERC-165', async () => {
