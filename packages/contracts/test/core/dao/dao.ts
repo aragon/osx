@@ -144,11 +144,6 @@ describe('DAO', function () {
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
-      ),
-      dao.grant(
-        dao.address,
-        ownerAddress,
         PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       ),
       dao.grant(
@@ -1230,7 +1225,7 @@ describe('DAO', function () {
       ).to.be.eq(true);
     });
 
-    it('reverts all signatures requests by default', async () => {
+    it('treats signatures as invalid by default if no permission is set', async () => {
       const caller = signers[0];
       const signer = signers[1];
 
@@ -1238,9 +1233,10 @@ describe('DAO', function () {
       const hash = ethers.utils.hashMessage(message);
       const signature = await signer.signMessage(message);
 
-      // The caller can validate signatures now.
-      expect(await dao.connect(caller).isValidSignature(hash, signature)).to.be
-        .reverted;
+      // Because no permission is set, the signature is said to be invalid
+      expect(
+        await dao.connect(caller).isValidSignature(hash, signature)
+      ).to.equal(INVALID_ERC1271_SIGNATURE);
     });
 
     it('allows caller specific signature validation', async () => {
