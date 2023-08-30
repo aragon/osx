@@ -13,7 +13,7 @@ abstract contract PermissionConditionUpgradeable is ERC165Upgradeable, IPermissi
     /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId) public view override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPermissionCondition).interfaceId ||
             super.supportsInterface(_interfaceId);
