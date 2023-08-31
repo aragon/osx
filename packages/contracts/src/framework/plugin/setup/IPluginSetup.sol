@@ -8,6 +8,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @title IPluginSetup
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for a plugin setup contract to be consumed by the `PluginSetupProcessor` for plugin installations, updates, and uninstallations.
+/// @custom:security-contact sirt@aragon.org
 interface IPluginSetup {
     /// @notice The data associated with a prepared setup.
     /// @param helpers The address array of helpers (contracts or EOAs) associated with this plugin version after the installation or update.

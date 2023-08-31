@@ -25,6 +25,7 @@ import {IDAO} from "./IDAO.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
+/// @custom:security-contact sirt@aragon.org
 contract DAO is
     IEIP4824,
     Initializable,

@@ -93,6 +93,7 @@ import {IMajorityVoting} from "./IMajorityVoting.sol";
 ///
 /// Accordingly, early execution is possible when the vote is open, the modified support criterion, and the particicpation criterion are met.
 /// @dev This contract implements the `IMajorityVoting` interface.
+/// @custom:security-contact sirt@aragon.org
 abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
