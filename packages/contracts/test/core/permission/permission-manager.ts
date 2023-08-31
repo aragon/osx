@@ -21,10 +21,10 @@ const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
   ethers.utils.id('TEST_PERMISSION_2'),
 ];
 
-export const UNSET_FLAG = ethers.utils.getAddress(
+const UNSET_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000000'
 );
-export const ALLOW_FLAG = ethers.utils.getAddress(
+const ALLOW_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000002'
 );
 export const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
