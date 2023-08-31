@@ -40,6 +40,7 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
 - [ ] Update `active_contracts.json` with the new deployed addresses
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Add a Github Release with the version number as tag and the defined content (see Notion)
 
 ### ManagingDAO
 
