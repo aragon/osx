@@ -10,7 +10,6 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
-import {IProtocolVersion, ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {DaoAuthorizableUpgradeable} from "../../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {IERC20MintableUpgradeable} from "../IERC20MintableUpgradeable.sol";
@@ -23,8 +22,7 @@ contract GovernanceERC20 is
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
-    DaoAuthorizableUpgradeable,
-    ProtocolVersion
+    DaoAuthorizableUpgradeable
 {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
@@ -99,7 +97,6 @@ contract GovernanceERC20 is
             _interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
             _interfaceId == type(IVotesUpgradeable).interfaceId ||
             _interfaceId == type(IERC20MintableUpgradeable).interfaceId ||
-            _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
