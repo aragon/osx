@@ -24,6 +24,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed unused `ERC1271Mock` contract.
 - Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place..
 
+## v1.3.1-rc0
+
+### Added
+
+### Changed
+
+- Added missing `virtual` keyword to `PermissionCondition` and `PermissionConditionUpgradeable`.
+
+### Removed
+
 ## v1.3.0-rc0
 
 ### Added

@@ -1,5 +1,5 @@
 ---
-title: Building the Plugin Setup Contract
+title: Plugin Setup Contract
 ---
 
 ## What is the Plugin Setup contract?

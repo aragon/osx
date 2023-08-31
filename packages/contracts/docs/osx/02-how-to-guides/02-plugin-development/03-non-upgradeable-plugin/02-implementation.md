@@ -1,5 +1,5 @@
 ---
-title: Building the Plugin Implementation Contract
+title: Plugin Implementation Contract
 ---
 
 ## How to Build a Non-Upgradeable Plugin
