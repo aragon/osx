@@ -72,7 +72,7 @@ contract DAO is
     /// @notice Removed variable that is left here to maintain the storage layout.
     /// @dev Introducedd in v1.0.0. Removed in v1.4.0.
     /// @custom:oz-renamed-from signatureValidator
-    address private __removed1;
+    address private __removed0;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     /// @dev Added in v1.0.0.
