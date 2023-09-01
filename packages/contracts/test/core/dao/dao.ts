@@ -21,6 +21,7 @@ import {
   IEIP4824__factory,
   IProtocolVersion__factory,
   PermissionConditionMock__factory,
+  PermissionConditionMock,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 import {DAO__factory as DAO_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.2/core/dao/DAO.sol';
@@ -54,6 +55,7 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../test-utils/protocol-version';
 import {ANY_ADDR} from '../permission/permission-manager';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 
 chai.use(smock.matchers);
 
@@ -1346,6 +1348,62 @@ describe('DAO', function () {
         await dao.connect(otherCaller).isValidSignature(hash, signature)
       ).to.equal(INVALID_ERC1271_SIGNATURE);
     });
+
+    context(
+      'A caller-specfic and a generic condition are both set',
+      async () => {
+        let specificMockCondition: PermissionConditionMock;
+        let genericMockCondition: PermissionConditionMock;
+
+        beforeEach(async () => {
+          // Setup the specfic condition for a specific caller
+          specificMockCondition = await mockConditionFactory.deploy();
+          await dao.grantWithCondition(
+            dao.address,
+            caller.address,
+            PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+            specificMockCondition.address
+          );
+
+          // Setup the generic condition for ANY caller
+          genericMockCondition = await mockConditionFactory.deploy();
+          await dao.grantWithCondition(
+            dao.address,
+            ANY_ADDR,
+            PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+            genericMockCondition.address
+          );
+        });
+
+        it('returns valid if both conditions are met', async () => {
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(VALID_ERC1271_SIGNATURE);
+        });
+
+        it('returns valid if only the specific condition is met', async () => {
+          await genericMockCondition.setAnswer(false);
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(VALID_ERC1271_SIGNATURE);
+        });
+
+        it('returns valid if only the generic condition is met', async () => {
+          await specificMockCondition.setAnswer(false);
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(VALID_ERC1271_SIGNATURE);
+        });
+
+        it('returns invalid if both conditions are not met', async () => {
+          await specificMockCondition.setAnswer(false);
+          await genericMockCondition.setAnswer(false);
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(INVALID_ERC1271_SIGNATURE);
+        });
+      }
+    );
 
     it('should revert if `setSignatureValidator` is called', async () => {
       await expect(
