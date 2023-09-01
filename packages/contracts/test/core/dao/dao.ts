@@ -1325,10 +1325,12 @@ describe('DAO', function () {
       expect(await mockCondition.answer()).to.be.true;
 
       // Any caller can validate signatures using this condition now.
-      expect(await dao.connect(caller).isValidSignature(hash, signature)).to.not
-        .be.reverted;
-      expect(await dao.connect(otherCaller).isValidSignature(hash, signature))
-        .to.not.be.reverted;
+      expect(
+        await dao.connect(caller).isValidSignature(hash, signature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+      expect(
+        await dao.connect(otherCaller).isValidSignature(hash, signature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
 
       // Set the mock condition to answer false.
       await mockCondition.setAnswer(false);
