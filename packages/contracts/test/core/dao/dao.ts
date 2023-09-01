@@ -1225,10 +1225,14 @@ describe('DAO', function () {
     let hash: string;
     let signature: string;
 
+    let mockConditionFactory: PermissionConditionMock__factory;
+
     beforeEach(async () => {
       caller = signers[0];
       signer = signers[1];
       otherCaller = signers[2];
+
+      mockConditionFactory = new PermissionConditionMock__factory(caller);
 
       message = 'The message!';
       hash = ethers.utils.hashMessage(message);
@@ -1271,9 +1275,7 @@ describe('DAO', function () {
         .withArgs();
 
       // Deploy a mock condition
-      const mockCondition = await new PermissionConditionMock__factory(
-        caller
-      ).deploy();
+      const mockCondition = await mockConditionFactory.deploy();
 
       // Grant the permission to validate signatures to the caller
       await dao.grantWithCondition(
@@ -1309,9 +1311,7 @@ describe('DAO', function () {
 
     it('allows generic signature validation by granting to ANY_ADDR', async () => {
       // Deploy a mock condition
-      const mockCondition = await new PermissionConditionMock__factory(
-        caller
-      ).deploy();
+      const mockCondition = await mockConditionFactory.deploy();
 
       // Grant the permission to validate signatures to the ANY caller conditionally (granting it unconditionally is not possible in combination with `_who: ANY_ADDR`)
       await dao.grantWithCondition(
