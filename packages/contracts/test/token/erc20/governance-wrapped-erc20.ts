@@ -11,8 +11,6 @@ import {
 } from '../../../typechain';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {IProtocolVersion__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.2/utils/protocol/IProtocolVersion.sol';
 
 export type AccountBalance = {account: string; amount: number};
 
@@ -111,14 +109,6 @@ describe('GovernanceWrappedERC20', function () {
     });
   });
 
-  describe('Protocol version', async () => {
-    it('returns the current protocol version', async () => {
-      expect(await governanceToken.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
-      );
-    });
-  });
-
   describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await governanceToken.supportsInterface('0xffffffff')).to.be.false;
@@ -126,11 +116,6 @@ describe('GovernanceWrappedERC20', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
-        .be.true;
-    });
-    it('supports the `IProtocolVersion` interface', async () => {
-      const iface = IProtocolVersion__factory.createInterface();
       expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
         .be.true;
     });

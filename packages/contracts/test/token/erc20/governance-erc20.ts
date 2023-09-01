@@ -10,13 +10,11 @@ import {
   IERC20MintableUpgradeable__factory,
   IERC20PermitUpgradeable__factory,
   IERC20Upgradeable__factory,
-  IProtocolVersion__factory,
   IVotesUpgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 export type MintSettings = {
   receivers: string[];
@@ -100,14 +98,6 @@ describe('GovernanceERC20', function () {
     });
   });
 
-  describe('Protocol version', async () => {
-    it('returns the current protocol version', async () => {
-      expect(await token.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
-      );
-    });
-  });
-
   describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await token.supportsInterface('0xffffffff')).to.be.false;
@@ -115,11 +105,6 @@ describe('GovernanceERC20', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await token.supportsInterface(getInterfaceID(iface))).to.be.true;
-    });
-
-    it('supports the `IProtocolVersion` interface', async () => {
-      const iface = IProtocolVersion__factory.createInterface();
       expect(await token.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
