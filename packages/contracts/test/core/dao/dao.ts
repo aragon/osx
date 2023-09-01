@@ -1313,7 +1313,7 @@ describe('DAO', function () {
         caller
       ).deploy();
 
-      // Grant the permission to validate signatures to the caller conditionally (granting it unconditionally is not possible in combination with `_who: ANY_ADDR`)
+      // Grant the permission to validate signatures to the ANY caller conditionally (granting it unconditionally is not possible in combination with `_who: ANY_ADDR`)
       await dao.grantWithCondition(
         dao.address,
         ANY_ADDR,
