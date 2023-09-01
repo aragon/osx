@@ -816,7 +816,7 @@ describe('Core: PermissionManager', function () {
         )
       ).to.be.equal(true);
 
-      await permissionCondition.setWillPerform(false);
+      await permissionCondition.setAnswer(false);
       expect(
         await pm.callStatic.isGranted(
           pm.address,
