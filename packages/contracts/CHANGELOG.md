@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed the `signatureValidator` variable in `DAO` to `__removed`.
+- Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.
 
 ### Removed
