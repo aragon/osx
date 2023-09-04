@@ -223,7 +223,7 @@ contract DAO is
         bytes32 _permissionId,
         bytes memory _data
     ) external view override returns (bool) {
-        return isGranted(_where, _who, _permissionId, _data);
+        return isGranted({_where: _where, _who: _who, _permissionId: _permissionId, _data: _data});
     }
 
     /// @inheritdoc IDAO
