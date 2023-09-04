@@ -65,8 +65,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare, changelog]
     if: >
+      (github.event_name	== 'workflow_dispatch') || (
       needs.changelog.result == 'success' &&
-      contains(toJson(github.event.pull_request.labels.*.name), 'subgraph:deploy')
+      contains(toJson(github.event.pull_request.labels.*.name), 'subgraph:deploy'))
     environment: ${{ needs.prepare.outputs.environment }}
     strategy:
       fail-fast: false
