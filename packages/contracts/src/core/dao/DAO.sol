@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
+import {IPermissionCondition} from "../permission/IPermissionCondition.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
 import {hasBit, flipBit} from "../utils/BitMap.sol";
 import {IEIP4824} from "./IEIP4824.sol";
@@ -327,6 +328,11 @@ contract DAO is
         revert FunctionRemoved();
     }
 
+    bytes4 private constant VALID_ERC1271_SIGNATURE = 0x1626ba7e; // `type(IERC1271).interfaceId` = bytes4(keccak256("isValidSignature(bytes32,bytes)")`
+    bytes4 private constant INVALID_ERC1271_SIGNATURE = 0xffffffff; // `bytes4(uint32(type(uint32).max-1))`
+
+    error SignatureError();
+
     /// @inheritdoc IDAO
     /// @dev Relays the validation logic determining who is allowed to sign on behalf of the DAO to its permission manager.
     /// Caller specific bypassing can be set direct granting (i.e., `grant({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID})`).
@@ -336,17 +342,57 @@ contract DAO is
         bytes32 _hash,
         bytes memory _signature
     ) external view override(IDAO, IERC1271) returns (bytes4) {
+        address accessFlagOrCondition = permissionsHashed[
+            permissionHash(address(this), msg.sender, VALIDATE_SIGNATURE_PERMISSION_ID)
+        ];
+
+        if (accessFlagOrCondition == UNSET_FLAG) return INVALID_ERC1271_SIGNATURE;
+        // Caller-specific bypassing
+        if (accessFlagOrCondition == ALLOW_FLAG) return VALID_ERC1271_SIGNATURE;
+
+        bytes memory data = abi.encode(_hash, _signature);
+
+        // Caller-specific condition
         if (
-            isGranted({
-                _where: address(this),
-                _who: msg.sender,
-                _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID,
-                _data: abi.encode(_hash, _signature)
+            _isSignatureConditionValid({
+                _condition: accessFlagOrCondition,
+                _caller: msg.sender,
+                _data: data
             })
         ) {
-            return 0x1626ba7e; // `type(IERC1271).interfaceId` = bytes4(keccak256("isValidSignature(bytes32,bytes)")`
+            return VALID_ERC1271_SIGNATURE;
         }
-        return 0xffffffff; // `bytes4(uint32(type(uint32).max-1))`
+
+        // Generic condition
+        if (
+            _isSignatureConditionValid({
+                _condition: accessFlagOrCondition,
+                _caller: ANY_ADDR,
+                _data: data
+            })
+        ) {
+            return VALID_ERC1271_SIGNATURE;
+        }
+
+        return INVALID_ERC1271_SIGNATURE;
+    }
+
+    function _isSignatureConditionValid(
+        address _condition,
+        address _caller,
+        bytes memory _data
+    ) internal view returns (bool) {
+        try
+            IPermissionCondition(_condition).isGranted({
+                _where: address(this),
+                _who: _caller,
+                _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID,
+                _data: _data
+            })
+        returns (bool valid) {
+            if (valid) return true;
+        } catch {}
+        return false;
     }
 
     /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.

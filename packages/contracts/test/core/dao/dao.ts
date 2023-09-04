@@ -1388,7 +1388,7 @@ describe('DAO', function () {
           ).to.equal(VALID_ERC1271_SIGNATURE);
         });
 
-        it('returns valid if only the generic condition is met', async () => {
+        it('returns invalid if the specific condition is not met although the generic condition would be met', async () => {
           await specificMockCondition.setAnswer(false);
           expect(
             await dao.connect(caller).isValidSignature(hash, signature)
