@@ -103,12 +103,13 @@ export function handleAction<
   // The below first checks if it's ERC721 by calling `supportsInterface` and then
   // moves to ERC20 check. Currently, if `action` is transferFrom, it will still check
   // both `handleERC721Action`, `handleERC20Action`.
+  let handledByErc721: bool = false;
   if (
     methodSig == ERC721_transferFrom ||
     methodSig == ERC721_safeTransferFromNoData ||
     methodSig == ERC721_safeTransferFromWithData
   ) {
-    handleERC721Action(
+    handledByErc721 = handleERC721Action(
       action.to,
       event.address,
       action.data,
@@ -131,7 +132,10 @@ export function handleAction<
     );
   }
 
-  if (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) {
+  if (
+    (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) &&
+    !handledByErc721
+  ) {
     handleERC20Action(
       action.to,
       event.address,

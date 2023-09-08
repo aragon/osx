@@ -138,10 +138,10 @@ export function handleERC721Action(
   proposalId: string,
   actionIndex: number,
   event: ethereum.Event
-): void {
+): bool {
   let contract = fetchERC721(token);
   if (!contract) {
-    return;
+    return false;
   }
 
   let functionSelector = data.toHexString().substring(0, 10);
@@ -164,7 +164,7 @@ export function handleERC721Action(
   let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
 
   if (!decoded) {
-    return;
+    return false;
   }
 
   let tuple = decoded.toTuple();
@@ -194,7 +194,7 @@ export function handleERC721Action(
   if (from == dao && to == dao) {
     transfer.type = 'Withdraw';
     transfer.save();
-    return;
+    return true;
   }
 
   // If from/to both aren't equal to dao, it means
@@ -203,7 +203,7 @@ export function handleERC721Action(
   if (from != dao && to != dao) {
     transfer.type = 'ExternalTransfer';
     transfer.save();
-    return;
+    return true;
   }
 
   if (from != dao && to == dao) {
@@ -231,4 +231,5 @@ export function handleERC721Action(
   }
 
   transfer.save();
+  return true;
 }
