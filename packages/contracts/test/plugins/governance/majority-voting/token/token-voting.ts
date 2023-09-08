@@ -59,6 +59,7 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
+import { ExecutedEvent } from '../../../../../typechain/DAO';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -878,19 +879,17 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        )
+      ).to.not.be.reverted;
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
     });
@@ -906,19 +905,17 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        )
+      ).to.not.be.reverted;
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
     });
@@ -1084,19 +1081,17 @@ describe('TokenVoting', function () {
         .withArgs(id, signers[0].address, VoteOption.Yes);
 
       // Works if the vote option is 'None'
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        )
+      ).to.not.be.reverted;
     });
   });
 
@@ -1126,19 +1121,17 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        await expect(
+          voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            0,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).to.not.be.reverted;
       });
 
       it('reverts on voting None', async () => {
@@ -1253,19 +1246,17 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        await expect(
+          voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            0,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).to.not.be.reverted;
       });
 
       it('does not allow voting, when the vote has not started yet', async () => {
@@ -1483,19 +1474,17 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        await expect(
+          voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            0,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).to.not.be.reverted;
       });
 
       it('reverts on voting None', async () => {
