@@ -5,9 +5,6 @@ ADD . /osx
 WORKDIR /osx
 RUN yarn install
 
-WORKDIR /osx/packages/contracts-versions
-RUN yarn build
-
 WORKDIR /osx/packages/contracts
 RUN yarn build
 
