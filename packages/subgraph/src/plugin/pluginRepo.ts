@@ -1,11 +1,15 @@
+import {store} from '@graphprotocol/graph-ts';
 import {
   ReleaseMetadataUpdated,
-  VersionCreated
+  VersionCreated,
+  Granted,
+  Revoked
 } from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {
   PluginVersion,
   PluginSetup,
-  PluginRelease
+  PluginRelease,
+  Permission
 } from '../../generated/schema';
 import {getPluginVersionId} from './utils';
 
@@ -62,4 +66,50 @@ export function handleReleaseMetadataUpdated(
 
   pluginReleaseEntity.metadata = releaseMetadata;
   pluginReleaseEntity.save();
+}
+
+export function handleGranted(event: Granted): void {
+  let contractAddress = event.address.toHexString();
+  let where = event.params.where;
+  let contractPermissionId = event.params.permissionId;
+  let who = event.params.who;
+
+  let permissionEntityId = [
+    contractAddress,
+    where.toHexString(),
+    contractPermissionId.toHexString(),
+    who.toHexString()
+  ].join('_');
+
+  let pluginRepo = contractAddress;
+
+  // Permission
+  let permissionEntity = new Permission(permissionEntityId);
+  permissionEntity.where = event.params.where;
+  permissionEntity.who = event.params.who;
+  permissionEntity.actor = event.params.here;
+  permissionEntity.condition = event.params.condition;
+
+  permissionEntity.pluginRepo = pluginRepo;
+  permissionEntity.save();
+}
+
+export function handleRevoked(event: Revoked): void {
+  // permission
+  let contractAddress = event.address.toHexString();
+  let where = event.params.where;
+  let contractPermissionId = event.params.permissionId;
+  let who = event.params.who;
+
+  let permissionEntityId = [
+    contractAddress,
+    where.toHexString(),
+    contractPermissionId.toHexString(),
+    who.toHexString()
+  ].join('_');
+
+  let permissionEntity = Permission.load(permissionEntityId);
+  if (permissionEntity) {
+    store.remove('Permission', permissionEntityId);
+  }
 }

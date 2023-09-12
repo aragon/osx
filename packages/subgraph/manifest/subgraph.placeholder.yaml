@@ -357,3 +357,8 @@ templates:
           handler: handleVersionCreated
         - event: ReleaseMetadataUpdated(uint8,bytes)
           handler: handleReleaseMetadataUpdated
+        - event: Granted(indexed bytes32,indexed address,address,indexed address,address)
+          handler: handleGranted
+        - event: Revoked(indexed bytes32,indexed address,address,indexed address)
+          handler: handleGranted
+        

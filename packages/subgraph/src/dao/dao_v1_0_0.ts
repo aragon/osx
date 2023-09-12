@@ -15,7 +15,6 @@ import {
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   Dao,
-  ContractPermissionId,
   Permission,
   StandardCallback,
   TransactionActionsProposal
@@ -164,49 +163,48 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
 }
 
 export function handleGranted(event: Granted): void {
-  // ContractPermissionId
-  let daoId = event.address.toHexString();
-  let contractPermissionIdEntityId =
-    event.params.where.toHexString() +
-    '_' +
-    event.params.permissionId.toHexString();
-  let contractPermissionIdEntity = ContractPermissionId.load(
-    contractPermissionIdEntityId
-  );
-  if (!contractPermissionIdEntity) {
-    contractPermissionIdEntity = new ContractPermissionId(
-      contractPermissionIdEntityId
-    );
-    contractPermissionIdEntity.dao = daoId;
-    contractPermissionIdEntity.where = event.params.where;
-    contractPermissionIdEntity.permissionId = event.params.permissionId;
-    contractPermissionIdEntity.save();
-  }
+  let contractAddress = event.address.toHexString();
+  let where = event.params.where;
+  let contractPermissionId = event.params.permissionId;
+  let who = event.params.who;
+
+  let permissionEntityId = [
+    contractAddress,
+    where.toHexString(),
+    contractPermissionId.toHexString(),
+    who.toHexString()
+  ].join('_');
+
+  let daoAddress = contractAddress;
 
   // Permission
-  let permissionId =
-    contractPermissionIdEntityId + '_' + event.params.who.toHexString();
-  let permissionEntity = new Permission(permissionId);
-  permissionEntity.dao = daoId;
-  permissionEntity.contractPermissionId = contractPermissionIdEntityId;
+  let permissionEntity = new Permission(permissionEntityId);
   permissionEntity.where = event.params.where;
   permissionEntity.who = event.params.who;
   permissionEntity.actor = event.params.here;
   permissionEntity.condition = event.params.condition;
+
+  permissionEntity.dao = daoAddress;
   permissionEntity.save();
 }
 
 export function handleRevoked(event: Revoked): void {
   // permission
-  let permissionId =
-    event.params.where.toHexString() +
-    '_' +
-    event.params.permissionId.toHexString() +
-    '_' +
-    event.params.who.toHexString();
-  let permissionEntity = Permission.load(permissionId);
+  let contractAddress = event.address.toHexString();
+  let where = event.params.where;
+  let contractPermissionId = event.params.permissionId;
+  let who = event.params.who;
+
+  let permissionEntityId = [
+    contractAddress,
+    where.toHexString(),
+    contractPermissionId.toHexString(),
+    who.toHexString()
+  ].join('_');
+
+  let permissionEntity = Permission.load(permissionEntityId);
   if (permissionEntity) {
-    store.remove('Permission', permissionId);
+    store.remove('Permission', permissionEntityId);
   }
 }
 
