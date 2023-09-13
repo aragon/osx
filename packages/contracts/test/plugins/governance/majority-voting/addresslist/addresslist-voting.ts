@@ -58,6 +58,7 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
+import {ExecutedEvent} from '../../../../../typechain/DAO';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -569,19 +570,20 @@ describe('AddresslistVoting', function () {
         signers.slice(0, 10).map(s => s.address)
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
     });
@@ -595,19 +597,20 @@ describe('AddresslistVoting', function () {
         signers.slice(0, 10).map(s => s.address)
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
     });
@@ -767,19 +770,20 @@ describe('AddresslistVoting', function () {
         .withArgs(id, signers[0].address, VoteOption.Yes);
 
       // Works if the vote option is 'None'
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
     });
   });
 
@@ -794,19 +798,20 @@ describe('AddresslistVoting', function () {
           signers.slice(0, 10).map(s => s.address)
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('reverts on voting None', async () => {
@@ -925,19 +930,20 @@ describe('AddresslistVoting', function () {
           signers.slice(0, 10).map(s => s.address)
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('does not allow voting, when the vote has not started yet', async () => {
@@ -1127,19 +1133,20 @@ describe('AddresslistVoting', function () {
           signers.slice(0, 10).map(s => s.address)
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('reverts on voting None', async () => {
@@ -1370,19 +1377,20 @@ describe('AddresslistVoting', function () {
           votingSettings,
           signers.slice(0, 10).map(s => s.address)
         );
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {
@@ -1580,7 +1588,7 @@ describe('AddresslistVoting', function () {
 
       it('does not execute with 9 votes', async () => {
         // does not execute early
-        advanceIntoVoteTime(startDate, endDate);
+        await advanceIntoVoteTime(startDate, endDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3, 4, 5, 6, 7, 8], // 9 votes
