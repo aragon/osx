@@ -12,6 +12,7 @@ import {AddresslistVoting} from "./AddresslistVoting.sol";
 /// @title AddresslistVotingSetup
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `AddresslistVoting` plugin.
+/// @custom:security-contact sirt@aragon.org
 contract AddresslistVotingSetup is PluginSetup {
     /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
     AddresslistVoting private immutable addresslistVotingBase;

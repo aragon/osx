@@ -5,6 +5,7 @@ pragma solidity ^0.8.8;
 /// @title IPlugin
 /// @author Aragon Association - 2022-2023
 /// @notice An interface defining the traits of a plugin.
+/// @custom:security-contact sirt@aragon.org
 interface IPlugin {
     enum PluginType {
         UUPS,

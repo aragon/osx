@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 /// @param _data The constructor arguments for this contract.
 /// @return The address of the proxy contract created.
 /// @dev Initializes the upgradeable proxy with an initial implementation specified by _logic. If _data is non-empty, it’s used as data in a delegate call to _logic. This will typically be an encoded function call, and allows initializing the storage of the proxy like a Solidity constructor (see [OpenZeppelin ERC1967Proxy-constructor](https://docs.openzeppelin.com/contracts/4.x/api/proxy#ERC1967Proxy-constructor-address-bytes-)).
+/// @custom:security-contact sirt@aragon.org
 function createERC1967Proxy(address _logic, bytes memory _data) returns (address) {
     return address(new ERC1967Proxy(_logic, _data));
 }
