@@ -208,11 +208,11 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if an address has permission on a contract via a permission identifier and relays the answer to a condition contract if this was declared during the the granting process.
+    /// @notice Checks if caller address has permission on target contract via a permission identifier and relays the answer to a condition contract if this was declared during the the granting process.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
-    /// @param _data The optional data passed to the `PermissionCondition` registered.
+    /// @param _data Optional data to be passed to a referenced `PermissionCondition`.
     /// @return Returns true if `_who` has the permissions on the target contract via the specified permission identifier.
     function isGranted(
         address _where,
@@ -286,13 +286,14 @@ abstract contract PermissionManager is Initializable {
         return false;
     }
 
+    /// @notice Relays the question if caller address has permission on target contract via a permission identifier to a condition contract.
     /// @notice Checks a condition contract by doing an external call via try/catch.
     /// @param _condition The condition contract that is called.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return Returns `true` if `_who` has the permissions on the contract via the specified permissionId identifier.
+    /// @param _data Optional data to be passed to a referenced `PermissionCondition`.
+    /// @return Returns `true` if a caller (`_who`) has the permissions on the contract (`_where`) via the specified permission identifier.
     /// @dev If the external call fails, we return `false`.
     function _checkCondition(
         address _condition,
