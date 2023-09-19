@@ -70,7 +70,7 @@ contract DAO is
     uint256 private constant _ENTERED = 2;
 
     /// @notice Removed variable that is left here to maintain the storage layout.
-    /// @dev Introducedd in v1.0.0. Removed in v1.4.0.
+    /// @dev Introduced in v1.0.0. Removed in v1.4.0.
     /// @custom:oz-renamed-from signatureValidator
     address private __removed0;
 
