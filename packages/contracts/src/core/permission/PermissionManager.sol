@@ -220,53 +220,61 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         bytes memory _data
     ) public view virtual returns (bool) {
-        // Specific caller and target
+        // Specific caller (`_who`) and target (`_where`) permission check
         {
-            address specificPermissionOrCondition = permissionsHashed[
+            // This permission may have been granted directly via the `grant` function or with a condition via the `grantWithCondition` function.
+            address specificCallerTargetPermission = permissionsHashed[
                 permissionHash({_where: _where, _who: _who, _permissionId: _permissionId})
             ];
 
-            if (specificPermissionOrCondition == ALLOW_FLAG) return true;
+            // If it is directly granted, return true.
+            if (specificCallerTargetPermission == ALLOW_FLAG) return true;
 
-            if (specificPermissionOrCondition != UNSET_FLAG) {
+            // If it points to a condition address, check it.
+            if (specificCallerTargetPermission != UNSET_FLAG) {
                 return
                     _checkCondition({
-                        _condition: specificPermissionOrCondition,
+                        _condition: specificCallerTargetPermission,
                         _where: _where,
                         _who: _who,
                         _permissionId: _permissionId,
                         _data: _data
                     });
             }
+
+            // If this permission is not set, check if there is a generic caller condition.
         }
 
-        // Generic caller `_who: ANY_ADDR`  (only possible by granting with `grantWithCondition`)
+        // Generic caller (`_who: ANY_ADDR`) condition check
         {
-            address genericCallerCondition = permissionsHashed[
+            // This permission can only be granted in conjunction with a condition via the `grantWithCondition` function.
+            address genericCallerPermissionCondition = permissionsHashed[
                 permissionHash({_where: _where, _who: ANY_ADDR, _permissionId: _permissionId})
             ];
 
-            if (genericCallerCondition != UNSET_FLAG) {
+            if (genericCallerPermissionCondition != UNSET_FLAG) {
                 return
                     _checkCondition({
-                        _condition: genericCallerCondition,
+                        _condition: genericCallerPermissionCondition,
                         _where: _where,
                         _who: _who,
                         _permissionId: _permissionId,
                         _data: _data
                     });
             }
+            // If no generic caller condition is set, check if there is a generic target condition.
         }
 
-        // Generic target `_where: ANY_ADDR` (only possible by granting with `grantWithCondition`)
+        // Generic target (`_where: ANY_ADDR`) condition check
         {
-            address genericTargetCondition = permissionsHashed[
+            // This permission can only be granted in conjunction with a condition via the `grantWithCondition` function.
+            address genericTargetPermissionCondition = permissionsHashed[
                 permissionHash({_where: ANY_ADDR, _who: _who, _permissionId: _permissionId})
             ];
-            if (genericTargetCondition != UNSET_FLAG) {
+            if (genericTargetPermissionCondition != UNSET_FLAG) {
                 return
                     _checkCondition({
-                        _condition: genericTargetCondition,
+                        _condition: genericTargetPermissionCondition,
                         _where: _where,
                         _who: _who,
                         _permissionId: _permissionId,
