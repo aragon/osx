@@ -208,7 +208,7 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
+    /// @notice Checks if an address has permission on a contract via a permission identifier and relays the answer to a condition contract if this was declared during the the granting process.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
@@ -230,7 +230,7 @@ abstract contract PermissionManager is Initializable {
             // If it is directly granted, return true.
             if (specificCallerTargetPermission == ALLOW_FLAG) return true;
 
-            // If it points to a condition address, check it.
+            // If it points to a condition address, check the condition.
             if (specificCallerTargetPermission != UNSET_FLAG) {
                 return
                     _checkCondition({
@@ -286,13 +286,14 @@ abstract contract PermissionManager is Initializable {
         return false;
     }
 
-    /// @notice Checks an condition contract by doing an external call.
-    /// @param _condition The condition contract that is asked.
+    /// @notice Checks a condition contract by doing an external call via try/catch.
+    /// @param _condition The condition contract that is called.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionCondition` registered.
-    /// @return Returns true if `_who` has the permissions on the contract via the specified permissionId identifier.
+    /// @return Returns `true` if `_who` has the permissions on the contract via the specified permissionId identifier.
+    /// @dev If the external call fails, we return `false`.
     function _checkCondition(
         address _condition,
         address _where,
@@ -300,7 +301,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         bytes memory _data
     ) internal view virtual returns (bool) {
-        // try-catch to skip failures
+        // Try-catch to skip failures
         try
             IPermissionCondition(_condition).isGranted({
                 _where: _where,
