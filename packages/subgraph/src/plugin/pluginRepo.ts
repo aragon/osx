@@ -86,6 +86,7 @@ export function handleGranted(event: Granted): void {
   // Permission
   let permissionEntity = new Permission(permissionEntityId);
   permissionEntity.where = event.params.where;
+  permissionEntity.permissionId = contractPermissionId;
   permissionEntity.who = event.params.who;
   permissionEntity.actor = event.params.here;
   permissionEntity.condition = event.params.condition;

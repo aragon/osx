@@ -2,12 +2,13 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, ByteArray, Bytes, crypto} from '@graphprotocol/graph-ts';
 
 import {handleGranted, handleRevoked} from '../../src/dao/dao_v1_0_0';
-import {Permission, ContractPermissionId} from '../../generated/schema';
+import {Permission} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
   CONTRACT_ADDRESS,
-  ADDRESS_TWO
+  ADDRESS_TWO,
+  ADDRESS_THREE
 } from '../constants';
 import {
   createNewGrantedEvent,
@@ -16,61 +17,37 @@ import {
   getEXECUTE_PERMISSION_IDreverted
 } from './utils';
 
-let contractPermissionId = Bytes.fromByteArray(
+const contractPermissionId = Bytes.fromByteArray(
   crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION'))
 );
+
+const daoId = Address.fromString(DAO_ADDRESS).toHexString();
+const where = Address.fromString(CONTRACT_ADDRESS);
+const who = Address.fromString(ADDRESS_ONE);
+const actor = Address.fromString(ADDRESS_TWO);
+const conditionAddress = ADDRESS_THREE;
 
 test('Run dao (handleGranted) mappings with mock event', () => {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
     contractPermissionId,
-    ADDRESS_ONE,
-    DAO_ADDRESS,
-    CONTRACT_ADDRESS,
-    ADDRESS_TWO,
-    DAO_ADDRESS
+    actor.toHexString(),
+    where.toHexString(),
+    who.toHexString(),
+    conditionAddress,
+    daoId
   );
 
   // handle event
   handleGranted(grantedEvent);
 
   // checks
-  // contractPermissionId
-  let contractPermissionIdEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    contractPermissionId.toHexString();
-
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'id',
-    contractPermissionIdEntityID
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'where',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'permissionId',
-    contractPermissionId.toHexString()
-  );
-
-  // permission
-  let permissionEntityID =
-    contractPermissionIdEntityID +
-    '_' +
-    Address.fromString(CONTRACT_ADDRESS).toHexString();
+  let permissionEntityID = [
+    daoId,
+    where.toHexString(),
+    contractPermissionId.toHexString(),
+    who.toHexString()
+  ].join('_');
 
   assert.fieldEquals(
     'Permission',
@@ -100,18 +77,6 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   handleGranted(grantedEvent);
 
   // checks
-  // contractPermissionId
-  let contractPermissionIdEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    contractPermissionId.toHexString();
-
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'id',
-    contractPermissionIdEntityID
-  );
 
   // governance
   let daoPluginEntityID =
@@ -125,34 +90,22 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
 });
 
 test('Run dao (handleRevoked) mappings with mock event', () => {
-  // create state
-  let contractPermissionIdEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    contractPermissionId.toHexString();
   // permission
-  let permissionEntityID =
-    contractPermissionIdEntityID +
-    '_' +
-    Address.fromString(CONTRACT_ADDRESS).toHexString();
-
-  let contractPermissionIdEntity = new ContractPermissionId(
-    contractPermissionIdEntityID
-  );
-  contractPermissionIdEntity.dao = Address.fromString(
-    DAO_ADDRESS
-  ).toHexString();
-  contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
-  contractPermissionIdEntity.permissionId = contractPermissionId;
-  contractPermissionIdEntity.save();
+  let permissionEntityID = [
+    daoId,
+    where.toHexString(),
+    contractPermissionId.toHexString(),
+    who.toHexString()
+  ].join('_');
 
   let permissionEntity = new Permission(permissionEntityID);
-  permissionEntity.contractPermissionId = contractPermissionIdEntity.id;
-  permissionEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
   permissionEntity.where = Address.fromString(CONTRACT_ADDRESS);
-  permissionEntity.contractPermissionId = contractPermissionId.toHexString();
+  permissionEntity.permissionId = contractPermissionId;
   permissionEntity.who = Address.fromString(ADDRESS_ONE);
   permissionEntity.actor = Address.fromString(ADDRESS_ONE);
+
+  permissionEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
+
   permissionEntity.save();
 
   // check state exist
@@ -166,10 +119,10 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   // create event and run it's handler
   let revokedEvent = createNewRevokedEvent(
     contractPermissionId,
-    ADDRESS_ONE,
-    DAO_ADDRESS,
-    CONTRACT_ADDRESS,
-    DAO_ADDRESS
+    actor.toHexString(),
+    where.toHexString(),
+    who.toHexString(),
+    daoId
   );
 
   getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionId);
@@ -178,30 +131,6 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   handleRevoked(revokedEvent);
 
   // checks
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'id',
-    contractPermissionIdEntityID
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'where',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'permissionId',
-    contractPermissionId.toHexString()
-  );
 
   assert.notInStore('Permission', permissionEntityID);
 
