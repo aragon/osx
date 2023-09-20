@@ -1294,7 +1294,7 @@ describe('DAO', function () {
       // Check that the mock condition will answer true.
       expect(await mockCondition.answer()).to.be.true;
 
-      // Check that the signature is invalid in this case.
+      // Check that the signature is valid in this case.
       expect(
         await dao.connect(caller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
