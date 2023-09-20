@@ -44,7 +44,7 @@ export async function initForkForOsxVersion(
   // Aggregate necessary information to HardhatEnvironment.
   hre.testingFork = {
     network: forkNetwork,
-    osxVersion: osxVersion.version,
+    osxVersion: osxVersion.version, // TODO: What is the `osxVersion` used for?
     activeContracts: osxVersion.activeContracts,
   };
 

@@ -13,6 +13,7 @@ import 'solidity-coverage';
 import 'solidity-docgen';
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
+import {parseUnits} from 'ethers/lib/utils';
 
 dotenv.config();
 
@@ -75,7 +76,7 @@ const config: HardhatUserConfig = {
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
-      gasPrice: 80000000000,
+      gasPrice: parseUnits('400.0', 'gwei').toNumber(),
       deploy: ENABLE_DEPLOY_TEST
         ? ['./deploy']
         : ['./deploy/new', './deploy/verification'],

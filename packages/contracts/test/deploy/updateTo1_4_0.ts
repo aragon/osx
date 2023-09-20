@@ -6,7 +6,7 @@ import {
   initForkForOsxVersion,
   initializeDeploymentFixture,
 } from '../test-utils/fixture';
-import {activeContractsList as v1_2_1_activeContracts} from '@aragon/osx-ethers-v1.2.1';
+import {activeContractsList as v1_3_0_rc0_2_activeContracts} from '@aragon/osx-ethers-v1.3.0-rc0.2';
 
 const enableTest = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 
@@ -22,12 +22,14 @@ if (enableTest) {
     {networkName: 'goerli', forkBlockNumber: 9225868},
     {networkName: 'polygon', forkBlockNumber: 42000000},
     {networkName: 'mumbai', forkBlockNumber: 33960187},
+    {networkName: 'baseMainnet', forkBlockNumber: 2094661},
+    {networkName: 'baseGoerli', forkBlockNumber: 7890908},
   ].forEach(function (networkData: NetworkForkData) {
-    describe(`${networkData.networkName} update/to_v1.3.0`, function () {
+    describe(`${networkData.networkName} update/to_v1.4.0`, function () {
       before(async () => {
         const previousOsxVersion: ForkOsxVersion = {
-          version: 'v1.0.1', // TODO: Write explaining comment why v1.0.1
-          activeContracts: v1_2_1_activeContracts, // TODO: Write explaining comment why v1.2.1
+          version: 'v1.3.0',
+          activeContracts: v1_3_0_rc0_2_activeContracts,
           forkBlockNumber: networkData.forkBlockNumber,
         };
 
@@ -36,24 +38,20 @@ if (enableTest) {
           previousOsxVersion
         );
 
-        const updateDeployTags = ['v1.3.0'];
+        const updateDeployTags = ['v1.4.0'];
         await initializeDeploymentFixture(updateDeployTags);
       });
 
       it('deploys new contracts with new addresses', async function () {
         const changedContracts = [
           'DAOFactory',
-          'PluginRepoFactory',
-          'MultisigSetup',
-          'TokenVotingSetup',
-          'AddresslistVotingSetup',
           // TODO: what about `managingDAOImplemenation` (note the typo in "Implemenation" )
         ];
 
         const allDeployments = await deployments.all();
 
         changedContracts.forEach((contractName: string) => {
-          const previous = (v1_2_1_activeContracts as any)[
+          const previous = (v1_3_0_rc0_2_activeContracts as any)[
             networkData.networkName
           ][contractName];
           const current = allDeployments[contractName].address;
