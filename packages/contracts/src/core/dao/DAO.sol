@@ -187,6 +187,15 @@ contract DAO is
             _reentrancyStatus = _NOT_ENTERED;
             _registerInterface(type(IProtocolVersion).interfaceId);
         }
+
+        // Revoke the `SET_SIGNATURE_VALIDATOR_PERMISSION` that was deprecated in v1.4.0.
+        if (_previousProtocolVersion[1] <= 3) {
+            _revoke({
+                _where: address(this),
+                _who: address(this),
+                _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
+            });
+        }
     }
 
     /// @inheritdoc PermissionManager
