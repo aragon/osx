@@ -242,7 +242,7 @@ abstract contract PermissionManager is Initializable {
                     });
             }
 
-            // If this permission is not set, check if there is a generic caller condition.
+            // If this permission is not set, continue.
         }
 
         // Generic caller (`_who: ANY_ADDR`) condition check
@@ -263,7 +263,7 @@ abstract contract PermissionManager is Initializable {
                         _data: _data
                     });
             }
-            // If no generic caller condition is set, check if there is a generic target condition.
+            // If this permission is not set, continue.
         }
 
         // Generic target (`_where: ANY_ADDR`) condition check
@@ -284,9 +284,10 @@ abstract contract PermissionManager is Initializable {
                         _data: _data
                     });
             }
+            // If this permission is not set, continue.
         }
 
-        // No specific or generic permission (condition) applies so we return `false`.
+        // No specific or generic permission applies to the `_who`, `_where`, `_permissionId`, so we return `false`.
         return false;
     }
 
