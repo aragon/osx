@@ -147,6 +147,9 @@ class PermissionMethods extends Permission {
     this.actor = actor;
     this.condition = condition;
 
+    this.dao = null;
+    this.pluginRepo = null;
+
     return this;
   }
 

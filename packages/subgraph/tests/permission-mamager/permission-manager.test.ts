@@ -3,12 +3,13 @@ import {Address} from '@graphprotocol/graph-ts';
 
 import {handleGranted, handleRevoked} from '../../src/dao/dao_v1_0_0';
 
-import {DAO_ADDRESS} from '../constants';
-import {getEXECUTE_PERMISSION_ID} from './utils';
+import {CONTRACT_ADDRESS, DAO_ADDRESS} from '../constants';
 import {ExtendedPermission} from '../helpers/extended-schema';
 
 const daoId = Address.fromString(DAO_ADDRESS).toHexString();
+const pluginRepoId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
+// DAO
 test('Run dao (handleGranted) mappings with mock event', () => {
   let permission = new ExtendedPermission().withDefaultValues(daoId);
   permission.dao = daoId;
@@ -19,7 +20,7 @@ test('Run dao (handleGranted) mappings with mock event', () => {
   handleGranted(grantedEvent);
 
   // checks
-  permission.assertEntity();
+  permission.assertEntity(true);
 
   clearStore();
 });
