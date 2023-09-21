@@ -962,7 +962,6 @@ describe('Core: PermissionManager', function () {
           genericTargetCondition.address
         )
       ).to.be.false;
-      //
       expect(
         await pm.isGranted(
           pm.address,
