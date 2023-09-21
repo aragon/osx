@@ -20,14 +20,30 @@ pragma solidity 0.8.17;
  */
 
 import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";
+import {DAO as DAO_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/core/dao/DAO.sol";
 import {DAORegistry as DAORegistry_v1_0_0} from "@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol";
+import {DAORegistry as DAORegistry_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/framework/dao/DAORegistry.sol";
+
 import {PluginRepo as PluginRepo_v1_0_0} from "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol";
+import {PluginRepo as PluginRepo_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/framework/plugin/repo/PluginRepo.sol";
+
 import {PluginRepoRegistry as PluginRepoRegistry_v1_0_0} from "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol";
+import {PluginRepoRegistry as PluginRepoRegistry_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/framework/plugin/repo/PluginRepoRegistry.sol";
+
 import {ENSSubdomainRegistrar as ENSSubdomainRegistrar_v1_0_0} from "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol";
+import {ENSSubdomainRegistrar as ENSSubdomainRegistrar_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/framework/utils/ens/ENSSubdomainRegistrar.sol";
 
 import {TokenVoting as TokenVoting_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/majority-voting/token/TokenVoting.sol";
+import {TokenVoting as TokenVoting_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/token/TokenVoting.sol";
+
 import {AddresslistVoting as AddresslistVoting_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol";
+import {AddresslistVoting as AddresslistVoting_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol";
+
 import {Multisig as Multisig_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol";
+import {Multisig as Multisig_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/governance/multisig/Multisig.sol";
 
 import {MerkleMinter as MerkleMinter_v1_0_0} from "@aragon/osx-v1.0.1/plugins/token/MerkleMinter.sol";
+import {MerkleMinter as MerkleMinter_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleMinter.sol";
+
 import {MerkleDistributor as MerkleDistributor_v1_0_0} from "@aragon/osx-v1.0.1/plugins/token/MerkleDistributor.sol";
+import {MerkleDistributor as MerkleDistributor_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleDistributor.sol";

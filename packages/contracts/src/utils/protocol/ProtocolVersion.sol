@@ -14,6 +14,6 @@ abstract contract ProtocolVersion is IProtocolVersion {
 
     /// @inheritdoc IProtocolVersion
     function protocolVersion() public pure returns (uint8[3] memory) {
-        return [1, 3, 0];
+        return [1, 4, 0];
     }
 }

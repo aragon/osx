@@ -53,13 +53,13 @@ contract DAO is
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `setSignatureValidator` function.
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
-        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
-
     /// @notice The ID of the permission required to call the `registerStandardCallback` function.
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
+
+    /// @notice The ID of the permission required to validate [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signatures.
+    bytes32 public constant VALIDATE_SIGNATURE_PERMISSION_ID =
+        keccak256("VALIDATE_SIGNATURE_PERMISSION");
 
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
@@ -70,9 +70,10 @@ contract DAO is
     /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
     uint256 private constant _ENTERED = 2;
 
-    /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
-    /// @dev Added in v1.0.0.
-    IERC1271 public signatureValidator;
+    /// @notice Removed variable that is left here to maintain the storage layout.
+    /// @dev Introduced in v1.0.0. Removed in v1.4.0.
+    /// @custom:oz-renamed-from signatureValidator
+    address private __removed0;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     /// @dev Added in v1.0.0.
@@ -109,6 +110,9 @@ contract DAO is
 
     /// @notice Thrown if an upgrade is not supported from a specific protocol version .
     error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
+
+    /// @notice Thrown when a function is removed but left to not corrupt the interface ID.
+    error FunctionRemoved();
 
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
@@ -194,7 +198,6 @@ contract DAO is
             _permissionId == UPGRADE_DAO_PERMISSION_ID ||
             _permissionId == SET_METADATA_PERMISSION_ID ||
             _permissionId == SET_TRUSTED_FORWARDER_PERMISSION_ID ||
-            _permissionId == SET_SIGNATURE_VALIDATOR_PERMISSION_ID ||
             _permissionId == REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     }
 
@@ -321,25 +324,30 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function setSignatureValidator(
-        address _signatureValidator
-    ) external override auth(SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
-        signatureValidator = IERC1271(_signatureValidator);
-
-        emit SignatureValidatorSet({signatureValidator: _signatureValidator});
+    function setSignatureValidator(address) external pure override {
+        revert FunctionRemoved();
     }
 
     /// @inheritdoc IDAO
+    /// @dev Relays the validation logic determining who is allowed to sign on behalf of the DAO to its permission manager.
+    /// Caller specific bypassing can be set direct granting (i.e., `grant({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID})`).
+    /// Caller specific signature validation logic can be set by granting with a `PermissionCondition` (i.e., `grantWithCondition({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})`)
+    /// Generic signature validation logic can be set for all calling contracts by granting with a `PermissionCondition` to `PermissionManager.ANY_ADDR()` (i.e., `grantWithCondition({_where: dao, _who: PermissionManager.ANY_ADDR(), _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})`).
     function isValidSignature(
         bytes32 _hash,
         bytes memory _signature
     ) external view override(IDAO, IERC1271) returns (bytes4) {
-        if (address(signatureValidator) == address(0)) {
-            // Return the invalid magic number
-            return bytes4(0);
+        if (
+            isGranted({
+                _where: address(this),
+                _who: msg.sender,
+                _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID,
+                _data: abi.encode(_hash, _signature)
+            })
+        ) {
+            return 0x1626ba7e; // `type(IERC1271).interfaceId` = bytes4(keccak256("isValidSignature(bytes32,bytes)")`
         }
-        // Forward the call to the set signature validator contract
-        return signatureValidator.isValidSignature(_hash, _signature);
+        return 0xffffffff; // `bytes4(uint32(type(uint32).max-1))`
     }
 
     /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.

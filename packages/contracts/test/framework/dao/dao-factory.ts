@@ -422,14 +422,6 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
-        SET_SIGNATURE_VALIDATOR_PERMISSION_ID,
-        daoFactory.address,
-        dao,
-        dao,
-        ALLOW_FLAG
-      )
-      .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(
         SET_TRUSTED_FORWARDER_PERMISSION_ID,
         daoFactory.address,
         dao,

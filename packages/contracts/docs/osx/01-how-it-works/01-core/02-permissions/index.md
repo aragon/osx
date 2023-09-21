@@ -145,7 +145,6 @@ The following functions in the DAO are permissioned:
 | `_authorizeUpgrade`                     | `UPGRADE_DAO_PERMISSION_ID`                | Required to upgrade the DAO (via the [UUPS](https://eips.ethereum.org/EIPS/eip-1822)).                          |
 | `setMetadata`                           | `SET_METADATA_PERMISSION_ID`               | Required to set the DAO’s metadata and [DAOstar.one DAO URI](https://eips.ethereum.org/EIPS/eip-4824).          |
 | `setTrustedForwarder`                   | `SET_TRUSTED_FORWARDER_PERMISSION_ID`      | Required to set the DAO’s trusted forwarder for meta transactions.                                              |
-| `setSignatureValidator`                 | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID`    | Required to set the DAO’s signature validator contract (see ERC-1271).                                          |
 | `registerStandardCallback`              | `REGISTER_STANDARD_CALLBACK_PERMISSION_ID` | Required to register a standard callback for an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID. |
 
 Plugins installed on the DAO might introduce other permissions and associated permission identifiers.

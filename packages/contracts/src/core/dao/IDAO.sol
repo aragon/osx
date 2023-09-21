@@ -113,15 +113,7 @@ interface IDAO {
     /// @param forwarder the new forwarder address.
     event TrustedForwarderSet(address forwarder);
 
-    /// @notice Setter for the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
-    /// @param _signatureValidator The address of the signature validator.
-    function setSignatureValidator(address _signatureValidator) external;
-
-    /// @notice Emitted when the signature validator address is updated.
-    /// @param signatureValidator The address of the signature validator.
-    event SignatureValidatorSet(address signatureValidator);
-
-    /// @notice Checks whether a signature is valid for the provided hash by forwarding the call to the set [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+    /// @notice Checks whether a signature is valid for a provided hash according to [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271).
     /// @param _hash The hash of the data to be signed.
     /// @param _signature The signature byte array associated with `_hash`.
     /// @return Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
@@ -136,4 +128,8 @@ interface IDAO {
         bytes4 _callbackSelector,
         bytes4 _magicNumber
     ) external;
+
+    /// @notice Removed function being left here to not corrupt the IDAO interface ID. Any call will revert.
+    /// @dev Introduced in v1.0.0. Removed in v1.4.0.
+    function setSignatureValidator(address) external;
 }

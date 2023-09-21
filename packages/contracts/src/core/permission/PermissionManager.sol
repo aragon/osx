@@ -61,7 +61,6 @@ abstract contract PermissionManager is Initializable {
     error ConditionInterfacNotSupported(IPermissionCondition condition);
 
     /// @notice Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
-
     error PermissionsForAnyAddressDisallowed();
 
     /// @notice Thrown for permission grants where `who` and `where` are both `ANY_ADDR`.

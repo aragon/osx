@@ -27,9 +27,9 @@ const UNSET_FLAG = ethers.utils.getAddress(
 const ALLOW_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000002'
 );
+export const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 const addressZero = ethers.constants.AddressZero;
-const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 let conditionMock: PermissionConditionMock;
 
@@ -816,7 +816,7 @@ describe('Core: PermissionManager', function () {
         )
       ).to.be.equal(true);
 
-      await permissionCondition.setWillPerform(false);
+      await permissionCondition.setAnswer(false);
       expect(
         await pm.callStatic.isGranted(
           pm.address,
