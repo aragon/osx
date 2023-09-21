@@ -3,7 +3,14 @@
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
 
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  crypto,
+  ethereum
+} from '@graphprotocol/graph-ts';
 import {
   Dao,
   ERC20Balance,
@@ -23,13 +30,16 @@ import {
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
-  TokenVotingVoter
+  TokenVotingVoter,
+  Permission
 } from '../../generated/schema';
 import {
   CallbackReceived,
   Deposited,
+  Granted,
   NativeTokenDeposited,
-  NewURI
+  NewURI,
+  Revoked
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   DelegateChanged,
@@ -77,12 +87,15 @@ import {
   STRING_DATA,
   ADDRESS_TWO,
   ADDRESS_THREE,
-  ADDRESS_ZERO
+  ADDRESS_ZERO,
+  ADDRESS_FOUR
 } from '../constants';
 import {
   createCallbackReceivedEvent,
   createNewDepositedEvent,
+  createNewGrantedEvent,
   createNewNativeTokenDepositedEvent,
+  createNewRevokedEvent,
   createNewURIEvent,
   getBalanceOf,
   getSupportsInterface
@@ -106,6 +119,76 @@ import {
 } from '../utils';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
+// PermissionManager
+class PermissionMethods extends Permission {
+  withDefaultValues(
+    emittingContract: string = Address.fromString(
+      CONTRACT_ADDRESS
+    ).toHexString()
+  ): PermissionMethods {
+    const permissionId = Bytes.fromByteArray(
+      crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION'))
+    );
+
+    const where = Address.fromString(ADDRESS_ONE);
+    const who = Address.fromString(ADDRESS_TWO);
+    const actor = Address.fromString(ADDRESS_THREE);
+    const condition = Address.fromString(ADDRESS_FOUR);
+
+    this.id = [
+      emittingContract,
+      where.toHexString(),
+      permissionId.toHexString(),
+      who.toHexString()
+    ].join('_');
+    this.where = where;
+    this.permissionId = permissionId;
+    this.who = who;
+    this.actor = actor;
+    this.condition = condition;
+
+    return this;
+  }
+
+  // events
+  createEvent_Granted(
+    emittingContract: string = Address.fromString(
+      CONTRACT_ADDRESS
+    ).toHexString()
+  ): Granted {
+    if (this.condition === null) {
+      throw new Error('Condition is null');
+    }
+
+    let event = createNewGrantedEvent(
+      this.permissionId,
+      this.actor.toHexString(),
+      this.where.toHexString(),
+      this.who.toHexString(),
+      (this.condition as Bytes).toHexString(),
+      emittingContract
+    );
+
+    return event;
+  }
+
+  createEvent_Revoked(
+    emittingContract: string = Address.fromString(
+      CONTRACT_ADDRESS
+    ).toHexString()
+  ): Revoked {
+    let event = createNewRevokedEvent(
+      this.permissionId,
+      this.actor.toHexString(),
+      this.where.toHexString(),
+      this.who.toHexString(),
+      emittingContract
+    );
+
+    return event;
+  }
+}
+
 //  ERC1155Contract
 class ERC1155ContractMethods extends ERC1155Contract {
   withDefaultValues(): ERC1155ContractMethods {

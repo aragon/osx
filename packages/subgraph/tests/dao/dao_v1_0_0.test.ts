@@ -155,7 +155,7 @@ test('Run dao (handleNewURI) mappings with mock event', () => {
   dao.daoURI = newDAOURI;
 
   // Assert dao entity
-  dao.assertEntity(true);
+  dao.assertEntity();
 
   clearStore();
 });
