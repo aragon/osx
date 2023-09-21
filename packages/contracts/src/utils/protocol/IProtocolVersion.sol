@@ -5,6 +5,7 @@ pragma solidity ^0.8.8;
 /// @title IProtocolVersion
 /// @author Aragon Association - 2022-2023
 /// @notice An interface defining the semantic OSx protocol version.
+/// @custom:security-contact sirt@aragon.org
 interface IProtocolVersion {
     /// @notice Returns the protocol version at which the current contract was built. Use it to check for future upgrades that might be applicable.
     /// @return _version Returns the semantic OSx protocol version.

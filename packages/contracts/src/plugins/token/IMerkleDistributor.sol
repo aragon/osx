@@ -7,6 +7,10 @@ import {ERC20WrapperUpgradeable} from "@openzeppelin/contracts-upgradeable/token
 
 import {IDAO} from "../../core/dao/IDAO.sol";
 
+/// @title IMerkleDistributor
+/// @author Uniswap 2020, Modified by Aragon Association 2021-2023
+/// @notice An interface for the plugin distributing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle balance tree.
+/// @custom:security-contact sirt@aragon.org
 interface IMerkleDistributor {
     /// @notice Emitted when tokens are claimed from the distributor.
     /// @param index The index in the balance tree that was claimed.

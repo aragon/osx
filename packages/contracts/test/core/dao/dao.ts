@@ -1294,7 +1294,7 @@ describe('DAO', function () {
       // Check that the mock condition will answer true.
       expect(await mockCondition.answer()).to.be.true;
 
-      // Check that the signature is invalid in this case.
+      // Check that the signature is valid in this case.
       expect(
         await dao.connect(caller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
@@ -1330,7 +1330,6 @@ describe('DAO', function () {
       expect(
         await dao.connect(caller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
-
       expect(
         await dao.connect(otherCaller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
@@ -1393,7 +1392,7 @@ describe('DAO', function () {
           await specificMockCondition.setAnswer(false);
           expect(
             await dao.connect(caller).isValidSignature(hash, signature)
-          ).to.equal(INVALID_ERC1271_SIGNATURE);
+          ).to.equal(VALID_ERC1271_SIGNATURE);
         });
 
         it('returns invalid if both conditions are not met', async () => {

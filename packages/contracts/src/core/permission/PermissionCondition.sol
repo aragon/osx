@@ -9,6 +9,7 @@ import {IPermissionCondition} from "./IPermissionCondition.sol";
 /// @title PermissionCondition
 /// @author Aragon Association - 2023
 /// @notice An abstract contract for non-upgradeable contracts instantiated via the `new` keyword  to inherit from to support customary permissions depending on arbitrary on-chain state.
+/// @custom:security-contact sirt@aragon.org
 abstract contract PermissionCondition is ERC165, IPermissionCondition {
     /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interface.
