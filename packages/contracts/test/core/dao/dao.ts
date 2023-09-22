@@ -55,7 +55,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../test-utils/protocol-version';
 import {ANY_ADDR} from '../permission/permission-manager';
-import {ANY_ADDR} from '../permission/permission-manager';
 
 chai.use(smock.matchers);
 
