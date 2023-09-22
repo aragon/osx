@@ -6,8 +6,6 @@ import {
   MetadataSet,
   NativeTokenDeposited,
   Deposited,
-  Granted,
-  Revoked,
   Executed,
   TrustedForwarderSet,
   SignatureValidatorSet,

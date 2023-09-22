@@ -36,10 +36,8 @@ import {
 import {
   CallbackReceived,
   Deposited,
-  Granted,
   NativeTokenDeposited,
-  NewURI,
-  Revoked
+  NewURI
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   DelegateChanged,
