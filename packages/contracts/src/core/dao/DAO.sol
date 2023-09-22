@@ -152,7 +152,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
@@ -173,7 +173,7 @@ contract DAO is
     function initializeFrom(
         uint8[3] calldata _previousProtocolVersion,
         bytes calldata _initData
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         _initData; // Silences the unused function parameter warning.
 
         // Check that the contract is not upgrading from a different major release.
