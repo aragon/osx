@@ -93,9 +93,7 @@ import {
 import {
   createCallbackReceivedEvent,
   createNewDepositedEvent,
-  createNewGrantedEvent,
   createNewNativeTokenDepositedEvent,
-  createNewRevokedEvent,
   createNewURIEvent,
   getBalanceOf,
   getSupportsInterface
@@ -117,6 +115,10 @@ import {
   createWrappedTokenCalls,
   createERC1155TokenCalls
 } from '../utils';
+import {
+  createNewGrantedEvent,
+  createNewRevokedEvent
+} from '../permission-mamager/utils';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
 // PermissionManager
@@ -154,16 +156,16 @@ class PermissionMethods extends Permission {
   }
 
   // events
-  createEvent_Granted(
+  createEvent_Granted<T>(
     emittingContract: string = Address.fromString(
       CONTRACT_ADDRESS
     ).toHexString()
-  ): Granted {
+  ): T {
     if (this.condition === null) {
       throw new Error('Condition is null');
     }
 
-    let event = createNewGrantedEvent(
+    let event = createNewGrantedEvent<T>(
       this.permissionId,
       this.actor.toHexString(),
       this.where.toHexString(),
@@ -172,15 +174,15 @@ class PermissionMethods extends Permission {
       emittingContract
     );
 
-    return event;
+    return event as T;
   }
 
-  createEvent_Revoked(
+  createEvent_Revoked<T>(
     emittingContract: string = Address.fromString(
       CONTRACT_ADDRESS
     ).toHexString()
-  ): Revoked {
-    let event = createNewRevokedEvent(
+  ): T {
+    let event = createNewRevokedEvent<T>(
       this.permissionId,
       this.actor.toHexString(),
       this.where.toHexString(),
@@ -188,7 +190,7 @@ class PermissionMethods extends Permission {
       emittingContract
     );
 
-    return event;
+    return event as T;
   }
 }
 
