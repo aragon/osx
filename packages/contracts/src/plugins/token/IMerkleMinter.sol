@@ -8,6 +8,10 @@ import {IERC20MintableUpgradeable} from "../../token/ERC20/IERC20MintableUpgrade
 import {IDAO} from "../../core/dao/IDAO.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
+/// @title IMerkleMinter
+/// @author Aragon Association
+/// @notice An interface for the minter plugin minting and distributing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle balance tree.
+/// @custom:security-contact sirt@aragon.org
 interface IMerkleMinter {
     /// @notice Emitted when a token is minted.
     /// @param distributor The `MerkleDistributor` address via which the tokens can be claimed.

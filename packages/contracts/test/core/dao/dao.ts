@@ -21,6 +21,7 @@ import {
   IEIP4824__factory,
   IProtocolVersion__factory,
   PermissionConditionMock__factory,
+  PermissionConditionMock,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 import {DAO__factory as DAO_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.2/core/dao/DAO.sol';
@@ -53,6 +54,7 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../test-utils/protocol-version';
+import {ANY_ADDR} from '../permission/permission-manager';
 import {ANY_ADDR} from '../permission/permission-manager';
 
 chai.use(smock.matchers);
@@ -140,11 +142,6 @@ describe('DAO', function () {
         dao.address,
         ownerAddress,
         PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-      ),
-      dao.grant(
-        dao.address,
-        ownerAddress,
-        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
@@ -1222,43 +1219,36 @@ describe('DAO', function () {
   });
 
   describe('ERC1271', async () => {
-    it('should register the interfaceId', async () => {
+    let signer: SignerWithAddress;
+    let caller: SignerWithAddress;
+    let otherCaller: SignerWithAddress;
+
+    let message: string;
+    let hash: string;
+    let signature: string;
+
+    let mockConditionFactory: PermissionConditionMock__factory;
+
+    beforeEach(async () => {
+      caller = signers[0];
+      signer = signers[1];
+      otherCaller = signers[2];
+
+      mockConditionFactory = new PermissionConditionMock__factory(caller);
+
+      message = 'The message!';
+      hash = ethers.utils.hashMessage(message);
+      signature = await signer.signMessage(message);
+    });
+
+    it('treats signatures as invalid by default if no permission is set', async () => {
       expect(
-        await dao.supportsInterface(
-          getInterfaceID(IERC1271__factory.createInterface())
-        )
-      ).to.be.eq(true);
+        await dao.connect(caller).isValidSignature(hash, signature)
+      ).to.equal(INVALID_ERC1271_SIGNATURE);
     });
 
-    it('reverts all signatures requests by default', async () => {
-      const caller = signers[0];
-      const signer = signers[1];
-
-      const message = 'Hi!';
-      const hash = ethers.utils.hashMessage(message);
-      const signature = await signer.signMessage(message);
-
-      // The caller can validate signatures now.
-      expect(await dao.connect(caller).isValidSignature(hash, signature)).to.be
-        .reverted;
-    });
-
-    it('allows caller specific signature validation', async () => {
-      const caller = signers[0];
-      const signer = signers[1];
-
-      const message = 'Hi!';
-      const hash = ethers.utils.hashMessage(message);
-      const goodSignature = await signer.signMessage(message);
-      const badSignature = await signer.signMessage('Bye!');
-      expect(badSignature).to.not.equal(goodSignature);
-
-      // Try to call with caller but caller has no permission
-      expect(await dao.connect(caller).isValidSignature(hash, goodSignature))
-        .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs();
-
-      // Grant the permission to validate signatures to the caller unconditionally
+    it('allows caller-specific signature validation bypassing', async () => {
+      // Grant the permission to validate signatures to the caller without a condition
       await dao.grant(
         dao.address,
         caller.address,
@@ -1266,74 +1256,66 @@ describe('DAO', function () {
       );
 
       // The caller can validate signatures now.
-      expect(await dao.connect(caller).isValidSignature(hash, goodSignature)).to
-        .not.be.reverted;
-
-      // Because the caller is allowed unconditionally, the validation is always true.
-      expect(
-        await dao.connect(caller).isValidSignature(hash, goodSignature)
-      ).to.equal(VALID_ERC1271_SIGNATURE);
-      expect(
-        await dao.connect(caller).isValidSignature(hash, badSignature)
-      ).to.equal(VALID_ERC1271_SIGNATURE);
-    });
-
-    it('allows caller specific signature validation', async () => {
-      const caller = signers[0];
-      const signer = signers[1];
-
-      const message = 'Hi!';
-      const hash = ethers.utils.hashMessage(message);
-      const goodSignature = await signer.signMessage(message);
-      const badSignature = await signer.signMessage('Bye!');
-      expect(badSignature).to.not.equal(goodSignature);
-
-      // Try to call with caller but caller has no permission
-      expect(await dao.connect(caller).isValidSignature(hash, goodSignature))
-        .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs();
-
-      // Grant the permission to validate signatures to the caller unconditionally
-      await dao.grant(
-        dao.address,
-        caller.address,
-        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
-      );
-
-      // The caller can validate signatures now.
-      expect(await dao.connect(caller).isValidSignature(hash, goodSignature)).to
-        .not.be.reverted;
+      expect(await dao.connect(caller).isValidSignature(hash, signature)).to.not
+        .be.reverted;
 
       // Because the caller is allowed unconditionally, the signature is always valid.
       expect(
-        await dao.connect(caller).isValidSignature(hash, goodSignature)
+        await dao.connect(caller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
+
+      // Because the other caller is not allowed, the signature is always invalid.
       expect(
-        await dao.connect(caller).isValidSignature(hash, badSignature)
-      ).to.equal(VALID_ERC1271_SIGNATURE);
+        await dao.connect(otherCaller).isValidSignature(hash, signature)
+      ).to.equal(INVALID_ERC1271_SIGNATURE);
     });
 
-    it('allows generic signature validation', async () => {
-      const caller = signers[0];
-      const signer = signers[1];
-      const other = signers[3];
-
-      const message = 'Hi!';
-      const hash = ethers.utils.hashMessage(message);
-      const goodSignature = await signer.signMessage(message);
-      const badSignature = await signer.signMessage('Bye!');
-      expect(badSignature).to.not.equal(goodSignature);
-
+    it('allows caller-specific signature validation conditions', async () => {
       // Try to call with caller but caller has no permission
-      expect(await dao.connect(caller).isValidSignature(hash, goodSignature))
+      expect(await dao.connect(caller).isValidSignature(hash, signature))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs();
 
-      const mockCondition = await new PermissionConditionMock__factory(
-        caller
-      ).deploy();
+      // Deploy a mock condition
+      const mockCondition = await mockConditionFactory.deploy();
 
-      // Grant the permission to validate signatures to the caller conditionally (granting it unconditionally is not possible in combination with `_who: ANY_ADDR`)
+      // Grant the permission to validate signatures to the caller
+      await dao.grantWithCondition(
+        dao.address,
+        caller.address,
+        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+        mockCondition.address
+      );
+
+      // The caller can validate signatures now.
+      expect(await dao.connect(caller).isValidSignature(hash, signature)).to.not
+        .be.reverted;
+
+      // Check that the mock condition will answer true.
+      expect(await mockCondition.answer()).to.be.true;
+
+      // Check that the signature is valid in this case.
+      expect(
+        await dao.connect(caller).isValidSignature(hash, signature)
+      ).to.equal(VALID_ERC1271_SIGNATURE);
+
+      // Set the mock condition to answer false.
+      await mockCondition.setAnswer(false);
+
+      // Check that the mock condition will answer false.
+      expect(await mockCondition.answer()).to.be.false;
+
+      // Check that the signature is invalid in this case.
+      expect(
+        await dao.connect(caller).isValidSignature(hash, signature)
+      ).to.equal(INVALID_ERC1271_SIGNATURE);
+    });
+
+    it('allows generic signature validation by granting to ANY_ADDR', async () => {
+      // Deploy a mock condition
+      const mockCondition = await mockConditionFactory.deploy();
+
+      // Grant the permission to validate signatures to the ANY caller conditionally (granting it unconditionally is not possible in combination with `_who: ANY_ADDR`)
       await dao.grantWithCondition(
         dao.address,
         ANY_ADDR,
@@ -1341,25 +1323,92 @@ describe('DAO', function () {
         mockCondition.address
       );
 
-      // Any contract can validate signatures now.
-      expect(await dao.connect(caller).isValidSignature(hash, goodSignature)).to
-        .not.be.reverted;
-      expect(await dao.connect(other).isValidSignature(hash, goodSignature)).to
-        .not.be.reverted;
+      // Check that the mock condition will answer true.
+      expect(await mockCondition.answer()).to.be.true;
 
-      // Because we use a mock condition always returning true, the signature is always valid.
+      // Any caller can validate signatures using this condition now.
       expect(
-        await dao.connect(caller).isValidSignature(hash, goodSignature)
+        await dao.connect(caller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
       expect(
-        await dao.connect(caller).isValidSignature(hash, badSignature)
+        await dao.connect(otherCaller).isValidSignature(hash, signature)
       ).to.equal(VALID_ERC1271_SIGNATURE);
+
+      // Set the mock condition to answer false.
+      await mockCondition.setAnswer(false);
+
+      // Check that the mock condition will answer false.
+      expect(await mockCondition.answer()).to.be.false;
+
+      // Check that the signature is invalid in this case for every caller.
+      expect(
+        await dao.connect(caller).isValidSignature(hash, signature)
+      ).to.equal(INVALID_ERC1271_SIGNATURE);
+      expect(
+        await dao.connect(otherCaller).isValidSignature(hash, signature)
+      ).to.equal(INVALID_ERC1271_SIGNATURE);
     });
+
+    context(
+      'A caller-specfic and a generic condition are both set',
+      async () => {
+        let specificMockCondition: PermissionConditionMock;
+        let genericMockCondition: PermissionConditionMock;
+
+        beforeEach(async () => {
+          // Setup the specfic condition for a specific caller
+          specificMockCondition = await mockConditionFactory.deploy();
+          await dao.grantWithCondition(
+            dao.address,
+            caller.address,
+            PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+            specificMockCondition.address
+          );
+
+          // Setup the generic condition for ANY caller
+          genericMockCondition = await mockConditionFactory.deploy();
+          await dao.grantWithCondition(
+            dao.address,
+            ANY_ADDR,
+            PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+            genericMockCondition.address
+          );
+        });
+
+        it('returns valid if both conditions are met', async () => {
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(VALID_ERC1271_SIGNATURE);
+        });
+
+        it('returns valid if only the specific condition is met', async () => {
+          await genericMockCondition.setAnswer(false);
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(VALID_ERC1271_SIGNATURE);
+        });
+
+        it('returns invalid if the specific condition is not met although the generic condition is met (no fallback)', async () => {
+          await specificMockCondition.setAnswer(false);
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(INVALID_ERC1271_SIGNATURE);
+        });
+
+        it('returns invalid if both conditions are not met', async () => {
+          await specificMockCondition.setAnswer(false);
+          await genericMockCondition.setAnswer(false);
+          expect(
+            await dao.connect(caller).isValidSignature(hash, signature)
+          ).to.equal(INVALID_ERC1271_SIGNATURE);
+        });
+      }
+    );
 
     it('should revert if `setSignatureValidator` is called', async () => {
       await expect(
         dao
-          .connect(signers[2])
+          .connect(caller)
           .setSignatureValidator(ethers.Wallet.createRandom().address)
       ).to.be.revertedWithCustomError(dao, 'FunctionRemoved');
     });

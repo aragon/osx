@@ -29,6 +29,7 @@ enum PreparationType {
 /// @notice Returns an ID for plugin installation by hashing the DAO and plugin address.
 /// @param _dao The address of the DAO conducting the setup.
 /// @param _plugin The plugin address.
+/// @custom:security-contact sirt@aragon.org
 function _getPluginInstallationId(address _dao, address _plugin) pure returns (bytes32) {
     return keccak256(abi.encode(_dao, _plugin));
 }
@@ -40,6 +41,7 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
 /// @param _data The bytes-encoded initialize data for the upgrade that is returned by `prepareUpdate`.
 /// @param _preparationType The type of preparation the plugin is currently undergoing. Without this, it is possible to call `applyUpdate` even after `applyInstallation` is called.
 /// @return The prepared setup id.
+/// @custom:security-contact sirt@aragon.org
 function _getPreparedSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionsHash,
@@ -64,6 +66,7 @@ function _getPreparedSetupId(
 /// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
 /// @param _helpersHash The hash of the helper contract addresses.
 /// @return The applied setup id.
+/// @custom:security-contact sirt@aragon.org
 function _getAppliedSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _helpersHash
@@ -76,6 +79,7 @@ function _getAppliedSetupId(
 
 /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
 /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.
+/// @custom:security-contact sirt@aragon.org
 function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
     return keccak256(abi.encode(_helpers));
 }
@@ -83,6 +87,7 @@ function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
 /// @notice Returns a hash of an array of multi-targeted permission operations.
 /// @param _permissions The array of of multi-targeted permission operations.
 /// @return The hash of the array of permission operations.
+/// @custom:security-contact sirt@aragon.org
 function hashPermissions(
     PermissionLib.MultiTargetPermission[] memory _permissions
 ) pure returns (bytes32) {

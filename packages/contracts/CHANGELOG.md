@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bumped OpenZeppelin dependencies to `4.9.3`.
-- Renamed the `signatureValidator` variable in `DAO` to `__deprecated`.
+- Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
+- Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.
 
 ### Removed

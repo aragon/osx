@@ -25,6 +25,7 @@ import {IDAO} from "./IDAO.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
+/// @custom:security-contact sirt@aragon.org
 contract DAO is
     IEIP4824,
     Initializable,
@@ -70,7 +71,7 @@ contract DAO is
     uint256 private constant _ENTERED = 2;
 
     /// @notice Removed variable that is left here to maintain the storage layout.
-    /// @dev Introducedd in v1.0.0. Removed in v1.4.0.
+    /// @dev Introduced in v1.0.0. Removed in v1.4.0.
     /// @custom:oz-renamed-from signatureValidator
     address private __removed0;
 
@@ -186,6 +187,15 @@ contract DAO is
             _reentrancyStatus = _NOT_ENTERED;
             _registerInterface(type(IProtocolVersion).interfaceId);
         }
+
+        // Revoke the `SET_SIGNATURE_VALIDATOR_PERMISSION` that was deprecated in v1.4.0.
+        if (_previousProtocolVersion[1] <= 3) {
+            _revoke({
+                _where: address(this),
+                _who: address(this),
+                _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
+            });
+        }
     }
 
     /// @inheritdoc PermissionManager
@@ -223,7 +233,7 @@ contract DAO is
         bytes32 _permissionId,
         bytes memory _data
     ) external view override returns (bool) {
-        return isGranted(_where, _who, _permissionId, _data);
+        return isGranted({_where: _where, _who: _who, _permissionId: _permissionId, _data: _data});
     }
 
     /// @inheritdoc IDAO

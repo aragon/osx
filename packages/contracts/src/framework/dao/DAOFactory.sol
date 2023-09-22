@@ -18,6 +18,7 @@ import {DAORegistry} from "./DAORegistry.sol";
 /// @title DAOFactory
 /// @author Aragon Association - 2022-2023
 /// @notice This contract is used to create a DAO.
+/// @custom:security-contact sirt@aragon.org
 contract DAOFactory is ERC165, ProtocolVersion {
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
     address public immutable daoBase;

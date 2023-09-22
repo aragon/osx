@@ -10,6 +10,7 @@ pragma solidity 0.8.17;
 /// @param subDomain The name of the DAO.
 /// @return `true` if the name is valid or `false` if at least one char is invalid.
 /// @dev Aborts on the first invalid char found.
+/// @custom:security-contact sirt@aragon.org
 function isSubdomainValid(string calldata subDomain) pure returns (bool) {
     bytes calldata nameBytes = bytes(subDomain);
     uint256 nameLength = nameBytes.length;

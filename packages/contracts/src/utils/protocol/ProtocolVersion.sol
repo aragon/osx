@@ -8,6 +8,7 @@ import {IProtocolVersion} from "./IProtocolVersion.sol";
 /// @author Aragon Association - 2023
 /// @notice An abstract, stateless, non-upgradeable contract serves as a base for other contracts requiring awareness of the OSx protocol version.
 /// @dev Do not add any new variables to this contract that would shift down storage in the inheritance chain.
+/// @custom:security-contact sirt@aragon.org
 abstract contract ProtocolVersion is IProtocolVersion {
     // IMPORTANT: Do not add any storage variable, see the above notice.
 

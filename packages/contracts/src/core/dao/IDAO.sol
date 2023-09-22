@@ -5,6 +5,7 @@ pragma solidity ^0.8.8;
 /// @title IDAO
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
+/// @custom:security-contact sirt@aragon.org
 interface IDAO {
     /// @notice The action struct to be consumed by the DAO's `execute` function resulting in an external call.
     /// @param to The address to call.
@@ -115,7 +116,7 @@ interface IDAO {
     /// @notice Checks whether a signature is valid for a provided hash according to [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271).
     /// @param _hash The hash of the data to be signed.
     /// @param _signature The signature byte array associated with `_hash`.
-    /// @return Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
+    /// @return Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid and `0xffffffff` if not.
     function isValidSignature(bytes32 _hash, bytes memory _signature) external returns (bytes4);
 
     /// @notice Registers an ERC standard having a callback by registering its [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
