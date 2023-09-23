@@ -1,4 +1,4 @@
-import {log, store} from '@graphprotocol/graph-ts';
+import {store} from '@graphprotocol/graph-ts';
 import {
   ReleaseMetadataUpdated,
   VersionCreated,
@@ -94,8 +94,6 @@ export function handleGranted(event: Granted): void {
     permissionEntity.condition = event.params.condition;
 
     permissionEntity.pluginRepo = pluginRepo;
-
-    permissionEntity.tx = event.transaction.hash.toHexString();
 
     permissionEntity.save();
   }

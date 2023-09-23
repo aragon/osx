@@ -210,7 +210,8 @@ type Permission @entity {
   actor: Bytes!
   condition: Bytes
 
-  "we can use the following attributes to create one-to-many between Dao or PluginRepo to Permission"
+  # The following attributes is used to create
+  # one-to-many between Dao or PluginRepo to Permission
   dao: Dao
   pluginRepo: PluginRepo
 }
