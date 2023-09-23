@@ -1,4 +1,4 @@
-import {store} from '@graphprotocol/graph-ts';
+import {log, store} from '@graphprotocol/graph-ts';
 import {
   ReleaseMetadataUpdated,
   VersionCreated,
@@ -69,47 +69,53 @@ export function handleReleaseMetadataUpdated(
 }
 
 export function handleGranted(event: Granted): void {
-  let contractAddress = event.address.toHexString();
-  let where = event.params.where;
-  let contractPermissionId = event.params.permissionId;
-  let who = event.params.who;
+  const contractAddress = event.address.toHexString();
+  const where = event.params.where;
+  const contractPermissionId = event.params.permissionId;
+  const who = event.params.who;
 
-  let permissionEntityId = [
+  const permissionEntityId = [
     contractAddress,
     where.toHexString(),
     contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 
-  let pluginRepo = contractAddress;
+  const pluginRepo = contractAddress;
 
   // Permission
-  let permissionEntity = new Permission(permissionEntityId);
-  permissionEntity.where = event.params.where;
-  permissionEntity.permissionId = contractPermissionId;
-  permissionEntity.who = event.params.who;
-  permissionEntity.actor = event.params.here;
-  permissionEntity.condition = event.params.condition;
+  let permissionEntity = Permission.load(permissionEntityId);
+  if (!permissionEntity) {
+    permissionEntity = new Permission(permissionEntityId);
+    permissionEntity.where = where;
+    permissionEntity.permissionId = contractPermissionId;
+    permissionEntity.who = who;
+    permissionEntity.actor = event.params.here;
+    permissionEntity.condition = event.params.condition;
 
-  permissionEntity.pluginRepo = pluginRepo;
-  permissionEntity.save();
+    permissionEntity.pluginRepo = pluginRepo;
+
+    permissionEntity.tx = event.transaction.hash.toHexString();
+
+    permissionEntity.save();
+  }
 }
 
 export function handleRevoked(event: Revoked): void {
   // permission
-  let contractAddress = event.address.toHexString();
-  let where = event.params.where;
-  let contractPermissionId = event.params.permissionId;
-  let who = event.params.who;
+  const contractAddress = event.address.toHexString();
+  const where = event.params.where;
+  const contractPermissionId = event.params.permissionId;
+  const who = event.params.who;
 
-  let permissionEntityId = [
+  const permissionEntityId = [
     contractAddress,
     where.toHexString(),
     contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 
-  let permissionEntity = Permission.load(permissionEntityId);
+  const permissionEntity = Permission.load(permissionEntityId);
   if (permissionEntity) {
     store.remove('Permission', permissionEntityId);
   }

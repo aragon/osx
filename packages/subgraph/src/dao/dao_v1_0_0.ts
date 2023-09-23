@@ -163,30 +163,33 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
 }
 
 export function handleGranted(event: Granted): void {
-  let contractAddress = event.address.toHexString();
-  let where = event.params.where;
-  let contractPermissionId = event.params.permissionId;
-  let who = event.params.who;
+  const contractAddress = event.address.toHexString();
+  const where = event.params.where;
+  const contractPermissionId = event.params.permissionId;
+  const who = event.params.who;
 
-  let permissionEntityId = [
+  const permissionEntityId = [
     contractAddress,
     where.toHexString(),
     contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 
-  let daoAddress = contractAddress;
+  const daoAddress = contractAddress;
 
   // Permission
-  let permissionEntity = new Permission(permissionEntityId);
-  permissionEntity.where = event.params.where;
-  permissionEntity.permissionId = contractPermissionId;
-  permissionEntity.who = event.params.who;
-  permissionEntity.actor = event.params.here;
-  permissionEntity.condition = event.params.condition;
+  let permissionEntity = Permission.load(permissionEntityId);
+  if (!permissionEntity) {
+    permissionEntity = new Permission(permissionEntityId);
+    permissionEntity.where = event.params.where;
+    permissionEntity.permissionId = contractPermissionId;
+    permissionEntity.who = event.params.who;
+    permissionEntity.actor = event.params.here;
+    permissionEntity.condition = event.params.condition;
 
-  permissionEntity.dao = daoAddress;
-  permissionEntity.save();
+    permissionEntity.dao = daoAddress;
+    permissionEntity.save();
+  }
 }
 
 export function handleRevoked(event: Revoked): void {
