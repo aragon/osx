@@ -1,4 +1,4 @@
-import {BigInt} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   Action,
   AddresslistVotingProposal,
@@ -61,30 +61,97 @@ export function updateProposalWithFailureMap(
   return false;
 }
 
+// export function handleAction<
+//   T extends ExecutedActionsStruct,
+//   R extends Executed
+// >(action: T, proposalId: string, index: i32, event: R): void {
+//   let actionId = proposalId.concat('_').concat(index.toString());
+//   let actionEntity = Action.load(actionId);
+
+//   // In case the execute on the dao is called by the address
+//   // That we don't currently index for the actions in the subgraph,
+//   // we fallback and still create an action.
+//   // NOTE that it's important to generate action id differently to not allow overwriting.
+//   if (!actionEntity) {
+//     actionEntity = new Action(actionId);
+//     actionEntity.to = action.to;
+//     actionEntity.value = action.value;
+//     actionEntity.data = action.data;
+//     actionEntity.proposal = proposalId;
+//     actionEntity.dao = event.address.toHexString();
+//   }
+
+//   actionEntity.execResult = event.params.execResults[index];
+//   actionEntity.save();
+
+//   if (action.data.toHexString() == '0x' && action.value.gt(BigInt.zero())) {
+//     handleNativeAction(
+//       event.address,
+//       action.to,
+//       action.value,
+//       'Native Token Withdraw',
+//       proposalId,
+//       index,
+//       event
+//     );
+//     return;
+//   }
+
+//   let methodSig = action.data.toHexString().slice(0, 10);
+
+//   // Since ERC721 transferFrom and ERC20 transferFrom have the same signature,
+//   // The below first checks if it's ERC721 by calling `supportsInterface` and then
+//   // moves to ERC20 check. Currently, if `action` is transferFrom, it will still check
+//   // both `handleERC721Action`, `handleERC20Action`.
+//   if (
+//     methodSig == ERC721_transferFrom ||
+//     methodSig == ERC721_safeTransferFromNoData ||
+//     methodSig == ERC721_safeTransferFromWithData
+//   ) {
+//     handleERC721Action(
+//       action.to,
+//       event.address,
+//       action.data,
+//       proposalId,
+//       index,
+//       event
+//     );
+//   }
+//   if (
+//     methodSig == ERC1155_safeBatchTransferFrom ||
+//     methodSig == ERC1155_safeTransferFrom
+//   ) {
+//     handleERC1155Action(
+//       action.to,
+//       event.address,
+//       action.data,
+//       proposalId,
+//       index,
+//       event
+//     );
+//   }
+
+//   if (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) {
+//     handleERC20Action(
+//       action.to,
+//       event.address,
+//       proposalId,
+//       action.data,
+//       index,
+//       event
+//     );
+//   }
+// }
+
 export function handleAction<
   T extends ExecutedActionsStruct,
   R extends Executed
 >(action: T, proposalId: string, index: i32, event: R): void {
-  let actionId = proposalId.concat('_').concat(index.toString());
-  let actionEntity = Action.load(actionId);
-
-  // In case the execute on the dao is called by the address
-  // That we don't currently index for the actions in the subgraph,
-  // we fallback and still create an action.
-  // NOTE that it's important to generate action id differently to not allow overwriting.
-  if (!actionEntity) {
-    actionEntity = new Action(actionId);
-    actionEntity.to = action.to;
-    actionEntity.value = action.value;
-    actionEntity.data = action.data;
-    actionEntity.proposal = proposalId;
-    actionEntity.dao = event.address.toHexString();
-  }
-
+  let actionEntity = getOrCreateActionEntity(action, proposalId, index, event);
   actionEntity.execResult = event.params.execResults[index];
   actionEntity.save();
 
-  if (action.data.toHexString() == '0x' && action.value.gt(BigInt.zero())) {
+  if (isNativeTokenAction(action)) {
     handleNativeAction(
       event.address,
       action.to,
@@ -97,52 +164,98 @@ export function handleAction<
     return;
   }
 
-  let methodSig = action.data.toHexString().slice(0, 10);
+  handleTokenTransfers(action, proposalId, index, event);
+}
 
-  // Since ERC721 transferFrom and ERC20 transferFrom have the same signature,
-  // The below first checks if it's ERC721 by calling `supportsInterface` and then
-  // moves to ERC20 check. Currently, if `action` is transferFrom, it will still check
-  // both `handleERC721Action`, `handleERC20Action`.
+function getOrCreateActionEntity<
+  T extends ExecutedActionsStruct,
+  R extends Executed
+>(action: T, proposalId: string, index: i32, event: R): Action {
+  const actionId = [proposalId, index.toString()].join('_');
+  let entity = Action.load(actionId);
+
+  // In case the execute on the dao is called by the address
+  // That we don't currently index for the actions in the subgraph,
+  // we fallback and still create an action.
+  // NOTE that it's important to generate action id differently to not allow
+
+  if (!entity) {
+    entity = new Action(actionId);
+    entity.to = action.to;
+    entity.value = action.value;
+    entity.data = action.data;
+    entity.proposal = proposalId;
+    entity.dao = event.address.toHexString();
+  }
+
+  return entity;
+}
+
+function handleTokenTransfers<
+  T extends ExecutedActionsStruct,
+  R extends Executed
+>(action: T, proposalId: string, actionIndex: i32, event: R): void {
+  const methodSig = getMethodSignature(action.data);
+
   let handledByErc721: bool = false;
-  if (
-    methodSig == ERC721_transferFrom ||
-    methodSig == ERC721_safeTransferFromNoData ||
-    methodSig == ERC721_safeTransferFromWithData
-  ) {
+  let handledByErc1155: bool = false;
+
+  if (isERC721Transfer(methodSig)) {
     handledByErc721 = handleERC721Action(
       action.to,
       event.address,
       action.data,
       proposalId,
-      index,
-      event
-    );
-  }
-  if (
-    methodSig == ERC1155_safeBatchTransferFrom ||
-    methodSig == ERC1155_safeTransferFrom
-  ) {
-    handleERC1155Action(
-      action.to,
-      event.address,
-      action.data,
-      proposalId,
-      index,
+      actionIndex,
       event
     );
   }
 
-  if (
-    (methodSig == ERC20_transfer || methodSig == ERC20_transferFrom) &&
-    !handledByErc721
-  ) {
+  if (isERC1155TransferMethod(methodSig)) {
+    handledByErc1155 = handleERC1155Action(
+      action.to,
+      event.address,
+      action.data,
+      proposalId,
+      actionIndex,
+      event
+    );
+  }
+
+  if (isERC20Transfer(methodSig) && !handledByErc721 && !handledByErc1155) {
     handleERC20Action(
       action.to,
       event.address,
       proposalId,
       action.data,
-      index,
+      actionIndex,
       event
     );
   }
+}
+
+function getMethodSignature(data: Bytes): string {
+  return data.toHexString().slice(0, 10);
+}
+
+function isERC721Transfer(methodSig: string): bool {
+  return [
+    ERC721_transferFrom,
+    ERC721_safeTransferFromNoData,
+    ERC721_safeTransferFromWithData
+  ].includes(methodSig);
+}
+
+function isERC20Transfer(methodSig: string): bool {
+  return [ERC20_transfer, ERC20_transferFrom].includes(methodSig);
+}
+
+function isNativeTokenAction<T extends ExecutedActionsStruct>(action: T): bool {
+  return action.data.toHexString() === '0x' && action.value.gt(BigInt.zero());
+}
+
+function isERC1155TransferMethod(methodSig: string): bool {
+  return [ERC1155_safeBatchTransferFrom, ERC1155_safeTransferFrom].includes(
+    methodSig
+  );
 }
