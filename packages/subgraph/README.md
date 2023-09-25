@@ -82,7 +82,7 @@ To start:
 yarn start:dev
 ```
 
-When there's changes in the contract's package, run
+When there are changes in the contract's package, run
 
 ```console
 yarn buildAndStart:dev
