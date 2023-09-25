@@ -129,7 +129,7 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
   },
   docgen: {
-    outputDir: 'docs/osx/03-reference-guide',
+    outputDir: 'docs/developer-portal/03-reference-guide',
     theme: 'markdown',
     pages: 'files',
     templates: 'docs/templates',
