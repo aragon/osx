@@ -16,6 +16,8 @@ import {
   IProposal__factory,
 } from '../../../../../typechain';
 import {AddresslistVoting__factory as AddresslistVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
+import {AddresslistVoting__factory as AddresslistVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
+
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
@@ -58,6 +60,7 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
+import {ExecutedEvent} from '../../../../../typechain/DAO';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -186,6 +189,36 @@ describe('AddresslistVoting', function () {
         currentContractFactory.attach(toImplementation)
       );
       expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+
+    it('from v1.3.0', async () => {
+      legacyContractFactory = new AddresslistVoting_V1_3_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
+        );
+      expect(toImplementation).to.equal(fromImplementation);
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.3.0 to the current version
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
@@ -569,19 +602,20 @@ describe('AddresslistVoting', function () {
         signers.slice(0, 10).map(s => s.address)
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
     });
@@ -595,19 +629,20 @@ describe('AddresslistVoting', function () {
         signers.slice(0, 10).map(s => s.address)
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
     });
@@ -767,19 +802,20 @@ describe('AddresslistVoting', function () {
         .withArgs(id, signers[0].address, VoteOption.Yes);
 
       // Works if the vote option is 'None'
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
     });
   });
 
@@ -794,19 +830,20 @@ describe('AddresslistVoting', function () {
           signers.slice(0, 10).map(s => s.address)
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('reverts on voting None', async () => {
@@ -925,19 +962,20 @@ describe('AddresslistVoting', function () {
           signers.slice(0, 10).map(s => s.address)
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('does not allow voting, when the vote has not started yet', async () => {
@@ -1127,19 +1165,20 @@ describe('AddresslistVoting', function () {
           signers.slice(0, 10).map(s => s.address)
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('reverts on voting None', async () => {
@@ -1370,19 +1409,20 @@ describe('AddresslistVoting', function () {
           votingSettings,
           signers.slice(0, 10).map(s => s.address)
         );
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {
@@ -1580,7 +1620,7 @@ describe('AddresslistVoting', function () {
 
       it('does not execute with 9 votes', async () => {
         // does not execute early
-        advanceIntoVoteTime(startDate, endDate);
+        await advanceIntoVoteTime(startDate, endDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3, 4, 5, 6, 7, 8], // 9 votes

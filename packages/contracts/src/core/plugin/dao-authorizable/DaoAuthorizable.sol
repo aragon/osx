@@ -10,6 +10,7 @@ import {_auth} from "../../utils/auth.sol";
 /// @title DaoAuthorizable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract providing a meta-transaction compatible modifier for non-upgradeable contracts instantiated via the `new` keyword to authorize function calls through an associated DAO.
+/// @custom:security-contact sirt@aragon.org
 abstract contract DaoAuthorizable is Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO private immutable dao_;

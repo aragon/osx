@@ -7,6 +7,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @title IMultisig
 /// @author Aragon Association - 2023
 /// @notice An interface for an on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
+/// @custom:security-contact sirt@aragon.org
 interface IMultisig {
     /// @notice Adds new members to the address list. Previously, it checks if the new address list length would be greater than `type(uint16).max`, the maximal number of approvals.
     /// @param _members The addresses of the members to be added.

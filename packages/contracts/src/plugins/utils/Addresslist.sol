@@ -10,6 +10,7 @@ import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using a list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
+/// @custom:security-contact sirt@aragon.org
 abstract contract Addresslist {
     using CheckpointsUpgradeable for CheckpointsUpgradeable.History;
 

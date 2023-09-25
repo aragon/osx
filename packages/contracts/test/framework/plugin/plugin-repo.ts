@@ -17,6 +17,7 @@ import {
   IProtocolVersion__factory,
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
+import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.2/framework/plugin/repo/PluginRepo.sol';
 
 import {
   getProtocolVersion,
@@ -131,6 +132,33 @@ describe('PluginRepo', function () {
         expect(fromProtocolVersion).to.deep.equal(
           IMPLICIT_INITIAL_PROTOCOL_VERSION
         );
+        expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      });
+
+      it('from v1.3.0', async () => {
+        legacyContractFactory = new PluginRepo_V1_3_0__factory(signers[0]);
+
+        const {fromImplementation, toImplementation} =
+          await deployAndUpgradeFromToCheck(
+            signers[0],
+            signers[1],
+            initArgs,
+            'initialize',
+            legacyContractFactory,
+            currentContractFactory,
+            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+          );
+        expect(toImplementation).to.not.equal(fromImplementation);
+
+        const fromProtocolVersion = await getProtocolVersion(
+          legacyContractFactory.attach(fromImplementation)
+        );
+        const toProtocolVersion = await getProtocolVersion(
+          currentContractFactory.attach(toImplementation)
+        );
+
+        expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+        expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
         expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
       });
     });
