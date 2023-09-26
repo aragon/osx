@@ -6,19 +6,19 @@ flowchart TD
     processStart ==> implementation
     subgraph implementation[Implementation]
         isUpgradeable{"is UUPS \n upgradeable?"}
-        upgradeableContractImplementation[[<a href='../03-sub-processes/upgradeable-contract.md'>UUPS upgradeable \n contract change</a>]]
-        nonUpgradeableContractImplementation[[<a href='../03-sub-processes/non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
+        upgradeableContractImplementation[[<a href='./02-upgradeable-contract.md'>UUPS upgradeable \n contract change</a>]]
+        nonUpgradeableContractImplementation[[<a href='./03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
         adaptPluginSetup[[<a href='./plugin-setup.md'>implement PluginSetup</a>]]
         isUpgradeable -->|yes| upgradeableContractImplementation --> adaptPluginSetup
         isUpgradeable -->|no| nonUpgradeableContractImplementation --> adaptPluginSetup
 
     end
 
-    implementation ==> testing[<a href='../03-sub-processes/testing.md'>Testing</a>]
+    implementation ==> testing[<a href='../03-sub-processes/03-testing.md'>Testing</a>]
     %%subgraph testing[Testing]
     %%end
 
-    testing ==> docs[<a href='../03-sub-processes/documentation.md'>Documentation</a>]
+    testing ==> docs[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]
     %%subgraph testing[Testing]
     %%end
 

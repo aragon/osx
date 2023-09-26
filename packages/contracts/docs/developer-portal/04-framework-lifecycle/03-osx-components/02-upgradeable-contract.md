@@ -17,7 +17,7 @@ flowchart TD
         adaptSubgraph[["adapt subgraph"]]
 
         affectsInitialization{"affects \n initialization?"}
-        adaptInitialization[["<a href='./protocol-version.md'adapt initialization> adapt initialization</a>"]]
+        adaptInitialization[["<a href='../04-sub-processes/02-contract-initialization.md'> adapt initialization</a>"]]
 
         affectsStorageGaps -->|yes| adaptStorageGaps
         affectsStorageGaps -->|no| affectsSubgraph
@@ -30,23 +30,11 @@ flowchart TD
         affectsInitialization -->|yes| adaptInitialization
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/testing.md'>Testing</a>]]
-    %%subgraph testing[Testing]
-    %%end
+    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
 
-    testing ==> docs[[<a href='../03-sub-processes/documentation.md'>Documentation</a>]]
-    %%subgraph testing[Testing]
-    %%end
+    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
 
-    docs ==> deployment
-    subgraph deployment[Deployment]
-        deployContracts[["deploy contracts"]]
-        newSubgraph{"new \n subgraph?"}
-        deploySubgraph[["deploy subgraph"]]
-
-        deployContracts --> newSubgraph --> deploySubgraph
-
-    end
+    docs ==> deployment[[<a href='../03-sub-processes/05-deployment.md'>Deployment</a>]]
 
     deployment ==> rollout
     subgraph rollout[Roll-out]

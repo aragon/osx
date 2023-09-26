@@ -5,17 +5,17 @@ flowchart TD
     processStart("Process Name")
     processStart ==> implementation
     subgraph implementation[Implementation]
-        nonUpgradeableContractImplementation[[<a href='../03-sub-processes/non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
+        nonUpgradeableContractImplementation[[<a href='./03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
         ensureCompatibility["ensure backwards compat- \n ibilitywith active setups"]
 
         nonUpgradeableContractImplementation --> ensureCompatibility
     end
 
-    implementation ==> testing[<a href='../03-sub-processes/testing.md'>Testing</a>]
+    implementation ==> testing[<a href='../03-sub-processes/03-testing.md'>Testing</a>]
     %%subgraph testing[Testing]
     %%end
 
-    testing ==> docs[<a href='../03-sub-processes/documentation.md'>Documentation</a>]
+    testing ==> docs[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]
     %%subgraph testing[Testing]
     %%end
 
@@ -51,4 +51,4 @@ flowchart TD
 
 ## Roll-Out
 
-Inform plugin developers to use the new contract.
+Use the new contract in the Aragon CLI.

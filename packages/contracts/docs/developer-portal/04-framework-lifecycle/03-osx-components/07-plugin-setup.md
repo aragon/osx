@@ -21,11 +21,11 @@ flowchart TD
         isUpgradeable -->|no| updateMetadata
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/testing.md'>Testing</a>]]
+    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
     %%subgraph testing[Testing]
     %%end
 
-    testing ==> docs[[<a href='../03-sub-processes/documentation.md'>Documentation</a>]]
+    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
     %%subgraph testing[Testing]
     %%end
 

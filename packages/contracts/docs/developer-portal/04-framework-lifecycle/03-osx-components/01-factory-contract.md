@@ -15,7 +15,7 @@ flowchart TD
     subgraph implementation[Implementation]
 
         %% Standard Checks
-        bumpProtocolVersion[["<a href='../03-sub-processes/protocol-version.md'>Bump protocol version</a>"]]
+        bumpProtocolVersion[["<a href='../03-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
         isEventAddition{"event addition?"}
         isBaseChange{"is base imple- \n mentation  change?"}
 
@@ -37,11 +37,11 @@ flowchart TD
         isEventAddition -->|yes| adaptSubgraph[["Subgraph change"]]
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/testing.md'>Testing</a>]]
+    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
     %%subgraph testing[Testing]
     %%end
 
-    testing ==> docs[[<a href='../03-sub-processes/documentation.md'>Documentation</a>]]
+    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
     %%subgraph testing[Testing]
     %%end
 
