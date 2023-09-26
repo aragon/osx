@@ -75,7 +75,7 @@ flowchart TD
         affectsApp -->|yes| appUpdate --> announceUpdate
         affectsApp -->|no| announceUpdate
 
-        announceUpdate[["announce Aragon update"]]
+        announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
         announceUpdate --> initializationChange
 
         initializationChange{"initializtion \n change?"}

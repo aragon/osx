@@ -30,7 +30,11 @@ We use the semver notation to version the OSx Protocol smart conctract and to cl
 
 ### Change Classications
 
-We now classify [smart contract changes](../01-systems.md#smart-contracts) according to SemVer and how they affect the [the subgraph](../01-systems.md#the-subgraph), consumers of the contracts and the subgraph such as the [the SDK or 3rd party projects](../01-systems.md#sdk-3rd-party-projects-contract--subgraph-consumers), and [the App](../01-systems.md#app).
+We now classify [smart contract changes](../01-systems.md#smart-contracts) according to SemVer and how they affect
+
+- [The subgraph](../01-systems.md#the-subgraph)
+- [the SDK or 3rd party projects](../01-systems.md#sdk-3rd-party-projects-contract--subgraph-consumers) consuming the contracts and the subgraph
+- [the App](../01-systems.md#app)
 
 | SemVer Classification | Change in                       | Affected contracts    | Action                    | Contract Implication (OSx or 3rd party)                                | Subgraph                                                     | SDK                                                          | App                                                          |
 | --------------------- | ------------------------------- | --------------------- | ------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |

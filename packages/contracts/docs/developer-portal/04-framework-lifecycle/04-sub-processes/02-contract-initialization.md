@@ -58,11 +58,7 @@ Accordingly, `v1.2.0` is the 5th version and our `reinitializer()` number is `5`
 
 First, change the `reinitializer(5)` and make sure that there is a test for it.
 
-:::todo
-We must write tests for this.
-:::
-
-Then do all the initialzation changes and write a note, in which version they have been introduced (for easier traceability)
+Then do all the initialzation changes and write a note, in which version they have been introduced (for easier traceability).
 
 ```solidity
 function initialize(uint256 calldata _a, address calldata _c) external reinitializer(5) {
@@ -127,5 +123,5 @@ If we now upgrade from the previous version `1.0.1` to `1.2.0`, we would apply t
 Written this way, the `initializeFrom` function ensures that all initializations that have happened in between the two versions are applied.
 
 :::todo
-We have to implement the less than comparator `function lt(uint[3] memory lhs, uint[3] memory lhs) internal pure returns (bool)`.
+We have to implement the less than comparator `function lte(uint[3] memory lhs, uint[3] memory lhs) internal pure returns (bool)`.
 :::

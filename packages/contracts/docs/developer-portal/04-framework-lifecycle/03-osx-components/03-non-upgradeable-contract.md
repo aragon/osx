@@ -33,10 +33,10 @@ flowchart TD
 
         appUpdate["update App"]
         affectsApp{"affects App?"}
+
+        announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
         affectsApp -->|yes| appUpdate --> announceUpdate
         affectsApp -->|no| announceUpdate
-
-        announceUpdate[["announce Aragon update"]]
     end
 
     rollout ==> processEnd("Done")

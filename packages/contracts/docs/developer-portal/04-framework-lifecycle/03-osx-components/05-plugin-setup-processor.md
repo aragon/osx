@@ -12,12 +12,8 @@ flowchart TD
     end
 
     implementation ==> testing[<a href='../03-sub-processes/03-testing.md'>Testing</a>]
-    %%subgraph testing[Testing]
-    %%end
 
     testing ==> docs[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]
-    %%subgraph testing[Testing]
-    %%end
 
     docs ==> deployment
     subgraph deployment[Deployment]
@@ -32,12 +28,10 @@ flowchart TD
         sdkUpdate["update SDK"]
         appUpdate["update App"]
 
-        announceUpdate["Announce Update"]
         revokeApplyPermissions["create proposal to grant/revoke \n APPLY...PERMISSION to/from \n new/old PluginSetupProcessor"]
 
         sdkUpdate -->|yes| appUpdate
-        appUpdate--> announceUpdate
-        announceUpdate --> revokeApplyPermissions
+        appUpdate --> revokeApplyPermissions
     end
 
     rollout ==> processEnd("Done")
@@ -51,4 +45,4 @@ flowchart TD
 
 ## Roll-Out
 
-Use the new contract in the Aragon CLI.
+Use the new `PluginSetupProcessor` in the Aragon CLI.

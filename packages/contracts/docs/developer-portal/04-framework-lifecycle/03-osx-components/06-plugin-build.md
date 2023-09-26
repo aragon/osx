@@ -8,7 +8,7 @@ flowchart TD
         isUpgradeable{"is UUPS \n upgradeable?"}
         upgradeableContractImplementation[[<a href='./02-upgradeable-contract.md'>UUPS upgradeable \n contract change</a>]]
         nonUpgradeableContractImplementation[[<a href='./03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
-        adaptPluginSetup[[<a href='./plugin-setup.md'>implement PluginSetup</a>]]
+        adaptPluginSetup[[<a href='./07-plugin-setup.md'>implement PluginSetup</a>]]
         isUpgradeable -->|yes| upgradeableContractImplementation --> adaptPluginSetup
         isUpgradeable -->|no| nonUpgradeableContractImplementation --> adaptPluginSetup
 
@@ -29,7 +29,7 @@ flowchart TD
 
     deployment ==> rollout
     subgraph rollout[Roll-out]
-        publishPluginSetup[[<a href='plugin-setup.md'>publish PluginSetup</a>]]
+        publishPluginSetup[[<a href='./07-plugin-setup.md'>publish PluginSetup</a>]]
     end
 
     rollout ==> processEnd("Done")
