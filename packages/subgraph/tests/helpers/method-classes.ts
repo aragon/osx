@@ -137,8 +137,8 @@ class PermissionMethods extends Permission {
 
     this.id = [
       emittingContract,
-      where.toHexString(),
       permissionId.toHexString(),
+      where.toHexString(),
       who.toHexString()
     ].join('_');
     this.where = where;

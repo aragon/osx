@@ -165,13 +165,13 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
 export function handleGranted(event: Granted): void {
   const contractAddress = event.address.toHexString();
   const where = event.params.where;
-  const contractPermissionId = event.params.permissionId;
+  const permissionId = event.params.permissionId;
   const who = event.params.who;
 
   const permissionEntityId = [
     contractAddress,
+    permissionId.toHexString(),
     where.toHexString(),
-    contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 
@@ -181,9 +181,9 @@ export function handleGranted(event: Granted): void {
   let permissionEntity = Permission.load(permissionEntityId);
   if (!permissionEntity) {
     permissionEntity = new Permission(permissionEntityId);
-    permissionEntity.where = event.params.where;
-    permissionEntity.permissionId = contractPermissionId;
-    permissionEntity.who = event.params.who;
+    permissionEntity.where = where;
+    permissionEntity.permissionId = permissionId;
+    permissionEntity.who = who;
     permissionEntity.actor = event.params.here;
     permissionEntity.condition = event.params.condition;
 
@@ -194,15 +194,15 @@ export function handleGranted(event: Granted): void {
 
 export function handleRevoked(event: Revoked): void {
   // permission
-  let contractAddress = event.address.toHexString();
-  let where = event.params.where;
-  let contractPermissionId = event.params.permissionId;
-  let who = event.params.who;
+  const contractAddress = event.address.toHexString();
+  const where = event.params.where;
+  const permissionId = event.params.permissionId;
+  const who = event.params.who;
 
-  let permissionEntityId = [
+  const permissionEntityId = [
     contractAddress,
+    permissionId.toHexString(),
     where.toHexString(),
-    contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 

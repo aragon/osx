@@ -35,7 +35,7 @@ test('Run dao (handleGranted) mappings with mock event', () => {
   daoHandleGranted(grantedEvent);
 
   // checks
-  permission.assertEntity(true);
+  permission.assertEntity();
 
   clearStore();
 });
@@ -74,7 +74,7 @@ test('Run PluginRepo (handleGranted) mappings with mock event', () => {
   repoHandleGranted(grantedEvent);
 
   // checks
-  permission.assertEntity(true);
+  permission.assertEntity();
 
   clearStore();
 });

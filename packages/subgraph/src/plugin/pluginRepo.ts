@@ -71,13 +71,13 @@ export function handleReleaseMetadataUpdated(
 export function handleGranted(event: Granted): void {
   const contractAddress = event.address.toHexString();
   const where = event.params.where;
-  const contractPermissionId = event.params.permissionId;
+  const permissionId = event.params.permissionId;
   const who = event.params.who;
 
   const permissionEntityId = [
     contractAddress,
+    permissionId.toHexString(),
     where.toHexString(),
-    contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 
@@ -88,7 +88,7 @@ export function handleGranted(event: Granted): void {
   if (!permissionEntity) {
     permissionEntity = new Permission(permissionEntityId);
     permissionEntity.where = where;
-    permissionEntity.permissionId = contractPermissionId;
+    permissionEntity.permissionId = permissionId;
     permissionEntity.who = who;
     permissionEntity.actor = event.params.here;
     permissionEntity.condition = event.params.condition;
@@ -103,13 +103,13 @@ export function handleRevoked(event: Revoked): void {
   // permission
   const contractAddress = event.address.toHexString();
   const where = event.params.where;
-  const contractPermissionId = event.params.permissionId;
+  const permissionId = event.params.permissionId;
   const who = event.params.who;
 
   const permissionEntityId = [
     contractAddress,
+    permissionId.toHexString(),
     where.toHexString(),
-    contractPermissionId.toHexString(),
     who.toHexString()
   ].join('_');
 
