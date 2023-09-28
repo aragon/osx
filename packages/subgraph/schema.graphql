@@ -203,7 +203,7 @@ type Dao @entity {
 # This results in an error in the subgraph if the entity is immutable.
 # No need to store granted as we can delete permission when revoked
 type Permission @entity {
-  id: ID! # emitting contract Address (DAO or PluginRepo) + where + permissionId + who
+  id: ID! # emitting contract Address (DAO or PluginRepo) + permissionId + where + who
   where: Bytes!
   permissionId: Bytes!
   who: Bytes!
