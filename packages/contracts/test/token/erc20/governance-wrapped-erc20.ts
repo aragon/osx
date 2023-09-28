@@ -109,7 +109,7 @@ describe('GovernanceWrappedERC20', function () {
     });
   });
 
-  describe('supportsInterface:', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await governanceToken.supportsInterface('0xffffffff')).to.be.false;
     });

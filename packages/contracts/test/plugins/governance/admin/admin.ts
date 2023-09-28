@@ -22,6 +22,7 @@ import {
   IPlugin__factory,
   IProposal__factory,
   DAO__factory,
+  IProtocolVersion__factory,
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
@@ -112,7 +113,7 @@ describe('Admin', function () {
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await plugin.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -124,6 +125,11 @@ describe('Admin', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 

@@ -85,6 +85,7 @@ import {
   uninstallPlugin,
 } from '../../test-utils/psp/atomic-helpers';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -323,6 +324,14 @@ describe('Plugin Setup Processor', function () {
 
       expect(proxy).to.equal(await setup.callStatic.implementation());
     }
+  });
+
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await psp.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
   });
 
   describe('Installation', function () {

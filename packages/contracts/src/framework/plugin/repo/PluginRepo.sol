@@ -33,7 +33,7 @@ contract PluginRepo is
     /// @notice The struct describing the tag of a version obtained by a release and build number as `RELEASE.BUILD`.
     /// @param release The release number.
     /// @param build The build number
-    /// @dev Releases can include a storage layout or the addition of new functions. Builds include logic changes or updates of the UI.
+    /// @dev Releases mark incompatible changes (e.g., the plugin interface, storage layout, or incompatible behavior) whereas builds mark compatible changes (e.g., patches and compatible feature additions).
     struct Tag {
         uint8 release;
         uint16 build;
