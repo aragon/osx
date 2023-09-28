@@ -1,26 +1,37 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {Contract} from 'ethers';
+import {Contract, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   Addresslist__factory,
   DAO,
+  DAO__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IMultisig__factory,
   IPlugin__factory,
   IProposal__factory,
   Multisig,
+  Multisig__factory,
 } from '../../../../typechain';
+import {Multisig__factory as Multisig_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol';
+import {Multisig__factory as Multisig_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/multisig/Multisig.sol';
+
+import {
+  ApprovedEvent,
+  ProposalExecutedEvent,
+} from '../../../../typechain/Multisig';
+import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
+
 import {
   findEvent,
+  findEventTopicLog,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../utils/event';
-import {getMergedABI} from '../../../../utils/abi';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {
@@ -30,16 +41,19 @@ import {
   timestampIn,
   toBytes32,
 } from '../../../test-utils/voting';
-import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {
-  ApprovedEvent,
-  ProposalExecutedEvent,
-} from '../../../../typechain/Multisig';
+  getProtocolVersion,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
+} from '../../../test-utils/uups-upgradeable';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
 import {ExecutedEvent} from '../../../../typechain/DAO';
-import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -76,19 +90,8 @@ describe('Multisig', function () {
 
   const id = 0;
 
-  let mergedAbi: any;
-  let multisigFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
-
-    ({abi: mergedAbi, bytecode: multisigFactoryBytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'Multisig',
-      ['src/core/dao/DAO.sol:DAO']
-    ));
-
     dummyActions = [
       {
         to: signers[0].address,
@@ -109,11 +112,7 @@ describe('Multisig', function () {
       onlyListed: true,
     };
 
-    const MultisigFactory = new ethers.ContractFactory(
-      mergedAbi,
-      multisigFactoryBytecode,
-      signers[0]
-    );
+    const MultisigFactory = new Multisig__factory(signers[0]);
     multisig = await deployWithProxy(MultisigFactory);
 
     dao.grant(
@@ -125,26 +124,6 @@ describe('Multisig', function () {
       multisig.address,
       signers[0].address,
       ethers.utils.id('UPDATE_MULTISIG_SETTINGS_PERMISSION')
-    );
-  });
-
-  describe('Upgrade', () => {
-    beforeEach(async function () {
-      this.upgrade = {
-        contract: multisig,
-        dao: dao,
-        user: signers[8],
-      };
-      await multisig.initialize(
-        dao.address,
-        signers.slice(0, 5).map(s => s.address),
-        multisigSettings
-      );
-    });
-
-    shouldUpgradeCorrectly(
-      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
-      'DaoUnauthorized'
     );
   });
 
@@ -220,6 +199,96 @@ describe('Multisig', function () {
       await expect(multisig.initialize(dao.address, members, multisigSettings))
         .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
         .withArgs(65535, members.length);
+    });
+  });
+
+  describe('Upgrades', () => {
+    let legacyContractFactory: ContractFactory;
+    let currentContractFactory: ContractFactory;
+    let initArgs: any;
+
+    before(() => {
+      currentContractFactory = new Multisig__factory(signers[0]);
+    });
+
+    beforeEach(() => {
+      initArgs = {
+        dao: dao.address,
+        members: [signers[0].address, signers[1].address, signers[2].address],
+        multisigSettings: multisigSettings,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
+      legacyContractFactory = new Multisig_V1_0_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
+        );
+      expect(toImplementation).to.not.equal(fromImplementation); // The build did change
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+
+    it('from v1.3.0', async () => {
+      legacyContractFactory = new Multisig_V1_3_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
+        );
+      expect(toImplementation).to.equal(fromImplementation);
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.3.0 to the current version
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
@@ -1183,21 +1252,33 @@ describe('Multisig', function () {
         // `tryExecution` is turned on but the vote is not decided yet
         let tx = await multisig.connect(signers[1]).approve(id, true);
         await expect(
-          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
-        ).to.rejectedWith('Event Executed not found in TX.');
+          findEventTopicLog<ExecutedEvent>(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          )
+        ).to.rejectedWith('No logs found for the topic of event "Executed".');
 
         expect(await multisig.canExecute(id)).to.equal(false);
 
         // `tryExecution` is turned off and the vote is decided
         tx = await multisig.connect(signers[2]).approve(id, false);
         await expect(
-          findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED)
-        ).to.rejectedWith('Event Executed not found in TX.');
+          findEventTopicLog<ExecutedEvent>(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          )
+        ).to.rejectedWith('No logs found for the topic of event "Executed".');
 
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
         {
-          const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+          const event = await findEventTopicLog<ExecutedEvent>(
+            tx,
+            DAO__factory.createInterface(),
+            DAO_EVENTS.EXECUTED
+          );
 
           expect(event.args.actor).to.equal(multisig.address);
           expect(event.args.callId).to.equal(toBytes32(id));

@@ -7,7 +7,12 @@ import {
   DAO__factory as DAO_V1_0_0__factory,
 } from '../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 
-import {DAO, DAO__factory, ProtocolVersion__factory} from '../../typechain';
+import {
+  DAO as DAO_V1_3_0,
+  DAO__factory as DAO_V1_3_0__factory,
+} from '../../typechain/@aragon/osx-v1.3.0-rc0.2/core/dao/DAO.sol';
+
+import {DAO, ProtocolVersion__factory} from '../../typechain';
 
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
@@ -15,14 +20,14 @@ import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {UpgradedEvent} from '../../typechain/DAO';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
 
 let signers: SignerWithAddress[];
-let DAO_old: DAO_V1_0_0__factory;
-let DAO_Current: DAO__factory;
 
 let daoV100Proxy: DAO_V1_0_0;
-let daoV100Implementation: string;
-let daoCurrentImplementaion: DAO;
+let daoV100Implementation: DAO_V1_0_0;
+let daoV130Implementation: DAO_V1_3_0;
 
 const EMPTY_DATA = '0x';
 
@@ -37,18 +42,16 @@ describe('DAO Upgrade', function () {
   before(async function () {
     signers = await ethers.getSigners();
 
-    // We don't use the typchain here but directly grab the artifacts. This will be changed in an upcoming PR again.
-    DAO_old = new DAO_V1_0_0__factory(signers[0]);
-    DAO_Current = new DAO__factory(signers[0]);
-
     // Deploy the v1.3.0 implementation
-    daoCurrentImplementaion = await DAO_Current.deploy();
+    daoV130Implementation = await new DAO_V1_3_0__factory(signers[0]).deploy();
   });
 
   context(`Re-entrancy`, function () {
     context(`v1.0.0 to v1.3.0`, function () {
       beforeEach(async function () {
-        daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
+        daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(
+          new DAO_V1_0_0__factory(signers[0])
+        );
         await daoV100Proxy.initialize(
           DUMMY_METADATA,
           signers[0].address,
@@ -57,8 +60,8 @@ describe('DAO Upgrade', function () {
         );
 
         // Store the v1.0.0 implementation
-        daoV100Implementation = await readImplementationValueFromSlot(
-          daoV100Proxy.address
+        daoV100Implementation = new DAO_V1_0_0__factory(signers[0]).attach(
+          await readImplementationValueFromSlot(daoV100Proxy.address)
         );
 
         // Grant the upgrade permission
@@ -72,9 +75,9 @@ describe('DAO Upgrade', function () {
       it('does not corrupt the DAO storage', async () => {
         // Upgrade and call `initializeFrom`.
         const upgradeTx = await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+          daoV130Implementation.address,
+          daoV130Implementation.interface.encodeFunctionData('initializeFrom', [
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -83,15 +86,19 @@ describe('DAO Upgrade', function () {
         const implementationAfterUpgrade =
           await readImplementationValueFromSlot(daoV100Proxy.address);
         expect(implementationAfterUpgrade).to.equal(
-          daoCurrentImplementaion.address
+          daoV130Implementation.address
         );
         expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
         // Check the emitted implementation.
         const emittedImplementation = (
-          await findEventTopicLog(upgradeTx, DAO_old.interface, 'Upgraded')
+          await findEventTopicLog<UpgradedEvent>(
+            upgradeTx,
+            daoV130Implementation.interface,
+            'Upgraded'
+          )
         ).args.implementation;
-        expect(emittedImplementation).to.equal(daoCurrentImplementaion.address);
+        expect(emittedImplementation).to.equal(daoV130Implementation.address);
 
         // Check that storage is not corrupted.
         expect(await daoV100Proxy.callStatic.daoURI()).to.equal(daoExampleURI);
@@ -134,9 +141,9 @@ describe('DAO Upgrade', function () {
 
         // Upgrade and call `initializeFrom`.
         await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+          daoV130Implementation.address,
+          daoV130Implementation.interface.encodeFunctionData('initializeFrom', [
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -145,7 +152,7 @@ describe('DAO Upgrade', function () {
         const implementationAfterUpgrade =
           await readImplementationValueFromSlot(daoV100Proxy.address);
         expect(implementationAfterUpgrade).to.equal(
-          daoCurrentImplementaion.address
+          daoV130Implementation.address
         );
         expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
@@ -214,9 +221,9 @@ describe('DAO Upgrade', function () {
 
         // Upgrade and call `initializeFrom`.
         await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+          daoV130Implementation.address,
+          daoV130Implementation.interface.encodeFunctionData('initializeFrom', [
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -225,7 +232,7 @@ describe('DAO Upgrade', function () {
         const implementationAfterUpgrade =
           await readImplementationValueFromSlot(daoV100Proxy.address);
         expect(implementationAfterUpgrade).to.equal(
-          daoCurrentImplementaion.address
+          daoV130Implementation.address
         );
         expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
@@ -256,7 +263,9 @@ describe('DAO Upgrade', function () {
   context(`Protocol Version`, function () {
     beforeEach(async function () {
       // prepare v1.0.0
-      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
+      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(
+        new DAO_V1_0_0__factory(signers[0])
+      );
       await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -274,7 +283,9 @@ describe('DAO Upgrade', function () {
 
     it('fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards', async () => {
       // deploy the different versions
-      const daoCurrentProxy = await deployWithProxy<DAO>(DAO_Current);
+      const daoCurrentProxy = await deployWithProxy<DAO>(
+        new DAO_V1_3_0__factory(signers[0])
+      );
       await daoCurrentProxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -319,9 +330,9 @@ describe('DAO Upgrade', function () {
 
         // Upgrade and call `initializeFrom`.
         await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+          daoV130Implementation.address,
+          daoV130Implementation.interface.encodeFunctionData('initializeFrom', [
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
@@ -337,14 +348,16 @@ describe('DAO Upgrade', function () {
       it('returns the correct protocol version after upgrade', async () => {
         // Upgrade and call `initializeFrom`.
         await daoV100Proxy.upgradeToAndCall(
-          daoCurrentImplementaion.address,
-          DAO_Current.interface.encodeFunctionData('initializeFrom', [
-            [1, 0, 0],
+          daoV130Implementation.address,
+          daoV130Implementation.interface.encodeFunctionData('initializeFrom', [
+            IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
         );
 
-        const daoV130 = DAO_Current.attach(daoV100Proxy.address);
+        const daoV130 = new DAO_V1_3_0__factory(signers[0]).attach(
+          daoV100Proxy.address
+        );
         expect(await daoV130.protocolVersion()).to.be.deep.eq([1, 3, 0]);
       });
     });

@@ -1,9 +1,4 @@
-import {
-  assert,
-  clearStore,
-  describe,
-  test
-} from 'matchstick-as/assembly/index';
+import {assert, clearStore, describe, test} from 'matchstick-as/assembly/index';
 import {bigInt, BigInt} from '@graphprotocol/graph-ts';
 
 import {
@@ -234,7 +229,7 @@ describe('handleMembershipContractAnnounced', () => {
     erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
-    erc20Contract.mockCall_supportsInterface('00000000', false);
+    erc20Contract.mockCall_supportsInterface('ffffffff', false);
 
     tokenVotingPlugin.token = erc20Contract.id;
     tokenVotingPlugin.buildOrUpdate();
@@ -258,7 +253,7 @@ describe('handleMembershipContractAnnounced', () => {
     erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
-    erc20Contract.mockCall_supportsInterface('00000000', false);
+    erc20Contract.mockCall_supportsInterface('ffffffff', false);
 
     erc20WrappedContract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20WrappedContract.mockCall_balanceOf(
@@ -269,7 +264,7 @@ describe('handleMembershipContractAnnounced', () => {
       WRAPPED_ERC20_INTERFACE,
       true
     );
-    erc20WrappedContract.mockCall_supportsInterface('00000000', false);
+    erc20WrappedContract.mockCall_supportsInterface('ffffffff', false);
 
     tokenVotingPlugin.token = erc20WrappedContract.id;
     tokenVotingPlugin.buildOrUpdate();

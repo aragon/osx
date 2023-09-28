@@ -5,7 +5,7 @@ import path from 'path';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@nomiclabs/hardhat-etherscan';
+import '@nomicfoundation/hardhat-verify';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
@@ -96,8 +96,27 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_KEY || '',
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumTestnet: process.env.ARBISCAN_KEY || '',
+      baseMainnet: process.env.BASESCAN_KEY || '',
+      baseGoerli: process.env.BASESCAN_KEY || '',
     },
-    customChains: [],
+    customChains: [
+      {
+        network: 'baseMainnet',
+        chainId: 8453,
+        urls: {
+          apiURL: 'https://api.basescan.org/api',
+          browserURL: 'https://basescan.org',
+        },
+      },
+      {
+        network: 'baseGoerli',
+        chainId: 84531,
+        urls: {
+          apiURL: 'https://api-goerli.basescan.org/api',
+          browserURL: 'https://goerli.basescan.org',
+        },
+      },
+    ],
   },
   namedAccounts: {
     deployer: 0,
@@ -110,7 +129,7 @@ const config: HardhatUserConfig = {
     deploy: './deploy',
   },
   docgen: {
-    outputDir: 'docs/osx/03-reference-guide',
+    outputDir: 'docs/developer-portal/03-reference-guide',
     theme: 'markdown',
     pages: 'files',
     templates: 'docs/templates',

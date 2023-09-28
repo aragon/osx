@@ -6,6 +6,7 @@ This checklist is seen as a guide to update the existing deployment.
 
 - [ ] Make sure you are using Node v16
 - [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
+- [ ] Check that storage corruption tests using OZ's `hardhat-upgrades` package (e.g., by using the methods in [uups-upgradeable.ts](packages/contracts/test/test-utils/uups-upgradeable.ts)) exist for every upgradeable contract and test the upgrade from all prior versions to the current version.
 - [ ] Check that all contracts that undergo an upgrade and
   - [ ] do require reinitialzation are reinitialized correctly by an `upgradeToAndCall` call to a respective initialization method with an incremented `reinitializer(X)` number
   - [ ] do NOT require reinitialzation are upgraded via `upgradeTo` and keep the same `reinitializer(X)` number in the respective initialization methods
@@ -39,6 +40,7 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
 - [ ] Update `active_contracts.json` with the new deployed addresses
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
 ### ManagingDAO
 

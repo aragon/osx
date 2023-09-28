@@ -1,17 +1,21 @@
 import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
 import {Contract} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
 
-import {findEvent} from '../utils/event';
-import {getMergedABI} from '../utils/abi';
+import {findEvent, findEventTopicLog} from '../utils/event';
 import {Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
-import {ENSRegistry__factory, PluginRepo__factory} from '../typechain';
+import {
+  ENSRegistry__factory,
+  PluginRepoFactory__factory,
+  PluginRepoRegistry__factory,
+  PluginRepo__factory,
+} from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -204,15 +208,7 @@ export async function createPluginRepo(
     hre
   );
 
-  const {abi, bytecode} = await getMergedABI(hre, 'PluginRepoFactory', [
-    'PluginRepoRegistry',
-  ]);
-
-  const pluginRepoFactoryFactory = new ethers.ContractFactory(
-    abi,
-    bytecode,
-    signers[0]
-  );
+  const pluginRepoFactoryFactory = new PluginRepoFactory__factory(signers[0]);
   const pluginRepoFactoryContract = pluginRepoFactoryFactory.attach(
     pluginRepoFactoryAddress
   );
@@ -228,8 +224,9 @@ export async function createPluginRepo(
   );
   await tx.wait();
 
-  const event = await findEvent<PluginRepoRegisteredEvent>(
+  const event = await findEventTopicLog<PluginRepoRegisteredEvent>(
     tx,
+    PluginRepoRegistry__factory.createInterface(),
     'PluginRepoRegistered'
   );
   const repoAddress = event.args.pluginRepo;

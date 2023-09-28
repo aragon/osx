@@ -25,6 +25,7 @@ import {IDAO} from "./IDAO.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
+/// @custom:security-contact sirt@aragon.org
 contract DAO is
     IEIP4824,
     Initializable,
@@ -52,13 +53,13 @@ contract DAO is
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `setSignatureValidator` function.
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
-        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
-
     /// @notice The ID of the permission required to call the `registerStandardCallback` function.
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
+
+    /// @notice The ID of the permission required to validate [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signatures.
+    bytes32 public constant VALIDATE_SIGNATURE_PERMISSION_ID =
+        keccak256("VALIDATE_SIGNATURE_PERMISSION");
 
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
@@ -69,9 +70,10 @@ contract DAO is
     /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
     uint256 private constant _ENTERED = 2;
 
-    /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
-    /// @dev Added in v1.0.0.
-    IERC1271 public signatureValidator;
+    /// @notice Removed variable that is left here to maintain the storage layout.
+    /// @dev Introduced in v1.0.0. Removed in v1.4.0.
+    /// @custom:oz-renamed-from signatureValidator
+    address private __removed0;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     /// @dev Added in v1.0.0.
@@ -109,6 +111,9 @@ contract DAO is
     /// @notice Thrown if an upgrade is not supported from a specific protocol version .
     error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
 
+    /// @notice Thrown when a function is removed but left to not corrupt the interface ID.
+    error FunctionRemoved();
+
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
     event NewURI(string daoURI);
@@ -127,6 +132,7 @@ contract DAO is
     }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -146,7 +152,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
@@ -167,7 +173,7 @@ contract DAO is
     function initializeFrom(
         uint8[3] calldata _previousProtocolVersion,
         bytes calldata _initData
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         _initData; // Silences the unused function parameter warning.
 
         // Check that the contract is not upgrading from a different major release.
@@ -181,6 +187,15 @@ contract DAO is
             _reentrancyStatus = _NOT_ENTERED;
             _registerInterface(type(IProtocolVersion).interfaceId);
         }
+
+        // Revoke the `SET_SIGNATURE_VALIDATOR_PERMISSION` that was deprecated in v1.4.0.
+        if (_previousProtocolVersion[1] <= 3) {
+            _revoke({
+                _where: address(this),
+                _who: address(this),
+                _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
+            });
+        }
     }
 
     /// @inheritdoc PermissionManager
@@ -192,7 +207,6 @@ contract DAO is
             _permissionId == UPGRADE_DAO_PERMISSION_ID ||
             _permissionId == SET_METADATA_PERMISSION_ID ||
             _permissionId == SET_TRUSTED_FORWARDER_PERMISSION_ID ||
-            _permissionId == SET_SIGNATURE_VALIDATOR_PERMISSION_ID ||
             _permissionId == REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     }
 
@@ -219,7 +233,7 @@ contract DAO is
         bytes32 _permissionId,
         bytes memory _data
     ) external view override returns (bool) {
-        return isGranted(_where, _who, _permissionId, _data);
+        return isGranted({_where: _where, _who: _who, _permissionId: _permissionId, _data: _data});
     }
 
     /// @inheritdoc IDAO
@@ -319,25 +333,30 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function setSignatureValidator(
-        address _signatureValidator
-    ) external override auth(SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
-        signatureValidator = IERC1271(_signatureValidator);
-
-        emit SignatureValidatorSet({signatureValidator: _signatureValidator});
+    function setSignatureValidator(address) external pure override {
+        revert FunctionRemoved();
     }
 
     /// @inheritdoc IDAO
+    /// @dev Relays the validation logic determining who is allowed to sign on behalf of the DAO to its permission manager.
+    /// Caller specific bypassing can be set direct granting (i.e., `grant({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID})`).
+    /// Caller specific signature validation logic can be set by granting with a `PermissionCondition` (i.e., `grantWithCondition({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})`)
+    /// Generic signature validation logic can be set for all calling contracts by granting with a `PermissionCondition` to `PermissionManager.ANY_ADDR()` (i.e., `grantWithCondition({_where: dao, _who: PermissionManager.ANY_ADDR(), _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})`).
     function isValidSignature(
         bytes32 _hash,
         bytes memory _signature
     ) external view override(IDAO, IERC1271) returns (bytes4) {
-        if (address(signatureValidator) == address(0)) {
-            // Return the invalid magic number
-            return bytes4(0);
+        if (
+            isGranted({
+                _where: address(this),
+                _who: msg.sender,
+                _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID,
+                _data: abi.encode(_hash, _signature)
+            })
+        ) {
+            return 0x1626ba7e; // `type(IERC1271).interfaceId` = bytes4(keccak256("isValidSignature(bytes32,bytes)")`
         }
-        // Forward the call to the set signature validator contract
-        return signatureValidator.isValidSignature(_hash, _signature);
+        return 0xffffffff; // `bytes4(uint32(type(uint32).max-1))`
     }
 
     /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.

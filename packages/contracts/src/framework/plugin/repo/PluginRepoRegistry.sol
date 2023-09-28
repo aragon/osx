@@ -11,6 +11,7 @@ import {IPluginRepo} from "./IPluginRepo.sol";
 /// @title PluginRepoRegistry
 /// @author Aragon Association - 2022-2023
 /// @notice This contract maintains an address-based registry of plugin repositories in the Aragon App DAO framework.
+/// @custom:security-contact sirt@aragon.org
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
@@ -31,6 +32,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     error EmptyPluginRepoSubdomain();
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

@@ -12,6 +12,10 @@ import {
   ERC721Balance,
   ERC721Contract,
   ERC721Transfer,
+  ERC1155Contract,
+  ERC1155Transfer,
+  ERC1155Balance,
+  ERC1155TokenIdBalance,
   NativeBalance,
   NativeTransfer,
   TokenVotingMember,
@@ -44,7 +48,12 @@ import {
   VOTING_MODES,
   VOTING_MODE_INDEXES
 } from '../../src/utils/constants';
-import {getTransferId} from '../../src/utils/tokens/common';
+import {
+  getBalanceId,
+  getERC1155TransferId,
+  getTokenIdBalanceId,
+  getTransferId
+} from '../../src/utils/tokens/common';
 import {
   ADDRESS_ONE,
   ALLOW_FAILURE_MAP,
@@ -92,10 +101,69 @@ import {
   createGetProposalCall,
   createTotalVotingPowerCall,
   createTokenCalls,
-  createWrappedTokenCalls
+  createWrappedTokenCalls,
+  createERC1155TokenCalls
 } from '../utils';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
+//  ERC1155Contract
+class ERC1155ContractMethods extends ERC1155Contract {
+  withDefaultValues(): ERC1155ContractMethods {
+    this.id = Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
+    return this;
+  }
+  mockCall_createERC1155TokenCalls(): void {
+    createERC1155TokenCalls(this.id, '0', 'https://example.org/0.json');
+  }
+}
+
+class ERC1155BalanceMethods extends ERC1155Balance {
+  withDefaultValues(): ERC1155BalanceMethods {
+    let daoId = Address.fromString(DAO_ADDRESS).toHexString();
+    let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    let balanceId = getBalanceId(daoId, tokenId);
+
+    this.id = balanceId;
+    this.token = tokenId;
+    this.dao = daoId;
+    this.metadataUri = 'https://example.org/{id}.json';
+    this.lastUpdated = BigInt.zero();
+    return this;
+  }
+}
+class ERC1155TokenIdBalanceMethods extends ERC1155TokenIdBalance {
+  withDefaultValues(): ERC1155TokenIdBalanceMethods {
+    let daoId = Address.fromString(DAO_ADDRESS).toHexString();
+    let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    let balanceId = getBalanceId(daoId, tokenId);
+
+    this.id = getTokenIdBalanceId(daoId, tokenId, BigInt.zero());
+    this.amount = BigInt.zero();
+    this.balance = balanceId;
+    this.tokenId = BigInt.zero();
+    this.lastUpdated = BigInt.zero();
+    return this;
+  }
+}
+
+class ERC1155TransferMethods extends ERC1155Transfer {
+  withDefaultValues(
+    id: string = getERC1155TransferId(Bytes.empty(), BigInt.zero(), 0, 0)
+  ): ERC1155TransferMethods {
+    this.id = id;
+    this.dao = DAO_ADDRESS;
+    this.token = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
+    this.tokenId = BigInt.zero();
+    this.from = Address.fromHexString(ADDRESS_ONE);
+    this.to = Address.fromHexString(DAO_ADDRESS);
+    this.proposal = 'null';
+    this.type = 'Deposit';
+    this.txHash = Bytes.empty();
+    this.createdAt = BigInt.fromString(CREATED_AT);
+
+    return this;
+  }
+}
 
 // ERC721Contract
 class ERC721ContractMethods extends ERC721Contract {

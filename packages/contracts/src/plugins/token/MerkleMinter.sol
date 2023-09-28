@@ -17,6 +17,7 @@ import {IMerkleMinter} from "./IMerkleMinter.sol";
 /// @title MerkleMinter
 /// @author Aragon Association
 /// @notice A component minting [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributing them on merkle trees using `MerkleDistributor` clones.
+/// @custom:security-contact sirt@aragon.org
 contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     using Clones for address;
 

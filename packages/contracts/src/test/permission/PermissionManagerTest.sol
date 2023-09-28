@@ -41,7 +41,7 @@ contract PermissionManagerTest is PermissionManager {
         bytes32 _permissionId,
         bytes memory _data
     ) public view returns (bool) {
-        return _isGranted(_where, _who, _permissionId, _data);
+        return isGranted(_where, _who, _permissionId, _data);
     }
 
     function isPermissionRestrictedForAnyAddr(

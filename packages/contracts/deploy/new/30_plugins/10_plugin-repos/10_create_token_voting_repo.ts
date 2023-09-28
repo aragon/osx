@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await createPluginRepo(hre, 'token-voting');
   await populatePluginRepo(hre, 'token-voting', [
     {
-      versionTag: [1, 1],
+      versionTag: [1, 2],
       pluginSetupContract: tokenVotingSetupContract,
       releaseMetadata: ethers.utils.hexlify(
         ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingReleaseCIDPath}`)

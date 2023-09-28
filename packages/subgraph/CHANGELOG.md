@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+### Changed
+
+### Removed
+
+## [1.3.0]
+
+### Added
+
+- Add support for `ERC1155` tokens.
+
+## [1.2.2]
+
+### Changed
+
+- Fixed missing interfaces of ERC20, ERC721, TokenVoting, AddresslistVoting, and CallbackHandler from Aragon OSx v1.3.0.
+
+## [1.2.1]
+
 ### Changed
 
 - Fixed wrong interface for indexing GovernanceWrappedERC20.

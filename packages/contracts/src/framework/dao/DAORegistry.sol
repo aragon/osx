@@ -10,6 +10,7 @@ import {isSubdomainValid} from "../utils/RegistryUtils.sol";
 /// @title Register your unique DAO subdomain
 /// @author Aragon Association - 2022-2023
 /// @notice This contract provides the possibility to register a DAO.
+/// @custom:security-contact sirt@aragon.org
 contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
@@ -27,6 +28,7 @@ contract DAORegistry is InterfaceBasedRegistry {
     event DAORegistered(address indexed dao, address indexed creator, string subdomain);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

@@ -13,6 +13,7 @@ import {IPlugin} from "./IPlugin.sol";
 /// @title PluginUUPSUpgradeable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+/// @custom:security-contact sirt@aragon.org
 abstract contract PluginUUPSUpgradeable is
     IPlugin,
     ERC165Upgradeable,
@@ -22,6 +23,7 @@ abstract contract PluginUUPSUpgradeable is
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

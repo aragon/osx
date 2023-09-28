@@ -9,11 +9,12 @@ import {IPermissionCondition} from "./IPermissionCondition.sol";
 /// @title PermissionCondition
 /// @author Aragon Association - 2023
 /// @notice An abstract contract for non-upgradeable contracts instantiated via the `new` keyword  to inherit from to support customary permissions depending on arbitrary on-chain state.
+/// @custom:security-contact sirt@aragon.org
 abstract contract PermissionCondition is ERC165, IPermissionCondition {
     /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId) public view override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPermissionCondition).interfaceId ||
             super.supportsInterface(_interfaceId);

@@ -1,96 +1,172 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {Contract} from 'ethers';
-import {defaultAbiCoder} from 'ethers/lib/utils';
-import {ethers} from 'hardhat';
-import {PluginUUPSUpgradeableV1Mock__factory} from '../../typechain';
+import {Contract, ContractFactory, errors} from 'ethers';
+import {upgrades} from 'hardhat';
+import {DAO, PluginRepo} from '../../typechain';
+import {readImplementationValueFromSlot} from '../../utils/storage';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 
-// See https://eips.ethereum.org/EIPS/eip-1967
-export const IMPLEMENTATION_SLOT =
-  '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'; // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
-
-/// Used as a common test suite to test upgradeability of the contracts.
-/// Presumes that `upgrade` object is set on `this` inside the actual test file.
-/// this.upgrade consists of:
-///     contract - address of the contract on which it tests if `upgradeTo` works as intended.
-///     dao - dao contact that the contract belongs to.
-///     user - ethers user object. Presumed that it doesn't have permission to call `upgradeTo`.
-export function shouldUpgradeCorrectly(
+// Deploys a proxy and a new implementation from the same factory and checks that the upgrade works.
+export async function deployAndUpgradeSelfCheck(
+  deployer: SignerWithAddress,
+  upgrader: SignerWithAddress,
+  initArgs: any,
+  initializerName: string,
+  factory: ContractFactory,
   upgradePermissionId: string,
-  upgradeRevertPermissionMessage: string
+  managingContract?: DAO | PluginRepo | undefined
 ) {
-  let uupsCompatibleBase: string;
+  // Deploy proxy and implementation
+  const proxy = await upgrades.deployProxy(
+    factory.connect(deployer),
+    Object.values(initArgs),
+    {
+      kind: 'uups',
+      initializer: initializerName,
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    }
+  );
 
-  function DaoUnauthorizedRevertArgs(
-    contract: Contract,
-    user: SignerWithAddress,
-    dao: Contract
-  ) {
-    return [dao.address, contract.address, user.address, upgradePermissionId];
+  // Grant the upgrade permission
+  const grantArgs: [string, string, string] = [
+    proxy.address,
+    upgrader.address,
+    upgradePermissionId,
+  ];
+
+  // Check if the contract is a permission manager itself
+  if (managingContract === undefined) {
+    await expect(
+      upgrades.upgradeProxy(proxy.address, factory.connect(upgrader), {
+        unsafeAllow: ['constructor'],
+        constructorArgs: [],
+      })
+    )
+      .to.be.revertedWithCustomError(proxy, 'Unauthorized')
+      .withArgs(...grantArgs);
+
+    await proxy.connect(deployer).grant(...grantArgs);
+  }
+  // Or if the permission manager is located in a different contract
+  else {
+    await expect(
+      upgrades.upgradeProxy(proxy.address, factory.connect(upgrader), {
+        unsafeAllow: ['constructor'],
+        constructorArgs: [],
+      })
+    )
+      .to.be.revertedWithCustomError(proxy, 'DaoUnauthorized')
+      .withArgs(managingContract.address, ...grantArgs);
+
+    await managingContract.connect(deployer).grant(...grantArgs);
   }
 
-  function UnauthorizedRevertArgs(dao: Contract, user: SignerWithAddress) {
-    return [dao.address, user.address, upgradePermissionId];
+  // Deploy a new implementation (the same contract at a different address)
+  const toImplementation = (await factory.deploy()).address;
+
+  // Confirm that the two implementations are different
+  const fromImplementation = await readImplementationValueFromSlot(
+    proxy.address
+  );
+  expect(toImplementation).to.not.equal(fromImplementation);
+
+  // Upgrade from the old to the new implementation
+  await proxy.connect(upgrader).upgradeTo(toImplementation);
+
+  // Confirm that the proxy points to the new implementation
+  const implementationAfterUpgrade = await readImplementationValueFromSlot(
+    proxy.address
+  );
+  expect(implementationAfterUpgrade).to.equal(toImplementation);
+}
+
+// Deploys a proxy and a new implementation via two different factories and checks that the upgrade works.
+export async function deployAndUpgradeFromToCheck(
+  deployer: SignerWithAddress,
+  upgrader: SignerWithAddress,
+  initArgs: any,
+  initializerName: string,
+  from: ContractFactory,
+  to: ContractFactory,
+  upgradePermissionId: string,
+  managingDao?: DAO | PluginRepo
+): Promise<{
+  proxy: Contract;
+  fromImplementation: string;
+  toImplementation: string;
+}> {
+  // Deploy proxy and implementation
+  let proxy = await upgrades.deployProxy(
+    from.connect(deployer),
+    Object.values(initArgs),
+    {
+      kind: 'uups',
+      initializer: initializerName,
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    }
+  );
+
+  const fromImplementation = await readImplementationValueFromSlot(
+    proxy.address
+  );
+
+  // Grant the upgrade permission
+  const grantArgs: [string, string, string] = [
+    proxy.address,
+    upgrader.address,
+    upgradePermissionId,
+  ];
+
+  if (managingDao === undefined) {
+    await expect(
+      upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+        unsafeAllow: ['constructor'],
+        constructorArgs: [],
+      })
+    )
+      .to.be.revertedWithCustomError(proxy, 'Unauthorized')
+      .withArgs(...grantArgs);
+
+    await proxy.connect(deployer).grant(...grantArgs);
+  } else {
+    await expect(
+      upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+        unsafeAllow: ['constructor'],
+        constructorArgs: [],
+      })
+    )
+      .to.be.revertedWithCustomError(proxy, 'DaoUnauthorized')
+      .withArgs(managingDao.address, ...grantArgs);
+
+    await managingDao.connect(deployer).grant(...grantArgs);
   }
 
-  describe('UUPS Upgradeability Test', async () => {
-    before(async () => {
-      const signers = await ethers.getSigners();
-      const factory = new PluginUUPSUpgradeableV1Mock__factory(signers[0]);
-      uupsCompatibleBase = (await factory.deploy()).address;
-    });
-
-    it('reverts if user without permission tries to upgrade', async function () {
-      const {user, contract, dao} = this.upgrade;
-      const connect = contract.connect(user);
-      const tx1 = connect.upgradeTo(ethers.constants.AddressZero);
-      const tx2 = connect.upgradeToAndCall(ethers.constants.AddressZero, '0x');
-      if (upgradeRevertPermissionMessage === 'DaoUnauthorized') {
-        await expect(tx1)
-          .to.be.revertedWithCustomError(
-            contract,
-            upgradeRevertPermissionMessage
-          )
-          .withArgs(...DaoUnauthorizedRevertArgs(contract, user, dao));
-        await expect(tx2)
-          .to.be.revertedWithCustomError(
-            contract,
-            upgradeRevertPermissionMessage
-          )
-          .withArgs(...DaoUnauthorizedRevertArgs(contract, user, dao));
-      } else {
-        await expect(tx1)
-          .to.be.revertedWithCustomError(
-            contract,
-            upgradeRevertPermissionMessage
-          )
-          .withArgs(...UnauthorizedRevertArgs(dao, user));
-        await expect(tx2)
-          .to.be.revertedWithCustomError(
-            contract,
-            upgradeRevertPermissionMessage
-          )
-          .withArgs(...UnauthorizedRevertArgs(dao, user));
-      }
-    });
-
-    it('updates correctly to new implementation', async function () {
-      const {user, contract, dao} = this.upgrade;
-      await dao.grant(contract.address, user.address, upgradePermissionId);
-      const connect = contract.connect(user);
-
-      // Check the event.
-      await expect(connect.upgradeTo(uupsCompatibleBase))
-        .to.emit(contract, 'Upgraded')
-        .withArgs(uupsCompatibleBase);
-
-      // Check the storage slot.
-      const encoded = await ethers.provider.getStorageAt(
-        contract.address,
-        IMPLEMENTATION_SLOT
-      );
-      const implementation = defaultAbiCoder.decode(['address'], encoded)[0];
-      expect(implementation).to.equal(uupsCompatibleBase);
-    });
+  // Upgrade the proxy to a new implementation from a different factory
+  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+    unsafeAllow: ['constructor'],
+    constructorArgs: [],
   });
+
+  const toImplementation = await readImplementationValueFromSlot(proxy.address);
+
+  return {proxy, fromImplementation, toImplementation};
+}
+
+export async function getProtocolVersion(
+  contract: Contract
+): Promise<[number, number, number]> {
+  let protocolVersion: [number, number, number];
+  try {
+    contract.interface.getFunction('protocolVersion');
+    protocolVersion = await contract.protocolVersion();
+  } catch (error) {
+    if (error.code === errors.INVALID_ARGUMENT) {
+      protocolVersion = IMPLICIT_INITIAL_PROTOCOL_VERSION;
+    } else {
+      throw error;
+    }
+  }
+  return protocolVersion;
 }

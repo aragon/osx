@@ -1,5 +1,5 @@
 import {BytesLike} from 'ethers';
-import {defaultAbiCoder, keccak256} from 'ethers/lib/utils';
+import {defaultAbiCoder, keccak256, solidityPack} from 'ethers/lib/utils';
 
 import {hashHelpers} from '../../../utils/psp';
 import {PermissionOperation, PluginRepoPointer, PreparationType} from './types';
@@ -10,6 +10,10 @@ const ZERO_BYTES_HASH = keccak256(
     ['0x0000000000000000000000000000000000000000000000000000000000000000']
   )
 );
+
+export function tagHash(release: number, build: number) {
+  return keccak256(solidityPack(['uint8', 'uint16'], [release, build]));
+}
 
 export function hashPermissions(permissions: PermissionOperation[]) {
   return keccak256(
