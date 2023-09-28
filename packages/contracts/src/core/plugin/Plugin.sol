@@ -4,6 +4,7 @@ pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {IDAO} from "../dao/IDAO.sol";
 import {DaoAuthorizable} from "./dao-authorizable/DaoAuthorizable.sol";
 import {IPlugin} from "./IPlugin.sol";
@@ -12,7 +13,7 @@ import {IPlugin} from "./IPlugin.sol";
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the `new` keyword.
 /// @custom:security-contact sirt@aragon.org
-abstract contract Plugin is IPlugin, ERC165, DaoAuthorizable {
+abstract contract Plugin is IPlugin, ERC165, DaoAuthorizable, ProtocolVersion {
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     constructor(IDAO _dao) DaoAuthorizable(_dao) {}
@@ -26,6 +27,9 @@ abstract contract Plugin is IPlugin, ERC165, DaoAuthorizable {
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == type(IPlugin).interfaceId || super.supportsInterface(_interfaceId);
+        return
+            _interfaceId == type(IPlugin).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 }
