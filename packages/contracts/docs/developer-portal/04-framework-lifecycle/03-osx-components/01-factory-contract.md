@@ -16,7 +16,6 @@ flowchart TD
 
         %% Standard Checks
         bumpProtocolVersion[["<a href='../03-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
-        isEventAddition{"event addition?"}
         isBaseChange{"is base imple- \n mentation  change?"}
 
         %% Actions
@@ -25,36 +24,22 @@ flowchart TD
         adaptConstructor["adapt the constructor"]
 
         %% Base Change
-
         bumpProtocolVersion --> isBaseChange
         isBaseChange -->|yes| deployNewImplementation
         isBaseChange -->|no| reuseOldImplementation
         deployNewImplementation-->adaptConstructor
         reuseOldImplementation-->adaptConstructor
 
-        %% Event Change
-        adaptConstructor --> isEventAddition
-        isEventAddition -->|yes| adaptSubgraph[["Subgraph change"]]
     end
 
     implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
-    %%subgraph testing[Testing]
-    %%end
 
     testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
-    %%subgraph testing[Testing]
-    %%end
 
     docs ==> deployment
     subgraph deployment[Deployment]
-        deployContract["deploy contracts"]
-        verifyContract["verify contracts"]
-
-        deploySubgraph["deploy Subgraph \n now indexing old \n and new factories"]
-
-        deployContract --> verifyContract
-        verifyContract --> deploySubgraph
-        deploySubgraph --> managingDaoProposal
+        deployContract[[<a href='../03-sub-processes/04-deployment.md'>standard deployment process</a>]]
+        deployContract --> managingDaoProposal
 
         subgraph managingDaoProposal["Managing DAO Proposal"]
             grantNewPermissions["grant registry permission \n for the new factory"]
@@ -76,11 +61,7 @@ flowchart TD
         affectsApp -->|no| announceUpdate
 
         announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
-        announceUpdate --> initializationChange
-
-        initializationChange{"initializtion \n change?"}
-        initializationChange -->|yes| upgradeToAndCall["upgrade \n via upgradeToAndCall() \n and initializeFrom()"]
-        initializationChange -->|no| upgradeTo["upgrade \n via upgradeTo()"]
+        announceUpdate
 
     end
 

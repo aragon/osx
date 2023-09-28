@@ -6,7 +6,7 @@ flowchart TD
     deployContracts["deploy contracts"]
     verifyContract["verify contracts"]
 
-    newSubgraph{"new \n subgraph?"}
+    newSubgraph{"subgraph \n change?"}
     deploySubgraph["deploy subgraph"]
 
     deployContracts --> verifyContract --> newSubgraph --> deploySubgraph
