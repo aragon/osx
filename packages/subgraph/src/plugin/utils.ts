@@ -24,12 +24,13 @@ import {
   MultisigPlugin
 } from '../../generated/schema';
 import {
-  TOKEN_VOTING_INTERFACE,
-  ADDRESSLIST_VOTING_INTERFACE,
-  ADMIN_INTERFACE,
   VOTING_MODES,
-  MULTISIG_INTERFACE
+  ADMIN_INTERFACE_ID,
+  TOKEN_VOTING_INTERFACE_ID,
+  ADDRESSLIST_VOTING_INTERFACE_ID,
+  MULTISIG_INTERFACE_ID
 } from '../utils/constants';
+
 import {supportsInterface} from '../utils/erc165';
 import {
   fetchERC20,
@@ -173,16 +174,16 @@ export function addPlugin(daoId: string, plugin: Address): void {
 
   let tokenVotingInterfaceSupported = supportsInterface(
     contract,
-    TOKEN_VOTING_INTERFACE
+    TOKEN_VOTING_INTERFACE_ID
   );
   let addresslistInterfaceSupported = supportsInterface(
     contract,
-    ADDRESSLIST_VOTING_INTERFACE
+    ADDRESSLIST_VOTING_INTERFACE_ID
   );
-  let adminInterfaceSupported = supportsInterface(contract, ADMIN_INTERFACE);
+  let adminInterfaceSupported = supportsInterface(contract, ADMIN_INTERFACE_ID);
   let multisigInterfaceSupported = supportsInterface(
     contract,
-    MULTISIG_INTERFACE
+    MULTISIG_INTERFACE_ID
   );
 
   if (tokenVotingInterfaceSupported) {

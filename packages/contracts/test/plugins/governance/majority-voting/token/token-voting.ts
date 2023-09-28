@@ -50,7 +50,12 @@ import {
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {deployWithProxy} from '../../../../test-utils/proxy';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {
+  TOKEN_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
+
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   getProtocolVersion,
@@ -63,11 +68,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
-
-export const tokenVotingInterface = new ethers.utils.Interface([
-  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
-  'function getVotingToken()',
-]);
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -338,9 +338,9 @@ describe('TokenVoting', function () {
     });
 
     it('supports the `TokenVoting` interface', async () => {
-      expect(
-        await voting.supportsInterface(getInterfaceID(tokenVotingInterface))
-      ).to.be.true;
+      const iface = getInterfaceID(TOKEN_VOTING_INTERFACE);
+      expect(iface).to.equal(TOKEN_VOTING_INTERFACE_ID); // checks that it didn't change
+      expect(await voting.supportsInterface(iface)).to.be.true;
     });
   });
 
