@@ -77,9 +77,15 @@ function main() {
             returnType = `Extended${originalClassName}`;
           }
 
+          // Get the type parameters
+          const typeParameters = method
+            .getTypeParameters()
+            .map(param => param.getText());
+
           const newMethod = newClass.addMethod({
             name: method.getName(),
-            returnType: returnType
+            returnType: returnType,
+            typeParameters: typeParameters // Add the type parameters to the new method
           });
 
           const parameters = method.getParameters().map(parameter => {

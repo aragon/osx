@@ -6,8 +6,7 @@ import {
   afterEach,
   clearStore,
   assert,
-  beforeAll,
-  log
+  beforeAll
 } from 'matchstick-as';
 import {
   TransactionActionsProposal,
@@ -682,11 +681,7 @@ describe('handleExecuted', () => {
         handleExecuted(event);
 
         let timestamp = event.block.timestamp;
-        let tokenIdBalanceId = getTokenIdBalanceId(
-          daoId,
-          tokenId,
-          transferToken
-        );
+
         // check ERC1155Contract entity
         assert.entityCount('ERC1155Contract', 1);
         let erc1155Contract = new ExtendedERC1155Contract().withDefaultValues();
