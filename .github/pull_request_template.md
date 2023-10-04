@@ -2,7 +2,7 @@
 
 Please include a summary of the change and be sure you follow the contributions rules we do provide [here](./CONTRIBUTIONS.md)
 
-Task: [ID]()
+Task ID: [OS-?](https://aragonassociation.atlassian.net/browse/OS-?)
 
 ## Type of change
 See the framework lifecylce in `packages/contracts/docs/framework-lifecycle` to decide what kind of change this pull request is.

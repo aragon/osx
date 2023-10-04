@@ -80,11 +80,9 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     ) external override auth(MERKLE_MINT_PERMISSION_ID) returns (IMerkleDistributor distributor) {
         address distributorAddr = createERC1967Proxy(
             address(distributorBase),
-            abi.encodeWithSelector(
-                MerkleDistributor.initialize.selector,
-                dao(),
-                IERC20Upgradeable(address(token)),
-                _merkleRoot
+            abi.encodeCall(
+                MerkleDistributor.initialize,
+                (dao(), IERC20Upgradeable(address(token)), _merkleRoot)
             )
         );
 
