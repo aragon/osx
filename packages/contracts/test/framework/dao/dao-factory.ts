@@ -26,7 +26,11 @@ import {
   PluginRepo__factory,
   IProtocolVersion__factory,
   IERC165__factory,
+  PluginRepoRegistry__factory,
 } from '../../../typechain';
+import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
+import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
@@ -36,8 +40,7 @@ import {
 } from '../../test-utils/repo';
 import adminMetadata from '../../../src/plugins/governance/admin/build-metadata.json';
 
-import {findEvent} from '../../../utils/event';
-import {getMergedABI} from '../../../utils/abi';
+import {findEventTopicLog} from '../../../utils/event';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
@@ -53,8 +56,6 @@ import {
   prepareUninstallation,
   prepareUpdate,
 } from '../../test-utils/psp/wrappers';
-import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
-import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 
@@ -112,26 +113,26 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   helpers: any;
   permissions: any;
 }> {
-  const data = await tx.wait();
-  const {events} = data;
-  const {dao, creator, subdomain} = events.find(
-    ({event}: {event: any}) => event === EVENTS.DAORegistered
-  ).args;
+  const daoRegisteredEvent = await findEventTopicLog<DAORegisteredEvent>(
+    tx,
+    DAORegistry__factory.createInterface(),
+    EVENTS.DAORegistered
+  );
 
-  const {
-    plugin,
-    preparedSetupData: {permissions, helpers},
-  } = events.find(
-    ({event}: {event: any}) => event === EVENTS.InstallationPrepared
-  ).args;
+  const installationPreparedEvent =
+    await findEventTopicLog<InstallationPreparedEvent>(
+      tx,
+      PluginSetupProcessor__factory.createInterface(),
+      EVENTS.InstallationPrepared
+    );
 
   return {
-    dao: dao,
-    creator: creator,
-    subdomain: subdomain,
-    plugin: plugin,
-    helpers: helpers,
-    permissions: permissions,
+    dao: daoRegisteredEvent.args.dao,
+    creator: daoRegisteredEvent.args.creator,
+    subdomain: daoRegisteredEvent.args.subdomain,
+    plugin: installationPreparedEvent.args.plugin,
+    helpers: installationPreparedEvent.args.preparedSetupData.helpers,
+    permissions: installationPreparedEvent.args.preparedSetupData.permissions,
   };
 }
 
@@ -163,22 +164,9 @@ describe('DAOFactory: ', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
 
-  let mergedABI: any;
-  let daoFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-
-    const {abi, bytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'DAOFactory',
-      ['DAORegistry', 'PluginSetupProcessor', 'src/core/dao/DAO.sol:DAO']
-    );
-
-    mergedABI = abi;
-    daoFactoryBytecode = bytecode;
   });
 
   beforeEach(async function () {
@@ -217,11 +205,7 @@ describe('DAOFactory: ', function () {
     );
 
     // Deploy DAO Factory
-    const DAOFactory = new ethers.ContractFactory(
-      mergedABI,
-      daoFactoryBytecode,
-      signers[0]
-    ) as DAOFactory__factory;
+    const DAOFactory = new DAOFactory__factory(signers[0]);
     daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
 
     // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
@@ -265,8 +249,9 @@ describe('DAOFactory: ', function () {
       '0x00',
       '0x00'
     );
-    const event = await findEvent<PluginRepoRegisteredEvent>(
+    const event = await findEventTopicLog<PluginRepoRegisteredEvent>(
       tx,
+      PluginRepoRegistry__factory.createInterface(),
       EVENTS.PluginRepoRegistered
     );
     pluginSetupMockRepoAddress = event.args.pluginRepo;
@@ -551,16 +536,19 @@ describe('DAOFactory: ', function () {
 
     const plugins = [plugin1, plugin2];
     const tx = await daoFactory.createDao(daoSettings, plugins);
-    const {events} = await tx.wait();
 
-    let installEventCount = 0;
+    // Count how often the event was emitted by inspecting the logs
+    const receipt = await tx.wait();
+    const topic = PluginSetupProcessor__factory.createInterface().getEventTopic(
+      EVENTS.InstallationApplied
+    );
 
-    // @ts-ignore
-    events.forEach(event => {
-      if (event.event == EVENTS.InstallationApplied) installEventCount++;
+    let installationAppliedEventCount = 0;
+    receipt.logs.forEach(log => {
+      if (log.topics[0] === topic) installationAppliedEventCount++;
     });
 
-    expect(installEventCount).to.equal(2);
+    expect(installationAppliedEventCount).to.equal(2);
   });
 
   describe('E2E: Install,Update,Uninstall Plugin through Admin Plugin', async () => {
@@ -596,11 +584,13 @@ describe('DAOFactory: ', function () {
         '0x11',
         '0x11'
       );
-      let event = await findEvent<PluginRepoRegisteredEvent>(
-        tx,
-        EVENTS.PluginRepoRegistered
-      );
-      adminPluginRepoAddress = event.args.pluginRepo;
+      const pluginRepoRegisteredEvent =
+        await findEventTopicLog<PluginRepoRegisteredEvent>(
+          tx,
+          PluginRepoRegistry__factory.createInterface(),
+          EVENTS.PluginRepoRegistered
+        );
+      adminPluginRepoAddress = pluginRepoRegisteredEvent.args.pluginRepo;
 
       // create dao with admin plugin.
       const adminPluginRepoPointer: PluginRepoPointer = [
@@ -622,15 +612,20 @@ describe('DAOFactory: ', function () {
       );
       tx = await daoFactory.createDao(daoSettings, [adminPluginInstallation]);
       {
-        const event = await findEvent<InstallationPreparedEvent>(
-          tx,
-          EVENTS.InstallationPrepared
-        );
+        const installationPreparedEvent =
+          await findEventTopicLog<InstallationPreparedEvent>(
+            tx,
+            PluginSetupProcessor__factory.createInterface(),
+            EVENTS.InstallationPrepared
+          );
+
         const adminFactory = new Admin__factory(signers[0]);
-        adminPlugin = adminFactory.attach(event.args.plugin);
+        adminPlugin = adminFactory.attach(
+          installationPreparedEvent.args.plugin
+        );
 
         const daoFactory = new DAO__factory(signers[0]);
-        dao = daoFactory.attach(event.args.dao);
+        dao = daoFactory.attach(installationPreparedEvent.args.dao);
       }
     });
 
@@ -646,15 +641,15 @@ describe('DAOFactory: ', function () {
         EMPTY_DATA
       );
 
-      let DAO_INTERFACE = DAO__factory.createInterface();
-      let PSP_INTERFACE = PluginSetupProcessor__factory.createInterface();
+      const daoInterface = DAO__factory.createInterface();
+      const pspInterface = PluginSetupProcessor__factory.createInterface();
 
       // Prepare actions for apply Installation.
       let applyInstallationActions = [
         {
           to: dao.address,
           value: 0,
-          data: DAO_INTERFACE.encodeFunctionData('grant', [
+          data: daoInterface.encodeFunctionData('grant', [
             dao.address,
             psp.address,
             ethers.utils.id('ROOT_PERMISSION'),
@@ -663,7 +658,7 @@ describe('DAOFactory: ', function () {
         {
           to: psp.address,
           value: 0,
-          data: PSP_INTERFACE.encodeFunctionData('applyInstallation', [
+          data: pspInterface.encodeFunctionData('applyInstallation', [
             dao.address,
             createApplyInstallationParams(
               plugin,
@@ -702,7 +697,7 @@ describe('DAOFactory: ', function () {
         {
           to: dao.address,
           value: 0,
-          data: DAO_INTERFACE.encodeFunctionData('grant', [
+          data: daoInterface.encodeFunctionData('grant', [
             plugin,
             psp.address,
             ethers.utils.id('UPGRADE_PLUGIN_PERMISSION'),
@@ -711,7 +706,7 @@ describe('DAOFactory: ', function () {
         {
           to: psp.address,
           value: 0,
-          data: PSP_INTERFACE.encodeFunctionData('applyUpdate', [
+          data: pspInterface.encodeFunctionData('applyUpdate', [
             dao.address,
             createApplyUpdateParams(
               plugin,
@@ -743,7 +738,7 @@ describe('DAOFactory: ', function () {
         {
           to: psp.address,
           value: 0,
-          data: PSP_INTERFACE.encodeFunctionData('applyUninstallation', [
+          data: pspInterface.encodeFunctionData('applyUninstallation', [
             dao.address,
             createApplyUninstallationParams(
               plugin,

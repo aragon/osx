@@ -2,12 +2,12 @@ import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {getMergedABI} from '../../../../utils/abi';
 import {
   findEvent,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
+  findEventTopicLog,
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
@@ -16,13 +16,15 @@ import {toBytes32} from '../../../test-utils/voting';
 import {
   AdminCloneFactory,
   AdminCloneFactory__factory,
+  Admin__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
   IPlugin__factory,
   IProposal__factory,
+  DAO__factory,
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
-import {ExecutedEvent} from '../../../../typechain/DAO';
+import {ExecutedEvent} from '../../../../typechain/IDAO';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -44,19 +46,9 @@ describe('Admin', function () {
   let dummyActions: any;
   let dummyMetadata: string;
 
-  let mergedAbi: any;
-  let adminFactoryBytecode: any;
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-
-    ({abi: mergedAbi, bytecode: adminFactoryBytecode} = await getMergedABI(
-      // @ts-ignore
-      hre,
-      'Admin',
-      ['src/core/dao/DAO.sol:DAO']
-    ));
 
     dummyActions = [
       {
@@ -76,11 +68,7 @@ describe('Admin', function () {
   });
 
   beforeEach(async () => {
-    const AdminFactory = new ethers.ContractFactory(
-      mergedAbi,
-      adminFactoryBytecode,
-      signers[0]
-    );
+    const AdminFactory = new Admin__factory(signers[0]);
 
     const nonce = await ethers.provider.getTransactionCount(
       adminCloneFactory.address
@@ -250,7 +238,12 @@ describe('Admin', function () {
           dummyActions,
           allowFailureMap
         );
-        const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+
+        const event = await findEventTopicLog<ExecutedEvent>(
+          tx,
+          DAO__factory.createInterface(),
+          DAO_EVENTS.EXECUTED
+        );
 
         expect(event.args.actor).to.equal(plugin.address);
         expect(event.args.callId).to.equal(toBytes32(proposalId));
@@ -266,8 +259,12 @@ describe('Admin', function () {
         const proposalId = 1;
 
         const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
-        const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
 
+        const event = await findEventTopicLog<ExecutedEvent>(
+          tx,
+          DAO__factory.createInterface(),
+          DAO_EVENTS.EXECUTED
+        );
         expect(event.args.callId).to.equal(toBytes32(proposalId));
       }
     });

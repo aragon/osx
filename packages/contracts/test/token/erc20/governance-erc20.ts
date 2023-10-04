@@ -7,6 +7,10 @@ import {
   GovernanceERC20,
   GovernanceERC20__factory,
   IERC165Upgradeable__factory,
+  IERC20MintableUpgradeable__factory,
+  IERC20PermitUpgradeable__factory,
+  IERC20Upgradeable__factory,
+  IVotesUpgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -107,17 +111,13 @@ describe('GovernanceERC20', function () {
     it('it supports all inherited interfaces', async () => {
       await Promise.all(
         [
-          'IERC20Upgradeable',
-          'IERC20PermitUpgradeable',
-          'IVotesUpgradeable',
-          'IERC20MintableUpgradeable',
+          IERC20Upgradeable__factory.createInterface(),
+          IERC20PermitUpgradeable__factory.createInterface(),
+          IVotesUpgradeable__factory.createInterface(),
+          IERC20MintableUpgradeable__factory.createInterface(),
         ].map(async interfaceName => {
-          const iface = new ethers.utils.Interface(
-            // @ts-ignore
-            (await hre.artifacts.readArtifact(interfaceName)).abi
-          );
-          expect(await token.supportsInterface(getInterfaceID(iface))).to.be
-            .true;
+          expect(await token.supportsInterface(getInterfaceID(interfaceName)))
+            .to.be.true;
         })
       );
       // We must check `IERC20MetadataUpgradeable` separately as it inherits from `IERC20Upgradeable` and we cannot get the isolated ABI.

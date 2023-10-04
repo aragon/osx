@@ -15,11 +15,14 @@ import {
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
   ERC20_transfer,
-  ERC20_transferFrom
+  ERC20_transferFrom,
+  ERC1155_safeBatchTransferFrom,
+  ERC1155_safeTransferFrom
 } from '../utils/tokens/common';
 import {handleERC20Action} from '../utils/tokens/erc20';
 import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleNativeAction} from '../utils/tokens/eth';
+import {handleERC1155Action} from '../utils/tokens/erc1155';
 
 // AssemblyScript struggles having mutliple return types. Due to this,
 // The below seems most effective way.
@@ -106,6 +109,19 @@ export function handleAction<
     methodSig == ERC721_safeTransferFromWithData
   ) {
     handleERC721Action(
+      action.to,
+      event.address,
+      action.data,
+      proposalId,
+      index,
+      event
+    );
+  }
+  if (
+    methodSig == ERC1155_safeBatchTransferFrom ||
+    methodSig == ERC1155_safeTransferFrom
+  ) {
+    handleERC1155Action(
       action.to,
       event.address,
       action.data,

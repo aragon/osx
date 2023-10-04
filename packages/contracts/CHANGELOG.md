@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.3.1-rc0
+
+### Added
+
+### Changed
+
+- Added missing `virtual` keyword to `PermissionCondition` and `PermissionConditionUpgradeable`.
+
+### Removed
+
 ## v1.3.0-rc0
 
 ### Added
@@ -25,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed logic bug in the `TokenVoting` and `AddresslistVoting` implementations that caused the `createProposal` function to emit the unvalidated `_startDate` and `_endDate` input arguments (that both can be zero) in the `ProposalCreated` event instead of the validated ones.
 - Changed the `createProposal` functions in `Multisig` to allow creating proposals when the `_msgSender()` is listed in the current block.
 - Changed the `createProposal` functions in `AddresslistVoting` to allow creating proposals when the `_msgSender()` is listed in the current block.
-- Changed the `createProposal` functions in `TokenVoting` to allow creating proposals when the `_msgSender()` owns more tokens at least `minProposerVotingPower()` tokens in the current block.
+- Changed the `createProposal` functions in `TokenVoting` to allow creating proposals when the `_msgSender()` owns at least `minProposerVotingPower()` tokens in the current block, also if they are delegated.
 - Changed the `isMember` function in the `TokenVoting` plugin to also take delegators of the token into account.
 - Fixed and clarified the NatSpec comments according to the Code4rena audit suggestions.
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
