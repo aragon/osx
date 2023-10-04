@@ -4,7 +4,7 @@ import {DAOFactory__factory, DAO__factory} from '../../../typechain';
 import {getContractAddress} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nUpgrade the managing DAO to new implemenation');
+  console.log('\nUpgrade the managing DAO to new Implementation');
 
   const daoFactoryAddress = await getContractAddress('DAOFactory', hre);
   const newDaoImplementation = await DAOFactory__factory.connect(

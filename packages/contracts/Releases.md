@@ -1,7 +1,7 @@
 # Contract Releases
 
 Commit: [39dcba1d10b335445724ae006322f584fc1fc9c5](https://github.aragon/osx/commit/39dcba1d10b335445724ae006322f584fc1fc9c5)  
-managingDAOImplemenation: 0xCa834B3F404c97273f34e108029eEd776144d324  
+managingDAOImplementation: 0xCa834B3F404c97273f34e108029eEd776144d324  
 managingDAO: 0x57e24f85ceAcDa3Ef4F0fd04005589B88dc01A19  
 ENSRegistry: 0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8  
 DAO_ENSSubdomainRegistrar_Implementation: 0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8  
@@ -90,7 +90,7 @@ multisig-repo: 0x3308fd88Db88e11c4d99EC805836d7E9F181CdE0
 Commit: [d429e77c68fcc972126bef6dd58d5d8b32118a09](https://github.com/aragon/osx/commit/d429e77c68fcc972126bef6dd58d5d8b32118a09)  
 Network: baseMainnet  
 managingDAO: 0xB93f5Be5900C2d5fBaE8e4F99B46FfB2Db52ee21  
-managingDAOImplemenation: 0xF3AaA3372EbBf01b923a4Cc98Cd847126b3D73cA  
+managingDAOImplementation: 0xF3AaA3372EbBf01b923a4Cc98Cd847126b3D73cA  
 ENSRegistry: 0xc4ddBd0472C2688F5d278dAFC02E66EE176C8DE3  
 PublicResolver: 0x85138280659cc0cA3f40579E2C8f2713fBAA8878  
 DAO_ENSSubdomainRegistrar_Implementation: 0x57bf333951967a0cC0afcD58FC7959Ca0Eae6905  
@@ -123,7 +123,7 @@ Network: baseGoerli
 managingDAO: 0xCd74Cf89EB90f2abB444E2D1784ee473f338B76B  
 DAO_ENSSubdomainRegistrar: 0x6115b7F05cCeF2D883AB64c88ba7e4BD1b877215  
 DAO_ENSSubdomainRegistrar_Implementation: 0x74b3B3504B5d6D1c6247009c9b1e3D8cFF7bd445  
-managingDAOImplemenation: 0xB93f5Be5900C2d5fBaE8e4F99B46FfB2Db52ee21  
+managingDAOImplementation: 0xB93f5Be5900C2d5fBaE8e4F99B46FfB2Db52ee21  
 ENSRegistry: 0x85138280659cc0cA3f40579E2C8f2713fBAA8878  
 Plugin_ENSSubdomainRegistrar_Implementation: 0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8  
 PublicResolver: 0xfec29D921A138f819F4921b3E75A35d716aDdC3D  
@@ -182,7 +182,7 @@ DAORegistry: 0x96E54098317631641703404C06A5afAD89da7373
 DAORegistry_Implementation: 0x5B3B36BdC9470963A2734D6a0d2F6a64C21C159f  
 DAO_ENSSubdomainRegistrar: 0x07f49c49Ce2A99CF7C28F66673d406386BDD8Ff4  
 DAO_ENSSubdomainRegistrar_Implementation: 0x35B62715459cB60bf6dC17fF8cfe138EA305E7Ee  
-managingDAOImplemenation: 0xCa834B3F404c97273f34e108029eEd776144d324  
+managingDAOImplementation: 0xCa834B3F404c97273f34e108029eEd776144d324  
 ENSRegistry: 0x57bf333951967a0cC0afcD58FC7959Ca0Eae6905  
 PluginRepoFactory: 0x6E924eA5864044D8642385683fFA5AD42FB687f2  
 PluginRepoRegistry: 0xA03C2182af8eC460D498108C92E8638a580b94d4  
@@ -200,7 +200,7 @@ multisig-repo: 0x5A5035E7E8aeff220540F383a9cf8c35929bcF31
   
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: mumbai  
-managingDAOImplemenation: 0x5E993db91Fd2c713Df1110358396EAc60d54fE66  
+managingDAOImplementation: 0x5E993db91Fd2c713Df1110358396EAc60d54fE66  
 managingDAO: 0xE1De373E219a0d19a0500e599adb903477bCA0f9  
 ENSRegistry: 0xD24A78824dF3C29CA03661368e6437b767A5422D  
 PublicResolver: 0xdbFf6be618180E0FF0d74dd3B6BdC1b5de074273  
@@ -226,7 +226,7 @@ multisig-repo: 0x2c4690b8be39adAd4F15A69340d5035aC6E53eEF
   
 Commit: [054f89908fa881dba230b7f3815f081463138fed](https://github.com/aragon/osx/commit/054f89908fa881dba230b7f3815f081463138fed)  
 Network: mumbai  
-managingDAOImplemenation: 0x38e85D5A0A7F49EcfD24FF191E543a7c7001068d  
+managingDAOImplementation: 0x38e85D5A0A7F49EcfD24FF191E543a7c7001068d  
 managingDAO: 0xd3d5A6b2dB077B5eBBDe90f85eAF4b8466e7EA25  
 ENSRegistry: 0x42256AD2900d4eCd684ceAF2107f78a25433a526  
 PublicResolver: 0x9540237cb446979839AbeC89d5861ce327d4EF75  
@@ -253,7 +253,7 @@ multisig-repo: 0x6E8dA9b20078657c18397407d2a2671AC907F83B
   
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: mainnet  
-managingDAOImplemenation: 0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8  
+managingDAOImplementation: 0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8  
 managingDAO: 0xf2d594F3C93C19D7B1a6F15B5489FFcE4B01f7dA  
 DAO_ENSSubdomainRegistrar_Implementation: 0xCe0B4124dea6105bfB85fB4461c4D39f360E9ef3  
 DAO_ENSSubdomainRegistrar: 0xE640Da5AD169630555A86D9b6b9C145B4961b1EB  
@@ -277,7 +277,7 @@ multisig-repo: 0x8c278e37D0817210E18A7958524b7D0a1fAA6F7b
   
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: goerli  
-managingDAOImplemenation: 0x99C83C89C59166f7f766A221D5D0Ee00D37170c3  
+managingDAOImplementation: 0x99C83C89C59166f7f766A221D5D0Ee00D37170c3  
 managingDAO: 0xB76F8d3512497040a96E77141c951a5374F24Eb9  
 DAO_ENSSubdomainRegistrar_Implementation: 0x394B49Cc32Dc81B8EaCdeb62A6Fa66F31D1D022c  
 DAO_ENSSubdomainRegistrar: 0xC62820f3E74cC82F89100032Ad7F04682F9EdaE0  
@@ -301,7 +301,7 @@ multisig-repo: 0x92C090cffC592B1bC321aCfAF735057B876375F8
   
 Commit: [f8aee0a0fa7ae5825130b9726a18ef6e36ddc121](https://github.com/aragon/osx/commit/f8aee0a0fa7ae5825130b9726a18ef6e36ddc121)  
 Network: goerli  
-managingDAOImplemenation: 0xF37d853fF9a8B4396fE4CcCc8C9DE744Ea3E7278  
+managingDAOImplementation: 0xF37d853fF9a8B4396fE4CcCc8C9DE744Ea3E7278  
 managingDAO: 0xE0f01b08002c202A8Ecba7b57A8CCEe428bd3a98  
 DAO_ENSSubdomainRegistrar_Implementation: 0xA5dF309eE52BFdC31f863Bc7492182EbD307A7F0  
 DAO_ENSSubdomainRegistrar: 0xcfF83b5fA46574fBc58f771787640a4cc76b329f  
@@ -325,7 +325,7 @@ multisig-repo: 0x160b35934f24B1b7eE238d37Ca2F495AB1a5a803
   
 Commit: [da1278afd8263f7cc13973853bd3b58a352a1ec8](https://github.com/aragon/osx/commit/da1278afd8263f7cc13973853bd3b58a352a1ec8)  
 Network: goerli  
-managingDAOImplemenation: 0x59f3159E8d0F445F711D4f5a1DeA6899cB048B9b  
+managingDAOImplementation: 0x59f3159E8d0F445F711D4f5a1DeA6899cB048B9b  
 managingDAO: 0x5EF485A707ed0437B457F52792bF5645b23ce36d  
 DAO_ENSSubdomainRegistrar_Implementation: 0xbF06efe19627fa4D694e362B8eB708D610f98481  
 DAO_ENSSubdomainRegistrar: 0x5C1f7Dca99dF07beBDD9B07507A002D1e4c67Dd2  

@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           console.log(`Managing DAO: ${deployedContracts[deployment].address}`);
           break;
         case 'DAO_Implementation':
-          deployedContractAddresses['managingDAOImplemenation'] =
+          deployedContractAddresses['managingDAOImplementation'] =
             deployedContracts[deployment].address;
           console.log(
             `Managing DAO Implementation: ${deployedContracts[deployment].address}`
