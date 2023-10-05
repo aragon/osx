@@ -12,6 +12,7 @@ import {
   ERC721_safeTransferFromWithData,
   ERC721_transferFrom
 } from './common';
+import {getMethodSignature} from '../bytes';
 
 function supportsERC721(token: Address): bool {
   // Double check that it's ERC721 by calling supportsInterface checks.
@@ -142,8 +143,8 @@ export function handleERC721Action(
   let contract = fetchERC721(token);
   if (!contract) return false;
 
-  let functionSelector = data.toHexString().substring(0, 10);
-  let decodeABI = determineDecodeABI(functionSelector);
+  let functionSelector = getMethodSignature(data);
+  let decodeABI = determineERC721DecodeABI(functionSelector);
 
   if (!decodeABI) return false;
 
@@ -196,7 +197,7 @@ export function handleERC721Action(
   return true;
 }
 
-function determineDecodeABI(functionSelector: string): string | null {
+function determineERC721DecodeABI(functionSelector: string): string | null {
   if (
     functionSelector == ERC721_transferFrom ||
     functionSelector == ERC721_safeTransferFromNoData

@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {BigInt} from '@graphprotocol/graph-ts';
 import {
   Action,
   AddresslistVotingProposal,
@@ -23,8 +23,9 @@ import {handleERC20Action} from '../utils/tokens/erc20';
 import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleNativeAction} from '../utils/tokens/eth';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
+import {getMethodSignature} from '../utils/bytes';
 
-// AssemblyScript struggles having mutliple return types. Due to this,
+// AssemblyScript struggles having multiple return types. Due to this,
 // The below seems most effective way.
 export function updateProposalWithFailureMap(
   proposalId: string,
@@ -150,10 +151,6 @@ function handleTokenTransfers<
       event
     );
   }
-}
-
-function getMethodSignature(data: Bytes): string {
-  return data.toHexString().slice(0, 10);
 }
 
 function isERC721Transfer(methodSig: string): bool {

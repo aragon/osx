@@ -18,6 +18,7 @@ import {
   getERC1155TransferId,
   getTokenIdBalanceId
 } from './common';
+import {getMethodSignature} from '../bytes';
 
 export function supportsERC1155(token: Address): bool {
   // Double check that it's ERC1155 by calling supportsInterface checks.
@@ -204,7 +205,7 @@ export function handleERC1155Action(
     return false;
   }
 
-  let functionSelector = data.toHexString().substring(0, 10);
+  let functionSelector = getMethodSignature(data);
   let decodeABI = determineERC1155DecodeABI(functionSelector);
 
   // If decodeABI is not determined, return false
