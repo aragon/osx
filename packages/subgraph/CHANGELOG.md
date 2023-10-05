@@ -9,9 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add support for `Granted` & `Revoked` event in `PluginRepo`
+- Add one-to-many relationship from `Dao` & `PluginRepo` to `Permission`
+
 ### Changed
 
+- Refactored `Permission` entity & added `pluginRepo` attribute.
+
 ### Removed
+
+- Removed `ContractPermissionId` entity.
 
 ## [1.3.0]
 

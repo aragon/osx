@@ -133,6 +133,11 @@ Granting a permission with `_where: ANY_ADDR` to a condition has the effect that
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
 
 However, some restrictions apply. For security reasons, Aragon OSx does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
+Moreover, if a condition is set, we return its `isGranted` result and do not fall back to a more generic one. The condition checks occur in the following order
+
+1. Condition with specific `_who` and specific `where`.
+2. Condition with generic `_who: ANY_ADDR` and specific `_where`.
+3. Condition with specific `_where` and generic `_who: ANY_ADDR`.
 
 ### Permissions Native to the `DAO` Contract
 
@@ -145,7 +150,6 @@ The following functions in the DAO are permissioned:
 | `_authorizeUpgrade`                     | `UPGRADE_DAO_PERMISSION_ID`                | Required to upgrade the DAO (via the [UUPS](https://eips.ethereum.org/EIPS/eip-1822)).                          |
 | `setMetadata`                           | `SET_METADATA_PERMISSION_ID`               | Required to set the DAO’s metadata and [DAOstar.one DAO URI](https://eips.ethereum.org/EIPS/eip-4824).          |
 | `setTrustedForwarder`                   | `SET_TRUSTED_FORWARDER_PERMISSION_ID`      | Required to set the DAO’s trusted forwarder for meta transactions.                                              |
-| `setSignatureValidator`                 | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID`    | Required to set the DAO’s signature validator contract (see ERC-1271).                                          |
 | `registerStandardCallback`              | `REGISTER_STANDARD_CALLBACK_PERMISSION_ID` | Required to register a standard callback for an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID. |
 
 Plugins installed on the DAO might introduce other permissions and associated permission identifiers.

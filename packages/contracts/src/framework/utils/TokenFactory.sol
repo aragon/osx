@@ -19,6 +19,7 @@ import {IDAO} from "../../core/dao/IDAO.sol";
 /// @title TokenFactory
 /// @author Aragon Association - 2022-2023
 /// @notice This contract creates [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance tokens.
+/// @custom:security-contact sirt@aragon.org
 contract TokenFactory {
     using Address for address;
     using Clones for address;
@@ -87,7 +88,7 @@ contract TokenFactory {
         if (token != address(0)) {
             // Validate if token is ERC20
             bytes memory data = token.functionStaticCall(
-                abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
+                abi.encodeCall(IERC20Upgradeable.balanceOf, (address(this)))
             );
 
             if (data.length != 0x20) {

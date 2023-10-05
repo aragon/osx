@@ -12,10 +12,13 @@ import {
   IMultisig__factory,
   IPlugin__factory,
   IProposal__factory,
+  IProtocolVersion__factory,
   Multisig,
   Multisig__factory,
 } from '../../../../typechain';
 import {Multisig__factory as Multisig_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol';
+import {Multisig__factory as Multisig_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/multisig/Multisig.sol';
+
 import {
   ApprovedEvent,
   ProposalExecutedEvent,
@@ -41,19 +44,21 @@ import {
 } from '../../../test-utils/voting';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
-import {getInterfaceID} from '../../../test-utils/interfaces';
+import {
+  MULTISIG_INTERFACE,
+  getInterfaceID,
+} from '../../../test-utils/interfaces';
+import {MULTISIG_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
 import {
   getProtocolVersion,
-  ozUpgradeCheckManagedContract,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
-
-export const multisigInterface = new ethers.utils.Interface([
-  'function initialize(address,address[],tuple(bool,uint16))',
-  'function updateMultisigSettings(tuple(bool,uint16))',
-  'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,bool,bool,uint64,uint64) ',
-  'function getProposal(uint256)',
-]);
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
+import {ExecutedEvent} from '../../../../typechain/DAO';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -198,32 +203,45 @@ describe('Multisig', function () {
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new Multisig__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: dao.address,
+        members: [signers[0].address, signers[1].address, signers[2].address],
+        multisigSettings: multisigSettings,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new Multisig_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
+        await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
-          dao,
-          {
-            dao: dao.address,
-            members: [
-              signers[0].address,
-              signers[1].address,
-              signers[2].address,
-            ],
-            multisigSettings: multisigSettings,
-          },
+          initArgs,
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
 
@@ -234,13 +252,45 @@ describe('Multisig', function () {
         currentContractFactory.attach(toImplementation)
       );
 
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+
+    it('from v1.3.0', async () => {
+      legacyContractFactory = new Multisig_V1_3_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
+        );
+      expect(toImplementation).to.not.equal(fromImplementation);
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await multisig.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -253,6 +303,12 @@ describe('Multisig', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });
@@ -282,9 +338,9 @@ describe('Multisig', function () {
     });
 
     it('supports the `Multisig` interface', async () => {
-      expect(
-        await multisig.supportsInterface(getInterfaceID(multisigInterface))
-      ).to.be.true;
+      const iface = getInterfaceID(MULTISIG_INTERFACE);
+      expect(iface).to.equal(MULTISIG_INTERFACE_ID); // checks that it didn't change
+      expect(await multisig.supportsInterface(iface)).to.be.true;
     });
   });
 

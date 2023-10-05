@@ -1,3 +1,4 @@
 node_modules
 build
 generated
+tests/helpers/extended-schema.ts

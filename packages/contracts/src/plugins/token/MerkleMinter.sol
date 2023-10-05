@@ -17,6 +17,7 @@ import {IMerkleMinter} from "./IMerkleMinter.sol";
 /// @title MerkleMinter
 /// @author Aragon Association
 /// @notice A component minting [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributing them on merkle trees using `MerkleDistributor` clones.
+/// @custom:security-contact sirt@aragon.org
 contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     using Clones for address;
 
@@ -79,11 +80,9 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     ) external override auth(MERKLE_MINT_PERMISSION_ID) returns (IMerkleDistributor distributor) {
         address distributorAddr = createERC1967Proxy(
             address(distributorBase),
-            abi.encodeWithSelector(
-                MerkleDistributor.initialize.selector,
-                dao(),
-                IERC20Upgradeable(address(token)),
-                _merkleRoot
+            abi.encodeCall(
+                MerkleDistributor.initialize,
+                (dao(), IERC20Upgradeable(address(token)), _merkleRoot)
             )
         );
 

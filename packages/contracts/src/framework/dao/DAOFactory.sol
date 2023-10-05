@@ -18,6 +18,7 @@ import {DAORegistry} from "./DAORegistry.sol";
 /// @title DAOFactory
 /// @author Aragon Association - 2022-2023
 /// @notice This contract is used to create a DAO.
+/// @custom:security-contact sirt@aragon.org
 contract DAOFactory is ERC165, ProtocolVersion {
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
     address public immutable daoBase;
@@ -169,7 +170,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
     function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
         PermissionLib.SingleTargetPermission[]
-            memory items = new PermissionLib.SingleTargetPermission[](6);
+            memory items = new PermissionLib.SingleTargetPermission[](5);
 
         // Grant DAO all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
@@ -185,19 +186,14 @@ contract DAOFactory is ERC165, ProtocolVersion {
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
+            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
         items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
-        items[4] = PermissionLib.SingleTargetPermission(
-            PermissionLib.Operation.Grant,
-            address(_dao),
             _dao.SET_METADATA_PERMISSION_ID()
         );
-        items[5] = PermissionLib.SingleTargetPermission(
+        items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID()

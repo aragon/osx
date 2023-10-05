@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
+import {IDAO} from "../../../core/dao/IDAO.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {IPluginSetup} from "../../../framework/plugin/setup/IPluginSetup.sol";
 import {PluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
@@ -37,7 +38,10 @@ contract CounterV2PluginSetup is PluginSetup {
         returns (address plugin, PreparedSetupData memory preparedSetupData)
     {
         // Decode the parameters from the UI
-        (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
+        (address _multiplyHelper, uint256 _num, uint256 _newVariable) = abi.decode(
+            _data,
+            (address, uint256, uint256)
+        );
 
         address multiplyHelper = _multiplyHelper;
 
@@ -45,11 +49,9 @@ contract CounterV2PluginSetup is PluginSetup {
             multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));
         }
 
-        bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("initialize(address,address,uint256)")),
-            _dao,
-            multiplyHelper,
-            _num
+        bytes memory initData = abi.encodeCall(
+            CounterV2.initialize,
+            (IDAO(_dao), MultiplyHelper(multiplyHelper), _num, _newVariable)
         );
 
         PermissionLib.MultiTargetPermission[]
@@ -62,30 +64,30 @@ contract CounterV2PluginSetup is PluginSetup {
         plugin = createERC1967Proxy(address(counterBase), initData);
 
         // set permissions
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            _dao,
-            plugin,
-            PermissionLib.NO_CONDITION,
-            keccak256("EXECUTE_PERMISSION")
-        );
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: _dao,
+            who: plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: keccak256("EXECUTE_PERMISSION")
+        });
 
-        permissions[1] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            PermissionLib.NO_CONDITION,
-            counterBase.MULTIPLY_PERMISSION_ID()
-        );
+        permissions[1] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: plugin,
+            who: _dao,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: counterBase.MULTIPLY_PERMISSION_ID()
+        });
 
         if (_multiplyHelper == address(0)) {
-            permissions[2] = PermissionLib.MultiTargetPermission(
-                PermissionLib.Operation.Grant,
-                multiplyHelper,
-                plugin,
-                PermissionLib.NO_CONDITION,
-                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
-            );
+            permissions[2] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Grant,
+                where: multiplyHelper,
+                who: plugin,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: multiplyHelperBase.MULTIPLY_PERMISSION_ID()
+            });
         }
 
         // add helpers
@@ -112,21 +114,18 @@ contract CounterV2PluginSetup is PluginSetup {
 
         if (_currentBuild == 1) {
             (_newVariable) = abi.decode(_payload.data, (uint256));
-            initData = abi.encodeWithSelector(
-                bytes4(keccak256("setNewVariable(uint256)")),
-                _newVariable
-            );
+            initData = abi.encodeCall(CounterV2.setNewVariable, (_newVariable));
         }
 
         PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](1);
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _dao,
-            _payload.plugin,
-            PermissionLib.NO_CONDITION,
-            multiplyHelperBase.MULTIPLY_PERMISSION_ID()
-        );
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _dao,
+            who: _payload.plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: multiplyHelperBase.MULTIPLY_PERMISSION_ID()
+        });
 
         // if another helper is deployed, put it inside activeHelpers + put old ones as well.
         address[] memory activeHelpers = new address[](1);
@@ -146,30 +145,30 @@ contract CounterV2PluginSetup is PluginSetup {
         );
 
         // set permissions
-        permissions[0] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _dao,
-            _payload.plugin,
-            PermissionLib.NO_CONDITION,
-            keccak256("EXECUTE_PERMISSION")
-        );
+        permissions[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _dao,
+            who: _payload.plugin,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: keccak256("EXECUTE_PERMISSION")
+        });
 
-        permissions[1] = PermissionLib.MultiTargetPermission(
-            PermissionLib.Operation.Revoke,
-            _payload.plugin,
-            _dao,
-            PermissionLib.NO_CONDITION,
-            counterBase.MULTIPLY_PERMISSION_ID()
-        );
+        permissions[1] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: _payload.plugin,
+            who: _dao,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: counterBase.MULTIPLY_PERMISSION_ID()
+        });
 
         if (_payload.currentHelpers.length != 0) {
-            permissions[2] = PermissionLib.MultiTargetPermission(
-                PermissionLib.Operation.Revoke,
-                _payload.currentHelpers[0],
-                _payload.plugin,
-                PermissionLib.NO_CONDITION,
-                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
-            );
+            permissions[2] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Revoke,
+                where: _payload.currentHelpers[0],
+                who: _payload.plugin,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: multiplyHelperBase.MULTIPLY_PERMISSION_ID()
+            });
         }
     }
 

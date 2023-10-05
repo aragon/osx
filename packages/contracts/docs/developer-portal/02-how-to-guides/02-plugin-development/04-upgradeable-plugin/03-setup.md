@@ -1,5 +1,5 @@
 ---
-title: The Plugin Setup Contract
+title: Plugin Setup Contract
 ---
 
 ## How to build the Plugin Setup Contract for Upgradeable Plugins
@@ -76,7 +76,7 @@ contract SimpleStorageBuild1Setup is PluginSetup {
 
     plugin = createERC1967Proxy(
       simpleStorageImplementation,
-      abi.encodeWithSelector(SimpleStorageBuild1.initializeBuild1.selector, _dao, number)
+      abi.encodeCall(SimpleStorageBuild1.initializeBuild1, (IDAO(_dao), number))
     );
 
     PermissionLib.MultiTargetPermission[]

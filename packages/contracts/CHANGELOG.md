@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.4.0-rc0
+
+### Added
+
+- Inherit `ProtocolVersion` in `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable`, `PluginSetup`, `PermissionCondition`, `PermissionConditionUpgradeable` `PluginSetupProcessor`, `PluginRepoRegistry`, `DAORegistry`, and `ENSSubdomainRegistrar`.
+- Added the `FunctionDeprecated` error to `DAO`.
+
+### Changed
+
+- Improved type safety by using `abi.encodeCall` instead of `abi.encodeWithSelector` and the more explicit bracket syntax for permissions.
+- Bumped OpenZeppelin dependencies to `4.9.3`.
+- Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
+- Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
+- Use the DAOs permission manager functionality to validate signatures.
+
+### Removed
+
+- Removed the `SignatureValidatorSet` event from `IDAO`.
+- Removed unused `ERC1271Mock` contract.
+- Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place..
+
 ## v1.3.1-rc0
 
 ### Added

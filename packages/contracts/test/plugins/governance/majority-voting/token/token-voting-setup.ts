@@ -14,7 +14,10 @@ import {
   TokenVoting__factory,
 } from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {
+  TOKEN_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
 import {Operation} from '../../../../../utils/types';
 import metadata from '../../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 
@@ -24,7 +27,6 @@ import {
   pctToRatio,
   ONE_HOUR,
 } from '../../../../test-utils/voting';
-import {tokenVotingInterface} from './token-voting';
 import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 
 let defaultData: any;
@@ -137,7 +139,9 @@ describe('TokenVotingSetup', function () {
     const tokenVoting = factory.attach(implementationAddress);
 
     expect(
-      await tokenVoting.supportsInterface(getInterfaceID(tokenVotingInterface))
+      await tokenVoting.supportsInterface(
+        getInterfaceID(TOKEN_VOTING_INTERFACE)
+      )
     ).to.be.eq(true);
   });
 
