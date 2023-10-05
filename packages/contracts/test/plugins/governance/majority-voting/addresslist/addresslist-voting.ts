@@ -50,7 +50,11 @@ import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {
+  ADDRESSLIST_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {ADDRESSLIST_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
 
 import {
   getProtocolVersion,
@@ -62,12 +66,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
-
-export const addresslistVotingInterface = new ethers.utils.Interface([
-  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
-  'function addAddresses(address[])',
-  'function removeAddresses(address[])',
-]);
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -276,11 +274,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('supports the `AddresslistVoting` interface', async () => {
-      expect(
-        await voting.supportsInterface(
-          getInterfaceID(addresslistVotingInterface)
-        )
-      ).to.be.true;
+      const iface = getInterfaceID(ADDRESSLIST_VOTING_INTERFACE);
+      expect(iface).to.equal(ADDRESSLIST_VOTING_INTERFACE_ID); // checks that it didn't change
+      expect(await voting.supportsInterface(iface)).to.be.true;
     });
   });
 

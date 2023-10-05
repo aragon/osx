@@ -16,11 +16,14 @@ import {
   PluginSetupProcessor__factory,
 } from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
+import {
+  MULTISIG_INTERFACE,
+  getInterfaceID,
+} from '../../../test-utils/interfaces';
 import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {MultisigSettings, multisigInterface} from './multisig';
+import {MultisigSettings} from './multisig';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {findEvent} from '../../../../utils/event';
 import {
@@ -87,7 +90,7 @@ describe('MultisigSetup', function () {
 
     expect(
       await multisigContract.supportsInterface(
-        getInterfaceID(multisigInterface)
+        getInterfaceID(MULTISIG_INTERFACE)
       )
     ).to.be.true;
   });

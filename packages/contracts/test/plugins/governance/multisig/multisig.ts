@@ -44,7 +44,11 @@ import {
 } from '../../../test-utils/voting';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {deployWithProxy} from '../../../test-utils/proxy';
-import {getInterfaceID} from '../../../test-utils/interfaces';
+import {
+  MULTISIG_INTERFACE,
+  getInterfaceID,
+} from '../../../test-utils/interfaces';
+import {MULTISIG_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -55,13 +59,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../test-utils/protocol-version';
 import {ExecutedEvent} from '../../../../typechain/DAO';
-
-export const multisigInterface = new ethers.utils.Interface([
-  'function initialize(address,address[],tuple(bool,uint16))',
-  'function updateMultisigSettings(tuple(bool,uint16))',
-  'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,bool,bool,uint64,uint64) ',
-  'function getProposal(uint256)',
-]);
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -341,9 +338,9 @@ describe('Multisig', function () {
     });
 
     it('supports the `Multisig` interface', async () => {
-      expect(
-        await multisig.supportsInterface(getInterfaceID(multisigInterface))
-      ).to.be.true;
+      const iface = getInterfaceID(MULTISIG_INTERFACE);
+      expect(iface).to.equal(MULTISIG_INTERFACE_ID); // checks that it didn't change
+      expect(await multisig.supportsInterface(iface)).to.be.true;
     });
   });
 

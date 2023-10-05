@@ -32,11 +32,12 @@ import {PluginPreparation} from '../../generated/schema';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {getSupportsInterface} from '../../tests/dao/utils';
 import {
-  ADDRESSLIST_VOTING_INTERFACE,
-  ADMIN_INTERFACE,
-  MULTISIG_INTERFACE,
-  TOKEN_VOTING_INTERFACE
+  ADMIN_INTERFACE_ID,
+  TOKEN_VOTING_INTERFACE_ID,
+  ADDRESSLIST_VOTING_INTERFACE_ID,
+  MULTISIG_INTERFACE_ID
 } from '../../src/utils/constants';
+
 import {
   getPluginInstallationId,
   PERMISSION_OPERATIONS
@@ -78,10 +79,10 @@ test('InstallationPrepared event', function() {
     ]
   ];
 
-  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE, false);
-  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE, false);
-  getSupportsInterface(plugin, ADMIN_INTERFACE, false);
-  getSupportsInterface(plugin, MULTISIG_INTERFACE, false);
+  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(plugin, ADMIN_INTERFACE_ID, false);
+  getSupportsInterface(plugin, MULTISIG_INTERFACE_ID, false);
 
   let event = createInstallationPreparedEvent(
     ADDRESS_THREE,
@@ -473,10 +474,10 @@ test('UpdateApplied event', function() {
   let installationIdString = installationId.toHexString();
   let preparationId = `${installationIdString}_${setupId}`;
 
-  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE, false);
-  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE, false);
-  getSupportsInterface(plugin, ADMIN_INTERFACE, false);
-  getSupportsInterface(plugin, MULTISIG_INTERFACE, false);
+  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(plugin, ADMIN_INTERFACE_ID, false);
+  getSupportsInterface(plugin, MULTISIG_INTERFACE_ID, false);
 
   let event = createUpdateAppliedEvent(
     dao,

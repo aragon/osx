@@ -10,7 +10,9 @@ import {
   findEventTopicLog,
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
+import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {ADMIN_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
+
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {toBytes32} from '../../../test-utils/voting';
 import {
@@ -32,11 +34,6 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
   'EXECUTE_PROPOSAL_PERMISSION'
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
-
-export const adminInterface = new ethers.utils.Interface([
-  'function initialize(address)',
-  'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
-]);
 
 describe('Admin', function () {
   let signers: SignerWithAddress[];
@@ -144,8 +141,9 @@ describe('Admin', function () {
     });
 
     it('supports the `Admin` interface', async () => {
-      expect(await plugin.supportsInterface(getInterfaceID(adminInterface))).to
-        .be.true;
+      const iface = getInterfaceID(ADMIN_INTERFACE);
+      expect(iface).to.equal(ADMIN_INTERFACE_ID); // checks that it didn't change
+      expect(await plugin.supportsInterface(iface)).to.be.true;
     });
   });
 
