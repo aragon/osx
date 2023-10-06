@@ -19,14 +19,15 @@ flowchart TD
         affectsInitialization{"affects \n initialization?"}
         adaptInitialization[["<a href='../04-sub-processes/02-contract-initialization.md'> adapt initialization</a>"]]
 
-        affectsStorageGaps -->|yes| adaptStorageGaps
         affectsStorageGaps -->|no| affectsSubgraph
+        affectsStorageGaps -->|yes| adaptStorageGaps
+        adaptStorageGaps --> affectsSubgraph
 
-
+        affectsSubgraph -->|no| affectsInitialization
         affectsSubgraph -->|yes| adaptSubgraph
         adaptSubgraph --> affectsInitialization
 
-        adaptStorageGaps --> affectsInitialization
+
         affectsInitialization -->|yes| adaptInitialization
     end
 
