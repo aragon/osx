@@ -22,7 +22,7 @@ flowchart TD
         bumpProtocolVersion --> isUpgradeable
         isUpgradeable -->|yes| upgradeableContractImplementation --> affectsInitialization
         isUpgradeable -->|no| nonUpgradeableContractImplementation --> affectsInitialization
-        affectsInitialization --> adaptInitialization
+        affectsInitialization -->|yes| adaptInitialization
     end
 
     implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]

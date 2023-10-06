@@ -9,7 +9,7 @@ flowchart TD
     newSubgraph{"subgraph \n change?"}
     deploySubgraph["deploy subgraph"]
 
-    deployContracts --> verifyContract --> newSubgraph --> deploySubgraph
+    deployContracts --> verifyContract --> newSubgraph -->|yes| deploySubgraph
 
 
 ```
