@@ -17,13 +17,13 @@
               "internalType": "uint32",
               "name": "supportThreshold",
               "type": "uint32",
-              "description": "The support threshold value. Its value has to be in the interval [0, 10^6] defined by `RATIO_BASE = 10**6`."
+              "description": "The support threshold value. Its value has to be in the interval [0, 10^6] defined by 'RATIO_BASE = 10**6'."
             },
             {
               "internalType": "uint32",
               "name": "minParticipation",
               "type": "uint32",
-              "description": "The minimum participation value. Its value has to be in the interval [0, 10^6] defined by `RATIO_BASE = 10**6`."
+              "description": "The minimum participation value. Its value has to be in the interval [0, 10^6] defined by 'RATIO_BASE = 10**6'."
             },
             {
               "internalType": "uint64",
@@ -49,17 +49,17 @@
           "type": "address[]",
           "description": "The addresses of the initial members to be added."
         }
-      ],
-      "prepareUpdate": {
-        "1": {
-          "description": "No input is required for the update.",
-          "inputs": []
-        }
-      },
-      "prepareUninstallation": {
-        "description": "No input is required for the uninstallation.",
+      ]
+    },
+    "prepareUpdate": {
+      "1": {
+        "description": "No input is required for the update.",
         "inputs": []
       }
+    },
+    "prepareUninstallation": {
+      "description": "No input is required for the uninstallation.",
+      "inputs": []
     }
   }
 }
