@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 library VersionComparisonLib {
     /// @notice Equality comparator for two semantic version numbers.
     /// @param lhs The left-hand side semantic version number.
-    /// @param lhs The right-hand side semantic version number.
+    /// @param rhs The right-hand side semantic version number.
     /// @return Whether the two numbers are equal or not.
     function eq(uint8[3] memory lhs, uint8[3] memory rhs) internal pure returns (bool) {
         if (lhs[0] != rhs[0]) return false;
@@ -19,7 +19,7 @@ library VersionComparisonLib {
 
     /// @notice Inequality comparator for two semantic version numbers.
     /// @param lhs The left-hand side semantic version number.
-    /// @param lhs The right-hand side semantic version number.
+    /// @param rhs The right-hand side semantic version number.
     /// @return Whether the two numbers are inequal or not.
     function neq(uint8[3] memory lhs, uint8[3] memory rhs) internal pure returns (bool) {
         if (lhs[0] != rhs[0]) return true;
@@ -33,7 +33,7 @@ library VersionComparisonLib {
 
     /// @notice Less than comparator for two semantic version numbers.
     /// @param lhs The left-hand side semantic version number.
-    /// @param lhs The right-hand side semantic version number.
+    /// @param rhs The right-hand side semantic version number.
     /// @return Whether the first number is less than the second number or not.
     function lt(uint8[3] memory lhs, uint8[3] memory rhs) internal pure returns (bool) {
         if (lhs[0] < rhs[0]) return true;
@@ -49,7 +49,7 @@ library VersionComparisonLib {
 
     /// @notice Less than or equal to comparator for two semantic version numbers.
     /// @param lhs The left-hand side semantic version number.
-    /// @param lhs The right-hand side semantic version number.
+    /// @param rhs The right-hand side semantic version number.
     /// @return Whether the first number is less than or equal to the second number or not.
     function lte(uint8[3] memory lhs, uint8[3] memory rhs) internal pure returns (bool) {
         if (lhs[0] < rhs[0]) return true;
@@ -65,7 +65,7 @@ library VersionComparisonLib {
 
     /// @notice Greater than comparator for two semantic version numbers.
     /// @param lhs The left-hand side semantic version number.
-    /// @param lhs The right-hand side semantic version number.
+    /// @param rhs The right-hand side semantic version number.
     /// @return Whether the first number is greater than the second number or not.
     function gt(uint8[3] memory lhs, uint8[3] memory rhs) internal pure returns (bool) {
         if (lhs[0] > rhs[0]) return true;
@@ -81,7 +81,7 @@ library VersionComparisonLib {
 
     /// @notice Greater than or equal to comparator for two semantic version numbers.
     /// @param lhs The left-hand side semantic version number.
-    /// @param lhs The right-hand side semantic version number.
+    /// @param rhs The right-hand side semantic version number.
     /// @return Whether the first number is greater than or equal to the second number or not.
     function gte(uint8[3] memory lhs, uint8[3] memory rhs) internal pure returns (bool) {
         if (lhs[0] > rhs[0]) return true;
