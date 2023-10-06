@@ -11,11 +11,11 @@
           "type": "address",
           "description": "The address of the admin account receiving the `EXECUTE_PERMISSION_ID` permission."
         }
-      ],
-      "prepareUninstallation": {
-        "description": "No input is required for the uninstallation.",
-        "inputs": []
-      }
+      ]
+    },
+    "prepareUninstallation": {
+      "description": "No input is required for the uninstallation.",
+      "inputs": []
     }
   }
 }
