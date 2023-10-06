@@ -105,8 +105,8 @@ describe('VersionComparisonLib', function () {
   });
 
   describe('eq', async () => {
-    async function eq(lhs: SemVer, rhs: SemVer): Promise<boolean> {
-      return await cmp.eq(lhs, rhs);
+    function eq(lhs: SemVer, rhs: SemVer): Promise<boolean> {
+      return cmp.eq(lhs, rhs);
     }
 
     it('returns true if lhs equals rhs', async () => {
@@ -120,8 +120,8 @@ describe('VersionComparisonLib', function () {
   });
 
   describe('neq', async () => {
-    async function neq(lhs: SemVer, rhs: SemVer): Promise<boolean> {
-      return await cmp.neq(lhs, rhs);
+    function neq(lhs: SemVer, rhs: SemVer): Promise<boolean> {
+      return cmp.neq(lhs, rhs);
     }
 
     it('returns true if lhs does not equal rhs', async () => {
@@ -135,8 +135,8 @@ describe('VersionComparisonLib', function () {
   });
 
   describe('lt', async () => {
-    async function lt(lhs: SemVer, rhs: SemVer): Promise<boolean> {
-      return await cmp.lt(lhs, rhs);
+    function lt(lhs: SemVer, rhs: SemVer): Promise<boolean> {
+      return cmp.lt(lhs, rhs);
     }
 
     it('returns true if lhs is less than rhs', async () => {
@@ -150,8 +150,8 @@ describe('VersionComparisonLib', function () {
   });
 
   describe('lte', async () => {
-    async function lte(lhs: SemVer, rhs: SemVer): Promise<boolean> {
-      return await cmp.lte(lhs, rhs);
+    function lte(lhs: SemVer, rhs: SemVer): Promise<boolean> {
+      return cmp.lte(lhs, rhs);
     }
 
     it('returns true if lhs is less than or equal to rhs', async () => {
@@ -165,8 +165,8 @@ describe('VersionComparisonLib', function () {
   });
 
   describe('gt', async () => {
-    async function gt(lhs: SemVer, rhs: SemVer): Promise<boolean> {
-      return await cmp.gt(lhs, rhs);
+    function gt(lhs: SemVer, rhs: SemVer): Promise<boolean> {
+      return cmp.gt(lhs, rhs);
     }
 
     it('returns true if lhs is greater than rhs', async () => {
@@ -180,8 +180,8 @@ describe('VersionComparisonLib', function () {
   });
 
   describe('gte', async () => {
-    async function gte(lhs: SemVer, rhs: SemVer): Promise<boolean> {
-      return await cmp.gte(lhs, rhs);
+    function gte(lhs: SemVer, rhs: SemVer): Promise<boolean> {
+      return cmp.gte(lhs, rhs);
     }
 
     it('returns true if lhs is greater than or equal to rhs', async () => {
