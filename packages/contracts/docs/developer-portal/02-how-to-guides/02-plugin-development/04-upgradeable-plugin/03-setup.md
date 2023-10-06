@@ -12,7 +12,7 @@ Before building the Plugin Setup contract, make sure you have the logic for your
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
@@ -53,7 +53,7 @@ Similarly, the `prepareUninstallation()` function takes in a `payload`.
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
