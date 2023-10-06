@@ -26,11 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed unused `ERC1271Mock` contract.
 - Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place..
 
+## v1.3.1
+
+### Changed
+
+- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
+
 ## v1.3.0
 
 ### Added
 
-- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
 - Inherit `ProtocolVersion` and `ERC165` in `DAOFactory` and `PluginRepoFactory`.
 - Inherit `ProtocolVersion` in `DAO` and `PluginRepo`.
 - Added a `nonReentrant` modifier to the `execute` function in the `DAO` contract.
