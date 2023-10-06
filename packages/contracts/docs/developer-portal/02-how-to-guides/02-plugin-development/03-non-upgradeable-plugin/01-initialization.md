@@ -29,7 +29,7 @@ In this case, the compiler will force you to write a `constructor` function call
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
@@ -57,7 +57,7 @@ To deploy our plugin via the [minimal clones pattern (ERC-1167)](https://eips.et
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {PluginCloneable, IDAO} from '@aragon/osx/core/plugin/PluginCloneable.sol';
 
