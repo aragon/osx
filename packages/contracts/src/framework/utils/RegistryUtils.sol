@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 /// @notice Validates that a subdomain name is composed only from characters in the allowed character set:
 /// - the lowercase letters `a-z`
