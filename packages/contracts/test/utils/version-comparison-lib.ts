@@ -8,94 +8,6 @@ import {
 
 type SemVer = [number, number, number];
 
-async function eqChecks(
-  func: (lhs: SemVer, rhs: SemVer) => Promise<boolean>,
-  expected: boolean
-) {
-  const results: boolean[] = await Promise.all([
-    func([1, 1, 1], [1, 1, 1]),
-    //
-    func([0, 1, 1], [0, 1, 1]),
-    func([1, 0, 1], [1, 0, 1]),
-    func([1, 1, 0], [1, 1, 0]),
-    //
-    func([1, 0, 0], [1, 0, 0]),
-    func([0, 1, 0], [0, 1, 0]),
-    func([0, 0, 1], [0, 0, 1]),
-    //
-    func([0, 0, 0], [0, 0, 0]),
-  ]);
-
-  // Check that all results match the expected value
-  expect(results.every(v => v === expected)).to.be.true;
-}
-
-async function ltChecks(
-  func: (lhs: SemVer, rhs: SemVer) => Promise<boolean>,
-  expected: boolean
-) {
-  const results: boolean[] = await Promise.all([
-    func([1, 1, 1], [2, 1, 1]),
-    func([1, 1, 1], [1, 2, 1]),
-    func([1, 1, 1], [1, 1, 2]),
-    //
-    func([1, 1, 1], [1, 2, 2]),
-    func([1, 1, 1], [2, 1, 2]),
-    func([1, 1, 1], [2, 2, 1]),
-    //
-    func([1, 1, 1], [2, 2, 2]),
-    //
-    func([1, 1, 0], [1, 2, 0]),
-    func([1, 1, 0], [2, 1, 0]),
-    //
-    func([1, 1, 0], [2, 2, 0]),
-    //
-    func([0, 1, 1], [0, 1, 2]),
-    func([0, 1, 1], [0, 2, 1]),
-    //
-    func([0, 1, 1], [0, 2, 2]),
-    //
-    func([1, 0, 0], [2, 0, 0]),
-    func([0, 1, 0], [0, 2, 0]),
-    func([0, 0, 1], [0, 0, 2]),
-  ]);
-
-  // Check that all results match the expected value
-  expect(results.every(v => v === expected)).to.be.true;
-}
-
-async function gtChecks(
-  func: (lhs: SemVer, rhs: SemVer) => Promise<boolean>,
-  expected: boolean
-) {
-  const results: boolean[] = await Promise.all([
-    func([2, 1, 1], [1, 1, 1]),
-    func([1, 2, 1], [1, 1, 1]),
-    func([1, 1, 2], [1, 1, 1]),
-    //
-    func([1, 2, 2], [1, 1, 1]),
-    func([2, 1, 2], [1, 1, 1]),
-    func([2, 2, 1], [1, 1, 1]),
-    //
-    func([2, 2, 2], [1, 1, 1]),
-    //
-    func([1, 2, 0], [1, 1, 0]),
-    func([2, 1, 0], [1, 1, 0]),
-    func([2, 2, 0], [1, 1, 0]),
-    //
-    func([0, 1, 2], [0, 1, 1]),
-    func([0, 2, 1], [0, 1, 1]),
-    func([0, 2, 2], [0, 1, 1]),
-    //
-    func([2, 0, 0], [1, 0, 0]),
-    func([0, 2, 0], [0, 1, 0]),
-    func([0, 0, 2], [0, 0, 1]),
-  ]);
-
-  // Check that all results match the expected value
-  expect(results.every(v => v === expected)).to.be.true;
-}
-
 describe('VersionComparisonLib', function () {
   let cmp: VersionComparisonLibTest;
 
@@ -194,3 +106,91 @@ describe('VersionComparisonLib', function () {
     });
   });
 });
+
+async function eqChecks(
+  func: (lhs: SemVer, rhs: SemVer) => Promise<boolean>,
+  expected: boolean
+) {
+  const results: boolean[] = await Promise.all([
+    func([1, 1, 1], [1, 1, 1]),
+    //
+    func([0, 1, 1], [0, 1, 1]),
+    func([1, 0, 1], [1, 0, 1]),
+    func([1, 1, 0], [1, 1, 0]),
+    //
+    func([1, 0, 0], [1, 0, 0]),
+    func([0, 1, 0], [0, 1, 0]),
+    func([0, 0, 1], [0, 0, 1]),
+    //
+    func([0, 0, 0], [0, 0, 0]),
+  ]);
+
+  // Check that all results match the expected value
+  expect(results.every(v => v === expected)).to.be.true;
+}
+
+async function ltChecks(
+  func: (lhs: SemVer, rhs: SemVer) => Promise<boolean>,
+  expected: boolean
+) {
+  const results: boolean[] = await Promise.all([
+    func([1, 1, 1], [2, 1, 1]),
+    func([1, 1, 1], [1, 2, 1]),
+    func([1, 1, 1], [1, 1, 2]),
+    //
+    func([1, 1, 1], [1, 2, 2]),
+    func([1, 1, 1], [2, 1, 2]),
+    func([1, 1, 1], [2, 2, 1]),
+    //
+    func([1, 1, 1], [2, 2, 2]),
+    //
+    func([1, 1, 0], [1, 2, 0]),
+    func([1, 1, 0], [2, 1, 0]),
+    //
+    func([1, 1, 0], [2, 2, 0]),
+    //
+    func([0, 1, 1], [0, 1, 2]),
+    func([0, 1, 1], [0, 2, 1]),
+    //
+    func([0, 1, 1], [0, 2, 2]),
+    //
+    func([1, 0, 0], [2, 0, 0]),
+    func([0, 1, 0], [0, 2, 0]),
+    func([0, 0, 1], [0, 0, 2]),
+  ]);
+
+  // Check that all results match the expected value
+  expect(results.every(v => v === expected)).to.be.true;
+}
+
+async function gtChecks(
+  func: (lhs: SemVer, rhs: SemVer) => Promise<boolean>,
+  expected: boolean
+) {
+  const results: boolean[] = await Promise.all([
+    func([2, 1, 1], [1, 1, 1]),
+    func([1, 2, 1], [1, 1, 1]),
+    func([1, 1, 2], [1, 1, 1]),
+    //
+    func([1, 2, 2], [1, 1, 1]),
+    func([2, 1, 2], [1, 1, 1]),
+    func([2, 2, 1], [1, 1, 1]),
+    //
+    func([2, 2, 2], [1, 1, 1]),
+    //
+    func([1, 2, 0], [1, 1, 0]),
+    func([2, 1, 0], [1, 1, 0]),
+    func([2, 2, 0], [1, 1, 0]),
+    //
+    func([0, 1, 2], [0, 1, 1]),
+    func([0, 2, 1], [0, 1, 1]),
+    func([0, 2, 2], [0, 1, 1]),
+    //
+    func([2, 0, 0], [1, 0, 0]),
+    func([0, 2, 0], [0, 1, 0]),
+    func([0, 0, 2], [0, 0, 1]),
+  ]);
+
+  // Check that all results match the expected value
+  expect(results.every(v => v === expected)).to.be.true;
+}
