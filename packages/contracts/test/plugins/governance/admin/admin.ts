@@ -16,8 +16,8 @@ import {ADMIN_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {toBytes32} from '../../../test-utils/voting';
 import {
-  AdminCloneFactory,
-  AdminCloneFactory__factory,
+  CloneFactory,
+  CloneFactory__factory,
   Admin__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
@@ -38,7 +38,7 @@ const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
-  let adminCloneFactory: AdminCloneFactory;
+  let adminCloneFactory: CloneFactory;
   let dao: any;
   let ownerAddress: string;
   let dummyActions: any;
@@ -61,8 +61,10 @@ describe('Admin', function () {
 
     dao = await deployNewDAO(signers[0]);
 
-    const AdminCloneFactory = new AdminCloneFactory__factory(signers[0]);
-    adminCloneFactory = await AdminCloneFactory.deploy();
+    const admin = await new Admin__factory(signers[0]).deploy();
+    adminCloneFactory = await new CloneFactory__factory(signers[0]).deploy(
+      admin.address
+    );
   });
 
   beforeEach(async () => {
