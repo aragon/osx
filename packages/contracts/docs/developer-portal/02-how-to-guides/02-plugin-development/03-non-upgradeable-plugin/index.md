@@ -215,7 +215,7 @@ npx hardhat run scripts/deploy.ts
 
 #### b) Goerli testnet network or others
 
-Now that we know the local deployment works, we will want to deploy our pugin to Goerli testnet so we can publish it in the Aragon OSx protocol to be accessed by DAOs.
+Now that we know the local deployment works, we will want to deploy our plugin to Goerli testnet so we can publish it in the Aragon OSx protocol to be accessed by DAOs.
 
 1. Firstly, let's set up the `hardhat.config.js` with Goerli environment attributes (or whichever network you'd like to deploy your plugin to).
 
