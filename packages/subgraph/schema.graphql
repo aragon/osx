@@ -104,7 +104,7 @@ interface TokenTransfer {
 type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
-  token: ERC20Contract!
+  token: Token!
   amount: BigInt!
   from: Bytes!
   to: Bytes!

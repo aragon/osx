@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed type of `token` attribute of `ERC20Transfer` from `ERC20Contract` to `Token`.
 - Refactored `Permission` entity & added `pluginRepo` attribute.
 
 ### Removed

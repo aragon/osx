@@ -95,6 +95,31 @@ export function fetchERC20(address: Address): ERC20Contract | null {
   return contract;
 }
 
+/**
+ * @dev Determines the type of ERC20 token (wrapped or regular) and returns its address.
+ *
+ * @param token The address of the token to be determined.
+ * @return tokenAddress The address of the ERC20 token if it's either wrapped or regular, null otherwise.
+ */
+export function determineERC20Token(token: Address): string | null {
+  let tokenAddress: string;
+  if (supportsERC20Wrapped(token)) {
+    let contract = fetchWrappedERC20(token);
+    if (!contract) {
+      return null;
+    }
+    tokenAddress = contract.id;
+  } else {
+    let contract = fetchERC20(token);
+    if (!contract) {
+      return null;
+    }
+    tokenAddress = contract.id;
+  }
+
+  return tokenAddress;
+}
+
 export function updateERC20Balance(
   token: Address,
   dao: Address,
@@ -133,8 +158,8 @@ export function handleERC20Action(
   actionIndex: number,
   event: ethereum.Event
 ): void {
-  let contract = fetchERC20(token);
-  if (!contract) {
+  let tokenAddress = determineERC20Token(token);
+  if (!tokenAddress) {
     return;
   }
 
@@ -191,7 +216,7 @@ export function handleERC20Action(
   transfer.amount = amount;
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
-  transfer.token = contract.id;
+  transfer.token = tokenAddress as string;
   transfer.proposal = proposalId;
 
   // If from/to both aren't equal to dao, it means
@@ -226,8 +251,8 @@ export function handleERC20Deposit(
   amount: BigInt,
   event: ethereum.Event
 ): void {
-  let contract = fetchERC20(token);
-  if (!contract) {
+  let tokenAddress = determineERC20Token(token);
+  if (!tokenAddress) {
     return;
   }
 
@@ -243,7 +268,7 @@ export function handleERC20Deposit(
   erc20Transfer.amount = amount;
   erc20Transfer.txHash = event.transaction.hash;
   erc20Transfer.createdAt = event.block.timestamp;
-  erc20Transfer.token = contract.id;
+  erc20Transfer.token = tokenAddress as string;
   erc20Transfer.type = 'Deposit';
 
   erc20Transfer.save();

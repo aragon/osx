@@ -25,7 +25,8 @@ import {
   ERC1155_safeBatchTransferFrom,
   ERC1155_INTERFACE_ID,
   getTokenIdBalanceId,
-  getERC1155TransferId
+  getERC1155TransferId,
+  ERC165_INTERFACE_ID
 } from '../../src/utils/tokens/common';
 import {
   DAO_ADDRESS,
@@ -53,6 +54,7 @@ import {
   ExtendedERC1155TokenIdBalance,
   ExtendedERC1155Transfer
 } from '../helpers/extended-schema';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 
 const eq = assert.fieldEquals;
 let daoId = Address.fromString(DAO_ADDRESS).toHexString();
@@ -215,6 +217,18 @@ describe('handleExecuted', () => {
     });
 
     describe('ERC20 transfer action', () => {
+      beforeAll(() => {
+        createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', null, null);
+
+        getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
+        getSupportsInterface(
+          DAO_TOKEN_ADDRESS,
+          GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+          false
+        );
+        getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
+      });
+
       test('creates entities with correct values', () => {
         let transferToken = BigInt.fromU32(10);
         let tupleArray: Array<ethereum.Value> = [
