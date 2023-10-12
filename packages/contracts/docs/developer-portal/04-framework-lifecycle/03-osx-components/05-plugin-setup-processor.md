@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart TD
-    processStart("Process Name")
+    processStart("PluginSetupProcessor change")
     processStart ==> implementation
     subgraph implementation[Implementation]
         nonUpgradeableContractImplementation[[<a href='./03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
-        ensureCompatibility["ensure backwards compat- \n ibilitywith active setups"]
+        ensureCompatibility["ensure backwards compat- \n ibility with active setups"]
 
         nonUpgradeableContractImplementation --> ensureCompatibility
     end
@@ -39,9 +39,10 @@ flowchart TD
 
 ## Ensuring backwards compatibility
 
-- ensure backwards compatibility with old setups
-  - use the old `mapping(bytes32 => PluginState) public states;` mapping
-  - Update Subgraph & SDK to be able to handle both old & new `PluginSetupProcessor`
+Active setups are maintained in the [`mapping(bytes32 pluginInstallationId => PluginState data) public states;` mapping](../../03-reference-guide/framework/plugin/setup/PluginSetupProcessor.md#public-variable-states).
+The old public mapping in the outdated `PluginSetupProcessor` can be read and accessed in the new one to ensure active plugins can still be updated or uninstalled.
+
+Make sure to also update the Subgraph and SDK to be able to handle both old & new `PluginSetupProcessor`
 
 ## Roll-Out
 
