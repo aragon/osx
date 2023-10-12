@@ -25,7 +25,7 @@ During run time, the successful execution of transactions
 
 with construction / initialization constituting a special.
 
-## Contracts of Aragon OSX
+### Aragon OSX
 
 <div class="center-column">
 
