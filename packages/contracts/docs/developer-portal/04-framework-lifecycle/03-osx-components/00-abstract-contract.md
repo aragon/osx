@@ -12,10 +12,10 @@ flowchart TD
     processStart("Abstract Contract Change")
     processStart ==> implementation
     subgraph implementation[Implementation]
-        bumpProtocolVersion[["<a href='../03-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
+        bumpProtocolVersion[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
         isUpgradeable{"is UUPS \n upgradeable?"}
-        upgradeableContractImplementation[[<a href='./02-upgradeable-contract.md'>UUPS upgradeable \n contract change</a>]]
-        nonUpgradeableContractImplementation[[<a href='./03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
+        upgradeableContractImplementation[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/03-osx-components/02-upgradeable-contract.md'>UUPS upgradeable \n contract change</a>]]
+        nonUpgradeableContractImplementation[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/03-osx-components/03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
         affectsInitialization{"affects \n initialization?"}
         adaptInitialization[["<a href='../03-sub-processes/02-contract-initialization.md'adapt initialization> adapt initialization</a>\n in inheriting contract"]]
 

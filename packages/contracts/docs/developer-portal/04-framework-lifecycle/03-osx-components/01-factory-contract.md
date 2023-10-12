@@ -19,7 +19,7 @@ flowchart TD
         isBaseChange{"is base imple- \n mentation  change?"}
 
         %% Actions
-        deployNewImplementation["deplot new implementation \n contract through constructor"]
+        deployNewImplementation["deploy new implementation \n contract through constructor"]
         reuseOldImplementation["reuse old implementation \n contract through constructor"]
         adaptConstructor["adapt the constructor"]
 

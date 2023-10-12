@@ -34,7 +34,7 @@ flowchart TD
 **Purpose:** The primary purpose of regression testing is to maintain the stability and reliability of the software over time. As the software evolves, new code changes can inadvertently break existing features. Regression tests help catch these regressions early.
 **Testing Approach:** Regression tests can include both unit tests and integration tests, as well as system-level tests.
 
-For our smart contracts, this kind of testing is important to make sure that that we don't accidentally break the compatibility between existing contracts and new implementations.
+For our smart contracts, this kind of testing is important to make sure that we don't accidentally break the compatibility between existing contracts and new implementations.
 They fill the gap between unit tests testing isolated functionalities and integration tests testing the interplay between contracts that all belong to the same OSx version.
 This might include:
 

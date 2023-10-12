@@ -53,7 +53,7 @@ flowchart TD
         announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
         announceUpdate --> initializationChange
 
-        initializationChange{"initializtion \n change?"}
+        initializationChange{"initialization \n change?"}
         initializationChange -->|yes| upgradeToAndCall["upgrade \n via upgradeToAndCall() \n and initializeFrom()"]
         initializationChange -->|no| upgradeTo["upgrade \n via upgradeTo()"]
 

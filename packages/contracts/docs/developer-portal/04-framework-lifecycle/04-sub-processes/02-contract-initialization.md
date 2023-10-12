@@ -123,5 +123,5 @@ If we now upgrade from the previous version `1.0.1` to `1.2.0`, we would apply t
 Written this way, the `initializeFrom` function ensures that all initializations that have happened in between the two versions are applied.
 
 :::todo
-We have to implement the less than comparator `function lte(uint[3] memory lhs, uint[3] memory lhs) internal pure returns (bool)`.
+We have to implement the less than comparator `function lte(uint[3] memory lhs, uint[3] memory rhs) internal pure returns (bool)`.
 :::

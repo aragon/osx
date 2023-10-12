@@ -20,7 +20,7 @@ flowchart TD
 
 ## Semantic Versioning
 
-We use the semver notation to version the OSx Protocol smart conctract and to classify changes into MAJOR, MINOR, or PATCH.
+We use the semver notation to version the OSx Protocol smart contract and to classify changes into MAJOR, MINOR, or PATCH.
 
 > Given a version number MAJOR.MINOR.PATCH, increment the:
 >
@@ -28,7 +28,7 @@ We use the semver notation to version the OSx Protocol smart conctract and to cl
 > 2. MINOR version when you add functionality in a backwards compatible manner
 > 3. PATCH version when you make backwards compatible bug fixes
 
-### Change Classications
+### Change Classifications
 
 We now classify [smart contract changes](../01-systems.md#smart-contracts) according to SemVer and how they affect
 
