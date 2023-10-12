@@ -1,6 +1,6 @@
-# Software Systems Running the Aragon OSx
+# Software Systems of Aragon OSx
 
-## Smart Contracts
+## Contracts
 
 Ethereum smart contracts are created at compile time
 
@@ -25,7 +25,70 @@ During run time, the successful execution of transactions
 
 with construction / initialization constituting a special.
 
-## The Subgraph
+## Contracts of Aragon OSX
+
+<div class="center-column">
+
+![UML diagram of Aragon OSx contracts and their internal dependencies.](aragon-osx.svg)
+
+<p class="caption">
+  UML diagram of Aragon OSx contracts and their internal dependencies.
+</p>
+
+</div>
+
+<details><summary><b>Interfaces</b></summary>
+
+- `IDAO`
+- `IPlugin`
+- `IPluginSetup`
+- `IPluginRepo`
+- `IPermissionCondition`
+- `IProposal`
+- `IMembership`
+
+</details>
+
+<details><summary><b>Abstract Contracts</b></summary>
+
+- Non-Upgradable
+
+  - `DaoAuthorizable`
+  - `Proposal`
+  - `CallbackHandler`
+  - `PermissionManager`
+  - `Plugin`
+  - `PluginCloneable`
+  - `PluginSetup`
+
+- Upgradeable
+
+  - `DaoAuthorizableUpgradeable`
+  - `ProposalUpgradeable`
+  - `InterfaceBasedRegistry`
+
+</details>
+
+<details><summary><b>Deployed Contracts</b></summary>
+
+- Non-Upgradable
+
+  - `DAOFactory`
+  - `PluginRepoFactory`
+  - `PluginSetupProcessor`
+
+- Upgradeable
+
+  - `DAO`
+  - `DAORegistry`
+  - `PluginRepo`
+  - `PluginRepoRegistry`
+  - `PluginUUPSUpgradeable`
+  - `ENSSubdomainRegistrar`
+
+  </details>
+
+## Subgraph
 
 The subgraph is composed of
 
@@ -43,9 +106,9 @@ OSx contract changes being relevant are:
 
 Addition of an event is a compatible change, whereas all other changes are incompatible and force the subgraph to adapt.
 
-## SDK, 3rd-Party Projects (Contract & Subgraph Consumers)
+## Aragon SDK, 3rd-Party Projects (Contract & Subgraph Consumers)
 
-The SDK (as well as 3rd-party projects) queries the subgraph and interacts with the deployed contract’s ABI.
+The SDK as well as 3rd-party projects query the subgraph and interact with the deployed contract’s ABI.
 
 OSx contract changes being relevant are:
 
@@ -68,7 +131,7 @@ If these changes happen on plugin-related components, i.e.,
 
 this affects integrators of the protocol.
 
-## App
+## Aragon App
 
 The App queries the subgraph and uses the SDK to interact with the contracts.
 In some cases, it makes direct calls to contracts provided by us or third parties.

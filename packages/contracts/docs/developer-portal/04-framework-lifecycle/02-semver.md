@@ -38,7 +38,7 @@ We now classify [smart contract changes](systems.md#smart-contracts) according t
 ### Storage
 
 - Addition
-  Be aware that public constatns/immutables affect the `interfaceId``.
+  Be aware that public constatns/immutables affect the `interfaceId`.
   Implementation
 
   - **IF** contract is **NOT** upgradeable
