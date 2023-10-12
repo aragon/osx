@@ -10,7 +10,7 @@ You need it for the plugin to be installed intto the DAO.
 
 ### 1. Finish the Plugin contract
 
-Before building your Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple admin pugin which grants one address permission to execute actions on behalf of the DAO.
+Before building your Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple admin plugin which grants one address permission to execute actions on behalf of the DAO.
 
 ```solidity
 contract SimpleAdmin is PluginCloneable {
