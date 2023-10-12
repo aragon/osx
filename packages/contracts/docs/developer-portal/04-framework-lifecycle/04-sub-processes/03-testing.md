@@ -42,6 +42,6 @@ This might include:
   - checks for storage corruption
   - checks for reinitializer number bumps
 - fork tests against currently active contracts (to ensure that interfaces and functionalities match with each other) such as
-  - the`PluginSetupProcessor`
+  - the `PluginSetupProcessor`
   - `PluginRepo`s
-  - ....
+  - ...
