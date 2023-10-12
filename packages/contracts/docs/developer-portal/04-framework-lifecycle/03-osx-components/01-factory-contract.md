@@ -1,12 +1,5 @@
 # Factory Change
 
-Applies to
-
-- `DAOFactory`
-- `PluginRepoFactory`
-
-For changes in the underlying implementations (i.e., `DAO` and `PluginRepo`), see the process of [replacing upgradeable contracts](../03-sub-processes/upgradeable-contract.md).
-
 ```mermaid
 flowchart TD
     processStart("Factory Change")
@@ -67,3 +60,10 @@ flowchart TD
 
     rollout ==> processEnd("Done")
 ```
+
+Applies to
+
+- `DAOFactory`
+- `PluginRepoFactory`
+
+For changes in the underlying implementations (i.e., `DAO` and `PluginRepo`), see the process of [replacing upgradeable contracts](../03-sub-processes/upgradeable-contract.md).

@@ -1,12 +1,5 @@
 # Abstract Contract Change
 
-Applies to:
-
-- `PermissionManager`
-- `CallbackHandler`
-- `DaoAuthorizable` and `DaoAuthorizableUpgradeable`
-- `Proposal` and `ProposalUpgradeable`
-
 ```mermaid
 flowchart TD
     processStart("Abstract Contract Change")

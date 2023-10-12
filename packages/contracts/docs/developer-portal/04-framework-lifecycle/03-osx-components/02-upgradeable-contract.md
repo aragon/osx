@@ -1,10 +1,5 @@
 # UUPS Upgradeable Contract Change
 
-Applies to
-
-- `DAO`
-- `PluginRepo`
-
 ```mermaid
 flowchart TD
     processStart("UUPS upgradeable contract")
