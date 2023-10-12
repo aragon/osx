@@ -76,7 +76,7 @@ Inside the `GreeterPlugin.sol`, we want to:
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
@@ -105,7 +105,7 @@ Inside the file, we'll add the `prepareInstallation` and `prepareUninstallation`
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';

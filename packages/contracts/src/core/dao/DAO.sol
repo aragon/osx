@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -15,6 +15,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
+import {VersionComparisonLib} from "../../utils/protocol/VersionComparisonLib.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
 import {hasBit, flipBit} from "../utils/BitMap.sol";
@@ -39,6 +40,7 @@ contract DAO is
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
+    using VersionComparisonLib for uint8[3];
 
     /// @notice The ID of the permission required to call the `execute` function.
     bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
@@ -152,7 +154,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
@@ -173,7 +175,7 @@ contract DAO is
     function initializeFrom(
         uint8[3] calldata _previousProtocolVersion,
         bytes calldata _initData
-    ) external reinitializer(2) {
+    ) external reinitializer(3) {
         _initData; // Silences the unused function parameter warning.
 
         // Check that the contract is not upgrading from a different major release.
@@ -183,13 +185,13 @@ contract DAO is
 
         // Initialize `_reentrancyStatus` that was added in v1.3.0.
         // Register Interface `ProtocolVersion` that was added in v1.3.0.
-        if (_previousProtocolVersion[1] <= 2) {
+        if (_previousProtocolVersion.lt([1, 3, 0])) {
             _reentrancyStatus = _NOT_ENTERED;
             _registerInterface(type(IProtocolVersion).interfaceId);
         }
 
         // Revoke the `SET_SIGNATURE_VALIDATOR_PERMISSION` that was deprecated in v1.4.0.
-        if (_previousProtocolVersion[1] <= 3) {
+        if (_previousProtocolVersion.lt([1, 4, 0])) {
             _revoke({
                 _where: address(this),
                 _who: address(this),

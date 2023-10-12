@@ -8,11 +8,11 @@ The Plugin Setup contract is the contract defining the instructions for installi
 
 ### 1. Finish the Plugin contract's first build
 
-Before building the Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple storage pugin which stores a number.
+Before building the Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple storage plugin which stores a number.
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {IDAO, PluginUUPSUpgradeable} from '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
 
@@ -53,7 +53,7 @@ Similarly, the `prepareUninstallation()` function takes in a `payload`.
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
@@ -76,7 +76,7 @@ contract SimpleStorageBuild1Setup is PluginSetup {
 
     plugin = createERC1967Proxy(
       simpleStorageImplementation,
-      abi.encodeWithSelector(SimpleStorageBuild1.initializeBuild1.selector, _dao, number)
+      abi.encodeCall(SimpleStorageBuild1.initializeBuild1, (IDAO(_dao), number))
     );
 
     PermissionLib.MultiTargetPermission[]

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 /*
  * @title Migration
@@ -47,3 +47,9 @@ import {MerkleMinter as MerkleMinter_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plug
 
 import {MerkleDistributor as MerkleDistributor_v1_0_0} from "@aragon/osx-v1.0.1/plugins/token/MerkleDistributor.sol";
 import {MerkleDistributor as MerkleDistributor_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleDistributor.sol";
+
+import {GovernanceERC20 as GovernanceERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceERC20.sol";
+import {GovernanceERC20 as GovernanceERC20_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/token/ERC20/governance/GovernanceERC20.sol";
+
+import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceWrappedERC20.sol";
+import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/token/ERC20/governance/GovernanceWrappedERC20.sol";

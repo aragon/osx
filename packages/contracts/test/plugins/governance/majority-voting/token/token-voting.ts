@@ -13,6 +13,7 @@ import {
   IMembership__factory,
   IPlugin__factory,
   IProposal__factory,
+  IProtocolVersion__factory,
   TokenVoting,
   TokenVoting__factory,
 } from '../../../../../typechain';
@@ -49,7 +50,12 @@ import {
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {deployWithProxy} from '../../../../test-utils/proxy';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {
+  TOKEN_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
+
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   getProtocolVersion,
@@ -62,11 +68,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
-
-export const tokenVotingInterface = new ethers.utils.Interface([
-  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
-  'function getVotingToken()',
-]);
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -255,11 +256,11 @@ describe('TokenVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
     it('from v1.3.0', async () => {
@@ -277,7 +278,7 @@ describe('TokenVoting', function () {
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
-      expect(toImplementation).to.equal(fromImplementation);
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -285,15 +286,15 @@ describe('TokenVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.3.0 to the current version
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await voting.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -305,6 +306,11 @@ describe('TokenVoting', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
@@ -332,9 +338,9 @@ describe('TokenVoting', function () {
     });
 
     it('supports the `TokenVoting` interface', async () => {
-      expect(
-        await voting.supportsInterface(getInterfaceID(tokenVotingInterface))
-      ).to.be.true;
+      const iface = getInterfaceID(TOKEN_VOTING_INTERFACE);
+      expect(iface).to.equal(TOKEN_VOTING_INTERFACE_ID); // checks that it didn't change
+      expect(await voting.supportsInterface(iface)).to.be.true;
     });
   });
 

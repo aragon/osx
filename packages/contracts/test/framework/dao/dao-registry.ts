@@ -254,6 +254,14 @@ describe('DAORegistry', function () {
     }).timeout(120000);
   });
 
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await daoRegistry.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
+  });
+
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
@@ -296,7 +304,7 @@ describe('DAORegistry', function () {
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDao
         );
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -305,11 +313,11 @@ describe('DAORegistry', function () {
         currentContractFactory.attach(toImplementation)
       );
 
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
     it('from v1.3.0', async () => {
@@ -326,7 +334,7 @@ describe('DAORegistry', function () {
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDao
         );
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.3.0 to the current version
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -335,11 +343,11 @@ describe('DAORegistry', function () {
         currentContractFactory.attach(toImplementation)
       );
 
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 });

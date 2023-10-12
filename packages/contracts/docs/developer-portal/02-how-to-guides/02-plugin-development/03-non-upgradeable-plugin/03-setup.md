@@ -10,7 +10,7 @@ You need it for the plugin to be installed intto the DAO.
 
 ### 1. Finish the Plugin contract
 
-Before building your Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple admin pugin which grants one address permission to execute actions on behalf of the DAO.
+Before building your Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple admin plugin which grants one address permission to execute actions on behalf of the DAO.
 
 ```solidity
 contract SimpleAdmin is PluginCloneable {
@@ -41,7 +41,7 @@ Each `PluginSetup` contract is deployed only once and we will publish a separate
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {PluginSetup, IPluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {SimpleAdmin} from './SimpleAdmin.sol';
@@ -227,7 +227,7 @@ Now, it's time to wrap up everything together. You should have a contract that l
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
 

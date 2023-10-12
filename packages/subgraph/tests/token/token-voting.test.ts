@@ -8,7 +8,8 @@ import {
   _handleProposalCreated,
   handleMembershipContractAnnounced
 } from '../../src/packages/token/token-voting';
-import {VOTING_MODES, WRAPPED_ERC20_INTERFACE} from '../../src/utils/constants';
+import {VOTING_MODES} from '../../src/utils/constants';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   DAO_TOKEN_ADDRESS,
   STRING_DATA,
@@ -228,7 +229,10 @@ describe('handleMembershipContractAnnounced', () => {
     let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
     erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
-    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface(
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+      false
+    );
     erc20Contract.mockCall_supportsInterface('ffffffff', false);
 
     tokenVotingPlugin.token = erc20Contract.id;
@@ -252,7 +256,10 @@ describe('handleMembershipContractAnnounced', () => {
     let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
     erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
-    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface(
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+      false
+    );
     erc20Contract.mockCall_supportsInterface('ffffffff', false);
 
     erc20WrappedContract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
@@ -261,7 +268,7 @@ describe('handleMembershipContractAnnounced', () => {
       ERC20_AMOUNT_FULL
     );
     erc20WrappedContract.mockCall_supportsInterface(
-      WRAPPED_ERC20_INTERFACE,
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
       true
     );
     erc20WrappedContract.mockCall_supportsInterface('ffffffff', false);

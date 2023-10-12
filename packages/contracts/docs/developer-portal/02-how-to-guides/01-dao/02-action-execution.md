@@ -106,7 +106,7 @@ function exampleFunctionCall(
   actions[0] = IDAO.Action({
     to: address(_calculator),
     value: 0, // 0 native tokens must be sent with this call
-    data: abi.encodeWithSelector(_calculator.add.selector, _a, _b)
+    data: abi.encodeCall(_calculator.add, (_a, _b))
   });
 
   // Execute the action array
@@ -141,7 +141,7 @@ function examplePayableFunctionCall(IDAO dao, bytes32 _callId, IWETH9 _wethToken
   actions[0] = IDAO.Action({
     to: address(_wethToken),
     value: 0.1 ether,
-    data: abi.encodeWithSelector(IWETH9.deposit.selector) // abi.encodeWithSelector(bytes4(keccak256('deposit()')), [])
+    data: abi.encodeCall(IWETH9.deposit, ())
   });
 
   // Execute the action array

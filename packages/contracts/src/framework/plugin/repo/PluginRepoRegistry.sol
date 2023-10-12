@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
+import {ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 import {ENSSubdomainRegistrar} from "../../utils/ens/ENSSubdomainRegistrar.sol";
 import {InterfaceBasedRegistry} from "../../utils/InterfaceBasedRegistry.sol";
@@ -12,7 +13,7 @@ import {IPluginRepo} from "./IPluginRepo.sol";
 /// @author Aragon Association - 2022-2023
 /// @notice This contract maintains an address-based registry of plugin repositories in the Aragon App DAO framework.
 /// @custom:security-contact sirt@aragon.org
-contract PluginRepoRegistry is InterfaceBasedRegistry {
+contract PluginRepoRegistry is InterfaceBasedRegistry, ProtocolVersion {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
         keccak256("REGISTER_PLUGIN_REPO_PERMISSION");

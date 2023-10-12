@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
@@ -80,11 +80,9 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     ) external override auth(MERKLE_MINT_PERMISSION_ID) returns (IMerkleDistributor distributor) {
         address distributorAddr = createERC1967Proxy(
             address(distributorBase),
-            abi.encodeWithSelector(
-                MerkleDistributor.initialize.selector,
-                dao(),
-                IERC20Upgradeable(address(token)),
-                _merkleRoot
+            abi.encodeCall(
+                MerkleDistributor.initialize,
+                (dao(), IERC20Upgradeable(address(token)), _merkleRoot)
             )
         );
 

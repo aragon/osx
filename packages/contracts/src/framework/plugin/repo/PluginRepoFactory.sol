@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
@@ -133,7 +133,7 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
         pluginRepo = PluginRepo(
             createERC1967Proxy(
                 pluginRepoBase,
-                abi.encodeWithSelector(PluginRepo.initialize.selector, _initialOwner)
+                abi.encodeCall(PluginRepo.initialize, (_initialOwner))
             )
         );
 

@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes, ethereum, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC1155Balance,
   ERC1155Contract,
@@ -18,6 +18,7 @@ import {
   getERC1155TransferId,
   getTokenIdBalanceId
 } from './common';
+import {getMethodSignature} from '../bytes';
 
 export function supportsERC1155(token: Address): bool {
   // Double check that it's ERC1155 by calling supportsInterface checks.
@@ -198,87 +199,131 @@ export function handleERC1155Action(
   proposalId: string,
   actionIndex: number,
   event: ethereum.Event
-): void {
+): bool {
   let contract = fetchERC1155(token);
   if (!contract) {
-    return;
+    return false;
   }
 
-  let functionSelector = data.toHexString().substring(0, 10);
+  let functionSelector = getMethodSignature(data);
+  let decodeABI = determineERC1155DecodeABI(functionSelector);
+
+  // If decodeABI is not determined, return false
+  if (!decodeABI) return false;
+
   let calldata = DECODE_OFFSET + data.toHexString().slice(10);
-
-  let decodeABI = '';
-
-  if (functionSelector == ERC1155_safeTransferFrom) {
-    decodeABI = '(address,address,uint256,uint256,bytes)';
-  }
-
-  if (functionSelector == ERC1155_safeBatchTransferFrom) {
-    decodeABI = '(address,address,uint256[],uint256[],bytes)';
-  }
   let bytes = Bytes.fromHexString(calldata);
-  let decoded = ethereum.decode(decodeABI, bytes);
+  let decoded = ethereum.decode(decodeABI as string, bytes);
+
   if (!decoded) {
-    return;
+    return false;
   }
 
   let tuple = decoded.toTuple();
 
-  let from = tuple[0].toAddress();
-  let to = tuple[1].toAddress();
   if (functionSelector == ERC1155_safeTransferFrom) {
-    // in single transfer create a single transfer
-    let tokenId = tuple[2].toBigInt();
-    let amount = tuple[3].toBigInt();
-    // generate unique transfer id
+    handleERC1155SingleTransfer(
+      tuple,
+      dao,
+      token,
+      proposalId,
+      event,
+      actionIndex
+    );
+  } else if (functionSelector == ERC1155_safeBatchTransferFrom) {
+    handleERC1155BatchTransfer(
+      tuple,
+      dao,
+      token,
+      proposalId,
+      event,
+      actionIndex
+    );
+  }
+
+  return true;
+}
+
+function determineERC1155DecodeABI(functionSelector: string): string | null {
+  if (functionSelector == ERC1155_safeTransferFrom) {
+    return '(address,address,uint256,uint256,bytes)';
+  }
+
+  if (functionSelector == ERC1155_safeBatchTransferFrom) {
+    return '(address,address,uint256[],uint256[],bytes)';
+  }
+
+  return null;
+}
+
+function handleERC1155SingleTransfer(
+  tuple: ethereum.Tuple,
+  dao: Address,
+  token: Address,
+  proposalId: string,
+  event: ethereum.Event,
+  actionIndex: number
+): void {
+  let tokenId = tuple[2].toBigInt();
+  let amount = tuple[3].toBigInt();
+
+  // generate unique transfer id
+  let transferId = getERC1155TransferId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    actionIndex,
+    0
+  );
+
+  createErc1155Transfer(
+    transferId,
+    dao, // operator field, the operator is going to be the dao since is the one executing the action
+    tuple[0].toAddress(),
+    tuple[1].toAddress(),
+    dao,
+    token,
+    tokenId,
+    amount,
+    proposalId,
+    event.transaction.hash,
+    event.block.timestamp
+  );
+}
+
+function handleERC1155BatchTransfer(
+  tuple: ethereum.Tuple,
+  dao: Address,
+  token: Address,
+  proposalId: string,
+  event: ethereum.Event,
+  actionIndex: number
+): void {
+  let tokenIds = tuple[2].toBigIntArray();
+  let amounts = tuple[3].toBigIntArray();
+
+  // in batch transfer iterate over the tokenIds and create a transfer for each
+  for (let i = 0; i < tokenIds.length; i++) {
+    // generate unique transfer id by adding the index of the tokenIds array
     let transferId = getERC1155TransferId(
       event.transaction.hash,
       event.transactionLogIndex,
       actionIndex,
-      0
+      i
     );
-    // create transfer
+
     createErc1155Transfer(
       transferId,
       dao, // operator field, the operator is going to be the dao since is the one executing the action
-      from,
-      to,
+      tuple[0].toAddress(),
+      tuple[1].toAddress(),
       dao,
       token,
-      tokenId,
-      amount,
+      tokenIds[i],
+      amounts[i],
       proposalId,
       event.transaction.hash,
       event.block.timestamp
     );
-  }
-  if (functionSelector == ERC1155_safeBatchTransferFrom) {
-    let tokenIds = tuple[2].toBigIntArray();
-    let amounts = tuple[3].toBigIntArray();
-    // in batch transfer iterate over the tokenIds and create a transfer for each
-    for (let i = 0; i < tokenIds.length; i++) {
-      // generate unique transfer id by adding the index of the tokenIds array
-      let transferId = getERC1155TransferId(
-        event.transaction.hash,
-        event.transactionLogIndex,
-        actionIndex,
-        i
-      );
-      // create transfer
-      createErc1155Transfer(
-        transferId,
-        dao, // operator field, the operator is going to be the dao since is the one executing the action
-        from,
-        to,
-        dao,
-        token,
-        tokenIds[i],
-        amounts[i],
-        proposalId,
-        event.transaction.hash,
-        event.block.timestamp
-      );
-    }
   }
 }
 

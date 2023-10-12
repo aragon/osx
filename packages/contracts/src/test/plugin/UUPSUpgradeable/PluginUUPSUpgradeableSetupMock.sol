@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
@@ -83,9 +83,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         // Update from V1
         if (_currentBuild == 1) {
             preparedSetupData.helpers = mockHelpers(2);
-            initData = abi.encodeWithSelector(
-                PluginUUPSUpgradeableV2Mock.initializeV1toV2.selector
-            );
+            initData = abi.encodeCall(PluginUUPSUpgradeableV2Mock.initializeV1toV2, ());
             preparedSetupData.permissions = mockPermissions(1, 2, PermissionLib.Operation.Grant);
         }
     }
@@ -121,18 +119,14 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         // Update from V1
         if (_currentBuild == 1) {
             preparedSetupData.helpers = mockHelpers(3);
-            initData = abi.encodeWithSelector(
-                PluginUUPSUpgradeableV3Mock.initializeV1toV3.selector
-            );
+            initData = abi.encodeCall(PluginUUPSUpgradeableV3Mock.initializeV1toV3, ());
             preparedSetupData.permissions = mockPermissions(1, 3, PermissionLib.Operation.Grant);
         }
 
         // Update from V2
         if (_currentBuild == 2) {
             preparedSetupData.helpers = mockHelpers(3);
-            initData = abi.encodeWithSelector(
-                PluginUUPSUpgradeableV3Mock.initializeV2toV3.selector
-            );
+            initData = abi.encodeCall(PluginUUPSUpgradeableV3Mock.initializeV2toV3, ());
             preparedSetupData.permissions = mockPermissions(2, 3, PermissionLib.Operation.Grant);
         }
     }

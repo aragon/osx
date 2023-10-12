@@ -8,7 +8,10 @@ import {
   AddresslistVoting__factory,
 } from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {
+  ADDRESSLIST_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
 import {Operation} from '../../../../../utils/types';
 import {
   VotingSettings,
@@ -17,7 +20,6 @@ import {
   ONE_HOUR,
 } from '../../../../test-utils/voting';
 import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
-import {addresslistVotingInterface} from './addresslist-voting';
 import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 
 let defaultData: any;
@@ -83,7 +85,7 @@ describe('AddresslistVotingSetup', function () {
 
     expect(
       await addresslistVotingContract.supportsInterface(
-        getInterfaceID(addresslistVotingInterface)
+        getInterfaceID(ADDRESSLIST_VOTING_INTERFACE)
       )
     ).to.be.eq(true);
   });

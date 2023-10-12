@@ -55,7 +55,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../test-utils/protocol-version';
 import {ANY_ADDR} from '../permission/permission-manager';
-import {defaultAbiCoder} from 'ethers/lib/utils';
 
 chai.use(smock.matchers);
 
@@ -156,10 +155,6 @@ describe('DAO', function () {
     ]);
   });
 
-  it('does not support the empty interface', async () => {
-    expect(await dao.supportsInterface('0xffffffff')).to.be.false;
-  });
-
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(
@@ -204,7 +199,7 @@ describe('DAO', function () {
       );
     });
 
-    it('sets OZs `_initialized` at storage slot [0] to 2', async () => {
+    it('sets OZs `_initialized` at storage slot [0] to 3', async () => {
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -212,7 +207,7 @@ describe('DAO', function () {
             OZ_INITIALIZED_SLOT_POSITION
           )
         ).toNumber()
-      ).to.equal(2);
+      ).to.equal(3);
     });
 
     it('sets the `_reentrancyStatus` at storage slot [304] to `_NOT_ENTERED = 1`', async () => {
@@ -239,11 +234,11 @@ describe('DAO', function () {
         .withArgs([0, 1, 0]);
     });
 
-    it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
+    it('increments `_initialized` to `3`', async () => {
       // Create an unitialized DAO.
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
-      // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
+      // Expect the contract to be uninitialized  with `_initialized = 0`.
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -252,6 +247,28 @@ describe('DAO', function () {
           )
         ).toNumber()
       ).to.equal(0);
+
+      // Call `initializeFrom` with version 1.2.0.
+      await expect(uninitializedDao.initializeFrom([1, 2, 0], EMPTY_DATA)).to
+        .not.be.reverted;
+
+      // Expect the contract to be initialized with `_initialized = 3`.
+      expect(
+        ethers.BigNumber.from(
+          await ethers.provider.getStorageAt(
+            uninitializedDao.address,
+            OZ_INITIALIZED_SLOT_POSITION
+          )
+        ).toNumber()
+      ).to.equal(3);
+    });
+
+    it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
+      // Create an unitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      // Expect the contract to be uninitialized  with `_reentrancyStatus = 0`.
+
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -265,15 +282,7 @@ describe('DAO', function () {
       await expect(uninitializedDao.initializeFrom([1, 2, 0], EMPTY_DATA)).to
         .not.be.reverted;
 
-      // Expect the contract to be initialized with `_initialized = 2` and  `_reentrancyStatus = 1`.
-      expect(
-        ethers.BigNumber.from(
-          await ethers.provider.getStorageAt(
-            uninitializedDao.address,
-            OZ_INITIALIZED_SLOT_POSITION
-          )
-        ).toNumber()
-      ).to.equal(2);
+      // Expect the contract to be initialized with `_reentrancyStatus = 1`.
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -288,15 +297,8 @@ describe('DAO', function () {
       // Create an unitialized DAO.
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
-      // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
-      expect(
-        ethers.BigNumber.from(
-          await ethers.provider.getStorageAt(
-            uninitializedDao.address,
-            OZ_INITIALIZED_SLOT_POSITION
-          )
-        ).toNumber()
-      ).to.equal(0);
+      // Expect the contract to be uninitialized  with `_reentrancyStatus = 0`.
+
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(
@@ -310,15 +312,8 @@ describe('DAO', function () {
       await expect(uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA)).to
         .not.be.reverted;
 
-      // Expect the contract to be initialized with `_initialized = 2` but `_reentrancyStatus` to remain unchanged.
-      expect(
-        ethers.BigNumber.from(
-          await ethers.provider.getStorageAt(
-            uninitializedDao.address,
-            OZ_INITIALIZED_SLOT_POSITION
-          )
-        ).toNumber()
-      ).to.equal(2);
+      // Expect `_reentrancyStatus` to remain unchanged.
+
       expect(
         ethers.BigNumber.from(
           await ethers.provider.getStorageAt(

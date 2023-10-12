@@ -14,6 +14,7 @@ import {
   IMembership__factory,
   IPlugin__factory,
   IProposal__factory,
+  IProtocolVersion__factory,
 } from '../../../../../typechain';
 import {AddresslistVoting__factory as AddresslistVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
 import {AddresslistVoting__factory as AddresslistVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
@@ -49,7 +50,11 @@ import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {deployWithProxy} from '../../../../test-utils/proxy';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {
+  ADDRESSLIST_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {ADDRESSLIST_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
 
 import {
   getProtocolVersion,
@@ -61,12 +66,6 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
-
-export const addresslistVotingInterface = new ethers.utils.Interface([
-  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
-  'function addAddresses(address[])',
-  'function removeAddresses(address[])',
-]);
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -180,7 +179,7 @@ describe('AddresslistVoting', function () {
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
-      expect(toImplementation).to.not.equal(fromImplementation); // The build did change
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -188,11 +187,11 @@ describe('AddresslistVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
     it('from v1.3.0', async () => {
@@ -210,7 +209,7 @@ describe('AddresslistVoting', function () {
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
-      expect(toImplementation).to.equal(fromImplementation);
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -218,11 +217,11 @@ describe('AddresslistVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.3.0 to the current version
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
@@ -238,6 +237,11 @@ describe('AddresslistVoting', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
@@ -270,11 +274,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('supports the `AddresslistVoting` interface', async () => {
-      expect(
-        await voting.supportsInterface(
-          getInterfaceID(addresslistVotingInterface)
-        )
-      ).to.be.true;
+      const iface = getInterfaceID(ADDRESSLIST_VOTING_INTERFACE);
+      expect(iface).to.equal(ADDRESSLIST_VOTING_INTERFACE_ID); // checks that it didn't change
+      expect(await voting.supportsInterface(iface)).to.be.true;
     });
   });
 

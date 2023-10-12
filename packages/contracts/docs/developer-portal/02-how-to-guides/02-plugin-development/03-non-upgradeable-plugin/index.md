@@ -85,7 +85,7 @@ Then, inside of the file, add the functionality:
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
 
@@ -122,7 +122,7 @@ In the `prepareInstallation()` function here then, we will grant the `GREET_PERM
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity 0.8.17;
+pragma solidity 0.8.21;
 
 import {PluginSetup} from '@aragon/osx/framework/plugin/setup/PluginSetup.sol';
 import {PermissionLib} from '@aragon/osx/core/permission/PermissionLib.sol';
@@ -215,7 +215,7 @@ npx hardhat run scripts/deploy.ts
 
 #### b) Goerli testnet network or others
 
-Now that we know the local deployment works, we will want to deploy our pugin to Goerli testnet so we can publish it in the Aragon OSx protocol to be accessed by DAOs.
+Now that we know the local deployment works, we will want to deploy our plugin to Goerli testnet so we can publish it in the Aragon OSx protocol to be accessed by DAOs.
 
 1. Firstly, let's set up the `hardhat.config.js` with Goerli environment attributes (or whichever network you'd like to deploy your plugin to).
 
