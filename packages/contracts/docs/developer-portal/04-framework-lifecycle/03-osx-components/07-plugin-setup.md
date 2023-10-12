@@ -1,9 +1,5 @@
 # Plugin Setup
 
-:::todo
-PAGE IS WORK IN PROGRESS
-:::
-
 ```mermaid
 flowchart TD
     processStart("Publish a PluginSetup")
@@ -73,14 +69,15 @@ Conduct all necessary actions to prepare the uninstallation of a plugin and to d
 - decode `_payload._data` if required
 - return initialization data to be used with `upgradeToAndCall`
 - transition
+
   - the `SetupPayload.plugin` contract
   - `SetupPayload.currentHelpers` contracts
   - and existing permission
 
-over from the `_currentBuild` to the new build by
+  over from the `_currentBuild` to the new build by
 
-- deploying / decomissioning helpers return the addresses of the prevailing ones via the `preparedSetupData.helpers` array of addresses.
-- requesting to grant new / revoke existing permissions and returning them via the `preparedSetupData.permissions` array of permission structs.
+  - deploying / decomissioning helpers return the addresses of the prevailing ones via the `preparedSetupData.helpers` array of addresses.
+  - requesting to grant new / revoke existing permissions and returning them via the `preparedSetupData.permissions` array of permission structs.
 
 ## Update Metadata
 
