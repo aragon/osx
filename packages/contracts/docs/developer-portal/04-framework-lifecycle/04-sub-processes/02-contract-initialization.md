@@ -96,19 +96,19 @@ function initializeFrom(
 
   // Everybody will have at least a v1.0.0 contract initialized so we don't need to check for `_previousProtocolVersion.lte([1, 0, 0])`
 
-  if (_previousProtocolVersion.lte([1, 0, 1])) {
+  if (_previousProtocolVersion.lt([1, 0, 1])) {
     internalCallB();
   }
 
-  if (_previousProtocolVersion.lte([1, 1, 0])) {
+  if (_previousProtocolVersion.lt([1, 1, 0])) {
     c = _c;
   }
 
-  if (_previousProtocolVersion.lte([1, 1, 1])) {
+  if (_previousProtocolVersion.lt([1, 1, 1])) {
     emit EventD();
   }
 
-  if (_previousProtocolVersion.lte([1, 2, 0])) {
+  if (_previousProtocolVersion.lt([1, 2, 0])) {
     externalCallE();
     emit EventE();
   }
