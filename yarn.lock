@@ -2,10 +2,17 @@
 # yarn lockfile v1
 
 
-"@aragon/osx-ethers-v1.2.0@npm:@aragon/osx-ethers@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.0.tgz#b7e58714394183372ddf25d97cfe326f18ce6f1d"
-  integrity sha512-XI/tJo5NSjOwtcRRXvlfDFRh6YTTSVLYwlbd+4QlBxbTB2WDwS/4lq7rFwnO1bPufCQ4pSqGsTXFR5pwDLS4Ig==
+"@aragon/osx-ethers-v1.2.1@npm:@aragon/osx-ethers@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.1.tgz#a442048137153ed5a3ca4eff3f3927b45a5134b5"
+  integrity sha512-3Fscq8C9elIktiI6OT7fR5iaAvim+ghU6IUvZF3P/phvWm9roNp/GXAROhA/Vx41NQxeqmfXokgFo6KOWt4drA==
+  dependencies:
+    ethers "^5.6.2"
+
+"@aragon/osx-ethers-v1.3.0-rc0.2@npm:@aragon/osx-ethers@v1.3.0-rc0.2":
+  version "1.3.0-rc0.2"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.3.0-rc0.2.tgz#820f325ee8514bc6e598135bba2501f124d92d31"
+  integrity sha512-PpsmyZOBRQPElEsiLNkoGg/4j+oJn8SJC6S0oN837k5JofkleLbOdZgUmB0SHmL98hvcE157MoRZ4YM+IXbhhA==
   dependencies:
     ethers "^5.6.2"
 
