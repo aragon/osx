@@ -33,8 +33,8 @@ import {
 
 import {supportsInterface} from '../utils/erc165';
 import {
-  fetchERC20,
-  fetchWrappedERC20,
+  fetchOrCreateERC20Entity,
+  fetchOrCreateWrappedERC20Entity,
   supportsERC20Wrapped
 } from '../utils/tokens/erc20';
 
@@ -68,14 +68,14 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
     if (!token.reverted) {
       let tokenAddress = token.value;
       if (supportsERC20Wrapped(tokenAddress)) {
-        let contract = fetchWrappedERC20(tokenAddress);
+        let contract = fetchOrCreateWrappedERC20Entity(tokenAddress);
         if (!contract) {
           return;
         }
 
         packageEntity.token = contract.id;
       } else {
-        let contract = fetchERC20(tokenAddress);
+        let contract = fetchOrCreateERC20Entity(tokenAddress);
         if (!contract) {
           return;
         }
