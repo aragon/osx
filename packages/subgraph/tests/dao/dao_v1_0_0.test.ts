@@ -51,6 +51,7 @@ import {
 } from './utils';
 import {
   ERC1155_INTERFACE_ID,
+  ERC165_INTERFACE_ID,
   ERC20_transfer,
   ERC20_transferFrom,
   ERC721_safeTransferFromWithData,
@@ -83,6 +84,7 @@ import {
   ExtendedNativeBalance,
   ExtendedNativeTransfer
 } from '../helpers/extended-schema';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 
 const eq = assert.fieldEquals;
 
@@ -253,6 +255,16 @@ describe('handleDeposited: ', () => {
     daoTokenContract.mockCall_createTokenCalls(totalSupply);
     daoTokenContract.mockCall_balanceOf(DAO_ADDRESS, ERC20_AMOUNT_HALF);
     daoTokenContract.mockCall_balanceOf(DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
+
+    createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', null, null);
+
+    getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
+    getSupportsInterface(
+      DAO_TOKEN_ADDRESS,
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+      false
+    );
+    getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
   });
 
   afterEach(() => {

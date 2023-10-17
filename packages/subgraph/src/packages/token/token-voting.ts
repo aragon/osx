@@ -20,11 +20,7 @@ import {
 } from '../../../generated/schema';
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {
-  fetchERC20,
-  fetchWrappedERC20,
-  supportsERC20Wrapped
-} from '../../utils/tokens/erc20';
+import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
 import {getProposalId} from '../../utils/proposals';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -256,22 +252,11 @@ export function handleMembershipContractAnnounced(
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
 
   if (packageEntity) {
-    let contractAddress: string;
-
-    if (supportsERC20Wrapped(token)) {
-      let contract = fetchWrappedERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
-    } else {
-      let contract = fetchERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
+    let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+    if (!tokenAddress) {
+      return;
     }
-    packageEntity.token = contractAddress;
+    packageEntity.token = tokenAddress as string;
 
     packageEntity.save();
 
