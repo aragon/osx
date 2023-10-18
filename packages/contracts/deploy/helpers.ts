@@ -74,10 +74,10 @@ export async function uploadToIPFS(
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }
 
-  const cid = await client.add(metadata);
-  await client.pin.add(cid.cid);
-  console.log(`Uploaded to IPFS with cid ${cid.cid}`);
-  return cid.path;
+  const res = await client.add(metadata);
+  await client.pin.add(res.cid);
+  console.log(`Uploaded to IPFS with cid ${res.cid.toString()}`);
+  return res.cid.toString();
 }
 
 export async function getContractAddress(
