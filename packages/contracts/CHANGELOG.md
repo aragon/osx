@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed unused `MerkleMinter` and `MerkleDistributor` contracts.
 - Removed unused `TokenFactory` contract.
 - Removed the `SignatureValidatorSet` event from `IDAO`.
-- Removed unused `ERC1271Mock` contract.
 - Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place..
 
 ## v1.3.1
