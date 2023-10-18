@@ -2,15 +2,9 @@ name: Style Checks
 on:
   push:
 
-env:
-  working-directory: .
-
 jobs:
   formatting:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{env.working-directory}}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
