@@ -16,8 +16,6 @@ import {
   // plugins
   IMajorityVoting__factory,
   IMultisig__factory,
-  IMerkleMinter__factory,
-  IMerkleDistributor__factory,
   // token
   IERC20MintableUpgradeable__factory,
   IGovernanceWrappedERC20__factory,
@@ -37,8 +35,6 @@ import {IPluginSetup__factory as IPluginSetup_V1_0_0__factory} from '../typechai
 
 import {IMajorityVoting__factory as IMajorityVoting_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/IMajorityVoting.sol';
 import {IMultisig__factory as IMultisig_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/IMultisig.sol';
-import {IMerkleMinter__factory as IMerkleMinter_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleMinter.sol';
-import {IMerkleDistributor__factory as IMerkleDistributor_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleDistributor.sol';
 
 import {IERC20MintableUpgradeable__factory as IERC20MintableUpgradeable_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/IERC20MintableUpgradeable.sol';
 import {IGovernanceWrappedERC20__factory as IGovernanceWrappedERC20_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/governance/IGovernanceWrappedERC20.sol'; // TODO: For some reason this file is missing.
@@ -144,30 +140,6 @@ describe('Interfaces', function () {
         const current = getInterfaceID(IMultisig__factory.createInterface());
         const initial = getInterfaceID(
           IMultisig_V1_0_0__factory.createInterface()
-        );
-        expect(current).to.equal(initial);
-      });
-    });
-
-    describe('IMerkleMinter', function () {
-      it('has still the same interface ID', async () => {
-        const current = getInterfaceID(
-          IMerkleMinter__factory.createInterface()
-        );
-        const initial = getInterfaceID(
-          IMerkleMinter_V1_0_0__factory.createInterface()
-        );
-        expect(current).to.equal(initial);
-      });
-    });
-
-    describe('IMerkleDistributor', function () {
-      it('has still the same interface ID', async () => {
-        const current = getInterfaceID(
-          IMerkleDistributor__factory.createInterface()
-        );
-        const initial = getInterfaceID(
-          IMerkleDistributor_V1_0_0__factory.createInterface()
         );
         expect(current).to.equal(initial);
       });

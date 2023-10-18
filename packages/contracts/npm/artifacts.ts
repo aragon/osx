@@ -41,10 +41,6 @@ import * as TokenVotingSetup from '../artifacts/src/plugins/governance/majority-
 import * as Multisig from '../artifacts/src/plugins/governance/multisig/Multisig.sol/Multisig.json';
 import * as MultisigSetup from '../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
 
-//// Token Creation
-import * as MerkleMinter from '../artifacts/src/plugins/token/MerkleMinter.sol/MerkleMinter.json';
-import * as MerkleDistributor from '../artifacts/src/plugins/token/MerkleDistributor.sol/MerkleDistributor.json';
-
 // Token
 //// ERC20
 ////// Governance
@@ -73,9 +69,6 @@ export default {
   TokenVotingSetup,
   Multisig,
   MultisigSetup,
-
-  MerkleMinter,
-  MerkleDistributor,
 
   GovernanceERC20,
   GovernanceWrappedERC20,

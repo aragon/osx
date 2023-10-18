@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed unused `MerkleMinter` and `MerkleDistributor` contracts.
 - Removed unused `TokenFactory` contract.
 - Removed the `SignatureValidatorSet` event from `IDAO`.
 - Removed unused `ERC1271Mock` contract.
