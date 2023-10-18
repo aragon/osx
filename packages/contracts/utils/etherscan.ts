@@ -1,7 +1,7 @@
-import HRE from 'hardhat';
 import fs from 'fs';
-import {file} from 'tmp-promise';
+import HRE from 'hardhat';
 import path from 'path';
+import {file} from 'tmp-promise';
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));

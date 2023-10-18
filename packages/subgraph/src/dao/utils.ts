@@ -1,15 +1,15 @@
-import {BigInt} from '@graphprotocol/graph-ts';
 import {
   Action,
   AddresslistVotingProposal,
   AdminProposal,
   MultisigProposal,
-  TokenVotingProposal
+  TokenVotingProposal,
 } from '../../generated/schema';
 import {
   Executed,
-  ExecutedActionsStruct
+  ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
+import {getMethodSignature} from '../utils/bytes';
 import {
   ERC721_transferFrom,
   ERC721_safeTransferFromNoData,
@@ -17,13 +17,13 @@ import {
   ERC20_transfer,
   ERC20_transferFrom,
   ERC1155_safeBatchTransferFrom,
-  ERC1155_safeTransferFrom
+  ERC1155_safeTransferFrom,
 } from '../utils/tokens/common';
 import {handleERC20Action} from '../utils/tokens/erc20';
 import {handleERC721Action} from '../utils/tokens/erc721';
-import {handleNativeAction} from '../utils/tokens/eth';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
-import {getMethodSignature} from '../utils/bytes';
+import {handleNativeAction} from '../utils/tokens/eth';
+import {BigInt} from '@graphprotocol/graph-ts';
 
 // AssemblyScript struggles having multiple return types. Due to this,
 // The below seems most effective way.
@@ -157,7 +157,7 @@ function isERC721Transfer(methodSig: string): bool {
   return [
     ERC721_transferFrom,
     ERC721_safeTransferFromNoData,
-    ERC721_safeTransferFromWithData
+    ERC721_safeTransferFromWithData,
   ].includes(methodSig);
 }
 

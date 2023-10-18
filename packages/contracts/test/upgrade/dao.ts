@@ -1,27 +1,23 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import {DAO, ProtocolVersion__factory} from '../../typechain';
 import {
   DAO as DAO_V1_0_0,
   DAO__factory as DAO_V1_0_0__factory,
 } from '../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
-
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0__factory,
 } from '../../typechain/@aragon/osx-v1.3.0-rc0.2/core/dao/DAO.sol';
-
-import {DAO, ProtocolVersion__factory} from '../../typechain';
-
-import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {deployWithProxy} from '../test-utils/proxy';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {UpgradedEvent} from '../../typechain/DAO';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
+import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {UpgradedEvent} from '../../typechain/DAO';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
+import {deployWithProxy} from '../test-utils/proxy';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 let signers: SignerWithAddress[];
 

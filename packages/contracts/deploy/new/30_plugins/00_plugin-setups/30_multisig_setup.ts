@@ -1,7 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import multisigSetupArtifact from '../../../../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;

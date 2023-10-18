@@ -1,7 +1,7 @@
 import {TransactionActionsProposal} from '../../generated/schema';
 import {
   Executed,
-  ExecutedActionsStruct
+  ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_3_0/DAO';
 import {handleAction} from './utils';
 

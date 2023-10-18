@@ -1,9 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import {setupENS} from '../../../utils/ens';
-
 import {ENS_ADDRESSES} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

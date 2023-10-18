@@ -1,3 +1,23 @@
+import {PluginPreparation} from '../../generated/schema';
+import {
+  handleInstallationApplied,
+  handleInstallationPrepared,
+  handleUninstallationApplied,
+  handleUninstallationPrepared,
+  handleUpdateApplied,
+  handleUpdatePrepared,
+} from '../../src/plugin/pluginSetupProcessor';
+import {
+  getPluginInstallationId,
+  PERMISSION_OPERATIONS,
+} from '../../src/plugin/utils';
+import {
+  ADMIN_INTERFACE_ID,
+  TOKEN_VOTING_INTERFACE_ID,
+  ADDRESSLIST_VOTING_INTERFACE_ID,
+  MULTISIG_INTERFACE_ID,
+} from '../../src/utils/constants';
+import {getSupportsInterface} from '../../tests/dao/utils';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -9,7 +29,7 @@ import {
   PLUGIN_SETUP_ID,
   ADDRESS_SIX,
   APPLIED_PLUGIN_SETUP_ID,
-  CONTRACT_ADDRESS
+  CONTRACT_ADDRESS,
 } from '../constants';
 import {
   createInstallationAppliedEvent,
@@ -17,33 +37,12 @@ import {
   createUninstallationAppliedEvent,
   createUninstallationPreparedEvent,
   createUpdateAppliedEvent,
-  createUpdatePreparedEvent
+  createUpdatePreparedEvent,
 } from './utils';
-import {
-  handleInstallationApplied,
-  handleInstallationPrepared,
-  handleUninstallationApplied,
-  handleUninstallationPrepared,
-  handleUpdateApplied,
-  handleUpdatePrepared
-} from '../../src/plugin/pluginSetupProcessor';
-import {assert, clearStore, test} from 'matchstick-as';
-import {PluginPreparation} from '../../generated/schema';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {getSupportsInterface} from '../../tests/dao/utils';
-import {
-  ADMIN_INTERFACE_ID,
-  TOKEN_VOTING_INTERFACE_ID,
-  ADDRESSLIST_VOTING_INTERFACE_ID,
-  MULTISIG_INTERFACE_ID
-} from '../../src/utils/constants';
+import {assert, clearStore, test} from 'matchstick-as';
 
-import {
-  getPluginInstallationId,
-  PERMISSION_OPERATIONS
-} from '../../src/plugin/utils';
-
-test('InstallationPrepared event', function() {
+test('InstallationPrepared event', function () {
   let dao = DAO_ADDRESS;
   let plugin = CONTRACT_ADDRESS;
   let setupId = PLUGIN_SETUP_ID;
@@ -67,7 +66,7 @@ test('InstallationPrepared event', function() {
       ethereum.Value.fromAddress(Address.fromString(dao)),
       ethereum.Value.fromAddress(Address.fromString(plugin)),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_ZERO)),
-      ethereum.Value.fromBytes(Bytes.fromHexString('0x1234'))
+      ethereum.Value.fromBytes(Bytes.fromHexString('0x1234')),
     ],
 
     [
@@ -75,8 +74,8 @@ test('InstallationPrepared event', function() {
       ethereum.Value.fromAddress(Address.fromString(dao)),
       ethereum.Value.fromAddress(Address.fromString(plugin)),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_SIX)),
-      ethereum.Value.fromBytes(Bytes.fromHexString('0x5678'))
-    ]
+      ethereum.Value.fromBytes(Bytes.fromHexString('0x5678')),
+    ],
   ];
 
   getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE_ID, false);
@@ -152,7 +151,7 @@ test('InstallationPrepared event', function() {
 
   let helpers = [
     Address.fromString(ADDRESS_FOUR),
-    Address.fromString(ADDRESS_FIVE)
+    Address.fromString(ADDRESS_FIVE),
   ];
   let pluginPreparation = PluginPreparation.load(preparationId);
   if (!pluginPreparation) {
@@ -170,9 +169,9 @@ test('InstallationPrepared event', function() {
     let operation = PERMISSION_OPERATIONS.get(permission[0].toI32());
     let permissionEntityId = `${preparationId}_${operation}_${permission[1]
       .toAddress()
-      .toHexString()}_${permission[2]
-      .toAddress()
-      .toHexString()}_${permission[4].toBytes().toHexString()}`;
+      .toHexString()}_${permission[2].toAddress().toHexString()}_${permission[4]
+      .toBytes()
+      .toHexString()}`;
     assert.fieldEquals(
       'PluginPermission',
       permissionEntityId,
@@ -233,7 +232,7 @@ test('InstallationPrepared event', function() {
   clearStore();
 });
 
-test('InstallationApplied event', function() {
+test('InstallationApplied event', function () {
   let dao = DAO_ADDRESS;
   let plugin = ADDRESS_ONE;
   let setupId = PLUGIN_SETUP_ID;
@@ -293,7 +292,7 @@ test('InstallationApplied event', function() {
   clearStore();
 });
 
-test('UpdatePrepared event', function() {
+test('UpdatePrepared event', function () {
   let dao = DAO_ADDRESS;
   let plugin = ADDRESS_ONE;
   let setupId = PLUGIN_SETUP_ID;
@@ -316,7 +315,7 @@ test('UpdatePrepared event', function() {
       ethereum.Value.fromAddress(Address.fromString(dao)),
       ethereum.Value.fromAddress(Address.fromString(plugin)),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_ZERO)),
-      ethereum.Value.fromBytes(Bytes.fromHexString('0x1234'))
+      ethereum.Value.fromBytes(Bytes.fromHexString('0x1234')),
     ],
 
     [
@@ -324,8 +323,8 @@ test('UpdatePrepared event', function() {
       ethereum.Value.fromAddress(Address.fromString(dao)),
       ethereum.Value.fromAddress(Address.fromString(plugin)),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_SIX)),
-      ethereum.Value.fromBytes(Bytes.fromHexString('0x5678'))
-    ]
+      ethereum.Value.fromBytes(Bytes.fromHexString('0x5678')),
+    ],
   ];
 
   let event = createUpdatePreparedEvent(
@@ -386,7 +385,7 @@ test('UpdatePrepared event', function() {
 
   let helpers = [
     Address.fromString(ADDRESS_FOUR),
-    Address.fromString(ADDRESS_FIVE)
+    Address.fromString(ADDRESS_FIVE),
   ];
   let pluginPreparation = PluginPreparation.load(preparationId);
   if (!pluginPreparation) {
@@ -405,9 +404,9 @@ test('UpdatePrepared event', function() {
     let operation = PERMISSION_OPERATIONS.get(permission[0].toI32());
     let permissionEntityId = `${preparationId}_${operation}_${permission[1]
       .toAddress()
-      .toHexString()}_${permission[2]
-      .toAddress()
-      .toHexString()}_${permission[4].toBytes().toHexString()}`;
+      .toHexString()}_${permission[2].toAddress().toHexString()}_${permission[4]
+      .toBytes()
+      .toHexString()}`;
     assert.fieldEquals(
       'PluginPermission',
       permissionEntityId,
@@ -463,7 +462,7 @@ test('UpdatePrepared event', function() {
   clearStore();
 });
 
-test('UpdateApplied event', function() {
+test('UpdateApplied event', function () {
   let dao = DAO_ADDRESS;
   let plugin = ADDRESS_ONE;
   let setupId = PLUGIN_SETUP_ID;
@@ -528,7 +527,7 @@ test('UpdateApplied event', function() {
   clearStore();
 });
 
-test('UninstallationPrepared event', function() {
+test('UninstallationPrepared event', function () {
   let dao = DAO_ADDRESS;
   let plugin = ADDRESS_ONE;
   let setupId = PLUGIN_SETUP_ID;
@@ -551,7 +550,7 @@ test('UninstallationPrepared event', function() {
       ethereum.Value.fromAddress(Address.fromString(dao)),
       ethereum.Value.fromAddress(Address.fromString(plugin)),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_ZERO)),
-      ethereum.Value.fromBytes(Bytes.fromHexString('0x1234'))
+      ethereum.Value.fromBytes(Bytes.fromHexString('0x1234')),
     ],
 
     [
@@ -559,8 +558,8 @@ test('UninstallationPrepared event', function() {
       ethereum.Value.fromAddress(Address.fromString(dao)),
       ethereum.Value.fromAddress(Address.fromString(plugin)),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_SIX)),
-      ethereum.Value.fromBytes(Bytes.fromHexString('0x5678'))
-    ]
+      ethereum.Value.fromBytes(Bytes.fromHexString('0x5678')),
+    ],
   ];
 
   let event = createUninstallationPreparedEvent(
@@ -637,9 +636,9 @@ test('UninstallationPrepared event', function() {
     let operation = PERMISSION_OPERATIONS.get(permission[0].toI32());
     let permissionEntityId = `${preparationId}_${operation}_${permission[1]
       .toAddress()
-      .toHexString()}_${permission[2]
-      .toAddress()
-      .toHexString()}_${permission[4].toBytes().toHexString()}`;
+      .toHexString()}_${permission[2].toAddress().toHexString()}_${permission[4]
+      .toBytes()
+      .toHexString()}`;
     assert.fieldEquals(
       'PluginPermission',
       permissionEntityId,
@@ -695,7 +694,7 @@ test('UninstallationPrepared event', function() {
   clearStore();
 });
 
-test('UninstallationApplied event', function() {
+test('UninstallationApplied event', function () {
   let dao = DAO_ADDRESS;
   let plugin = ADDRESS_ONE;
   let setupId = PLUGIN_SETUP_ID;

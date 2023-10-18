@@ -1,8 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-
+import adminMetadata from '../../../src/plugins/governance/admin/build-metadata.json';
 import {
   DAORegistry,
   PluginSetupProcessor,
@@ -29,35 +25,36 @@ import {
   PluginRepoRegistry__factory,
 } from '../../../typechain';
 import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
-import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
-
-import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {
-  deployPluginRepoFactory,
-  deployPluginRepoRegistry,
-} from '../../test-utils/repo';
-import adminMetadata from '../../../src/plugins/governance/admin/build-metadata.json';
-
+import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {findEventTopicLog} from '../../../utils/event';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
-import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
-import {PluginRepoPointer} from '../../test-utils/psp/types';
 import {
   createApplyInstallationParams,
   createApplyUninstallationParams,
   createApplyUpdateParams,
   createPrepareInstallationParams,
 } from '../../test-utils/psp/create-params';
+import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
+import {PluginRepoPointer} from '../../test-utils/psp/types';
 import {
   prepareInstallation,
   prepareUninstallation,
   prepareUpdate,
 } from '../../test-utils/psp/wrappers';
-import {getInterfaceID} from '../../test-utils/interfaces';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {
+  deployPluginRepoFactory,
+  deployPluginRepoRegistry,
+} from '../../test-utils/repo';
+import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

@@ -1,8 +1,8 @@
+import {Multisig__factory} from '../../../typechain';
+import {getManagingDAOMultisigAddress, uploadToIPFS} from '../../helpers';
 import {writeFile} from 'fs/promises';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {Multisig__factory} from '../../../typechain';
-import {getManagingDAOMultisigAddress, uploadToIPFS} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nCreating managing DAO Proposal');

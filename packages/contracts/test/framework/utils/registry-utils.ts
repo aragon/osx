@@ -1,7 +1,7 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
 import {RegistryUtils, RegistryUtils__factory} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 describe('RegistryUtils', () => {
   let registryUtilsContract: RegistryUtils;

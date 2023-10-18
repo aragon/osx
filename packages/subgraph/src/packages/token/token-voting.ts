@@ -1,27 +1,23 @@
-import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  TokenVotingPlugin,
+  TokenVotingProposal,
+  TokenVotingVoter,
+  TokenVotingVote,
+} from '../../../generated/schema';
+import {GovernanceERC20} from '../../../generated/templates';
 import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
   MembershipContractAnnounced,
-  TokenVoting
+  TokenVoting,
 } from '../../../generated/templates/TokenVoting/TokenVoting';
-
-import {GovernanceERC20} from '../../../generated/templates';
-
-import {
-  Action,
-  TokenVotingPlugin,
-  TokenVotingProposal,
-  TokenVotingVoter,
-  TokenVotingVote
-} from '../../../generated/schema';
-
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
 import {getProposalId} from '../../utils/proposals';
+import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
+import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();

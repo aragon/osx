@@ -1,6 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-
 import {
   IERC165__factory,
   IPlugin__factory,
@@ -8,9 +5,11 @@ import {
   PluginV1Mock,
   PluginV1Mock__factory,
 } from '../../../typechain';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {PluginType} from '../../test-utils/psp/types';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 describe('Plugin', function () {
   let plugin: PluginV1Mock;

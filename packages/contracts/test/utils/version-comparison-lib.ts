@@ -1,10 +1,9 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-
 import {
   VersionComparisonLibTest,
   VersionComparisonLibTest__factory,
 } from '../../typechain';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 type SemVer = [number, number, number];
 

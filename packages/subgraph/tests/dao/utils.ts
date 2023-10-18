@@ -1,7 +1,4 @@
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
-import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {Dao} from '../../generated/schema';
-
 import {
   MetadataSet,
   NativeTokenDeposited,
@@ -11,8 +8,10 @@ import {
   SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived,
-  NewURI
+  NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 
 // events
 
@@ -398,7 +397,7 @@ export function getIsUserAllowed(
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.zero())
+      ethereum.Value.fromUnsignedBigInt(BigInt.zero()),
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
@@ -427,7 +426,7 @@ export function getSupportsInterface(
     'supportsInterface(bytes4):(bool)'
   )
     .withArgs([
-      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes),
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }

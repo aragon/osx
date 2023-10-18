@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   MajorityVotingMock,
   DAO,
@@ -14,6 +10,10 @@ import {
   IProtocolVersion__factory,
 } from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
+import {daoExampleURI} from '../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../test-utils/error';
+import {getInterfaceID} from '../../../test-utils/interfaces';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   VotingSettings,
   VotingMode,
@@ -21,10 +21,9 @@ import {
   ONE_HOUR,
   ONE_YEAR,
 } from '../../../test-utils/voting';
-import {deployWithProxy} from '../../../test-utils/proxy';
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {daoExampleURI} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 export const majorityVotingBaseInterface = new ethers.utils.Interface([
   'function minDuration()',

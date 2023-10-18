@@ -1,9 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import pluginUUPSUpgradeableArtifact from '../../../artifacts/src/core/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
-
 import {
   PluginSetupProcessor,
   PluginUUPSUpgradeableSetupV1Mock,
@@ -33,18 +28,41 @@ import {
   PluginCloneableSetupV1MockBad__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
-
-import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
-import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
 import {findEventTopicLog} from '../../../utils/event';
 import {Operation} from '../../../utils/types';
-
+import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
+import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {
+  installPlugin,
+  updatePlugin,
+  uninstallPlugin,
+} from '../../test-utils/psp/atomic-helpers';
+import {
+  createPrepareInstallationParams,
+  createApplyInstallationParams,
+  createPrepareUninstallationParams,
+  createApplyUninstallationParams,
+  createPrepareUpdateParams,
+  createApplyUpdateParams,
+} from '../../test-utils/psp/create-params';
+import {
+  getAppliedSetupId,
+  getPluginInstallationId,
+  getPreparedSetupId,
+} from '../../test-utils/psp/hash-helpers';
 import {
   mockPermissionsOperations,
   mockHelpers,
 } from '../../test-utils/psp/mock-helpers';
-
+import {
+  PluginRepoPointer,
+  PreparationType,
+  VersionTag,
+} from '../../test-utils/psp/types';
+import {PermissionOperation} from '../../test-utils/psp/types';
 import {
   prepareInstallation,
   prepareUpdate,
@@ -54,38 +72,15 @@ import {
   applyUninstallation,
 } from '../../test-utils/psp/wrappers';
 import {
-  createPrepareInstallationParams,
-  createApplyInstallationParams,
-  createPrepareUninstallationParams,
-  createApplyUninstallationParams,
-  createPrepareUpdateParams,
-  createApplyUpdateParams,
-} from '../../test-utils/psp/create-params';
-
-import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {BytesLike} from 'ethers';
-import {
-  PluginRepoPointer,
-  PreparationType,
-  VersionTag,
-} from '../../test-utils/psp/types';
-import {PermissionOperation} from '../../test-utils/psp/types';
-import {
-  getAppliedSetupId,
-  getPluginInstallationId,
-  getPreparedSetupId,
-} from '../../test-utils/psp/hash-helpers';
 import {MockContract, smock} from '@defi-wonderland/smock';
-import {
-  installPlugin,
-  updatePlugin,
-  uninstallPlugin,
-} from '../../test-utils/psp/atomic-helpers';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {BytesLike} from 'ethers';
+import {ethers} from 'hardhat';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',

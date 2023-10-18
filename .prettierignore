@@ -13,7 +13,6 @@ typechain
 types
 imported
 generated
-*/js-client/test/integration/*.test.ts
 
 # files
 *.env
@@ -22,6 +21,5 @@ generated
 .pnp.*
 coverage.json
 package-lock.json
-pnpm-lock.yaml
 yarn.lock
 extended-schema.ts

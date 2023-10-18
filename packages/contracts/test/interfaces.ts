@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-
-import {getInterfaceID} from './test-utils/interfaces';
-
 import {
   // core
   IDAO__factory,
@@ -9,41 +5,35 @@ import {
   IPermissionCondition__factory,
   IPlugin__factory,
   IMembership__factory,
-  IProposal__factory,
-  // framework
+  IProposal__factory, // framework
   IPluginRepo__factory,
-  IPluginSetup__factory,
-  // plugins
+  IPluginSetup__factory, // plugins
   IMajorityVoting__factory,
   IMultisig__factory,
   IMerkleMinter__factory,
-  IMerkleDistributor__factory,
-  // token
+  IMerkleDistributor__factory, // token
   IERC20MintableUpgradeable__factory,
-  IGovernanceWrappedERC20__factory,
-  // utils
+  IGovernanceWrappedERC20__factory, // utils
   IProtocolVersion__factory,
 } from '../typechain';
-
 import {IDAO__factory as IDAO_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/dao/IDAO.sol';
 import {IEIP4824__factory as IEIP4824_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/dao/IEIP4824.sol';
 import {IPermissionCondition__factory as IPermissionCondition_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/permission/IPermissionCondition.sol';
 import {IPlugin__factory as IPlugin_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/plugin/IPlugin.sol';
 import {IMembership__factory as IMembership_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/plugin/membership/IMembership.sol';
 import {IProposal__factory as IProposal_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/plugin/proposal/IProposal.sol';
-
 import {IPluginRepo__factory as IPluginRepo_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/IPluginRepo.sol';
 import {IPluginSetup__factory as IPluginSetup_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/framework/plugin/setup/IPluginSetup.sol';
-
 import {IMajorityVoting__factory as IMajorityVoting_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/IMajorityVoting.sol';
 import {IMultisig__factory as IMultisig_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/IMultisig.sol';
-import {IMerkleMinter__factory as IMerkleMinter_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleMinter.sol';
 import {IMerkleDistributor__factory as IMerkleDistributor_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleDistributor.sol';
-
+import {IMerkleMinter__factory as IMerkleMinter_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleMinter.sol';
 import {IERC20MintableUpgradeable__factory as IERC20MintableUpgradeable_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/IERC20MintableUpgradeable.sol';
-import {IGovernanceWrappedERC20__factory as IGovernanceWrappedERC20_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/governance/IGovernanceWrappedERC20.sol'; // TODO: For some reason this file is missing.
-
+import {IGovernanceWrappedERC20__factory as IGovernanceWrappedERC20_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/governance/IGovernanceWrappedERC20.sol';
+// TODO: For some reason this file is missing.
 import {IProtocolVersion__factory as IProtocolVersion_V1_3_0__factory} from '../typechain/@aragon/osx-v1.3.0-rc0.2/utils/protocol/IProtocolVersion.sol';
+import {getInterfaceID} from './test-utils/interfaces';
+import {expect} from 'chai';
 
 describe('Interfaces', function () {
   context('introduced in v1.0.0', function () {

@@ -1,8 +1,3 @@
-import {expect} from 'chai';
-import {BigNumberish} from 'ethers';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   DAOMock,
   CounterV1PluginSetup,
@@ -15,6 +10,10 @@ import {
   DAOMock__factory,
 } from '../../../typechain';
 import {Operation} from '../../../utils/types';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {BigNumberish} from 'ethers';
+import {ethers} from 'hardhat';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;

@@ -1,20 +1,4 @@
-import {expect} from 'chai';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ethers} from 'hardhat';
-
-import {
-  findEvent,
-  DAO_EVENTS,
-  PROPOSAL_EVENTS,
-  MEMBERSHIP_EVENTS,
-  findEventTopicLog,
-} from '../../../../utils/event';
-import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
 import {ADMIN_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
-
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {toBytes32} from '../../../test-utils/voting';
 import {
   CloneFactory,
   CloneFactory__factory,
@@ -28,6 +12,20 @@ import {
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
+import {
+  findEvent,
+  DAO_EVENTS,
+  PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
+  findEventTopicLog,
+} from '../../../../utils/event';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../test-utils/error';
+import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {toBytes32} from '../../../test-utils/voting';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(

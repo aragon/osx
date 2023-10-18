@@ -1,6 +1,6 @@
+import {promises as fs} from 'fs';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {promises as fs} from 'fs';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nPrinting deployed contracts.');

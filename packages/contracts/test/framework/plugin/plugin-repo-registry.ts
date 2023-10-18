@@ -1,8 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {ContractFactory} from 'ethers';
-
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO,
   PluginRepo,
@@ -12,22 +7,25 @@ import {
 } from '../../../typechain';
 import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol';
 import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.2/framework/plugin/repo/PluginRepoRegistry.sol';
-
-import {deployNewDAO} from '../../test-utils/dao';
-import {deployNewPluginRepo} from '../../test-utils/repo';
-import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {ensDomainHash} from '../../../utils/ens';
-import {deployWithProxy} from '../../test-utils/proxy';
+import {deployNewDAO} from '../../test-utils/dao';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
+import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

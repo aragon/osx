@@ -1,8 +1,3 @@
-import chai, {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   ActionExecute__factory,
   DAO,
@@ -16,12 +11,15 @@ import {
   TokenFactory,
   TokenFactory__factory,
 } from '../../../typechain';
-
-import {findEvent} from '../../../utils/event';
 import {
   TokenCreatedEvent,
   WrappedTokenEvent,
 } from '../../../typechain/TokenFactory';
+import {findEvent} from '../../../utils/event';
+import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import chai, {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const daoArtifactPath = 'src/core/dao/DAO.sol:DAO';
 const governanceErc20ArtifactPath =

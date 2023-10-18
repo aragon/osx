@@ -1,18 +1,18 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC721Balance,
   ERC721Contract,
-  ERC721Transfer
+  ERC721Transfer,
 } from '../../../generated/schema';
 import {ERC721} from '../../../generated/templates/DaoTemplateV1_0_0/ERC721';
+import {getMethodSignature} from '../bytes';
 import {supportsInterface} from '../erc165';
 import {DECODE_OFFSET, getTransferId, TransferType} from './common';
 import {
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
-  ERC721_transferFrom
+  ERC721_transferFrom,
 } from './common';
-import {getMethodSignature} from '../bytes';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 function supportsERC721(token: Address): bool {
   // Double check that it's ERC721 by calling supportsInterface checks.

@@ -1,3 +1,11 @@
+import {Administrator, AdministratorAdminPlugin} from '../../generated/schema';
+import {
+  handleGranted,
+  handleRevoked,
+} from '../../src/packages/admin/adminMembers';
+import {ADDRESS_ONE, ADDRESS_TWO, DAO_ADDRESS} from '../constants';
+import {createGrantedEvent, createRevokedEvent} from './utils';
+import {DataSourceContext} from '@graphprotocol/graph-ts';
 import {
   assert,
   clearStore,
@@ -5,35 +13,26 @@ import {
   test,
   describe,
   beforeEach,
-  afterEach
+  afterEach,
 } from 'matchstick-as/assembly/index';
 
-import {ADDRESS_ONE, ADDRESS_TWO, DAO_ADDRESS} from '../constants';
-import {createGrantedEvent, createRevokedEvent} from './utils';
-import {
-  handleGranted,
-  handleRevoked
-} from '../../src/packages/admin/adminMembers';
-import {DataSourceContext} from '@graphprotocol/graph-ts';
-import {Administrator, AdministratorAdminPlugin} from '../../generated/schema';
-
-describe('AdminMembers', function() {
+describe('AdminMembers', function () {
   // keccack256 of EXECUTE_PROPOSAL_PERMISSION
   const AdminPermission =
     '0xf281525e53675515a6ba7cc7bea8a81e649b3608423ee2d73be1752cea887889';
 
-  beforeEach(function() {
+  beforeEach(function () {
     let context = new DataSourceContext();
     context.setString('permissionId', AdminPermission);
     context.setString('pluginAddress', ADDRESS_ONE);
     dataSourceMock.setContext(context);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     clearStore();
   });
 
-  test('handleGranted', function() {
+  test('handleGranted', function () {
     let event = createGrantedEvent(
       DAO_ADDRESS,
       ADDRESS_ONE,
@@ -69,7 +68,7 @@ describe('AdminMembers', function() {
     );
   });
 
-  test('handleRevoked', function() {
+  test('handleRevoked', function () {
     let administrator = new Administrator(ADDRESS_TWO);
     administrator.address = ADDRESS_TWO;
     administrator.save();
