@@ -12,7 +12,6 @@ import * as PermissionLib from '../artifacts/src/core/permission/PermissionLib.s
 //// dao
 import * as DAOFactory from '../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 import * as DAORegistry from '../artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json';
-import * as TokenFactory from '../artifacts/src/framework/utils/TokenFactory.sol/TokenFactory.json';
 
 //// Plugin
 ///// Repo
@@ -58,7 +57,6 @@ export default {
   PermissionLib,
 
   DAOFactory,
-  TokenFactory,
   DAORegistry,
 
   PluginRepo,
