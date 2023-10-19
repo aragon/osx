@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-
-import hre, {ethers, deployments} from 'hardhat';
-import {Deployment} from 'hardhat-deploy/dist/types';
 import {
   DAO,
   DAORegistry,
@@ -16,16 +12,17 @@ import {
   PluginRepoRegistry__factory,
   PluginRepo__factory,
 } from '../../typechain';
-
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
-
 import {
   EXECUTE_PERMISSION_ID,
   MAINTAINER_PERMISSION_ID,
   ROOT_PERMISSION_ID,
   UPGRADE_PERMISSIONS,
 } from '../test-utils/permissions';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import hre, {ethers, deployments} from 'hardhat';
+import {Deployment} from 'hardhat-deploy/dist/types';
 
 async function deployAll() {
   await initializeDeploymentFixture('New');

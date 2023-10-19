@@ -38,16 +38,16 @@ export function createTokenCalls(
   totalSupply: string | null
 ): void {
   createMockGetter(contractAddress, 'name', 'name():(string)', [
-    ethereum.Value.fromString(name)
+    ethereum.Value.fromString(name),
   ]);
 
   createMockGetter(contractAddress, 'symbol', 'symbol():(string)', [
-    ethereum.Value.fromString(symbol)
+    ethereum.Value.fromString(symbol),
   ]);
 
   if (decimals) {
     createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals)),
     ]);
   }
 
@@ -70,7 +70,7 @@ export function createWrappedTokenCalls(
 ): void {
   createTokenCalls(contractAddress, name, symbol, '18', totalSupply);
   createMockGetter(contractAddress, 'underlying', 'underlying():(address)', [
-    ethereum.Value.fromAddress(Address.fromString(underlyingTokenAddress))
+    ethereum.Value.fromAddress(Address.fromString(underlyingTokenAddress)),
   ]);
 }
 
@@ -141,7 +141,7 @@ export function createGetProposalCall(
     'getProposal(uint256):(bool,bool,(uint8,uint32,uint64,uint64,uint64,uint256),(uint256,uint256,uint256),(address,uint256,bytes)[],uint256)'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId)),
     ])
     .returns([
       ethereum.Value.fromBoolean(open),
@@ -155,7 +155,7 @@ export function createGetProposalCall(
 
       ethereum.Value.fromTupleArray(actions),
 
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap)),
     ]);
 }
 
@@ -171,9 +171,9 @@ export function createTotalVotingPowerCall(
     'totalVotingPower(uint256):(uint256)'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(blockNumber))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(blockNumber)),
     ])
     .returns([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(totalVotingPower))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(totalVotingPower)),
     ]);
 }

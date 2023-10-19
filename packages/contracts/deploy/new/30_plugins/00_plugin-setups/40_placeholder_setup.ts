@@ -1,9 +1,8 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-import {uploadToIPFS} from '../../../helpers';
-
 import placeholderSetupArtifact from '../../../../artifacts/src/plugins/placeholder-version/PlaceholderSetup.sol/PlaceholderSetup.json';
 import placeholderBuildMetadata from '../../../../src/plugins/placeholder-version/build-metadata.json';
+import {uploadToIPFS} from '../../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;

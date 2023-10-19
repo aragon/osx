@@ -1,5 +1,10 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  MultisigPlugin,
+  MultisigProposal,
+  MultisigApprover,
+  MultisigProposalApprover,
+} from '../../../generated/schema';
 import {
   ProposalCreated,
   ProposalExecuted,
@@ -7,16 +12,10 @@ import {
   MembersRemoved,
   Multisig,
   Approved,
-  MultisigSettingsUpdated
+  MultisigSettingsUpdated,
 } from '../../../generated/templates/Multisig/Multisig';
-import {
-  Action,
-  MultisigPlugin,
-  MultisigProposal,
-  MultisigApprover,
-  MultisigProposalApprover
-} from '../../../generated/schema';
 import {getProposalId} from '../../utils/proposals';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -105,9 +104,8 @@ export function handleApproved(event: Approved): void {
   let proposalId = getProposalId(event.address, pluginProposalId);
   let approverProposalId = member.concat('_').concat(proposalId);
 
-  let approverProposalEntity = MultisigProposalApprover.load(
-    approverProposalId
-  );
+  let approverProposalEntity =
+    MultisigProposalApprover.load(approverProposalId);
   if (!approverProposalEntity) {
     approverProposalEntity = new MultisigProposalApprover(approverProposalId);
     approverProposalEntity.approver = memberId;

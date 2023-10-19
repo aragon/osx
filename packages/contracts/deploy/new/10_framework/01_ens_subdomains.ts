@@ -1,5 +1,4 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {ENSRegistry__factory} from '../../../typechain';
 import {
   getContractAddress,
   getENSAddress,
@@ -7,7 +6,8 @@ import {
   registerSubnodeRecord,
   transferSubnodeChain,
 } from '../../helpers';
-import {ENSRegistry__factory} from '../../../typechain';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;

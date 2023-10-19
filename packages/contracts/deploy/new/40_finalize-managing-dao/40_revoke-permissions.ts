@@ -1,8 +1,7 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import {getContractAddress, managePermissions, Permission} from '../../helpers';
-import {Operation} from '../../../utils/types';
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
+import {Operation} from '../../../utils/types';
+import {getContractAddress, managePermissions, Permission} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

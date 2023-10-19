@@ -11,7 +11,7 @@ function main() {
     './tests/helpers/extended-schema.ts',
     '',
     {
-      overwrite: true
+      overwrite: true,
     }
   );
 
@@ -34,16 +34,17 @@ function main() {
   // Import assert into generated file
   outputFile.addImportDeclaration({
     namedImports: ['assert', 'log'],
-    moduleSpecifier: `matchstick-as`
+    moduleSpecifier: `matchstick-as`,
   });
 
   // Add import statements for the original classes
-  const sourceFileNameWithoutExtension = sourceFile.getBaseNameWithoutExtension();
+  const sourceFileNameWithoutExtension =
+    sourceFile.getBaseNameWithoutExtension();
   outputFile.addImportDeclaration({
     namedImports: sourceClasses.map(
       classDeclaration => classDeclaration.getName() as string
     ),
-    moduleSpecifier: `../../generated/${sourceFileNameWithoutExtension}`
+    moduleSpecifier: `../../generated/${sourceFileNameWithoutExtension}`,
   });
 
   // Iterate through the classes in the source file
@@ -54,7 +55,7 @@ function main() {
     const newClass = outputFile.addClass({
       name: newClassName,
       isExported: true,
-      extends: originalClassName
+      extends: originalClassName,
     });
 
     // Create a new constructor that calls super() with a default id.
@@ -63,7 +64,7 @@ function main() {
       statements: (writer: CodeBlockWriter) => {
         const defaultEntityId = '0x1';
         writer.writeLine(`super('${defaultEntityId}');`);
-      }
+      },
     });
 
     // add methods to generated classes
@@ -85,7 +86,7 @@ function main() {
           const newMethod = newClass.addMethod({
             name: method.getName(),
             returnType: returnType,
-            typeParameters: typeParameters // Add the type parameters to the new method
+            typeParameters: typeParameters, // Add the type parameters to the new method
           });
 
           const parameters = method.getParameters().map(parameter => {
@@ -96,7 +97,7 @@ function main() {
               initializer: parameter.getInitializer()?.getText(),
               decorators: parameter
                 .getDecorators()
-                .map(decorator => decorator.getStructure())
+                .map(decorator => decorator.getStructure()),
             };
           });
 
@@ -115,7 +116,7 @@ function main() {
       returnType: 'void',
       statements: (writer: CodeBlockWriter) => {
         writer.writeLine('this.save();');
-      }
+      },
     });
 
     newClass.addMethod({
@@ -125,8 +126,8 @@ function main() {
         {
           name: 'debug',
           type: 'boolean',
-          initializer: 'false'
-        }
+          initializer: 'false',
+        },
       ],
       statements: (writer: CodeBlockWriter) => {
         writer.writeLine(`let entity = ${originalClassName}.load(this.id);`);
@@ -163,7 +164,7 @@ function main() {
               );
             });
         });
-      }
+      },
     });
   });
 

@@ -1,8 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {Contract, ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import {MULTISIG_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
 import {
   Addresslist__factory,
   DAO,
@@ -18,13 +14,12 @@ import {
 } from '../../../../typechain';
 import {Multisig__factory as Multisig_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol';
 import {Multisig__factory as Multisig_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/multisig/Multisig.sol';
-
+import {ExecutedEvent} from '../../../../typechain/DAO';
+import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
 import {
   ApprovedEvent,
   ProposalExecutedEvent,
 } from '../../../../typechain/Multisig';
-import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
-
 import {
   findEvent,
   findEventTopicLog,
@@ -36,29 +31,31 @@ import {
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {
-  advanceTime,
-  getTime,
-  setTimeForNextBlock,
-  timestampIn,
-  toBytes32,
-} from '../../../test-utils/voting';
-import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {deployWithProxy} from '../../../test-utils/proxy';
-import {
   MULTISIG_INTERFACE,
   getInterfaceID,
 } from '../../../test-utils/interfaces';
-import {MULTISIG_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
+import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
 import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../test-utils/protocol-version';
-import {ExecutedEvent} from '../../../../typechain/DAO';
+  advanceTime,
+  getTime,
+  setTimeForNextBlock,
+  timestampIn,
+  toBytes32,
+} from '../../../test-utils/voting';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {Contract, ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 export type MultisigSettings = {
   minApprovals: number;

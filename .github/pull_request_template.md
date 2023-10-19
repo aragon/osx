@@ -5,7 +5,9 @@ Please include a summary of the change and be sure you follow the contributions 
 Task ID: [OS-?](https://aragonassociation.atlassian.net/browse/OS-?)
 
 ## Type of change
+
 See the framework lifecylce in `packages/contracts/docs/framework-lifecycle` to decide what kind of change this pull request is.
+
 <!--- Please delete options that are not relevant. -->
 
 - [ ] Bug fix (non-breaking change which fixes an issue)

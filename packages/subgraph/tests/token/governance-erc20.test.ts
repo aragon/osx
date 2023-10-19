@@ -1,27 +1,27 @@
 import {
+  handleDelegateChanged,
+  handleDelegateVotesChanged,
+  handleTransfer,
+} from '../../src/packages/token/governance-erc20';
+import {
+  ADDRESS_ONE,
+  ADDRESS_SIX,
+  ADDRESS_TWO,
+  ONE_ETH,
+  ADDRESS_THREE,
+} from '../constants';
+import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
+import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
+import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
+import {
   assert,
   afterEach,
   beforeAll,
   clearStore,
   dataSourceMock,
   test,
-  describe
+  describe,
 } from 'matchstick-as';
-import {
-  ADDRESS_ONE,
-  ADDRESS_SIX,
-  ADDRESS_TWO,
-  ONE_ETH,
-  ADDRESS_THREE
-} from '../constants';
-import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
-import {
-  handleDelegateChanged,
-  handleDelegateVotesChanged,
-  handleTransfer
-} from '../../src/packages/token/governance-erc20';
-import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
-import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 
 describe('Governance ERC20', () => {
   beforeAll(() => {
@@ -113,9 +113,7 @@ describe('Governance ERC20', () => {
         'TokenVotingMember',
         fromUserId,
         'balance',
-        BigInt.fromString(ONE_ETH)
-          .times(BigInt.fromString('9'))
-          .toString()
+        BigInt.fromString(ONE_ETH).times(BigInt.fromString('9')).toString()
       );
     });
 
@@ -140,9 +138,7 @@ describe('Governance ERC20', () => {
         'TokenVotingMember',
         toUserId,
         'balance',
-        BigInt.fromString(ONE_ETH)
-          .times(BigInt.fromString('11'))
-          .toString()
+        BigInt.fromString(ONE_ETH).times(BigInt.fromString('11')).toString()
       );
     });
   });
@@ -316,10 +312,7 @@ describe('Governance ERC20', () => {
       memberOne.votingPower = BigInt.fromString('100');
       memberOne.assertEntity();
       // member two should be deleted because it has no balance or voting power
-      assert.notInStore(
-        'TokenVotingMember',
-        memberTwo.id
-      );
+      assert.notInStore('TokenVotingMember', memberTwo.id);
       assert.entityCount('TokenVotingMember', 1);
     });
   });

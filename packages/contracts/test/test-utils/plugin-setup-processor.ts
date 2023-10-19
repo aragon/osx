@@ -1,10 +1,9 @@
-import {ethers} from 'hardhat';
-
 import {
   PluginSetupProcessor__factory,
   PluginRepoRegistry,
   PluginSetupProcessor,
 } from '../../typechain';
+import {ethers} from 'hardhat';
 
 export async function deployPluginSetupProcessor(
   pluginRepoRegistry: PluginRepoRegistry
