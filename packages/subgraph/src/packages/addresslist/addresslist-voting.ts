@@ -1,5 +1,10 @@
-import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  AddresslistVotingPlugin,
+  AddresslistVotingProposal,
+  AddresslistVotingVoter,
+  AddresslistVotingVote,
+} from '../../../generated/schema';
 import {
   VoteCast,
   ProposalCreated,
@@ -7,17 +12,11 @@ import {
   VotingSettingsUpdated,
   MembersAdded,
   MembersRemoved,
-  AddresslistVoting
+  AddresslistVoting,
 } from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
-import {
-  Action,
-  AddresslistVotingPlugin,
-  AddresslistVotingProposal,
-  AddresslistVotingVoter,
-  AddresslistVotingVote
-} from '../../../generated/schema';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {getProposalId} from '../../utils/proposals';
+import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();

@@ -1,12 +1,12 @@
 import {DAORegistered} from '../../generated/DAORegistry/DAORegistry';
-import {DaoTemplateV1_0_0, DaoTemplateV1_3_0} from '../../generated/templates';
 import {Dao} from '../../generated/schema';
+import {DaoTemplateV1_0_0, DaoTemplateV1_3_0} from '../../generated/templates';
 import {dataSource} from '@graphprotocol/graph-ts';
 
 // blocklists of addresses for which we don't index the subdomain.
 // Put the reason next to the address as a comment
 const subdomain_blocklist_mainnet = [
-  '0x16070493aa513f91fc8957f14b7b7c6c0c41fbac' // domain squatting lido.dao.eth
+  '0x16070493aa513f91fc8957f14b7b7c6c0c41fbac', // domain squatting lido.dao.eth
 ];
 
 export function handleDAORegistered(event: DAORegistered): void {

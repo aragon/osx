@@ -1,10 +1,8 @@
+import {DAO__factory} from '../../../typechain';
+import {Operation} from '../../../utils/types';
+import {getContractAddress, managePermissions} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-
-import {Operation} from '../../../utils/types';
-
-import {getContractAddress, managePermissions} from '../../helpers';
-import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;

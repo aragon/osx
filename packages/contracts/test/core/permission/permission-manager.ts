@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   PermissionManagerTest,
   PermissionConditionMock,
@@ -9,8 +5,11 @@ import {
   PermissionConditionMock__factory,
   TestPlugin__factory,
 } from '../../../typechain';
-import {OZ_ERRORS} from '../../test-utils/error';
 import {Operation} from '../../../utils/types';
+import {OZ_ERRORS} from '../../test-utils/error';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');

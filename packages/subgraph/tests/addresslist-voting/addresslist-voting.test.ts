@@ -1,18 +1,15 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
-
+import {
+  AddresslistVotingPlugin,
+  AddresslistVotingVoter,
+} from '../../generated/schema';
 import {
   handleMembersAdded,
   handleVoteCast,
   handleProposalExecuted,
   handleMembersRemoved,
   handleVotingSettingsUpdated,
-  _handleProposalCreated
+  _handleProposalCreated,
 } from '../../src/packages/addresslist/addresslist-voting';
-import {
-  AddresslistVotingPlugin,
-  AddresslistVotingVoter
-} from '../../generated/schema';
 import {VOTING_MODES} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
@@ -33,12 +30,12 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   ALLOW_FAILURE_MAP,
-  PROPOSAL_ENTITY_ID
+  PROPOSAL_ENTITY_ID,
 } from '../constants';
 import {
   createDummyActions,
   createGetProposalCall,
-  createTotalVotingPowerCall
+  createTotalVotingPowerCall,
 } from '../utils';
 import {
   createNewMembersAddedEvent,
@@ -48,8 +45,10 @@ import {
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall,
-  createAddresslistVotingProposalEntityState
+  createAddresslistVotingProposalEntityState,
 } from './utils';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -564,7 +563,7 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
 test('Run AddresslistVoting (handleMembersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO)
+    Address.fromString(ADDRESS_TWO),
   ];
 
   // create event
@@ -601,7 +600,7 @@ test('Run AddresslistVoting (MembersRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO)
+    Address.fromString(ADDRESS_TWO),
   ];
 
   for (let index = 0; index < memberAddresses.length; index++) {

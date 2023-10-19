@@ -2,15 +2,6 @@
  * IMPORTANT: Do not export classes from this file.
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
-
-import {
-  Address,
-  BigInt,
-  ByteArray,
-  Bytes,
-  crypto,
-  ethereum
-} from '@graphprotocol/graph-ts';
 import {
   Dao,
   ERC20Balance,
@@ -31,36 +22,36 @@ import {
   TokenVotingProposal,
   TokenVotingVote,
   TokenVotingVoter,
-  Permission
+  Permission,
 } from '../../generated/schema';
 import {
   CallbackReceived,
   Deposited,
   NativeTokenDeposited,
-  NewURI
+  NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   DelegateChanged,
-  DelegateVotesChanged
+  DelegateVotesChanged,
 } from '../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   MembershipContractAnnounced,
   ProposalCreated,
   ProposalExecuted,
   VoteCast,
-  VotingSettingsUpdated
+  VotingSettingsUpdated,
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {
   VOTER_OPTIONS,
   VOTE_OPTIONS,
   VOTING_MODES,
-  VOTING_MODE_INDEXES
+  VOTING_MODE_INDEXES,
 } from '../../src/utils/constants';
 import {
   getBalanceId,
   getERC1155TransferId,
   getTokenIdBalanceId,
-  getTransferId
+  getTransferId,
 } from '../../src/utils/tokens/common';
 import {
   ADDRESS_ONE,
@@ -86,7 +77,7 @@ import {
   ADDRESS_TWO,
   ADDRESS_THREE,
   ADDRESS_ZERO,
-  ADDRESS_FOUR
+  ADDRESS_FOUR,
 } from '../constants';
 import {
   createCallbackReceivedEvent,
@@ -94,8 +85,12 @@ import {
   createNewNativeTokenDepositedEvent,
   createNewURIEvent,
   getBalanceOf,
-  getSupportsInterface
+  getSupportsInterface,
 } from '../dao/utils';
+import {
+  createNewGrantedEvent,
+  createNewRevokedEvent,
+} from '../permission-mamager/utils';
 import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
@@ -104,19 +99,23 @@ import {
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
   createNewVotingSettingsUpdatedEvent,
-  getProposalCountCall
+  getProposalCountCall,
 } from '../token/utils';
 import {
   createGetProposalCall,
   createTotalVotingPowerCall,
   createTokenCalls,
   createWrappedTokenCalls,
-  createERC1155TokenCalls
+  createERC1155TokenCalls,
 } from '../utils';
 import {
-  createNewGrantedEvent,
-  createNewRevokedEvent
-} from '../permission-mamager/utils';
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  crypto,
+  ethereum,
+} from '@graphprotocol/graph-ts';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
 // PermissionManager
@@ -139,7 +138,7 @@ class PermissionMethods extends Permission {
       emittingContract,
       permissionId.toHexString(),
       where.toHexString(),
-      who.toHexString()
+      who.toHexString(),
     ].join('_');
     this.where = where;
     this.permissionId = permissionId;
@@ -321,9 +320,8 @@ class ERC20WrapperContractMethods extends ERC20WrapperContract {
     this.name = 'Wrapped Test Token';
     this.symbol = 'WTT';
     this.decimals = 18;
-    this.underlyingToken = Address.fromHexString(
-      DAO_TOKEN_ADDRESS
-    ).toHexString();
+    this.underlyingToken =
+      Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
     return this;
   }
   // calls

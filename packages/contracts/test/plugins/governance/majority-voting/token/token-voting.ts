@@ -1,8 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {BigNumber, ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
 import {
   DAO,
   DAO__factory,
@@ -19,12 +15,11 @@ import {
 } from '../../../../../typechain';
 import {TokenVoting__factory as TokenVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/token/TokenVoting.sol';
 import {TokenVoting__factory as TokenVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/token/TokenVoting.sol';
-
+import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
-
 import {
   findEvent,
   findEventTopicLog,
@@ -33,6 +28,23 @@ import {
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../../test-utils/error';
+import {
+  TOKEN_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../../test-utils/proxy';
+import {
+  getProtocolVersion,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
+} from '../../../../test-utils/uups-upgradeable';
 import {
   VoteOption,
   pctToRatio,
@@ -47,27 +59,11 @@ import {
   voteWithSigners,
   toBytes32,
 } from '../../../../test-utils/voting';
-import {deployNewDAO} from '../../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../../test-utils/error';
-import {deployWithProxy} from '../../../../test-utils/proxy';
-import {
-  TOKEN_VOTING_INTERFACE,
-  getInterfaceID,
-} from '../../../../test-utils/interfaces';
-import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
-
-import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
-import {
-  getProtocolVersion,
-  deployAndUpgradeFromToCheck,
-  deployAndUpgradeSelfCheck,
-} from '../../../../test-utils/uups-upgradeable';
 import {majorityVotingBaseInterface} from '../majority-voting';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../../test-utils/protocol-version';
-import {ExecutedEvent} from '../../../../../typechain/DAO';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {BigNumber, ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];

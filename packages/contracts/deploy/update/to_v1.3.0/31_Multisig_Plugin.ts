@@ -1,12 +1,10 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import multisigSetupArtifact from '../../../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
+import multisigBuildMetadata from '../../../src/plugins/governance/multisig/build-metadata.json';
+import multisigReleaseMetadata from '../../../src/plugins/governance/multisig/release-metadata.json';
 import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
-
-import multisigSetupArtifact from '../../../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
-
-import multisigReleaseMetadata from '../../../src/plugins/governance/multisig/release-metadata.json';
-import multisigBuildMetadata from '../../../src/plugins/governance/multisig/build-metadata.json';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const TARGET_RELEASE = 1;
 

@@ -1,15 +1,15 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC20Balance,
   ERC20Contract,
   ERC20Transfer,
-  ERC20WrapperContract
+  ERC20WrapperContract,
 } from '../../../generated/schema';
 import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
 import {GovernanceWrappedERC20} from '../../../generated/templates/TokenVoting/GovernanceWrappedERC20';
-import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
-import {supportsInterface} from '../erc165';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../utils/constants';
+import {supportsInterface} from '../erc165';
+import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 export function supportsERC20Wrapped(token: Address): bool {
   // Double check that it's ERC20Wrapped by calling supportsInterface checks.

@@ -1,12 +1,11 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {defaultAbiCoder, hexDataSlice, id} from 'ethers/lib/utils';
-
 import {
   CallbackHandlerMockHelper,
   CallbackHandlerMockHelper__factory,
 } from '../../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {defaultAbiCoder, hexDataSlice, id} from 'ethers/lib/utils';
+import {ethers} from 'hardhat';
 
 const EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',

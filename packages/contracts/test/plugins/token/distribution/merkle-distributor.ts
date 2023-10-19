@@ -1,10 +1,4 @@
 // Copied and modified from: https://github.com/Uniswap/merkle-distributor/blob/master/test/MerkleDistributor.spec.ts
-
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {BigNumber, ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   MerkleDistributor,
   DAO,
@@ -18,21 +12,24 @@ import {
 } from '../../../../typechain';
 import {MerkleDistributor__factory as MerkleDistributor_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/token/MerkleDistributor.sol';
 import {MerkleDistributor__factory as MerkleDistributor_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleDistributor.sol';
-
-import {deployWithProxy} from '../../../test-utils/proxy';
-import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../test-utils/protocol-version';
+import BalanceTree from './src/balance-tree';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {BigNumber, ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 

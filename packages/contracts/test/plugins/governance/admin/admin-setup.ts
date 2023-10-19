@@ -1,16 +1,15 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-
-import {Operation} from '../../../../utils/types';
+import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 import {
   AdminSetup,
   AdminSetup__factory,
   Admin__factory,
 } from '../../../../typechain';
+import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
+import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
-import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
-import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;

@@ -1,8 +1,7 @@
+import {AddresslistMock, AddresslistMock__factory} from '../../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
-import {AddresslistMock, AddresslistMock__factory} from '../../../typechain';
 
 describe('AddresslistMock', function () {
   let signers: SignerWithAddress[];

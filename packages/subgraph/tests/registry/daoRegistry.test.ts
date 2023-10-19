@@ -1,17 +1,16 @@
+import {Dao} from '../../generated/schema';
+import {handleDAORegistered} from '../../src/registries/daoRegistry';
+import {DAO_ADDRESS, ADDRESS_ONE} from '../constants';
+import {createNewDaoEvent} from './utils';
+import {Address} from '@graphprotocol/graph-ts';
 import {
   assert,
   clearStore,
   test,
   dataSourceMock,
   describe,
-  afterEach
+  afterEach,
 } from 'matchstick-as/assembly/index';
-import {Address} from '@graphprotocol/graph-ts';
-
-import {handleDAORegistered} from '../../src/registries/daoRegistry';
-import {DAO_ADDRESS, ADDRESS_ONE} from '../constants';
-import {createNewDaoEvent} from './utils';
-import {Dao} from '../../generated/schema';
 
 describe('DAORegistry', () => {
   afterEach(() => {
