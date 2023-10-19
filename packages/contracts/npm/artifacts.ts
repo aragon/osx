@@ -16,7 +16,6 @@ import * as PluginRepoFactory from '../artifacts/src/framework/plugin/repo/Plugi
 import * as PluginRepoRegistry from '../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 ///// Setup
 import * as PluginSetupProcessor from '../artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
-import * as TokenFactory from '../artifacts/src/framework/utils/TokenFactory.sol/TokenFactory.json';
 // Plugins
 //// Governance
 ////// Admin
