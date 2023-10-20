@@ -3,11 +3,11 @@
 pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {IProtocolVersion} from "../../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
-import {createERC1967Proxy} from "../../../utils/Proxy.sol";
 import {PluginRepoRegistry} from "./PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 
@@ -19,7 +19,7 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
     /// @notice The Aragon plugin registry contract.
     PluginRepoRegistry public pluginRepoRegistry;
 
-    /// @notice The address of the `PluginRepo` base contract to proxy to..
+    /// @notice The `PluginRepo` base contract, to be used for creating new `ERC1967Proxy` repos.
     address public pluginRepoBase;
 
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
@@ -131,9 +131,11 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
         address _initialOwner
     ) internal returns (PluginRepo pluginRepo) {
         pluginRepo = PluginRepo(
-            createERC1967Proxy(
-                pluginRepoBase,
-                abi.encodeCall(PluginRepo.initialize, (_initialOwner))
+            address(
+                new ERC1967Proxy(
+                    pluginRepoBase,
+                    abi.encodeCall(PluginRepo.initialize, (_initialOwner))
+                )
             )
         );
 

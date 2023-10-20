@@ -194,18 +194,14 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginSetupUpgradeable {
         // Update from V1
         if (_currentBuild == 1) {
             preparedSetupData.helpers = mockHelpers(3);
-            initData = abi.encodeWithSelector(
-                PluginUUPSUpgradeableV3Mock.initializeV1toV3.selector
-            );
+            initData = abi.encodeCall(PluginUUPSUpgradeableV3Mock.initializeV1toV3, ());
             preparedSetupData.permissions = mockPermissions(1, 3, PermissionLib.Operation.Grant);
         }
 
         // Update from V2
         if (_currentBuild == 2) {
             preparedSetupData.helpers = mockHelpers(3);
-            initData = abi.encodeWithSelector(
-                PluginUUPSUpgradeableV3Mock.initializeV2toV3.selector
-            );
+            initData = abi.encodeCall(PluginUUPSUpgradeableV3Mock.initializeV2toV3, ());
             preparedSetupData.permissions = mockPermissions(2, 3, PermissionLib.Operation.Grant);
         }
     }

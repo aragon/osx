@@ -3,15 +3,16 @@
 pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../../utils/protocol/ProtocolVersion.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {createERC1967Proxy as createProxy} from "../../../utils/Proxy.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
 
 /// @title PluginSetup
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
-abstract contract PluginSetupUpgradeable is ERC165, IPluginSetup {
+abstract contract PluginSetupUpgradeable is ERC165, IPluginSetup, ProtocolVersion {
     /// @notice The address of plugin implementation contract to create [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxies from.
     address public immutable implementation;
 
@@ -40,7 +41,7 @@ abstract contract PluginSetupUpgradeable is ERC165, IPluginSetup {
         address _implementation,
         bytes memory _data
     ) internal returns (address) {
-        return createProxy(_implementation, _data);
+        return address(new ERC1967Proxy(_implementation, _data));
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -48,6 +49,8 @@ abstract contract PluginSetupUpgradeable is ERC165, IPluginSetup {
     /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            _interfaceId == type(IPluginSetup).interfaceId || super.supportsInterface(_interfaceId);
+            _interfaceId == type(IPluginSetup).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 }

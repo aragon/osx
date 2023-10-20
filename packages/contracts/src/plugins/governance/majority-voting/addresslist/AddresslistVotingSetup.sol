@@ -29,12 +29,7 @@ contract AddresslistVotingSetup is PluginSetupUpgradeable {
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             implementation,
-            abi.encodeWithSelector(
-                AddresslistVoting.initialize.selector,
-                _dao,
-                votingSettings,
-                members
-            )
+            abi.encodeCall(AddresslistVoting.initialize, (IDAO(_dao), votingSettings, members))
         );
         AddresslistVoting addresslistVoting = AddresslistVoting(implementation);
 

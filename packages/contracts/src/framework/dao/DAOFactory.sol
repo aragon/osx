@@ -3,12 +3,12 @@
 pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {DAO} from "../../core/dao/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {createERC1967Proxy} from "../../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/repo/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/setup/PluginSetupProcessor.sol";
 import {hashHelpers, PluginSetupRef} from "../plugin/setup/PluginSetupProcessorHelpers.sol";
@@ -20,7 +20,7 @@ import {DAORegistry} from "./DAORegistry.sol";
 /// @notice This contract is used to create a DAO.
 /// @custom:security-contact sirt@aragon.org
 contract DAOFactory is ERC165, ProtocolVersion {
-    /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
+    /// @notice The DAO base contract, to be used for creating new `ERC1967Proxy` DAOs.
     address public immutable daoBase;
 
     /// @notice The DAO registry listing the `DAO` contracts created via this contract.
@@ -154,7 +154,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // create dao
-        dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
+        dao = DAO(payable(address(new ERC1967Proxy(daoBase, bytes("")))));
 
         // initialize the DAO and give the `ROOT_PERMISSION_ID` permission to this contract.
         dao.initialize(

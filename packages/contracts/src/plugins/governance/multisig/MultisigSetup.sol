@@ -30,7 +30,7 @@ contract MultisigSetup is PluginSetupUpgradeable {
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             implementation,
-            abi.encodeWithSelector(Multisig.initialize.selector, _dao, members, multisigSettings)
+            abi.encodeCall(Multisig.initialize, (IDAO(_dao), members, multisigSettings))
         );
         Multisig multisig = Multisig(plugin);
 

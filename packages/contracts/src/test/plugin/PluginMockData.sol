@@ -2,8 +2,9 @@
 
 pragma solidity ^0.8.8;
 
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {createERC1967Proxy} from "../../utils/Proxy.sol";
 
 address constant NO_CONDITION = address(0);
 
@@ -36,8 +37,10 @@ function mockHelpers(uint160 amount) pure returns (address[] memory helpers) {
 
 function mockPluginProxy(address _pluginBase, address _dao) returns (address) {
     return
-        createERC1967Proxy(
-            _pluginBase,
-            abi.encodeWithSelector(bytes4(keccak256("initialize(address)")), _dao)
+        address(
+            new ERC1967Proxy(
+                _pluginBase,
+                abi.encodeWithSelector(bytes4(keccak256("initialize(address)")), _dao)
+            )
         );
 }

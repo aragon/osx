@@ -13,7 +13,7 @@ import {IPluginSetup} from "./IPluginSetup.sol";
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 /// @custom:security-contact sirt@aragon.org
-abstract contract PluginSetup is ERC165, IPluginSetup {
+abstract contract PluginSetup is ERC165, IPluginSetup, ProtocolVersion {
     using Clones for address;
 
     /// @notice Thrown when trying to update a non-upgradeable plugin.
