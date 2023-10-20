@@ -16,7 +16,6 @@ import * as PluginRepoFactory from '../artifacts/src/framework/plugin/repo/Plugi
 import * as PluginRepoRegistry from '../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 ///// Setup
 import * as PluginSetupProcessor from '../artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
-import * as TokenFactory from '../artifacts/src/framework/utils/TokenFactory.sol/TokenFactory.json';
 // Plugins
 //// Governance
 ////// Admin
@@ -32,9 +31,6 @@ import * as TokenVotingSetup from '../artifacts/src/plugins/governance/majority-
 ////// Multisig
 import * as Multisig from '../artifacts/src/plugins/governance/multisig/Multisig.sol/Multisig.json';
 import * as MultisigSetup from '../artifacts/src/plugins/governance/multisig/MultisigSetup.sol/MultisigSetup.json';
-import * as MerkleDistributor from '../artifacts/src/plugins/token/MerkleDistributor.sol/MerkleDistributor.json';
-//// Token Creation
-import * as MerkleMinter from '../artifacts/src/plugins/token/MerkleMinter.sol/MerkleMinter.json';
 // Token
 //// ERC20
 ////// Governance
@@ -47,7 +43,6 @@ export default {
   PermissionLib,
 
   DAOFactory,
-  TokenFactory,
   DAORegistry,
 
   PluginRepo,
@@ -64,9 +59,6 @@ export default {
   TokenVotingSetup,
   Multisig,
   MultisigSetup,
-
-  MerkleMinter,
-  MerkleDistributor,
 
   GovernanceERC20,
   GovernanceWrappedERC20,

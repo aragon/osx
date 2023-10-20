@@ -1,19 +1,16 @@
 import {
-  // core
   IDAO__factory,
   IEIP4824__factory,
   IPermissionCondition__factory,
   IPlugin__factory,
   IMembership__factory,
-  IProposal__factory, // framework
+  IProposal__factory,
   IPluginRepo__factory,
-  IPluginSetup__factory, // plugins
+  IPluginSetup__factory,
   IMajorityVoting__factory,
   IMultisig__factory,
-  IMerkleMinter__factory,
-  IMerkleDistributor__factory, // token
   IERC20MintableUpgradeable__factory,
-  IGovernanceWrappedERC20__factory, // utils
+  IGovernanceWrappedERC20__factory,
   IProtocolVersion__factory,
 } from '../typechain';
 import {IDAO__factory as IDAO_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/dao/IDAO.sol';
@@ -26,11 +23,8 @@ import {IPluginRepo__factory as IPluginRepo_V1_0_0__factory} from '../typechain/
 import {IPluginSetup__factory as IPluginSetup_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/framework/plugin/setup/IPluginSetup.sol';
 import {IMajorityVoting__factory as IMajorityVoting_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/IMajorityVoting.sol';
 import {IMultisig__factory as IMultisig_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/IMultisig.sol';
-import {IMerkleDistributor__factory as IMerkleDistributor_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleDistributor.sol';
-import {IMerkleMinter__factory as IMerkleMinter_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/token/IMerkleMinter.sol';
 import {IERC20MintableUpgradeable__factory as IERC20MintableUpgradeable_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/IERC20MintableUpgradeable.sol';
 import {IGovernanceWrappedERC20__factory as IGovernanceWrappedERC20_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/governance/IGovernanceWrappedERC20.sol';
-// TODO: For some reason this file is missing.
 import {IProtocolVersion__factory as IProtocolVersion_V1_3_0__factory} from '../typechain/@aragon/osx-v1.3.0-rc0.2/utils/protocol/IProtocolVersion.sol';
 import {getInterfaceID} from './test-utils/interfaces';
 import {expect} from 'chai';
@@ -134,30 +128,6 @@ describe('Interfaces', function () {
         const current = getInterfaceID(IMultisig__factory.createInterface());
         const initial = getInterfaceID(
           IMultisig_V1_0_0__factory.createInterface()
-        );
-        expect(current).to.equal(initial);
-      });
-    });
-
-    describe('IMerkleMinter', function () {
-      it('has still the same interface ID', async () => {
-        const current = getInterfaceID(
-          IMerkleMinter__factory.createInterface()
-        );
-        const initial = getInterfaceID(
-          IMerkleMinter_V1_0_0__factory.createInterface()
-        );
-        expect(current).to.equal(initial);
-      });
-    });
-
-    describe('IMerkleDistributor', function () {
-      it('has still the same interface ID', async () => {
-        const current = getInterfaceID(
-          IMerkleDistributor__factory.createInterface()
-        );
-        const initial = getInterfaceID(
-          IMerkleDistributor_V1_0_0__factory.createInterface()
         );
         expect(current).to.equal(initial);
       });
