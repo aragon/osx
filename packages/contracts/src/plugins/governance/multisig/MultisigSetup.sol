@@ -85,7 +85,7 @@ contract MultisigSetup is PluginSetupUpgradeable {
         address _dao,
         SetupPayload calldata _payload
     ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        Multisig multisig = Multisig(_payload.plugin);
+        Multisig multisig = Multisig(implementation);
 
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](3);

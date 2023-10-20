@@ -80,7 +80,7 @@ contract AddresslistVotingSetup is PluginSetupUpgradeable {
         address _dao,
         SetupPayload calldata _payload
     ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        AddresslistVoting addresslistVoting = AddresslistVoting(_payload.plugin);
+        AddresslistVoting addresslistVoting = AddresslistVoting(implementation);
 
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](4);

@@ -202,7 +202,7 @@ contract TokenVotingSetup is PluginSetupUpgradeable {
             revert WrongHelpersArrayLength({length: helperLength});
         }
 
-        TokenVoting tokenVoting = TokenVoting(_payload.plugin);
+        TokenVoting tokenVoting = TokenVoting(implementation);
 
         // token can be either GovernanceERC20, GovernanceWrappedERC20, or IVotesUpgradeable, which
         // does not follow the GovernanceERC20 and GovernanceWrappedERC20 standard.
