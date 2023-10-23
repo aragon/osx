@@ -5,15 +5,15 @@ flowchart TD
     processStart("PluginSetupProcessor change")
     processStart ==> implementation
     subgraph implementation[Implementation]
-        nonUpgradeableContractImplementation[[<a href='./03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
+        nonUpgradeableContractImplementation[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/03-osx-components/03-non-upgradeable-contract.md'>non-upgradeable \n contract change</a>]]
         ensureCompatibility["ensure backwards compat- \n ibility with active setups"]
 
         nonUpgradeableContractImplementation --> ensureCompatibility
     end
 
-    implementation ==> testing[<a href='../03-sub-processes/03-testing.md'>Testing</a>]
+    implementation ==> testing[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/03-testing.md'>Testing</a>]
 
-    testing ==> docs[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]
+    testing ==> docs[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/04-documentation.md'>Documentation</a>]
 
     docs ==> deployment
     subgraph deployment[Deployment]

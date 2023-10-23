@@ -10,7 +10,7 @@ flowchart TD
         adaptSubgraph[["adapt subgraph"]]
 
         affectsInitialization{"affects \n initialization?"}
-        adaptInitialization[["<a href='../04-sub-processes/02-contract-initialization.md'> adapt initialization</a>"]]
+        adaptInitialization[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/02-contract-initialization.md'> adapt initialization</a>"]]
 
         affectsSubgraph -->|no| affectsInitialization
         affectsSubgraph -->|yes| adaptSubgraph
@@ -19,11 +19,11 @@ flowchart TD
         affectsInitialization -->|yes| adaptInitialization
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
+    implementation ==> testing[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/03-testing.md'>Testing</a>]]
 
-    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
+    testing ==> docs[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/04-documentation.md'>Documentation</a>]]
 
-    docs ==> deployment[[<a href='../03-sub-processes/05-deployment.md'>Deployment</a>]]
+    docs ==> deployment[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/05-deployment.md'>Deployment</a>]]
 
     deployment ==> rollout
     subgraph rollout[Roll-out]
@@ -35,7 +35,7 @@ flowchart TD
         appUpdate["update App"]
         affectsApp{"affects App?"}
 
-        announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
+        announceUpdate[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
         affectsApp -->|yes| appUpdate --> announceUpdate
         affectsApp -->|no| announceUpdate
     end

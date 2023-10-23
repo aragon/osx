@@ -17,11 +17,11 @@ flowchart TD
         isUpgradeable -->|no| updateMetadata
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
+    implementation ==> testing[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/03-testing.md'>Testing</a>]]
     %%subgraph testing[Testing]
     %%end
 
-    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
+    testing ==> docs[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/04-documentation.md'>Documentation</a>]]
     %%subgraph testing[Testing]
     %%end
 
@@ -34,7 +34,7 @@ flowchart TD
     subgraph rollout[Roll-out]
         isAragonPlugin{"is Aragon \n plugin?"}
         managingDaoProposal["management DAO \n proposal"]
-        announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
+        announceUpdate[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
 
         publishToAragonPluginRepo["publish PluginSetup \n in Aragon PluginRepo"]
         publishToPluginRepo["publish  PluginSetup \n in 3rd-party repo"]

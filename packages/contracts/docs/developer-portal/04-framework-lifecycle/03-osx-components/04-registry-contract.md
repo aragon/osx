@@ -10,17 +10,17 @@ flowchart TD
     processStart("Registry change")
     processStart ==> implementation
     subgraph implementation[Implementation]
-        bumpProtocolVersion[["<a href='../03-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
-        upgradeableContractImplementation[[<a href='./02-upgradeable-contract.md'>UUPS upgradeable contract \n change</a>]]
+        bumpProtocolVersion[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
+        upgradeableContractImplementation[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/03-osx-components/02-upgradeable-contract.md'>UUPS upgradeable contract \n change</a>]]
 
         bumpProtocolVersion --> upgradeableContractImplementation
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
+    implementation ==> testing[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/03-testing.md'>Testing</a>]]
     %%subgraph testing[Testing]
     %%end
 
-    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
+    testing ==> docs[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/04-documentation.md'>Documentation</a>]]
     %%subgraph testing[Testing]
     %%end
 

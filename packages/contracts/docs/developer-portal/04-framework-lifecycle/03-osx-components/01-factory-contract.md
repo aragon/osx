@@ -8,7 +8,7 @@ flowchart TD
     subgraph implementation[Implementation]
 
         %% Standard Checks
-        bumpProtocolVersion[["<a href='../03-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
+        bumpProtocolVersion[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/01-protocol-version.md'>Bump protocol version</a>"]]
         isBaseChange{"is base imple- \n mentation  change?"}
 
         %% Actions
@@ -25,13 +25,14 @@ flowchart TD
 
     end
 
-    implementation ==> testing[[<a href='../03-sub-processes/03-testing.md'>Testing</a>]]
+    implementation ==> testing[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/03-testing.md'>Testing</a>]]
 
-    testing ==> docs[[<a href='../03-sub-processes/04-documentation.md'>Documentation</a>]]
+    testing ==> docs[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/04-documentation.md'>Documentation</a>]]
+
 
     docs ==> deployment
     subgraph deployment[Deployment]
-        deployContract[[<a href='../03-sub-processes/04-deployment.md'>standard deployment process</a>]]
+        deployContract[[<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/05-deployment.md'>standard deployment process</a>]]
         deployContract --> managingDaoProposal
 
         subgraph managingDaoProposal["Managing DAO Proposal"]
@@ -53,7 +54,7 @@ flowchart TD
         affectsApp -->|yes| appUpdate --> announceUpdate
         affectsApp -->|no| announceUpdate
 
-        announceUpdate[["<a href='../04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
+        announceUpdate[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/04-sub-processes/06-aragon-update.md'>announce Aragon update</a>"]]
         announceUpdate
 
     end

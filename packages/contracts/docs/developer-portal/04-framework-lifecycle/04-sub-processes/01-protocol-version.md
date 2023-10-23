@@ -7,7 +7,7 @@ flowchart TD
 
 	bumpProtocolVersion["Bump the global \n ProtocolVersion number"]
 	mostDerivedCheck["Check that all most derived contracts \n inherit from the ProtocolVersion contract"]
-	adaptInitializeFrom[["<a href='./02-contract-initialization.md#adapting-the-initializefrom-function'>adapt the initializeFrom() \n function</a> of affected contracts"]]
+	adaptInitializeFrom[["<a href='https://github.com/aragon/osx/blob/develop/packages/contracts/docs/developer-portal/04-framework-lifecycle/03-osx-components/02-contract-initialization.md#adapting-the-initializefrom-function'>adapt the initializeFrom() \n function</a> of affected contracts"]]
 
 	processStart --> bumpProtocolVersion
 
