@@ -12,7 +12,6 @@ import {
   Granted,
   Revoked,
   TrustedForwarderSet,
-  SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived,
   NewURI,
@@ -214,17 +213,6 @@ export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
   let entity = Dao.load(daoId);
   if (entity) {
     entity.trustedForwarder = event.params.forwarder;
-    entity.save();
-  }
-}
-
-export function handleSignatureValidatorSet(
-  event: SignatureValidatorSet
-): void {
-  let daoId = event.address.toHexString();
-  let entity = Dao.load(daoId);
-  if (entity) {
-    entity.signatureValidator = event.params.signatureValidator;
     entity.save();
   }
 }

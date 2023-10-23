@@ -10,7 +10,6 @@ import {
   handleExecuted,
   _handleMetadataSet,
   handleTrustedForwarderSet,
-  handleSignatureValidatorSet,
   handleStandardCallbackRegistered,
   handleCallbackReceived,
   handleNewURI,
@@ -69,7 +68,6 @@ import {
   createNewExecutedEvent,
   createDaoEntityState,
   createTrustedForwarderSetEvent,
-  createSignatureValidatorSetEvent,
   createStandardCallbackRegisteredEvent,
   getSupportsInterface,
   encodeWithFunctionSelector,
@@ -1385,32 +1383,6 @@ test('Run dao (handleTrustedForwarderSet) mappings with mock event', () => {
     'Dao',
     entityID,
     'trustedForwarder',
-    Address.fromString(ADDRESS_ONE).toHexString()
-  );
-
-  clearStore();
-});
-
-test('Run dao (handleSignatureValidatorSet) mappings with mock event', () => {
-  // create state
-  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
-  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
-
-  let signatureValidator = ADDRESS_ONE;
-
-  let newEvent = createSignatureValidatorSetEvent(
-    signatureValidator,
-    DAO_ADDRESS
-  );
-  // handle event
-  handleSignatureValidatorSet(newEvent);
-
-  // checks
-  assert.fieldEquals('Dao', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'Dao',
-    entityID,
-    'signatureValidator',
     Address.fromString(ADDRESS_ONE).toHexString()
   );
 

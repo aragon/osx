@@ -5,7 +5,6 @@ import {
   Deposited,
   Executed,
   TrustedForwarderSet,
-  SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived,
   NewURI,
@@ -104,27 +103,6 @@ export function createTrustedForwarderSetEvent(
   newTrustedForwarderSetEvent.parameters.push(trustedForwarderParam);
 
   return newTrustedForwarderSetEvent;
-}
-
-export function createSignatureValidatorSetEvent(
-  signatureValidator: string,
-  contractAddress: string
-): SignatureValidatorSet {
-  let newSignatureValidatorSetEvent = changetype<SignatureValidatorSet>(
-    newMockEvent()
-  );
-
-  newSignatureValidatorSetEvent.address = Address.fromString(contractAddress);
-  newSignatureValidatorSetEvent.parameters = [];
-
-  let trustedForwarderParam = new ethereum.EventParam(
-    'signatureValidator',
-    ethereum.Value.fromAddress(Address.fromString(signatureValidator))
-  );
-
-  newSignatureValidatorSetEvent.parameters.push(trustedForwarderParam);
-
-  return newSignatureValidatorSetEvent;
 }
 
 export function createNewNativeTokenDepositedEvent(
