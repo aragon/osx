@@ -1,7 +1,3 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-
-import {checkSetManagingDao, getContractAddress} from '../../helpers';
 import {
   DAOFactory__factory,
   DAORegistry__factory,
@@ -11,6 +7,9 @@ import {
   PluginRepoRegistry__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
+import {checkSetManagingDao, getContractAddress} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying framework deployment.');

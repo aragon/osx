@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   DAO,
   GovernanceERC20,
@@ -15,6 +11,9 @@ import {
 import {deployNewDAO} from '../../test-utils/dao';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 export type MintSettings = {
   receivers: string[];

@@ -1,12 +1,3 @@
-import {promises as fs} from 'fs';
-import {ethers} from 'hardhat';
-import {Contract} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import IPFS from 'ipfs-http-client';
-
-import {findEvent, findEventTopicLog} from '../utils/event';
-import {Operation} from '../utils/types';
 import {VersionTag} from '../test/test-utils/psp/types';
 import {
   ENSRegistry__factory,
@@ -16,6 +7,14 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {findEvent, findEventTopicLog} from '../utils/event';
+import {Operation} from '../utils/types';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {Contract} from 'ethers';
+import {promises as fs} from 'fs';
+import {ethers} from 'hardhat';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import IPFS from 'ipfs-http-client';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -74,10 +73,10 @@ export async function uploadToIPFS(
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }
 
-  const cid = await client.add(metadata);
-  await client.pin.add(cid.cid);
-  console.log(`Uploaded to IPFS with cid ${cid.cid}`);
-  return cid.path;
+  const res = await client.add(metadata);
+  await client.pin.add(res.cid);
+  console.log(`Uploaded to IPFS with cid ${res.cid.toString()}`);
+  return res.cid.toString();
 }
 
 export async function getContractAddress(

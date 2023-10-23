@@ -1,5 +1,9 @@
-import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
-
+import {
+  Dao,
+  Permission,
+  StandardCallback,
+  TransactionActionsProposal,
+} from '../../generated/schema';
 import {
   MetadataSet,
   Executed,
@@ -11,30 +15,23 @@ import {
   SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived,
-  NewURI
+  NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
-import {
-  Dao,
-  Permission,
-  StandardCallback,
-  TransactionActionsProposal
-} from '../../generated/schema';
-
 import {ADDRESS_ZERO} from '../utils/constants';
-
-import {handleERC721Received} from '../utils/tokens/erc721';
-import {handleERC20Deposit} from '../utils/tokens/erc20';
-import {handleNativeDeposit} from '../utils/tokens/eth';
 import {
   onERC1155BatchReceived,
   onERC1155Received,
-  onERC721Received
+  onERC721Received,
 } from '../utils/tokens/common';
-import {handleAction, updateProposalWithFailureMap} from './utils';
+import {handleERC20Deposit} from '../utils/tokens/erc20';
+import {handleERC721Received} from '../utils/tokens/erc721';
 import {
   handleERC1155BatchReceived,
-  handleERC1155Received
+  handleERC1155Received,
 } from '../utils/tokens/erc1155';
+import {handleNativeDeposit} from '../utils/tokens/eth';
+import {handleAction, updateProposalWithFailureMap} from './utils';
+import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -172,7 +169,7 @@ export function handleGranted(event: Granted): void {
     contractAddress,
     permissionId.toHexString(),
     where.toHexString(),
-    who.toHexString()
+    who.toHexString(),
   ].join('_');
 
   const daoAddress = contractAddress;
@@ -203,7 +200,7 @@ export function handleRevoked(event: Revoked): void {
     contractAddress,
     permissionId.toHexString(),
     where.toHexString(),
-    who.toHexString()
+    who.toHexString(),
   ].join('_');
 
   let permissionEntity = Permission.load(permissionEntityId);

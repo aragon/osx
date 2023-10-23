@@ -1,3 +1,31 @@
+import {ERC165 as ERC165Contract} from '../../generated/PluginSetupProcessor/ERC165';
+import {
+  TokenVotingPlugin,
+  AddresslistVotingPlugin,
+  AdminPlugin,
+  MultisigPlugin,
+} from '../../generated/schema';
+import {
+  TokenVoting,
+  AddresslistVoting,
+  Admin,
+  Multisig,
+} from '../../generated/templates';
+import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
+import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
+import {
+  VOTING_MODES,
+  ADMIN_INTERFACE_ID,
+  TOKEN_VOTING_INTERFACE_ID,
+  ADDRESSLIST_VOTING_INTERFACE_ID,
+  MULTISIG_INTERFACE_ID,
+} from '../utils/constants';
+import {supportsInterface} from '../utils/erc165';
+import {
+  fetchOrCreateERC20Entity,
+  fetchOrCreateWrappedERC20Entity,
+  supportsERC20Wrapped,
+} from '../utils/tokens/erc20';
 import {
   Address,
   Bytes,
@@ -5,38 +33,8 @@ import {
   ethereum,
   crypto,
   ByteArray,
-  BigInt
+  BigInt,
 } from '@graphprotocol/graph-ts';
-
-import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
-import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
-import {ERC165 as ERC165Contract} from '../../generated/PluginSetupProcessor/ERC165';
-import {
-  TokenVoting,
-  AddresslistVoting,
-  Admin,
-  Multisig
-} from '../../generated/templates';
-import {
-  TokenVotingPlugin,
-  AddresslistVotingPlugin,
-  AdminPlugin,
-  MultisigPlugin
-} from '../../generated/schema';
-import {
-  VOTING_MODES,
-  ADMIN_INTERFACE_ID,
-  TOKEN_VOTING_INTERFACE_ID,
-  ADDRESSLIST_VOTING_INTERFACE_ID,
-  MULTISIG_INTERFACE_ID
-} from '../utils/constants';
-
-import {supportsInterface} from '../utils/erc165';
-import {
-  fetchERC20,
-  fetchWrappedERC20,
-  supportsERC20Wrapped
-} from '../utils/tokens/erc20';
 
 export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(0, 'Grant')
@@ -68,14 +66,14 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
     if (!token.reverted) {
       let tokenAddress = token.value;
       if (supportsERC20Wrapped(tokenAddress)) {
-        let contract = fetchWrappedERC20(tokenAddress);
+        let contract = fetchOrCreateWrappedERC20Entity(tokenAddress);
         if (!contract) {
           return;
         }
 
         packageEntity.token = contract.id;
       } else {
-        let contract = fetchERC20(tokenAddress);
+        let contract = fetchOrCreateERC20Entity(tokenAddress);
         if (!contract) {
           return;
         }

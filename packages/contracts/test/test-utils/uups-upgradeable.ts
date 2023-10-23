@@ -1,10 +1,10 @@
+import {DAO, PluginRepo} from '../../typechain';
+import {readImplementationValueFromSlot} from '../../utils/storage';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
 import {upgrades} from 'hardhat';
-import {DAO, PluginRepo} from '../../typechain';
-import {readImplementationValueFromSlot} from '../../utils/storage';
-import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 
 // Deploys a proxy and a new implementation from the same factory and checks that the upgrade works.
 export async function deployAndUpgradeSelfCheck(

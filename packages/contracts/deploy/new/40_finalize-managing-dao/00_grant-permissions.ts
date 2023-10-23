@@ -1,9 +1,8 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
+import {DAO__factory, PluginRepo__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
 import {getContractAddress, managePermissions, Permission} from '../../helpers';
-import {DAO__factory, PluginRepo__factory} from '../../../typechain';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);

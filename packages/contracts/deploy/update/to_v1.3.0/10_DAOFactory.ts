@@ -1,10 +1,9 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
+import {DAO__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
 import {getActiveContractAddress} from '../../helpers';
-import {DAO__factory} from '../../../typechain';
-
-import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpdating DAOFactory');

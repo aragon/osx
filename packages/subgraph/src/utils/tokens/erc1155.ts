@@ -1,11 +1,11 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC1155Balance,
   ERC1155Contract,
   ERC1155TokenIdBalance,
-  ERC1155Transfer
+  ERC1155Transfer,
 } from '../../../generated/schema';
 import {ERC1155} from '../../../generated/templates/DaoTemplateV1_0_0/ERC1155';
+import {getMethodSignature} from '../bytes';
 import {supportsInterface} from '../erc165';
 import {
   DECODE_OFFSET,
@@ -16,9 +16,9 @@ import {
   TransferType,
   getBalanceId,
   getERC1155TransferId,
-  getTokenIdBalanceId
+  getTokenIdBalanceId,
 } from './common';
-import {getMethodSignature} from '../bytes';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 export function supportsERC1155(token: Address): bool {
   // Double check that it's ERC1155 by calling supportsInterface checks.

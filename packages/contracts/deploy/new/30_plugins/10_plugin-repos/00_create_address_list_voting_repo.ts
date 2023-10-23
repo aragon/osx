@@ -1,9 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import addresslistReleaseMetadata from '../../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import addresslistBuildMetadata from '../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
-
+import addresslistReleaseMetadata from '../../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import {
   createPluginRepo,
   populatePluginRepo,
@@ -11,6 +7,8 @@ import {
   uploadToIPFS,
 } from '../../../helpers';
 import {ethers} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating address-list-voting repo.`);

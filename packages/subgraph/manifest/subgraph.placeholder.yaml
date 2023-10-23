@@ -123,6 +123,8 @@ templates:
           file: $ARAGON_OSX_MODULE/../subgraph/abis/DAO_v1_0_0.json
         - name: CallbackHandler
           file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
+        - name: GovernanceWrappedERC20
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
@@ -175,6 +177,8 @@ templates:
           file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: CallbackHandler
           file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
+        - name: GovernanceWrappedERC20
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: Executed(indexed address,bytes32,(address,uint256,bytes)[],uint256,uint256,bytes[])
           handler: handleExecuted

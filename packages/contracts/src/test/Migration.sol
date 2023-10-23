@@ -42,12 +42,6 @@ import {AddresslistVoting as AddresslistVoting_v1_3_0} from "@aragon/osx-v1.3.0-
 import {Multisig as Multisig_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol";
 import {Multisig as Multisig_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/governance/multisig/Multisig.sol";
 
-import {MerkleMinter as MerkleMinter_v1_0_0} from "@aragon/osx-v1.0.1/plugins/token/MerkleMinter.sol";
-import {MerkleMinter as MerkleMinter_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleMinter.sol";
-
-import {MerkleDistributor as MerkleDistributor_v1_0_0} from "@aragon/osx-v1.0.1/plugins/token/MerkleDistributor.sol";
-import {MerkleDistributor as MerkleDistributor_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/plugins/token/MerkleDistributor.sol";
-
 import {GovernanceERC20 as GovernanceERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceERC20.sol";
 import {GovernanceERC20 as GovernanceERC20_v1_3_0} from "@aragon/osx-v1.3.0-rc0.2/token/ERC20/governance/GovernanceERC20.sol";
 

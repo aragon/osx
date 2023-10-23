@@ -1,18 +1,16 @@
-import * as dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
-
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {AragonPluginRepos, TestingFork} from './utils/types';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-verify';
+import '@openzeppelin/hardhat-upgrades';
+import * as dotenv from 'dotenv';
+import fs from 'fs';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-import '@openzeppelin/hardhat-upgrades';
+import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import path from 'path';
 import 'solidity-coverage';
 import 'solidity-docgen';
-
-import {AragonPluginRepos, TestingFork} from './utils/types';
 
 dotenv.config();
 

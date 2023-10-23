@@ -2,15 +2,6 @@
  * IMPORTANT: Do not export classes from this file.
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
-
-import {
-  Address,
-  BigInt,
-  ByteArray,
-  Bytes,
-  crypto,
-  ethereum
-} from '@graphprotocol/graph-ts';
 import {
   Dao,
   ERC20Balance,
@@ -97,6 +88,10 @@ import {
   getSupportsInterface
 } from '../dao/utils';
 import {
+  createNewGrantedEvent,
+  createNewRevokedEvent
+} from '../permission-mamager/utils';
+import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
   createNewMembershipContractAnnouncedEvent,
@@ -115,10 +110,13 @@ import {
   createERC1155TokenCalls
 } from '../utils';
 import {
-  createNewGrantedEvent,
-  createNewRevokedEvent
-} from '../permission-mamager/utils';
-import {createMockedFunction} from 'matchstick-as';
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  crypto,
+  ethereum
+} from '@graphprotocol/graph-ts';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
 // PermissionManager

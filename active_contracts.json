@@ -25,7 +25,7 @@
     "token-voting-repo": "0x424F4cA6FA9c24C03f2396DF0E96057eD11CF7dF",
     "admin-repo": "0x152c9E28995E418870b85cbbc0AEE4e53020edb2",
     "multisig-repo": "0x9e7956C8758470dE159481e5DD0d08F8B59217A2"
-  },  
+  },
   "goerli": {
     "managingDAO": "0xB76F8d3512497040a96E77141c951a5374F24Eb9",
     "DAO_ENSSubdomainRegistrar_Implementation": "0x394B49Cc32Dc81B8EaCdeb62A6Fa66F31D1D022c",

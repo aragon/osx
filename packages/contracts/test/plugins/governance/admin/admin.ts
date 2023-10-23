@@ -1,23 +1,7 @@
-import {expect} from 'chai';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ethers} from 'hardhat';
-
-import {
-  findEvent,
-  DAO_EVENTS,
-  PROPOSAL_EVENTS,
-  MEMBERSHIP_EVENTS,
-  findEventTopicLog,
-} from '../../../../utils/event';
-import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
 import {ADMIN_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
-
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {toBytes32} from '../../../test-utils/voting';
 import {
-  AdminCloneFactory,
-  AdminCloneFactory__factory,
+  CloneFactory,
+  CloneFactory__factory,
   Admin__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
@@ -28,6 +12,20 @@ import {
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
+import {
+  findEvent,
+  DAO_EVENTS,
+  PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
+  findEventTopicLog,
+} from '../../../../utils/event';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../test-utils/error';
+import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {toBytes32} from '../../../test-utils/voting';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -38,7 +36,7 @@ const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
-  let adminCloneFactory: AdminCloneFactory;
+  let adminCloneFactory: CloneFactory;
   let dao: any;
   let ownerAddress: string;
   let dummyActions: any;
@@ -61,8 +59,10 @@ describe('Admin', function () {
 
     dao = await deployNewDAO(signers[0]);
 
-    const AdminCloneFactory = new AdminCloneFactory__factory(signers[0]);
-    adminCloneFactory = await AdminCloneFactory.deploy();
+    const admin = await new Admin__factory(signers[0]).deploy();
+    adminCloneFactory = await new CloneFactory__factory(signers[0]).deploy(
+      admin.address
+    );
   });
 
   beforeEach(async () => {

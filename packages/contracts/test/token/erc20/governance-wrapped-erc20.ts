@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   TestERC20,
   TestERC20__factory,
@@ -16,6 +12,9 @@ import {
 } from '../../../typechain';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 export type AccountBalance = {account: string; amount: number};
 

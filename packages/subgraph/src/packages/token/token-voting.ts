@@ -1,31 +1,23 @@
-import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  TokenVotingPlugin,
+  TokenVotingProposal,
+  TokenVotingVoter,
+  TokenVotingVote,
+} from '../../../generated/schema';
+import {GovernanceERC20} from '../../../generated/templates';
 import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
   MembershipContractAnnounced,
-  TokenVoting
+  TokenVoting,
 } from '../../../generated/templates/TokenVoting/TokenVoting';
-
-import {GovernanceERC20} from '../../../generated/templates';
-
-import {
-  Action,
-  TokenVotingPlugin,
-  TokenVotingProposal,
-  TokenVotingVoter,
-  TokenVotingVote
-} from '../../../generated/schema';
-
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {
-  fetchERC20,
-  fetchWrappedERC20,
-  supportsERC20Wrapped
-} from '../../utils/tokens/erc20';
 import {getProposalId} from '../../utils/proposals';
+import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
+import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -256,22 +248,11 @@ export function handleMembershipContractAnnounced(
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
 
   if (packageEntity) {
-    let contractAddress: string;
-
-    if (supportsERC20Wrapped(token)) {
-      let contract = fetchWrappedERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
-    } else {
-      let contract = fetchERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
+    let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+    if (!tokenAddress) {
+      return;
     }
-    packageEntity.token = contractAddress;
+    packageEntity.token = tokenAddress as string;
 
     packageEntity.save();
 

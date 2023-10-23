@@ -1,8 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import {ADDRESSLIST_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
 import {
   AddresslistVoting,
   AddresslistVoting__factory,
@@ -18,13 +14,11 @@ import {
 } from '../../../../../typechain';
 import {AddresslistVoting__factory as AddresslistVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
 import {AddresslistVoting__factory as AddresslistVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
-
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/AddresslistVoting';
-import {majorityVotingBaseInterface} from '../majority-voting';
-
+import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
   findEvent,
   findEventTopicLog,
@@ -33,6 +27,23 @@ import {
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../../test-utils/error';
+import {
+  ADDRESSLIST_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../../test-utils/proxy';
+import {
+  getProtocolVersion,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
+} from '../../../../test-utils/uups-upgradeable';
 import {
   VoteOption,
   pctToRatio,
@@ -46,26 +57,11 @@ import {
   voteWithSigners,
   toBytes32,
 } from '../../../../test-utils/voting';
-import {deployNewDAO} from '../../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../../test-utils/error';
-import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
-import {deployWithProxy} from '../../../../test-utils/proxy';
-import {
-  ADDRESSLIST_VOTING_INTERFACE,
-  getInterfaceID,
-} from '../../../../test-utils/interfaces';
-import {ADDRESSLIST_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
-
-import {
-  getProtocolVersion,
-  deployAndUpgradeFromToCheck,
-  deployAndUpgradeSelfCheck,
-} from '../../../../test-utils/uups-upgradeable';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../../test-utils/protocol-version';
-import {ExecutedEvent} from '../../../../../typechain/DAO';
+import {majorityVotingBaseInterface} from '../majority-voting';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];

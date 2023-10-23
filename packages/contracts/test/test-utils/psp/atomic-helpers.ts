@@ -1,4 +1,3 @@
-import {BytesLike} from 'ethers';
 import {DAO, PluginSetupProcessor} from '../../../typechain';
 import {PermissionOperation, PluginRepoPointer, VersionTag} from './types';
 import {
@@ -9,6 +8,7 @@ import {
   prepareUninstallation,
   prepareUpdate,
 } from './wrappers';
+import {BytesLike} from 'ethers';
 
 const EMPTY_DATA = '0x';
 

@@ -1,13 +1,8 @@
 import {
-  assert,
-  afterEach,
-  beforeAll,
-  clearStore,
-  dataSourceMock,
-  test,
-  describe,
-  beforeEach
-} from 'matchstick-as';
+  handleDelegateChanged,
+  handleDelegateVotesChanged,
+  handleTransfer
+} from '../../src/packages/token/governance-erc20';
 import {
   ADDRESS_ONE,
   ADDRESS_SIX,
@@ -16,18 +11,18 @@ import {
   ADDRESS_THREE,
   DAO_TOKEN_ADDRESS
 } from '../constants';
-import {
-  createNewERC20TransferEvent,
-  createTokenVotingMember,
-  delegatesCall
-} from './utils';
-import {
-  handleDelegateChanged,
-  handleDelegateVotesChanged,
-  handleTransfer
-} from '../../src/packages/token/governance-erc20';
-import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
+import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
+import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
+import {
+  assert,
+  afterEach,
+  beforeAll,
+  clearStore,
+  dataSourceMock,
+  test,
+  describe
+} from 'matchstick-as';
 
 describe('Governance ERC20', () => {
   beforeAll(() => {

@@ -1,17 +1,17 @@
-import {store} from '@graphprotocol/graph-ts';
-import {
-  ReleaseMetadataUpdated,
-  VersionCreated,
-  Granted,
-  Revoked
-} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {
   PluginVersion,
   PluginSetup,
   PluginRelease,
-  Permission
+  Permission,
 } from '../../generated/schema';
+import {
+  ReleaseMetadataUpdated,
+  VersionCreated,
+  Granted,
+  Revoked,
+} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {getPluginVersionId} from './utils';
+import {store} from '@graphprotocol/graph-ts';
 
 export function handleVersionCreated(event: VersionCreated): void {
   // PluginSetup
@@ -78,7 +78,7 @@ export function handleGranted(event: Granted): void {
     contractAddress,
     permissionId.toHexString(),
     where.toHexString(),
-    who.toHexString()
+    who.toHexString(),
   ].join('_');
 
   const pluginRepo = contractAddress;
@@ -110,7 +110,7 @@ export function handleRevoked(event: Revoked): void {
     contractAddress,
     permissionId.toHexString(),
     where.toHexString(),
-    who.toHexString()
+    who.toHexString(),
   ].join('_');
 
   const permissionEntity = Permission.load(permissionEntityId);

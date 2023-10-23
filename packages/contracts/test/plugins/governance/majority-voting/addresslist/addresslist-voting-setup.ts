@@ -1,26 +1,25 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 import {
   AddresslistVotingSetup,
   AddresslistVotingSetup__factory,
   AddresslistVoting__factory,
 } from '../../../../../typechain';
+import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
+import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   getInterfaceID,
 } from '../../../../test-utils/interfaces';
-import {Operation} from '../../../../../utils/types';
 import {
   VotingSettings,
   VotingMode,
   pctToRatio,
   ONE_HOUR,
 } from '../../../../test-utils/voting';
-import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
-import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;

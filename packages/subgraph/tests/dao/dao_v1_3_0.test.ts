@@ -1,20 +1,11 @@
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
-import {
-  describe,
-  test,
-  beforeEach,
-  afterEach,
-  clearStore,
-  assert,
-  beforeAll
-} from 'matchstick-as';
 import {
   TransactionActionsProposal,
   Action,
-  ERC721Balance
+  ERC721Balance,
 } from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplateV1_3_0/DAO';
 import {handleExecuted} from '../../src/dao/dao_v1_3_0';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   ERC20_transfer,
   getTransferId,
@@ -25,7 +16,8 @@ import {
   ERC1155_safeBatchTransferFrom,
   ERC1155_INTERFACE_ID,
   getTokenIdBalanceId,
-  getERC1155TransferId
+  getERC1155TransferId,
+  ERC165_INTERFACE_ID,
 } from '../../src/utils/tokens/common';
 import {
   DAO_ADDRESS,
@@ -34,25 +26,35 @@ import {
   ADDRESS_THREE,
   ERC20_AMOUNT_FULL,
   CONTRACT_ADDRESS,
-  ZERO_BYTES32
+  ZERO_BYTES32,
 } from '../constants';
+import {
+  ExtendedERC1155Balance,
+  ExtendedERC1155Contract,
+  ExtendedERC1155TokenIdBalance,
+  ExtendedERC1155Transfer,
+} from '../helpers/extended-schema';
 import {
   createDummyActions,
   createERC1155TokenCalls,
-  createTokenCalls
+  createTokenCalls,
 } from '../utils';
 import {
   createNewExecutedEvent,
   encodeWithFunctionSelector,
   getBalanceOf,
-  getSupportsInterface
+  getSupportsInterface,
 } from './utils';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {
-  ExtendedERC1155Balance,
-  ExtendedERC1155Contract,
-  ExtendedERC1155TokenIdBalance,
-  ExtendedERC1155Transfer
-} from '../helpers/extended-schema';
+  describe,
+  test,
+  beforeEach,
+  afterEach,
+  clearStore,
+  assert,
+  beforeAll,
+} from 'matchstick-as';
 
 const eq = assert.fieldEquals;
 let daoId = Address.fromString(DAO_ADDRESS).toHexString();
@@ -70,7 +72,7 @@ describe('handleExecuted', () => {
 
     let execResults = [
       Bytes.fromHexString('0x11'),
-      Bytes.fromHexString('0x22')
+      Bytes.fromHexString('0x22'),
     ];
 
     let allowFailureMap = '2';
@@ -215,11 +217,23 @@ describe('handleExecuted', () => {
     });
 
     describe('ERC20 transfer action', () => {
+      beforeAll(() => {
+        createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', null, null);
+
+        getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
+        getSupportsInterface(
+          DAO_TOKEN_ADDRESS,
+          GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+          false
+        );
+        getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
+      });
+
       test('creates entities with correct values', () => {
         let transferToken = BigInt.fromU32(10);
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(transferToken)
+          ethereum.Value.fromUnsignedBigInt(transferToken),
         ];
 
         let event = createExecutedEvent(
@@ -278,7 +292,7 @@ describe('handleExecuted', () => {
       test('correctly handles multiple events and updates balance', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
+          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10)),
         ];
 
         let event = createExecutedEvent(
@@ -323,7 +337,7 @@ describe('handleExecuted', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(transferToken)
+          ethereum.Value.fromUnsignedBigInt(transferToken),
         ];
 
         let event = createExecutedEvent(
@@ -383,7 +397,7 @@ describe('handleExecuted', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
+          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10)),
         ];
 
         let event = createExecutedEvent(
@@ -436,7 +450,7 @@ describe('handleExecuted', () => {
       entity.tokenIds = [
         BigInt.fromI32(4),
         BigInt.fromI32(8),
-        BigInt.fromI32(12)
+        BigInt.fromI32(12),
       ];
       entity.lastUpdated = BigInt.fromI32(2);
       entity.token = tokenId;
@@ -450,7 +464,7 @@ describe('handleExecuted', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(transferToKen)
+          ethereum.Value.fromUnsignedBigInt(transferToKen),
         ];
 
         let event = createExecutedEvent(
@@ -545,7 +559,7 @@ describe('handleExecuted', () => {
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
           ethereum.Value.fromUnsignedBigInt(transferToKen),
-          ethereum.Value.fromBytes(Bytes.fromHexString('0x'))
+          ethereum.Value.fromBytes(Bytes.fromHexString('0x')),
         ];
 
         let event = createExecutedEvent(
@@ -668,7 +682,7 @@ describe('handleExecuted', () => {
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // to
           ethereum.Value.fromUnsignedBigInt(transferToken), // tokenId
           ethereum.Value.fromUnsignedBigInt(amount), // amount
-          ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+          ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
         ];
         let event = createExecutedEvent(
           [tupleArray],
@@ -695,7 +709,8 @@ describe('handleExecuted', () => {
 
         // check ERC1155TokenIdBalance entity
         assert.entityCount('ERC1155TokenIdBalance', 1);
-        let erc1155TokenIdBalance = new ExtendedERC1155TokenIdBalance().withDefaultValues();
+        let erc1155TokenIdBalance =
+          new ExtendedERC1155TokenIdBalance().withDefaultValues();
         erc1155TokenIdBalance.amount = amount;
         erc1155TokenIdBalance.lastUpdated = timestamp;
         erc1155TokenIdBalance.assertEntity();
@@ -734,7 +749,7 @@ describe('handleExecuted', () => {
             ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
             ethereum.Value.fromUnsignedBigInt(transferTokens[i]),
             ethereum.Value.fromUnsignedBigInt(amount),
-            ethereum.Value.fromBytes(Bytes.fromHexString('0x'))
+            ethereum.Value.fromBytes(Bytes.fromHexString('0x')),
           ]);
         }
 
@@ -766,19 +781,19 @@ describe('handleExecuted', () => {
         let tokenIds = [
           BigInt.fromI32(0),
           BigInt.fromI32(1),
-          BigInt.fromI32(2)
+          BigInt.fromI32(2),
         ];
         let amounts = [
           BigInt.fromI32(10),
           BigInt.fromI32(10),
-          BigInt.fromI32(10)
+          BigInt.fromI32(10),
         ];
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)), // from
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // to
           ethereum.Value.fromUnsignedBigIntArray(tokenIds), // tokenIds
           ethereum.Value.fromUnsignedBigIntArray(amounts), // amounts
-          ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+          ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
         ];
         let event = createExecutedEvent(
           [tupleArray],
@@ -810,7 +825,8 @@ describe('handleExecuted', () => {
         // check ERC1155TokenIdBalance entity
         assert.entityCount('ERC1155TokenIdBalance', 3);
         for (let i = 0; i < tokenIds.length; i++) {
-          let erc1155TokenIdBalance = new ExtendedERC1155TokenIdBalance().withDefaultValues();
+          let erc1155TokenIdBalance =
+            new ExtendedERC1155TokenIdBalance().withDefaultValues();
           erc1155TokenIdBalance.id = tokenIdBalanceIdArray[i];
           erc1155TokenIdBalance.tokenId = tokenIds[i];
           erc1155TokenIdBalance.amount = amounts[i];
@@ -830,7 +846,8 @@ describe('handleExecuted', () => {
           .concat('_')
           .concat(logIndex.toHexString());
         for (let i = 0; i < tokenIds.length; i++) {
-          let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
+          let erc1155Transfer =
+            new ExtendedERC1155Transfer().withDefaultValues();
           erc1155Transfer.id = getERC1155TransferId(txHash, logIndex, 0, i);
           // appeend index to transferId to make sure it is unique
           erc1155Transfer.amount = amounts[i];
@@ -847,11 +864,11 @@ describe('handleExecuted', () => {
       test('correctly handles multiple events and updates balance', () => {
         let tokenIds = [
           [BigInt.fromI32(0), BigInt.fromI32(1), BigInt.fromI32(2)],
-          [BigInt.fromI32(0), BigInt.fromI32(1), BigInt.fromI32(2)]
+          [BigInt.fromI32(0), BigInt.fromI32(1), BigInt.fromI32(2)],
         ];
         let amounts = [
           [BigInt.fromI32(10), BigInt.fromI32(10), BigInt.fromI32(10)],
-          [BigInt.fromI32(30), BigInt.fromI32(30), BigInt.fromI32(30)]
+          [BigInt.fromI32(30), BigInt.fromI32(30), BigInt.fromI32(30)],
         ];
         let tuples: ethereum.Value[][] = [];
         for (let i = 0; i < tokenIds.length; i++) {
@@ -860,7 +877,7 @@ describe('handleExecuted', () => {
             ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // to
             ethereum.Value.fromUnsignedBigIntArray(tokenIds[i]), // tokenIds
             ethereum.Value.fromUnsignedBigIntArray(amounts[i]), // amounts
-            ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+            ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
           ]);
         }
         let event = createExecutedEvent(

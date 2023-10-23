@@ -1,25 +1,23 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address} from '@graphprotocol/graph-ts';
-
+import {
+  Granted as DaoGrantedEvent,
+  Revoked as DaoRevokedEvent,
+} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
+import {
+  Granted as RepoGrantedEvent,
+  Revoked as RepoRevokedEvent,
+} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {
   handleGranted as daoHandleGranted,
-  handleRevoked as daoHandleRevoked
+  handleRevoked as daoHandleRevoked,
 } from '../../src/dao/dao_v1_0_0';
 import {
   handleGranted as repoHandleGranted,
-  handleRevoked as repoHandleRevoked
+  handleRevoked as repoHandleRevoked,
 } from '../../src/plugin/pluginRepo';
-
 import {CONTRACT_ADDRESS, DAO_ADDRESS} from '../constants';
 import {ExtendedPermission} from '../helpers/extended-schema';
-import {
-  Granted as RepoGrantedEvent,
-  Revoked as RepoRevokedEvent
-} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
-import {
-  Granted as DaoGrantedEvent,
-  Revoked as DaoRevokedEvent
-} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
+import {Address} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 const daoId = Address.fromString(DAO_ADDRESS).toHexString();
 const pluginRepoId = Address.fromString(CONTRACT_ADDRESS).toHexString();
@@ -66,9 +64,8 @@ test('Run PluginRepo (handleGranted) mappings with mock event', () => {
   let permission = new ExtendedPermission().withDefaultValues(pluginRepoId);
   permission.pluginRepo = pluginRepoId;
 
-  let grantedEvent = permission.createEvent_Granted<RepoGrantedEvent>(
-    pluginRepoId
-  );
+  let grantedEvent =
+    permission.createEvent_Granted<RepoGrantedEvent>(pluginRepoId);
 
   // handle event
   repoHandleGranted(grantedEvent);
@@ -89,9 +86,8 @@ test('Run PluginRepo (handleRevoked) mappings with mock event', () => {
   permission.assertEntity();
 
   // create event and run it's handler
-  let revokedEvent = permission.createEvent_Revoked<RepoRevokedEvent>(
-    pluginRepoId
-  );
+  let revokedEvent =
+    permission.createEvent_Revoked<RepoRevokedEvent>(pluginRepoId);
 
   // handle event
   repoHandleRevoked(revokedEvent);

@@ -19,9 +19,7 @@
     "buildAndStart:dev": "docker-compose -f docker/docker-compose.yml up -d --build hardhat && sleep 30 && yarn create:local && yarn deploy:local",
     "test:fast": "graph test",
     "test": "graph test -r",
-    "coverage": "graph test -c",
-    "formatting:check": "prettier '**/*.{json,ts,js}' -c",
-    "formatting:write": "prettier '**/*.{json,ts,js}' --write"
+    "coverage": "graph test -c"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.52.0",
