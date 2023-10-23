@@ -1,20 +1,7 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[solidity]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[handlebars]": {
-    "editor.formatOnSave": false,
-    "editor.formatOnPaste": false
-  },
-  "prettier.bracketSpacing": true,
-  "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  "editor.formatOnSave": true,
+  "prettier.documentSelectors": ["**/*.sol"],
+  "solidity.formatter": "prettier",
+  "editor.tabSize": 4
 }
