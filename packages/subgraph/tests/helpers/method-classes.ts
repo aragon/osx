@@ -104,6 +104,7 @@ import {
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
   createNewVotingSettingsUpdatedEvent,
+  delegatesCall,
   getProposalCountCall
 } from '../token/utils';
 import {
@@ -117,6 +118,7 @@ import {
   createNewGrantedEvent,
   createNewRevokedEvent
 } from '../permission-mamager/utils';
+import {createMockedFunction} from 'matchstick-as';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
 // PermissionManager
@@ -791,10 +793,18 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     return this;
   }
 
+  mockCall_delegatesCall(
+    tokenContractAddress: string,
+    account: string,
+    returns: string
+  ): void {
+    delegatesCall(tokenContractAddress, account, returns);
+  }
+
   createEvent_DelegateChanged(
     delegator: string = this.address.toHexString(),
-    fromDelegate: string = ADDRESS_ONE,
-    toDelegate: string = ADDRESS_ONE,
+    fromDelegate: string = this.address.toHexString(),
+    toDelegate: string = this.address.toHexString(),
     tokenContract: string = Address.fromHexString(
       DAO_TOKEN_ADDRESS
     ).toHexString()

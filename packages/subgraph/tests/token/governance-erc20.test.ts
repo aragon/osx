@@ -5,16 +5,22 @@ import {
   clearStore,
   dataSourceMock,
   test,
-  describe
+  describe,
+  beforeEach
 } from 'matchstick-as';
 import {
   ADDRESS_ONE,
   ADDRESS_SIX,
   ADDRESS_TWO,
   ONE_ETH,
-  ADDRESS_THREE
+  ADDRESS_THREE,
+  DAO_TOKEN_ADDRESS
 } from '../constants';
-import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
+import {
+  createNewERC20TransferEvent,
+  createTokenVotingMember,
+  delegatesCall
+} from './utils';
 import {
   handleDelegateChanged,
   handleDelegateVotesChanged,
@@ -243,6 +249,9 @@ describe('Governance ERC20', () => {
   });
 
   describe('handleDelegateChanged', () => {
+    // beforeEach(() => {
+    //   delegatesCall(DAO_TOKEN_ADDRESS, ADDRESS_ONE, ADDRESS_ONE);
+    // });
     test('it should create member for delegate address', () => {
       let memberAddress = ADDRESS_ONE;
       let pluginAddress = ADDRESS_SIX;
@@ -279,7 +288,7 @@ describe('Governance ERC20', () => {
       assert.entityCount('TokenVotingMember', 1);
     });
 
-    test('it should delete a member without voting power or balance', () => {
+    test('it should delete a member without voting power and balance and not delegating to another address', () => {
       let memberOneAddress = ADDRESS_ONE;
       let memberTwoAddress = ADDRESS_TWO;
       let pluginAddress = ADDRESS_SIX;
@@ -304,9 +313,15 @@ describe('Governance ERC20', () => {
 
       assert.entityCount('TokenVotingMember', 2);
 
-      // member one undelegates from member two
+      // member one un-delegates from member two
       let eventOne = memberOne.createEvent_DelegateVotesChanged('100');
       let eventTwo = memberTwo.createEvent_DelegateVotesChanged('0');
+
+      memberTwo.mockCall_delegatesCall(
+        DAO_TOKEN_ADDRESS,
+        ADDRESS_TWO,
+        ADDRESS_TWO
+      );
 
       handleDelegateVotesChanged(eventOne);
       handleDelegateVotesChanged(eventTwo);
@@ -315,12 +330,58 @@ describe('Governance ERC20', () => {
       // expected changes
       memberOne.votingPower = BigInt.fromString('100');
       memberOne.assertEntity();
-      // member two should be deleted because it has no balance or voting power
-      assert.notInStore(
-        'TokenVotingMember',
-        memberTwo.id
-      );
+      // member two should be deleted because it has no (balance and voting power) and not delegates to another address.
+      assert.notInStore('TokenVotingMember', memberTwo.id);
       assert.entityCount('TokenVotingMember', 1);
+    });
+
+    test('it should not delete a member without voting power and balance, but delegating to another address', () => {
+      let memberOneAddress = ADDRESS_ONE;
+      let memberTwoAddress = ADDRESS_TWO;
+      let pluginAddress = ADDRESS_SIX;
+      let memberOne = new ExtendedTokenVotingMember().withDefaultValues(
+        memberOneAddress,
+        pluginAddress
+      );
+      let memberTwo = new ExtendedTokenVotingMember().withDefaultValues(
+        memberTwoAddress,
+        pluginAddress
+      );
+      /* member one has 100s token delegated to member two*/
+      memberOne.balance = BigInt.fromString('100');
+      memberOne.votingPower = BigInt.fromString('0');
+      /* member two balance is 0 but has 100 voting power from the delegation of member one */
+      memberTwo.balance = BigInt.fromString('0');
+      memberTwo.votingPower = BigInt.fromString('100');
+      /* member three has 100 tokens and none delegated */
+
+      memberOne.buildOrUpdate();
+      memberTwo.buildOrUpdate();
+
+      assert.entityCount('TokenVotingMember', 2);
+
+      // member one un-delegates from member two
+      let eventOne = memberOne.createEvent_DelegateVotesChanged('100');
+      let eventTwo = memberTwo.createEvent_DelegateVotesChanged('0');
+
+      memberTwo.mockCall_delegatesCall(
+        DAO_TOKEN_ADDRESS,
+        ADDRESS_TWO,
+        ADDRESS_ONE
+      );
+
+      handleDelegateVotesChanged(eventOne);
+      handleDelegateVotesChanged(eventTwo);
+
+      // assert
+      // expected changes
+      memberOne.votingPower = BigInt.fromString('100');
+      memberOne.assertEntity();
+
+      assert.fieldEquals('TokenVotingMember', memberOne.id, 'id', memberOne.id);
+      // memberTwo should not be deleted because it has no (balance and voting power), but it delegates to another address.
+      assert.fieldEquals('TokenVotingMember', memberTwo.id, 'id', memberTwo.id);
+      assert.entityCount('TokenVotingMember', 2);
     });
   });
 });

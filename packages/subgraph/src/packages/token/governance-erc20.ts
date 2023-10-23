@@ -2,6 +2,7 @@ import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 import {TokenVotingMember} from '../../../generated/schema';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
+import {GovernanceERC20 as GovernanceERC20Contract} from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   DelegateChanged,
   DelegateVotesChanged
@@ -74,20 +75,41 @@ export function handleDelegateChanged(event: DelegateChanged): void {
 }
 
 export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
-  let context = dataSource.context();
-  let pluginId = context.getString('pluginId');
+  const delegate = event.params.delegate;
+  if (delegate == Address.zero()) return;
+  const newVotingPower = event.params.newBalance;
 
-  if (event.params.delegate != Address.zero()) {
-    let member = getOrCreateMember(event.params.delegate, pluginId);
-    if (
-      member.balance.equals(BigInt.zero()) &&
-      event.params.newBalance.equals(BigInt.zero())
-    ) {
+  const context = dataSource.context();
+  const pluginId = context.getString('pluginId');
+  let member = getOrCreateMember(delegate, pluginId);
+
+  if (isZeroBalanceAndVotingPower(member.balance, newVotingPower)) {
+    if (shouldRemoveMember(event.address, delegate)) {
       store.remove('TokenVotingMember', member.id);
-    } else {
-      // Assign the cumulative delegated votes to this member from all their delegators.
-      member.votingPower = event.params.newBalance;
-      member.save();
+      return;
     }
   }
+  member.votingPower = newVotingPower;
+  member.save();
+}
+
+function isZeroBalanceAndVotingPower(
+  memberBalance: BigInt,
+  votingPower: BigInt
+): boolean {
+  return (
+    memberBalance.equals(BigInt.zero()) && votingPower.equals(BigInt.zero())
+  );
+}
+
+function shouldRemoveMember(
+  contractAddress: Address,
+  delegate: Address
+): boolean {
+  const governanceERC20Contract = GovernanceERC20Contract.bind(contractAddress);
+  const delegates = governanceERC20Contract.try_delegates(delegate);
+  if (!delegates.reverted) {
+    return delegates.value == delegate || delegates.value == Address.zero();
+  }
+  return false;
 }
