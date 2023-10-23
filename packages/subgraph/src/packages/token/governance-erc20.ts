@@ -2,16 +2,13 @@ import {TokenVotingMember} from '../../../generated/schema';
 import {GovernanceERC20 as GovernanceERC20Contract} from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   DelegateChanged,
-  DelegateVotesChanged
+  DelegateVotesChanged,
 } from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
-  let id = user
-    .toHexString()
-    .concat('_')
-    .concat(pluginId);
+  let id = user.toHexString().concat('_').concat(pluginId);
   let member = TokenVotingMember.load(id);
   if (!member) {
     member = new TokenVotingMember(id);

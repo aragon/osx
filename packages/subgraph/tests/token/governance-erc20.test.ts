@@ -1,7 +1,7 @@
 import {
   handleDelegateChanged,
   handleDelegateVotesChanged,
-  handleTransfer
+  handleTransfer,
 } from '../../src/packages/token/governance-erc20';
 import {
   ADDRESS_ONE,
@@ -9,7 +9,7 @@ import {
   ADDRESS_TWO,
   ONE_ETH,
   ADDRESS_THREE,
-  DAO_TOKEN_ADDRESS
+  DAO_TOKEN_ADDRESS,
 } from '../constants';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
@@ -21,7 +21,7 @@ import {
   clearStore,
   dataSourceMock,
   test,
-  describe
+  describe,
 } from 'matchstick-as';
 
 describe('Governance ERC20', () => {
@@ -114,9 +114,7 @@ describe('Governance ERC20', () => {
         'TokenVotingMember',
         fromUserId,
         'balance',
-        BigInt.fromString(ONE_ETH)
-          .times(BigInt.fromString('9'))
-          .toString()
+        BigInt.fromString(ONE_ETH).times(BigInt.fromString('9')).toString()
       );
     });
 
@@ -141,9 +139,7 @@ describe('Governance ERC20', () => {
         'TokenVotingMember',
         toUserId,
         'balance',
-        BigInt.fromString(ONE_ETH)
-          .times(BigInt.fromString('11'))
-          .toString()
+        BigInt.fromString(ONE_ETH).times(BigInt.fromString('11')).toString()
       );
     });
   });
