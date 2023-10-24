@@ -405,7 +405,7 @@ type TokenVotingMember @entity {
   plugin: TokenVotingPlugin!
 
   # delegates
-  delegatee: TokenVotingMember!
+  delegatee: TokenVotingMember
   votingPower: BigInt
   # we assume token owners and/or delegatees are members
   delegators: [TokenVotingMember!]! @derivedFrom(field: "delegatee")
