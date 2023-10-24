@@ -157,6 +157,9 @@ describe('Governance ERC20', () => {
 
       handleDelegateChanged(event);
 
+      // expected changes
+      member.delegatee = [memberAddress, pluginAddress].join('_');
+
       member.assertEntity();
       assert.entityCount('TokenVotingMember', 1);
     });

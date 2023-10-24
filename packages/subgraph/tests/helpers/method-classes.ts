@@ -784,7 +784,7 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     this.address = Address.fromHexString(memberAddress);
     this.balance = BigInt.zero();
     this.plugin = plugin.toHexString();
-    this.delegatee = id;
+    this.delegatee = null;
     this.votingPower = BigInt.zero();
 
     return this;
