@@ -144,8 +144,6 @@ templates:
           handler: handleTrustedForwarderSet
         - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
           handler: handleStandardCallbackRegistered
-        - event: SignatureValidatorSet(address)
-          handler: handleSignatureValidatorSet
         - event: NewURI(string)
           handler: handleNewURI
   - name: DaoTemplateV1_3_0

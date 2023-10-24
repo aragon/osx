@@ -76,7 +76,6 @@ const EVENTS = {
   Deposited: 'Deposited',
   Executed: 'Executed',
   NativeTokenDeposited: 'NativeTokenDeposited',
-  SignatureValidatorSet: 'SignatureValidatorSet',
   StandardCallbackRegistered: 'StandardCallbackRegistered',
   CallbackReceived: 'CallbackReceived',
 };
