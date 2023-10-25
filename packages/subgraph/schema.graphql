@@ -305,6 +305,7 @@ type PluginInstallation @entity {
 enum PluginPreparationType {
   Installation
   Update
+  Uninstallation
 }
 
 enum PluginPreparationState {
