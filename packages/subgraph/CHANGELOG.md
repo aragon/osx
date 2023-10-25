@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 1.3.1
+On 2023-10-25 15:10:13
+
 ### Added
 
 - Add support for `Granted` & `Revoked` event in `PluginRepo`
