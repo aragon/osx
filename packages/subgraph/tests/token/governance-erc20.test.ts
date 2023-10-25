@@ -243,9 +243,6 @@ describe('Governance ERC20', () => {
   });
 
   describe('handleDelegateChanged', () => {
-    // beforeEach(() => {
-    //   delegatesCall(DAO_TOKEN_ADDRESS, ADDRESS_ONE, ADDRESS_ONE);
-    // });
     test('it should create member for delegate address', () => {
       let memberAddress = ADDRESS_ONE;
       let pluginAddress = ADDRESS_SIX;
@@ -294,7 +291,7 @@ describe('Governance ERC20', () => {
         memberTwoAddress,
         pluginAddress
       );
-      /* member one has 100s token delegated to member two*/
+      /* member one has 100 token delegated to member two*/
       memberOne.balance = BigInt.fromString('100');
       memberOne.votingPower = BigInt.fromString('0');
       /* member two balance is 0 but has 100 voting power from the delegation of member one */
@@ -341,7 +338,7 @@ describe('Governance ERC20', () => {
         memberTwoAddress,
         pluginAddress
       );
-      /* member one has 100s token delegated to member two*/
+      /* member one has 100 token delegated to member two*/
       memberOne.balance = BigInt.fromString('100');
       memberOne.votingPower = BigInt.fromString('0');
       /* member two balance is 0 but has 100 voting power from the delegation of member one */
