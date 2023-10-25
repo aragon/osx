@@ -55,7 +55,7 @@ jobs:
         with:
           commit_message: 'Update changelog in subgraph'
           repo: ${{ github.repository }}
-          branch: ${{ github.head_ref || github.ref_name }}
+          branch: ${{ github.base_ref || github.head_ref || github.ref_name }}
           file_pattern: 'packages/subgraph/CHANGELOG.md'
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
