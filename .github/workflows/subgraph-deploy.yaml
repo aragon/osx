@@ -45,6 +45,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          token: ${{secrets.ARABOT_PAT}}
 
       - name: Update Changelog
         working-directory: packages/subgraph
@@ -58,7 +60,7 @@ jobs:
           branch: ${{ github.base_ref || github.head_ref || github.ref_name }}
           file_pattern: 'packages/subgraph/CHANGELOG.md'
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.ARABOT_PAT}}
 
   # The build-deploy job builds and deploys the subgraph.
   # It depends on the prepare and changelog jobs to complete successfully,
