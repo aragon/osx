@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `fetchERC20` & `fetchWrappedERC20` to `fetchOrCreateERC20Entity` & `fetchOrCreateWrappedERC20Entity` respectively.
 - Changed type of `token` attribute of `ERC20Transfer` from `ERC20Contract` to `Token`.
 - Refactored `Permission` entity & added `pluginRepo` attribute.
+- Fixed wrong token voting member deletion, when balance & voting power was zero, but it was still delegating to another address.
 
 ### Removed
 

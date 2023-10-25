@@ -289,6 +289,20 @@ export function getProposalCountCall(
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
 
+export function delegatesCall(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
+}
+
 // state
 
 export function createTokenVotingProposalEntityState(

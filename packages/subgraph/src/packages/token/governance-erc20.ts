@@ -1,4 +1,5 @@
 import {TokenVotingMember} from '../../../generated/schema';
+import {GovernanceERC20 as GovernanceERC20Contract} from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   DelegateChanged,
   DelegateVotesChanged,
@@ -7,7 +8,7 @@ import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
-  let id = user.toHexString().concat('_').concat(pluginId);
+  let id = [user.toHexString(), pluginId].join('_');
   let member = TokenVotingMember.load(id);
   if (!member) {
     member = new TokenVotingMember(id);
@@ -15,7 +16,7 @@ function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
     member.balance = BigInt.zero();
     member.plugin = pluginId;
 
-    member.delegatee = id; // we assume by default member delegates itself
+    member.delegatee = null;
     member.votingPower = BigInt.zero();
   }
 
@@ -42,14 +43,15 @@ export function handleTransfer(event: Transfer): void {
 export function handleDelegateChanged(event: DelegateChanged): void {
   let context = dataSource.context();
   let pluginId = context.getString('pluginId');
+  const toDelegate = event.params.toDelegate;
 
   // make sure `fromDelegate` &  `toDelegate`are members
   if (event.params.fromDelegate != Address.zero()) {
     let fromMember = getOrCreateMember(event.params.fromDelegate, pluginId);
     fromMember.save();
   }
-  if (event.params.toDelegate != Address.zero()) {
-    let toMember = getOrCreateMember(event.params.toDelegate, pluginId);
+  if (toDelegate != Address.zero()) {
+    let toMember = getOrCreateMember(toDelegate, pluginId);
     toMember.save();
   }
 
@@ -58,32 +60,53 @@ export function handleDelegateChanged(event: DelegateChanged): void {
     let delegator = getOrCreateMember(event.params.delegator, pluginId);
 
     // set delegatee
-    let delegatee = event.params.toDelegate
-      .toHexString()
-      .concat('_')
-      .concat(pluginId);
+    let delegatee: string | null = null;
+    if (toDelegate != Address.zero()) {
+      delegatee = [toDelegate.toHexString(), pluginId].join('_');
 
-    delegator.delegatee = delegatee;
+      delegator.delegatee = delegatee;
+    }
 
     delegator.save();
   }
 }
 
 export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
-  let context = dataSource.context();
-  let pluginId = context.getString('pluginId');
+  const delegate = event.params.delegate;
+  if (delegate == Address.zero()) return;
+  const newVotingPower = event.params.newBalance;
 
-  if (event.params.delegate != Address.zero()) {
-    let member = getOrCreateMember(event.params.delegate, pluginId);
-    if (
-      member.balance.equals(BigInt.zero()) &&
-      event.params.newBalance.equals(BigInt.zero())
-    ) {
+  const context = dataSource.context();
+  const pluginId = context.getString('pluginId');
+  let member = getOrCreateMember(delegate, pluginId);
+
+  if (isZeroBalanceAndVotingPower(member.balance, newVotingPower)) {
+    if (shouldRemoveMember(event.address, delegate)) {
       store.remove('TokenVotingMember', member.id);
-    } else {
-      // Assign the cumulative delegated votes to this member from all their delegators.
-      member.votingPower = event.params.newBalance;
-      member.save();
+      return;
     }
   }
+  member.votingPower = newVotingPower;
+  member.save();
+}
+
+function isZeroBalanceAndVotingPower(
+  memberBalance: BigInt,
+  votingPower: BigInt
+): boolean {
+  return (
+    memberBalance.equals(BigInt.zero()) && votingPower.equals(BigInt.zero())
+  );
+}
+
+function shouldRemoveMember(
+  contractAddress: Address,
+  delegate: Address
+): boolean {
+  const governanceERC20Contract = GovernanceERC20Contract.bind(contractAddress);
+  const delegates = governanceERC20Contract.try_delegates(delegate);
+  if (!delegates.reverted) {
+    return delegates.value == delegate || delegates.value == Address.zero();
+  }
+  return false;
 }

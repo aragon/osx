@@ -99,6 +99,7 @@ import {
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
   createNewVotingSettingsUpdatedEvent,
+  delegatesCall,
   getProposalCountCall,
 } from '../token/utils';
 import {
@@ -783,16 +784,24 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     this.address = Address.fromHexString(memberAddress);
     this.balance = BigInt.zero();
     this.plugin = plugin.toHexString();
-    this.delegatee = id;
+    this.delegatee = null;
     this.votingPower = BigInt.zero();
 
     return this;
   }
 
+  mockCall_delegatesCall(
+    tokenContractAddress: string,
+    account: string,
+    returns: string
+  ): void {
+    delegatesCall(tokenContractAddress, account, returns);
+  }
+
   createEvent_DelegateChanged(
     delegator: string = this.address.toHexString(),
-    fromDelegate: string = ADDRESS_ONE,
-    toDelegate: string = ADDRESS_ONE,
+    fromDelegate: string = this.address.toHexString(),
+    toDelegate: string = this.address.toHexString(),
     tokenContract: string = Address.fromHexString(
       DAO_TOKEN_ADDRESS
     ).toHexString()
