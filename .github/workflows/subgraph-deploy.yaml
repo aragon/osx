@@ -52,7 +52,7 @@ jobs:
         working-directory: packages/subgraph
         run: |
           VERSION=$(cat package.json | jq -r .version)
-          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./CHANGELOG.md"
+          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION/" "./CHANGELOG.md"
       - uses: planetscale/ghcommit-action@v0.1.6
         with:
           commit_message: 'Update changelog in subgraph'
