@@ -67,7 +67,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 ### Permissions
 
 - [ ] Check that the deployer has not the ROOT permission on the managing DAO
-- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry
+- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `DAO_ENSSubdomainRegistrar` as an operator
 - [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry
 - [ ] Check if the `DAORegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `DAO_ENSSubdomainRegistrar`
 - [ ] Check if the `PluginRepoRegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `Plugin_ENSSubdomainRegistrar`
