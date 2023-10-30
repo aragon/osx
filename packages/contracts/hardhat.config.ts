@@ -97,7 +97,7 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_KEY || '',
       baseMainnet: process.env.BASESCAN_KEY || '',
       baseGoerli: process.env.BASESCAN_KEY || '',
-      arbitrum: process.env.ARBISCAN_KEY || '',
+      arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumGoerli: process.env.ARBISCAN_KEY || '',
     },
     customChains: [

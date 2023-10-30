@@ -49,6 +49,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
   - [ ] If the proxies are not verified with the `Similar Match Source Code` feature
     - [ ] Verify one of the proxies
     - [ ] Check if the other proxies are now verified with `Similar Match Source Code`
+  - [ ] If it is a `PluginSetup`, check that the implementation is verified.
 
 ### Configurations
 
@@ -67,8 +68,8 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 ### Permissions
 
 - [ ] Check that the deployer has not the ROOT permission on the managing DAO
-- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `DAO_ENSSubdomainRegistrar` as an operator
-- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry
+- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `DAO_ENSSubdomainRegistrar` as the operator.
+- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `Plugin_ENSSubdomainRegistrar` as the operator.
 - [ ] Check if the `DAORegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `DAO_ENSSubdomainRegistrar`
 - [ ] Check if the `PluginRepoRegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `Plugin_ENSSubdomainRegistrar`
 - [ ] Check if the `DAOFactory` has `REGISTER_DAO_PERMISSION` on `DAORegistry`
