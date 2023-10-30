@@ -4,6 +4,8 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 
 ## Pre-Deployment
 
+- [ ] Verify that the deployers wallet has enough funds.
+- [ ] Check that the subgraph hoster supports the network OSx is deployed to.
 - [ ] Make sure you are using Node v16
 - [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
 - [ ] Check that version tags are set correctly in the plugin repo deploy scripts `packages/contracts/deploy/new/30_plugins/10_plugin-repos` to ensure synchronized version numbers across all supported networks.
