@@ -1,4 +1,10 @@
 {
+  "mainnet": {
+    "url": "https://mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
+    "isTestnet": false,
+    "chainId": 1,
+    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
+  },
   "goerli": {
     "url": "https://goerli.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": true,
@@ -10,17 +16,6 @@
     "isTestnet": true,
     "chainId": 11155111,
     "deploy": ["./deploy/new", "./deploy/verification"]
-  },
-  "mainnet": {
-    "url": "https://mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
-    "isTestnet": false,
-    "chainId": 1,
-    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
-  },
-  "arbitrum": {
-    "url": "https://arbitrum-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
-    "isTestnet": false,
-    "chainId": 42161
   },
   "polygon": {
     "url": "https://polygon-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
@@ -49,5 +44,17 @@
     "chainId": 84531,
     "deploy": ["./deploy/new", "./deploy/verification"],
     "gasPrice": 1000000
+  },
+  "arbitrum": {
+    "url": "https://arbitrum-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
+    "isTestnet": false,
+    "chainId": 42161,
+    "deploy": ["./deploy/new", "./deploy/verification"]
+  },
+  "arbitrumGoerli": {
+    "url": "https://arbitrum-goerli.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
+    "isTestnet": true,
+    "chainId": 421613,
+    "deploy": ["./deploy/new", "./deploy/verification"]
   }
 }
