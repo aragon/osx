@@ -55,16 +55,17 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Configurations
 
-- [ ] Check if the managing DAO set in the `DAO_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO set in the `Plugin_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO set in the `DAORegistry`
-- [ ] Check if the `DAO_ENSSubdomainRegistrar` set in the `DAORegistry`
+- [ ] Check that all managing DAO signers are members of the managing DAO multisig and noone else.
+- [ ] Check if the managing DAO is set in the `DAO_ENSSubdomainRegistrar`
+- [ ] Check if the managing DAO is set in the `Plugin_ENSSubdomainRegistrar`
+- [ ] Check if the managing DAO is set in the `DAORegistry`
+- [ ] Check if the `DAO_ENSSubdomainRegistrar` is set in the `DAORegistry`
 - [ ] Check if the managing DAO set in the `PluginRepoRegistry`
-- [ ] Check if the `Plugin_ENSSubdomainRegistrar` set in the `PluginRepoRegistry`
+- [ ] Check if the `Plugin_ENSSubdomainRegistrar` is set in the `PluginRepoRegistry`
 - [ ] Check if the `PluginRepoRegistry` is set in the `PluginRepoFactory`
-- [ ] Check if the `PluginRepoRegistry` set in the `PluginSetupProcessor`
-- [ ] Check if the `DAORegistry` set in the `DAOFactory`
-- [ ] Check if the `PluginSetupProcessor` set in the `DAOFactory`
+- [ ] Check if the `PluginRepoRegistry` is set in the `PluginSetupProcessor`
+- [ ] Check if the `DAORegistry` is set in the `DAOFactory`
+- [ ] Check if the `PluginSetupProcessor` is set in the `DAOFactory`
 - [ ] Check that the versions (and eventual `PlaceholderSetup` builds) are published correctly in the `token-voting-repo`, `address-list-voting-repo`, `multisig-repo`, and `admin-repo` and are synchronized across all supported networks.
 
 ### Permissions
