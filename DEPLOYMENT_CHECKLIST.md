@@ -55,7 +55,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Configurations
 
-- [ ] Check that all managing DAO signers are members of the managing DAO multisig and noone else.
+- [ ] Check that all managing DAO signers are members of the managing DAO multisig and no one else.
 - [ ] Check if the managing DAO is set in the `DAO_ENSSubdomainRegistrar`
 - [ ] Check if the managing DAO is set in the `Plugin_ENSSubdomainRegistrar`
 - [ ] Check if the managing DAO is set in the `DAORegistry`
