@@ -1,9 +1,9 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
 import {
   Administrator,
-  AdministratorAdminPlugin
+  AdministratorAdminPlugin,
 } from '../../../generated/schema';
 import {Granted, Revoked} from '../../../generated/templates/Admin/DAO';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleGranted(event: Granted): void {
   if (

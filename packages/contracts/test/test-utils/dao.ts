@@ -1,5 +1,3 @@
-import {BigNumber} from 'ethers';
-import {ethers} from 'hardhat';
 import {
   DAO,
   ActionExecute__factory,
@@ -10,6 +8,8 @@ import {
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {BigNumber} from 'ethers';
+import {ethers} from 'hardhat';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';

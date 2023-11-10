@@ -104,7 +104,7 @@ interface TokenTransfer {
 type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
-  token: ERC20Contract!
+  token: Token!
   amount: BigInt!
   from: Bytes!
   to: Bytes!
@@ -155,28 +155,6 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   createdAt: BigInt!
 }
 
-# ACL
-
-type ContractPermissionId @entity(immutable: true) {
-  id: ID! # where + permissionId
-  dao: Dao!
-  where: Bytes!
-  permissionId: Bytes!
-}
-
-# Cannot be immutable because a permission can be revoked and granted in the same TX.
-# This results in an error in the subgraph if the entity is immutable.
-type Permission @entity {
-  "no need to store granted as we can delete permission when revoked"
-  id: ID! # where + permissionId + who
-  dao: Dao!
-  where: Bytes!
-  contractPermissionId: ContractPermissionId!
-  who: Bytes!
-  actor: Bytes!
-  condition: Bytes
-}
-
 # Executions
 
 type Action @entity {
@@ -210,7 +188,6 @@ type Dao @entity {
   actions: [Action!]! @derivedFrom(field: "dao")
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
-  contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   proposals: [IProposal!]! @derivedFrom(field: "dao")
   trustedForwarder: Bytes
@@ -218,6 +195,25 @@ type Dao @entity {
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
   plugins: [PluginInstallation!]! @derivedFrom(field: "dao")
+}
+
+# ACL
+
+# Cannot be immutable because a permission can be revoked and granted in the same TX.
+# This results in an error in the subgraph if the entity is immutable.
+# No need to store granted as we can delete permission when revoked
+type Permission @entity {
+  id: ID! # emitting contract Address (DAO or PluginRepo) + permissionId + where + who
+  where: Bytes!
+  permissionId: Bytes!
+  who: Bytes!
+  actor: Bytes!
+  condition: Bytes
+
+  # The following attributes is used to create
+  # one-to-many between Dao or PluginRepo to Permission
+  dao: Dao
+  pluginRepo: PluginRepo
 }
 
 # Plugins
@@ -230,6 +226,8 @@ type PluginRepo @entity(immutable: true) {
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
   # Holds all installed and uninstalled installations.
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
+
+  permissions: [Permission!]! @derivedFrom(field: "pluginRepo")
 }
 
 type PluginSetup @entity(immutable: true) {
@@ -307,6 +305,7 @@ type PluginInstallation @entity {
 enum PluginPreparationType {
   Installation
   Update
+  Uninstallation
 }
 
 enum PluginPreparationState {
@@ -407,7 +406,7 @@ type TokenVotingMember @entity {
   plugin: TokenVotingPlugin!
 
   # delegates
-  delegatee: TokenVotingMember!
+  delegatee: TokenVotingMember
   votingPower: BigInt
   # we assume token owners and/or delegatees are members
   delegators: [TokenVotingMember!]! @derivedFrom(field: "delegatee")

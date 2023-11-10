@@ -1,0 +1,22 @@
+name: Style Checks
+on:
+  push:
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          node-version: 16
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Check with prettier
+        run: yarn run prettier:check

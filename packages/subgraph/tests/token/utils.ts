@@ -1,14 +1,16 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {createMockedFunction, newMockEvent} from 'matchstick-as';
-
+import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
+import {
+  DelegateChanged,
+  DelegateVotesChanged,
+} from '../../generated/templates/GovernanceERC20/GovernanceERC20';
+import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
 import {
   VotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  MembershipContractAnnounced
+  MembershipContractAnnounced,
 } from '../../generated/templates/TokenVoting/TokenVoting';
-import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
@@ -23,13 +25,10 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
 } from '../constants';
-import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
-import {
-  DelegateChanged,
-  DelegateVotesChanged
-} from '../../generated/templates/GovernanceERC20/GovernanceERC20';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 // events
 
@@ -288,6 +287,20 @@ export function getProposalCountCall(
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
+}
+
+export function delegatesCall(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }
 
 // state

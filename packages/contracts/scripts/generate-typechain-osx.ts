@@ -1,8 +1,8 @@
-import {exec} from 'child_process';
-import path from 'path';
-import fs from 'fs';
-import util from 'util';
 import {OSX_VERSION_ALIASES} from './osx-versions-aliases';
+import {exec} from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import util from 'util';
 
 const execPromise = util.promisify(exec);
 

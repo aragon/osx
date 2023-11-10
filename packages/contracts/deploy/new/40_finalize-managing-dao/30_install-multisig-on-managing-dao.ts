@@ -1,20 +1,18 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import buildMetadataJson from '../../../src/plugins/governance/multisig/build-metadata.json';
-import {findEvent} from '../../../utils/event';
-
-import {checkPermission, getContractAddress} from '../../helpers';
-import {Operation} from '../../../utils/types';
-import {hashHelpers} from '../../../utils/psp';
 import {
   DAO__factory,
   MultisigSetup__factory,
   Multisig__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {findEvent} from '../../../utils/event';
 import {getNamedTypesFromMetadata} from '../../../utils/metadata';
+import {hashHelpers} from '../../../utils/psp';
+import {Operation} from '../../../utils/types';
+import {checkPermission, getContractAddress} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;

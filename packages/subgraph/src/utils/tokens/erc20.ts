@@ -1,22 +1,22 @@
-import {Address, BigInt, Bytes, Value, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC20Balance,
   ERC20Contract,
   ERC20Transfer,
-  ERC20WrapperContract
+  ERC20WrapperContract,
 } from '../../../generated/schema';
 import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
 import {GovernanceWrappedERC20} from '../../../generated/templates/TokenVoting/GovernanceWrappedERC20';
-import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../utils/constants';
 import {supportsInterface} from '../erc165';
-import {WRAPPED_ERC20_INTERFACE} from '../constants';
+import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 export function supportsERC20Wrapped(token: Address): bool {
   // Double check that it's ERC20Wrapped by calling supportsInterface checks.
   let erc20Wrapped = GovernanceWrappedERC20.bind(token);
   let introspection_wrapped_erc20 = supportsInterface(
     erc20Wrapped,
-    WRAPPED_ERC20_INTERFACE
+    GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID
   ); // GovernanceWrappedERC20
   if (!introspection_wrapped_erc20) {
     return false;
@@ -29,7 +29,7 @@ export function supportsERC20Wrapped(token: Address): bool {
   return introspection_ffffffff;
 }
 
-export function fetchWrappedERC20(
+export function fetchOrCreateWrappedERC20Entity(
   address: Address
 ): ERC20WrapperContract | null {
   let wrappedErc20 = GovernanceWrappedERC20.bind(address);
@@ -52,7 +52,7 @@ export function fetchWrappedERC20(
     return null;
   }
   // get and save the underliying contract
-  let underlyingContract = fetchERC20(underlying.value);
+  let underlyingContract = fetchOrCreateERC20Entity(underlying.value);
   if (!underlyingContract) {
     return null;
   }
@@ -65,7 +65,9 @@ export function fetchWrappedERC20(
   return contract;
 }
 
-export function fetchERC20(address: Address): ERC20Contract | null {
+export function fetchOrCreateERC20Entity(
+  address: Address
+): ERC20Contract | null {
   let erc20 = ERC20.bind(address);
 
   // Try load entry
@@ -93,6 +95,37 @@ export function fetchERC20(address: Address): ERC20Contract | null {
   contract.save();
 
   return contract;
+}
+
+/**
+ * @dev Identifies the type of ERC20 token (wrapped or regular), fetches or creates the corresponding entity, and returns its entity ID.
+ *
+ * 1. Checks whether the token supports wrapped ERC20.
+ * 2. Fetches the existing entity if it exists.
+ * 3. Creates a new entity if it doesn't exist.
+ *
+ * @param token The address of the token to be identified.
+ * @return entityId The entity ID of the ERC20 token if it's either wrapped or regular, null otherwise.
+ */
+export function identifyAndFetchOrCreateERC20TokenEntity(
+  token: Address
+): string | null {
+  let tokenAddress: string;
+  if (supportsERC20Wrapped(token)) {
+    let contract = fetchOrCreateWrappedERC20Entity(token);
+    if (!contract) {
+      return null;
+    }
+    tokenAddress = contract.id;
+  } else {
+    let contract = fetchOrCreateERC20Entity(token);
+    if (!contract) {
+      return null;
+    }
+    tokenAddress = contract.id;
+  }
+
+  return tokenAddress;
 }
 
 export function updateERC20Balance(
@@ -133,8 +166,8 @@ export function handleERC20Action(
   actionIndex: number,
   event: ethereum.Event
 ): void {
-  let contract = fetchERC20(token);
-  if (!contract) {
+  let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+  if (!tokenAddress) {
     return;
   }
 
@@ -191,7 +224,7 @@ export function handleERC20Action(
   transfer.amount = amount;
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
-  transfer.token = contract.id;
+  transfer.token = tokenAddress as string;
   transfer.proposal = proposalId;
 
   // If from/to both aren't equal to dao, it means
@@ -226,8 +259,8 @@ export function handleERC20Deposit(
   amount: BigInt,
   event: ethereum.Event
 ): void {
-  let contract = fetchERC20(token);
-  if (!contract) {
+  let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+  if (!tokenAddress) {
     return;
   }
 
@@ -243,7 +276,7 @@ export function handleERC20Deposit(
   erc20Transfer.amount = amount;
   erc20Transfer.txHash = event.transaction.hash;
   erc20Transfer.createdAt = event.block.timestamp;
-  erc20Transfer.token = contract.id;
+  erc20Transfer.token = tokenAddress as string;
   erc20Transfer.type = 'Deposit';
 
   erc20Transfer.save();

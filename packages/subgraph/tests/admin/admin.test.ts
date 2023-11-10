@@ -1,8 +1,9 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
-
 import {AdminPlugin, Action, AdminProposal} from '../../generated/schema';
-
+import {
+  handleProposalExecuted,
+  _handleProposalCreated,
+} from '../../src/packages/admin/admin';
+import {getProposalId} from '../../src/utils/proposals';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -13,19 +14,15 @@ import {
   START_DATE,
   ALLOW_FAILURE_MAP,
   PROPOSAL_ENTITY_ID,
-  ZERO
+  ZERO,
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
   createNewProposalCreatedEvent,
-  createProposalExecutedEvent
+  createProposalExecutedEvent,
 } from './utils';
-
-import {
-  handleProposalExecuted,
-  _handleProposalCreated
-} from '../../src/packages/admin/admin';
-import {getProposalId} from '../../src/utils/proposals';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 const actionValue = '0';
 const actionData = '0x00000000';

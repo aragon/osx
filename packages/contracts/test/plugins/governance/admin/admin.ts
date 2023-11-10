@@ -1,7 +1,17 @@
-import {expect} from 'chai';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ethers} from 'hardhat';
-
+import {ADMIN_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
+import {
+  CloneFactory,
+  CloneFactory__factory,
+  Admin__factory,
+  IERC165Upgradeable__factory,
+  IMembership__factory,
+  IPlugin__factory,
+  IProposal__factory,
+  DAO__factory,
+  IProtocolVersion__factory,
+} from '../../../../typechain';
+import {ProposalCreatedEvent} from '../../../../typechain/Admin';
+import {ExecutedEvent} from '../../../../typechain/IDAO';
 import {
   findEvent,
   DAO_EVENTS,
@@ -10,21 +20,12 @@ import {
   findEventTopicLog,
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../../test-utils/error';
+import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
 import {toBytes32} from '../../../test-utils/voting';
-import {
-  AdminCloneFactory,
-  AdminCloneFactory__factory,
-  Admin__factory,
-  IERC165Upgradeable__factory,
-  IMembership__factory,
-  IPlugin__factory,
-  IProposal__factory,
-  DAO__factory,
-} from '../../../../typechain';
-import {ProposalCreatedEvent} from '../../../../typechain/Admin';
-import {ExecutedEvent} from '../../../../typechain/IDAO';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -32,15 +33,10 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-export const adminInterface = new ethers.utils.Interface([
-  'function initialize(address)',
-  'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
-]);
-
 describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
-  let adminCloneFactory: AdminCloneFactory;
+  let adminCloneFactory: CloneFactory;
   let dao: any;
   let ownerAddress: string;
   let dummyActions: any;
@@ -63,8 +59,10 @@ describe('Admin', function () {
 
     dao = await deployNewDAO(signers[0]);
 
-    const AdminCloneFactory = new AdminCloneFactory__factory(signers[0]);
-    adminCloneFactory = await AdminCloneFactory.deploy();
+    const admin = await new Admin__factory(signers[0]).deploy();
+    adminCloneFactory = await new CloneFactory__factory(signers[0]).deploy(
+      admin.address
+    );
   });
 
   beforeEach(async () => {
@@ -112,7 +110,7 @@ describe('Admin', function () {
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await plugin.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -127,6 +125,11 @@ describe('Admin', function () {
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
@@ -138,8 +141,9 @@ describe('Admin', function () {
     });
 
     it('supports the `Admin` interface', async () => {
-      expect(await plugin.supportsInterface(getInterfaceID(adminInterface))).to
-        .be.true;
+      const iface = getInterfaceID(ADMIN_INTERFACE);
+      expect(iface).to.equal(ADMIN_INTERFACE_ID); // checks that it didn't change
+      expect(await plugin.supportsInterface(iface)).to.be.true;
     });
   });
 

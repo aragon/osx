@@ -1,14 +1,13 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {PluginRepo__factory} from '../../../typechain';
-import {getContractAddress, uploadToIPFS} from '../../helpers';
-
+import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import governanceERC20Artifact from '../../../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
 import governanceWrappedERC20Artifact from '../../../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
-import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
-import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json';
+import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import {MintSettings} from '../../../test/token/erc20/governance-erc20';
+import {PluginRepo__factory} from '../../../typechain';
+import {getContractAddress, uploadToIPFS} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const TARGET_RELEASE = 1;
 

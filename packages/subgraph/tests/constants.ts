@@ -1,6 +1,5 @@
-import {Address, BigInt} from '@graphprotocol/graph-ts';
-
 import {getProposalId} from '../src/utils/proposals';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 export const ADDRESS_ONE = '0x0000000000000000000000000000000000000001';
@@ -70,6 +69,5 @@ export const PROPOSAL_ENTITY_ID = getProposalId(
   BigInt.fromString(PLUGIN_PROPOSAL_ID)
 );
 
-export const PLUGIN_ENTITY_ID = Address.fromString(
-  CONTRACT_ADDRESS
-).toHexString();
+export const PLUGIN_ENTITY_ID =
+  Address.fromString(CONTRACT_ADDRESS).toHexString();

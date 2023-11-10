@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
@@ -10,7 +10,8 @@ import {IDAO} from "../../core/dao/IDAO.sol";
 
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022-2023
-/// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
+/// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts.
+/// @custom:security-contact sirt@aragon.org
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     using ERC165CheckerUpgradeable for address;
 

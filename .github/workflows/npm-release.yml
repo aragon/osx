@@ -30,7 +30,7 @@ jobs:
         run: echo "run=true" >> $GITHUB_OUTPUT
   npmDeploy:
     needs: ['check']
-    if: needs.check.outputs.run != true
+    if: needs.check.outputs.run == true
     uses: './.github/workflows/npm-release-reusable.yml'
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
