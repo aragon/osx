@@ -42,10 +42,9 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../../test-utils/uups-upgradeable';
+import {MAJORITY_VOTING_BASE_INTERFACE} from '@aragon/osx-commons/contracts/test/governance/majority-voting/majority-voting';
 import {
   VoteOption,
-  pctToRatio,
-  RATIO_BASE,
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
@@ -55,8 +54,11 @@ import {
   MAX_UINT64,
   voteWithSigners,
   toBytes32,
-} from '../../../../test-utils/voting';
-import {majorityVotingBaseInterface} from '../majority-voting';
+} from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
+import {
+  pctToRatio,
+  RATIO_BASE,
+} from '@aragon/osx-commons/contracts/test/utils/math/ratio';
 import {
   findEvent,
   findEventTopicLog,
@@ -330,7 +332,7 @@ describe('TokenVoting', function () {
     it('supports the `MajorityVotingBase` interface', async () => {
       expect(
         await voting.supportsInterface(
-          getInterfaceId(majorityVotingBaseInterface)
+          getInterfaceId(MAJORITY_VOTING_BASE_INTERFACE)
         )
       ).to.be.true;
     });

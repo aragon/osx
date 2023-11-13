@@ -7,16 +7,14 @@ import {
 import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {
-  ADDRESSLIST_VOTING_INTERFACE,
-  getInterfaceId,
-} from '../../../../test-utils/interfaces';
+import {ADDRESSLIST_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {
   VotingSettings,
   VotingMode,
-  pctToRatio,
   ONE_HOUR,
-} from '../../../../test-utils/voting';
+} from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
+import {pctToRatio} from '@aragon/osx-commons/contracts/test/utils/math/ratio';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

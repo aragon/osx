@@ -28,10 +28,7 @@ import {
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
-import {
-  MULTISIG_INTERFACE,
-  getInterfaceId,
-} from '../../../test-utils/interfaces';
+import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -48,12 +45,13 @@ import {
   setTimeForNextBlock,
   timestampIn,
   toBytes32,
-} from '../../../test-utils/voting';
+} from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
 import {
   findEvent,
   findEventTopicLog,
 } from '@aragon/osx-commons/contracts/utils/events';
 import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';

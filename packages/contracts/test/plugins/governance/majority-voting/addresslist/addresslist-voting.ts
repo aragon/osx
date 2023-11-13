@@ -27,10 +27,7 @@ import {
 } from '../../../../../utils/event';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
-import {
-  ADDRESSLIST_VOTING_INTERFACE,
-  getInterfaceId,
-} from '../../../../test-utils/interfaces';
+import {ADDRESSLIST_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -41,9 +38,9 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../../test-utils/uups-upgradeable';
+import {MAJORITY_VOTING_BASE_INTERFACE} from '@aragon/osx-commons/contracts/test/governance/majority-voting/majority-voting';
 import {
   VoteOption,
-  pctToRatio,
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
@@ -53,13 +50,14 @@ import {
   MAX_UINT64,
   voteWithSigners,
   toBytes32,
-} from '../../../../test-utils/voting';
-import {majorityVotingBaseInterface} from '../majority-voting';
+} from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
+import {pctToRatio} from '@aragon/osx-commons/contracts/test/utils/math/ratio';
 import {
   findEvent,
   findEventTopicLog,
 } from '@aragon/osx-commons/contracts/utils/events';
 import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -266,7 +264,7 @@ describe('AddresslistVoting', function () {
     it('supports the `MajorityVotingBase` interface', async () => {
       expect(
         await voting.supportsInterface(
-          getInterfaceId(majorityVotingBaseInterface)
+          getInterfaceId(MAJORITY_VOTING_BASE_INTERFACE)
         )
       ).to.be.true;
     });
