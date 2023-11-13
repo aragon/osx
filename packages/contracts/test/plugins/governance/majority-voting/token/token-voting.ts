@@ -2,8 +2,8 @@ import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/co
 import {
   DAO,
   DAO__factory,
-  GovernanceERC20Mock,
-  GovernanceERC20Mock__factory,
+  TestGovernanceERC20ck,
+  TestGovernanceERC20ck__factory,
   IERC165Upgradeable__factory,
   IMajorityVoting__factory,
   IMembership__factory,
@@ -21,8 +21,6 @@ import {
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
 import {
-  findEvent,
-  findEventTopicLog,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
@@ -32,14 +30,13 @@ import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {
   TOKEN_VOTING_INTERFACE,
-  getInterfaceID,
+  getInterfaceId,
 } from '../../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
-import {deployWithProxy} from '../../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -60,6 +57,11 @@ import {
   toBytes32,
 } from '../../../../test-utils/voting';
 import {majorityVotingBaseInterface} from '../majority-voting';
+import {
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons/contracts/utils/events';
+import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {BigNumber, ContractFactory} from 'ethers';
@@ -69,8 +71,8 @@ describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
   let voting: TokenVoting;
   let dao: DAO;
-  let governanceErc20Mock: GovernanceERC20Mock;
-  let GovernanceERC20Mock: GovernanceERC20Mock__factory;
+  let governanceErc20Mock: TestGovernanceERC20ck;
+  let TestGovernanceERC20ck: TestGovernanceERC20ck__factory;
   let dummyActions: any;
   let dummyMetadata: string;
   let startDate: number;
@@ -107,8 +109,8 @@ describe('TokenVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    GovernanceERC20Mock = new GovernanceERC20Mock__factory(signers[0]);
-    governanceErc20Mock = await GovernanceERC20Mock.deploy(
+    TestGovernanceERC20ck = new TestGovernanceERC20ck__factory(signers[0]);
+    governanceErc20Mock = await TestGovernanceERC20ck.deploy(
       dao.address,
       'GOV',
       'GOV',
@@ -297,44 +299,44 @@ describe('TokenVoting', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IMembership` interface', async () => {
       const iface = IMembership__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
       const iface = IMajorityVoting__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `MajorityVotingBase` interface', async () => {
       expect(
         await voting.supportsInterface(
-          getInterfaceID(majorityVotingBaseInterface)
+          getInterfaceId(majorityVotingBaseInterface)
         )
       ).to.be.true;
     });
 
     it('supports the `TokenVoting` interface', async () => {
-      const iface = getInterfaceID(TOKEN_VOTING_INTERFACE);
+      const iface = getInterfaceId(TOKEN_VOTING_INTERFACE);
       expect(iface).to.equal(TOKEN_VOTING_INTERFACE_ID); // checks that it didn't change
       expect(await voting.supportsInterface(iface)).to.be.true;
     });
@@ -752,7 +754,7 @@ describe('TokenVoting', function () {
     });
 
     it('reverts if the total token supply is 0', async () => {
-      governanceErc20Mock = await GovernanceERC20Mock.deploy(
+      governanceErc20Mock = await TestGovernanceERC20ck.deploy(
         dao.address,
         'GOV',
         'GOV',

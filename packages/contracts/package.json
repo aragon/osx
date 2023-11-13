@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/aragon/osx#readme",
   "dependencies": {
+    "@aragon/osx-commons": "aragon/osx-commons#feature/version-number",
     "@ensdomains/ens-contracts": "0.0.11",
     "@openzeppelin/contracts": "4.9.5",
     "@openzeppelin/contracts-upgradeable": "4.9.5"

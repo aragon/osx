@@ -20,8 +20,6 @@ import {
 } from '../../../../../typechain/AddresslistVoting';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
-  findEvent,
-  findEventTopicLog,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
@@ -31,14 +29,13 @@ import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
-  getInterfaceID,
+  getInterfaceId,
 } from '../../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../../test-utils/protocol-version';
-import {deployWithProxy} from '../../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -58,6 +55,11 @@ import {
   toBytes32,
 } from '../../../../test-utils/voting';
 import {majorityVotingBaseInterface} from '../majority-voting';
+import {
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons/contracts/utils/events';
+import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -228,49 +230,49 @@ describe('AddresslistVoting', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IMembership` interface', async () => {
       const iface = IMembership__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `Addresslist` interface', async () => {
       const iface = Addresslist__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
       const iface = IMajorityVoting__factory.createInterface();
-      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await voting.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `MajorityVotingBase` interface', async () => {
       expect(
         await voting.supportsInterface(
-          getInterfaceID(majorityVotingBaseInterface)
+          getInterfaceId(majorityVotingBaseInterface)
         )
       ).to.be.true;
     });
 
     it('supports the `AddresslistVoting` interface', async () => {
-      const iface = getInterfaceID(ADDRESSLIST_VOTING_INTERFACE);
+      const iface = getInterfaceId(ADDRESSLIST_VOTING_INTERFACE);
       expect(iface).to.equal(ADDRESSLIST_VOTING_INTERFACE_ID); // checks that it didn't change
       expect(await voting.supportsInterface(iface)).to.be.true;
     });

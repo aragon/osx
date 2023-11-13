@@ -28,7 +28,6 @@ import {
   PluginCloneableSetupV1MockBad__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
-import {findEventTopicLog} from '../../../utils/event';
 import {Operation} from '../../../utils/types';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
@@ -75,6 +74,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

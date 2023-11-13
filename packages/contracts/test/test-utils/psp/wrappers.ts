@@ -7,7 +7,6 @@ import {
   UpdateAppliedEvent,
   UpdatePreparedEvent,
 } from '../../../typechain/PluginSetupProcessor';
-import {findEvent} from '../../../utils/event';
 import {
   createApplyInstallationParams,
   createApplyUninstallationParams,
@@ -17,6 +16,7 @@ import {
   createPrepareUpdateParams,
 } from './create-params';
 import {PermissionOperation, PluginRepoPointer} from './types';
+import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
 import {BytesLike} from 'ethers';
 
 export async function prepareInstallation(

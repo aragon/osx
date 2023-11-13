@@ -17,17 +17,17 @@ import {
   InstallationPreparedEvent,
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
-import {findEvent} from '../../../../utils/event';
 import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 import {hashHelpers} from '../../../../utils/psp';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {
   MULTISIG_INTERFACE,
-  getInterfaceID,
+  getInterfaceId,
 } from '../../../test-utils/interfaces';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {MultisigSettings} from './multisig';
+import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
+import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -89,7 +89,7 @@ describe('MultisigSetup', function () {
 
     expect(
       await multisigContract.supportsInterface(
-        getInterfaceID(MULTISIG_INTERFACE)
+        getInterfaceId(MULTISIG_INTERFACE)
       )
     ).to.be.true;
   });
@@ -366,7 +366,7 @@ describe('MultisigSetup', function () {
       pluginRepoRegistry = await pluginRepoRegistryFactory.deploy();
       pluginRepoRegistry.initialize(
         managingDAO.address,
-        getInterfaceID(IPluginRepo__factory.createInterface())
+        getInterfaceId(IPluginRepo__factory.createInterface())
       );
 
       // Grant the owner full rights on the registry

@@ -9,7 +9,7 @@ import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
-  getInterfaceID,
+  getInterfaceId,
 } from '../../../../test-utils/interfaces';
 import {
   VotingSettings,
@@ -84,7 +84,7 @@ describe('AddresslistVotingSetup', function () {
 
     expect(
       await addresslistVotingContract.supportsInterface(
-        getInterfaceID(ADDRESSLIST_VOTING_INTERFACE)
+        getInterfaceId(ADDRESSLIST_VOTING_INTERFACE)
       )
     ).to.be.eq(true);
   });

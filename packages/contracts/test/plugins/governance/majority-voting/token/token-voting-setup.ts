@@ -15,7 +15,7 @@ import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {
   TOKEN_VOTING_INTERFACE,
-  getInterfaceID,
+  getInterfaceId,
 } from '../../../../test-utils/interfaces';
 import {
   VotingSettings,
@@ -138,7 +138,7 @@ describe('TokenVotingSetup', function () {
 
     expect(
       await tokenVoting.supportsInterface(
-        getInterfaceID(TOKEN_VOTING_INTERFACE)
+        getInterfaceId(TOKEN_VOTING_INTERFACE)
       )
     ).to.be.eq(true);
   });

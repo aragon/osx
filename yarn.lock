@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@aragon/osx-commons@aragon/osx-commons#feature/version-number":
+  version "1.0.0"
+  resolved "https://codeload.github.com/aragon/osx-commons/tar.gz/7e93a9c37796be932af10b2f83914fe9657ad0ee"
+
 "@aragon/osx-ethers-v1.2.0@npm:@aragon/osx-ethers@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.0.tgz#b7e58714394183372ddf25d97cfe326f18ce6f1d"

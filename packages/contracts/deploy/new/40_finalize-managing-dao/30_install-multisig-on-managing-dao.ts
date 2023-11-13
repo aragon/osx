@@ -6,11 +6,11 @@ import {
   PluginSetupProcessor__factory,
 } from '../../../typechain';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
-import {findEvent} from '../../../utils/event';
 import {getNamedTypesFromMetadata} from '../../../utils/metadata';
 import {hashHelpers} from '../../../utils/psp';
 import {Operation} from '../../../utils/types';
 import {checkPermission, getContractAddress} from '../../helpers';
+import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

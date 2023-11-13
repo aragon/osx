@@ -27,13 +27,10 @@ import {
 import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
-import {findEventTopicLog} from '../../../utils/event';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {getInterfaceID} from '../../test-utils/interfaces';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   createApplyInstallationParams,
   createApplyUninstallationParams,
@@ -51,6 +48,9 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
+import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -284,13 +284,13 @@ describe('DAOFactory: ', function () {
 
     it('supports the `IERC165` interface', async () => {
       const iface = IERC165__factory.createInterface();
-      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await daoFactory.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await daoFactory.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
   });

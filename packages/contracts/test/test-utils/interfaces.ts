@@ -1,7 +1,7 @@
 import {ethers as ethersDirect} from 'ethers';
 import {ethers} from 'hardhat';
 
-export function getInterfaceID(
+export function getInterfaceId(
   contractInterface: ethersDirect.utils.Interface
 ) {
   let interfaceID = ethers.constants.Zero;

@@ -5,9 +5,9 @@ import {
   PluginV1Mock,
   PluginV1Mock__factory,
 } from '../../../typechain';
-import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {PluginType} from '../../test-utils/psp/types';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
@@ -34,17 +34,17 @@ describe('Plugin', function () {
 
     it('supports the `IERC165` interface', async () => {
       const iface = IERC165__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
   });
 

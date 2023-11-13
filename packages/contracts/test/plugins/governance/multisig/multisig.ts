@@ -21,8 +21,6 @@ import {
   ProposalExecutedEvent,
 } from '../../../../typechain/Multisig';
 import {
-  findEvent,
-  findEventTopicLog,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
@@ -32,14 +30,13 @@ import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {
   MULTISIG_INTERFACE,
-  getInterfaceID,
+  getInterfaceId,
 } from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../test-utils/protocol-version';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -52,6 +49,11 @@ import {
   timestampIn,
   toBytes32,
 } from '../../../test-utils/voting';
+import {
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons/contracts/utils/events';
+import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';
@@ -294,48 +296,48 @@ describe('Multisig', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IMembership` interface', async () => {
       const iface = IMembership__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `Addresslist` interface', async () => {
       const iface = Addresslist__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IMultisig` interface', async () => {
       const iface = IMultisig__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `Multisig` interface', async () => {
-      const iface = getInterfaceID(MULTISIG_INTERFACE);
+      const iface = getInterfaceId(MULTISIG_INTERFACE);
       expect(iface).to.equal(MULTISIG_INTERFACE_ID); // checks that it didn't change
       expect(await multisig.supportsInterface(iface)).to.be.true;
     });

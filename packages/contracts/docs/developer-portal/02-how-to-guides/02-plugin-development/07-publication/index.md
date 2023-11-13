@@ -45,14 +45,10 @@ You may want to have a publishing script directly off of your Hardhat project. I
 ```js
 import buildMetadata1 from '../../contracts/release1/build1/build-metadata.json';
 import releaseMetadata1 from '../../contracts/release1/release-metadata.json';
-import {
-  networkNameMapping,
-  osxContracts,
-  findEventTopicLog,
-  addDeployedContract,
-} from '../../utils/helpers';
+import {networkNameMapping, osxContracts, addDeployedContract} from '../../utils/helpers';
 import {toHex} from '../../utils/ipfs-upload';
 import {uploadToIPFS} from '../../utils/ipfs-upload';
+import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
 import {
   PluginRepoFactory__factory,
   PluginRepoRegistry__factory,

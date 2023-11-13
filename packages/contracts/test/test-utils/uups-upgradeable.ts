@@ -1,6 +1,9 @@
 import {DAO, PluginRepo} from '../../typechain';
-import {readImplementationValueFromSlot} from '../../utils/storage';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
+import {
+  readStorage,
+  ERC1967_IMPLEMENTATION_SLOT,
+} from '@aragon/osx-commons/contracts/utils/storage';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
@@ -66,8 +69,10 @@ export async function deployAndUpgradeSelfCheck(
   const toImplementation = (await factory.deploy()).address;
 
   // Confirm that the two implementations are different
-  const fromImplementation = await readImplementationValueFromSlot(
-    proxy.address
+  const fromImplementation = await readStorage(
+    proxy.address,
+    ERC1967_IMPLEMENTATION_SLOT,
+    ['address']
   );
   expect(toImplementation).to.not.equal(fromImplementation);
 
@@ -75,8 +80,10 @@ export async function deployAndUpgradeSelfCheck(
   await proxy.connect(upgrader).upgradeTo(toImplementation);
 
   // Confirm that the proxy points to the new implementation
-  const implementationAfterUpgrade = await readImplementationValueFromSlot(
-    proxy.address
+  const implementationAfterUpgrade = await readStorage(
+    proxy.address,
+    ERC1967_IMPLEMENTATION_SLOT,
+    ['address']
   );
   expect(implementationAfterUpgrade).to.equal(toImplementation);
 }
@@ -108,8 +115,10 @@ export async function deployAndUpgradeFromToCheck(
     }
   );
 
-  const fromImplementation = await readImplementationValueFromSlot(
-    proxy.address
+  const fromImplementation = await readStorage(
+    proxy.address,
+    ERC1967_IMPLEMENTATION_SLOT,
+    ['address']
   );
 
   // Grant the upgrade permission
@@ -149,8 +158,11 @@ export async function deployAndUpgradeFromToCheck(
     constructorArgs: [],
   });
 
-  const toImplementation = await readImplementationValueFromSlot(proxy.address);
-
+  const toImplementation = await readStorage(
+    proxy.address,
+    ERC1967_IMPLEMENTATION_SLOT,
+    ['address']
+  );
   return {proxy, fromImplementation, toImplementation};
 }
 

@@ -9,12 +9,12 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {
   deployMockPluginSetup,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -105,13 +105,13 @@ describe('PluginRepoFactory: ', function () {
 
     it('supports the `IERC165` interface', async () => {
       const iface = IERC165__factory.createInterface();
-      expect(await pluginRepoFactory.supportsInterface(getInterfaceID(iface)))
+      expect(await pluginRepoFactory.supportsInterface(getInterfaceId(iface)))
         .to.be.true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await pluginRepoFactory.supportsInterface(getInterfaceID(iface)))
+      expect(await pluginRepoFactory.supportsInterface(getInterfaceId(iface)))
         .to.be.true;
     });
   });

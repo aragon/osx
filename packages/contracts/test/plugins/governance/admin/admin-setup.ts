@@ -7,7 +7,7 @@ import {
 import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {ADMIN_INTERFACE, getInterfaceId} from '../../../test-utils/interfaces';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
@@ -57,7 +57,7 @@ describe('AdminSetup', function () {
 
     expect(
       await adminAddressContract.supportsInterface(
-        getInterfaceID(ADMIN_INTERFACE)
+        getInterfaceId(ADMIN_INTERFACE)
       )
     ).to.be.eq(true);
   });

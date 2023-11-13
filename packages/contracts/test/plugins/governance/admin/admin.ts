@@ -13,16 +13,18 @@ import {
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
 import {
-  findEvent,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
-  findEventTopicLog,
 } from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
-import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {ADMIN_INTERFACE, getInterfaceId} from '../../../test-utils/interfaces';
 import {toBytes32} from '../../../test-utils/voting';
+import {
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons/contracts/utils/events';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -117,31 +119,31 @@ describe('Admin', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IMembership` interface', async () => {
       const iface = IMembership__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `Admin` interface', async () => {
-      const iface = getInterfaceID(ADMIN_INTERFACE);
+      const iface = getInterfaceId(ADMIN_INTERFACE);
       expect(iface).to.equal(ADMIN_INTERFACE_ID); // checks that it didn't change
       expect(await plugin.supportsInterface(iface)).to.be.true;
     });

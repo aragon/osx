@@ -13,7 +13,6 @@ import {
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
 import {ZERO_BYTES32} from '../../test-utils/dao';
-import {getInterfaceID} from '../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -29,6 +28,7 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -166,20 +166,20 @@ describe('PluginRepo', function () {
 
       it('supports the `IERC165` interface', async () => {
         const iface = IERC165__factory.createInterface();
-        expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
 
       it('supports the `IPluginRepo` interface', async () => {
         const iface = IPluginRepo__factory.createInterface();
-        expect(getInterfaceID(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
-        expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        expect(getInterfaceId(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
+        expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
 
       it('supports the `IProtocolVersion` interface', async () => {
         const iface = IProtocolVersion__factory.createInterface();
-        expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
     });
