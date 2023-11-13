@@ -6,7 +6,7 @@ import {
   PluginRepoRegistry__factory,
 } from '../../../typechain';
 import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol';
-import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.2/framework/plugin/repo/PluginRepoRegistry.sol';
+import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.4/framework/plugin/repo/PluginRepoRegistry.sol';
 import {ensDomainHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
