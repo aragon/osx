@@ -21,7 +21,7 @@ import {
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 import {DAO__factory as DAO_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
 import {ExecutedEvent} from '../../../typechain/DAO';
-import {findEvent, DAO_EVENTS} from '../../../utils/event';
+import {DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
 import {
   getActions,
@@ -45,6 +45,7 @@ import {
 } from '../../test-utils/uups-upgradeable';
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
+import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
 import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
