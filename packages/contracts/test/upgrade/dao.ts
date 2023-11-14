@@ -8,15 +8,12 @@ import {
   DAO__factory as DAO_V1_3_0__factory,
 } from '../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
 import {UpgradedEvent} from '../../typechain/DAO';
+import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
 import {deployWithProxy} from '../test-utils/proxy';
 import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
-import {
-  ERC1967_IMPLEMENTATION_SLOT,
-  readStorage,
-} from '@aragon/osx-commons/contracts/utils/storage';
 import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

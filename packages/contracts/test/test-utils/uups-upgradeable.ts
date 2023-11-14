@@ -1,9 +1,6 @@
 import {DAO, PluginRepo} from '../../typechain';
+import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
-import {
-  readStorage,
-  ERC1967_IMPLEMENTATION_SLOT,
-} from '@aragon/osx-commons/contracts/utils/storage';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
