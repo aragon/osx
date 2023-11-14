@@ -21,13 +21,11 @@ import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 import {hashHelpers} from '../../../../utils/psp';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {
-  MULTISIG_INTERFACE,
-  getInterfaceId,
-} from '../../../test-utils/interfaces';
+import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
 import {MultisigSettings} from './multisig';
 import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
 import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
