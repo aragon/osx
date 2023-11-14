@@ -11,8 +11,8 @@ import {UpgradedEvent} from '../../typechain/DAO';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
+import {deployWithProxy} from '../test-utils/proxy';
 import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
-import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
 import {
   ERC1967_IMPLEMENTATION_SLOT,
   readStorage,

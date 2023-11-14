@@ -6,7 +6,7 @@ import {
   TestParameterScopingPermissionCondition__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {deployWithProxy} from '../../test-utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

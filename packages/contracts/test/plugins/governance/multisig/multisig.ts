@@ -34,6 +34,7 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -50,7 +51,6 @@ import {
   findEvent,
   findEventTopicLog,
 } from '@aragon/osx-commons/contracts/utils/events';
-import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
 import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
