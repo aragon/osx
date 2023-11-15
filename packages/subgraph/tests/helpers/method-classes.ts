@@ -576,7 +576,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     this.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.creationBlockNumber = BigInt.fromString(ZERO);
-    this.potentiallyExecutable = false;
+    this.approvalReached = false;
 
     return this;
   }

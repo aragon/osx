@@ -102,7 +102,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // check proposal
   // expected changes to the proposal entity
   proposal.castedVotingPower = BigInt.fromString(ONE);
-  proposal.potentiallyExecutable = false;
+  proposal.approvalReached = false;
   // assert proposal entity
   proposal.assertEntity();
 
@@ -146,7 +146,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event3);
 
   // expected changes to the proposal entity
-  proposal.potentiallyExecutable = true;
+  proposal.approvalReached = true;
   proposal.castedVotingPower = BigInt.fromString(TWO);
 
   proposal.assertEntity();

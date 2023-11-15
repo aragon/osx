@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Renamed `potentiallyExecutable` attribute to `approvalReached` and stopped setting it to `true` during multisig proposal creation if `minApprovals = 1` when zero approvals were given yet.
+
 ## 1.3.1
 
 ### Added
@@ -82,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `IPluginInstallation` to `IPlugin`.
 - Changed `release: Int!` to `release: PluginRelease!` in `PluginVersion`
 - Changed `versions` to `releases` in `PluginRepo`.
-- Changes `Permission` entity to be muteable.
+- Changes `Permission` entity to be mutable.
 
 ### Removed
 

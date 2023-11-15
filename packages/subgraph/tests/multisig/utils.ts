@@ -308,7 +308,7 @@ export function createMultisigProposalEntityState(
   multisigProposal.creator = Address.fromString(creator);
   multisigProposal.startDate = BigInt.fromString(startDate);
   multisigProposal.endDate = BigInt.fromString(endDate);
-  multisigProposal.potentiallyExecutable = executable;
+  multisigProposal.approvalReached = executable;
   multisigProposal.executed = executed;
   multisigProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   multisigProposal.minApprovals = BigInt.fromString(minApprovals).toI32();

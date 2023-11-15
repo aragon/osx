@@ -45,7 +45,7 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
-  proposalEntity.potentiallyExecutable = false;
+  proposalEntity.approvalReached = false;
 
   let contract = TokenVoting.bind(event.address);
   let proposal = contract.try_getProposal(pluginProposalId);
@@ -198,7 +198,7 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.potentiallyExecutable =
+        proposalEntity.approvalReached =
           supportThresholdReached && minParticipationReached;
 
         // Used when proposal has not ended.
@@ -219,7 +219,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;

@@ -461,7 +461,7 @@ type TokenVotingProposal implements IProposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   creationBlockNumber: BigInt!
-  potentiallyExecutable: Boolean!
+  approvalReached: Boolean!
   earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
@@ -536,7 +536,7 @@ type AddresslistVotingProposal implements IProposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   creationBlockNumber: BigInt!
-  potentiallyExecutable: Boolean!
+  approvalReached: Boolean!
   earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
@@ -640,7 +640,7 @@ type MultisigProposal implements IProposal @entity {
   snapshotBlock: BigInt!
   minApprovals: Int!
   approvals: Int
-  potentiallyExecutable: Boolean!
+  approvalReached: Boolean!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt

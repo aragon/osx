@@ -349,7 +349,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
   tokenVotingProposal.creationBlockNumber = creationBlockNumber;
-  tokenVotingProposal.potentiallyExecutable = executable;
+  tokenVotingProposal.approvalReached = executable;
   tokenVotingProposal.earlyExecutable = earlyExecutable;
 
   tokenVotingProposal.save();

@@ -287,7 +287,7 @@ export function createAddresslistVotingProposalEntityState(
 
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
   addresslistProposal.creationBlockNumber = creationBlockNumber;
-  addresslistProposal.potentiallyExecutable = executable;
+  addresslistProposal.approvalReached = executable;
   addresslistProposal.earlyExecutable = earlyExecutable;
 
   addresslistProposal.save();
