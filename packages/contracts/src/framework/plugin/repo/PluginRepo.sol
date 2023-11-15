@@ -16,7 +16,7 @@ import {IPluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
-/// @author Aragon Association - 2020 - 2023
+/// @author Aragon - 2020 - 2023
 /// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework.
 /// @custom:security-contact sirt@aragon.org
 contract PluginRepo is

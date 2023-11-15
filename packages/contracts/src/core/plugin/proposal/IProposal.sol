@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 import {IDAO} from "../../dao/IDAO.sol";
 
 /// @title IProposal
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An interface to be implemented by DAO plugins that create and execute proposals.
 /// @custom:security-contact sirt@aragon.org
 interface IProposal {

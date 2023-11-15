@@ -10,7 +10,7 @@ import {PluginCloneable} from "../../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../../core/dao/IDAO.sol";
 
 /// @title Admin
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
 /// @custom:security-contact sirt@aragon.org
 contract Admin is IMembership, PluginCloneable, ProposalUpgradeable {

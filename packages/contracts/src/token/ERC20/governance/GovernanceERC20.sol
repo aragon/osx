@@ -15,7 +15,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 import {IERC20MintableUpgradeable} from "../IERC20MintableUpgradeable.sol";
 
 /// @title GovernanceERC20
-/// @author Aragon Association
+/// @author Aragon
 /// @notice An [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
 /// @custom:security-contact sirt@aragon.org
 contract GovernanceERC20 is

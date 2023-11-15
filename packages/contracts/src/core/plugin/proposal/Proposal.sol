@@ -8,7 +8,7 @@ import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IProposal.sol";
 
 /// @title Proposal
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An abstract contract containing the traits and internal functionality to create and execute proposals that can be inherited by non-upgradeable DAO plugins.
 /// @custom:security-contact sirt@aragon.org
 abstract contract Proposal is IProposal, ERC165 {

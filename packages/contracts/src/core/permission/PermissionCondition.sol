@@ -8,7 +8,7 @@ import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVe
 import {IPermissionCondition} from "./IPermissionCondition.sol";
 
 /// @title PermissionCondition
-/// @author Aragon Association - 2023
+/// @author Aragon - 2023
 /// @notice An abstract contract for non-upgradeable contracts instantiated via the `new` keyword  to inherit from to support customary permissions depending on arbitrary on-chain state.
 /// @custom:security-contact sirt@aragon.org
 abstract contract PermissionCondition is ERC165, IPermissionCondition, ProtocolVersion {

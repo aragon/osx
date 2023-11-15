@@ -17,7 +17,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 import {IGovernanceWrappedERC20} from "./IGovernanceWrappedERC20.sol";
 
 /// @title GovernanceWrappedERC20
-/// @author Aragon Association
+/// @author Aragon
 /// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`. The latter is compatible with [OpenZeppelin's `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) interface.
 /// The contract also supports meta transactions. To use an `amount` of underlying tokens for voting, the token owner has to
 /// 1. call `approve` for the tokens to be used by this contract

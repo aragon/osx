@@ -12,7 +12,7 @@ import {createERC1967Proxy as createERC1967} from "../../../utils/Proxy.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
 
 /// @title PluginSetup
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 /// @custom:security-contact sirt@aragon.org
 abstract contract PluginSetup is ERC165, IPluginSetup, ProtocolVersion {

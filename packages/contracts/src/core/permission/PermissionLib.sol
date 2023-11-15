@@ -3,7 +3,7 @@
 pragma solidity ^0.8.8;
 
 /// @title PermissionLib
-/// @author Aragon Association - 2021-2023
+/// @author Aragon - 2021-2023
 /// @notice A library containing objects for permission processing.
 /// @custom:security-contact sirt@aragon.org
 library PermissionLib {

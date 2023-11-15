@@ -8,7 +8,7 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import "./IProposal.sol";
 
 /// @title ProposalUpgradeable
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An abstract contract containing the traits and internal functionality to create and execute proposals that can be inherited by upgradeable DAO plugins.
 /// @custom:security-contact sirt@aragon.org
 abstract contract ProposalUpgradeable is IProposal, ERC165Upgradeable {

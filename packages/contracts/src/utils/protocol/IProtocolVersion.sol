@@ -3,7 +3,7 @@
 pragma solidity ^0.8.8;
 
 /// @title IProtocolVersion
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An interface defining the semantic Aragon OSx protocol version number.
 /// @custom:security-contact sirt@aragon.org
 interface IProtocolVersion {
