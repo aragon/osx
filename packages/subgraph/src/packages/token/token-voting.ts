@@ -89,6 +89,7 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+    proposalEntity.isSignaling = actions.length == 0;
 
     // totalVotingPower
     proposalEntity.totalVotingPower = contract.try_totalVotingPower(

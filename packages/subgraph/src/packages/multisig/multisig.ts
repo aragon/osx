@@ -75,6 +75,7 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+    proposalEntity.isSignaling = actions.length == 0;
   }
 
   proposalEntity.save();

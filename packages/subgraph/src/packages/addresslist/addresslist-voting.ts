@@ -2,25 +2,25 @@ import {
   Action,
   AddresslistVotingPlugin,
   AddresslistVotingProposal,
-  AddresslistVotingVoter,
   AddresslistVotingVote,
-} from '../../../generated/schema';
+  AddresslistVotingVoter,
+} from "../../../generated/schema";
 import {
-  VoteCast,
-  ProposalCreated,
-  ProposalExecuted,
-  VotingSettingsUpdated,
+  AddresslistVoting,
   MembersAdded,
   MembersRemoved,
-  AddresslistVoting,
-} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
-import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {getProposalId} from '../../utils/proposals';
-import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
+  ProposalCreated,
+  ProposalExecuted,
+  VoteCast,
+  VotingSettingsUpdated,
+} from "../../../generated/templates/AddresslistVoting/AddresslistVoting";
+import { RATIO_BASE, VOTER_OPTIONS, VOTING_MODES } from "../../utils/constants";
+import { getProposalId } from "../../utils/proposals";
+import { BigInt, dataSource, store } from "@graphprotocol/graph-ts";
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
-  let daoId = context.getString('daoAddress');
+  let daoId = context.getString("daoAddress");
   let metdata = event.params.metadata.toString();
   _handleProposalCreated(event, daoId, metdata);
 }
@@ -29,7 +29,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
 export function _handleProposalCreated(
   event: ProposalCreated,
   daoId: string,
-  metadata: string
+  metadata: string,
 ): void {
   let pluginAddress = event.address;
   let pluginProposalId = event.params.proposalId;
@@ -77,7 +77,7 @@ export function _handleProposalCreated(
       const action = actions[index];
 
       let actionId = getProposalId(pluginAddress, pluginProposalId)
-        .concat('_')
+        .concat("_")
         .concat(index.toString());
 
       let actionEntity = new Action(actionId);
@@ -88,10 +88,10 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
-
+    proposalEntity.isSignaling = actions.length == 0;
     // totalVotingPower
     proposalEntity.totalVotingPower = contract.try_totalVotingPower(
-      parameters.snapshotBlock
+      parameters.snapshotBlock,
     ).value;
   }
 
@@ -113,12 +113,12 @@ export function handleVoteCast(event: VoteCast): void {
   const member = event.params.voter.toHexString();
   const pluginAddress = event.address;
   const pluginId = pluginAddress.toHexString();
-  const memberId = pluginId.concat('_').concat(member);
+  const memberId = pluginId.concat("_").concat(member);
   let proposalId = getProposalId(pluginAddress, pluginProposalId);
-  let voterVoteId = member.concat('_').concat(proposalId);
+  let voterVoteId = member.concat("_").concat(proposalId);
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
-  if (voteOption === 'None') {
+  if (voteOption === "None") {
     return;
   }
 
@@ -148,7 +148,7 @@ export function handleVoteCast(event: VoteCast): void {
       let parameters = proposal.value.value2;
       let tally = proposal.value.value3;
       let totalVotingPowerCall = contract.try_totalVotingPower(
-        parameters.snapshotBlock
+        parameters.snapshotBlock,
       );
 
       if (!totalVotingPowerCall.reverted) {
@@ -185,12 +185,11 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.approvalReached =
-          supportThresholdReached && minParticipationReached;
+        proposalEntity.approvalReached = supportThresholdReached &&
+          minParticipationReached;
 
         // Used when proposal has not ended.
-        proposalEntity.earlyExecutable =
-          supportThresholdReachedEarly &&
+        proposalEntity.earlyExecutable = supportThresholdReachedEarly &&
           minParticipationReached &&
           proposalEntity.votingMode === VOTING_MODES.get(1);
       }
@@ -215,7 +214,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 }
 
 export function handleVotingSettingsUpdated(
-  event: VotingSettingsUpdated
+  event: VotingSettingsUpdated,
 ): void {
   let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
@@ -233,7 +232,7 @@ export function handleMembersAdded(event: MembersAdded): void {
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
     const pluginId = event.address.toHexString();
-    const memberId = pluginId + '_' + member;
+    const memberId = pluginId + "_" + member;
 
     let voterEntity = AddresslistVotingVoter.load(memberId);
     if (!voterEntity) {
@@ -250,11 +249,11 @@ export function handleMembersRemoved(event: MembersRemoved): void {
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
     const pluginId = event.address.toHexString();
-    const memberId = pluginId + '_' + member;
+    const memberId = pluginId + "_" + member;
 
     let voterEntity = AddresslistVotingVoter.load(memberId);
     if (voterEntity) {
-      store.remove('AddresslistVotingVoter', memberId);
+      store.remove("AddresslistVotingVoter", memberId);
     }
   }
 }
