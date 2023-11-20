@@ -281,6 +281,7 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.startDate = BigInt.fromString(startDate);
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  addresslistProposal.isSignaling = false;
 
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   addresslistProposal.allowFailureMap = BigInt.fromString(allowFailureMap);

@@ -344,6 +344,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.startDate = BigInt.fromString(startDate);
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  tokenVotingProposal.isSignaling = false;
 
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   tokenVotingProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
