@@ -37,7 +37,7 @@ with construction / initialization constituting a special.
 
 </div>
 
-<details><summary><b>Interfaces</b></summary>
+#### Interfaces
 
 - `IDAO`
 - `IPlugin`
@@ -47,9 +47,7 @@ with construction / initialization constituting a special.
 - `IProposal`
 - `IMembership`
 
-</details>
-
-<details><summary><b>Abstract Contracts</b></summary>
+#### Abstract Contracts
 
 - Non-Upgradable
 
@@ -67,9 +65,7 @@ with construction / initialization constituting a special.
   - `ProposalUpgradeable`
   - `InterfaceBasedRegistry`
 
-</details>
-
-<details><summary><b>Deployed Contracts</b></summary>
+#### Deployed Contracts
 
 - Non-Upgradable
 
@@ -85,8 +81,6 @@ with construction / initialization constituting a special.
   - `PluginRepoRegistry`
   - `PluginUUPSUpgradeable`
   - `ENSSubdomainRegistrar`
-
-  </details>
 
 ## Subgraph
 
