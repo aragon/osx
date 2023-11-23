@@ -462,7 +462,7 @@ type TokenVotingProposal implements IProposal @entity {
   endDate: BigInt!
   creationBlockNumber: BigInt!
   approvalReached: Boolean!
-isSignaling: Boolean!
+  isSignaling: Boolean!
   earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
