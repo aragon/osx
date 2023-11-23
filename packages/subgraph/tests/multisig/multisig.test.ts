@@ -216,7 +216,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   assert.fieldEquals(
     'MultisigProposal',
     proposal.id,
-    'potentiallyExecutable',
+    'approvalReached',
     'false'
   );
 
@@ -254,7 +254,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   assert.fieldEquals(
     'MultisigProposal',
     proposal.id,
-    'potentiallyExecutable',
+    'approvalReached',
     'true'
   );
 

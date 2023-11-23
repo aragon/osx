@@ -46,26 +46,20 @@ export function _handleProposalCreated(
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = Multisig.bind(event.address);
-  let vote = contract.try_getProposal(pluginProposalId);
+  let proposal = contract.try_getProposal(pluginProposalId);
 
-  if (!vote.reverted) {
-    proposalEntity.executed = vote.value.value0;
-    proposalEntity.approvals = vote.value.value1;
+  if (!proposal.reverted) {
+    proposalEntity.executed = proposal.value.value0;
+    proposalEntity.approvals = proposal.value.value1;
 
     // ProposalParameters
-    let parameters = vote.value.value2;
+    let parameters = proposal.value.value2;
     proposalEntity.minApprovals = parameters.minApprovals;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
-
-    // if minApproval is 1, the proposal is always executable
-    if (parameters.minApprovals == 1) {
-      proposalEntity.potentiallyExecutable = true;
-    } else {
-      proposalEntity.potentiallyExecutable = false;
-    }
+    proposalEntity.approvalReached = false;
 
     // Actions
-    let actions = vote.value.value3;
+    let actions = proposal.value.value3;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -81,6 +75,7 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+    proposalEntity.isSignaling = actions.length == 0;
   }
 
   proposalEntity.save();
@@ -129,9 +124,9 @@ export function handleApproved(event: Approved): void {
 
       if (
         approvals >= minApprovalsStruct.minApprovals &&
-        !proposalEntity.potentiallyExecutable
+        !proposalEntity.approvalReached
       ) {
-        proposalEntity.potentiallyExecutable = true;
+        proposalEntity.approvalReached = true;
       }
 
       proposalEntity.save();
@@ -145,7 +140,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = false;
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;

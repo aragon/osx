@@ -289,7 +289,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   // check proposal
   assert.fieldEquals('AddresslistVotingProposal', proposal.id, 'yes', '1');
-  // Check potentiallyExecutable
+  // Check approvalReached
   // abstain: 0, yes: 1, no: 0
   // support          : 100%
   // worstCaseSupport :  33%
@@ -297,7 +297,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'AddresslistVotingProposal',
     proposal.id,
-    'potentiallyExecutable',
+    'approvalReached',
     'false'
   );
   // check vote count
@@ -389,7 +389,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   handleVoteCast(event3);
 
-  // Check potentiallyExecutable
+  // Check approvalReached
   // abstain: 0, yes: 2, no: 0
   // support          : 100%
   // worstCaseSupport :  67%
@@ -397,7 +397,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'AddresslistVotingProposal',
     proposal.id,
-    'potentiallyExecutable',
+    'approvalReached',
     'true'
   );
 
