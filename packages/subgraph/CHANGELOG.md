@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 1.4.0
+
 ### Added
 
 - Added `isSignaling` attribute to `TokenVotingProposal`, `AddresslistVotingProposal`, and `MultisigProposal` that is set to true for proposals having an empty action array.
