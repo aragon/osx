@@ -74,7 +74,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // check proposal entity
   proposal.assertEntity();
 
-  // // create calls
+  // create calls
   proposal.yes = bigInt.fromString(ONE);
   proposal.mockCall_getProposal(actions);
   proposal.mockCall_totalVotingPower();
