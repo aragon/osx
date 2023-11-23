@@ -577,6 +577,7 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.creationBlockNumber = BigInt.fromString(ZERO);
     this.approvalReached = false;
+    this.isSignaling = false;
 
     return this;
   }
