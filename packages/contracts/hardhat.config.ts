@@ -93,10 +93,10 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_KEY || '',
       polygon: process.env.POLYGONSCAN_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_KEY || '',
-      arbitrumOne: process.env.ARBISCAN_KEY || '',
-      arbitrumTestnet: process.env.ARBISCAN_KEY || '',
       baseMainnet: process.env.BASESCAN_KEY || '',
       baseGoerli: process.env.BASESCAN_KEY || '',
+      arbitrumOne: process.env.ARBISCAN_KEY || '',
+      arbitrumGoerli: process.env.ARBISCAN_KEY || '',
     },
     customChains: [
       {

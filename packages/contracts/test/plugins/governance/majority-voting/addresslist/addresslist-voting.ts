@@ -13,7 +13,7 @@ import {
   IProtocolVersion__factory,
 } from '../../../../../typechain';
 import {AddresslistVoting__factory as AddresslistVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
-import {AddresslistVoting__factory as AddresslistVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
+import {AddresslistVoting__factory as AddresslistVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.4/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol';
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,

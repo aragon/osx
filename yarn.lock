@@ -14,10 +14,10 @@
   resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.0.1.tgz#b758ba87db93a46a8ddabfaefc99ac8e44c46c78"
   integrity sha512-TiP5/1AGv/hth+V8PoDVFlwMzmLazYxzp//jiepAZ0WJkx9EnQNYafo+M7+pjAqRPG005liQjmFZNiK6ARLULg==
 
-"@aragon/osx-v1.3.0-rc0.2@npm:@aragon/osx@1.3.0-rc0.2":
-  version "1.3.0-rc0.2"
-  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0-rc0.2.tgz#6922052bc7eaa180e143478b56292cc1e1245adf"
-  integrity sha512-IQTOPXgISEOGhcf2LeE4iz+TF4YmNzYjga9UgaIEYpcMkVKN1LUdJgvrF6VxGeGWiDjRTb0nNijtdmeOw4ungw==
+"@aragon/osx-v1.3.0-rc0.4@npm:@aragon/osx@1.3.0-rc0.4":
+  version "1.3.0-rc0.4"
+  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0-rc0.4.tgz#c42eba799d9ac57fbe10d5c73bf02681c5d4328d"
+  integrity sha512-vE+zW5LUaPFDvsWWDCESFjibERvWtwsOyqb1pUaB+OS8j9eEZVxsRaSWhe23Nx2vAhUtTF9p77e1vWtCfP/BvQ==
   dependencies:
     "@ensdomains/ens-contracts" "0.0.11"
     "@openzeppelin/contracts" "4.8.1"

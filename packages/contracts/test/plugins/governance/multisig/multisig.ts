@@ -13,7 +13,7 @@ import {
   Multisig__factory,
 } from '../../../../typechain';
 import {Multisig__factory as Multisig_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol';
-import {Multisig__factory as Multisig_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.2/plugins/governance/multisig/Multisig.sol';
+import {Multisig__factory as Multisig_V1_3_0__factory} from '../../../../typechain/@aragon/osx-v1.3.0-rc0.4/plugins/governance/multisig/Multisig.sol';
 import {ExecutedEvent} from '../../../../typechain/DAO';
 import {ProposalCreatedEvent} from '../../../../typechain/IProposal';
 import {
