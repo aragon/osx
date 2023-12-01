@@ -1,6 +1,5 @@
 {
   "arbitrum": {
-    "managingDAOImplementation": "0x741061B01d3A95a7734B594f1884b6c30E0fDA96",
     "managingDAO": "0xF3AaA3372EbBf01b923a4Cc98Cd847126b3D73cA",
     "ENSRegistry": "0x9277acd65B5dc0F85867Dfd40f5488Be8d47AD18",
     "PublicResolver": "0xc4ddBd0472C2688F5d278dAFC02E66EE176C8DE3",
@@ -28,7 +27,6 @@
     "multisig-repo": "0x7553E6Fb020c5740768cF289e603770AA09b7aE2"
   },
   "arbitrumGoerli": {
-    "managingDAOImplementation": "0x741061B01d3A95a7734B594f1884b6c30E0fDA96",
     "managingDAO": "0xF3AaA3372EbBf01b923a4Cc98Cd847126b3D73cA",
     "ENSRegistry": "0x9277acd65B5dc0F85867Dfd40f5488Be8d47AD18",
     "PublicResolver": "0xc4ddBd0472C2688F5d278dAFC02E66EE176C8DE3",
@@ -56,7 +54,6 @@
     "multisig-repo": "0x7553E6Fb020c5740768cF289e603770AA09b7aE2"
   },
   "sepolia": {
-    "managingDAOImplementation": "0x57e24f85ceAcDa3Ef4F0fd04005589B88dc01A19",
     "managingDAO": "0xCa834B3F404c97273f34e108029eEd776144d324",
     "ENSRegistry": "0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8",
     "DAO_ENSSubdomainRegistrar_Implementation": "0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8",
@@ -107,7 +104,6 @@
     "GovernanceWrappedERC20": "0xb16d3b1efed5540c5B96DbEDa58860b327CB0D12"
   },
   "mainnet": {
-    "managingDAOImplementation": "0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8",
     "managingDAO": "0xf2d594F3C93C19D7B1a6F15B5489FFcE4B01f7dA",
     "DAO_ENSSubdomainRegistrar_Implementation": "0xCe0B4124dea6105bfB85fB4461c4D39f360E9ef3",
     "DAO_ENSSubdomainRegistrar": "0xE640Da5AD169630555A86D9b6b9C145B4961b1EB",
@@ -164,7 +160,6 @@
     "DAORegistry_Implementation": "0x5B3B36BdC9470963A2734D6a0d2F6a64C21C159f",
     "DAO_ENSSubdomainRegistrar": "0x07f49c49Ce2A99CF7C28F66673d406386BDD8Ff4",
     "DAO_ENSSubdomainRegistrar_Implementation": "0x35B62715459cB60bf6dC17fF8cfe138EA305E7Ee",
-    "managingDAOImplementation": "0xCa834B3F404c97273f34e108029eEd776144d324",
     "ENSRegistry": "0x57bf333951967a0cC0afcD58FC7959Ca0Eae6905",
     "PluginRepoFactory": "0x868581Ee5991C6C08D2467132698fa4AB6C9c272",
     "PluginRepoRegistry": "0xA03C2182af8eC460D498108C92E8638a580b94d4",
@@ -181,7 +176,6 @@
     "multisig-repo": "0x5A5035E7E8aeff220540F383a9cf8c35929bcF31"
   },
   "baseGoerli": {
-    "managingDAOImplementation": "0x82aBAfBf46759358c705c7E323543A7Be47AbAf0",
     "managingDAO": "0xD63A8Cfb0eec960C3e70F96a9e3F3091f3FD70b6",
     "ENSRegistry": "0x9bD1EF0C495F6b078d9A82586A35F4d623384E97",
     "PublicResolver": "0x818428f875943eE7c0366de1AAa174a1225dC4eA",
@@ -209,7 +203,6 @@
     "multisig-repo": "0x3308fd88Db88e11c4d99EC805836d7E9F181CdE0"
   },
   "baseMainnet": {
-    "managingDAOImplementation": "0x03445b197271CB3BE5E453745eD98a05793a4538",
     "managingDAO": "0x264308C03feAfA071C97b73b09E911530CCCd216",
     "ENSRegistry": "0xE3625B9Ed80306f590Dcf8a0d50b193F28DB969E",
     "PublicResolver": "0x09AF4b83A9a7EA682A2Eb61d1d0B9e89103b1A06",
