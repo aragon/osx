@@ -27,6 +27,8 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 - [ ] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
 - [ ] Set the multisig members of the managing DAO as a comma (`,`) separated list to `MANAGINGDAO_MULTISIG_APPROVERS` in `.env`
 - [ ] Set the amount of minimum approvals the managing DAO needs to `MANAGINGDAO_MULTISIG_MINAPPROVALS` in `.env`
+- [ ] If new plugin builds are released
+  - [ ] Double-check that the build- and release-metadata is published correctly by the deploy script and contracts
 
 ## Deployment
 
