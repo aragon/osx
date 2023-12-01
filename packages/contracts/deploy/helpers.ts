@@ -321,14 +321,16 @@ export async function populatePluginRepo(
 
     const placeholderSetup = await getContractAddress('PlaceholderSetup', hre);
 
-    const emptyMetadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(''));
+    const emptyJsonObject = ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('{}')
+    );
 
     for (let i = 1; i < latestBuildNumber; i++) {
       await createVersion(
         hre.aragonPluginRepos[pluginRepoName],
         placeholderSetup,
         releaseNumber,
-        emptyMetadata,
+        emptyJsonObject,
         ethers.utils.hexlify(
           ethers.utils.toUtf8Bytes(`ipfs://${hre.placeholderBuildCIDPath}`)
         )
