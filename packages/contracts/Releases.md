@@ -1,6 +1,17 @@
 # Contract Releases
 
 Commit: [40f342b5906681e0050ec8bb984fc331070b932a](https://github.com/aragon/osx/commit/40f342b5906681e0050ec8bb984fc331070b932a)  
+Network: polygon  
+DAOFactory: 0x392f0FdfF3283b9f026CfFeC7f9c2De443af3E7C  
+PluginRepoFactory: 0x868581Ee5991C6C08D2467132698fa4AB6C9c272  
+MultisigSetup: 0xCC925a32fA4fa41c42a7d5585D69C980b6Fa9342  
+GovernanceERC20: 0x644D3bA8A335F5b1a6afFe63e551306D0C933582  
+GovernanceWrappedERC20: 0x8f2088E83F007B1567E8E1187380DFfdC83079d4  
+TokenVotingSetup: 0xf65268ed4501391b69540268f461a7e2351d9e4f  
+AddresslistVotingSetup: 0xc096770a17b24CEFa725122E4c823F450aBEa7b4
+
+
+Commit: [40f342b5906681e0050ec8bb984fc331070b932a](https://github.com/aragon/osx/commit/40f342b5906681e0050ec8bb984fc331070b932a)  
 Network: mainnet  
 DAOFactory: 0xf96e6FD76BD0A15580604e1Ea5818D448b1041C0  
 PluginRepoFactory: 0xaac9E9cdb8C1eb42d881ADd59Ee9c53847a3a4f3  
