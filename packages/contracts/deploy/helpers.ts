@@ -255,8 +255,8 @@ export async function createVersion(
   const tx = await pluginRepo.createVersion(
     releaseNumber,
     pluginSetupContract,
-    releaseMetadata,
-    buildMetadata
+    buildMetadata,
+    releaseMetadata
   );
 
   console.log(`Creating build for release ${releaseNumber} with tx ${tx.hash}`);
