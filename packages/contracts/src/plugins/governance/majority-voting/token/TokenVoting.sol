@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.8;
 
+import {IERC6372Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC6372Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -17,7 +18,7 @@ import {IMajorityVoting} from "../IMajorityVoting.sol";
 /// @notice The majority voting implementation using an [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 /// @custom:security-contact sirt@aragon.org
-contract TokenVoting is IMembership, MajorityVotingBase {
+contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -54,6 +55,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         return
             _interfaceId == TOKEN_VOTING_INTERFACE_ID ||
             _interfaceId == type(IMembership).interfaceId ||
+            _interfaceId == type(IERC6372Upgradeable).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
@@ -65,8 +67,28 @@ contract TokenVoting is IMembership, MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function totalVotingPower(uint256 _blockNumber) public view override returns (uint256) {
-        return votingToken.getPastTotalSupply(_blockNumber);
+    function totalVotingPower(uint256 _timepoint) public view override returns (uint256) {
+        return votingToken.getPastTotalSupply(_timepoint);
+    }
+
+    /// @dev Clock (as specified in EIP-6372) is set to match the token's clock.
+    /// Fallback to block numbers if the token does not implement EIP-6372.
+    function clock() public view virtual override returns (uint48) {
+        try IERC6372Upgradeable(address(votingToken)).clock() returns (uint48 timepoint) {
+            return timepoint;
+        } catch {
+            return block.number.toUint48();
+        }
+    }
+
+    /// @dev Machine-readable description of the clock as specified in EIP-6372.
+    // solhint-disable-next-line func-name-mixedcase
+    function CLOCK_MODE() public view virtual override returns (string memory) {
+        try IERC6372Upgradeable(address(votingToken)).CLOCK_MODE() returns (string memory clockmode) {
+            return clockmode;
+        } catch {
+            return "mode=blocknumber&from=default";
+        }
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -95,12 +117,12 @@ contract TokenVoting is IMembership, MajorityVotingBase {
             }
         }
 
-        uint256 snapshotBlock;
+        uint256 snapshotTimepoint;
         unchecked {
-            snapshotBlock = block.number - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
+            snapshotTimepoint = clock() - 1; // The snapshot must not be taken at the same timepoint as the proposal creation to protect the transaction against backrunning transactions causing census changes.
         }
 
-        uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
+        uint256 totalVotingPower_ = totalVotingPower(snapshotTimepoint);
 
         if (totalVotingPower_ == 0) {
             revert NoVotingPower();
@@ -122,7 +144,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
 
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
-        proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
+        proposal_.parameters.snapshotTimepoint = uint64(snapshotTimepoint);
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minVotingPower = _applyRatioCeiled(
@@ -165,7 +187,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock);
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotTimepoint);
         VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
@@ -219,7 +241,7 @@ contract TokenVoting is IMembership, MajorityVotingBase {
         }
 
         // The voter has no voting power.
-        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotBlock) == 0) {
+        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotTimepoint) == 0) {
             return false;
         }
 

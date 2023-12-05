@@ -148,14 +148,14 @@ abstract contract MajorityVotingBase is
     /// @param supportThreshold The support threshold value. The value has to be in the interval [0, 10^6] defined by `RATIO_BASE = 10**6`.
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
-    /// @param snapshotBlock The number of the block prior to the proposal creation.
+    /// @param snapshotTimepoint The timepoint at which the voting power is queried.
     /// @param minVotingPower The minimum voting power needed.
     struct ProposalParameters {
         VotingMode votingMode;
         uint32 supportThreshold;
         uint64 startDate;
         uint64 endDate;
-        uint64 snapshotBlock;
+        uint64 snapshotTimepoint;
         uint256 minVotingPower;
     }
 
@@ -326,7 +326,7 @@ abstract contract MajorityVotingBase is
     ) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        uint256 noVotesWorstCase = totalVotingPower(proposal_.parameters.snapshotBlock) -
+        uint256 noVotesWorstCase = totalVotingPower(proposal_.parameters.snapshotTimepoint) -
             proposal_.tally.yes -
             proposal_.tally.abstain;
 
@@ -376,10 +376,10 @@ abstract contract MajorityVotingBase is
         return votingSettings.votingMode;
     }
 
-    /// @notice Returns the total voting power checkpointed for a specific block number.
-    /// @param _blockNumber The block number.
+    /// @notice Returns the total voting power checkpointed for a specific timepoint.
+    /// @param _timepoint The timepoint.
     /// @return The total voting power.
-    function totalVotingPower(uint256 _blockNumber) public view virtual returns (uint256);
+    function totalVotingPower(uint256 _timepoint) public view virtual returns (uint256);
 
     /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.
