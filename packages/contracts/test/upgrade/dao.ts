@@ -6,7 +6,7 @@ import {
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0__factory,
-} from '../../typechain/@aragon/osx-v1.3.0-rc0.4/core/dao/DAO.sol';
+} from '../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
 import {UpgradedEvent} from '../../typechain/DAO';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';

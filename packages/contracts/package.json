@@ -45,7 +45,7 @@
   "devDependencies": {
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
     "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
-    "@aragon/osx-v1.3.0-rc0.4": "npm:@aragon/osx@1.3.0-rc0.4",
+    "@aragon/osx-v1.3.0": "npm:@aragon/osx@1.3.0",
     "@defi-wonderland/smock": "^2.3.4",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
     "@nomicfoundation/hardhat-verify": "^1.0.4",

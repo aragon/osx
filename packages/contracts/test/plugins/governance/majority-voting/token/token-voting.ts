@@ -14,7 +14,7 @@ import {
   TokenVoting__factory,
 } from '../../../../../typechain';
 import {TokenVoting__factory as TokenVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/token/TokenVoting.sol';
-import {TokenVoting__factory as TokenVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0-rc0.4/plugins/governance/majority-voting/token/TokenVoting.sol';
+import {TokenVoting__factory as TokenVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0/plugins/governance/majority-voting/token/TokenVoting.sol';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
   ProposalCreatedEvent,
