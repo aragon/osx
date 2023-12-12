@@ -29,12 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed the `SignatureValidatorSet` event from `IDAO`.
 - Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place..
 
-## v1.3.1
-
-### Changed
-
-- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
-
 ## v1.3.0
 
 ### Added
@@ -48,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Added missing `virtual` keyword to `PermissionCondition` and `PermissionConditionUpgradeable`.
+- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
 - Changed `TokenVotingSetup` to receive the `GovernanceERC20` and `GovernanceWrappedERC20` base contracts as constructor arguments to reduce the `initCode` size because of limitations on the Goerli testnet.
 - Revert with errors (`ConditionNotAContract`, `ConditionInterfacNotSupported`) if the `grantWithCondition` function in `PermissionManager` is called with a condition address that is not a `IPermissionCondition` implementation.
 - `_grantWithCondition()` doesn't accept `ALLOW_FLAG` anymore as valid condition input.
