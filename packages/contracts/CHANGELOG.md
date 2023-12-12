@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Added missing `virtual` keyword to `PermissionCondition` and `PermissionConditionUpgradeable`.
+- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
 - Changed `TokenVotingSetup` to receive the `GovernanceERC20` and `GovernanceWrappedERC20` base contracts as constructor arguments to reduce the `initCode` size because of limitations on the Goerli testnet.
 - Revert with errors (`ConditionNotAContract`, `ConditionInterfacNotSupported`) if the `grantWithCondition` function in `PermissionManager` is called with a condition address that is not a `IPermissionCondition` implementation.
 - `_grantWithCondition()` doesn't accept `ALLOW_FLAG` anymore as valid condition input.
@@ -29,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the `isMember` function in the `TokenVoting` plugin to also take delegators of the token into account.
 - Fixed and clarified the NatSpec comments according to the Code4rena audit suggestions.
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for files that external developers inherit from.
-- Added `PermissionCondition` and `PermissionConditionUpgradeable` to have ERC-165 support for `IPermissionCondition` implementations.
 
 ### Removed
 
