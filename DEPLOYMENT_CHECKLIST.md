@@ -4,6 +4,8 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 
 ## Pre-Deployment
 
+- [ ] Verify that the deployers wallet has enough funds.
+- [ ] Check that the subgraph hoster supports the network OSx is deployed to.
 - [ ] Make sure you are using Node v16
 - [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
 - [ ] Check that version tags are set correctly in the plugin repo deploy scripts `packages/contracts/deploy/new/30_plugins/10_plugin-repos` to ensure synchronized version numbers across all supported networks.
@@ -50,26 +52,28 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
   - [ ] If the proxies are not verified with the `Similar Match Source Code` feature
     - [ ] Verify one of the proxies
     - [ ] Check if the other proxies are now verified with `Similar Match Source Code`
+  - [ ] If it is a `PluginSetup`, check that the implementation is verified.
 
 ### Configurations
 
-- [ ] Check if the managing DAO set in the `DAO_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO set in the `Plugin_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO set in the `DAORegistry`
-- [ ] Check if the `DAO_ENSSubdomainRegistrar` set in the `DAORegistry`
+- [ ] Check that all managing DAO signers are members of the managing DAO multisig and no one else.
+- [ ] Check if the managing DAO is set in the `DAO_ENSSubdomainRegistrar`
+- [ ] Check if the managing DAO is set in the `Plugin_ENSSubdomainRegistrar`
+- [ ] Check if the managing DAO is set in the `DAORegistry`
+- [ ] Check if the `DAO_ENSSubdomainRegistrar` is set in the `DAORegistry`
 - [ ] Check if the managing DAO set in the `PluginRepoRegistry`
-- [ ] Check if the `Plugin_ENSSubdomainRegistrar` set in the `PluginRepoRegistry`
+- [ ] Check if the `Plugin_ENSSubdomainRegistrar` is set in the `PluginRepoRegistry`
 - [ ] Check if the `PluginRepoRegistry` is set in the `PluginRepoFactory`
-- [ ] Check if the `PluginRepoRegistry` set in the `PluginSetupProcessor`
-- [ ] Check if the `DAORegistry` set in the `DAOFactory`
-- [ ] Check if the `PluginSetupProcessor` set in the `DAOFactory`
+- [ ] Check if the `PluginRepoRegistry` is set in the `PluginSetupProcessor`
+- [ ] Check if the `DAORegistry` is set in the `DAOFactory`
+- [ ] Check if the `PluginSetupProcessor` is set in the `DAOFactory`
 - [ ] Check that the versions (and eventual `PlaceholderSetup` builds) are published correctly in the `token-voting-repo`, `address-list-voting-repo`, `multisig-repo`, and `admin-repo` and are synchronized across all supported networks.
 
 ### Permissions
 
 - [ ] Check that the deployer has not the ROOT permission on the managing DAO
-- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry
-- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry
+- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `DAO_ENSSubdomainRegistrar` as the operator.
+- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `Plugin_ENSSubdomainRegistrar` as the operator.
 - [ ] Check if the `DAORegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `DAO_ENSSubdomainRegistrar`
 - [ ] Check if the `PluginRepoRegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `Plugin_ENSSubdomainRegistrar`
 - [ ] Check if the `DAOFactory` has `REGISTER_DAO_PERMISSION` on `DAORegistry`

@@ -49,7 +49,7 @@ else
     graph deploy $FULLNAME \
         --version-label $SUBGRAPH_VERSION \
         --ipfs https://ipfs.satsuma.xyz \
-        --node https://app.satsuma.xyz/api/subgraphs/deploy \
+        --node https://subgraphs.alchemy.com/api/subgraphs/deploy \
         --deploy-key $GRAPH_KEY > deploy-output.txt
 
     SUBGRAPH_ID=$(grep "Build completed:" deploy-output.txt | grep -oE "Qm[a-zA-Z0-9]{44}")
