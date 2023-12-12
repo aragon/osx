@@ -39,8 +39,8 @@
   "homepage": "https://github.com/aragon/osx#readme",
   "dependencies": {
     "@ensdomains/ens-contracts": "0.0.11",
-    "@openzeppelin/contracts": "4.9.4",
-    "@openzeppelin/contracts-upgradeable": "4.9.4"
+    "@openzeppelin/contracts": "4.9.5",
+    "@openzeppelin/contracts-upgradeable": "4.9.5"
   },
   "devDependencies": {
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
