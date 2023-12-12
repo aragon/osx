@@ -117,7 +117,7 @@
   },
   "goerli": {
     "managingDAO": "0xB76F8d3512497040a96E77141c951a5374F24Eb9",
-    "managingDAO_Implementation" :"0x53d483975773a2a9e5d9e84d9cd42cee85e90d97",
+    "managingDAO_Implementation": "0x53d483975773a2a9e5d9e84d9cd42cee85e90d97",
     "DAO_ENSSubdomainRegistrar_Implementation": "0x394B49Cc32Dc81B8EaCdeb62A6Fa66F31D1D022c",
     "DAO_ENSSubdomainRegistrar": "0xC62820f3E74cC82F89100032Ad7F04682F9EdaE0",
     "Plugin_ENSSubdomainRegistrar_Implementation": "0xbcE9b6fE957464aF2B739337bd1a936EbFCB5B48",
@@ -152,7 +152,7 @@
   },
   "mainnet": {
     "managingDAO": "0xf2d594F3C93C19D7B1a6F15B5489FFcE4B01f7dA",
-    "managingDAO_Implementation": "0x52Af16664155608b845BE18aa29620EbF6eA2D3a", 
+    "managingDAO_Implementation": "0x52Af16664155608b845BE18aa29620EbF6eA2D3a",
     "DAO_ENSSubdomainRegistrar_Implementation": "0xCe0B4124dea6105bfB85fB4461c4D39f360E9ef3",
     "DAO_ENSSubdomainRegistrar": "0xE640Da5AD169630555A86D9b6b9C145B4961b1EB",
     "Plugin_ENSSubdomainRegistrar_Implementation": "0x08633901DdF9cD8e2DC3a073594d0A7DaD6f3f57",
