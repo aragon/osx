@@ -1,11 +1,5 @@
 // This is an extension (adaptation) of the work at:
 // https://github.com/aragon/apm/blob/next/test/contracts/apm/apm_repo.js
-
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   PluginRepo,
   PluginRepo__factory,
@@ -17,21 +11,28 @@ import {
   IProtocolVersion__factory,
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
-
+import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.4/framework/plugin/repo/PluginRepo.sol';
+import {ZERO_BYTES32} from '../../test-utils/dao';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
-  getProtocolVersion,
-  ozUpgradeCheckManagingContract,
-} from '../../test-utils/uups-upgradeable';
-
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
+import {tagHash} from '../../test-utils/psp/hash-helpers';
 import {
   deployMockPluginSetup,
   deployNewPluginRepo,
 } from '../../test-utils/repo';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {ZERO_BYTES32} from '../../test-utils/dao';
-import {getInterfaceID} from '../../test-utils/interfaces';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {tagHash} from '../../test-utils/psp/hash-helpers';
+import {
+  getProtocolVersion,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
+} from '../../test-utils/uups-upgradeable';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -43,6 +44,7 @@ describe('PluginRepo', function () {
   let pluginRepo: PluginRepo;
   let signers: SignerWithAddress[];
   let pluginSetupMock: PluginUUPSUpgradeableSetupV1Mock;
+  let initArgs: any;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -83,18 +85,31 @@ describe('PluginRepo', function () {
 
       before(() => {
         currentContractFactory = new PluginRepo__factory(signers[0]);
+
+        initArgs = {
+          initialOwner: ownerAddress,
+        };
       });
 
-      it('from v1.0.0', async () => {
+      it('upgrades to a new implementation', async () => {
+        await deployAndUpgradeSelfCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+        );
+      });
+
+      it('upgrades from v1.0.0', async () => {
         legacyContractFactory = new PluginRepo_V1_0_0__factory(signers[0]);
 
         const {fromImplementation, toImplementation} =
-          await ozUpgradeCheckManagingContract(
+          await deployAndUpgradeFromToCheck(
             signers[0],
             signers[1],
-            {
-              initialOwner: signers[0].address,
-            },
+            initArgs,
             'initialize',
             legacyContractFactory,
             currentContractFactory,
@@ -110,7 +125,36 @@ describe('PluginRepo', function () {
         );
 
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-        expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+        expect(fromProtocolVersion).to.deep.equal(
+          IMPLICIT_INITIAL_PROTOCOL_VERSION
+        );
+        expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      });
+
+      it('from v1.3.0', async () => {
+        legacyContractFactory = new PluginRepo_V1_3_0__factory(signers[0]);
+
+        const {fromImplementation, toImplementation} =
+          await deployAndUpgradeFromToCheck(
+            signers[0],
+            signers[1],
+            initArgs,
+            'initialize',
+            legacyContractFactory,
+            currentContractFactory,
+            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+          );
+        expect(toImplementation).to.not.equal(fromImplementation);
+
+        const fromProtocolVersion = await getProtocolVersion(
+          legacyContractFactory.attach(fromImplementation)
+        );
+        const toProtocolVersion = await getProtocolVersion(
+          currentContractFactory.attach(toImplementation)
+        );
+
+        expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+        expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
         expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
       });
     });

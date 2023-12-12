@@ -1,6 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-
+import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {
   DAO,
   InterfaceBasedRegistryMock,
@@ -15,20 +13,24 @@ import {
   PluginSetupProcessor,
   PluginSetupProcessor__factory,
 } from '../../../../typechain';
-import {deployNewDAO} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
-import {Operation} from '../../../../utils/types';
-import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {MultisigSettings, multisigInterface} from './multisig';
-import {deployWithProxy} from '../../../test-utils/proxy';
-import {findEvent} from '../../../../utils/event';
 import {
   InstallationPreparedEvent,
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
-import {hashHelpers} from '../../../../utils/psp';
+import {findEvent} from '../../../../utils/event';
 import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
+import {hashHelpers} from '../../../../utils/psp';
+import {Operation} from '../../../../utils/types';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {
+  MULTISIG_INTERFACE,
+  getInterfaceID,
+} from '../../../test-utils/interfaces';
+import {deployWithProxy} from '../../../test-utils/proxy';
+import {MultisigSettings} from './multisig';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -87,7 +89,7 @@ describe('MultisigSetup', function () {
 
     expect(
       await multisigContract.supportsInterface(
-        getInterfaceID(multisigInterface)
+        getInterfaceID(MULTISIG_INTERFACE)
       )
     ).to.be.true;
   });

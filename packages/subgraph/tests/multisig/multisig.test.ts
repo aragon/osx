@@ -1,15 +1,13 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
-
+import {MultisigApprover} from '../../generated/schema';
 import {
   handleMembersAdded,
   handleApproved,
   handleProposalExecuted,
   handleMembersRemoved,
   _handleProposalCreated,
-  handleMultisigSettingsUpdated
+  handleMultisigSettingsUpdated,
 } from '../../src/packages/multisig/multisig';
-import {MultisigApprover} from '../../generated/schema';
+import {getProposalId} from '../../src/utils/proposals';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -24,7 +22,7 @@ import {
   PROPOSAL_ENTITY_ID,
   START_DATE,
   END_DATE,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -37,9 +35,10 @@ import {
   createMultisigProposalEntityState,
   createGetProposalCall,
   createNewMultisigSettingsUpdatedEvent,
-  createMultisigPluginState
+  createMultisigPluginState,
 } from './utils';
-import {getProposalId} from '../../src/utils/proposals';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -217,7 +216,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   assert.fieldEquals(
     'MultisigProposal',
     proposal.id,
-    'potentiallyExecutable',
+    'approvalReached',
     'false'
   );
 
@@ -255,7 +254,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   assert.fieldEquals(
     'MultisigProposal',
     proposal.id,
-    'potentiallyExecutable',
+    'approvalReached',
     'true'
   );
 
@@ -315,7 +314,7 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
 test('Run Multisig (handleMembersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO)
+    Address.fromString(ADDRESS_TWO),
   ];
 
   // create event
@@ -351,7 +350,7 @@ test('Run Multisig (handleMembersRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO)
+    Address.fromString(ADDRESS_TWO),
   ];
 
   for (let index = 0; index < memberAddresses.length; index++) {

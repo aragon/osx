@@ -49,17 +49,17 @@
           "type": "address[]",
           "description": "The addresses of the initial members to be added."
         }
-      ],
-      "prepareUpdate": {
-        "1": {
-          "description": "No input is required for the update.",
-          "inputs": []
-        }
-      },
-      "prepareUninstallation": {
-        "description": "No input is required for the uninstallation.",
+      ]
+    },
+    "prepareUpdate": {
+      "1": {
+        "description": "No input is required for the update.",
         "inputs": []
       }
+    },
+    "prepareUninstallation": {
+      "description": "No input is required for the uninstallation.",
+      "inputs": []
     }
   }
 }

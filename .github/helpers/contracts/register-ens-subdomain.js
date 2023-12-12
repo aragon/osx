@@ -45,7 +45,7 @@ async function main() {
       resolver,
       0
     );
-    console.log(`Creation tx hash ${creationTx.hash}`)
+    console.log(`Creation tx hash ${creationTx.hash}`);
     await creationTx.wait();
     console.log('Created');
   } else {
@@ -58,7 +58,7 @@ async function main() {
         labelHash,
         wallet.address
       );
-      console.log(`Ownership transfer tx hash ${ownerTx.hash}`)
+      console.log(`Ownership transfer tx hash ${ownerTx.hash}`);
       await ownerTx.wait();
     } else {
       console.log('Already owner.');
@@ -76,7 +76,7 @@ const RegistryAbi = [
     inputs: [{internalType: 'contract ENS', name: '_old', type: 'address'}],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'constructor'
+    type: 'constructor',
   },
   {
     anonymous: false,
@@ -86,22 +86,22 @@ const RegistryAbi = [
         indexed: true,
         internalType: 'address',
         name: 'operator',
-        type: 'address'
+        type: 'address',
       },
-      {indexed: false, internalType: 'bool', name: 'approved', type: 'bool'}
+      {indexed: false, internalType: 'bool', name: 'approved', type: 'bool'},
     ],
     name: 'ApprovalForAll',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
     inputs: [
       {indexed: true, internalType: 'bytes32', name: 'node', type: 'bytes32'},
       {indexed: true, internalType: 'bytes32', name: 'label', type: 'bytes32'},
-      {indexed: false, internalType: 'address', name: 'owner', type: 'address'}
+      {indexed: false, internalType: 'address', name: 'owner', type: 'address'},
     ],
     name: 'NewOwner',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -111,41 +111,41 @@ const RegistryAbi = [
         indexed: false,
         internalType: 'address',
         name: 'resolver',
-        type: 'address'
-      }
+        type: 'address',
+      },
     ],
     name: 'NewResolver',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
     inputs: [
       {indexed: true, internalType: 'bytes32', name: 'node', type: 'bytes32'},
-      {indexed: false, internalType: 'uint64', name: 'ttl', type: 'uint64'}
+      {indexed: false, internalType: 'uint64', name: 'ttl', type: 'uint64'},
     ],
     name: 'NewTTL',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
     inputs: [
       {indexed: true, internalType: 'bytes32', name: 'node', type: 'bytes32'},
-      {indexed: false, internalType: 'address', name: 'owner', type: 'address'}
+      {indexed: false, internalType: 'address', name: 'owner', type: 'address'},
     ],
     name: 'Transfer',
-    type: 'event'
+    type: 'event',
   },
   {
     constant: true,
     inputs: [
       {internalType: 'address', name: 'owner', type: 'address'},
-      {internalType: 'address', name: 'operator', type: 'address'}
+      {internalType: 'address', name: 'operator', type: 'address'},
     ],
     name: 'isApprovedForAll',
     outputs: [{internalType: 'bool', name: '', type: 'bool'}],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -154,7 +154,7 @@ const RegistryAbi = [
     outputs: [{internalType: 'contract ENS', name: '', type: 'address'}],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -163,7 +163,7 @@ const RegistryAbi = [
     outputs: [{internalType: 'address', name: '', type: 'address'}],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -172,7 +172,7 @@ const RegistryAbi = [
     outputs: [{internalType: 'bool', name: '', type: 'bool'}],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -181,31 +181,31 @@ const RegistryAbi = [
     outputs: [{internalType: 'address', name: '', type: 'address'}],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
     inputs: [
       {internalType: 'address', name: 'operator', type: 'address'},
-      {internalType: 'bool', name: 'approved', type: 'bool'}
+      {internalType: 'bool', name: 'approved', type: 'bool'},
     ],
     name: 'setApprovalForAll',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
     inputs: [
       {internalType: 'bytes32', name: 'node', type: 'bytes32'},
-      {internalType: 'address', name: 'owner', type: 'address'}
+      {internalType: 'address', name: 'owner', type: 'address'},
     ],
     name: 'setOwner',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -213,38 +213,38 @@ const RegistryAbi = [
       {internalType: 'bytes32', name: 'node', type: 'bytes32'},
       {internalType: 'address', name: 'owner', type: 'address'},
       {internalType: 'address', name: 'resolver', type: 'address'},
-      {internalType: 'uint64', name: 'ttl', type: 'uint64'}
+      {internalType: 'uint64', name: 'ttl', type: 'uint64'},
     ],
     name: 'setRecord',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
     inputs: [
       {internalType: 'bytes32', name: 'node', type: 'bytes32'},
-      {internalType: 'address', name: 'resolver', type: 'address'}
+      {internalType: 'address', name: 'resolver', type: 'address'},
     ],
     name: 'setResolver',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
     inputs: [
       {internalType: 'bytes32', name: 'node', type: 'bytes32'},
       {internalType: 'bytes32', name: 'label', type: 'bytes32'},
-      {internalType: 'address', name: 'owner', type: 'address'}
+      {internalType: 'address', name: 'owner', type: 'address'},
     ],
     name: 'setSubnodeOwner',
     outputs: [{internalType: 'bytes32', name: '', type: 'bytes32'}],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -253,25 +253,25 @@ const RegistryAbi = [
       {internalType: 'bytes32', name: 'label', type: 'bytes32'},
       {internalType: 'address', name: 'owner', type: 'address'},
       {internalType: 'address', name: 'resolver', type: 'address'},
-      {internalType: 'uint64', name: 'ttl', type: 'uint64'}
+      {internalType: 'uint64', name: 'ttl', type: 'uint64'},
     ],
     name: 'setSubnodeRecord',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
     inputs: [
       {internalType: 'bytes32', name: 'node', type: 'bytes32'},
-      {internalType: 'uint64', name: 'ttl', type: 'uint64'}
+      {internalType: 'uint64', name: 'ttl', type: 'uint64'},
     ],
     name: 'setTTL',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -280,6 +280,6 @@ const RegistryAbi = [
     outputs: [{internalType: 'uint64', name: '', type: 'uint64'}],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
-  }
+    type: 'function',
+  },
 ];

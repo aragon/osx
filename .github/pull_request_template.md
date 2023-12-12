@@ -2,9 +2,11 @@
 
 Please include a summary of the change and be sure you follow the contributions rules we do provide [here](./CONTRIBUTIONS.md)
 
-Task: [ID]()
+Task ID: [OS-?](https://aragonassociation.atlassian.net/browse/OS-?)
 
 ## Type of change
+
+See the framework lifecylce in `packages/contracts/docs/framework-lifecycle` to decide what kind of change this pull request is.
 
 <!--- Please delete options that are not relevant. -->
 
@@ -17,7 +19,6 @@ Task: [ID]()
 - [ ] I have selected the correct base branch.
 - [ ] I have performed a self-review of my own code.
 - [ ] I have commented my code, particularly in hard-to-understand areas.
-- [ ] I have made corresponding changes to the documentation.
 - [ ] My changes generate no new warnings.
 - [ ] Any dependent changes have been merged and published in downstream modules.
 - [ ] I ran all tests with success and extended them if necessary.

@@ -1,16 +1,20 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   TestERC20,
   TestERC20__factory,
   GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
   IERC165Upgradeable__factory,
+  IGovernanceWrappedERC20__factory,
+  IERC20Upgradeable__factory,
+  IERC20PermitUpgradeable__factory,
+  IVotesUpgradeable__factory,
+  IERC20MetadataUpgradeable__factory,
 } from '../../../typechain';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 export type AccountBalance = {account: string; amount: number};
 
@@ -109,7 +113,7 @@ describe('GovernanceWrappedERC20', function () {
     });
   });
 
-  describe('supportsInterface:', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await governanceToken.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -120,33 +124,39 @@ describe('GovernanceWrappedERC20', function () {
         .be.true;
     });
 
-    it('it supports all inherited interfaces', async () => {
-      await Promise.all(
-        [
-          'IGovernanceWrappedERC20',
-          'IERC20Upgradeable',
-          'IERC20PermitUpgradeable',
-          'IVotesUpgradeable',
-        ].map(async interfaceName => {
-          const iface = new ethers.utils.Interface(
-            // @ts-ignore
-            (await hre.artifacts.readArtifact(interfaceName)).abi
-          );
-          expect(await governanceToken.supportsInterface(getInterfaceID(iface)))
-            .to.be.true;
-        })
-      );
+    it('supports the `IGovernanceWrappedERC20` interface', async () => {
+      const iface = IGovernanceWrappedERC20__factory.createInterface();
+      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+        .be.true;
+    });
+
+    it('supports the `IERC20Upgradeable` interface', async () => {
+      const iface = IERC20Upgradeable__factory.createInterface();
+      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+        .be.true;
+    });
+
+    it('supports the `IERC20PermitUpgradeable` interface', async () => {
+      const iface = IERC20PermitUpgradeable__factory.createInterface();
+      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+        .be.true;
+    });
+
+    it('supports the `IVotesUpgradeable` interface', async () => {
+      const iface = IVotesUpgradeable__factory.createInterface();
+      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+        .be.true;
+    });
+
+    it('supports the `IERC20MetadataUpgradeable` interface', async () => {
       // We must check `IERC20MetadataUpgradeable` separately as it inherits from `IERC20Upgradeable` and we cannot get the isolated ABI.
-      const ierc20MetadataInterface = new ethers.utils.Interface([
+      const iface = new ethers.utils.Interface([
         'function name()',
         'function symbol()',
         'function decimals()',
       ]);
-      expect(
-        await governanceToken.supportsInterface(
-          getInterfaceID(ierc20MetadataInterface)
-        )
-      ).to.be.true;
+      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+        .be.true;
     });
   });
 

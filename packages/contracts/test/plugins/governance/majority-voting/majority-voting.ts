@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   MajorityVotingMock,
   DAO,
@@ -11,8 +7,13 @@ import {
   IMajorityVoting__factory,
   DAO__factory,
   MajorityVotingMock__factory,
+  IProtocolVersion__factory,
 } from '../../../../typechain';
 import {VOTING_EVENTS} from '../../../../utils/event';
+import {daoExampleURI} from '../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../test-utils/error';
+import {getInterfaceID} from '../../../test-utils/interfaces';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   VotingSettings,
   VotingMode,
@@ -20,10 +21,9 @@ import {
   ONE_HOUR,
   ONE_YEAR,
 } from '../../../test-utils/voting';
-import {deployWithProxy} from '../../../test-utils/proxy';
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {daoExampleURI} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 export const majorityVotingBaseInterface = new ethers.utils.Interface([
   'function minDuration()',
@@ -85,7 +85,7 @@ describe('MajorityVotingMock', function () {
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await votingBase.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -98,6 +98,12 @@ describe('MajorityVotingMock', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+        .true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
         .true;
     });

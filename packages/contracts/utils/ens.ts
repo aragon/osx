@@ -1,8 +1,7 @@
-import {ethers} from 'hardhat';
-import {ENSRegistry__factory} from '../typechain';
-
 import ensRegistryArtifact from '../artifacts/@ensdomains/ens-contracts/contracts/registry/ENSRegistry.sol/ENSRegistry.json';
 import publicResolverArtifact from '../artifacts/@ensdomains/ens-contracts/contracts/resolvers/PublicResolver.sol/PublicResolver.json';
+import {ENSRegistry__factory} from '../typechain';
+import {ethers} from 'hardhat';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export function ensLabelHash(label: string): string {
