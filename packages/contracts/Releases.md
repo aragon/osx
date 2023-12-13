@@ -1,5 +1,26 @@
 # Contract Releases
 
+Commit: [40f342b5906681e0050ec8bb984fc331070b932a](https://github.com/aragon/osx/commit/40f342b5906681e0050ec8bb984fc331070b932a)  
+Network: polygon  
+DAOFactory: 0x392f0FdfF3283b9f026CfFeC7f9c2De443af3E7C  
+PluginRepoFactory: 0x868581Ee5991C6C08D2467132698fa4AB6C9c272  
+MultisigSetup: 0xCC925a32fA4fa41c42a7d5585D69C980b6Fa9342  
+GovernanceERC20: 0x644D3bA8A335F5b1a6afFe63e551306D0C933582  
+GovernanceWrappedERC20: 0x8f2088E83F007B1567E8E1187380DFfdC83079d4  
+TokenVotingSetup: 0xf65268ed4501391b69540268f461a7e2351d9e4f  
+AddresslistVotingSetup: 0xc096770a17b24CEFa725122E4c823F450aBEa7b4
+
+
+Commit: [40f342b5906681e0050ec8bb984fc331070b932a](https://github.com/aragon/osx/commit/40f342b5906681e0050ec8bb984fc331070b932a)  
+Network: mainnet  
+DAOFactory: 0xf96e6FD76BD0A15580604e1Ea5818D448b1041C0  
+PluginRepoFactory: 0xaac9E9cdb8C1eb42d881ADd59Ee9c53847a3a4f3  
+MultisigSetup: 0x392f0FdfF3283b9f026CfFeC7f9c2De443af3E7C  
+GovernanceERC20: 0x868581Ee5991C6C08D2467132698fa4AB6C9c272  
+GovernanceWrappedERC20: 0xCC925a32fA4fa41c42a7d5585D69C980b6Fa9342  
+TokenVotingSetup: 0x644D3bA8A335F5b1a6afFe63e551306D0C933582  
+AddresslistVotingSetup: 0x8f2088E83F007B1567E8E1187380DFfdC83079d4
+
 Commit: [2a02e0b32492ea1267139f6608310cec16551f05](https://github.com/aragon/osx/commit/2a02e0b32492ea1267139f6608310cec16551f05)  
 Network: arbitrum  
 Managing DAO Implementation: 0x741061B01d3A95a7734B594f1884b6c30E0fDA96  
@@ -27,7 +48,7 @@ PlaceholderSetup: 0x6E924eA5864044D8642385683fFA5AD42FB687f2
 address-list-voting-repo: 0xf415FF95166EF5D365fFB3bc6d1701f9e9ed7Df7  
 token-voting-repo: 0x1AeD2BEb470aeFD65B43f905Bd5371b1E4749d18  
 admin-repo: 0x326A2aee6A8eE78D79E7E956DE60C6E452f76a8e  
-multisig-repo: 0x7553E6Fb020c5740768cF289e603770AA09b7aE2  
+multisig-repo: 0x7553E6Fb020c5740768cF289e603770AA09b7aE2
 
 Commit: [2a02e0b32492ea1267139f6608310cec16551f05](https://github.com/aragon/osx/commit/2a02e0b32492ea1267139f6608310cec16551f05)  
 Network: arbitrumGoerli  
@@ -86,7 +107,7 @@ PlaceholderSetup: 0xB2A2b32b9d885C85d5b229C0509341c37CaE7483
 address-list-voting-repo: 0xdfA1fBeC1Cad92597101A4f4A18e1340c5eA55C1  
 token-voting-repo: 0x424F4cA6FA9c24C03f2396DF0E96057eD11CF7dF  
 admin-repo: 0x152c9E28995E418870b85cbbc0AEE4e53020edb2  
-multisig-repo: 0x9e7956C8758470dE159481e5DD0d08F8B59217A2  
+multisig-repo: 0x9e7956C8758470dE159481e5DD0d08F8B59217A2
 
 Commit: [d429e77c68fcc972126bef6dd58d5d8b32118a09](https://github.com/aragon/osx/commit/d429e77c68fcc972126bef6dd58d5d8b32118a09)  
 Network: baseMainnet  
@@ -115,8 +136,8 @@ PlaceholderSetup: 0xFcaBf5b75473447E4fde4043F8255B2DAdbF0782
 address-list-voting-repo: 0x0A5387021B2722E983842fA701D0BaD8B9279fE2  
 token-voting-repo: 0x2532570DcFb749A7F976136CC05648ef2a0f60b0  
 admin-repo: 0x212eF339C77B3390599caB4D46222D79fAabcb5c  
-multisig-repo: 0xcDC4b0BC63AEfFf3a7826A19D101406C6322A585  
-  
+multisig-repo: 0xcDC4b0BC63AEfFf3a7826A19D101406C6322A585
+
 Commit: [d429e77c68fcc972126bef6dd58d5d8b32118a09](https://github.com/aragon/osx/commit/d429e77c68fcc972126bef6dd58d5d8b32118a09)  
 Network: baseGoerli  
 ManagingDAOImplementation: 0x82aBAfBf46759358c705c7E323543A7Be47AbAf0  
@@ -144,10 +165,10 @@ PlaceholderSetup: 0xb163e7606847E86A6ecd8c40432A3c75d27dBD80
 address-list-voting-repo: 0x38177F525C4BC8427Fe5496fcEA567E7396f9Bba  
 token-voting-repo: 0x0bdd1C7dD81000777Efcba4BBCeAdBF75560e0b8  
 admin-repo: 0x64Ee23C65bFBfEC35d337Ae93fcf22137c2E9c13  
-multisig-repo: 0x3308fd88Db88e11c4d99EC805836d7E9F181CdE0  
-  
----  
-  
+multisig-repo: 0x3308fd88Db88e11c4d99EC805836d7E9F181CdE0
+
+---
+
 Commit: [d429e77c68fcc972126bef6dd58d5d8b32118a09](https://github.com/aragon/osx/commit/d429e77c68fcc972126bef6dd58d5d8b32118a09)  
 Network: baseMainnet  
 managingDAO: 0xB93f5Be5900C2d5fBaE8e4F99B46FfB2Db52ee21  
@@ -175,7 +196,7 @@ PlaceholderSetup: 0xadAdd899F1096B77B6fE601748be1A7a9ADB714B
 address-list-voting-repo: 0x83a977d564349586936f17D9536b2c5702B4Fe20  
 token-voting-repo: 0xFBFbE98845B4E2751a8A004B5A1759e3A278FC68  
 admin-repo: 0x86C87Aa7C09a447048adf4197fec7C12eF62A07F  
-multisig-repo: 0x2784e9500f8f60C1267e819f216682a88A37d56D  
+multisig-repo: 0x2784e9500f8f60C1267e819f216682a88A37d56D
 
 ---
 
@@ -231,8 +252,8 @@ AddresslistVotingSetup: 0x0B295EDeDF122E5A57d0661E1993f617dE1bEDF4
 Commit: [39ffa73f91454f75bab6920c4bec2dc8a0da56eb](https://github.com/aragon/osx/commit/39ffa73f91454f75bab6920c4bec2dc8a0da56eb)  
 Network: mumbai  
 DAOFactory: 0x3ff1681f31f68Ff2723d25Cf839bA7500FE5d218  
-MultisigSetup: 0x2C233F09CaB08BC66b750CB80da401Bd700B74a0  
-  
+MultisigSetup: 0x2C233F09CaB08BC66b750CB80da401Bd700B74a0
+
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: polygon  
 AddresslistVotingSetup: 0x622DB36633643E4A4075ecc3A309a4f0B942922a  
@@ -257,8 +278,8 @@ MultisigSetup: 0xD63A8Cfb0eec960C3e70F96a9e3F3091f3FD70b6
 address-list-voting-repo: 0x641DdEdc2139d9948e8dcC936C1Ab2314D9181E6  
 token-voting-repo: 0xae67aea0B830ed4504B36670B5Fa70c5C386Bb58  
 admin-repo: 0x7fF570473d0876db16A59e8F04EE7F17Ab117309  
-multisig-repo: 0x5A5035E7E8aeff220540F383a9cf8c35929bcF31  
-  
+multisig-repo: 0x5A5035E7E8aeff220540F383a9cf8c35929bcF31
+
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: mumbai  
 managingDAOImplementation: 0x5E993db91Fd2c713Df1110358396EAc60d54fE66  
@@ -283,8 +304,8 @@ MultisigSetup: 0x8b2361C65E898F40372a0DD5E1BfEE9895A676B3
 address-list-voting-repo: 0x71570268A86A80B5cCa3F5e430c2BAa3F4b26278  
 token-voting-repo: 0xaCa70D8c462940B839DE386BcDD4CACf745632cA  
 admin-repo: 0x0DF9b15550fF39149e491dDD154b28f587e0cD16  
-multisig-repo: 0x2c4690b8be39adAd4F15A69340d5035aC6E53eEF  
-  
+multisig-repo: 0x2c4690b8be39adAd4F15A69340d5035aC6E53eEF
+
 Commit: [054f89908fa881dba230b7f3815f081463138fed](https://github.com/aragon/osx/commit/054f89908fa881dba230b7f3815f081463138fed)  
 Network: mumbai  
 managingDAOImplementation: 0x38e85D5A0A7F49EcfD24FF191E543a7c7001068d  
@@ -310,8 +331,8 @@ PlaceholderSetup: 0x4F6f58b1683cc8f11743dDB96078a5937Fe932a9
 address-list-voting-repo: 0x9531c5c5C1207a319cBDe3A944f6dC54FA088243  
 token-voting-repo: 0x296c00A28B6e532e37b8D4665ad3Dc40CE588cB8  
 admin-repo: 0x746E5F3fCBFc797EF98f38483c6B955349D1542D  
-multisig-repo: 0x6E8dA9b20078657c18397407d2a2671AC907F83B  
-  
+multisig-repo: 0x6E8dA9b20078657c18397407d2a2671AC907F83B
+
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: mainnet  
 managingDAOImplementation: 0x005098056a837c2c4F99C7eCeE976F8D90bdFFF8  
@@ -334,8 +355,8 @@ MultisigSetup: 0x8d6726Fe85Caa585d88FD8342ebEEE88d703E754
 address-list-voting-repo: 0xC207767d8A7a28019AFFAEAe6698F84B5526EbD7  
 token-voting-repo: 0xb7401cD221ceAFC54093168B814Cc3d42579287f  
 admin-repo: 0xA4371a239D08bfBA6E8894eccf8466C6323A52C3  
-multisig-repo: 0x8c278e37D0817210E18A7958524b7D0a1fAA6F7b  
-  
+multisig-repo: 0x8c278e37D0817210E18A7958524b7D0a1fAA6F7b
+
 Commit: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)  
 Network: goerli  
 managingDAOImplementation: 0x99C83C89C59166f7f766A221D5D0Ee00D37170c3  
@@ -358,8 +379,8 @@ MultisigSetup: 0xBFd84852C8007Bf148721d2c20F69456F193b201
 address-list-voting-repo: 0xbD293e27226EF2b85E84FADCF2d5135AbC52e50A  
 token-voting-repo: 0xFCc843C48BD44e5dA5976a2f2d85772D59C5959E  
 admin-repo: 0xF66348E9865bb0f29B889E7c0FE1BCf4acAb5f54  
-multisig-repo: 0x92C090cffC592B1bC321aCfAF735057B876375F8  
-  
+multisig-repo: 0x92C090cffC592B1bC321aCfAF735057B876375F8
+
 Commit: [f8aee0a0fa7ae5825130b9726a18ef6e36ddc121](https://github.com/aragon/osx/commit/f8aee0a0fa7ae5825130b9726a18ef6e36ddc121)  
 Network: goerli  
 managingDAOImplementation: 0xF37d853fF9a8B4396fE4CcCc8C9DE744Ea3E7278  
@@ -382,8 +403,8 @@ MultisigSetup: 0x5E993db91Fd2c713Df1110358396EAc60d54fE66
 address-list-voting-repo: 0xAbcf728903C84Abad57320fd78A7bb21ae07A261  
 token-voting-repo: 0xb60Fd6C478541eE150DE7aE7bd379612b2626234  
 admin-repo: 0xe6eEca8428b36ab2e5a96D3F8A903f3c3F8c6938  
-multisig-repo: 0x160b35934f24B1b7eE238d37Ca2F495AB1a5a803  
-  
+multisig-repo: 0x160b35934f24B1b7eE238d37Ca2F495AB1a5a803
+
 Commit: [da1278afd8263f7cc13973853bd3b58a352a1ec8](https://github.com/aragon/osx/commit/da1278afd8263f7cc13973853bd3b58a352a1ec8)  
 Network: goerli  
 managingDAOImplementation: 0x59f3159E8d0F445F711D4f5a1DeA6899cB048B9b  
@@ -406,11 +427,11 @@ MultisigSetup: 0x9D89405D1187d619Da33415856F978474E15C41a
 address-list-voting-repo: 0x583E48C1d7dBd9a65b7866A5fF6956339458d001  
 token-voting-repo: 0x2b5D9CCb5c9676680aac70a19f22c4F46af5b1F5  
 admin-repo: 0xf33F81C42D571EF439cb55d26dF9f0C8c20C822c  
-multisig-repo: 0x39e04b9728db34650110f99161AE6d2521D7Cf67  
-  
-Time: 2023-01-10T21:54:05.494Z    
-Commit: [b72fe768be0709d87d7feba1ddce25cc5fb8703c](https://github.com/aragon/osx/commit/b72fe768be0709d87d7feba1ddce25cc5fb8703c)    
-Network: goerli    
+multisig-repo: 0x39e04b9728db34650110f99161AE6d2521D7Cf67
+
+Time: 2023-01-10T21:54:05.494Z  
+Commit: [b72fe768be0709d87d7feba1ddce25cc5fb8703c](https://github.com/aragon/osx/commit/b72fe768be0709d87d7feba1ddce25cc5fb8703c)  
+Network: goerli  
 AddresslistVotingSetup: 0x6c6E258b07B31BedD44dCedA07779Beb37015857  
 AdminSetup: 0xfB7C644a0771CC8D1Db6590889d413A616930989  
 DAO: 0x115268e5D541a2c13789683dF7E53AFfEC6169f5  
@@ -432,13 +453,13 @@ PluginSetupProcessor: 0x1a4393236D112Ac1Cf6cC6b984165cC0A36D7cEc
 Plugin_ENSSubdomainRegistrar: 0xB189491f8394a5C898dDBd88cD6a65372e02F9f2  
 Plugin_ENSSubdomainRegistrar_Implementation: 0xAd5c3089b8A07A07fAB8658bE9B8b240d66e1608  
 Plugin_ENSSubdomainRegistrar_Proxy: 0xB189491f8394a5C898dDBd88cD6a65372e02F9f2  
-TokenVotingSetup: 0xBD5429e38C6db78b0D959Aae471dbF007D18367E  
-  
----  
-  
-Time: 2022-12-20T17:32:37.842Z    
-Commit: [3c35fece6d9114cfa509cd0a92ad271bc9a39080](https://github.com/aragon/osx/commit/3c35fece6d9114cfa509cd0a92ad271bc9a39080)    
-Network: goerli    
+TokenVotingSetup: 0xBD5429e38C6db78b0D959Aae471dbF007D18367E
+
+---
+
+Time: 2022-12-20T17:32:37.842Z  
+Commit: [3c35fece6d9114cfa509cd0a92ad271bc9a39080](https://github.com/aragon/osx/commit/3c35fece6d9114cfa509cd0a92ad271bc9a39080)  
+Network: goerli  
 AddresslistVotingSetup: 0x3a43B0994c6105E81c949bcB333A56dC4A354E9A  
 AdminSetup: 0xa3a33C600ea0bF965ecbaf874cDC1EE7c0B2D7ee  
 DAO: 0xf01D2c896cE96a5832bcB001b94eFd663eDcaaE1  
@@ -459,13 +480,13 @@ PluginSetupProcessor: 0xA57f171A2fe4B71F993d3518A86965Ee849a860A
 Plugin_ENSSubdomainRegistrar: 0xFdB98b110f8c8a5a79F903304014fC726b3f2A75  
 Plugin_ENSSubdomainRegistrar_Implementation: 0x636416cd599da0890B7013e8bc1aA1F53cF37B9e  
 Plugin_ENSSubdomainRegistrar_Proxy: 0xFdB98b110f8c8a5a79F903304014fC726b3f2A75  
-TokenVotingSetup: 0xDD17348A1C689336024CC79003c2EB54CbD908f2  
-  
----  
-  
-Time: 2022-11-02T16:59:33.582Z    
-Commit: [88d3bff1edb2e66ba7d8e31cd6e0ceffc4939053](https://github.com/aragon/osx/commit/88d3bff1edb2e66ba7d8e31cd6e0ceffc4939053)    
-Network: goerli    
+TokenVotingSetup: 0xDD17348A1C689336024CC79003c2EB54CbD908f2
+
+---
+
+Time: 2022-11-02T16:59:33.582Z  
+Commit: [88d3bff1edb2e66ba7d8e31cd6e0ceffc4939053](https://github.com/aragon/osx/commit/88d3bff1edb2e66ba7d8e31cd6e0ceffc4939053)  
+Network: goerli  
 AllowlistVotingSetup: 0xD39cE95D1e29d4EA9F4E8813d73E68F2F720377a  
 DAO: 0xe0C6B6f2078bbC38Bf71af47C286766689D3BaaF  
 DAOFactory: 0xd52CA6BbfC11627aF9aC3496CAb975ae20E70A81  
@@ -485,341 +506,341 @@ PluginRepoRegistry_Proxy: 0x22C8AEA0Ad1c1872E60bD43b3FaF20471F7CC43f
 PluginSetupProcessor: 0xf7777b97EBEec7EaFCFD28aabE31EDd8F9b46A08  
 Plugin_ENSSubdomainRegistrar: 0x03d529D600eb5bf30FFa4A644F88F4bC3Bc0fD7c  
 Plugin_ENSSubdomainRegistrar_Implementation: 0xC234cb557F7a45207FFCC3575FD4eE1C165055B1  
-Plugin_ENSSubdomainRegistrar_Proxy: 0x03d529D600eb5bf30FFa4A644F88F4bC3Bc0fD7c  
-  
----  
-  
-Time: 2022-07-07T09:05:05.960Z    
-Commit: [edbd0653cfcdb01f5f939af7af4b333a055f8a1e](https://github.com/aragon/osx/commit/edbd0653cfcdb01f5f939af7af4b333a055f8a1e)    
-Network: arbitrum-rinkeby    
+Plugin_ENSSubdomainRegistrar_Proxy: 0x03d529D600eb5bf30FFa4A644F88F4bC3Bc0fD7c
+
+---
+
+Time: 2022-07-07T09:05:05.960Z  
+Commit: [edbd0653cfcdb01f5f939af7af4b333a055f8a1e](https://github.com/aragon/osx/commit/edbd0653cfcdb01f5f939af7af4b333a055f8a1e)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x014e2862A05C82aac74c7Ce0cDFeAfc9EA9815cc  
 Registry: 0xcDbC588740854c24EF8edd50d91d3E511f984501  
-TokenFactory: 0xDbb359eA1d5734eDba168b070309347FfA9Eab3e  
-  
----  
-  
-Time: 2022-07-07T09:05:05.965Z    
-Commit: [edbd0653cfcdb01f5f939af7af4b333a055f8a1e](https://github.com/aragon/osx/commit/edbd0653cfcdb01f5f939af7af4b333a055f8a1e)    
-Network: mumbai    
+TokenFactory: 0xDbb359eA1d5734eDba168b070309347FfA9Eab3e
+
+---
+
+Time: 2022-07-07T09:05:05.965Z  
+Commit: [edbd0653cfcdb01f5f939af7af4b333a055f8a1e](https://github.com/aragon/osx/commit/edbd0653cfcdb01f5f939af7af4b333a055f8a1e)  
+Network: mumbai  
 DAOFactory: 0xCED6b706B8A0Db179C3056Bb03dF48744e25652B  
 Registry: 0xaB7807aA4755F2D93dE59f6eaA9764c14B71cAf7  
-TokenFactory: 0x9DE8341f7369DcEC25Fd085dC55F5BbD8e279891  
-  
----  
-  
-Time: 2022-07-07T09:05:05.970Z    
-Commit: [edbd0653cfcdb01f5f939af7af4b333a055f8a1e](https://github.com/aragon/osx/commit/edbd0653cfcdb01f5f939af7af4b333a055f8a1e)    
-Network: rinkeby    
+TokenFactory: 0x9DE8341f7369DcEC25Fd085dC55F5BbD8e279891
+
+---
+
+Time: 2022-07-07T09:05:05.970Z  
+Commit: [edbd0653cfcdb01f5f939af7af4b333a055f8a1e](https://github.com/aragon/osx/commit/edbd0653cfcdb01f5f939af7af4b333a055f8a1e)  
+Network: rinkeby  
 DAOFactory: 0xeC9d97d6143fCd8A5a3dd83F4C3Ac5e738069E9a  
 Registry: 0xCC5FD930dcbA825e9686F987A9243036Db4A317D  
-TokenFactory: 0x749Ea9650F043edDE2F243E2e43cdf5d7D22C76D  
-  
----  
-  
-Time: 2022-06-22T15:41:08.074Z    
-Commit: [132e9fd914f30ed750f9730631283589ddb361cd](https://github.com/aragon/osx/commit/132e9fd914f30ed750f9730631283589ddb361cd)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x749Ea9650F043edDE2F243E2e43cdf5d7D22C76D
+
+---
+
+Time: 2022-06-22T15:41:08.074Z  
+Commit: [132e9fd914f30ed750f9730631283589ddb361cd](https://github.com/aragon/osx/commit/132e9fd914f30ed750f9730631283589ddb361cd)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x705aC33fBC258081CA03beBbc4049b6f4Ff2d5a4  
 Registry: 0xabF0792869D4dEEaEeCD14238c41578eB112183c  
-TokenFactory: 0x9f0452337D4b39b81610B29ddcEa68F42Cc4e142  
-  
----  
-  
-Time: 2022-06-22T15:41:08.079Z    
-Commit: [132e9fd914f30ed750f9730631283589ddb361cd](https://github.com/aragon/osx/commit/132e9fd914f30ed750f9730631283589ddb361cd)    
-Network: mumbai    
+TokenFactory: 0x9f0452337D4b39b81610B29ddcEa68F42Cc4e142
+
+---
+
+Time: 2022-06-22T15:41:08.079Z  
+Commit: [132e9fd914f30ed750f9730631283589ddb361cd](https://github.com/aragon/osx/commit/132e9fd914f30ed750f9730631283589ddb361cd)  
+Network: mumbai  
 DAOFactory: 0x5dA356d7945B1A81F61a748ed85448c7cFB9d712  
 Registry: 0x744c5d61354aD6bC7c40C84766e9f4e56f4017bC  
-TokenFactory: 0x9d492648900c2E785C00cA90f3945025d99D6EB0  
-  
----  
-  
-Time: 2022-06-22T15:41:08.083Z    
-Commit: [132e9fd914f30ed750f9730631283589ddb361cd](https://github.com/aragon/osx/commit/132e9fd914f30ed750f9730631283589ddb361cd)    
-Network: rinkeby    
+TokenFactory: 0x9d492648900c2E785C00cA90f3945025d99D6EB0
+
+---
+
+Time: 2022-06-22T15:41:08.083Z  
+Commit: [132e9fd914f30ed750f9730631283589ddb361cd](https://github.com/aragon/osx/commit/132e9fd914f30ed750f9730631283589ddb361cd)  
+Network: rinkeby  
 DAOFactory: 0xF4433059cb12E224EF33510a3bE3329c8c750fD8  
 Registry: 0xFdB98b110f8c8a5a79F903304014fC726b3f2A75  
-TokenFactory: 0x841d1Cd625135d0EC53cFF2A3D9F943ace9CF9bA  
-  
----  
-  
-Time: 2022-05-18T12:54:06.081Z    
-Commit: [9030920927c7367265c6b9aa1082368bcf17301a](https://github.com/aragon/osx/commit/9030920927c7367265c6b9aa1082368bcf17301a)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x841d1Cd625135d0EC53cFF2A3D9F943ace9CF9bA
+
+---
+
+Time: 2022-05-18T12:54:06.081Z  
+Commit: [9030920927c7367265c6b9aa1082368bcf17301a](https://github.com/aragon/osx/commit/9030920927c7367265c6b9aa1082368bcf17301a)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x04787AB72C98f7bE20fCfC132ff5dfd452C67081  
 Registry: 0x1BcA3c46A88b5Ba1B80B2948037Fa47dbD92E53e  
-TokenFactory: 0x2a8f09684a8bCbA13E3d186F10ef08db15F0f47C  
-  
----  
-  
-Time: 2022-05-18T12:54:06.086Z    
-Commit: [9030920927c7367265c6b9aa1082368bcf17301a](https://github.com/aragon/osx/commit/9030920927c7367265c6b9aa1082368bcf17301a)    
-Network: mumbai    
+TokenFactory: 0x2a8f09684a8bCbA13E3d186F10ef08db15F0f47C
+
+---
+
+Time: 2022-05-18T12:54:06.086Z  
+Commit: [9030920927c7367265c6b9aa1082368bcf17301a](https://github.com/aragon/osx/commit/9030920927c7367265c6b9aa1082368bcf17301a)  
+Network: mumbai  
 DAOFactory: 0xCb7631ab66110fD2799f07de8a9cA0677670554b  
 Registry: 0x02cFdae148b0FED1902eC241988D917419163f63  
-TokenFactory: 0x00ae6faCc6Fa8851725D34024F621D2a17530Fb4  
-  
----  
-  
-Time: 2022-05-18T12:54:06.089Z    
-Commit: [9030920927c7367265c6b9aa1082368bcf17301a](https://github.com/aragon/osx/commit/9030920927c7367265c6b9aa1082368bcf17301a)    
-Network: rinkeby    
+TokenFactory: 0x00ae6faCc6Fa8851725D34024F621D2a17530Fb4
+
+---
+
+Time: 2022-05-18T12:54:06.089Z  
+Commit: [9030920927c7367265c6b9aa1082368bcf17301a](https://github.com/aragon/osx/commit/9030920927c7367265c6b9aa1082368bcf17301a)  
+Network: rinkeby  
 DAOFactory: 0x2290E6dF695C5272cE942015c90aAe24bFB94960  
 Registry: 0x5895B0B32d438f85872b164AE967B3E802d33750  
-TokenFactory: 0x84641573c077F12C73bd2612fe1d96AE58bE7D1a  
-  
----  
-  
-Time: 2022-05-18T12:29:44.709Z    
-Commit: [b1d7fee68c65adfc3c564df2ec4474bfcf90d38c](https://github.com/aragon/osx/commit/b1d7fee68c65adfc3c564df2ec4474bfcf90d38c)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x84641573c077F12C73bd2612fe1d96AE58bE7D1a
+
+---
+
+Time: 2022-05-18T12:29:44.709Z  
+Commit: [b1d7fee68c65adfc3c564df2ec4474bfcf90d38c](https://github.com/aragon/osx/commit/b1d7fee68c65adfc3c564df2ec4474bfcf90d38c)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0xce1EB68b54d026781f92957bAB583EEa62f27344  
 Registry: 0x00ae6faCc6Fa8851725D34024F621D2a17530Fb4  
-TokenFactory: 0xCb7631ab66110fD2799f07de8a9cA0677670554b  
-  
----  
-  
-Time: 2022-05-18T12:29:44.713Z    
-Commit: [b1d7fee68c65adfc3c564df2ec4474bfcf90d38c](https://github.com/aragon/osx/commit/b1d7fee68c65adfc3c564df2ec4474bfcf90d38c)    
-Network: mumbai    
+TokenFactory: 0xCb7631ab66110fD2799f07de8a9cA0677670554b
+
+---
+
+Time: 2022-05-18T12:29:44.713Z  
+Commit: [b1d7fee68c65adfc3c564df2ec4474bfcf90d38c](https://github.com/aragon/osx/commit/b1d7fee68c65adfc3c564df2ec4474bfcf90d38c)  
+Network: mumbai  
 DAOFactory: 0x325F8c55A1A8C223aA7C8e3903Cf7079524706Aa  
 Registry: 0xB88fE875623E33BFDa76A517e9d5DC2023995f73  
-TokenFactory: 0x9d4669361461443eB25A29b79C68C8AC906D8cC1  
-  
----  
-  
-Time: 2022-05-18T12:29:44.717Z    
-Commit: [b1d7fee68c65adfc3c564df2ec4474bfcf90d38c](https://github.com/aragon/osx/commit/b1d7fee68c65adfc3c564df2ec4474bfcf90d38c)    
-Network: rinkeby    
+TokenFactory: 0x9d4669361461443eB25A29b79C68C8AC906D8cC1
+
+---
+
+Time: 2022-05-18T12:29:44.717Z  
+Commit: [b1d7fee68c65adfc3c564df2ec4474bfcf90d38c](https://github.com/aragon/osx/commit/b1d7fee68c65adfc3c564df2ec4474bfcf90d38c)  
+Network: rinkeby  
 DAOFactory: 0xC234cb557F7a45207FFCC3575FD4eE1C165055B1  
 Registry: 0x99C7D164fcd6a6F11E0C11fC7e932D285b7F08aB  
-TokenFactory: 0xDBEf66fA86d8E7173d28C310c5b2C96D603C6F48  
-  
----  
-  
-Time: 2022-05-16T21:35:49.676Z    
-Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/osx/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0xDBEf66fA86d8E7173d28C310c5b2C96D603C6F48
+
+---
+
+Time: 2022-05-16T21:35:49.676Z  
+Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/osx/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x9d4669361461443eB25A29b79C68C8AC906D8cC1  
 Registry: 0xAAAb8c6b83a5C7b1462af4427d97b33197388C38  
-TokenFactory: 0xB88fE875623E33BFDa76A517e9d5DC2023995f73  
-  
----  
-  
-Time: 2022-05-16T21:35:49.680Z    
-Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/osx/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)    
-Network: mumbai    
+TokenFactory: 0xB88fE875623E33BFDa76A517e9d5DC2023995f73
+
+---
+
+Time: 2022-05-16T21:35:49.680Z  
+Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/osx/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)  
+Network: mumbai  
 DAOFactory: 0x246503df057A9a85E0144b6867a828c99676128B  
 Registry: 0xBa48CE7E1a29c3E43ad2C46D2defd4Ef6BB8CD88  
-TokenFactory: 0x56ce4D8006292Abf418291FaE813C1E3769240A4  
-  
----  
-  
-Time: 2022-05-16T21:35:49.684Z    
-Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/osx/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)    
-Network: rinkeby    
+TokenFactory: 0x56ce4D8006292Abf418291FaE813C1E3769240A4
+
+---
+
+Time: 2022-05-16T21:35:49.684Z  
+Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/osx/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)  
+Network: rinkeby  
 DAOFactory: 0x971571f70638B09E7488C33c8ed6cC9eE90c946c  
 Registry: 0xB22F1918E444c95F3C98595725884c28183714fB  
-TokenFactory: 0x4d35922def435b32b3c9f262754410EB30c1D296  
-  
----  
-  
-Time: 2022-05-16T07:47:45.181Z    
-Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/osx/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x4d35922def435b32b3c9f262754410EB30c1D296
+
+---
+
+Time: 2022-05-16T07:47:45.181Z  
+Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/osx/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0xA2c6c82e327954979792d696Bf2cFbC2Ba16Ba80  
 Registry: 0x740eA36d08A3a2A583234c7416899D40051c698f  
-TokenFactory: 0x2a4B34fB0C2064C4784d98b48AD5f594Dd8191F3  
-  
----  
-  
-Time: 2022-05-16T07:47:45.186Z    
-Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/osx/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)    
-Network: mumbai    
+TokenFactory: 0x2a4B34fB0C2064C4784d98b48AD5f594Dd8191F3
+
+---
+
+Time: 2022-05-16T07:47:45.186Z  
+Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/osx/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)  
+Network: mumbai  
 DAOFactory: 0xE6eAAa5Fde32f5827175FEc20d04551a9C67563B  
 Registry: 0x089Bf74E902A0DA68c756585cf277720bF31CbB1  
-TokenFactory: 0xbda31B34f09069DF702cC9eC7F27AEAFAA3a2ce7  
-  
----  
-  
-Time: 2022-05-16T07:47:45.191Z    
-Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/osx/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)    
-Network: rinkeby    
+TokenFactory: 0xbda31B34f09069DF702cC9eC7F27AEAFAA3a2ce7
+
+---
+
+Time: 2022-05-16T07:47:45.191Z  
+Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/osx/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)  
+Network: rinkeby  
 DAOFactory: 0xDbb359eA1d5734eDba168b070309347FfA9Eab3e  
 Registry: 0x324322A9d61AA0585Db8721d6Ee9b2dC3CB9FF53  
-TokenFactory: 0xcDbC588740854c24EF8edd50d91d3E511f984501  
-  
----  
-  
-Time: 2022-05-10T12:19:29.503Z    
-Commit: [0d91a20e1fc6119814d860e5bf18451a9ffc9e58](https://github.com/aragon/osx/commit/0d91a20e1fc6119814d860e5bf18451a9ffc9e58)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0xcDbC588740854c24EF8edd50d91d3E511f984501
+
+---
+
+Time: 2022-05-10T12:19:29.503Z  
+Commit: [0d91a20e1fc6119814d860e5bf18451a9ffc9e58](https://github.com/aragon/osx/commit/0d91a20e1fc6119814d860e5bf18451a9ffc9e58)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0xCC925a32fA4fa41c42a7d5585D69C980b6Fa9342  
 Registry: 0x392f0FdfF3283b9f026CfFeC7f9c2De443af3E7C  
-TokenFactory: 0x868581Ee5991C6C08D2467132698fa4AB6C9c272  
-  
----  
-  
-Time: 2022-05-10T12:19:29.509Z    
-Commit: [0d91a20e1fc6119814d860e5bf18451a9ffc9e58](https://github.com/aragon/osx/commit/0d91a20e1fc6119814d860e5bf18451a9ffc9e58)    
-Network: mumbai    
+TokenFactory: 0x868581Ee5991C6C08D2467132698fa4AB6C9c272
+
+---
+
+Time: 2022-05-10T12:19:29.509Z  
+Commit: [0d91a20e1fc6119814d860e5bf18451a9ffc9e58](https://github.com/aragon/osx/commit/0d91a20e1fc6119814d860e5bf18451a9ffc9e58)  
+Network: mumbai  
 DAOFactory: 0x70080B0775C0898327F9557b03a9Ff7B10238429  
 Registry: 0x009e285A017f5cd0382dcD58a70Fe5F255Cc785c  
-TokenFactory: 0x54Db969d1423CF089025bc21308c921Ad9B842F1  
-  
----  
-  
-Time: 2022-05-10T12:19:29.514Z    
-Commit: [0d91a20e1fc6119814d860e5bf18451a9ffc9e58](https://github.com/aragon/osx/commit/0d91a20e1fc6119814d860e5bf18451a9ffc9e58)    
-Network: rinkeby    
+TokenFactory: 0x54Db969d1423CF089025bc21308c921Ad9B842F1
+
+---
+
+Time: 2022-05-10T12:19:29.514Z  
+Commit: [0d91a20e1fc6119814d860e5bf18451a9ffc9e58](https://github.com/aragon/osx/commit/0d91a20e1fc6119814d860e5bf18451a9ffc9e58)  
+Network: rinkeby  
 DAOFactory: 0x705aC33fBC258081CA03beBbc4049b6f4Ff2d5a4  
 Registry: 0xabF0792869D4dEEaEeCD14238c41578eB112183c  
-TokenFactory: 0x9f0452337D4b39b81610B29ddcEa68F42Cc4e142  
-  
----  
-  
-Time: 2022-04-27T15:38:32.596Z    
-Commit: [dfb15306c22145fd0fdcedf1704f5df2e14a9502](https://github.com/aragon/osx/commit/dfb15306c22145fd0fdcedf1704f5df2e14a9502)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x9f0452337D4b39b81610B29ddcEa68F42Cc4e142
+
+---
+
+Time: 2022-04-27T15:38:32.596Z  
+Commit: [dfb15306c22145fd0fdcedf1704f5df2e14a9502](https://github.com/aragon/osx/commit/dfb15306c22145fd0fdcedf1704f5df2e14a9502)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x76d72457990e07dd889Bd8F19a02feB89d11A946  
 Registry: 0xBB1F7ACf2068Ec3F669FDCB4d0Ad9a70E3E418d6  
-TokenFactory: 0x78E839210aa3072ce638A2d6b08DA611ca361A0E  
-  
----  
-  
-Time: 2022-04-27T15:38:32.600Z    
-Commit: [dfb15306c22145fd0fdcedf1704f5df2e14a9502](https://github.com/aragon/osx/commit/dfb15306c22145fd0fdcedf1704f5df2e14a9502)    
-Network: mumbai    
+TokenFactory: 0x78E839210aa3072ce638A2d6b08DA611ca361A0E
+
+---
+
+Time: 2022-04-27T15:38:32.600Z  
+Commit: [dfb15306c22145fd0fdcedf1704f5df2e14a9502](https://github.com/aragon/osx/commit/dfb15306c22145fd0fdcedf1704f5df2e14a9502)  
+Network: mumbai  
 DAOFactory: 0xB815791c233807D39b7430127975244B36C19C8e  
 Registry: 0x7870837ffe670E62d4e601393D454f1b8649F7f9  
-TokenFactory: 0x58cd7d773389F68250338C13A1BB5662CFBd0C9A  
-  
----  
-  
-Time: 2022-04-27T15:38:32.603Z    
-Commit: [dfb15306c22145fd0fdcedf1704f5df2e14a9502](https://github.com/aragon/osx/commit/dfb15306c22145fd0fdcedf1704f5df2e14a9502)    
-Network: rinkeby    
+TokenFactory: 0x58cd7d773389F68250338C13A1BB5662CFBd0C9A
+
+---
+
+Time: 2022-04-27T15:38:32.603Z  
+Commit: [dfb15306c22145fd0fdcedf1704f5df2e14a9502](https://github.com/aragon/osx/commit/dfb15306c22145fd0fdcedf1704f5df2e14a9502)  
+Network: rinkeby  
 DAOFactory: 0x806555bEa94Dd7FF47f250AC8913F3942eDCf2B6  
 Registry: 0xc08Ab8CebC502d35f7Fe5806CaE6cF0431eC1d36  
-TokenFactory: 0xF52346Ea8F60c351B96377Dd7d51358dE1A0C9eB  
-  
----  
-  
-Time: 2022-04-27T15:14:24.792Z    
-Commit: [a0d726d8523022abc4caf006ef29233de14ffac3](https://github.com/aragon/osx/commit/a0d726d8523022abc4caf006ef29233de14ffac3)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0xF52346Ea8F60c351B96377Dd7d51358dE1A0C9eB
+
+---
+
+Time: 2022-04-27T15:14:24.792Z  
+Commit: [a0d726d8523022abc4caf006ef29233de14ffac3](https://github.com/aragon/osx/commit/a0d726d8523022abc4caf006ef29233de14ffac3)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0xD47f4ea555FFe3A16Bb997e90C2c4A51CC6d823A  
 Registry: 0x7DC8d6d35070A13192C754CF96CB046615f2a3E0  
-TokenFactory: 0x91f190a6f6E38042e3398B3f78Eb7e0AF58Ac8c3  
-  
----  
-  
-Time: 2022-04-27T15:14:24.797Z    
-Commit: [a0d726d8523022abc4caf006ef29233de14ffac3](https://github.com/aragon/osx/commit/a0d726d8523022abc4caf006ef29233de14ffac3)    
-Network: mumbai    
+TokenFactory: 0x91f190a6f6E38042e3398B3f78Eb7e0AF58Ac8c3
+
+---
+
+Time: 2022-04-27T15:14:24.797Z  
+Commit: [a0d726d8523022abc4caf006ef29233de14ffac3](https://github.com/aragon/osx/commit/a0d726d8523022abc4caf006ef29233de14ffac3)  
+Network: mumbai  
 DAOFactory: 0xd8C229F3644576b200319cB3919B0E87716f47d8  
 Registry: 0xda2bAb5554a6f5e655cD0A1B46dcAFBb39742334  
-TokenFactory: 0xC8109e7B790346F662C6e4ef2bA863a9700cA8Eb  
-  
----  
-  
-Time: 2022-04-27T15:14:24.800Z    
-Commit: [a0d726d8523022abc4caf006ef29233de14ffac3](https://github.com/aragon/osx/commit/a0d726d8523022abc4caf006ef29233de14ffac3)    
-Network: rinkeby    
+TokenFactory: 0xC8109e7B790346F662C6e4ef2bA863a9700cA8Eb
+
+---
+
+Time: 2022-04-27T15:14:24.800Z  
+Commit: [a0d726d8523022abc4caf006ef29233de14ffac3](https://github.com/aragon/osx/commit/a0d726d8523022abc4caf006ef29233de14ffac3)  
+Network: rinkeby  
 DAOFactory: 0x9d492648900c2E785C00cA90f3945025d99D6EB0  
 Registry: 0x246780ba3A9b4166da770e310442Dee830E4E409  
-TokenFactory: 0x744c5d61354aD6bC7c40C84766e9f4e56f4017bC  
-  
----  
-  
-Time: 2022-04-26T12:31:07.037Z    
-Commit: [662cb58bb14a743fc93ed2e8fbd249e3ee5168b3](https://github.com/aragon/osx/commit/662cb58bb14a743fc93ed2e8fbd249e3ee5168b3)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x744c5d61354aD6bC7c40C84766e9f4e56f4017bC
+
+---
+
+Time: 2022-04-26T12:31:07.037Z  
+Commit: [662cb58bb14a743fc93ed2e8fbd249e3ee5168b3](https://github.com/aragon/osx/commit/662cb58bb14a743fc93ed2e8fbd249e3ee5168b3)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x7F5F2BB64efD9c542F26ABa34D59e1895FcDF69D  
 Registry: 0x198b64a53b39f454e56626d9262cBf67E7C13138  
-TokenFactory: 0x49e04AB7af7A263b8ac802c1cAe22f5b4E4577Cd  
-  
----  
-  
-Time: 2022-04-26T12:31:07.042Z    
-Commit: [662cb58bb14a743fc93ed2e8fbd249e3ee5168b3](https://github.com/aragon/osx/commit/662cb58bb14a743fc93ed2e8fbd249e3ee5168b3)    
-Network: mumbai    
+TokenFactory: 0x49e04AB7af7A263b8ac802c1cAe22f5b4E4577Cd
+
+---
+
+Time: 2022-04-26T12:31:07.042Z  
+Commit: [662cb58bb14a743fc93ed2e8fbd249e3ee5168b3](https://github.com/aragon/osx/commit/662cb58bb14a743fc93ed2e8fbd249e3ee5168b3)  
+Network: mumbai  
 DAOFactory: 0x3E773BCb6a8C5ED2f23BF167284DF45D9A550fF6  
 Registry: 0x1B6632D1357D26055D6452E3b3BEBd1c1d982e86  
-TokenFactory: 0x6095b5004c59301f8Bb98768Bd395d0bc637C893  
-  
----  
-  
-Time: 2022-04-26T12:31:07.047Z    
-Commit: [662cb58bb14a743fc93ed2e8fbd249e3ee5168b3](https://github.com/aragon/osx/commit/662cb58bb14a743fc93ed2e8fbd249e3ee5168b3)    
-Network: rinkeby    
+TokenFactory: 0x6095b5004c59301f8Bb98768Bd395d0bc637C893
+
+---
+
+Time: 2022-04-26T12:31:07.047Z  
+Commit: [662cb58bb14a743fc93ed2e8fbd249e3ee5168b3](https://github.com/aragon/osx/commit/662cb58bb14a743fc93ed2e8fbd249e3ee5168b3)  
+Network: rinkeby  
 DAOFactory: 0x04787AB72C98f7bE20fCfC132ff5dfd452C67081  
 Registry: 0x1BcA3c46A88b5Ba1B80B2948037Fa47dbD92E53e  
-TokenFactory: 0x2a8f09684a8bCbA13E3d186F10ef08db15F0f47C  
-  
----  
-  
-Time: 2022-04-19T12:08:03.515Z    
-Commit: [e6f6463d8ffde7330fd2ab6365f4299968dcbf13](https://github.com/aragon/osx/commit/e6f6463d8ffde7330fd2ab6365f4299968dcbf13)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x2a8f09684a8bCbA13E3d186F10ef08db15F0f47C
+
+---
+
+Time: 2022-04-19T12:08:03.515Z  
+Commit: [e6f6463d8ffde7330fd2ab6365f4299968dcbf13](https://github.com/aragon/osx/commit/e6f6463d8ffde7330fd2ab6365f4299968dcbf13)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x139c6995B2a74A43a8eDcE0B541C23f2Dfb5D921  
 Registry: 0x818428f875943eE7c0366de1AAa174a1225dC4eA  
-TokenFactory: 0xDf433DA72bE56aCFF3eB1205A0f9eBFf602A547B  
-  
----  
-  
-Time: 2022-04-19T12:08:03.519Z    
-Commit: [e6f6463d8ffde7330fd2ab6365f4299968dcbf13](https://github.com/aragon/osx/commit/e6f6463d8ffde7330fd2ab6365f4299968dcbf13)    
-Network: mumbai    
+TokenFactory: 0xDf433DA72bE56aCFF3eB1205A0f9eBFf602A547B
+
+---
+
+Time: 2022-04-19T12:08:03.519Z  
+Commit: [e6f6463d8ffde7330fd2ab6365f4299968dcbf13](https://github.com/aragon/osx/commit/e6f6463d8ffde7330fd2ab6365f4299968dcbf13)  
+Network: mumbai  
 DAOFactory: 0x91a851E9Ed7F2c6d41b15F76e4a88f5A37067cC9  
 Registry: 0xB5eB5C011827C9F5787ceE3Abc72d247E36a5a0D  
-TokenFactory: 0xE47C0B1Ea698F2914b6CC218cdC3A5Ca4FAcff18  
-  
----  
-  
-Time: 2022-04-19T12:08:03.523Z    
-Commit: [e6f6463d8ffde7330fd2ab6365f4299968dcbf13](https://github.com/aragon/osx/commit/e6f6463d8ffde7330fd2ab6365f4299968dcbf13)    
-Network: rinkeby    
+TokenFactory: 0xE47C0B1Ea698F2914b6CC218cdC3A5Ca4FAcff18
+
+---
+
+Time: 2022-04-19T12:08:03.523Z  
+Commit: [e6f6463d8ffde7330fd2ab6365f4299968dcbf13](https://github.com/aragon/osx/commit/e6f6463d8ffde7330fd2ab6365f4299968dcbf13)  
+Network: rinkeby  
 DAOFactory: 0x4148503aDd81CFCA3768fA28F12bb4DC6E5Ac053  
 Registry: 0x6DA8932099aa64aE0083E7648cE4010467822472  
-TokenFactory: 0x9e51Fa051c4aB868a7dAAfa6F417e8AF80afA3C7  
-  
----  
-  
-Time: 2022-04-14T08:34:55.985Z    
-Commit: [ce24d725e29a02ea709b8c9471dd8cb87765a2ed](https://github.com/aragon/osx/commit/ce24d725e29a02ea709b8c9471dd8cb87765a2ed)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0x9e51Fa051c4aB868a7dAAfa6F417e8AF80afA3C7
+
+---
+
+Time: 2022-04-14T08:34:55.985Z  
+Commit: [ce24d725e29a02ea709b8c9471dd8cb87765a2ed](https://github.com/aragon/osx/commit/ce24d725e29a02ea709b8c9471dd8cb87765a2ed)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0x9bD1EF0C495F6b078d9A82586A35F4d623384E97  
 Registry: 0xE3625B9Ed80306f590Dcf8a0d50b193F28DB969E  
-TokenFactory: 0x09AF4b83A9a7EA682A2Eb61d1d0B9e89103b1A06  
-  
----  
-  
-Time: 2022-04-14T08:34:55.989Z    
-Commit: [ce24d725e29a02ea709b8c9471dd8cb87765a2ed](https://github.com/aragon/osx/commit/ce24d725e29a02ea709b8c9471dd8cb87765a2ed)    
-Network: mumbai    
+TokenFactory: 0x09AF4b83A9a7EA682A2Eb61d1d0B9e89103b1A06
+
+---
+
+Time: 2022-04-14T08:34:55.989Z  
+Commit: [ce24d725e29a02ea709b8c9471dd8cb87765a2ed](https://github.com/aragon/osx/commit/ce24d725e29a02ea709b8c9471dd8cb87765a2ed)  
+Network: mumbai  
 DAOFactory: 0x21D9B7b3D7280e9DA46769f79FffEC4cdf64D1cc  
 Registry: 0x76d72457990e07dd889Bd8F19a02feB89d11A946  
-TokenFactory: 0xeB98a71d69a1e12B62c10368D9dA5364CE0f7178  
-  
----  
-  
-Time: 2022-04-14T08:34:55.993Z    
-Commit: [ce24d725e29a02ea709b8c9471dd8cb87765a2ed](https://github.com/aragon/osx/commit/ce24d725e29a02ea709b8c9471dd8cb87765a2ed)    
-Network: rinkeby    
+TokenFactory: 0xeB98a71d69a1e12B62c10368D9dA5364CE0f7178
+
+---
+
+Time: 2022-04-14T08:34:55.993Z  
+Commit: [ce24d725e29a02ea709b8c9471dd8cb87765a2ed](https://github.com/aragon/osx/commit/ce24d725e29a02ea709b8c9471dd8cb87765a2ed)  
+Network: rinkeby  
 DAOFactory: 0x20c5D7c7E4417346f3649c5d54f9F8e8cC8b9de3  
 Registry: 0xCb7631ab66110fD2799f07de8a9cA0677670554b  
-TokenFactory: 0xce1EB68b54d026781f92957bAB583EEa62f27344  
-  
----  
-  
-Time: 2022-04-13T11:30:33.325Z    
-Commit: [57587091968f1abb5c34661ac3f18297c3be2e65](https://github.com/aragon/osx/commit/57587091968f1abb5c34661ac3f18297c3be2e65)    
-Network: arbitrum-rinkeby    
+TokenFactory: 0xce1EB68b54d026781f92957bAB583EEa62f27344
+
+---
+
+Time: 2022-04-13T11:30:33.325Z  
+Commit: [57587091968f1abb5c34661ac3f18297c3be2e65](https://github.com/aragon/osx/commit/57587091968f1abb5c34661ac3f18297c3be2e65)  
+Network: arbitrum-rinkeby  
 DAOFactory: 0xD63A8Cfb0eec960C3e70F96a9e3F3091f3FD70b6  
 Registry: 0x264308C03feAfA071C97b73b09E911530CCCd216  
-TokenFactory: 0x82aBAfBf46759358c705c7E323543A7Be47AbAf0  
-  
+TokenFactory: 0x82aBAfBf46759358c705c7E323543A7Be47AbAf0
+
 ---
 
 Time: 2022-04-13T11:30:33.330Z  
