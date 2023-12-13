@@ -23,7 +23,7 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Copy the managing DAO multisig env variables from `packages/contracts/.env-example` into `packages/contracts/.env`
 - [ ] Follow the version specific tasks in the section `Version tasks`
 - [ ] If new plugin builds are released
-  - [ ] Double-check that the build-metadata was updated correctly for the UI to work correctly
+  - [ ] Double-check that the build- and release-metadata is published and updated correctly by the deploy script and contracts
   - [ ] If the plugin is used by the managing DAO and the new build includes security relevant changes it must be applied immediately
 
 ## Update
