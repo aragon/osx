@@ -23,11 +23,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   hre.aragonToVerifyContracts.push({
-    contract: "src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol:AddresslistVotingSetup",
-    ...AddresslistVotingSetupDeployment
+    contract:
+      'src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol:AddresslistVotingSetup',
+    ...AddresslistVotingSetupDeployment,
   });
   hre.aragonToVerifyContracts.push({
-    contract: "src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol:AddresslistVoting",
+    contract:
+      'src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol:AddresslistVoting',
     address: await addresslistVotingSetup.implementation(),
     args: [],
   });
