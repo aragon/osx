@@ -9,7 +9,8 @@ function delay(ms: number) {
 
 export const verifyContract = async (
   address: string,
-  constructorArguments: any[]
+  constructorArguments: any[],
+  contract?: string,
 ) => {
   const currentNetwork = HRE.network.name;
 
@@ -41,7 +42,8 @@ export const verifyContract = async (
     );
 
     const params = {
-      address: address,
+      contract,
+      address,
       constructorArgs: path,
     };
     await runTaskWithRetry('verify', params, times, msDelay, cleanup);

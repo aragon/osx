@@ -22,8 +22,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await setTimeout(30000);
   }
 
-  hre.aragonToVerifyContracts.push(AddresslistVotingSetupDeployment);
   hre.aragonToVerifyContracts.push({
+    contract: "src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol:AddresslistVotingSetup",
+    ...AddresslistVotingSetupDeployment
+  });
+  hre.aragonToVerifyContracts.push({
+    contract: "src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol:AddresslistVoting",
     address: await addresslistVotingSetup.implementation(),
     args: [],
   });

@@ -21,8 +21,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await setTimeout(30000);
   }
 
-  hre.aragonToVerifyContracts.push(MultisigSetupDeployment);
   hre.aragonToVerifyContracts.push({
+    contract: 'src/plugins/governance/multisig/MultisigSetup.sol:MultisigSetup',
+    ...MultisigSetupDeployment,
+  });
+  hre.aragonToVerifyContracts.push({
+    contract: 'src/plugins/governance/multisig/Multisig.sol:Multisig',
     address: await multisigSetup.implementation(),
     args: [],
   });
