@@ -14,9 +14,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
-  hre.aragonToVerifyContracts.push(DAOFactoryDeployment);
   hre.aragonToVerifyContracts.push({
-    contract: "src/core/dao/DAO.sol:DAO",
+    contract: 'src/framework/dao/DAOFactory.sol:DAOFactory',
+    ...DAOFactoryDeployment,
+  });
+  hre.aragonToVerifyContracts.push({
+    contract: 'src/core/dao/DAO.sol:DAO',
     address: await daoFactory.daoBase(),
     args: [],
   });

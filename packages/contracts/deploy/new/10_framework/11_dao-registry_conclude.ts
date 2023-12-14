@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   hre.aragonToVerifyContracts.push(await deployments.get('DAORegistry_Proxy'));
   hre.aragonToVerifyContracts.push({
-    contract: 'src/framework/dao/DAOFactory.sol:DAOFactory',
+    contract: 'src/framework/dao/DAORegistry.sol:DAORegistry',
     ...(await deployments.get('DAORegistry_Implementation')),
   });
 };

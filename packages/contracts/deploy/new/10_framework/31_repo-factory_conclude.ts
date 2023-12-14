@@ -16,9 +16,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
-  hre.aragonToVerifyContracts.push(pluginRepoFactoryDeployment);
   hre.aragonToVerifyContracts.push({
-    contract: "src/framework/plugin/repo/PluginRepo.sol:PluginRepo",
+    contract:
+      'src/framework/plugin/repo/PluginRepoFactory.sol:PluginRepoFactory',
+    ...pluginRepoFactoryDeployment,
+  });
+  hre.aragonToVerifyContracts.push({
+    contract: 'src/framework/plugin/repo/PluginRepo.sol:PluginRepo',
     address: await pluginRepoFactory.pluginRepoBase(),
     args: [],
   });
