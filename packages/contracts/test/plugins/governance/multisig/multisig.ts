@@ -588,7 +588,7 @@ describe('Multisig', function () {
         );
     });
 
-    it.skip('reverts if the multisig settings have been changed in the same block', async () => {
+    it('reverts if the multisig settings have been changed in the same block', async () => {
       await multisig.initialize(
         dao.address,
         [signers[0].address], // signers[0] is listed
