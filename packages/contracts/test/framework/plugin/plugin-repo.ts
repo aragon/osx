@@ -11,7 +11,7 @@ import {
   IProtocolVersion__factory,
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
-import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0-rc0.4/framework/plugin/repo/PluginRepo.sol';
+import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
 import {ZERO_BYTES32} from '../../test-utils/dao';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';

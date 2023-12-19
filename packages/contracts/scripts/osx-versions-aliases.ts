@@ -7,5 +7,5 @@
  */
 export const OSX_VERSION_ALIASES = [
   '@aragon/osx-v1.0.1/',
-  '@aragon/osx-v1.3.0-rc0.4/',
+  '@aragon/osx-v1.3.0/',
 ];

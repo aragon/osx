@@ -14,10 +14,10 @@
   resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.0.1.tgz#b758ba87db93a46a8ddabfaefc99ac8e44c46c78"
   integrity sha512-TiP5/1AGv/hth+V8PoDVFlwMzmLazYxzp//jiepAZ0WJkx9EnQNYafo+M7+pjAqRPG005liQjmFZNiK6ARLULg==
 
-"@aragon/osx-v1.3.0-rc0.4@npm:@aragon/osx@1.3.0-rc0.4":
-  version "1.3.0-rc0.4"
-  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0-rc0.4.tgz#c42eba799d9ac57fbe10d5c73bf02681c5d4328d"
-  integrity sha512-vE+zW5LUaPFDvsWWDCESFjibERvWtwsOyqb1pUaB+OS8j9eEZVxsRaSWhe23Nx2vAhUtTF9p77e1vWtCfP/BvQ==
+"@aragon/osx-v1.3.0@npm:@aragon/osx@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0.tgz#eee59963546016bb3b41b7c7a9b7c41d33b37de2"
+  integrity sha512-ziLmnhWEoFS/uthxAYfI9tSylesMLTDe69XggKP9LK/tIOKAhyYjfAJ2mbhWZcH558c9o0gzAEErkDhqh/wdog==
   dependencies:
     "@ensdomains/ens-contracts" "0.0.11"
     "@openzeppelin/contracts" "4.8.1"
@@ -1883,42 +1883,30 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@opengsn/contracts@2.2.6":
-  version "2.2.6"
-  resolved "https://registry.yarnpkg.com/@opengsn/contracts/-/contracts-2.2.6.tgz#1784326bc243be2f33cd0171550d3a7f35aa412f"
-  integrity sha512-NraQgKZZUp7/ipLzpe2wd6lqX6w5PbLtHaKOFirm+zJYeCDoG9d6xrVc2VlDwjapMTJyWlYxuXSwOZQhHEMrAg==
-  dependencies:
-    "@openzeppelin/contracts" "^4.2.0"
-
 "@openzeppelin/contracts-upgradeable@4.8.1":
   version "4.8.1"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.8.1.tgz#363f7dd08f25f8f77e16d374350c3d6b43340a7a"
   integrity sha512-1wTv+20lNiC0R07jyIAbHU7TNHKRwGiTGRfiNnA8jOWjKT98g5OgLpYWOi40Vgpk8SPLA9EvfJAbAeIyVn+7Bw==
 
-"@openzeppelin/contracts-upgradeable@4.9.3":
-  version "4.9.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.3.tgz#ff17a80fb945f5102571f8efecb5ce5915cc4811"
-  integrity sha512-jjaHAVRMrE4UuZNfDwjlLGDxTHWIOwTJS2ldnc278a0gevfXfPr8hxKEVBGFBE96kl2G3VHDZhUimw/+G3TG2A==
+"@openzeppelin/contracts-upgradeable@4.9.5":
+  version "4.9.5"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.5.tgz#572b5da102fc9be1d73f34968e0ca56765969812"
+  integrity sha512-f7L1//4sLlflAN7fVzJLoRedrf5Na3Oal5PZfIq55NFcVZ90EpV1q5xOvL4lFvg3MNICSDr2hH0JUBxwlxcoPg==
 
 "@openzeppelin/contracts@4.8.1":
   version "4.8.1"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.1.tgz#709cfc4bbb3ca9f4460d60101f15dac6b7a2d5e4"
   integrity sha512-xQ6eUZl+RDyb/FiZe1h+U7qr/f4p/SrTSQcTPH2bjur3C5DbuW/zFgCU/b1P/xcIaEqJep+9ju4xDRi3rmChdQ==
 
-"@openzeppelin/contracts@4.9.3":
-  version "4.9.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
-  integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
+"@openzeppelin/contracts@4.9.5":
+  version "4.9.5"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.5.tgz#1eed23d4844c861a1835b5d33507c1017fa98de8"
+  integrity sha512-ZK+W5mVhRppff9BE6YdR8CC52C8zAvsVAiWhEtQ5+oNxFE6h1WdeWo+FJSF8KKvtxxVYZ7MTP/5KoVpAU3aSWg==
 
 "@openzeppelin/contracts@^4.1.0":
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.6.0.tgz#c91cf64bc27f573836dba4122758b4743418c1b3"
   integrity sha512-8vi4d50NNya/bQqCmaVzvHNmwHvS0OBKb7HNtuNwEE3scXWrP31fKQoGxNMT+KbzmrNZzatE3QK5p2gFONI/hg==
-
-"@openzeppelin/contracts@^4.2.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.5.0.tgz#3fd75d57de172b3743cdfc1206883f56430409cc"
-  integrity sha512-fdkzKPYMjrRiPK6K4y64e6GzULR7R7RwxSigHS8DDp7aWDeoReqsQI+cxHV1UuhAqX69L1lAaWDxenfP+xiqzA==
 
 "@openzeppelin/hardhat-upgrades@^1.23.1":
   version "1.23.1"
