@@ -1,0 +1,9 @@
+{
+  "ui": "",
+  "change": "",
+  "pluginSetup": {
+    "prepareInstallation": "",
+    "prepareUpdate": "",
+    "prepareUninstallation": ""
+  }
+}
