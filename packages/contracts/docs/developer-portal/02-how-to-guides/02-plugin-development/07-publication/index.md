@@ -48,7 +48,7 @@ import releaseMetadata1 from '../../contracts/release1/release-metadata.json';
 import {networkNameMapping, osxContracts, addDeployedContract} from '../../utils/helpers';
 import {toHex} from '../../utils/ipfs-upload';
 import {uploadToIPFS} from '../../utils/ipfs-upload';
-import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {
   PluginRepoFactory__factory,
   PluginRepoRegistry__factory,

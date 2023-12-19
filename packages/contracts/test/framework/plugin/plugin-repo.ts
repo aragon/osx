@@ -28,7 +28,7 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

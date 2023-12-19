@@ -13,8 +13,8 @@ import {IERC1155ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/t
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import {VersionComparisonLib} from "@aragon/osx-commons/contracts/src/utils/VersionComparisonLib.sol";
-import {hasBit, flipBit} from "@aragon/osx-commons/contracts/src/utils/math/BitMap.sol";
+import {VersionComparisonLib} from "@aragon/osx-commons/src/utils/VersionComparisonLib.sol";
+import {hasBit, flipBit} from "@aragon/osx-commons/src/utils/math/BitMap.sol";
 
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";

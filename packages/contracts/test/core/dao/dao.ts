@@ -37,7 +37,6 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -45,8 +44,9 @@ import {
 } from '../../test-utils/uups-upgradeable';
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
-import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
+import {findEvent} from '@aragon/osx-commons-sdk/src/events';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chai, {expect} from 'chai';

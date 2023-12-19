@@ -40,18 +40,15 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
+import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {
   advanceTime,
   getTime,
   setTimeForNextBlock,
   timestampIn,
-  toBytes32,
+  proposalIdtoBytes32,
 } from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
-import {
-  findEvent,
-  findEventTopicLog,
-} from '@aragon/osx-commons/contracts/utils/events';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';
@@ -1282,7 +1279,7 @@ describe('Multisig', function () {
           );
 
           expect(event.args.actor).to.equal(multisig.address);
-          expect(event.args.callId).to.equal(toBytes32(id));
+          expect(event.args.callId).to.equal(proposalIdtoBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);

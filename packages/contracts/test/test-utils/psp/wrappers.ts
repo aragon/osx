@@ -16,7 +16,7 @@ import {
   createPrepareUpdateParams,
 } from './create-params';
 import {PermissionOperation, PluginRepoPointer} from './types';
-import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
+import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {BytesLike} from 'ethers';
 
 export async function prepareInstallation(
@@ -29,10 +29,13 @@ export async function prepareInstallation(
     daoAddress,
     createPrepareInstallationParams(pluginRepoPointer, data)
   );
-  const event = await findEvent<InstallationPreparedEvent>(
-    tx,
-    'InstallationPrepared'
-  );
+
+  const eventName = 'InstallationPrepared';
+  const event = await findEvent<InstallationPreparedEvent>(tx, eventName);
+  if (!event) {
+    throw new Error(`Failed to get ${eventName} event`);
+  }
+
   return event.args;
 }
 
@@ -54,10 +57,12 @@ export async function applyInstallation(
     )
   );
 
-  const event = await findEvent<InstallationAppliedEvent>(
-    tx,
-    'InstallationApplied'
-  );
+  const eventName = 'InstallationApplied';
+  const event = await findEvent<InstallationAppliedEvent>(tx, eventName);
+  if (!event) {
+    throw new Error(`Failed to get ${eventName} event`);
+  }
+
   return event.args;
 }
 
@@ -83,7 +88,12 @@ export async function prepareUpdate(
     )
   );
 
-  const event = await findEvent<UpdatePreparedEvent>(tx, 'UpdatePrepared');
+  const eventName = 'UpdatePrepared';
+  const event = await findEvent<UpdatePreparedEvent>(tx, eventName);
+  if (!event) {
+    throw new Error(`Failed to get ${eventName} event`);
+  }
+
   return event.args;
 }
 
@@ -107,7 +117,12 @@ export async function applyUpdate(
     )
   );
 
-  const event = await findEvent<UpdateAppliedEvent>(tx, 'UpdateApplied');
+  const eventName = 'UpdateApplied';
+  const event = await findEvent<UpdateAppliedEvent>(tx, eventName);
+  if (!event) {
+    throw new Error(`Failed to get ${eventName} event`);
+  }
+
   return event.args;
 }
 
@@ -124,10 +139,12 @@ export async function prepareUninstallation(
     createPrepareUninstallationParams(plugin, pluginRepoPointer, helpers, data)
   );
 
-  const event = await findEvent<UninstallationPreparedEvent>(
-    tx,
-    'UninstallationPrepared'
-  );
+  const eventName = 'UninstallationPrepared';
+  const event = await findEvent<UninstallationPreparedEvent>(tx, eventName);
+  if (!event) {
+    throw new Error(`Failed to get ${eventName} event`);
+  }
+
   return event.args;
 }
 
@@ -143,9 +160,11 @@ export async function applyUninstallation(
     createApplyUninstallationParams(plugin, pluginRepoPointer, permissions)
   );
 
-  const event = await findEvent<UninstallationAppliedEvent>(
-    tx,
-    'UninstallationApplied'
-  );
+  const eventName = 'UninstallationApplied';
+  const event = await findEvent<UninstallationAppliedEvent>(tx, eventName);
+  if (!event) {
+    throw new Error(`Failed to get ${eventName} event`);
+  }
+
   return event.args;
 }

@@ -2,12 +2,11 @@
 
 pragma solidity ^0.8.8;
 
-import {MajorityVotingBase} from "@aragon/osx-commons/contracts/src/governance/majority-voting/MajorityVotingBase.sol";
-
 import {IDAO} from "../../../../core/dao/IDAO.sol";
 import {DAO} from "../../../../core/dao/DAO.sol";
 import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../../framework/plugin/setup/PluginSetup.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup

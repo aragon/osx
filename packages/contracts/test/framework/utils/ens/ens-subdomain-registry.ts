@@ -23,7 +23,8 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
+// TODO move / replace
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

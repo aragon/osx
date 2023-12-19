@@ -74,7 +74,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

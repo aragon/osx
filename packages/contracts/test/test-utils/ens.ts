@@ -10,7 +10,7 @@ import {
   PublicResolver__factory,
 } from '../../typechain';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
-import {deployWithProxy} from './proxy';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 

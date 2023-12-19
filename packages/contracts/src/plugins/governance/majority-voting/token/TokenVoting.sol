@@ -2,45 +2,50 @@
 
 pragma solidity ^0.8.8;
 
+import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import {IMembership} from "@aragon/osx-commons/contracts/src/governance/membership/IMembership.sol";
-import {Addresslist} from "@aragon/osx-commons/contracts/src/governance/membership/Addresslist.sol";
-import {MajorityVotingBase} from "@aragon/osx-commons/contracts/src/governance/majority-voting/MajorityVotingBase.sol";
-import {IMajorityVoting} from "@aragon/osx-commons/contracts/src/governance/majority-voting/IMajorityVoting.sol";
-import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons/contracts/src/utils/math/Ratio.sol";
+import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
+import {MajorityVotingBase} from "@aragon/osx-commons/src/governance/majority-voting/MajorityVotingBase.sol";
+import {IMajorityVoting} from "@aragon/osx-commons/src/governance/majority-voting/IMajorityVoting.sol";
+import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons/src/utils/math/Ratio.sol";
 
 import {IDAO} from "../../../../core/dao/IDAO.sol";
 
-/// @title AddresslistVoting
-/// @author Aragon Association - 2021-2023.
-/// @notice The majority voting implementation using a list of member addresses.
+/// @title TokenVoting
+/// @author Aragon Association - 2021-2023
+/// @notice The majority voting implementation using an [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 /// @custom:security-contact sirt@aragon.org
-contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
+contract TokenVoting is IMembership, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
-        this.initialize.selector ^ this.addAddresses.selector ^ this.removeAddresses.selector;
+    bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
+        this.initialize.selector ^ this.getVotingToken.selector;
 
-    /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
-    bytes32 public constant UPDATE_ADDRESSES_PERMISSION_ID =
-        keccak256("UPDATE_ADDRESSES_PERMISSION");
+    /// @notice An [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible contract referencing the token being used for voting.
+    IVotesUpgradeable private votingToken;
+
+    /// @notice Thrown if the voting power is zero
+    error NoVotingPower();
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _votingSettings The voting settings.
+    /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
         VotingSettings calldata _votingSettings,
-        address[] calldata _members
+        IVotesUpgradeable _token
     ) external initializer {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
-        _addAddresses(_members);
-        emit MembersAdded({members: _members});
+        votingToken = _token;
+
+        emit MembershipContractAnnounced({definingContract: address(_token)});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -48,36 +53,21 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            _interfaceId == ADDRESSLIST_VOTING_INTERFACE_ID ||
-            _interfaceId == type(Addresslist).interfaceId ||
+            _interfaceId == TOKEN_VOTING_INTERFACE_ID ||
             _interfaceId == type(IMembership).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
-    /// @notice Adds new members to the address list.
-    /// @param _members The addresses of members to be added.
-    /// @dev This function is used during the plugin initialization.
-    function addAddresses(
-        address[] calldata _members
-    ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
-        _addAddresses(_members);
-
-        emit MembersAdded({members: _members});
-    }
-
-    /// @notice Removes existing members from the address list.
-    /// @param _members The addresses of the members to be removed.
-    function removeAddresses(
-        address[] calldata _members
-    ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
-        _removeAddresses(_members);
-
-        emit MembersRemoved({members: _members});
+    /// @notice getter function for the voting token.
+    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface.
+    /// @return The token used for voting.
+    function getVotingToken() public view returns (IVotesUpgradeable) {
+        return votingToken;
     }
 
     /// @inheritdoc MajorityVotingBase
     function totalVotingPower(uint256 _blockNumber) public view override returns (uint256) {
-        return addresslistLengthAtBlock(_blockNumber);
+        return votingToken.getPastTotalSupply(_blockNumber);
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -90,13 +80,31 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        if (minProposerVotingPower() != 0 && !isListed(_msgSender())) {
-            revert ProposalCreationForbidden(_msgSender());
+        // Check that either `_msgSender` owns enough tokens or has enough voting power from being a delegatee.
+        {
+            uint256 minProposerVotingPower_ = minProposerVotingPower();
+
+            if (minProposerVotingPower_ != 0) {
+                // Because of the checks in `TokenVotingSetup`, we can assume that `votingToken` is an [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+                if (
+                    votingToken.getVotes(_msgSender()) < minProposerVotingPower_ &&
+                    IERC20Upgradeable(address(votingToken)).balanceOf(_msgSender()) <
+                    minProposerVotingPower_
+                ) {
+                    revert ProposalCreationForbidden(_msgSender());
+                }
+            }
         }
 
-        uint64 snapshotBlock;
+        uint256 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
+            snapshotBlock = block.number - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
+        }
+
+        uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
+
+        if (totalVotingPower_ == 0) {
+            revert NoVotingPower();
         }
 
         (_startDate, _endDate) = _validateProposalDates(_startDate, _endDate);
@@ -115,11 +123,11 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
-        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minVotingPower = _applyRatioCeiled(
-            totalVotingPower(snapshotBlock),
+            totalVotingPower_,
             minParticipation()
         );
 
@@ -142,7 +150,10 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
     /// @inheritdoc IMembership
     function isMember(address _account) external view returns (bool) {
-        return isListed(_account);
+        // A member must own at least one token or have at least one token delegated to her/him.
+        return
+            votingToken.getVotes(_account) > 0 ||
+            IERC20Upgradeable(address(votingToken)).balanceOf(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -154,24 +165,26 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     ) internal override {
         Proposal storage proposal_ = proposals[_proposalId];
 
+        // This could re-enter, though we can assume the governance token is not malicious
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock);
         VoteOption state = proposal_.voters[_voter];
 
-        // Remove the previous vote.
+        // If voter had previously voted, decrease count
         if (state == VoteOption.Yes) {
-            proposal_.tally.yes = proposal_.tally.yes - 1;
+            proposal_.tally.yes = proposal_.tally.yes - votingPower;
         } else if (state == VoteOption.No) {
-            proposal_.tally.no = proposal_.tally.no - 1;
+            proposal_.tally.no = proposal_.tally.no - votingPower;
         } else if (state == VoteOption.Abstain) {
-            proposal_.tally.abstain = proposal_.tally.abstain - 1;
+            proposal_.tally.abstain = proposal_.tally.abstain - votingPower;
         }
 
-        // Store the updated/new vote for the voter.
+        // write the updated/new vote for the voter.
         if (_voteOption == VoteOption.Yes) {
-            proposal_.tally.yes = proposal_.tally.yes + 1;
+            proposal_.tally.yes = proposal_.tally.yes + votingPower;
         } else if (_voteOption == VoteOption.No) {
-            proposal_.tally.no = proposal_.tally.no + 1;
+            proposal_.tally.no = proposal_.tally.no + votingPower;
         } else if (_voteOption == VoteOption.Abstain) {
-            proposal_.tally.abstain = proposal_.tally.abstain + 1;
+            proposal_.tally.abstain = proposal_.tally.abstain + votingPower;
         }
 
         proposal_.voters[_voter] = _voteOption;
@@ -180,7 +193,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
             proposalId: _proposalId,
             voter: _voter,
             voteOption: _voteOption,
-            votingPower: 1
+            votingPower: votingPower
         });
 
         if (_tryEarlyExecution && _canExecute(_proposalId)) {
@@ -207,11 +220,11 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         }
 
         // The voter has no voting power.
-        if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
+        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotBlock) == 0) {
             return false;
         }
 
-        // The voter has already voted but vote replacement is not allowed.
+        // The voter has already voted but vote replacment is not allowed.
         if (
             proposal_.voters[_account] != VoteOption.None &&
             proposal_.parameters.votingMode != VotingMode.VoteReplacement
@@ -225,5 +238,5 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 }

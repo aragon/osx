@@ -14,7 +14,7 @@ import {
   deployMockPluginSetup,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

@@ -31,7 +31,6 @@ import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   createApplyInstallationParams,
   createApplyUninstallationParams,
@@ -49,8 +48,9 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {findEventTopicLog} from '@aragon/osx-commons/contracts/utils/events';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

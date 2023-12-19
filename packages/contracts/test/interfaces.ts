@@ -26,7 +26,7 @@ import {IMultisig__factory as IMultisig_V1_0_0__factory} from '../typechain/@ara
 import {IERC20MintableUpgradeable__factory as IERC20MintableUpgradeable_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/IERC20MintableUpgradeable.sol';
 import {IGovernanceWrappedERC20__factory as IGovernanceWrappedERC20_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/token/ERC20/governance/IGovernanceWrappedERC20.sol';
 import {IProtocolVersion__factory as IProtocolVersion_V1_3_0__factory} from '../typechain/@aragon/osx-v1.3.0/utils/protocol/IProtocolVersion.sol';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {expect} from 'chai';
 
 describe('Interfaces', function () {

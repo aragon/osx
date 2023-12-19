@@ -6,7 +6,7 @@ import {
   TestERC1155__factory,
   DAO__factory,
 } from '../../typechain';
-import {deployWithProxy} from './proxy';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {BigNumber} from 'ethers';
 import {ethers} from 'hardhat';
@@ -24,8 +24,7 @@ export const TOKEN_INTERFACE_IDS = {
 };
 
 export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
-  const DAO = new DAO__factory(signer);
-  const dao = await deployWithProxy<DAO>(DAO);
+  const dao = await deployWithProxy<DAO>(new DAO__factory(signer));
 
   await dao.initialize(
     '0x00',

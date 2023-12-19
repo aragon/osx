@@ -38,7 +38,9 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../../test-utils/uups-upgradeable';
-import {MAJORITY_VOTING_BASE_INTERFACE} from '@aragon/osx-commons/contracts/test/governance/majority-voting/majority-voting';
+import {MAJORITY_VOTING_BASE_INTERFACE} from '../majority-voting';
+import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {
   VoteOption,
   getTime,
@@ -49,15 +51,10 @@ import {
   ONE_HOUR,
   MAX_UINT64,
   voteWithSigners,
-  toBytes32,
+  proposalIdtoBytes32,
 } from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
 import {pctToRatio} from '@aragon/osx-commons/contracts/test/utils/math/ratio';
-import {
-  findEvent,
-  findEventTopicLog,
-} from '@aragon/osx-commons/contracts/utils/events';
 import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -973,6 +970,7 @@ describe('AddresslistVoting', function () {
           tx,
           'ProposalCreated'
         );
+
         expect(event.args.proposalId).to.equal(id);
       });
 
@@ -1119,7 +1117,7 @@ describe('AddresslistVoting', function () {
           );
 
           expect(event.args.actor).to.equal(voting.address);
-          expect(event.args.callId).to.equal(toBytes32(id));
+          expect(event.args.callId).to.equal(proposalIdtoBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);

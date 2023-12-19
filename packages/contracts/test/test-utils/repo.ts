@@ -8,7 +8,7 @@ import {
   PluginRepoRegistry__factory,
   PluginRepoFactory__factory,
 } from '../../typechain';
-import {deployWithProxy} from './proxy';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 export async function deployMockPluginSetup(

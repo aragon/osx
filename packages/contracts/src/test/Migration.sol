@@ -48,7 +48,7 @@ import {GovernanceERC20 as GovernanceERC20_v1_3_0} from "@aragon/osx-v1.3.0/toke
 import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceWrappedERC20.sol";
 import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_3_0} from "@aragon/osx-v1.3.0/token/ERC20/governance/GovernanceWrappedERC20.sol";
 
-import {TestERC20} from "@aragon/osx-commons/contracts/src/test/token/TestERC20.sol";
-import {TestERC721} from "@aragon/osx-commons/contracts/src/test/token/TestERC721.sol";
-import {TestERC1155} from "@aragon/osx-commons/contracts/src/test/token/TestERC1155.sol";
+import {TestERC20} from "@aragon/osx-commons/src/test/token/TestERC20.sol";
+import {TestERC721} from "@aragon/osx-commons/src/test/token/TestERC721.sol";
+import {TestERC1155} from "@aragon/osx-commons/src/test/token/TestERC1155.sol";
 //import {TestGovernanceERC20} from "@aragon/osx-commons/contracts/src/test/token/TestGovernanceERC20.sol";

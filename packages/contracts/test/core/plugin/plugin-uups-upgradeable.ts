@@ -7,7 +7,7 @@ import {
 } from '../../../typechain';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {PluginType} from '../../test-utils/psp/types';
-import {getInterfaceId} from '@aragon/osx-commons/sdk/src/utils';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 

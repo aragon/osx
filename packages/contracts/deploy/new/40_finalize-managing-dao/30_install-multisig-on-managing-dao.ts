@@ -10,7 +10,7 @@ import {getNamedTypesFromMetadata} from '../../../utils/metadata';
 import {hashHelpers} from '../../../utils/psp';
 import {Operation} from '../../../utils/types';
 import {checkPermission, getContractAddress} from '../../helpers';
-import {findEvent} from '@aragon/osx-commons/contracts/utils/events';
+import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
