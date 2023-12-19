@@ -762,7 +762,7 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
-        await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
+        await time.setNextBlockTimestamp(startDate);
 
         await expect(
           multisig.createProposal(
@@ -807,7 +807,7 @@ describe('Multisig', function () {
       it('creates a proposal successfully and approves if specified', async () => {
         const allowFailureMap = 1;
 
-        await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
+        await time.setNextBlockTimestamp(startDate);
 
         await expect(
           multisig.createProposal(
