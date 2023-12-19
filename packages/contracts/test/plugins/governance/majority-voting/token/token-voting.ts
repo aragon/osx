@@ -2,8 +2,8 @@ import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/co
 import {
   DAO,
   DAO__factory,
-  TestGovernanceERC20ck,
-  TestGovernanceERC20ck__factory,
+  TestGovernanceERC20,
+  TestGovernanceERC20__factory,
   IERC165Upgradeable__factory,
   IMajorityVoting__factory,
   IMembership__factory,
@@ -66,8 +66,8 @@ describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
   let voting: TokenVoting;
   let dao: DAO;
-  let governanceErc20Mock: TestGovernanceERC20ck;
-  let TestGovernanceERC20ck: TestGovernanceERC20ck__factory;
+  let governanceErc20Mock: TestGovernanceERC20;
+  let TestGovernanceERC20: TestGovernanceERC20__factory;
   let dummyActions: any;
   let dummyMetadata: string;
   let startDate: number;
@@ -103,8 +103,8 @@ describe('TokenVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    TestGovernanceERC20ck = new TestGovernanceERC20ck__factory(signers[0]);
-    governanceErc20Mock = await TestGovernanceERC20ck.deploy(
+    TestGovernanceERC20 = new TestGovernanceERC20__factory(signers[0]);
+    governanceErc20Mock = await TestGovernanceERC20.deploy(
       dao.address,
       'GOV',
       'GOV',
@@ -118,7 +118,7 @@ describe('TokenVoting', function () {
 
     voting = await deployWithProxy<TokenVoting>(TokenVotingFactory);
 
-    startDate = (await getTime()) + 10;
+    startDate = (await getTime()) + 20;
     endDate = startDate + votingSettings.minDuration;
 
     dao.grant(
@@ -748,7 +748,7 @@ describe('TokenVoting', function () {
     });
 
     it('reverts if the total token supply is 0', async () => {
-      governanceErc20Mock = await TestGovernanceERC20ck.deploy(
+      governanceErc20Mock = await TestGovernanceERC20.deploy(
         dao.address,
         'GOV',
         'GOV',

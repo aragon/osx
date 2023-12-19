@@ -2,23 +2,21 @@
 
 pragma solidity ^0.8.8;
 
-import {GovernanceERC20} from "../../token/ERC20/governance/GovernanceERC20.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
-contract GovernanceERC20Mock is GovernanceERC20 {
+import {GovernanceERC20} from "../../token/ERC20/governance/GovernanceERC20.sol";
+
+/// @title TestGovernanceERC20
+/// @author Aragon Association - 2022-2023
+/// @notice A test GovernanceERC20 that can be minted and burned by everyone.
+/// @dev DO NOT USE IN PRODUCTION!
+contract TestGovernanceERC20 is GovernanceERC20 {
     constructor(
         IDAO _dao,
         string memory _name,
         string memory _symbol,
         MintSettings memory _mintSettings
-    )
-        GovernanceERC20(
-            _dao,
-            _name,
-            _symbol,
-            _mintSettings //MintSettings({amounts: new uint256[](0), receivers: new address[](0)})
-        )
-    {}
+    ) GovernanceERC20(_dao, _name, _symbol, _mintSettings) {}
 
     // sets the balance of the address
     // this mints/burns the amount depending on the current balance

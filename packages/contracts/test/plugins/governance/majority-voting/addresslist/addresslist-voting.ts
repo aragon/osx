@@ -103,7 +103,7 @@ describe('AddresslistVoting', function () {
 
     voting = await deployWithProxy(AddresslistVotingFactory);
 
-    startDate = (await getTime()) + 10;
+    startDate = (await getTime()) + 20;
     endDate = startDate + votingSettings.minDuration;
 
     await dao.grant(
