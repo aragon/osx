@@ -46,17 +46,13 @@ import {
   VotingSettings,
   voteWithSigners,
 } from '../voting-helpers';
+import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {RATIO_BASE, pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
-import {
-  MAX_UINT64,
-  ONE_HOUR,
-  advanceTimeTo,
-  getTime,
-} from '@aragon/osx-commons/utils/hardhat-time';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
+import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {BigNumber, ContractFactory} from 'ethers';
@@ -99,7 +95,7 @@ describe('TokenVoting', function () {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
       minParticipation: pctToRatio(20),
-      minDuration: ONE_HOUR,
+      minDuration: TIME.HOUR,
       minProposerVotingPower: 0,
     };
 
@@ -118,7 +114,7 @@ describe('TokenVoting', function () {
 
     voting = await deployWithProxy<TokenVoting>(TokenVotingFactory);
 
-    startDate = (await getTime()) + 20;
+    startDate = (await time.latest()) + 20;
     endDate = startDate + votingSettings.minDuration;
 
     dao.grant(
@@ -784,7 +780,7 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      const currentDate = await getTime();
+      const currentDate = await time.latest();
       const startDateInThePast = currentDate - 1;
       const endDate = 0; // startDate + minDuration
 
@@ -813,6 +809,7 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
+      const MAX_UINT64 = ethers.BigNumber.from(2).pow(64).sub(1);
       const latestStartDate = MAX_UINT64.sub(votingSettings.minDuration);
       const tooLateStartDate = latestStartDate.add(1);
       const endDate = 0; // startDate + minDuration
@@ -837,7 +834,7 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      const startDate = (await getTime()) + 1;
+      const startDate = (await time.latest()) + 1;
       const earliestEndDate = startDate + votingSettings.minDuration;
       const tooEarlyEndDate = earliestEndDate - 1;
 
@@ -1105,7 +1102,7 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      expect(await getTime()).to.be.lessThan(startDate);
+      expect(await time.latest()).to.be.lessThan(startDate);
 
       // Reverts if the vote option is not 'None'
       await expect(
@@ -1183,7 +1180,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts on voting None', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         // Check that voting is possible but don't vote using `callStatic`
         await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
@@ -1195,7 +1192,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts on vote replacement', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.vote(id, VoteOption.Yes, false);
 
@@ -1215,7 +1212,7 @@ describe('TokenVoting', function () {
       });
 
       it('cannot early execute', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3, 4, 5], // 60 votes
@@ -1229,7 +1226,7 @@ describe('TokenVoting', function () {
       });
 
       it('can execute normally if participation and support are met', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2], // 30 votes
@@ -1241,7 +1238,7 @@ describe('TokenVoting', function () {
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.isMinParticipationReached(id)).to.be.true;
@@ -1250,7 +1247,7 @@ describe('TokenVoting', function () {
       });
 
       it('does not execute early when voting with the `tryEarlyExecution` option', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3], // 40 votes
@@ -1277,7 +1274,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts if vote is not decided yet', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await expect(voting.execute(id))
           .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
@@ -1311,7 +1308,7 @@ describe('TokenVoting', function () {
       });
 
       it('does not allow voting, when the vote has not started yet', async () => {
-        expect(await getTime()).to.be.lessThan(startDate);
+        expect(await time.latest()).to.be.lessThan(startDate);
 
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
@@ -1319,7 +1316,7 @@ describe('TokenVoting', function () {
       });
 
       it('should not be able to vote if user has 0 token', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await expect(
           voting.connect(signers[19]).vote(id, VoteOption.Yes, false)
@@ -1329,7 +1326,7 @@ describe('TokenVoting', function () {
       });
 
       it('increases the yes, no, and abstain count and emits correct events', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await expect(voting.connect(signers[0]).vote(id, VoteOption.Yes, false))
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
@@ -1363,7 +1360,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts on voting None', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         // Check that voting is possible but don't vote using `callStatic`
         await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
@@ -1375,7 +1372,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts on vote replacement', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.vote(id, VoteOption.Yes, false);
 
@@ -1395,7 +1392,7 @@ describe('TokenVoting', function () {
       });
 
       it('can execute early if participation is large enough', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3, 4], // 50 votes
           no: [],
@@ -1411,7 +1408,7 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1419,7 +1416,7 @@ describe('TokenVoting', function () {
       });
 
       it('can execute normally if participation is large enough', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3, 4], // 50 yes
@@ -1428,14 +1425,14 @@ describe('TokenVoting', function () {
         });
 
         // closes the vote
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         //The vote is executable as support > 50%, participation > 20%, and the voting period is over
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
       it('cannot execute normally if participation is too low', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0], // 10 votes
@@ -1444,14 +1441,14 @@ describe('TokenVoting', function () {
         });
 
         // closes the vote
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         //The vote is not executable because the participation with 19% is still too low, despite a support of 67% and the voting period being over
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
       it('executes the vote immediately when the vote is decided early and the tryEarlyExecution options is selected', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3], // 40 votes
@@ -1507,7 +1504,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts if vote is not decided yet', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await expect(voting.execute(id))
           .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
@@ -1542,7 +1539,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts on voting None', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         // Check that voting is possible but don't vote using `callStatic`
         await expect(voting.callStatic.vote(id, VoteOption.Yes, false)).not.to
@@ -1554,7 +1551,7 @@ describe('TokenVoting', function () {
       });
 
       it('should allow vote replacement but not double-count votes by the same address', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.vote(id, VoteOption.Yes, false);
         await voting.vote(id, VoteOption.Yes, false);
@@ -1580,7 +1577,7 @@ describe('TokenVoting', function () {
       });
 
       it('cannot early execute', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3, 4, 5], // 60 votes
@@ -1594,7 +1591,7 @@ describe('TokenVoting', function () {
       });
 
       it('can execute normally if participation and support are met', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2], // 30 votes
@@ -1606,7 +1603,7 @@ describe('TokenVoting', function () {
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.isMinParticipationReached(id)).to.be.true;
@@ -1615,7 +1612,7 @@ describe('TokenVoting', function () {
       });
 
       it('does not execute early when voting with the `tryEarlyExecution` option', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2, 3], // 40 votes
@@ -1642,7 +1639,7 @@ describe('TokenVoting', function () {
       });
 
       it('reverts if vote is not decided yet', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await expect(voting.execute(id))
           .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
@@ -1688,7 +1685,7 @@ describe('TokenVoting', function () {
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {
-        advanceTimeTo(startDate);
+        time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
@@ -1697,7 +1694,7 @@ describe('TokenVoting', function () {
 
         expect(await voting.canExecute(id)).to.equal(false);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1705,7 +1702,7 @@ describe('TokenVoting', function () {
       });
 
       it('does not execute if participation is high enough but support is too low', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0], // 10 votes
@@ -1717,7 +1714,7 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.false;
@@ -1725,7 +1722,7 @@ describe('TokenVoting', function () {
       });
 
       it('executes after the duration if participation and support are met', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voteWithSigners(voting, id, signers, {
           yes: [0, 1, 2], // 30 votes
@@ -1737,7 +1734,7 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1759,7 +1756,7 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
 
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1795,14 +1792,14 @@ describe('TokenVoting', function () {
 
       it('does not execute with 0 votes', async () => {
         // does not execute early
-        advanceTimeTo(startDate);
+        time.increaseTo(startDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
         // does not execute normally
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.false;
@@ -1810,7 +1807,7 @@ describe('TokenVoting', function () {
       });
 
       it('executes if participation and support are met', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
@@ -1820,7 +1817,7 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true);
 
         // Check if the proposal can execute normally
-        await advanceTimeTo(endDate);
+        await time.increaseTo(endDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1867,7 +1864,7 @@ describe('TokenVoting', function () {
       });
 
       it('early support criterium is sharp by 1 vote', async () => {
-        advanceTimeTo(startDate);
+        time.increaseTo(startDate);
 
         // 99.9999% of the voting power voted for yes
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
@@ -1896,7 +1893,7 @@ describe('TokenVoting', function () {
       });
 
       it('participation criterium is sharp by 1 vote', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
@@ -1940,7 +1937,7 @@ describe('TokenVoting', function () {
       });
 
       it('early support criterium is sharp by 1 vote', async () => {
-        advanceTimeTo(startDate);
+        time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
@@ -1964,7 +1961,7 @@ describe('TokenVoting', function () {
       });
 
       it('participation is not met with 1 vote missing', async () => {
-        await advanceTimeTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         expect(await voting.isMinParticipationReached(id)).to.be.false;

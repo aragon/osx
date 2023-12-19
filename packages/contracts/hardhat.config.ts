@@ -1,5 +1,6 @@
 import {AragonPluginRepos, TestingFork} from './utils/types';
 import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-verify';
 import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';

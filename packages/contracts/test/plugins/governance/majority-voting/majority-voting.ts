@@ -10,9 +10,9 @@ import {
   IProtocolVersion__factory,
 } from '../../../../typechain';
 import {VotingSettings, VotingMode} from './voting-helpers';
+import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
-import {ONE_HOUR, ONE_YEAR} from '@aragon/osx-commons/utils/hardhat-time';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -53,13 +53,13 @@ describe('MajorityVotingMock', function () {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
       minParticipation: pctToRatio(20),
-      minDuration: ONE_HOUR,
+      minDuration: TIME.HOUR,
       minProposerVotingPower: 0,
     };
 
-    const MajorityVotingBase = new MajorityVotingMock__factory(signers[0]);
+    const MajorityVotingMock = new MajorityVotingMock__factory(signers[0]);
 
-    votingBase = await deployWithProxy<MajorityVotingMock>(MajorityVotingBase);
+    votingBase = await deployWithProxy<MajorityVotingMock>(MajorityVotingMock);
     await dao.grant(
       votingBase.address,
       ownerAddress,
@@ -156,17 +156,17 @@ describe('MajorityVotingMock', function () {
     });
 
     it('reverts if the minimal duration is shorter than one hour', async () => {
-      votingSettings.minDuration = ONE_HOUR - 1;
+      votingSettings.minDuration = TIME.HOUR - 1;
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
-        .withArgs(ONE_HOUR, votingSettings.minDuration);
+        .withArgs(TIME.HOUR, votingSettings.minDuration);
     });
 
     it('reverts if the minimal duration is longer than one year', async () => {
-      votingSettings.minDuration = ONE_YEAR + 1;
+      votingSettings.minDuration = TIME.YEAR + 1;
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
-        .withArgs(ONE_YEAR, votingSettings.minDuration);
+        .withArgs(TIME.YEAR, votingSettings.minDuration);
     });
 
     it('should change the voting settings successfully', async () => {

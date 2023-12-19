@@ -15,9 +15,9 @@ import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {TOKEN_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {VotingMode, VotingSettings} from '../voting-helpers';
+import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
-import {ONE_HOUR} from '@aragon/osx-commons/utils/hardhat-time';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -65,7 +65,7 @@ describe('TokenVotingSetup', function () {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
       minParticipation: pctToRatio(20),
-      minDuration: ONE_HOUR,
+      minDuration: TIME.HOUR,
       minProposerVotingPower: 0,
     };
 
