@@ -8,16 +8,16 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
-import {GovernanceERC20} from "@aragon/osx-commons/contracts/src/governance/token/erc20/GovernanceERC20.sol";
-import {IGovernanceWrappedERC20} from "@aragon/osx-commons/contracts/src/governance/token/erc20/IGovernanceWrappedERC20.sol";
-import {GovernanceWrappedERC20} from "@aragon/osx-commons/contracts/src/governance/token/erc20/GovernanceWrappedERC20.sol";
-import {MajorityVotingBase} from "@aragon/osx-commons/contracts/src/governance/majority-voting/MajorityVotingBase.sol";
+import {GovernanceERC20} from "../../../../token/ERC20/governance/GovernanceERC20.sol";
+import {IGovernanceWrappedERC20} from "../../../../token/ERC20/governance/IGovernanceWrappedERC20.sol";
+import {GovernanceWrappedERC20} from "../../../../token/ERC20/governance/GovernanceWrappedERC20.sol";
 
-import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 import {DAO} from "../../../../core/dao/DAO.sol";
 import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../../../framework/plugin/setup/PluginSetup.sol";
 
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
 /// @title TokenVotingSetup

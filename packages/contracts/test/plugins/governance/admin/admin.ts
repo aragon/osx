@@ -22,7 +22,7 @@ import {OZ_ERRORS} from '../../../test-utils/error';
 import {ADMIN_INTERFACE} from '../../../test-utils/interfaces';
 import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {proposalIdtoBytes32} from '@aragon/osx-commons-sdk/src/proposal';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -250,7 +250,7 @@ describe('Admin', function () {
         );
 
         expect(event.args.actor).to.equal(plugin.address);
-        expect(event.args.callId).to.equal(proposalIdtoBytes32(proposalId));
+        expect(event.args.callId).to.equal(proposalIdToBytes32(proposalId));
         expect(event.args.actions.length).to.equal(1);
         expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
         expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -269,7 +269,7 @@ describe('Admin', function () {
           DAO__factory.createInterface(),
           DAO_EVENTS.EXECUTED
         );
-        expect(event.args.callId).to.equal(proposalIdtoBytes32(proposalId));
+        expect(event.args.callId).to.equal(proposalIdToBytes32(proposalId));
       }
     });
   });

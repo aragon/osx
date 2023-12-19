@@ -7,7 +7,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {PermissionCondition} from "../../core/permission/PermissionCondition.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoUnauthorized} from "../../core/utils/auth.sol";
-import {IDAO} from "../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 /// @notice A test Plugin that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
 /// @dev This is realized by asking a `PermissionCondition` that must be authorized in the DAO's permission manager.

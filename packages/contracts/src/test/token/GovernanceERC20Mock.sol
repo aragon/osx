@@ -3,7 +3,7 @@
 pragma solidity ^0.8.8;
 
 import {GovernanceERC20} from "../../token/ERC20/governance/GovernanceERC20.sol";
-import {IDAO} from "../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 contract GovernanceERC20Mock is GovernanceERC20 {
     constructor(

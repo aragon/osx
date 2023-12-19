@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
-import {IDAO} from "../dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 import {DaoAuthorizable} from "./dao-authorizable/DaoAuthorizable.sol";
 import {IPlugin} from "./IPlugin.sol";
 

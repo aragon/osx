@@ -7,11 +7,11 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
-import {MajorityVotingBase} from "@aragon/osx-commons/src/governance/majority-voting/MajorityVotingBase.sol";
-import {IMajorityVoting} from "@aragon/osx-commons/src/governance/majority-voting/IMajorityVoting.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons/src/utils/math/Ratio.sol";
 
-import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
+import {IMajorityVoting} from "../IMajorityVoting.sol";
 
 /// @title TokenVoting
 /// @author Aragon Association - 2021-2023

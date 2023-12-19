@@ -34,7 +34,6 @@ import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../../test-utils/protocol-version';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -42,13 +41,14 @@ import {
 } from '../../../test-utils/uups-upgradeable';
 import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {
-  advanceTime,
+  advanceTimeBy,
   getTime,
   setTimeForNextBlock,
   timestampIn,
-  proposalIdtoBytes32,
-} from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
+} from '@aragon/osx-commons/utils/hardhat-time';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';
@@ -1023,7 +1023,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
 
-        await advanceTime(2000);
+        await advanceTimeBy(2000);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
       });
@@ -1041,7 +1041,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
 
-        await advanceTime(5000);
+        await advanceTimeBy(5000);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
       });
@@ -1105,7 +1105,7 @@ describe('Multisig', function () {
           'ApprovalCastForbidden'
         );
 
-        await advanceTime(7000);
+        await advanceTimeBy(7000);
 
         await expect(multisig.approve(1, false)).not.to.be.reverted;
       });
@@ -1120,12 +1120,12 @@ describe('Multisig', function () {
           0,
           await timestampIn(5000)
         );
-        await advanceTime(2000);
+        await advanceTimeBy(2000);
 
         await expect(multisig.connect(signers[1]).approve(1, false)).not.to.be
           .reverted;
 
-        await advanceTime(10000);
+        await advanceTimeBy(10000);
 
         await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
           multisig,
@@ -1172,7 +1172,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(1)).to.be.false;
 
-        await advanceTime(2000);
+        await advanceTimeBy(2000);
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
@@ -1191,7 +1191,7 @@ describe('Multisig', function () {
           await timestampIn(5000)
         );
 
-        await advanceTime(2000);
+        await advanceTimeBy(2000);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -1199,7 +1199,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(1)).to.be.true;
 
-        await advanceTime(5000);
+        await advanceTimeBy(5000);
 
         expect(await multisig.canExecute(1)).to.be.false;
       });
@@ -1279,7 +1279,7 @@ describe('Multisig', function () {
           );
 
           expect(event.args.actor).to.equal(multisig.address);
-          expect(event.args.callId).to.equal(proposalIdtoBytes32(id));
+          expect(event.args.callId).to.equal(proposalIdToBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -1339,7 +1339,7 @@ describe('Multisig', function () {
           'ProposalExecutionForbidden'
         );
 
-        await advanceTime(2000);
+        await advanceTimeBy(2000);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -1362,7 +1362,7 @@ describe('Multisig', function () {
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
 
-        await advanceTime(10000);
+        await advanceTimeBy(10000);
         await expect(
           multisig.connect(signers[1]).execute(1)
         ).to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden');

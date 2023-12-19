@@ -8,10 +8,9 @@ import {
   IERC20Upgradeable__factory,
   IERC20PermitUpgradeable__factory,
   IVotesUpgradeable__factory,
-  IERC20MetadataUpgradeable__factory,
 } from '../../../typechain';
 import {OZ_ERRORS} from '../../test-utils/error';
-import {getInterfaceID} from '../../test-utils/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -120,31 +119,31 @@ describe('GovernanceWrappedERC20', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IGovernanceWrappedERC20` interface', async () => {
       const iface = IGovernanceWrappedERC20__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IERC20Upgradeable` interface', async () => {
       const iface = IERC20Upgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IERC20PermitUpgradeable` interface', async () => {
       const iface = IERC20PermitUpgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IVotesUpgradeable` interface', async () => {
       const iface = IVotesUpgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
@@ -155,7 +154,7 @@ describe('GovernanceWrappedERC20', function () {
         'function symbol()',
         'function decimals()',
       ]);
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
   });

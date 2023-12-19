@@ -9,9 +9,10 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 import {IProposal} from "@aragon/osx-commons/src/governance/proposal/IProposal.sol";
 import {ProposalUpgradeable} from "@aragon/osx-commons/src/governance/proposal/ProposalUpgradeable.sol";
 import {RATIO_BASE, RatioOutOfBounds} from "@aragon/osx-commons/src/utils/math/Ratio.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../../core/dao/IDAO.sol";
+
 import {IMajorityVoting} from "./IMajorityVoting.sol";
 
 /// @title MajorityVotingBase

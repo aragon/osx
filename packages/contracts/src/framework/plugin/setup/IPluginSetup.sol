@@ -3,7 +3,7 @@
 pragma solidity ^0.8.8;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {IDAO} from "../../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 /// @title IPluginSetup
 /// @author Aragon Association - 2022-2023

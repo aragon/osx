@@ -7,8 +7,7 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
 import {Addresslist} from "@aragon/osx-commons/src/governance/membership/Addresslist.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons/src/utils/math/Ratio.sol";
-
-import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";

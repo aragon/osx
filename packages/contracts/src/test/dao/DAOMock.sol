@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.8;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
-import "../../core/permission/PermissionManager.sol";
-import "../../core/dao/IDAO.sol";
+import {PermissionManager} from "../../core/permission/PermissionManager.sol";
 
 contract DAOMock is IDAO, PermissionManager {
     mapping(uint256 => uint256) public totalSupply;

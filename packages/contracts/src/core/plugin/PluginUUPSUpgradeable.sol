@@ -7,7 +7,7 @@ import {IERC1822ProxiableUpgradeable} from "@openzeppelin/contracts-upgradeable/
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
-import {IDAO} from "../dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 import {DaoAuthorizableUpgradeable} from "./dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IPlugin} from "./IPlugin.sol";
 

@@ -14,13 +14,10 @@ import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {TOKEN_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
+import {VotingMode, VotingSettings} from '../voting-helpers';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {
-  VotingSettings,
-  VotingMode,
-  ONE_HOUR,
-} from '@aragon/osx-commons/contracts/test/governance/majority-voting/voting-helpers';
-import {pctToRatio} from '@aragon/osx-commons/contracts/test/utils/math/ratio';
+import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
+import {ONE_HOUR} from '@aragon/osx-commons/utils/hardhat-time';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

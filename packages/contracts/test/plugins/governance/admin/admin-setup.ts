@@ -7,7 +7,8 @@ import {
 import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE, getInterfaceId} from '../../../test-utils/interfaces';
+import {ADMIN_INTERFACE} from '../../../test-utils/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 

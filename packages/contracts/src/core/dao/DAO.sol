@@ -15,13 +15,13 @@ import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 import {VersionComparisonLib} from "@aragon/osx-commons/src/utils/VersionComparisonLib.sol";
 import {hasBit, flipBit} from "@aragon/osx-commons/src/utils/math/BitMap.sol";
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
 import {IEIP4824} from "./IEIP4824.sol";
-import {IDAO} from "./IDAO.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021-2023

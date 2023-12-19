@@ -25,7 +25,7 @@ import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
 import {MultisigSettings} from './multisig';
 import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {deployWithProxy} from '@aragon/osx-commons/contracts/utils/proxy';
+import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
