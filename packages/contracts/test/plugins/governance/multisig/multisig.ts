@@ -44,9 +44,9 @@ import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {
   advanceTimeBy,
+  advanceTimeTo,
   getTime,
   setTimeForNextBlock,
-  timestampIn,
 } from '@aragon/osx-commons/utils/hardhat-time';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -72,12 +72,14 @@ export async function approveWithSigners(
   await Promise.all(promises);
 }
 
-describe('Multisig', function () {
+describe.only('Multisig', function () {
   let signers: SignerWithAddress[];
   let multisig: Multisig;
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
+  let startDate: number;
+  let endDate: number;
   let multisigSettings: MultisigSettings;
 
   const id = 0;
@@ -99,6 +101,9 @@ describe('Multisig', function () {
   });
 
   beforeEach(async function () {
+    startDate = (await getTime()) + 1000;
+    endDate = startDate + 1000;
+
     multisigSettings = {
       minApprovals: 3,
       onlyListed: true,
@@ -501,7 +506,7 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(1000)
+          startDate
         )
       ).not.to.be.reverted;
 
@@ -523,7 +528,7 @@ describe('Multisig', function () {
         false,
         false,
         0,
-        await timestampIn(1000)
+        endDate
       );
       // create a new proposal for the proposalCounter to be incremented
       await expect(
@@ -534,7 +539,7 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(1000)
+          startDate
         )
       ).not.to.be.reverted;
 
@@ -545,7 +550,7 @@ describe('Multisig', function () {
         false,
         false,
         0,
-        await timestampIn(1000)
+        endDate
       );
 
       expect(proposalId0).to.equal(0); // To be removed when proposal ID is generated as a hash.
@@ -563,8 +568,6 @@ describe('Multisig', function () {
 
       const allowFailureMap = 1;
 
-      const startDate = await timestampIn(1000);
-      const endDate = await timestampIn(5000);
       await expect(
         multisig
           .connect(signers[0])
@@ -604,7 +607,7 @@ describe('Multisig', function () {
 
       await ethers.provider.send('evm_setAutomine', [false]);
 
-      const endDate = await timestampIn(5000);
+      endDate;
 
       await multisig.connect(signers[0]).createProposal(
         dummyMetadata,
@@ -652,9 +655,6 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal when unlisted accounts are allowed', async () => {
-        const startDate = await timestampIn(1000);
-        const endDate = await timestampIn(5000);
-
         await expect(
           multisig
             .connect(signers[1]) // not listed
@@ -696,15 +696,7 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[1]) // not listed
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              false,
-              false,
-              0,
-              await timestampIn(1000)
-            )
+            .createProposal(dummyMetadata, [], 0, false, false, 0, startDate)
         )
           .to.be.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
           .withArgs(signers[1].address);
@@ -712,15 +704,7 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[0])
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              false,
-              false,
-              0,
-              await timestampIn(1000)
-            )
+            .createProposal(dummyMetadata, [], 0, false, false, 0, startDate)
         ).not.to.be.reverted;
       });
 
@@ -738,15 +722,7 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[0])
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              false,
-              false,
-              0,
-              await timestampIn(1000)
-            )
+            .createProposal(dummyMetadata, [], 0, false, false, 0, startDate)
         )
           .to.be.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
           .withArgs(signers[0].address);
@@ -754,15 +730,7 @@ describe('Multisig', function () {
         // Transaction 4: Create the proposal as signers[1]
         const tx4 = await multisig
           .connect(signers[1])
-          .createProposal(
-            dummyMetadata,
-            [],
-            0,
-            false,
-            false,
-            0,
-            await timestampIn(1000)
-          );
+          .createProposal(dummyMetadata, [], 0, false, false, 0, startDate);
 
         // Check the listed members before the block is mined
         expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -801,9 +769,6 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
-        const startDate = await timestampIn(1000);
-        const endDate = await timestampIn(5000);
-
         await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
 
         await expect(
@@ -847,9 +812,6 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and approves if specified', async () => {
-        const startDate = await timestampIn(3000);
-        const endDate = await timestampIn(5000);
-
         const allowFailureMap = 1;
 
         await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
@@ -902,7 +864,7 @@ describe('Multisig', function () {
           true,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
         expect(await multisig.proposalCount()).to.equal(1);
 
@@ -913,7 +875,7 @@ describe('Multisig', function () {
           true,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
         expect(await multisig.proposalCount()).to.equal(2);
       });
@@ -981,7 +943,7 @@ describe('Multisig', function () {
         false,
         false,
         0,
-        await timestampIn(1000)
+        endDate
       );
     });
 
@@ -1017,13 +979,13 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(2000),
-          await timestampIn(5000)
+          startDate,
+          endDate
         );
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
 
-        await advanceTimeBy(2000);
+        await advanceTimeTo(startDate);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
       });
@@ -1036,12 +998,12 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
 
-        await advanceTimeBy(5000);
+        await advanceTimeTo(endDate + 1);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
       });
@@ -1096,8 +1058,8 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(5000),
-          await timestampIn(10000)
+          startDate,
+          endDate
         );
 
         await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
@@ -1105,7 +1067,7 @@ describe('Multisig', function () {
           'ApprovalCastForbidden'
         );
 
-        await advanceTimeBy(7000);
+        await advanceTimeTo(startDate);
 
         await expect(multisig.approve(1, false)).not.to.be.reverted;
       });
@@ -1118,14 +1080,13 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
-        await advanceTimeBy(2000);
 
         await expect(multisig.connect(signers[1]).approve(1, false)).not.to.be
           .reverted;
 
-        await advanceTimeBy(10000);
+        await advanceTimeTo(endDate + 1);
 
         await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
           multisig,
@@ -1166,13 +1127,13 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(1000),
-          await timestampIn(10000)
+          startDate,
+          endDate
         );
 
         expect(await multisig.canExecute(1)).to.be.false;
 
-        await advanceTimeBy(2000);
+        await advanceTimeTo(startDate);
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
@@ -1188,10 +1149,8 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
-
-        await advanceTimeBy(2000);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -1199,7 +1158,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(1)).to.be.true;
 
-        await advanceTimeBy(5000);
+        await advanceTimeTo(endDate + 1);
 
         expect(await multisig.canExecute(1)).to.be.false;
       });
@@ -1330,8 +1289,8 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(1000),
-          await timestampIn(5000)
+          startDate,
+          endDate
         );
 
         await expect(multisig.execute(1)).to.be.revertedWithCustomError(
@@ -1339,7 +1298,7 @@ describe('Multisig', function () {
           'ProposalExecutionForbidden'
         );
 
-        await advanceTimeBy(2000);
+        await advanceTimeTo(startDate);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -1356,7 +1315,7 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
