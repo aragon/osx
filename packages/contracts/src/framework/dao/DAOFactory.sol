@@ -4,6 +4,8 @@ pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
+import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {DAO} from "../../core/dao/DAO.sol";
@@ -87,7 +89,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
         createdDao = _createDAO(_daoSettings);
 
         // Register DAO.
-        daoRegistry.register(createdDao, msg.sender, _daoSettings.subdomain);
+        daoRegistry.register(IDAO(createdDao), msg.sender, _daoSettings.subdomain);
 
         // Get Permission IDs
         bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
