@@ -59,6 +59,7 @@ token-voting-repo: 0x424F4cA6FA9c24C03f2396DF0E96057eD11CF7dF
 admin-repo: 0x152c9E28995E418870b85cbbc0AEE4e53020edb2  
 multisig-repo: 0x9e7956C8758470dE159481e5DD0d08F8B59217A2  
 
+---
 
 Commit: [40f342b5906681e0050ec8bb984fc331070b932a](https://github.com/aragon/osx/commit/40f342b5906681e0050ec8bb984fc331070b932a)  
 Network: polygon  
