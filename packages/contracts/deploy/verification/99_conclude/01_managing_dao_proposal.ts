@@ -23,8 +23,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await managingDAOMultisig.callStatic.multisigSettings();
 
   const proposalDescription = hre.managingDAOActions
-    .map(action => action.description)
-    .join('\n');
+    .map(action => `<p>${action.description}</p>`)
+    .join('');
   const cid = await uploadToIPFS(
     JSON.stringify({
       title: 'Framework Upgrade 1.3.0',
