@@ -17,7 +17,6 @@ import {
   InstallationPreparedEvent,
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
-import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 import {hashHelpers} from '../../../../utils/psp';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
@@ -25,6 +24,7 @@ import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
 import {MultisigSettings} from './multisig';
 import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

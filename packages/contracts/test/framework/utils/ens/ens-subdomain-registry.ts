@@ -15,16 +15,15 @@ import {setupResolver} from '../../../test-utils/ens';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../test-utils/protocol-version';
-import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons/utils/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
-// TODO move / replace
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

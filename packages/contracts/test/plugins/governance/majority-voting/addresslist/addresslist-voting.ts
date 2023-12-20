@@ -30,10 +30,6 @@ import {OZ_ERRORS} from '../../../../test-utils/error';
 import {ADDRESSLIST_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../../test-utils/protocol-version';
-import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
@@ -50,6 +46,10 @@ import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons/utils/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

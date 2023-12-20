@@ -1,4 +1,4 @@
-import pluginUUPSUpgradeableArtifact from '../../../artifacts/src/core/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
+import pluginUUPSUpgradeableArtifact from '../../../artifacts/@aragon/osx-commons/src/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
 import {
   PluginSetupProcessor,
   PluginUUPSUpgradeableSetupV1Mock,
@@ -33,7 +33,6 @@ import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {
   installPlugin,
   updatePlugin,
@@ -75,6 +74,7 @@ import {
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -117,7 +117,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
 
-describe('Plugin Setup Processor', function () {
+describe('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;

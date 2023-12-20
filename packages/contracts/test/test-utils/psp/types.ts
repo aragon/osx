@@ -1,12 +1,6 @@
 import {Operation} from '../../../utils/types';
 import {BytesLike} from 'ethers';
 
-export enum PluginType {
-  UUPS,
-  Cloneable,
-  Constructable,
-}
-
 export type PermissionOperation = {
   operation: Operation;
   where: string;

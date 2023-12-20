@@ -6,9 +6,8 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 
 import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
 import {ProposalUpgradeable} from "@aragon/osx-commons/src/governance/proposal/ProposalUpgradeable.sol";
+import {PluginCloneable} from "@aragon/osx-commons/src/plugin/PluginCloneable.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
-
-import {PluginCloneable} from "../../../core/plugin/PluginCloneable.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022-2023

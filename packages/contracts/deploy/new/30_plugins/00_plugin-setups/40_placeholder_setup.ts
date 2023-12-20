@@ -1,6 +1,6 @@
-import placeholderSetupArtifact from '../../../../artifacts/src/plugins/placeholder-version/PlaceholderSetup.sol/PlaceholderSetup.json';
-import placeholderBuildMetadata from '../../../../src/plugins/placeholder-version/build-metadata.json';
+import placeholderSetupArtifact from '../../../../artifacts/@aragon/osx-commons/src/plugin/setup/placeholder/PlaceholderSetup.sol/PlaceholderSetup.json';
 import {uploadToIPFS} from '../../../helpers';
+import placeholderBuildMetadata from '@aragon/osx-commons/src/plugin/setup/placeholder/placeholder-build-metadata.json';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

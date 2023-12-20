@@ -10,7 +10,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
-import {DaoAuthorizableUpgradeable} from "../../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons/src/permission/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 import {IERC20MintableUpgradeable} from "../IERC20MintableUpgradeable.sol";
 

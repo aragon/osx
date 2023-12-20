@@ -2,8 +2,9 @@
 
 pragma solidity ^0.8.8;
 
-import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
+import {ProtocolVersion} from "@aragon/osx-commons/src/utils/versioning/ProtocolVersion.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+
 import {ENSSubdomainRegistrar} from "../utils/ens/ENSSubdomainRegistrar.sol";
 import {InterfaceBasedRegistry} from "../utils/InterfaceBasedRegistry.sol";
 import {isSubdomainValid} from "../utils/RegistryUtils.sol";

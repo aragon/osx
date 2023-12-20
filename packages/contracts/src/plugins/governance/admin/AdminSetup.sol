@@ -4,11 +4,12 @@ pragma solidity ^0.8.8;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {PluginSetup, IPluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
+import {IPluginSetup} from "@aragon/osx-commons/src/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "@aragon/osx-commons/src/plugin/setup/PluginSetup.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 import {DAO} from "../../../core/dao/DAO.sol";
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {PermissionLib} from "@aragon/osx-commons/src/permission/PermissionLib.sol";
 import {Admin} from "./Admin.sol";
 
 /// @title AdminAddressSetup

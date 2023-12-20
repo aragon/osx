@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-import {DaoAuthorizableUpgradeable} from "../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons/src/permission/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
 
 /// @title InterfaceBasedRegistry

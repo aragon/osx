@@ -11,16 +11,16 @@ import {ensDomainHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons/utils/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

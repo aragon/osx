@@ -9,12 +9,12 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {
   deployMockPluginSetup,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

@@ -5,8 +5,8 @@ import {
   PluginCloneableSetupV1Mock,
   PluginCloneableSetupV1Mock__factory,
 } from '../../../typechain';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 

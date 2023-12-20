@@ -7,9 +7,9 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
 import {Addresslist} from "@aragon/osx-commons/src/governance/membership/Addresslist.sol";
 import {ProposalUpgradeable} from "@aragon/osx-commons/src/governance/proposal/ProposalUpgradeable.sol";
-
+import {PluginUUPSUpgradeable} from "@aragon/osx-commons/src/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
-import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+
 import {IMultisig} from "./IMultisig.sol";
 
 /// @title Multisig - Release 1, Build 2
