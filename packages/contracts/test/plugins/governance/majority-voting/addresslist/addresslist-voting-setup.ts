@@ -1,24 +1,25 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 import {
   AddresslistVotingSetup,
   AddresslistVotingSetup__factory,
   AddresslistVoting__factory,
 } from '../../../../../typechain';
-import {deployNewDAO} from '../../../../test-utils/dao';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 import {Operation} from '../../../../../utils/types';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {
+  ADDRESSLIST_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
 import {
   VotingSettings,
   VotingMode,
   pctToRatio,
   ONE_HOUR,
 } from '../../../../test-utils/voting';
-import metadata from '../../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
-import {addresslistVotingInterface} from './addresslist-voting';
-import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -83,7 +84,7 @@ describe('AddresslistVotingSetup', function () {
 
     expect(
       await addresslistVotingContract.supportsInterface(
-        getInterfaceID(addresslistVotingInterface)
+        getInterfaceID(ADDRESSLIST_VOTING_INTERFACE)
       )
     ).to.be.eq(true);
   });

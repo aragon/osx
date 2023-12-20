@@ -54,6 +54,14 @@ You can find all documentation regarding how to use this protocol in [Aragon's D
 
 If you like what we're doing and would love to support, please review our `CONTRIBUTING_GUIDE.md` [here](https://github.com/aragon/osx/blob/develop/CONTRIBUTION_GUIDE.md). We'd love to build with you.
 
+## Security
+
+If you believe you've found a security issue, we encourage you to notify us. We welcome working with you to resolve the issue promptly.
+
+Security Contact Email: sirt@aragon.org
+
+Please do not use the issue tracker for security issues.
+
 ## Etherscan verification
 
 To try out Etherscan verification, you first need to deploy a contract to an Ethereum testnet that's supported by Etherscan, such as [goerli](https://goerli.etherscan.io) or [sepolia](https://sepolia.etherscan.io).
@@ -117,8 +125,8 @@ After successful contract compilation, TypeChain typings will be automatically g
 Here is a generic example of usage in a test:
 
 ```ts
-import {MyContract} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract}';
 import {MyContract____factory} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract__factory}';
+import {MyContract} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract}';
 
 describe('MyContract Test', function () {
   let myContract: MyContract;
@@ -141,13 +149,13 @@ Please replace 'MyContract' with the actual name of your contract, and follow th
 Example of usage in a test:
 
 ```ts
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0_factory,
 } from '@aragon/osx-ethers-v1.3.0/contracts/core/dao/DAO.sol';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 describe('Legacy Test Example', function () {
   let signers: SignerWithAddress[];

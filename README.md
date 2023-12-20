@@ -60,6 +60,14 @@ Our smart contracts undergo regular audits.
 
 We'd love to hear what you think! If you want to build this with us, please find a detailed contribution guide in the `CONTRIBUTION_GUIDE.md` [file here](https://github.com/aragon/osx/blob/develop/CONTRIBUTION_GUIDE.md).
 
+## Security
+
+If you believe you've found a security issue, we encourage you to notify us. We welcome working with you to resolve the issue promptly.
+
+Security Contact Email: sirt@aragon.org
+
+Please do not use the issue tracker for security issues.
+
 ## Setup
 
 Start by running `yarn install` in the project root in your terminal.

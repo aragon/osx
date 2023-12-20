@@ -28,17 +28,17 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: cd ../../ && yarn install --pure-lockfile
-      - name: Check formatting
-        run: yarn run formatting:check
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true
-          ETH_KEY: ''
           HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
           HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.dao.eth'
-          MANAGINGDAO_SUBDOMAIN: 'aragon-management'
+          MANAGINGDAO_SUBDOMAIN: 'management'
+          MANAGINGDAO_MULTISIG_LISTEDONLY: ${{ vars.MANAGINGDAO_MULTISIG_LISTEDONLY }}
+          MANAGINGDAO_MULTISIG_APPROVERS: ${{ vars.MANAGINGDAO_MULTISIG_APPROVERS }}
+          MANAGINGDAO_MULTISIG_MINAPPROVALS: ${{ vars.MANAGINGDAO_MULTISIG_MINAPPROVALS }}
         run: yarn run test
       - name: Run solidity-docgen
         run: yarn run docgen

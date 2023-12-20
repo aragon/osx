@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -41,7 +41,7 @@ contract PermissionManagerTest is PermissionManager {
         bytes32 _permissionId,
         bytes memory _data
     ) public view returns (bool) {
-        return _isGranted(_where, _who, _permissionId, _data);
+        return isGranted(_where, _who, _permissionId, _data);
     }
 
     function isPermissionRestrictedForAnyAddr(

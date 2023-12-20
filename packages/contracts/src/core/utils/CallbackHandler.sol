@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 /// @title CallbackHandler
 /// @author Aragon Association - 2022-2023
 /// @notice This contract handles callbacks by registering a magic number together with the callback function's selector. It provides the `_handleCallback` function that inheriting contracts have to call inside their `fallback()` function  (`_handleCallback(msg.callbackSelector, msg.data)`).  This allows to adaptively register ERC standards (e.g., [ERC-721](https://eips.ethereum.org/EIPS/eip-721), [ERC-1115](https://eips.ethereum.org/EIPS/eip-1155), or future versions of [ERC-165](https://eips.ethereum.org/EIPS/eip-165)) and returning the required magic numbers for the associated callback functions for the inheriting contract so that it doesn't need to be upgraded.
 /// @dev This callback handling functionality is intented to be used by executor contracts (i.e., `DAO.sol`).
+/// @custom:security-contact sirt@aragon.org
 abstract contract CallbackHandler {
     /// @notice A mapping between callback function selectors and magic return numbers.
     mapping(bytes4 => bytes4) internal callbackMagicNumbers;

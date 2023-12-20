@@ -1,5 +1,3 @@
-import {ethers} from 'hardhat';
-
 import {
   PluginRepoRegistry,
   PluginRepoFactory,
@@ -12,6 +10,7 @@ import {
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {ethers} from 'hardhat';
 
 export async function deployMockPluginSetup(
   signer: SignerWithAddress

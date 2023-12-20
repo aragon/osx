@@ -1,8 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {ContractFactory} from 'ethers';
-
-import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {
   DAO,
   DAORegistry,
@@ -10,17 +5,25 @@ import {
   ENSSubdomainRegistrar,
 } from '../../../typechain';
 import {DAORegistry__factory as DAORegistry_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol';
-
+import {DAORegistry__factory as DAORegistry_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/dao/DAORegistry.sol';
+import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
+import {
   getProtocolVersion,
-  ozUpgradeCheckManagedContract,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -249,33 +252,57 @@ describe('DAORegistry', function () {
     }).timeout(120000);
   });
 
+  describe('Protocol version', async () => {
+    it('returns the current protocol version', async () => {
+      expect(await daoRegistry.protocolVersion()).to.deep.equal(
+        CURRENT_PROTOCOL_VERSION
+      );
+    });
+  });
+
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new DAORegistry__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: managingDao.address,
+        ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+        managingDao
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new DAORegistry_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
+        await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
-          managingDao,
-          {
-            dao: managingDao.address,
-            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
-          },
+          initArgs,
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          managingDao
         );
-
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
+      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
@@ -284,9 +311,41 @@ describe('DAORegistry', function () {
         currentContractFactory.attach(toImplementation)
       );
 
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+
+    it('from v1.3.0', async () => {
+      legacyContractFactory = new DAORegistry_V1_3_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          managingDao
+        );
+      expect(toImplementation).to.not.equal(fromImplementation);
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 });

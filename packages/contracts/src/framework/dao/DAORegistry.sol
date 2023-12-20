@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
+import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {IDAO} from "../../core/dao/IDAO.sol";
 import {ENSSubdomainRegistrar} from "../utils/ens/ENSSubdomainRegistrar.sol";
 import {InterfaceBasedRegistry} from "../utils/InterfaceBasedRegistry.sol";
@@ -10,7 +11,8 @@ import {isSubdomainValid} from "../utils/RegistryUtils.sol";
 /// @title Register your unique DAO subdomain
 /// @author Aragon Association - 2022-2023
 /// @notice This contract provides the possibility to register a DAO.
-contract DAORegistry is InterfaceBasedRegistry {
+/// @custom:security-contact sirt@aragon.org
+contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
@@ -27,6 +29,7 @@ contract DAORegistry is InterfaceBasedRegistry {
     event DAORegistered(address indexed dao, address indexed creator, string subdomain);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

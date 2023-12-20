@@ -6,6 +6,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {IERC1822ProxiableUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {IProtocolVersion, ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {IDAO} from "../dao/IDAO.sol";
 import {DaoAuthorizableUpgradeable} from "./dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IPlugin} from "./IPlugin.sol";
@@ -13,15 +14,18 @@ import {IPlugin} from "./IPlugin.sol";
 /// @title PluginUUPSUpgradeable
 /// @author Aragon Association - 2022-2023
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+/// @custom:security-contact sirt@aragon.org
 abstract contract PluginUUPSUpgradeable is
     IPlugin,
     ERC165Upgradeable,
     UUPSUpgradeable,
-    DaoAuthorizableUpgradeable
+    DaoAuthorizableUpgradeable,
+    ProtocolVersion
 {
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -46,6 +50,7 @@ abstract contract PluginUUPSUpgradeable is
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == type(IPlugin).interfaceId ||
+            _interfaceId == type(IProtocolVersion).interfaceId ||
             _interfaceId == type(IERC1822ProxiableUpgradeable).interfaceId ||
             super.supportsInterface(_interfaceId);
     }

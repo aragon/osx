@@ -1,6 +1,6 @@
-import {ethers} from 'hardhat';
-import {utils, constants} from 'ethers';
 import {Operation} from '../../../utils/types';
+import {utils, constants} from 'ethers';
+import {ethers} from 'hardhat';
 
 export function mockPermissionsOperations(
   start: number,

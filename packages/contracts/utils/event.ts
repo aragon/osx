@@ -57,7 +57,6 @@ export const DAO_EVENTS = {
   DEPOSITED: 'Deposited',
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
   TRUSTED_FORWARDER_SET: 'TrustedForwarderSet',
-  SIGNATURE_VALIDATOR_SET: 'SignatureValidatorSet',
   NEW_URI: 'NewURI',
 };
 

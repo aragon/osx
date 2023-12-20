@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
@@ -15,6 +15,7 @@ import {IMultisig} from "./IMultisig.sol";
 /// @title Multisig - Release 1, Build 2
 /// @author Aragon Association - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
+/// @custom:security-contact sirt@aragon.org
 contract Multisig is
     IMultisig,
     IMembership,

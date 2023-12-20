@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
@@ -16,13 +16,13 @@ function mockPermissions(
     permissions = new PermissionLib.MultiTargetPermission[](end - start);
 
     for (uint160 i = start; i < end; i++) {
-        permissions[i - start] = PermissionLib.MultiTargetPermission(
-            op,
-            address(i),
-            address(i),
-            PermissionLib.NO_CONDITION,
-            keccak256("MOCK_PERMISSION")
-        );
+        permissions[i - start] = PermissionLib.MultiTargetPermission({
+            operation: op,
+            where: address(i),
+            who: address(i),
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: keccak256("MOCK_PERMISSION")
+        });
     }
 }
 

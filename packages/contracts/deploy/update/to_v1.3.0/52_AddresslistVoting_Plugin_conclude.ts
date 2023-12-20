@@ -1,6 +1,6 @@
+import {AddresslistVotingSetup__factory} from '../../../typechain';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {AddresslistVotingSetup__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nConcluding AddresslistVoting Plugin Update');
