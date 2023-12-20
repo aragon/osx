@@ -44,7 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         hre.managingDAOActions,
         0,
         true,
-        true,
+        false,
         0,
         Math.round(Date.now() / 1000) + 30 * 24 * 60 * 60 // Lets the proposal end in 30 days
       );
