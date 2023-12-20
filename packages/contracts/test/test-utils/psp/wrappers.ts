@@ -1,4 +1,3 @@
-import {BytesLike} from 'ethers';
 import {PluginSetupProcessor} from '../../../typechain';
 import {
   InstallationAppliedEvent,
@@ -18,6 +17,7 @@ import {
   createPrepareUpdateParams,
 } from './create-params';
 import {PermissionOperation, PluginRepoPointer} from './types';
+import {BytesLike} from 'ethers';
 
 export async function prepareInstallation(
   psp: PluginSetupProcessor,

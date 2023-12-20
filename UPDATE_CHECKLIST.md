@@ -16,7 +16,6 @@ This checklist is seen as a guide to update the existing deployment.
     - [ ] initialize the storage correctly
 - [ ] Make sure that the `deploy` property in `packages/contracts/networks.json` points to the correct update
 - [ ] Run `yarn` in the repository root to install the dependencies
-- [ ] Run `yarn run build:contracts-versions` in `packages/contracts` to make sure the contracts compile
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
@@ -40,6 +39,7 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
 - [ ] Update `active_contracts.json` with the new deployed addresses
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
 ### ManagingDAO
 

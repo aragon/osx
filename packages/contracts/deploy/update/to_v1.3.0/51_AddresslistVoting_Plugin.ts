@@ -1,11 +1,10 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import addresslistVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol/AddresslistVotingSetup.json';
+import addresslistVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
+import addresslistVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import {PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, uploadToIPFS} from '../../helpers';
-
-import addresslistVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol/AddresslistVotingSetup.json';
-import addresslistVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
-import addresslistVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const TARGET_RELEASE = 1;
 

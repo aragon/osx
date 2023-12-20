@@ -1,17 +1,15 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-
-import {Operation} from '../../../../utils/types';
+import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 import {
   AdminSetup,
   AdminSetup__factory,
   Admin__factory,
 } from '../../../../typechain';
-import {deployNewDAO} from '../../../test-utils/dao';
-import {getInterfaceID} from '../../../test-utils/interfaces';
-import metadata from '../../../../src/plugins/governance/admin/build-metadata.json';
-import {adminInterface} from './admin';
 import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
+import {Operation} from '../../../../utils/types';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -59,7 +57,7 @@ describe('AdminSetup', function () {
 
     expect(
       await adminAddressContract.supportsInterface(
-        getInterfaceID(adminInterface)
+        getInterfaceID(ADMIN_INTERFACE)
       )
     ).to.be.eq(true);
   });

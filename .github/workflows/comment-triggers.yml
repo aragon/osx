@@ -5,7 +5,7 @@ on:
   issue_comment:
     types: [created]
 
-jobs:  
+jobs:
   check_user_permission:
     runs-on: ubuntu-latest
     name: A job to check user's permission level
@@ -81,8 +81,6 @@ jobs:
     with:
       mode: ${{ needs.mythx_full.outputs.mode }}
     secrets: inherit
-
-
 
   release_label:
     needs: [check_user_permission]

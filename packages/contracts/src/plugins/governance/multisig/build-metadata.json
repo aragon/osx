@@ -31,17 +31,17 @@
           "type": "tuple",
           "description": "The inital multisig settings."
         }
-      ],
-      "prepareUpdate": {
-        "1": {
-          "description": "No input is required for the update.",
-          "inputs": []
-        }
-      },
-      "prepareUninstallation": {
-        "description": "No input is required for the uninstallation.",
+      ]
+    },
+    "prepareUpdate": {
+      "1": {
+        "description": "No input is required for the update.",
         "inputs": []
       }
+    },
+    "prepareUninstallation": {
+      "description": "No input is required for the uninstallation.",
+      "inputs": []
     }
   }
 }

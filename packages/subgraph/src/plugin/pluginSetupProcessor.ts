@@ -1,23 +1,23 @@
-import {Bytes, log} from '@graphprotocol/graph-ts';
 import {
   InstallationApplied,
   InstallationPrepared,
   UninstallationApplied,
   UninstallationPrepared,
   UpdateApplied,
-  UpdatePrepared
+  UpdatePrepared,
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 import {
   PluginInstallation,
   PluginPermission,
-  PluginPreparation
+  PluginPreparation,
 } from '../../generated/schema';
 import {
   addPlugin,
   getPluginInstallationId,
   getPluginVersionId,
-  PERMISSION_OPERATIONS
+  PERMISSION_OPERATIONS,
 } from './utils';
+import {Bytes, log} from '@graphprotocol/graph-ts';
 
 export function handleInstallationPrepared(event: InstallationPrepared): void {
   let dao = event.params.dao.toHexString();

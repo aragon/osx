@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 /// @title IPluginRepo
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for a plugin repository.
+/// @custom:security-contact sirt@aragon.org
 interface IPluginRepo {
     /// @notice Updates the metadata for release with content `@fromHex(_releaseMetadata)`.
     /// @param _release The release number.

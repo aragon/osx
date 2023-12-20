@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
@@ -16,6 +16,7 @@ import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 /// @author Aragon Association - 2021-2023.
 /// @notice The majority voting implementation using a list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
+/// @custom:security-contact sirt@aragon.org
 contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 

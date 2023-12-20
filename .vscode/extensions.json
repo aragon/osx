@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "NomicFoundation.hardhat-solidity",
+    "KnisterPeter.vscode-commitizen",
+    "tintinweb.solidity-visual-auditor"
+  ]
+}

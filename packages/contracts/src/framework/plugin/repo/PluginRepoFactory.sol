@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
@@ -14,6 +14,7 @@ import {PluginRepo} from "./PluginRepo.sol";
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022-2023
 /// @notice This contract creates `PluginRepo` proxies and registers them on a `PluginRepoRegistry` contract.
+/// @custom:security-contact sirt@aragon.org
 contract PluginRepoFactory is ERC165, ProtocolVersion {
     /// @notice The Aragon plugin registry contract.
     PluginRepoRegistry public pluginRepoRegistry;
@@ -132,7 +133,7 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
         pluginRepo = PluginRepo(
             createERC1967Proxy(
                 pluginRepoBase,
-                abi.encodeWithSelector(PluginRepo.initialize.selector, _initialOwner)
+                abi.encodeCall(PluginRepo.initialize, (_initialOwner))
             )
         );
 

@@ -1,9 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import multisigReleaseMetadata from '../../../../src/plugins/governance/multisig/release-metadata.json';
 import multisigBuildMetadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
-
+import multisigReleaseMetadata from '../../../../src/plugins/governance/multisig/release-metadata.json';
 import {
   createPluginRepo,
   populatePluginRepo,
@@ -11,6 +7,8 @@ import {
   uploadToIPFS,
 } from '../../../helpers';
 import {ethers} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating multisig repo.`);

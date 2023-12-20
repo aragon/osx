@@ -1,5 +1,5 @@
-import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {bigIntToBytes32} from './bytes';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 export function getProposalId(
   plugin: Address,

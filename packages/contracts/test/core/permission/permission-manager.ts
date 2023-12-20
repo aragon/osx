@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   PermissionManagerTest,
   PermissionConditionMock,
@@ -9,9 +5,11 @@ import {
   PermissionConditionMock__factory,
   TestPlugin__factory,
 } from '../../../typechain';
-import {DeployTestPermissionCondition} from '../../test-utils/conditions';
-import {OZ_ERRORS} from '../../test-utils/error';
 import {Operation} from '../../../utils/types';
+import {OZ_ERRORS} from '../../test-utils/error';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
@@ -27,9 +25,9 @@ const UNSET_FLAG = ethers.utils.getAddress(
 const ALLOW_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000002'
 );
+export const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 const addressZero = ethers.constants.AddressZero;
-const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 let conditionMock: PermissionConditionMock;
 
@@ -728,7 +726,7 @@ describe('Core: PermissionManager', function () {
   });
 
   describe('isGranted', () => {
-    it('should return true if the permission is granted to the user', async () => {
+    it('returns `true` if the permission is granted to the user', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       const isGranted = await pm.callStatic.isGranted(
         pm.address,
@@ -739,7 +737,7 @@ describe('Core: PermissionManager', function () {
       expect(isGranted).to.be.equal(true);
     });
 
-    it('should return false if the permissions is not granted to the user', async () => {
+    it('returns `false` if the permission is not granted to the user', async () => {
       const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
@@ -749,35 +747,112 @@ describe('Core: PermissionManager', function () {
       expect(isGranted).to.be.equal(false);
     });
 
-    it('should return true for permissions granted to any address on a specific target contract using the `ANY_ADDR` flag', async () => {
-      const anyAddr = await pm.getAnyAddr();
-      const condition = await DeployTestPermissionCondition();
+    it('returns `true` if a condition is set for a specific caller and target answering `true`', async () => {
+      const condition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
       await pm.grantWithCondition(
         pm.address,
-        anyAddr,
+        ownerSigner.address,
         ADMIN_PERMISSION_ID,
         condition.address
       );
+      await condition.setAnswer(true);
+
+      expect(
+        await pm.isGranted(
+          pm.address,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.true;
+    });
+
+    it('returns `true` if a condition is set for a generic caller answering `true`', async () => {
+      const condition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
       await pm.grantWithCondition(
-        anyAddr,
         pm.address,
+        ANY_ADDR,
         ADMIN_PERMISSION_ID,
         condition.address
       );
-      const isGranted_1 = await pm.callStatic.isGranted(
-        pm.address,
-        anyAddr,
+      await condition.setAnswer(true);
+
+      // Check `ownerSigner.address` as a caller `_who`
+      expect(
+        await pm.isGranted(
+          pm.address,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.true;
+
+      // Check `otherSigner.address` as a caller `_who`
+      expect(
+        await pm.isGranted(
+          pm.address,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.true;
+
+      // Check that `false` is returned if `address(0)` is the target `_where`.
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.false;
+    });
+
+    it('returns `true` if a condition is set for a generic target answering `true`', async () => {
+      const condition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+      await pm.grantWithCondition(
+        ANY_ADDR,
+        ownerSigner.address,
         ADMIN_PERMISSION_ID,
         condition.address
       );
-      const isGranted_2 = await pm.callStatic.isGranted(
-        pm.address,
-        anyAddr,
-        ADMIN_PERMISSION_ID,
-        condition.address
-      );
-      expect(isGranted_1).to.be.equal(true);
-      expect(isGranted_2).to.be.equal(true);
+      await condition.setAnswer(true);
+
+      // Check `pm.address` as a target `_where`
+      expect(
+        await pm.isGranted(
+          pm.address,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.true;
+
+      // Check `address(0)` as a target `_where`
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.true;
+
+      // Check that `false` is returned if `otherSigner is the caller `_who`.
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          condition.address
+        )
+      ).to.be.false;
     });
 
     it('should be callable by anyone', async () => {
@@ -791,13 +866,198 @@ describe('Core: PermissionManager', function () {
         );
       expect(isGranted).to.be.equal(false);
     });
+
+    it('does not fall back to a generic caller or target condition if a specific condition is set already answering `false`', async () => {
+      const specificCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+      const genericCallerCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+      const genericTargetCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
+      // Grant with a specific condition that will answer false
+      await pm.grantWithCondition(
+        pm.address,
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        specificCondition.address
+      );
+      await specificCondition.setAnswer(false);
+
+      // Grant with a generic caller condition that will answer true
+      await pm.grantWithCondition(
+        pm.address,
+        ANY_ADDR,
+        ADMIN_PERMISSION_ID,
+        genericCallerCondition.address
+      );
+      await genericCallerCondition.setAnswer(true);
+
+      // Grant with a generic target condition that will answer true
+      await pm.grantWithCondition(
+        ANY_ADDR,
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        genericTargetCondition.address
+      );
+      await genericCallerCondition.setAnswer(true);
+
+      // Check that `isGranted` returns false for `ownerSigner` to whom the specific condition was granted.
+      expect(
+        await pm.isGranted(
+          pm.address,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.false;
+
+      // Check that `ownerSigner` is still granted access to other contracts (e.g., `address(0)`) through the `genericTargetCondition` condition.
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.true;
+    });
+
+    it('does not fall back to a generic target condition if a generic caller condition is set already answering `false`', async () => {
+      const genericCallerCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+      const genericTargetCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
+      // Grant with a generic caller condition that will answer false.
+      await pm.grantWithCondition(
+        pm.address,
+        ANY_ADDR,
+        ADMIN_PERMISSION_ID,
+        genericCallerCondition.address
+      );
+      await genericCallerCondition.setAnswer(false);
+
+      // Grant with a generic target condition that will answer true.
+      await pm.grantWithCondition(
+        ANY_ADDR,
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        genericTargetCondition.address
+      );
+      await genericTargetCondition.setAnswer(true);
+
+      // Check that `isGranted` returns false for `ANY_ADDR` (here, we check only two addresses, `ownerSigner` and `otherSigner`).
+      expect(
+        await pm.isGranted(
+          pm.address,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.false;
+      expect(
+        await pm.isGranted(
+          pm.address,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.false;
+
+      // Check that `ownerSigner` is granted access to other contracts (e.g., `address(0)`) via the `genericTargetCondition` condition.
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.true;
+
+      // Check that `otherSigner` is not granted access to other contracts (e.g., `address(0)`) via the `genericTargetCondition` condition.
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.false;
+    });
+
+    it('does not fall back to a generic caller or target condition if a specific condition is set already answering `false`', async () => {
+      const specificCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+      const genericCallerCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+      const genericTargetCondition = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
+      // Grant with a specific condition that will answer false
+      await pm.grantWithCondition(
+        pm.address,
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        specificCondition.address
+      );
+      await specificCondition.setAnswer(false);
+
+      // Grant with a generic caller condition that will answer true
+      await pm.grantWithCondition(
+        pm.address,
+        ANY_ADDR,
+        ADMIN_PERMISSION_ID,
+        genericCallerCondition.address
+      );
+      await genericCallerCondition.setAnswer(true);
+
+      // Grant with a generic target condition that will answer true
+      await pm.grantWithCondition(
+        ANY_ADDR,
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        genericTargetCondition.address
+      );
+      await genericCallerCondition.setAnswer(true);
+
+      // Check that `isGranted` returns false for `ownerSigner` to whom the specific condition was granted.
+      expect(
+        await pm.isGranted(
+          pm.address,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.false;
+
+      // Check that `ownerSigner` is still granted access to other contracts (e.g., `address(0)`) through the `genericTargetCondition` condition.
+      expect(
+        await pm.isGranted(
+          ethers.constants.AddressZero,
+          ownerSigner.address,
+          ADMIN_PERMISSION_ID,
+          genericTargetCondition.address
+        )
+      ).to.be.true;
+    });
   });
 
   describe('_hasPermission', () => {
     let permissionCondition: PermissionConditionMock;
 
     beforeEach(async () => {
-      permissionCondition = await DeployTestPermissionCondition();
+      permissionCondition = await new PermissionConditionMock__factory(
+        ownerSigner
+      ).deploy();
     });
 
     it('should call IPermissionCondition.isGranted', async () => {
@@ -816,7 +1076,7 @@ describe('Core: PermissionManager', function () {
         )
       ).to.be.equal(true);
 
-      await permissionCondition.setWillPerform(false);
+      await permissionCondition.setAnswer(false);
       expect(
         await pm.callStatic.isGranted(
           pm.address,

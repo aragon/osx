@@ -1,6 +1,6 @@
 import {PluginRepoRegistered} from '../../generated/PluginRepoRegistry/PluginRepoRegistry';
-import {PluginRepoTemplate} from '../../generated/templates';
 import {PluginRepo} from '../../generated/schema';
+import {PluginRepoTemplate} from '../../generated/templates';
 
 export function handlePluginRepoRegistered(event: PluginRepoRegistered): void {
   let id = event.params.pluginRepo.toHexString();

@@ -1,7 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import metadata from '../../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 import {
   ERC20,
   ERC20__factory,
@@ -13,19 +10,22 @@ import {
   TokenVotingSetup__factory,
   TokenVoting__factory,
 } from '../../../../../typechain';
-import {deployNewDAO} from '../../../../test-utils/dao';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
 import {Operation} from '../../../../../utils/types';
-import metadata from '../../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
-
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {
+  TOKEN_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
 import {
   VotingSettings,
   VotingMode,
   pctToRatio,
   ONE_HOUR,
 } from '../../../../test-utils/voting';
-import {tokenVotingInterface} from './token-voting';
-import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -137,7 +137,9 @@ describe('TokenVotingSetup', function () {
     const tokenVoting = factory.attach(implementationAddress);
 
     expect(
-      await tokenVoting.supportsInterface(getInterfaceID(tokenVotingInterface))
+      await tokenVoting.supportsInterface(
+        getInterfaceID(TOKEN_VOTING_INTERFACE)
+      )
     ).to.be.eq(true);
   });
 

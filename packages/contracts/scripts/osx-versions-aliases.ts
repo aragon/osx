@@ -5,4 +5,7 @@
  *
  * To add a new version alias, append it to this array.
  */
-export const OSX_VERSION_ALIASES = ['@aragon/osx-v1.0.1/'];
+export const OSX_VERSION_ALIASES = [
+  '@aragon/osx-v1.0.1/',
+  '@aragon/osx-v1.3.0/',
+];

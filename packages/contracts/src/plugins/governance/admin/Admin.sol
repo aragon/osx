@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
@@ -12,6 +12,7 @@ import {IDAO} from "../../../core/dao/IDAO.sol";
 /// @title Admin
 /// @author Aragon Association - 2022-2023
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
+/// @custom:security-contact sirt@aragon.org
 contract Admin is IMembership, PluginCloneable, ProposalUpgradeable {
     using SafeCastUpgradeable for uint256;
 

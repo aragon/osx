@@ -11,3 +11,9 @@ export const UPGRADE_PERMISSIONS = {
   ),
   UPGRADE_REPO_PERMISSION_ID: ethers.utils.id('UPGRADE_REPO_PERMISSION'),
 };
+
+export const MAINTAINER_PERMISSION_ID = ethers.utils.id(
+  'MAINTAINER_PERMISSION'
+);
+export const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
+export const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');

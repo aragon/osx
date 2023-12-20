@@ -1,31 +1,23 @@
-import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  TokenVotingPlugin,
+  TokenVotingProposal,
+  TokenVotingVoter,
+  TokenVotingVote,
+} from '../../../generated/schema';
+import {GovernanceERC20} from '../../../generated/templates';
 import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
   MembershipContractAnnounced,
-  TokenVoting
+  TokenVoting,
 } from '../../../generated/templates/TokenVoting/TokenVoting';
-
-import {GovernanceERC20} from '../../../generated/templates';
-
-import {
-  Action,
-  TokenVotingPlugin,
-  TokenVotingProposal,
-  TokenVotingVoter,
-  TokenVotingVote
-} from '../../../generated/schema';
-
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {
-  fetchERC20,
-  fetchWrappedERC20,
-  supportsERC20Wrapped
-} from '../../utils/tokens/erc20';
 import {getProposalId} from '../../utils/proposals';
+import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
+import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -53,7 +45,7 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
-  proposalEntity.potentiallyExecutable = false;
+  proposalEntity.approvalReached = false;
 
   let contract = TokenVoting.bind(event.address);
   let proposal = contract.try_getProposal(pluginProposalId);
@@ -97,6 +89,7 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+    proposalEntity.isSignaling = actions.length == 0;
 
     // totalVotingPower
     proposalEntity.totalVotingPower = contract.try_totalVotingPower(
@@ -206,7 +199,7 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.potentiallyExecutable =
+        proposalEntity.approvalReached =
           supportThresholdReached && minParticipationReached;
 
         // Used when proposal has not ended.
@@ -227,7 +220,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;
@@ -256,22 +249,11 @@ export function handleMembershipContractAnnounced(
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
 
   if (packageEntity) {
-    let contractAddress: string;
-
-    if (supportsERC20Wrapped(token)) {
-      let contract = fetchWrappedERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
-    } else {
-      let contract = fetchERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
+    let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+    if (!tokenAddress) {
+      return;
     }
-    packageEntity.token = contractAddress;
+    packageEntity.token = tokenAddress as string;
 
     packageEntity.save();
 

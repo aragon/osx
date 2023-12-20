@@ -42,6 +42,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Update `active_contracts.json` with the new deployed addresses
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
 - [ ] Add the managing DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
+- [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
 ### Verification
 

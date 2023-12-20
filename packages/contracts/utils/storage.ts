@@ -1,5 +1,5 @@
-import {ethers} from 'hardhat';
 import {defaultAbiCoder} from 'ethers/lib/utils';
+import {ethers} from 'hardhat';
 
 // See https://eips.ethereum.org/EIPS/eip-1967
 export const IMPLEMENTATION_SLOT =

@@ -1,9 +1,5 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import tokenVotingReleaseMetadata from '../../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
-
+import tokenVotingReleaseMetadata from '../../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import {
   createPluginRepo,
   populatePluginRepo,
@@ -11,6 +7,8 @@ import {
   uploadToIPFS,
 } from '../../../helpers';
 import {ethers} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating token-voting repo.`);

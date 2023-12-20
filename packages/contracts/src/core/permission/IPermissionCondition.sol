@@ -6,6 +6,7 @@ pragma solidity ^0.8.8;
 /// @author Aragon Association - 2021-2023
 /// @notice An interface to be implemented to support custom permission logic.
 /// @dev To attach a condition to a permission, the `grantWithCondition` function must be used and refer to the implementing contract's address with the `condition` argument.
+/// @custom:security-contact sirt@aragon.org
 interface IPermissionCondition {
     /// @notice Checks if a call is permitted.
     /// @param _where The address of the target contract.
