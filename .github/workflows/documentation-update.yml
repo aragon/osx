@@ -25,8 +25,11 @@ jobs:
       - name: Generate Docs
         run: yarn run docgen
         working-directory: packages/contracts/
+      - name: Remove Framework Lifecycle docs
+        run: rm -rf 04-framework-lifecycle
+        working-directory: packages/contracts/docs/developer-portal/
       - name: Format with prettier
-        run: yarn run prettier 'packages/contracts/docs/osx/03-reference-guide/**/*.md' --write
+        run: yarn run prettier 'packages/contracts/docs/developer-portal/03-reference-guide/**/*.md' --write
       - name: Checkout developer-portal
         uses: actions/checkout@v3
         with:
@@ -36,8 +39,8 @@ jobs:
           token: ${{ secrets.ARABOT_PAT }}
       - name: Remove the docs/osx folder in the developer-portal
         run: rm -rf $GITHUB_WORKSPACE/developer-portal/docs/osx
-      - name: Copy the docs/osx folder to the developer-portal
-        run: cp -R packages/contracts/docs/osx $GITHUB_WORKSPACE/developer-portal/docs/osx
+      - name: Copy the docs/developer-portal folder to the developer-portal
+        run: cp -R packages/contracts/docs/developer-portal $GITHUB_WORKSPACE/developer-portal/docs/osx
       - name: Get short commit hash
         id: hash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT

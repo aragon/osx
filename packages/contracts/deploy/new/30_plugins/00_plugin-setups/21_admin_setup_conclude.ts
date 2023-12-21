@@ -1,7 +1,7 @@
-import {DeployFunction} from 'hardhat-deploy/types';
 import {AdminSetup__factory} from '../../../../typechain';
-import {setTimeout} from 'timers/promises';
+import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {setTimeout} from 'timers/promises';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding admin setup deployment.\n`);

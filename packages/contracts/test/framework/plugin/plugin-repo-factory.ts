@@ -1,14 +1,3 @@
-import {expect} from 'chai';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ethers} from 'hardhat';
-
-import {
-  deployMockPluginSetup,
-  deployPluginRepoRegistry,
-} from '../../test-utils/repo';
-import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {deployNewDAO} from '../../test-utils/dao';
-
 import {
   PluginRepoRegistry,
   DAO,
@@ -18,8 +7,17 @@ import {
   IProtocolVersion__factory,
   IERC165__factory,
 } from '../../../typechain';
+import {deployNewDAO} from '../../test-utils/dao';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {
+  deployMockPluginSetup,
+  deployPluginRepoRegistry,
+} from '../../test-utils/repo';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

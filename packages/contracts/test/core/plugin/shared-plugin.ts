@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   TestSharedPlugin,
   TestIdGatingCondition,
@@ -11,6 +7,9 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
   'ID_GATED_ACTION_PERMISSION'

@@ -1,5 +1,5 @@
-import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
+import {ethers} from 'hardhat';
 
 // @ts-ignore
 export function flipBit(index: number, num: BigNumber) {

@@ -1,18 +1,17 @@
-import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-
-import {
-  MembershipContractAnnounced,
-  ProposalCreated,
-  ProposalExecuted
-} from '../../../generated/templates/Admin/Admin';
 import {
   Action,
   AdministratorAdminPlugin,
   AdminProposal,
-  Administrator
+  Administrator,
 } from '../../../generated/schema';
 import {AdminMembers} from '../../../generated/templates';
+import {
+  MembershipContractAnnounced,
+  ProposalCreated,
+  ProposalExecuted,
+} from '../../../generated/templates/Admin/Admin';
 import {getProposalId} from '../../utils/proposals';
+import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();

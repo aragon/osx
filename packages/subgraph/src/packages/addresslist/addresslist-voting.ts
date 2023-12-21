@@ -1,23 +1,22 @@
-import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
-
-import {
-  VoteCast,
-  ProposalCreated,
-  ProposalExecuted,
-  VotingSettingsUpdated,
-  MembersAdded,
-  MembersRemoved,
-  AddresslistVoting
-} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   Action,
   AddresslistVotingPlugin,
   AddresslistVotingProposal,
+  AddresslistVotingVote,
   AddresslistVotingVoter,
-  AddresslistVotingVote
 } from '../../../generated/schema';
+import {
+  AddresslistVoting,
+  MembersAdded,
+  MembersRemoved,
+  ProposalCreated,
+  ProposalExecuted,
+  VoteCast,
+  VotingSettingsUpdated,
+} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {getProposalId} from '../../utils/proposals';
+import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -45,7 +44,7 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
-  proposalEntity.potentiallyExecutable = false;
+  proposalEntity.approvalReached = false;
 
   let contract = AddresslistVoting.bind(pluginAddress);
   let proposal = contract.try_getProposal(pluginProposalId);
@@ -89,7 +88,7 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
-
+    proposalEntity.isSignaling = actions.length == 0;
     // totalVotingPower
     proposalEntity.totalVotingPower = contract.try_totalVotingPower(
       parameters.snapshotBlock
@@ -186,7 +185,7 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.potentiallyExecutable =
+        proposalEntity.approvalReached =
           supportThresholdReached && minParticipationReached;
 
         // Used when proposal has not ended.
@@ -207,7 +206,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;

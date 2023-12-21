@@ -36,8 +36,6 @@ deployed_contracts.json
 managingDAOTX.json
 
 # generated
-packages/contracts/docs/core/03-reference-guide/*
-!packages/contracts/docs/core/03-reference-guide/index.md
 generated
 subgraph.yaml
 .bin

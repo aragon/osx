@@ -29,6 +29,7 @@ token-voting-repo: 0x424F4cA6FA9c24C03f2396DF0E96057eD11CF7dF
 admin-repo: 0x152c9E28995E418870b85cbbc0AEE4e53020edb2  
 multisig-repo: 0x9e7956C8758470dE159481e5DD0d08F8B59217A2  
 
+---
 
 Commit: [7c48725049c54a020b0f93a52870f2ddcb11b1e7](https://github.com/aragon/osx/commit/7c48725049c54a020b0f93a52870f2ddcb11b1e7)  
 Network: arbitrumSepolia  
@@ -71,6 +72,7 @@ GovernanceWrappedERC20: 0x8f2088E83F007B1567E8E1187380DFfdC83079d4
 TokenVotingSetup: 0xf65268ed4501391b69540268f461a7e2351d9e4f  
 AddresslistVotingSetup: 0xc096770a17b24CEFa725122E4c823F450aBEa7b4
 
+---
 
 Commit: [40f342b5906681e0050ec8bb984fc331070b932a](https://github.com/aragon/osx/commit/40f342b5906681e0050ec8bb984fc331070b932a)  
 Network: mainnet  
@@ -81,6 +83,8 @@ GovernanceERC20: 0x868581Ee5991C6C08D2467132698fa4AB6C9c272
 GovernanceWrappedERC20: 0xCC925a32fA4fa41c42a7d5585D69C980b6Fa9342  
 TokenVotingSetup: 0x644D3bA8A335F5b1a6afFe63e551306D0C933582  
 AddresslistVotingSetup: 0x8f2088E83F007B1567E8E1187380DFfdC83079d4
+
+---
 
 Commit: [2a02e0b32492ea1267139f6608310cec16551f05](https://github.com/aragon/osx/commit/2a02e0b32492ea1267139f6608310cec16551f05)  
 Network: arbitrum  
@@ -110,6 +114,8 @@ address-list-voting-repo: 0xf415FF95166EF5D365fFB3bc6d1701f9e9ed7Df7
 token-voting-repo: 0x1AeD2BEb470aeFD65B43f905Bd5371b1E4749d18  
 admin-repo: 0x326A2aee6A8eE78D79E7E956DE60C6E452f76a8e  
 multisig-repo: 0x7553E6Fb020c5740768cF289e603770AA09b7aE2
+
+---
 
 Commit: [2a02e0b32492ea1267139f6608310cec16551f05](https://github.com/aragon/osx/commit/2a02e0b32492ea1267139f6608310cec16551f05)  
 Network: arbitrumGoerli  

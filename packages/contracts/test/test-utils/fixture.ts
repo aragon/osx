@@ -1,6 +1,5 @@
-import hre, {network, deployments} from 'hardhat';
-
 import networks from '../../networks.json';
+import hre, {network, deployments} from 'hardhat';
 
 export interface ForkOsxVersion {
   version: string;

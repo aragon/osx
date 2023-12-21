@@ -1,8 +1,7 @@
-import {BytesLike} from 'ethers';
-import {defaultAbiCoder, keccak256, solidityPack} from 'ethers/lib/utils';
-
 import {hashHelpers} from '../../../utils/psp';
 import {PermissionOperation, PluginRepoPointer, PreparationType} from './types';
+import {BytesLike} from 'ethers';
+import {defaultAbiCoder, keccak256, solidityPack} from 'ethers/lib/utils';
 
 const ZERO_BYTES_HASH = keccak256(
   defaultAbiCoder.encode(

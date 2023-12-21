@@ -1,8 +1,4 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {BigNumber, ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
+import {TOKEN_VOTING_INTERFACE_ID} from '../../../../../../subgraph/src/utils/constants';
 import {
   DAO,
   DAO__factory,
@@ -13,15 +9,17 @@ import {
   IMembership__factory,
   IPlugin__factory,
   IProposal__factory,
+  IProtocolVersion__factory,
   TokenVoting,
   TokenVoting__factory,
 } from '../../../../../typechain';
 import {TokenVoting__factory as TokenVoting_V1_0_0__factory} from '../../../../../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/token/TokenVoting.sol';
+import {TokenVoting__factory as TokenVoting_V1_3_0__factory} from '../../../../../typechain/@aragon/osx-v1.3.0/plugins/governance/majority-voting/token/TokenVoting.sol';
+import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {
   ProposalCreatedEvent,
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
-
 import {
   findEvent,
   findEventTopicLog,
@@ -30,6 +28,23 @@ import {
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
 } from '../../../../../utils/event';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../../test-utils/error';
+import {
+  TOKEN_VOTING_INTERFACE,
+  getInterfaceID,
+} from '../../../../test-utils/interfaces';
+import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../../test-utils/proxy';
+import {
+  getProtocolVersion,
+  deployAndUpgradeFromToCheck,
+  deployAndUpgradeSelfCheck,
+} from '../../../../test-utils/uups-upgradeable';
 import {
   VoteOption,
   pctToRatio,
@@ -44,22 +59,11 @@ import {
   voteWithSigners,
   toBytes32,
 } from '../../../../test-utils/voting';
-import {deployNewDAO} from '../../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../../test-utils/error';
-import {deployWithProxy} from '../../../../test-utils/proxy';
-import {getInterfaceID} from '../../../../test-utils/interfaces';
-import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
-import {
-  getProtocolVersion,
-  ozUpgradeCheckManagedContract,
-} from '../../../../test-utils/uups-upgradeable';
 import {majorityVotingBaseInterface} from '../majority-voting';
-import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
-
-export const tokenVotingInterface = new ethers.utils.Interface([
-  'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
-  'function getVotingToken()',
-]);
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {BigNumber, ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -199,28 +203,46 @@ describe('TokenVoting', function () {
   describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
+    let initArgs: any;
 
     before(() => {
       currentContractFactory = new TokenVoting__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    beforeEach(() => {
+      initArgs = {
+        dao: dao.address,
+        votingSettings: votingSettings,
+        token: governanceErc20Mock.address,
+      };
+    });
+
+    it('upgrades to a new implementation', async () => {
+      await deployAndUpgradeSelfCheck(
+        signers[0],
+        signers[1],
+        initArgs,
+        'initialize',
+        currentContractFactory,
+        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        dao
+      );
+    });
+
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new TokenVoting_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
-        await ozUpgradeCheckManagedContract(
+        await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
-          dao,
-          {
-            dao: dao.address,
-            votingSettings: votingSettings,
-            token: governanceErc20Mock.address,
-          },
+
+          initArgs,
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
 
@@ -230,13 +252,45 @@ describe('TokenVoting', function () {
       const toProtocolVersion = await getProtocolVersion(
         currentContractFactory.attach(toImplementation)
       );
-      expect(fromProtocolVersion).to.deep.equal(toProtocolVersion); // The contracts inherited from OSx did not change from 1.0.0 to the current version
-      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.not.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+    });
+
+    it('from v1.3.0', async () => {
+      legacyContractFactory = new TokenVoting_V1_3_0__factory(signers[0]);
+
+      const {fromImplementation, toImplementation} =
+        await deployAndUpgradeFromToCheck(
+          signers[0],
+          signers[1],
+
+          initArgs,
+          'initialize',
+          legacyContractFactory,
+          currentContractFactory,
+          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          dao
+        );
+      expect(toImplementation).to.not.equal(fromImplementation);
+
+      const fromProtocolVersion = await getProtocolVersion(
+        legacyContractFactory.attach(fromImplementation)
+      );
+      const toProtocolVersion = await getProtocolVersion(
+        currentContractFactory.attach(toImplementation)
+      );
+      expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
+      expect(fromProtocolVersion).to.deep.equal(
+        IMPLICIT_INITIAL_PROTOCOL_VERSION
+      );
+      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });
 
-  describe('plugin interface: ', async () => {
+  describe('ERC-165', async () => {
     it('does not support the empty interface', async () => {
       expect(await voting.supportsInterface('0xffffffff')).to.be.false;
     });
@@ -248,6 +302,11 @@ describe('TokenVoting', function () {
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
+      expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
+    });
+
+    it('supports the `IProtocolVersion` interface', async () => {
+      const iface = IProtocolVersion__factory.createInterface();
       expect(await voting.supportsInterface(getInterfaceID(iface))).to.be.true;
     });
 
@@ -275,9 +334,9 @@ describe('TokenVoting', function () {
     });
 
     it('supports the `TokenVoting` interface', async () => {
-      expect(
-        await voting.supportsInterface(getInterfaceID(tokenVotingInterface))
-      ).to.be.true;
+      const iface = getInterfaceID(TOKEN_VOTING_INTERFACE);
+      expect(iface).to.equal(TOKEN_VOTING_INTERFACE_ID); // checks that it didn't change
+      expect(await voting.supportsInterface(iface)).to.be.true;
     });
   });
 
@@ -347,19 +406,22 @@ describe('TokenVoting', function () {
           },
         ]);
 
-        await expect(
-          voting
-            .connect(signers[1])
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-        ).to.not.be.reverted;
+        const tx = await voting
+          .connect(signers[1])
+          .createProposal(
+            dummyMetadata,
+            dummyActions,
+            0,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
     });
 
@@ -574,19 +636,22 @@ describe('TokenVoting', function () {
           .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
           .withArgs(signers[2].address);
 
-        await expect(
-          voting
-            .connect(signers[0])
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-        ).to.not.be.reverted;
+        const tx = await voting
+          .connect(signers[0])
+          .createProposal(
+            dummyMetadata,
+            dummyActions,
+            0,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('creates a proposal if `_msgSender` owns no tokens but has enough tokens delegated to her/him in the current block', async () => {
@@ -854,19 +919,20 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
     });
@@ -882,19 +948,20 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
 
       expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
     });
@@ -1060,19 +1127,20 @@ describe('TokenVoting', function () {
         .withArgs(id, signers[0].address, VoteOption.Yes);
 
       // Works if the vote option is 'None'
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      const tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
+      const event = await findEvent<ProposalCreatedEvent>(
+        tx,
+        'ProposalCreated'
+      );
+      expect(event.args.proposalId).to.equal(id);
     });
   });
 
@@ -1102,19 +1170,20 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('reverts on voting None', async () => {
@@ -1229,19 +1298,20 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('does not allow voting, when the vote has not started yet', async () => {
@@ -1459,19 +1529,20 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              0,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        const tx = await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
       });
 
       it('reverts on voting None', async () => {

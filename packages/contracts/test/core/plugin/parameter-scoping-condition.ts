@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   TestParameterScopingPermissionCondition,
   TestPlugin,
@@ -11,6 +7,9 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 
@@ -57,7 +56,7 @@ describe('TestParameterScopingCondition', function () {
     ];
   });
 
-  describe('condition conditions:', async () => {
+  describe('Conditions', async () => {
     it('adds if the first parameter is larger than the second', async () => {
       let param1 = 10;
       let param2 = 1;

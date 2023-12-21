@@ -16,6 +16,7 @@ error DaoUnauthorized(address dao, address where, address who, bytes32 permissio
 /// @param _who The address (EOA or contract) owning the permission.
 /// @param _permissionId The permission identifier.
 /// @param _data The optional data passed to the `PermissionCondition` registered.
+/// @custom:security-contact sirt@aragon.org
 function _auth(
     IDAO _dao,
     address _where,

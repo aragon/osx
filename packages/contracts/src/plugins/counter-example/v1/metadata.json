@@ -1,9 +1,0 @@
-{
-  "ui": "",
-  "change": "",
-  "pluginSetup": {
-    "prepareInstallation": ["address multiplyHelper", "uint num"],
-    "prepareUpdate": [""],
-    "prepareUninstallation": [""]
-  }
-}

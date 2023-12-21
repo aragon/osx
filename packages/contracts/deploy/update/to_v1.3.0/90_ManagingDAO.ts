@@ -1,7 +1,8 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../../../test/test-utils/protocol-version';
 import {DAOFactory__factory, DAO__factory} from '../../../typechain';
 import {getContractAddress} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nUpgrade the managing DAO to new Implementation');
@@ -19,7 +20,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const upgradeTX = await managingDAO.populateTransaction.upgradeToAndCall(
     newDaoImplementation,
-    managingDAO.interface.encodeFunctionData('initializeFrom', [[1, 0, 0], []])
+    managingDAO.interface.encodeFunctionData('initializeFrom', [
+      IMPLICIT_INITIAL_PROTOCOL_VERSION,
+      [],
+    ])
   );
 
   if (!upgradeTX.to || !upgradeTX.data) {

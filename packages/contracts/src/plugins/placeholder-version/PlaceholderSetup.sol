@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.8;
 
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../framework/plugin/setup/PluginSetup.sol";
@@ -8,6 +8,7 @@ import {PluginSetup, IPluginSetup} from "../../framework/plugin/setup/PluginSetu
 /// @title PlaceholderSetup
 /// @author Aragon Association - 2023
 /// @notice A placeholder setup contract for outdated plugin builds. When moving plugin repos to new chains or layers, where only the latest release and build should be available, this placeholder can be used to populate previous builds.
+/// @custom:security-contact sirt@aragon.org
 contract PlaceholderSetup is PluginSetup {
     /// @notice Thrown if the dummy is used.
     error PlaceholderSetupCannotBeUsed();

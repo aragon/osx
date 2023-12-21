@@ -1,7 +1,7 @@
-import {DeployFunction} from 'hardhat-deploy/types';
 import {TokenVotingSetup__factory} from '../../../../typechain';
-import {setTimeout} from 'timers/promises';
+import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {setTimeout} from 'timers/promises';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding token voting setup deployment.\n`);

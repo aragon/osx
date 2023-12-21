@@ -89,17 +89,17 @@
           "type": "tuple",
           "description": "The token mint settings struct containing the `receivers` and `amounts`."
         }
-      ],
-      "prepareUpdate": {
-        "1": {
-          "description": "No input is required for the update.",
-          "inputs": []
-        }
-      },
-      "prepareUninstallation": {
-        "description": "No input is required for the uninstallation.",
+      ]
+    },
+    "prepareUpdate": {
+      "1": {
+        "description": "No input is required for the update.",
         "inputs": []
       }
+    },
+    "prepareUninstallation": {
+      "description": "No input is required for the uninstallation.",
+      "inputs": []
     }
   }
 }

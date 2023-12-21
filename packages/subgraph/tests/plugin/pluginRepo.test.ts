@@ -1,11 +1,11 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {ADDRESS_ONE, ONE} from '../constants';
-import {createReleaseMetadataUpdatedEvent, createVersionCreated} from './utils';
 import {
   handleReleaseMetadataUpdated,
-  handleVersionCreated
+  handleVersionCreated,
 } from '../../src/plugin/pluginRepo';
+import {ADDRESS_ONE, ONE} from '../constants';
+import {createReleaseMetadataUpdatedEvent, createVersionCreated} from './utils';
 import {Bytes} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 test('PluginRepo (handleVersionCreated) mappings with mock event', () => {
   let release = ONE;
