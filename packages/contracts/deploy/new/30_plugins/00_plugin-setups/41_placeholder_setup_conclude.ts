@@ -7,7 +7,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
 
   const PlaceholderSetupDeployment = await deployments.get('PlaceholderSetup');
-  hre.aragonToVerifyContracts.push(PlaceholderSetupDeployment);
+  hre.aragonToVerifyContracts.push({
+    contract:
+      'src/plugins/placeholder-version/PlaceholderSetup.sol:PlaceholderSetup',
+    ...PlaceholderSetupDeployment,
+  });
 };
 
 export default func;
