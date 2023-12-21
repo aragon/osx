@@ -12,15 +12,16 @@ import {
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
-import {
-  DAO_EVENTS,
-  PROPOSAL_EVENTS,
-  MEMBERSHIP_EVENTS,
-} from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {ADMIN_INTERFACE} from '../../../test-utils/interfaces';
-import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {
+  DAO_EVENTS,
+  MEMBERSHIP_EVENTS,
+  PROPOSAL_EVENTS,
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

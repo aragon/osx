@@ -21,7 +21,6 @@ import {
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 import {DAO__factory as DAO_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
 import {ExecutedEvent} from '../../../typechain/DAO';
-import {DAO_EVENTS} from '../../../utils/event';
 import {
   getActions,
   getERC1155TransferAction,
@@ -40,7 +39,7 @@ import {
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {flipBit} from '@aragon/osx-commons-sdk/src/bitmap';
-import {findEvent} from '@aragon/osx-commons-sdk/src/events';
+import {DAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {
   CURRENT_PROTOCOL_VERSION,

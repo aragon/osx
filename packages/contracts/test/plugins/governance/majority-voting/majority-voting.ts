@@ -28,6 +28,11 @@ export const MAJORITY_VOTING_BASE_INTERFACE = new ethers.utils.Interface([
   'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
 ]);
 
+export const VOTING_EVENTS = {
+  VOTING_SETTINGS_UPDATED: 'VotingSettingsUpdated',
+  VOTE_CAST: 'VoteCast',
+};
+
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
   let votingBase: MajorityVotingMock;

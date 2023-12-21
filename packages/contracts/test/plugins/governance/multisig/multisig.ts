@@ -20,12 +20,6 @@ import {
   ApprovedEvent,
   ProposalExecutedEvent,
 } from '../../../../typechain/Multisig';
-import {
-  DAO_EVENTS,
-  PROPOSAL_EVENTS,
-  MULTISIG_EVENTS,
-  MEMBERSHIP_EVENTS,
-} from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
@@ -48,6 +42,11 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
+
+export const MULTISIG_EVENTS = {
+  MULTISIG_SETTINGS_UPDATED: 'MultisigSettingsUpdated',
+  APPROVED: 'Approved',
+};
 
 export type MultisigSettings = {
   minApprovals: number;

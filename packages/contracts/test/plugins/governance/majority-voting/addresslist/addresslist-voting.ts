@@ -19,12 +19,6 @@ import {
   ProposalExecutedEvent,
 } from '../../../../../typechain/AddresslistVoting';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
-import {
-  DAO_EVENTS,
-  VOTING_EVENTS,
-  PROPOSAL_EVENTS,
-  MEMBERSHIP_EVENTS,
-} from '../../../../../utils/event';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {ADDRESSLIST_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
@@ -34,7 +28,10 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../../test-utils/uups-upgradeable';
-import {MAJORITY_VOTING_BASE_INTERFACE} from '../majority-voting';
+import {
+  MAJORITY_VOTING_BASE_INTERFACE,
+  VOTING_EVENTS,
+} from '../majority-voting';
 import {
   VoteOption,
   VotingMode,
@@ -42,7 +39,13 @@ import {
   voteWithSigners,
 } from '../voting-helpers';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
-import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {
+  DAO_EVENTS,
+  MEMBERSHIP_EVENTS,
+  PROPOSAL_EVENTS,
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
