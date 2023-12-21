@@ -10,9 +10,9 @@ import {
 import {UpgradedEvent} from '../../typechain/DAO';
 import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -66,7 +66,7 @@ describe('DAO Upgrade', function () {
         await daoV100Proxy.grant(
           daoV100Proxy.address,
           signers[0].address,
-          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+          DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
       });
 
@@ -284,7 +284,7 @@ describe('DAO Upgrade', function () {
       await daoV100Proxy.grant(
         daoV100Proxy.address,
         signers[0].address,
-        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+        DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
       );
     });
 

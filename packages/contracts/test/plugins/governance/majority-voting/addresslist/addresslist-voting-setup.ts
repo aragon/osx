@@ -6,8 +6,8 @@ import {
 } from '../../../../../typechain';
 import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {ADDRESSLIST_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {VotingSettings, VotingMode} from '../voting-helpers';
+import {ADDRESSLIST_VOTING_INTERFACE} from './addresslist-voting-constants';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';

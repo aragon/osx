@@ -13,7 +13,10 @@ import {
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE} from '../../../test-utils/interfaces';
+import {
+  ADMIN_INTERFACE,
+  EXECUTE_PROPOSAL_PERMISSION_ID,
+} from './admin-constants';
 import {
   DAO_EVENTS,
   MEMBERSHIP_EVENTS,
@@ -22,16 +25,11 @@ import {
   findEventTopicLog,
 } from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-
-// Permissions
-const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
-  'EXECUTE_PROPOSAL_PERMISSION'
-);
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('Admin', function () {
   let signers: SignerWithAddress[];
@@ -79,7 +77,11 @@ describe('Admin', function () {
     await adminCloneFactory.deployClone();
     plugin = AdminFactory.attach(anticipatedPluginAddress);
 
-    await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
+    await dao.grant(
+      dao.address,
+      plugin.address,
+      DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+    );
     await dao.grant(
       plugin.address,
       ownerAddress,
@@ -153,11 +155,19 @@ describe('Admin', function () {
     });
 
     it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
-      await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
+      await dao.revoke(
+        dao.address,
+        plugin.address,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
+        .withArgs(
+          dao.address,
+          plugin.address,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+        );
     });
 
     it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {

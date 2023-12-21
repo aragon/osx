@@ -6,14 +6,14 @@ import {
   TestPlugin__factory,
 } from '../../../typechain';
 import {Operation} from '../../../utils/types';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
 const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
-  ROOT_PERMISSION_ID,
+  DAO_PERMISSIONS.ROOT_PERMISSION_ID,
   ethers.utils.id('TEST_PERMISSION_1'),
   ethers.utils.id('TEST_PERMISSION_2'),
 ];
@@ -79,7 +79,7 @@ describe('Core: PermissionManager', function () {
       const permission = await pm.getAuthPermission(
         pm.address,
         ownerSigner.address,
-        ROOT_PERMISSION_ID
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
       );
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
@@ -98,7 +98,7 @@ describe('Core: PermissionManager', function () {
 
     it('reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR', async () => {
       await expect(
-        pm.grant(ANY_ADDR, ANY_ADDR, ROOT_PERMISSION_ID)
+        pm.grant(ANY_ADDR, ANY_ADDR, DAO_PERMISSIONS.ROOT_PERMISSION_ID)
       ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
@@ -149,7 +149,11 @@ describe('Core: PermissionManager', function () {
           .grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -157,10 +161,18 @@ describe('Core: PermissionManager', function () {
       await expect(
         pm
           .connect(otherSigner)
-          .grant(pm.address, otherSigner.address, ROOT_PERMISSION_ID)
+          .grant(
+            pm.address,
+            otherSigner.address,
+            DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
@@ -325,7 +337,11 @@ describe('Core: PermissionManager', function () {
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
 
     it('reverts if the caller does not have `ROOT_PERMISSION_ID`', async () => {
@@ -341,12 +357,16 @@ describe('Core: PermissionManager', function () {
           .grantWithCondition(
             pm.address,
             otherSigner.address,
-            ROOT_PERMISSION_ID,
+            DAO_PERMISSIONS.ROOT_PERMISSION_ID,
             conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
@@ -377,7 +397,11 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
 
     it('should not emit revoked if already revoked', async () => {
@@ -395,7 +419,11 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -406,7 +434,11 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
@@ -532,7 +564,11 @@ describe('Core: PermissionManager', function () {
         pm.connect(signers[2]).applyMultiTargetPermissions(bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, signers[2].address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          signers[2].address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
@@ -702,7 +738,11 @@ describe('Core: PermissionManager', function () {
           .applySingleTargetPermissions(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -720,7 +760,11 @@ describe('Core: PermissionManager', function () {
           .applySingleTargetPermissions(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
@@ -1091,13 +1135,18 @@ describe('Core: PermissionManager', function () {
     it('should hash PERMISSIONS', async () => {
       const packed = ethers.utils.solidityPack(
         ['string', 'address', 'address', 'address'],
-        ['PERMISSION', ownerSigner.address, pm.address, ROOT_PERMISSION_ID]
+        [
+          'PERMISSION',
+          ownerSigner.address,
+          pm.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+        ]
       );
       const hash = ethers.utils.keccak256(packed);
       const contractHash = await pm.getPermissionHash(
         pm.address,
         ownerSigner.address,
-        ROOT_PERMISSION_ID
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
       );
       expect(hash).to.be.equal(contractHash);
     });

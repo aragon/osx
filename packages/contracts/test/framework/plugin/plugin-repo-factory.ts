@@ -14,6 +14,7 @@ import {
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {PLUGIN_REGISTRY_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -24,14 +25,6 @@ const EVENTS = {
   VersionCreated: 'VersionCreated',
   ReleaseMetadataUpdated: 'ReleaseMetadataUpdated',
 };
-
-const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_PLUGIN_REPO_PERMISSION'
-);
-
-const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-);
 
 async function getExpectedRepoAddress(from: string) {
   const nonce = await ethers.provider.getTransactionCount(from);
@@ -86,14 +79,14 @@ describe('PluginRepoFactory: ', function () {
     await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      REGISTER_PLUGIN_REPO_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
-      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
   });
 
@@ -129,7 +122,7 @@ describe('PluginRepoFactory: ', function () {
       await managingDao.revoke(
         pluginRepoRegistry.address,
         pluginRepoFactory.address,
-        REGISTER_PLUGIN_REPO_PERMISSION_ID
+        PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
       );
 
       await expect(
@@ -140,7 +133,7 @@ describe('PluginRepoFactory: ', function () {
           managingDao.address,
           pluginRepoRegistry.address,
           pluginRepoFactory.address,
-          REGISTER_PLUGIN_REPO_PERMISSION_ID
+          PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
         );
     });
 
@@ -207,7 +200,7 @@ describe('PluginRepoFactory: ', function () {
       await managingDao.revoke(
         pluginRepoRegistry.address,
         pluginRepoFactory.address,
-        REGISTER_PLUGIN_REPO_PERMISSION_ID
+        PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
       );
 
       await expect(
@@ -224,7 +217,7 @@ describe('PluginRepoFactory: ', function () {
           managingDao.address,
           pluginRepoRegistry.address,
           pluginRepoFactory.address,
-          REGISTER_PLUGIN_REPO_PERMISSION_ID
+          PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
         );
     });
 

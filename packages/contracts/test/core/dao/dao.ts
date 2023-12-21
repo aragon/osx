@@ -29,7 +29,6 @@ import {
   TOKEN_INTERFACE_IDS,
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -40,6 +39,7 @@ import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {flipBit} from '@aragon/osx-commons-sdk/src/bitmap';
 import {DAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
@@ -79,22 +79,6 @@ const EVENTS = {
   CallbackReceived: 'CallbackReceived',
 };
 
-export const PERMISSION_IDS = {
-  UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
-  SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
-  EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
-  VALIDATE_SIGNATURE_PERMISSION_ID: ethers.utils.id(
-    'VALIDATE_SIGNATURE_PERMISSION'
-  ),
-  SET_TRUSTED_FORWARDER_PERMISSION_ID: ethers.utils.id(
-    'SET_TRUSTED_FORWARDER_PERMISSION'
-  ),
-  MINT_PERMISSION_ID: ethers.utils.id('MINT_PERMISSION'),
-  REGISTER_STANDARD_CALLBACK_PERMISSION_ID: ethers.utils.id(
-    'REGISTER_STANDARD_CALLBACK_PERMISSION'
-  ),
-};
-
 export const VALID_ERC1271_SIGNATURE = '0x1626ba7e';
 export const INVALID_ERC1271_SIGNATURE = '0xffffffff';
 
@@ -124,27 +108,27 @@ describe('DAO', function () {
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+        DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
+        DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
+        DAO_PERMISSIONS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
+        DAO_PERMISSIONS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       ),
     ]);
   });
@@ -258,7 +242,7 @@ describe('DAO', function () {
     });
 
     it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
-      // Create an unitialized DAO.
+      // Create an uninitialized DAO.
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
       // Expect the contract to be uninitialized  with `_reentrancyStatus = 0`.
@@ -288,7 +272,7 @@ describe('DAO', function () {
     });
 
     it('does not initialize `_reentrancyStatus` for versions >= 1.3.0', async () => {
-      // Create an unitialized DAO.
+      // Create an uninitialized DAO.
       const uninitializedDao = await deployWithProxy<DAO>(DAO);
 
       // Expect the contract to be uninitialized  with `_reentrancyStatus = 0`.
@@ -342,7 +326,7 @@ describe('DAO', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+        DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
       );
     });
 
@@ -357,7 +341,7 @@ describe('DAO', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+          DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
       expect(toImplementation).to.not.equal(fromImplementation);
 
@@ -386,7 +370,7 @@ describe('DAO', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+          DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
       expect(toImplementation).to.not.equal(fromImplementation);
 
@@ -460,7 +444,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
+        DAO_PERMISSIONS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       );
 
       await expect(dao.setTrustedForwarder(dummyAddress2))
@@ -468,7 +452,7 @@ describe('DAO', function () {
         .withArgs(
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
+          DAO_PERMISSIONS.SET_TRUSTED_FORWARDER_PERMISSION_ID
         );
     });
 
@@ -489,7 +473,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+        DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID
       );
 
       await expect(dao.setMetadata(dummyMetadata1))
@@ -497,7 +481,7 @@ describe('DAO', function () {
         .withArgs(
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+          DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID
         );
     });
 
@@ -518,7 +502,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
       );
 
       await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
@@ -526,7 +510,7 @@ describe('DAO', function () {
         .withArgs(
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.EXECUTE_PERMISSION_ID
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
         );
     });
 
@@ -557,7 +541,7 @@ describe('DAO', function () {
       await dao.grant(
         dao.address,
         dao.address,
-        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
       );
 
       // Create a reentrant action calling `dao.execute` again.
@@ -737,7 +721,7 @@ describe('DAO', function () {
       ).to.not.be.reverted;
     });
 
-    describe('Transfering tokens', async () => {
+    describe('Transferring tokens', async () => {
       const amount = ethers.utils.parseEther('1.23');
       const options = {value: amount};
 
@@ -776,7 +760,7 @@ describe('DAO', function () {
 
         beforeEach(async () => {
           const TestERC20 = new TestERC20__factory(signers[0]);
-          erc20Token = await TestERC20.deploy('name', 'symbol', 0);
+          erc20Token = await TestERC20.deploy('name', 'symbol');
         });
 
         it('reverts if transfers more ERC20 than dao has', async () => {
@@ -1045,7 +1029,7 @@ describe('DAO', function () {
 
     beforeEach(async () => {
       const TestERC20 = new TestERC20__factory(signers[0]);
-      token = await TestERC20.deploy('name', 'symbol', 0);
+      token = await TestERC20.deploy('name', 'symbol');
     });
 
     it('reverts if amount is zero', async () => {
@@ -1123,7 +1107,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
+        DAO_PERMISSIONS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       );
 
       await expect(
@@ -1133,7 +1117,7 @@ describe('DAO', function () {
         .withArgs(
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
+          DAO_PERMISSIONS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
         );
     });
 
@@ -1241,7 +1225,7 @@ describe('DAO', function () {
       await dao.grant(
         dao.address,
         caller.address,
-        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID
+        DAO_PERMISSIONS.VALIDATE_SIGNATURE_PERMISSION_ID
       );
 
       // The caller can validate signatures now.
@@ -1272,7 +1256,7 @@ describe('DAO', function () {
       await dao.grantWithCondition(
         dao.address,
         caller.address,
-        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+        DAO_PERMISSIONS.VALIDATE_SIGNATURE_PERMISSION_ID,
         mockCondition.address
       );
 
@@ -1308,7 +1292,7 @@ describe('DAO', function () {
       await dao.grantWithCondition(
         dao.address,
         ANY_ADDR,
-        PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+        DAO_PERMISSIONS.VALIDATE_SIGNATURE_PERMISSION_ID,
         mockCondition.address
       );
 
@@ -1339,18 +1323,18 @@ describe('DAO', function () {
     });
 
     context(
-      'A caller-specfic and a generic condition are both set',
+      'A caller-specific and a generic condition are both set',
       async () => {
         let specificMockCondition: PermissionConditionMock;
         let genericMockCondition: PermissionConditionMock;
 
         beforeEach(async () => {
-          // Setup the specfic condition for a specific caller
+          // Setup the specific condition for a specific caller
           specificMockCondition = await mockConditionFactory.deploy();
           await dao.grantWithCondition(
             dao.address,
             caller.address,
-            PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+            DAO_PERMISSIONS.VALIDATE_SIGNATURE_PERMISSION_ID,
             specificMockCondition.address
           );
 
@@ -1359,7 +1343,7 @@ describe('DAO', function () {
           await dao.grantWithCondition(
             dao.address,
             ANY_ADDR,
-            PERMISSION_IDS.VALIDATE_SIGNATURE_PERMISSION_ID,
+            DAO_PERMISSIONS.VALIDATE_SIGNATURE_PERMISSION_ID,
             genericMockCondition.address
           );
         });
@@ -1422,7 +1406,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+        DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID
       );
 
       await expect(dao.setDaoURI('https://new.example.com'))
@@ -1430,7 +1414,7 @@ describe('DAO', function () {
         .withArgs(
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+          DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID
         );
     });
 

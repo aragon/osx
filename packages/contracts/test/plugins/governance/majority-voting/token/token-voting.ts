@@ -21,8 +21,6 @@ import {
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {TOKEN_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
-import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
@@ -31,13 +29,14 @@ import {
 import {
   MAJORITY_VOTING_BASE_INTERFACE,
   VOTING_EVENTS,
-} from '../majority-voting';
+} from '../majority-voting-constants';
 import {
   VoteOption,
   VotingMode,
   VotingSettings,
   voteWithSigners,
 } from '../voting-helpers';
+import {TOKEN_VOTING_INTERFACE} from './token-voting-constants';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {
   DAO_EVENTS,
@@ -48,6 +47,8 @@ import {
 } from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {RATIO_BASE, pctToRatio} from '@aragon/osx-commons-sdk/src/math';
+import '@aragon/osx-commons-sdk/src/permission';
+import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -218,7 +219,7 @@ describe('TokenVoting', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         dao
       );
     });
@@ -235,7 +236,7 @@ describe('TokenVoting', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
@@ -265,7 +266,7 @@ describe('TokenVoting', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
       expect(toImplementation).to.not.equal(fromImplementation);

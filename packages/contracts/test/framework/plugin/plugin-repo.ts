@@ -13,7 +13,6 @@ import {
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
 import {ZERO_BYTES32} from '../../test-utils/dao';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {tagHash} from '../../test-utils/psp/hash-helpers';
 import {
   deployMockPluginSetup,
@@ -25,6 +24,7 @@ import {
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {PLUGIN_REPO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
@@ -98,7 +98,7 @@ describe('PluginRepo', function () {
           initArgs,
           'initialize',
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+          PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
         );
       });
 
@@ -113,7 +113,7 @@ describe('PluginRepo', function () {
             'initialize',
             legacyContractFactory,
             currentContractFactory,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
         expect(toImplementation).to.not.equal(fromImplementation);
 
@@ -142,7 +142,7 @@ describe('PluginRepo', function () {
             'initialize',
             legacyContractFactory,
             currentContractFactory,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
         expect(toImplementation).to.not.equal(fromImplementation);
 

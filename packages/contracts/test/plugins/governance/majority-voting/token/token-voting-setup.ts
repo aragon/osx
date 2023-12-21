@@ -12,8 +12,8 @@ import {
 } from '../../../../../typechain';
 import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {TOKEN_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {VotingMode, VotingSettings} from '../voting-helpers';
+import {TOKEN_VOTING_INTERFACE} from './token-voting-constants';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';

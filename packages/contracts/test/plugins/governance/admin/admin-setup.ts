@@ -6,21 +6,19 @@ import {
 } from '../../../../typechain';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE} from '../../../test-utils/interfaces';
+import {
+  ADMIN_INTERFACE,
+  EXECUTE_PROPOSAL_PERMISSION_ID,
+} from './admin-constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
-
-// Permissions
-const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
-  'EXECUTE_PROPOSAL_PERMISSION'
-);
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('AdminSetup', function () {
   let ownerAddress: string;
@@ -129,7 +127,7 @@ describe('AdminSetup', function () {
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });
@@ -174,7 +172,7 @@ describe('AdminSetup', function () {
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });

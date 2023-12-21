@@ -14,11 +14,12 @@ import {
 } from '../../typechain';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
 import {
-  EXECUTE_PERMISSION_ID,
-  MAINTAINER_PERMISSION_ID,
-  ROOT_PERMISSION_ID,
-  UPGRADE_PERMISSIONS,
-} from '../test-utils/permissions';
+  DAO_PERMISSIONS,
+  DAO_REGISTRY_PERMISSIONS,
+  ENS_REGISTRAR_PERMISSIONS,
+  PLUGIN_REGISTRY_PERMISSIONS,
+  PLUGIN_REPO_PERMISSIONS,
+} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import hre, {ethers, deployments} from 'hardhat';
@@ -159,7 +160,7 @@ describe('Managing DAO', function () {
       await managingDao.hasPermission(
         managingDao.address,
         managingDao.address,
-        ROOT_PERMISSION_ID,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
         []
       )
     ).to.be.true;
@@ -171,7 +172,7 @@ describe('Managing DAO', function () {
         await managingDao.hasPermission(
           managingDao.address,
           multisig.address,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -199,7 +200,7 @@ describe('Managing DAO', function () {
         await managingDao.hasPermission(
           managingDao.address,
           managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
+          DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -210,7 +211,7 @@ describe('Managing DAO', function () {
         await managingDao.hasPermission(
           daoRegistry.address,
           managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -221,7 +222,7 @@ describe('Managing DAO', function () {
         await managingDao.hasPermission(
           pluginRepoRegistry.address,
           managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -232,7 +233,7 @@ describe('Managing DAO', function () {
         await managingDao.hasPermission(
           ensSubdomainRegistrars.daoRegistrar.address,
           managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+          ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -242,7 +243,7 @@ describe('Managing DAO', function () {
         await managingDao.hasPermission(
           ensSubdomainRegistrars.pluginRegistrar.address,
           managingDao.address,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+          ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           []
         )
       ).to.be.true;
@@ -254,7 +255,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.tokenVoting.isGranted(
             pluginsRepos.tokenVoting.address,
             managingDao.address,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -265,7 +266,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.tokenVoting.isGranted(
             pluginsRepos.tokenVoting.address,
             managingDao.address,
-            MAINTAINER_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -278,7 +279,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.addresslistVoting.isGranted(
             pluginsRepos.addresslistVoting.address,
             managingDao.address,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -288,7 +289,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.addresslistVoting.isGranted(
             pluginsRepos.addresslistVoting.address,
             managingDao.address,
-            MAINTAINER_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -301,7 +302,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.admin.isGranted(
             pluginsRepos.admin.address,
             managingDao.address,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -311,7 +312,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.admin.isGranted(
             pluginsRepos.admin.address,
             managingDao.address,
-            MAINTAINER_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -324,7 +325,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.multisig.isGranted(
             pluginsRepos.multisig.address,
             managingDao.address,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
         ).to.be.true;
@@ -335,7 +336,7 @@ describe('Managing DAO', function () {
           await pluginsRepos.multisig.isGranted(
             pluginsRepos.multisig.address,
             managingDao.address,
-            MAINTAINER_PERMISSION_ID,
+            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
         ).to.be.true;

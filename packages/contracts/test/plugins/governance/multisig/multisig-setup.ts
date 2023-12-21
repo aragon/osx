@@ -20,11 +20,19 @@ import {
 import {hashHelpers} from '../../../../utils/psp';
 import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
-import {MultisigSettings} from './multisig';
+import {
+  MULTISIG_INTERFACE,
+  MultisigSettings,
+  MULTISIG_EVENTS,
+  UPDATE_MULTISIG_SETTINGS_PERMISSION_ID,
+} from './multisig-constants';
 import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {
+  DAO_PERMISSIONS,
+  PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
+} from '@aragon/osx-commons-sdk/src/permission';
 import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -35,15 +43,6 @@ const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
 let defaultMultisigSettings: MultisigSettings;
-
-// Permissions
-const UPDATE_MULTISIG_SETTINGS_PERMISSION_ID = ethers.utils.id(
-  'UPDATE_MULTISIG_SETTINGS_PERMISSION'
-);
-const UPGRADE_PLUGIN_PERMISSION_ID_ID = ethers.utils.id(
-  'UPGRADE_PLUGIN_PERMISSION'
-);
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('MultisigSetup', function () {
   let signers: SignerWithAddress[];
@@ -239,14 +238,14 @@ describe('MultisigSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPGRADE_PLUGIN_PERMISSION_ID_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         ],
         [
           Operation.Grant,
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });
@@ -324,14 +323,14 @@ describe('MultisigSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPGRADE_PLUGIN_PERMISSION_ID_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         ],
         [
           Operation.Revoke,
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });

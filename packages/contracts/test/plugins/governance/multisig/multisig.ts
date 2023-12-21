@@ -21,15 +21,21 @@ import {
   ProposalExecutedEvent,
 } from '../../../../typechain/Multisig';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
-import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {MULTISIG_EVENTS, MULTISIG_INTERFACE} from './multisig-constants';
+import {
+  DAO_EVENTS,
+  MEMBERSHIP_EVENTS,
+  PROPOSAL_EVENTS,
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {
   CURRENT_PROTOCOL_VERSION,
@@ -41,16 +47,6 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
-
-export const MULTISIG_EVENTS = {
-  MULTISIG_SETTINGS_UPDATED: 'MultisigSettingsUpdated',
-  APPROVED: 'Approved',
-};
-
-export type MultisigSettings = {
-  minApprovals: number;
-  onlyListed: boolean;
-};
 
 export async function approveWithSigners(
   multisigContract: Contract,
@@ -216,7 +212,7 @@ describe('Multisig', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         dao
       );
     });
@@ -232,7 +228,7 @@ describe('Multisig', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
@@ -262,7 +258,7 @@ describe('Multisig', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
       expect(toImplementation).to.not.equal(fromImplementation);

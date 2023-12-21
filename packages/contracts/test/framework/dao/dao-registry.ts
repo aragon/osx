@@ -9,12 +9,15 @@ import {DAORegistry__factory as DAORegistry_V1_3_0__factory} from '../../../type
 import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {
+  DAO_REGISTRY_PERMISSIONS,
+  ENS_REGISTRAR_PERMISSIONS,
+} from '@aragon/osx-commons-sdk/src/permission';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
@@ -36,11 +39,6 @@ describe('DAORegistry', function () {
   let ownerAddress: string;
   let targetDao: DAO;
   let ensSubdomainRegistrar: ENSSubdomainRegistrar;
-
-  const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-    'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-  );
-  const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
   const topLevelDomain = 'dao.eth';
   const daoSubdomain = 'my-cool-org';
@@ -80,14 +78,14 @@ describe('DAORegistry', function () {
     await managingDao.grant(
       daoRegistry.address,
       ownerAddress,
-      REGISTER_DAO_PERMISSION_ID
+      DAO_REGISTRY_PERMISSIONS.REGISTER_DAO_PERMISSION_ID
     );
 
     // Grant the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission on the ENS subdomain registrar to the DAO registry contract
     await managingDao.grant(
       ensSubdomainRegistrar.address,
       daoRegistry.address,
-      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
   });
 
@@ -120,7 +118,7 @@ describe('DAORegistry', function () {
     await managingDao.revoke(
       daoRegistry.address,
       ownerAddress,
-      REGISTER_DAO_PERMISSION_ID
+      DAO_REGISTRY_PERMISSIONS.REGISTER_DAO_PERMISSION_ID
     );
 
     const newTargetDao = await deployNewDAO(signers[0]);
@@ -133,7 +131,7 @@ describe('DAORegistry', function () {
         managingDao.address,
         daoRegistry.address,
         ownerAddress,
-        REGISTER_DAO_PERMISSION_ID
+        DAO_REGISTRY_PERMISSIONS.REGISTER_DAO_PERMISSION_ID
       );
   });
 
@@ -283,7 +281,7 @@ describe('DAORegistry', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+        DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
         managingDao
       );
     });
@@ -299,7 +297,7 @@ describe('DAORegistry', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDao
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -329,7 +327,7 @@ describe('DAORegistry', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDao
         );
       expect(toImplementation).to.not.equal(fromImplementation);
