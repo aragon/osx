@@ -232,7 +232,7 @@ describe('DAO Upgrade', function () {
           ])
         );
 
-        // Check that the stored implementatio has changed.
+        // Check that the stored implementation has changed.
         const implementationAfterUpgrade = await readStorage(
           daoV100Proxy.address,
           ERC1967_IMPLEMENTATION_SLOT,

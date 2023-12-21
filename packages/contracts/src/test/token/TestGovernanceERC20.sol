@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
 
 import {GovernanceERC20} from "../../token/ERC20/governance/GovernanceERC20.sol";
 

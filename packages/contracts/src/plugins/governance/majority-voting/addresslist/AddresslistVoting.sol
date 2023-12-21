@@ -4,10 +4,10 @@ pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
-import {Addresslist} from "@aragon/osx-commons/src/governance/membership/Addresslist.sol";
+import {IMembership} from "@aragon/osx-commons/src/plugin/extensions/membership/IMembership.sol";
+import {Addresslist} from "@aragon/osx-commons/src/governance/Addresslist.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons/src/utils/math/Ratio.sol";
-import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
 
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";

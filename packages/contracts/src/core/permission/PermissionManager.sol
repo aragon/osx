@@ -5,8 +5,8 @@ pragma solidity ^0.8.8;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
-import {IPermissionCondition} from "@aragon/osx-commons/src/permission/IPermissionCondition.sol";
-import {PermissionCondition} from "@aragon/osx-commons/src/permission/PermissionCondition.sol";
+import {IPermissionCondition} from "@aragon/osx-commons/src/permission/condition/IPermissionCondition.sol";
+import {PermissionCondition} from "@aragon/osx-commons/src/permission/condition/PermissionCondition.sol";
 import {PermissionLib} from "@aragon/osx-commons/src/permission/PermissionLib.sol";
 
 /// @title PermissionManager

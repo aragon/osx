@@ -6,10 +6,10 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import {IMembership} from "@aragon/osx-commons/src/governance/membership/IMembership.sol";
+import {IMembership} from "@aragon/osx-commons/src/plugin/extensions/membership/IMembership.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons/src/utils/math/Ratio.sol";
 
-import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";
 

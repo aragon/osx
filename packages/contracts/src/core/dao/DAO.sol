@@ -17,7 +17,7 @@ import {IProtocolVersion} from "@aragon/osx-commons/src/utils/versioning/IProtoc
 import {ProtocolVersion} from "@aragon/osx-commons/src/utils/versioning/ProtocolVersion.sol";
 import {VersionComparisonLib} from "@aragon/osx-commons/src/utils/versioning/VersionComparisonLib.sol";
 import {hasBit, flipBit} from "@aragon/osx-commons/src/utils/math/BitMap.sol";
-import {IDAO} from "@aragon/osx-commons/src/interfaces/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
