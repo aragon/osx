@@ -9,7 +9,6 @@ import {
   IERC20PermitUpgradeable__factory,
   IVotesUpgradeable__factory,
 } from '../../../typechain';
-import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -86,7 +85,7 @@ describe('GovernanceWrappedERC20', function () {
     it('reverts if trying to re-initialize', async () => {
       await expect(
         governanceToken.initialize(...defaultGovernanceWrappedERC20InitData)
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
 
     it('sets the wrapped token name and symbol', async () => {
@@ -164,7 +163,7 @@ describe('GovernanceWrappedERC20', function () {
       const erc20Balance = await erc20.balanceOf(signers[0].address);
       await expect(
         governanceToken.depositFor(signers[0].address, erc20Balance)
-      ).to.be.revertedWith(OZ_ERRORS.ERC20_INSUFFICIENT_ALLOWANCE);
+      ).to.be.revertedWith('ERC20: insufficient allowance');
     });
 
     it('deposits an amount of tokens', async () => {

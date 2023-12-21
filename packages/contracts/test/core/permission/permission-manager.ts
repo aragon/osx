@@ -6,7 +6,6 @@ import {
   TestPlugin__factory,
 } from '../../../typechain';
 import {Operation} from '../../../utils/types';
-import {OZ_ERRORS} from '../../test-utils/error';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -66,7 +65,7 @@ describe('Core: PermissionManager', function () {
   describe('init', () => {
     it('should allow init call only once', async () => {
       await expect(pm.init(ownerSigner.address)).to.be.revertedWith(
-        OZ_ERRORS.ALREADY_INITIALIZED
+        'Initializable: contract is already initialized'
       );
     });
 

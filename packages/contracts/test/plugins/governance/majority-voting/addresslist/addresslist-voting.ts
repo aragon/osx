@@ -20,7 +20,6 @@ import {
 } from '../../../../../typechain/AddresslistVoting';
 import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../../test-utils/error';
 import {ADDRESSLIST_VOTING_INTERFACE} from '../../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
 import {
@@ -123,7 +122,7 @@ describe('AddresslistVoting', function () {
 
       await expect(
         voting.initialize(dao.address, votingSettings, [])
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
   });
 

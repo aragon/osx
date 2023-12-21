@@ -21,7 +21,6 @@ import {
   ProposalExecutedEvent,
 } from '../../../../typechain/Multisig';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../test-utils/error';
 import {MULTISIG_INTERFACE} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
@@ -132,7 +131,7 @@ describe('Multisig', function () {
           signers.slice(0, 5).map(s => s.address),
           multisigSettings
         )
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
 
     it('adds the initial addresses to the address list', async () => {

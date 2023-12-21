@@ -13,7 +13,6 @@ import {
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../test-utils/error';
 import {ADMIN_INTERFACE} from '../../../test-utils/interfaces';
 import {
   DAO_EVENTS,
@@ -97,7 +96,7 @@ describe('Admin', function () {
       await initializePlugin();
 
       await expect(initializePlugin()).to.be.revertedWith(
-        OZ_ERRORS.ALREADY_INITIALIZED
+        'Initializable: contract is already initialized'
       );
     });
 

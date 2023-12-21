@@ -9,7 +9,6 @@ import {
   IVotesUpgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -67,7 +66,7 @@ describe('GovernanceERC20', function () {
   describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(token.initialize(...defaultInitData)).to.be.revertedWith(
-        OZ_ERRORS.ALREADY_INITIALIZED
+        'Initializable: contract is already initialized'
       );
     });
 

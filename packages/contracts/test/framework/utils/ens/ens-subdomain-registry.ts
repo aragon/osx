@@ -12,7 +12,6 @@ import {ENSSubdomainRegistrar__factory as ENSSubdomainRegistrar_V1_3_0__factory}
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {setupResolver} from '../../../test-utils/ens';
-import {OZ_ERRORS} from '../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
   getProtocolVersion,
@@ -432,7 +431,7 @@ describe('ENSSubdomainRegistrar', function () {
             ens.address,
             ensDomainHash('foo')
           )
-        ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+        ).to.be.revertedWith('Initializable: contract is already initialized');
       });
 
       it('reverts subnode registration if the calling address lacks permission of the managing DAO', async () => {

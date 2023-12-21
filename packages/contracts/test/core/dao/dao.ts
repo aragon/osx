@@ -29,7 +29,6 @@ import {
   TOKEN_INTERFACE_IDS,
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {OZ_ERRORS} from '../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   getProtocolVersion,
@@ -159,7 +158,7 @@ describe('DAO', function () {
           dummyAddress1,
           daoExampleURI
         )
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
 
     it('initializes with the correct trusted forwarder', async () => {
