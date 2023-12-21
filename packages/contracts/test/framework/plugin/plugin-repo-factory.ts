@@ -86,7 +86,8 @@ describe('PluginRepoFactory: ', function () {
     await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
-      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.ENS_REGISTRAR_PERMISSIONS
+        .REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
   });
 
