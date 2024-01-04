@@ -1,6 +1,6 @@
+import networks from '../networks';
 import fs from 'fs';
 import HRE from 'hardhat';
-import path from 'path';
 import {file} from 'tmp-promise';
 
 function delay(ms: number) {
@@ -13,15 +13,10 @@ export const verifyContract = async (
 ) => {
   const currentNetwork = HRE.network.name;
 
-  const networks = await fs.promises.readFile(
-    path.join(__dirname, '../networks.json'),
-    'utf8'
-  );
-  const networksJSON = JSON.parse(networks.toString());
-  if (!Object.keys(networksJSON).includes(currentNetwork)) {
+  if (!Object.keys(networks).includes(currentNetwork)) {
     throw Error(
       `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${Object.keys(
-        networksJSON
+        networks
       ).join(',')}`
     );
   }

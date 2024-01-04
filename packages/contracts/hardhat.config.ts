@@ -1,29 +1,30 @@
+import networks, {ContractsNetworkConfig} from './networks';
 import {AragonPluginRepos, TestingFork} from './utils/types';
+import {NetworkConfigs} from '@aragon/osx-commons-configs';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-verify';
 import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';
-import fs from 'fs';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import path from 'path';
 import 'solidity-coverage';
 import 'solidity-docgen';
+
+type HardhatNetworksExtension = ContractsNetworkConfig & {
+  accounts?: string[];
+};
 
 dotenv.config();
 
 const ETH_KEY = process.env.ETH_KEY;
 const accounts = ETH_KEY ? ETH_KEY.split(',') : [];
 
-const networks = JSON.parse(
-  fs.readFileSync(path.join(__dirname, './networks.json'), 'utf8')
-);
-
 // add accounts to network configs
+const hardhatNetworks: NetworkConfigs<HardhatNetworksExtension> = networks;
 for (const network of Object.keys(networks)) {
-  networks[network].accounts = accounts;
+  hardhatNetworks[network].accounts = accounts;
 }
 
 // Extend HardhatRuntimeEnvironment
@@ -78,7 +79,7 @@ const config: HardhatUserConfig = {
         ? ['./deploy']
         : ['./deploy/new', './deploy/verification'],
     },
-    ...networks,
+    ...hardhatNetworks,
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

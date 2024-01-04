@@ -1,4 +1,4 @@
-import networks from '../../networks.json';
+import networks from '../../networks';
 import hre, {network, deployments} from 'hardhat';
 
 export interface ForkOsxVersion {
@@ -11,7 +11,7 @@ export async function initializeFork(
   forkNetwork: string,
   blockNumber: number
 ): Promise<void> {
-  if (!(networks as any)[forkNetwork]) {
+  if (!networks[forkNetwork]) {
     throw new Error(`No info found for network '${forkNetwork}'.`);
   }
 
