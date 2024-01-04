@@ -8,9 +8,9 @@ import {
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../utils/psp';
 import {checkPermission, getContractAddress} from '../../helpers';
-import {findEvent} from '@aragon/osx-commons-sdk/src/from_osx/events';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
-import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {findEvent} from '@aragon/osx-commons-sdk';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

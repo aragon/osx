@@ -72,15 +72,15 @@ import {
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/protocol-version';
-import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/from_osx/events';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {
   DAO_PERMISSIONS,
   ENS_REGISTRAR_PERMISSIONS,
   PLUGIN_REGISTRY_PERMISSIONS,
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
   PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
-} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+} from '@aragon/osx-commons-sdk';
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

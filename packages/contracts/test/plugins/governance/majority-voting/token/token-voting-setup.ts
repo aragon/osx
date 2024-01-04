@@ -13,11 +13,11 @@ import {
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {VotingMode, VotingSettings} from '../voting-helpers';
 import {TOKEN_VOTING_INTERFACE} from './token-voting-constants';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
-import {TIME} from '@aragon/osx-commons-sdk/src/from_osx/time';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
+import {TIME} from '@aragon/osx-commons-sdk';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
-import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

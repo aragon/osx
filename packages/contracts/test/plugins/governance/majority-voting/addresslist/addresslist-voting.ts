@@ -47,10 +47,10 @@ import {
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
-} from '@aragon/osx-commons-sdk/src/from_osx/events';
-import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
-import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/from_osx/proposal';
-import {TIME} from '@aragon/osx-commons-sdk/src/from_osx/time';
+} from '@aragon/osx-commons-sdk';
+import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk';
+import {TIME} from '@aragon/osx-commons-sdk';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {time} from '@nomicfoundation/hardhat-network-helpers';

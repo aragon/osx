@@ -4,7 +4,7 @@ import {
   DAO_PERMISSIONS,
   getContractAddress,
 } from '../../helpers';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

@@ -22,7 +22,7 @@ import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {
   DAO_REGISTRY_PERMISSIONS,
   ENS_REGISTRAR_PERMISSIONS,
-} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

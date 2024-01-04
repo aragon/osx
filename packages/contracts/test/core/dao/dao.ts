@@ -41,12 +41,9 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '@aragon/osx-commons-contracts/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {flipBit} from '@aragon/osx-commons-sdk/src/from_osx/bitmap';
-import {
-  IDAO_EVENTS,
-  findEvent,
-} from '@aragon/osx-commons-sdk/src/from_osx/events';
-import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {IDAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {flipBit} from '@aragon/osx-commons-sdk';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

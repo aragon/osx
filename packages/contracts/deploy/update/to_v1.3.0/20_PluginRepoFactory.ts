@@ -1,7 +1,7 @@
 import pluginRepoFactoryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
 import {PluginRepo__factory} from '../../../typechain';
 import {getActiveContractAddress} from '../../helpers';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

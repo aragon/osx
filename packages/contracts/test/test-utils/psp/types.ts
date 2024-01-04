@@ -1,4 +1,4 @@
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {BytesLike} from 'ethers';
 
 export type PermissionOperation = {

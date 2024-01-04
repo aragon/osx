@@ -9,10 +9,10 @@ import {
   ADMIN_INTERFACE,
   EXECUTE_PROPOSAL_PERMISSION_ID,
 } from './admin-constants';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
-import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 

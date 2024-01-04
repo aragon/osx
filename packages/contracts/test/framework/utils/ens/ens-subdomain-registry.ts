@@ -22,7 +22,7 @@ import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '@aragon/osx-commons-contracts/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {ENS_REGISTRAR_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {ENS_REGISTRAR_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

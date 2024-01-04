@@ -5,8 +5,8 @@ import {
   PermissionConditionMock__factory,
   TestPlugin__factory,
 } from '../../../typechain';
-import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
-import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

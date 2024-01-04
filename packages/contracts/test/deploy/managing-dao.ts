@@ -19,7 +19,7 @@ import {
   ENS_REGISTRAR_PERMISSIONS,
   PLUGIN_REGISTRY_PERMISSIONS,
   PLUGIN_REPO_PERMISSIONS,
-} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import hre, {ethers, deployments} from 'hardhat';
