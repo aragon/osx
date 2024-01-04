@@ -31,6 +31,7 @@ import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {
   installPlugin,
   updatePlugin,
@@ -71,7 +72,6 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/protocol-version';
 import {findEventTopicLog} from '@aragon/osx-commons-sdk';
 import {Operation} from '@aragon/osx-commons-sdk';
 import {

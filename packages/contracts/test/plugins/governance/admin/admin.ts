@@ -26,7 +26,7 @@ import {
 } from '@aragon/osx-commons-sdk';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

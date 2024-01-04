@@ -12,7 +12,7 @@ import {
 import {Operation} from '@aragon/osx-commons-sdk';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 

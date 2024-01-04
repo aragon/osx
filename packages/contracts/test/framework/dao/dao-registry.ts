@@ -10,15 +10,15 @@ import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
+import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {
   DAO_REGISTRY_PERMISSIONS,
   ENS_REGISTRAR_PERMISSIONS,
@@ -310,9 +310,7 @@ describe('DAORegistry', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
@@ -340,9 +338,7 @@ describe('DAORegistry', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });

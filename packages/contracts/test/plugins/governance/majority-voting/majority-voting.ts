@@ -9,12 +9,12 @@ import {
   MajorityVotingMock__factory,
   IProtocolVersion__factory,
 } from '../../../../typechain';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {MAJORITY_VOTING_BASE_INTERFACE} from './majority-voting-constants';
 import {VotingSettings, VotingMode} from './voting-helpers';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {TIME} from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
+import {pctToRatio} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

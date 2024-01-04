@@ -19,21 +19,20 @@ import {
 } from '../../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../../utils/psp';
 import {deployNewDAO} from '../../../test-utils/dao';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   MULTISIG_INTERFACE,
   MultisigSettings,
-  MULTISIG_EVENTS,
   UPDATE_MULTISIG_SETTINGS_PERMISSION_ID,
 } from './multisig-constants';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {findEvent} from '@aragon/osx-commons-sdk';
-import {Operation} from '@aragon/osx-commons-sdk';
 import {
+  getInterfaceId,
+  findEvent,
+  Operation,
   DAO_PERMISSIONS,
   PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
+  getNamedTypesFromMetadata,
 } from '@aragon/osx-commons-sdk';
-import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

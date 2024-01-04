@@ -30,6 +30,8 @@ import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
+import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
 import {
   createApplyInstallationParams,
   createApplyUninstallationParams,
@@ -47,17 +49,14 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {findEventTopicLog} from '@aragon/osx-commons-sdk';
 import {
+  findEventTopicLog,
   DAO_PERMISSIONS,
   DAO_REGISTRY_PERMISSIONS,
   PLUGIN_REGISTRY_PERMISSIONS,
-  PLUGIN_REPO_PERMISSIONS,
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
+  getInterfaceId,
 } from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

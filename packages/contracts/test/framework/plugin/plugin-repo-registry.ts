@@ -10,17 +10,17 @@ import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_3_0__factory} from 
 import {ensDomainHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {PLUGIN_REGISTRY_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -316,9 +316,7 @@ describe('PluginRepoRegistry', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
@@ -348,9 +346,7 @@ describe('PluginRepoRegistry', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });

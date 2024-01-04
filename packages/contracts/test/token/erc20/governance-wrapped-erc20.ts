@@ -9,7 +9,7 @@ import {
   IERC20PermitUpgradeable__factory,
   IVotesUpgradeable__factory,
 } from '../../../typechain';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

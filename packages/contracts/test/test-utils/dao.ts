@@ -6,7 +6,7 @@ import {
   TestERC1155__factory,
   DAO__factory,
 } from '../../typechain';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
+import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {BigNumber} from 'ethers';
 import {ethers} from 'hardhat';

@@ -21,6 +21,11 @@ import {
 import {ExecutedEvent} from '../../../../../typechain/DAO';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../../../test-utils/protocol-version';
+import {deployWithProxy} from '../../../../test-utils/proxy';
+import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
@@ -37,22 +42,17 @@ import {
 } from '../voting-helpers';
 import {ADDRESSLIST_VOTING_INTERFACE} from './addresslist-voting-constants';
 import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {
   IDAO_EVENTS,
   IMEMBERSHIP_EVENTS,
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
+  proposalIdToBytes32,
+  TIME,
+  getInterfaceId,
+  pctToRatio,
+  PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
 } from '@aragon/osx-commons-sdk';
-import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk';
-import {proposalIdToBytes32} from '@aragon/osx-commons-sdk';
-import {TIME} from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -179,9 +179,7 @@ describe('AddresslistVoting', function () {
         currentContractFactory.attach(toImplementation)
       );
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
 
@@ -209,9 +207,7 @@ describe('AddresslistVoting', function () {
         currentContractFactory.attach(toImplementation)
       );
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
       expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
     });
   });

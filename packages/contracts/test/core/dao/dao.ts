@@ -30,6 +30,11 @@ import {
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
+import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
@@ -37,14 +42,12 @@ import {
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {IDAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk';
-import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
-import {flipBit} from '@aragon/osx-commons-sdk';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+  IDAO_EVENTS,
+  findEvent,
+  flipBit,
+  getInterfaceId,
+  DAO_PERMISSIONS,
+} from '@aragon/osx-commons-sdk';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chai, {expect} from 'chai';

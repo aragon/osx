@@ -9,7 +9,7 @@ import {
   IVotesUpgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

@@ -16,12 +16,12 @@
   },
   "homepage": "https://github.com/aragon/osx#readme",
   "dependencies": {
-    "@aragon/osx-commons-contracts": "0.0.1-alpha.2",
+    "@aragon/osx-commons-contracts": "1.4.0-alpha.1",
     "@ensdomains/ens-contracts": "0.0.11",
     "@openzeppelin/contracts": "4.9.5",
     "@openzeppelin/contracts-upgradeable": "4.9.5"
   },
   "devDependencies": {
-    "@aragon/osx-commons-sdk": "0.0.1-alpha.0"
+    "@aragon/osx-commons-sdk": "0.0.1-alpha.2"
   }
 }
