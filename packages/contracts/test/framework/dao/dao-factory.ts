@@ -47,17 +47,17 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
-import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/from_osx/events';
 import {
   DAO_PERMISSIONS,
   DAO_REGISTRY_PERMISSIONS,
   PLUGIN_REGISTRY_PERMISSIONS,
   PLUGIN_REPO_PERMISSIONS,
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
-} from '@aragon/osx-commons-sdk/src/permission';
+} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

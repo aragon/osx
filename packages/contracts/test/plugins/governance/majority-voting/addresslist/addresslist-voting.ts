@@ -39,20 +39,20 @@ import {ADDRESSLIST_VOTING_INTERFACE} from './addresslist-voting-constants';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/utils/protocol-version';
+} from '@aragon/osx-commons-contracts/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {
   IDAO_EVENTS,
   IMEMBERSHIP_EVENTS,
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
-} from '@aragon/osx-commons-sdk/src/events';
+} from '@aragon/osx-commons-sdk/src/from_osx/events';
+import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/from_osx/proposal';
+import {TIME} from '@aragon/osx-commons-sdk/src/from_osx/time';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
-import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
-import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

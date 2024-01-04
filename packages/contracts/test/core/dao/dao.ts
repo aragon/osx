@@ -39,12 +39,15 @@ import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/utils/protocol-version';
+} from '@aragon/osx-commons-contracts/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {flipBit} from '@aragon/osx-commons-sdk/src/bitmap';
-import {IDAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk/src/events';
+import {flipBit} from '@aragon/osx-commons-sdk/src/from_osx/bitmap';
+import {
+  IDAO_EVENTS,
+  findEvent,
+} from '@aragon/osx-commons-sdk/src/from_osx/events';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chai, {expect} from 'chai';

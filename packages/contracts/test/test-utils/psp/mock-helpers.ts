@@ -1,4 +1,4 @@
-import {Operation} from '@aragon/osx-commons-sdk/src/permission';
+import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
 import {utils, constants} from 'ethers';
 import {ethers} from 'hardhat';
 

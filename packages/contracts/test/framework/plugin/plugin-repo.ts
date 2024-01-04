@@ -26,9 +26,9 @@ import {
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/utils/protocol-version';
+} from '@aragon/osx-commons-contracts/protocol-version';
+import {PLUGIN_REPO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {PLUGIN_REPO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

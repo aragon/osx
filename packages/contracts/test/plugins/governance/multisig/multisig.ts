@@ -30,7 +30,7 @@ import {MULTISIG_EVENTS, MULTISIG_INTERFACE} from './multisig-constants';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/utils/protocol-version';
+} from '@aragon/osx-commons-contracts/protocol-version';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {
   IDAO_EVENTS,
@@ -38,10 +38,10 @@ import {
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
-} from '@aragon/osx-commons-sdk/src/events';
+} from '@aragon/osx-commons-sdk/src/from_osx/events';
+import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/from_osx/proposal';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
-import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

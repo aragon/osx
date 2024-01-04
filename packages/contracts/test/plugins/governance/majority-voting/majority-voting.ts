@@ -12,7 +12,7 @@ import {
 import {MAJORITY_VOTING_BASE_INTERFACE} from './majority-voting-constants';
 import {VotingSettings, VotingMode} from './voting-helpers';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {TIME} from '@aragon/osx-commons-sdk/src/constants';
+import {TIME} from '@aragon/osx-commons-sdk/src/from_osx/time';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

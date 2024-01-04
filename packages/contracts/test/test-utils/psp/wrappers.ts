@@ -16,7 +16,7 @@ import {
   createPrepareUpdateParams,
 } from './create-params';
 import {PermissionOperation, PluginRepoPointer} from './types';
-import {findEvent} from '@aragon/osx-commons-sdk/src/events';
+import {findEvent} from '@aragon/osx-commons-sdk/src/from_osx/events';
 import {BytesLike} from 'ethers';
 
 export async function prepareInstallation(

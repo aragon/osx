@@ -1,6 +1,6 @@
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
 import {getContractAddress, managePermissions, Permission} from '../../helpers';
-import {Operation} from '@aragon/osx-commons-sdk/src/permission';
+import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

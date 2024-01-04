@@ -37,24 +37,24 @@ import {
   voteWithSigners,
 } from '../voting-helpers';
 import {TOKEN_VOTING_INTERFACE} from './token-voting-constants';
-import {TIME} from '@aragon/osx-commons-sdk/src/constants';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons-contracts/protocol-version';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {
   IDAO_EVENTS,
   IMEMBERSHIP_EVENTS,
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
-} from '@aragon/osx-commons-sdk/src/events';
+} from '@aragon/osx-commons-sdk/src/from_osx/events';
+import '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/from_osx/proposal';
+import {TIME} from '@aragon/osx-commons-sdk/src/from_osx/time';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {RATIO_BASE, pctToRatio} from '@aragon/osx-commons-sdk/src/math';
-import '@aragon/osx-commons-sdk/src/permission';
-import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
-import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons-contracts/utils/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

@@ -26,14 +26,14 @@ import {
   UPDATE_MULTISIG_SETTINGS_PERMISSION_ID,
 } from './multisig-constants';
 import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
-import {findEvent} from '@aragon/osx-commons-sdk/src/events';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
-import {Operation} from '@aragon/osx-commons-sdk/src/permission';
+import {findEvent} from '@aragon/osx-commons-sdk/src/from_osx/events';
+import {Operation} from '@aragon/osx-commons-sdk/src/from_osx/permission';
 import {
   DAO_PERMISSIONS,
   PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
-} from '@aragon/osx-commons-sdk/src/permission';
+} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

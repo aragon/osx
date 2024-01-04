@@ -23,10 +23,10 @@ import {
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
-} from '@aragon/osx-commons-sdk/src/events';
+} from '@aragon/osx-commons-sdk/src/from_osx/events';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/from_osx/permission';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/from_osx/proposal';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
-import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

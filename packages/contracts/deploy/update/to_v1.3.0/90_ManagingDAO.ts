@@ -1,6 +1,6 @@
 import {DAOFactory__factory, DAO__factory} from '../../../typechain';
 import {getContractAddress} from '../../helpers';
-import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/protocol-version';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
