@@ -12,10 +12,10 @@ import {GovernanceERC20} from "../../../../token/ERC20/governance/GovernanceERC2
 import {IGovernanceWrappedERC20} from "../../../../token/ERC20/governance/IGovernanceWrappedERC20.sol";
 import {GovernanceWrappedERC20} from "../../../../token/ERC20/governance/GovernanceWrappedERC20.sol";
 
-import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
-import {PermissionLib} from "@aragon/osx-commons/src/permission/PermissionLib.sol";
-import {IPluginSetup} from "@aragon/osx-commons/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons/src/plugin/setup/PluginSetup.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
 
 import {DAO} from "../../../../core/dao/DAO.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";

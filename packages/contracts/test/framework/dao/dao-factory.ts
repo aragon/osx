@@ -47,6 +47,8 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {
@@ -56,8 +58,6 @@ import {
   PLUGIN_REPO_PERMISSIONS,
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
 } from '@aragon/osx-commons-sdk/src/permission';
-import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

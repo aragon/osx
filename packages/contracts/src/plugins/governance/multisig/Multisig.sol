@@ -4,11 +4,11 @@ pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IMembership} from "@aragon/osx-commons/src/plugin/extensions/membership/IMembership.sol";
-import {Addresslist} from "@aragon/osx-commons/src/governance/Addresslist.sol";
-import {ProposalUpgradeable} from "@aragon/osx-commons/src/plugin/extensions/proposal/ProposalUpgradeable.sol";
-import {PluginUUPSUpgradeable} from "@aragon/osx-commons/src/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
+import {IMembership} from "@aragon/osx-commons-contracts/src/plugin/extensions/membership/IMembership.sol";
+import {Addresslist} from "@aragon/osx-commons-contracts/src/governance/Addresslist.sol";
+import {ProposalUpgradeable} from "@aragon/osx-commons-contracts/src/plugin/extensions/proposal/ProposalUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {IMultisig} from "./IMultisig.sol";
 

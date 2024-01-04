@@ -3,7 +3,7 @@
 pragma solidity ^0.8.8;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {PermissionManager} from "../../core/permission/PermissionManager.sol";
 

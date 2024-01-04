@@ -11,10 +11,10 @@ import {
 } from '../../../../typechain';
 import {MAJORITY_VOTING_BASE_INTERFACE} from './majority-voting-constants';
 import {VotingSettings, VotingMode} from './voting-helpers';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
-import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

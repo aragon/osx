@@ -36,6 +36,11 @@ import {
   voteWithSigners,
 } from '../voting-helpers';
 import {ADDRESSLIST_VOTING_INTERFACE} from './addresslist-voting-constants';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {
   IDAO_EVENTS,
@@ -48,11 +53,6 @@ import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons/utils/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';

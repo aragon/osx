@@ -24,7 +24,7 @@ pragma solidity ^0.8.8;
 
 // Deploy Script
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {PlaceholderSetup} from "@aragon/osx-commons/src/plugin/setup/placeholder/PlaceholderSetup.sol";
+import {PlaceholderSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/placeholder/PlaceholderSetup.sol";
 
 // Regression Testing
 import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";
@@ -57,17 +57,17 @@ import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_0_0} from "@aragon/o
 import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_3_0} from "@aragon/osx-v1.3.0/token/ERC20/governance/GovernanceWrappedERC20.sol";
 
 // Integration Testing
-import {CloneFactory} from "@aragon/osx-commons/src/mocks/plugin/CloneFactory.sol";
-import {TestERC20} from "@aragon/osx-commons/src/mocks/token/TestERC20.sol";
-import {TestERC721} from "@aragon/osx-commons/src/mocks/token/TestERC721.sol";
-import {TestERC1155} from "@aragon/osx-commons/src/mocks/token/TestERC1155.sol";
-import {TestPlugin} from "@aragon/osx-commons/src/mocks/plugin/TestPlugin.sol";
+import {CloneFactory} from "@aragon/osx-commons-contracts/src/mocks/plugin/CloneFactory.sol";
+import {TestERC20} from "@aragon/osx-commons-contracts/src/mocks/token/TestERC20.sol";
+import {TestERC721} from "@aragon/osx-commons-contracts/src/mocks/token/TestERC721.sol";
+import {TestERC1155} from "@aragon/osx-commons-contracts/src/mocks/token/TestERC1155.sol";
+import {TestPlugin} from "@aragon/osx-commons-contracts/src/mocks/plugin/TestPlugin.sol";
 
-import {PermissionConditionMock} from "@aragon/osx-commons/src/mocks/permission/PermissionConditionMock.sol";
-import {PluginV1Mock} from "@aragon/osx-commons/src/mocks/plugin/Constructable/PluginMock.sol";
-import {PluginCloneableV1Mock, PluginCloneableV1MockBad, PluginCloneableV2Mock} from "@aragon/osx-commons/src/mocks/plugin/Cloneable/PluginCloneableMock.sol";
-import {PluginCloneableSetupV1Mock, PluginCloneableSetupV1MockBad, PluginCloneableSetupV2Mock} from "@aragon/osx-commons/src/mocks/plugin/Cloneable/PluginCloneableSetupMock.sol";
-import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "@aragon/osx-commons/src/mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableMock.sol";
-import {PluginUUPSUpgradeableSetupV1Mock, PluginUUPSUpgradeableSetupV1MockBad, PluginUUPSUpgradeableSetupV2Mock, PluginUUPSUpgradeableSetupV3Mock, PluginUUPSUpgradeableSetupV4Mock} from "@aragon/osx-commons/src/mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableSetupMock.sol";
+import {PermissionConditionMock} from "@aragon/osx-commons-contracts/src/mocks/permission/PermissionConditionMock.sol";
+import {PluginV1Mock} from "@aragon/osx-commons-contracts/src/mocks/plugin/Constructable/PluginMock.sol";
+import {PluginCloneableV1Mock, PluginCloneableV1MockBad, PluginCloneableV2Mock} from "@aragon/osx-commons-contracts/src/mocks/plugin/Cloneable/PluginCloneableMock.sol";
+import {PluginCloneableSetupV1Mock, PluginCloneableSetupV1MockBad, PluginCloneableSetupV2Mock} from "@aragon/osx-commons-contracts/src/mocks/plugin/Cloneable/PluginCloneableSetupMock.sol";
+import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "@aragon/osx-commons-contracts/src/mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableMock.sol";
+import {PluginUUPSUpgradeableSetupV1Mock, PluginUUPSUpgradeableSetupV1MockBad, PluginUUPSUpgradeableSetupV2Mock, PluginUUPSUpgradeableSetupV3Mock, PluginUUPSUpgradeableSetupV4Mock} from "@aragon/osx-commons-contracts/src/mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableSetupMock.sol";
 
 /* solhint-enable no-unused-import */

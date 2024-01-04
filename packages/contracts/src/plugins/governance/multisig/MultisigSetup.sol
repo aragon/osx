@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.8;
 
-import {PermissionLib} from "@aragon/osx-commons/src/permission/PermissionLib.sol";
-import {IPluginSetup} from "@aragon/osx-commons/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons/src/plugin/setup/PluginSetup.sol";
-import {IDAO} from "@aragon/osx-commons/src/dao/IDAO.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {DAO} from "../../../core/dao/DAO.sol";
 import {Multisig} from "./Multisig.sol";

@@ -1,4 +1,4 @@
-import pluginUUPSUpgradeableArtifact from '../../../artifacts/@aragon/osx-commons/src/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
+import pluginUUPSUpgradeableArtifact from '../../../artifacts/@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
 import {
   PluginSetupProcessor,
   PluginUUPSUpgradeableSetupV1Mock,
@@ -71,6 +71,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons-contracts/utils/protocol-version';
 import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
 import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {
@@ -80,7 +81,6 @@ import {
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
   PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
 } from '@aragon/osx-commons-sdk/src/permission';
-import {CURRENT_PROTOCOL_VERSION} from '@aragon/osx-commons/utils/protocol-version';
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

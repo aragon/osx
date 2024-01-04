@@ -23,12 +23,12 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
-import {PLUGIN_REPO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons/utils/protocol-version';
+} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
+import {PLUGIN_REPO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

@@ -36,15 +36,15 @@ import {
 } from '../../test-utils/uups-upgradeable';
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
+import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
 import {flipBit} from '@aragon/osx-commons-sdk/src/bitmap';
 import {IDAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons/utils/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chai, {expect} from 'chai';

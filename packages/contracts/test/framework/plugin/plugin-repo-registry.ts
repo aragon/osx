@@ -16,12 +16,12 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {PLUGIN_REGISTRY_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {
   CURRENT_PROTOCOL_VERSION,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons/utils/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
+} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
+import {PLUGIN_REGISTRY_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

@@ -28,6 +28,11 @@ import {
 } from '../../../test-utils/uups-upgradeable';
 import {MULTISIG_EVENTS, MULTISIG_INTERFACE} from './multisig-constants';
 import {
+  CURRENT_PROTOCOL_VERSION,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons-contracts/utils/protocol-version';
+import {deployWithProxy} from '@aragon/osx-commons-contracts/utils/proxy';
+import {
   IDAO_EVENTS,
   IMEMBERSHIP_EVENTS,
   IPROPOSAL_EVENTS,
@@ -37,11 +42,6 @@ import {
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {proposalIdToBytes32} from '@aragon/osx-commons-sdk/src/proposal';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '@aragon/osx-commons/utils/protocol-version';
-import {deployWithProxy} from '@aragon/osx-commons/utils/proxy';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
