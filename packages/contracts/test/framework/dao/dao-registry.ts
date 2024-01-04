@@ -9,10 +9,7 @@ import {DAORegistry__factory as DAORegistry_V1_3_0__factory} from '../../../type
 import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {
   getProtocolVersion,
@@ -253,7 +250,7 @@ describe('DAORegistry', function () {
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await daoRegistry.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });
@@ -311,7 +308,7 @@ describe('DAORegistry', function () {
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -339,7 +336,7 @@ describe('DAORegistry', function () {
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 });

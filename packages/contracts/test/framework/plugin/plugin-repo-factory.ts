@@ -9,7 +9,7 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {
   deployMockPluginSetup,
   deployPluginRepoRegistry,
@@ -115,7 +115,7 @@ describe('PluginRepoFactory: ', function () {
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await pluginRepoFactory.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });

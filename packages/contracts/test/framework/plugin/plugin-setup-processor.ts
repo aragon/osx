@@ -31,7 +31,7 @@ import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {
   installPlugin,
   updatePlugin,
@@ -315,9 +315,7 @@ describe('PluginSetupProcessor', function () {
 
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
-      expect(await psp.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
-      );
+      expect(await psp.protocolVersion()).to.deep.equal(osxContractsVersion());
     });
   });
 

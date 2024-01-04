@@ -12,7 +12,7 @@ import {ENSSubdomainRegistrar__factory as ENSSubdomainRegistrar_V1_3_0__factory}
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {setupResolver} from '../../../test-utils/ens';
-import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../../test-utils/protocol-version';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
@@ -338,7 +338,7 @@ describe('ENSSubdomainRegistrar', function () {
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -368,7 +368,7 @@ describe('ENSSubdomainRegistrar', function () {
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 

@@ -21,10 +21,7 @@ import {
   ProposalExecutedEvent,
 } from '../../../../../typechain/TokenVoting';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../../../test-utils/protocol-version';
 import {deployWithProxy} from '../../../../test-utils/proxy';
 import {
   getProtocolVersion,
@@ -249,7 +246,7 @@ describe('TokenVoting', function () {
       );
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -277,7 +274,7 @@ describe('TokenVoting', function () {
       );
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 

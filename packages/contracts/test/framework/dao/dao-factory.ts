@@ -30,7 +30,7 @@ import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {
   createApplyInstallationParams,
@@ -281,7 +281,7 @@ describe('DAOFactory: ', function () {
   context('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await daoFactory.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });

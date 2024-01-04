@@ -5,7 +5,7 @@ import {
   PluginCloneableSetupV1Mock,
   PluginCloneableSetupV1Mock__factory,
 } from '../../../typechain';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -47,7 +47,7 @@ describe('PluginSetup', function () {
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await setupMock.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });

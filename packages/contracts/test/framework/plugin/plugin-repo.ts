@@ -13,10 +13,7 @@ import {
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
 import {ZERO_BYTES32} from '../../test-utils/dao';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {tagHash} from '../../test-utils/psp/hash-helpers';
 import {
   deployMockPluginSetup,
@@ -125,7 +122,7 @@ describe('PluginRepo', function () {
 
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
         expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
-        expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+        expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
       });
 
       it('from v1.3.0', async () => {
@@ -152,7 +149,7 @@ describe('PluginRepo', function () {
 
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
         expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
-        expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+        expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
       });
     });
 
@@ -184,7 +181,7 @@ describe('PluginRepo', function () {
     describe('Protocol version', async () => {
       it('returns the current protocol version', async () => {
         expect(await pluginRepo.protocolVersion()).to.deep.equal(
-          CURRENT_PROTOCOL_VERSION
+          osxContractsVersion()
         );
       });
     });

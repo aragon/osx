@@ -30,7 +30,7 @@ import {
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {
-  CURRENT_PROTOCOL_VERSION,
+  osxContractsVersion,
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
@@ -359,7 +359,7 @@ describe('DAO', function () {
       expect(fromProtocolVersion).to.deep.equal(
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -386,7 +386,7 @@ describe('DAO', function () {
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 
@@ -436,9 +436,7 @@ describe('DAO', function () {
 
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
-      expect(await dao.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
-      );
+      expect(await dao.protocolVersion()).to.deep.equal(osxContractsVersion());
     });
   });
 
