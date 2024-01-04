@@ -21,8 +21,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await setTimeout(30000);
   }
 
-  hre.aragonToVerifyContracts.push(AdminSetupDeployment);
   hre.aragonToVerifyContracts.push({
+    contract: 'src/plugins/governance/admin/AdminSetup.sol:AdminSetup',
+    ...AdminSetupDeployment,
+  });
+  hre.aragonToVerifyContracts.push({
+    contract: 'src/plugins/governance/admin/Admin.sol:Admin',
     address: await adminSetup.implementation(),
     args: [],
   });

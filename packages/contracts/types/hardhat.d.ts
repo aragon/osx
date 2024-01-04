@@ -11,10 +11,10 @@ export type AragonPluginRepos = {
 };
 
 export type AragonVerifyEntry = {
+  contract?: string;
   address: string;
   args?: any[];
 };
-
 
 /**
  * Represents a testing fork configuration.

@@ -9,9 +9,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   hre.aragonToVerifyContracts.push(
     await deployments.get('PluginRepoRegistry_Proxy')
   );
-  hre.aragonToVerifyContracts.push(
-    await deployments.get('PluginRepoRegistry_Implementation')
-  );
+  hre.aragonToVerifyContracts.push({
+    contract:
+      'src/framework/plugin/repo/PluginRepoRegistry.sol:PluginRepoRegistry',
+    ...(await deployments.get('PluginRepoRegistry_Implementation')),
+  });
 };
 
 export default func;

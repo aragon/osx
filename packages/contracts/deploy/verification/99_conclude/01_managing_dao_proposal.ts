@@ -23,8 +23,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await managingDAOMultisig.callStatic.multisigSettings();
 
   const proposalDescription = hre.managingDAOActions
-    .map(action => action.description)
-    .join('\n');
+    .map(action => `<p>${action.description}</p>`)
+    .join('');
   const cid = await uploadToIPFS(
     JSON.stringify({
       title: 'Framework Upgrade 1.3.0',
@@ -44,7 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         hre.managingDAOActions,
         0,
         true,
-        true,
+        false,
         0,
         Math.round(Date.now() / 1000) + 30 * 24 * 60 * 60 // Lets the proposal end in 30 days
       );
