@@ -7,8 +7,8 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
-import {Operation} from '../utils/types';
 import {findEvent, findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {Contract} from 'ethers';
 import {promises as fs} from 'fs';

@@ -7,10 +7,10 @@ import {
 } from '../../../typechain';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../utils/psp';
-import {Operation} from '../../../utils/types';
 import {checkPermission, getContractAddress} from '../../helpers';
 import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

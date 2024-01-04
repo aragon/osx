@@ -18,7 +18,6 @@ import {
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../../utils/psp';
-import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {
   MULTISIG_INTERFACE,
@@ -29,6 +28,7 @@ import {
 import {findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {
   DAO_PERMISSIONS,
   PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,

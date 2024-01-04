@@ -1,7 +1,7 @@
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
 import {DAO__factory} from '../../../typechain';
-import {Operation} from '../../../utils/types';
 import {getActiveContractAddress} from '../../helpers';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

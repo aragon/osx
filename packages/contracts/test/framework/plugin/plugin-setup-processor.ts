@@ -28,7 +28,6 @@ import {
   PluginCloneableSetupV1MockBad__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
-import {Operation} from '../../../utils/types';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
@@ -73,6 +72,7 @@ import {
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {findEventTopicLog} from '@aragon/osx-commons-sdk/src/events';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {
   DAO_PERMISSIONS,
   ENS_REGISTRAR_PERMISSIONS,

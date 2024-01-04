@@ -39,9 +39,9 @@ import {
 import {TOKEN_VOTING_INTERFACE} from './token-voting-constants';
 import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {
-  DAO_EVENTS,
-  MEMBERSHIP_EVENTS,
-  PROPOSAL_EVENTS,
+  IDAO_EVENTS,
+  IMEMBERSHIP_EVENTS,
+  IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
 } from '@aragon/osx-commons-sdk/src/events';
@@ -174,7 +174,7 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         )
       )
-        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .to.emit(voting, IMEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
         .withArgs(governanceErc20Mock.address);
     });
 
@@ -984,12 +984,12 @@ describe('TokenVoting', function () {
       );
 
       await expect(tx)
-        .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .to.emit(voting, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST);
 
       const event = await findEvent<ProposalCreatedEvent>(
         tx,
-        PROPOSAL_EVENTS.PROPOSAL_CREATED
+        IPROPOSAL_EVENTS.PROPOSAL_CREATED
       );
       expect(event.args.proposalId).to.equal(id);
       expect(event.args.creator).to.equal(signers[0].address);
@@ -1057,13 +1057,13 @@ describe('TokenVoting', function () {
       );
 
       await expect(tx)
-        .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .to.emit(voting, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.Yes, 10);
 
       const event = await findEvent<ProposalCreatedEvent>(
         tx,
-        PROPOSAL_EVENTS.PROPOSAL_CREATED
+        IPROPOSAL_EVENTS.PROPOSAL_CREATED
       );
       expect(event.args.proposalId).to.equal(id);
       expect(event.args.creator).to.equal(signers[0].address);
@@ -1477,7 +1477,7 @@ describe('TokenVoting', function () {
           const event = await findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           );
 
           expect(event.args.actor).to.equal(voting.address);
@@ -1495,7 +1495,7 @@ describe('TokenVoting', function () {
         {
           const event = await findEvent<ProposalExecutedEvent>(
             tx,
-            PROPOSAL_EVENTS.PROPOSAL_EXECUTED
+            IPROPOSAL_EVENTS.PROPOSAL_EXECUTED
           );
           expect(event.args.proposalId).to.equal(id);
         }

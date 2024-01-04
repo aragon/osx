@@ -37,7 +37,7 @@ import {
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {flipBit} from '@aragon/osx-commons-sdk/src/bitmap';
-import {DAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk/src/events';
+import {IDAO_EVENTS, findEvent} from '@aragon/osx-commons-sdk/src/events';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {
@@ -640,7 +640,7 @@ describe('DAO', function () {
       let tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
       let rc = await tx.wait();
 
-      const event = await findEvent<ExecutedEvent>(tx, DAO_EVENTS.EXECUTED);
+      const event = await findEvent<ExecutedEvent>(tx, IDAO_EVENTS.EXECUTED);
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
       expect(event.args.actions.length).to.equal(1);
@@ -1398,7 +1398,7 @@ describe('DAO', function () {
     it('should emit DaoURIUpdated', async () => {
       const newURI = 'https://new.example.com';
       await expect(dao.setDaoURI(newURI))
-        .to.emit(dao, DAO_EVENTS.NEW_URI)
+        .to.emit(dao, IDAO_EVENTS.NEW_URI)
         .withArgs(newURI);
     });
 

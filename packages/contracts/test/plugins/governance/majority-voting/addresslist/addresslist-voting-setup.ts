@@ -4,7 +4,6 @@ import {
   AddresslistVotingSetup__factory,
   AddresslistVoting__factory,
 } from '../../../../../typechain';
-import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {VotingSettings, VotingMode} from '../voting-helpers';
 import {ADDRESSLIST_VOTING_INTERFACE} from './addresslist-voting-constants';
@@ -12,6 +11,7 @@ import {TIME} from '@aragon/osx-commons-sdk/src/constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {pctToRatio} from '@aragon/osx-commons-sdk/src/math';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

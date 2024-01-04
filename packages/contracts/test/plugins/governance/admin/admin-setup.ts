@@ -4,7 +4,6 @@ import {
   AdminSetup__factory,
   Admin__factory,
 } from '../../../../typechain';
-import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {
   ADMIN_INTERFACE,
@@ -12,6 +11,7 @@ import {
 } from './admin-constants';
 import {getInterfaceId} from '@aragon/osx-commons-sdk/src/interfaces';
 import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk/src/metadata';
+import {Operation} from '@aragon/osx-commons-sdk/src/permission';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk/src/permission';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';

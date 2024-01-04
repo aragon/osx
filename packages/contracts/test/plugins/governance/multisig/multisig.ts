@@ -28,9 +28,9 @@ import {
 } from '../../../test-utils/uups-upgradeable';
 import {MULTISIG_EVENTS, MULTISIG_INTERFACE} from './multisig-constants';
 import {
-  DAO_EVENTS,
-  MEMBERSHIP_EVENTS,
-  PROPOSAL_EVENTS,
+  IDAO_EVENTS,
+  IMEMBERSHIP_EVENTS,
+  IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
 } from '@aragon/osx-commons-sdk/src/events';
@@ -408,7 +408,7 @@ describe('Multisig', function () {
 
       // add a new member
       await expect(multisig.addAddresses([signers[1].address]))
-        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
+        .to.emit(multisig, IMEMBERSHIP_EVENTS.MEMBERS_ADDED)
         .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -430,7 +430,7 @@ describe('Multisig', function () {
 
       // remove an existing member
       await expect(multisig.removeAddresses([signers[1].address]))
-        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
+        .to.emit(multisig, IMEMBERSHIP_EVENTS.MEMBERS_REMOVED)
         .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -570,7 +570,7 @@ describe('Multisig', function () {
             endDate
           )
       )
-        .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
         .withArgs(
           id,
           signers[0].address,
@@ -655,7 +655,7 @@ describe('Multisig', function () {
               endDate
             )
         )
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
             id,
             signers[1].address,
@@ -769,7 +769,7 @@ describe('Multisig', function () {
             endDate
           )
         )
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
             id,
             signers[0].address,
@@ -814,7 +814,7 @@ describe('Multisig', function () {
             endDate
           )
         )
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
             id,
             signers[0].address,
@@ -1199,7 +1199,7 @@ describe('Multisig', function () {
           findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           )
         ).to.rejectedWith('No logs found for the topic of event "Executed".');
 
@@ -1211,7 +1211,7 @@ describe('Multisig', function () {
           findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           )
         ).to.rejectedWith('No logs found for the topic of event "Executed".');
 
@@ -1221,7 +1221,7 @@ describe('Multisig', function () {
           const event = await findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           );
 
           expect(event.args.actor).to.equal(multisig.address);
@@ -1240,7 +1240,7 @@ describe('Multisig', function () {
         {
           const event = await findEvent<ProposalExecutedEvent>(
             tx,
-            PROPOSAL_EVENTS.PROPOSAL_EXECUTED
+            IPROPOSAL_EVENTS.PROPOSAL_EXECUTED
           );
           expect(event.args.proposalId).to.equal(id);
         }
@@ -1255,8 +1255,8 @@ describe('Multisig', function () {
         await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         await expect(multisig.connect(signers[3]).execute(id))
-          .to.emit(dao, DAO_EVENTS.EXECUTED)
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+          .to.emit(dao, IDAO_EVENTS.EXECUTED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.not.emit(multisig, MULTISIG_EVENTS.APPROVED);
       });
 
@@ -1264,8 +1264,8 @@ describe('Multisig', function () {
         await approveWithSigners(multisig, id, signers, [0, 1]);
 
         await expect(multisig.connect(signers[2]).approve(id, true))
-          .to.emit(dao, DAO_EVENTS.EXECUTED)
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+          .to.emit(dao, IDAO_EVENTS.EXECUTED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.emit(multisig, MULTISIG_EVENTS.APPROVED);
       });
 

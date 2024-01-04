@@ -18,9 +18,9 @@ import {
   EXECUTE_PROPOSAL_PERMISSION_ID,
 } from './admin-constants';
 import {
-  DAO_EVENTS,
-  MEMBERSHIP_EVENTS,
-  PROPOSAL_EVENTS,
+  IDAO_EVENTS,
+  IMEMBERSHIP_EVENTS,
+  IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
 } from '@aragon/osx-commons-sdk/src/events';
@@ -104,7 +104,7 @@ describe('Admin', function () {
 
     it('emits the `MembershipContractAnnounced` event and returns the admin as a member afterwards', async () => {
       await expect(plugin.initialize(dao.address))
-        .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .to.emit(plugin, IMEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
         .withArgs(dao.address);
 
       expect(await plugin.isMember(signers[0].address)).to.be.true; // signer[0] has `EXECUTE_PROPOSAL_PERMISSION_ID`
@@ -198,11 +198,11 @@ describe('Admin', function () {
         allowFailureMap
       );
 
-      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      await expect(tx).to.emit(plugin, IPROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       const event = await findEvent<ProposalCreatedEvent>(
         tx,
-        PROPOSAL_EVENTS.PROPOSAL_CREATED
+        IPROPOSAL_EVENTS.PROPOSAL_CREATED
       );
 
       expect(event.args.proposalId).to.equal(currentExpectedProposalId);
@@ -219,7 +219,7 @@ describe('Admin', function () {
       const currentExpectedProposalId = 0;
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
-        .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+        .to.emit(plugin, IPROPOSAL_EVENTS.PROPOSAL_EXECUTED)
         .withArgs(currentExpectedProposalId);
     });
 
@@ -232,11 +232,11 @@ describe('Admin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
 
-      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      await expect(tx).to.emit(plugin, IPROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       const event = await findEvent<ProposalCreatedEvent>(
         tx,
-        PROPOSAL_EVENTS.PROPOSAL_CREATED
+        IPROPOSAL_EVENTS.PROPOSAL_CREATED
       );
 
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
@@ -256,7 +256,7 @@ describe('Admin', function () {
         const event = await findEventTopicLog<ExecutedEvent>(
           tx,
           DAO__factory.createInterface(),
-          DAO_EVENTS.EXECUTED
+          IDAO_EVENTS.EXECUTED
         );
 
         expect(event.args.actor).to.equal(plugin.address);
@@ -277,7 +277,7 @@ describe('Admin', function () {
         const event = await findEventTopicLog<ExecutedEvent>(
           tx,
           DAO__factory.createInterface(),
-          DAO_EVENTS.EXECUTED
+          IDAO_EVENTS.EXECUTED
         );
         expect(event.args.callId).to.equal(proposalIdToBytes32(proposalId));
       }
