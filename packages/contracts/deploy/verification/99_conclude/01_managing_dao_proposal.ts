@@ -28,7 +28,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const cid = await uploadToIPFS(
     JSON.stringify({
       title: 'Framework Upgrade 1.3.0',
-      summary: proposalDescription,
+      summary: `This proposal upgrades the framework on ${network.name} to the 1.3.0 version`,
+      description: proposalDescription,
       resources: [],
     }),
     network.name
