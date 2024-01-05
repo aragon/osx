@@ -42,6 +42,7 @@ import {
   IPROPOSAL_EVENTS,
   findEvent,
   findEventTopicLog,
+  TIME,
 } from '@aragon/osx-commons-sdk';
 import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -866,6 +867,12 @@ describe('Multisig', function () {
     });
 
     it.only('should revert if startDate is < than now', async () => {
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address], // signers[0] is listed
+        multisigSettings
+      );
+
       const currentDate = await time.latest();
       const startDateInThePast = currentDate - 1;
       const endDate = 0; // startDate + minDuration
@@ -889,12 +896,14 @@ describe('Multisig', function () {
     });
 
     it.only('should revert if endDate is < than startDate', async () => {
-      // set next block time & mine a block with this time.
-      const nextBlockTime = (await time.latest()) + 500;
-      await ethers.provider.send('evm_mine', [nextBlockTime]);
-      // set next block's timestamp
-      const nextTimeStamp = nextBlockTime + 500;
-      await time.setNextBlockTimestamp(nextTimeStamp);
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address], // signers[0] is listed
+        multisigSettings
+      );
+
+      const startDate = (await time.latest()) + TIME.MINUTE;
+      const endDate = startDate - 1; // endDate < startDate
       await expect(
         multisig.createProposal(
           dummyMetadata,
@@ -902,12 +911,12 @@ describe('Multisig', function () {
           0,
           true,
           false,
-          0,
-          5
+          startDate,
+          endDate
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(nextTimeStamp, 5);
+        .withArgs(startDate, endDate);
     });
   });
 
