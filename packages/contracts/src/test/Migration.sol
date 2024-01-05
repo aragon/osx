@@ -24,7 +24,6 @@ pragma solidity ^0.8.8;
 
 // Deploy Script
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {PlaceholderSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/placeholder/PlaceholderSetup.sol";
 
 // Regression Testing
 import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";
