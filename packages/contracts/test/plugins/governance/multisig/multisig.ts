@@ -866,7 +866,7 @@ describe('Multisig', function () {
       });
     });
 
-    it.only('should revert if startDate is < than now', async () => {
+    it('should revert if startDate is < than now', async () => {
       await multisig.initialize(
         dao.address,
         [signers[0].address], // signers[0] is listed
@@ -895,7 +895,7 @@ describe('Multisig', function () {
         );
     });
 
-    it.only('should revert if endDate is < than startDate', async () => {
+    it('should revert if endDate is < than startDate', async () => {
       await multisig.initialize(
         dao.address,
         [signers[0].address], // signers[0] is listed
