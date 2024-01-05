@@ -8,6 +8,7 @@ import fs from 'fs';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import path from 'path';
 import 'solidity-coverage';
 import 'solidity-docgen';
