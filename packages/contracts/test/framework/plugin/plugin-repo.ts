@@ -5,7 +5,6 @@ import {
   PluginRepo__factory,
   PluginUUPSUpgradeableSetupV1Mock,
   PlaceholderSetup__factory,
-  TestPlugin__factory,
   IERC165__factory,
   IPluginRepo__factory,
   IProtocolVersion__factory,
@@ -25,6 +24,7 @@ import {
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {PLUGIN_REPO_PERMISSIONS, getInterfaceId} from '@aragon/osx-commons-sdk';
+import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -224,7 +224,7 @@ describe('PluginRepo', function () {
         );
 
         // If a contract is passed, but doesn't have `supportsInterface` signature described in the contract.
-        const randomContract = await new TestPlugin__factory(
+        const randomContract = await new PluginUUPSUpgradeableV1Mock__factory(
           signers[0]
         ).deploy();
         await expect(
