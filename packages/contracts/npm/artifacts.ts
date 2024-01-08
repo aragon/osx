@@ -1,6 +1,5 @@
 // JSON artifacts of the contracts
 // core
-import * as PluginV1Mock from '../artifacts/@aragon/osx-commons-contracts/src/mocks/plugin/Constructable/PluginMock.sol/PluginV1Mock.json';
 import * as DAO from '../artifacts/src/core/dao/DAO.sol/DAO.json';
 import * as PermissionManager from '../artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json';
 // framework
@@ -51,6 +50,4 @@ export default {
 
   GovernanceERC20,
   GovernanceWrappedERC20,
-
-  PluginV1Mock,
 };
