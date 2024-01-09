@@ -3,5 +3,8 @@
   "editor.formatOnSave": true,
   "prettier.documentSelectors": ["**/*.sol"],
   "solidity.formatter": "prettier",
-  "editor.tabSize": 4
+  "editor.tabSize": 4,
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
