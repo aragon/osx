@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@aragon/osx-commons-configs@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.0.2.tgz#8350da88c8fb93724de875589ba51eb7caa30936"
+  integrity sha512-RCTig39oTekBF+M5FVLY8vKlNb8CW/RPRMpZtp5llTW1AOsPwVHj8SzmVSIHDdUAcbY1f34kLYEgJJBn7AwQrQ==
+
 "@aragon/osx-ethers-v1.2.0@npm:@aragon/osx-ethers@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.0.tgz#b7e58714394183372ddf25d97cfe326f18ce6f1d"
