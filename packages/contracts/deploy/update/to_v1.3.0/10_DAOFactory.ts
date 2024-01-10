@@ -60,7 +60,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: managingDAOAddress,
     value: 0,
     data: calldata,
-    description: `Moves the REGISTER_DAO_PERMISSION_ID permission on the DAORegistry (${daoRegistryAddress}) from the old to the new DAOFactory (${previousDAOFactoryAddress} -> ${deployResult.address}).`,
+    description: `Moves the <strong>REGISTER_DAO_PERMISSION_ID</strong> permission on the <strong>DAORegistry</strong> (<code>${daoRegistryAddress}</code>) from the old <strong>DAOFactory</strong> (<code>${previousDAOFactoryAddress}</code>) to the new <strong>DAOFactory</strong> (<code>${deployResult.address}</code>).`,
   });
 };
 export default func;
