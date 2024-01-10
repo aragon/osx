@@ -42,9 +42,13 @@ export function handleNativeDeposit(
   reference: string,
   event: ethereum.Event
 ): void {
-  let daoEntityId = generateDaoEntityId(dao)
+  let daoEntityId = generateDaoEntityId(dao);
 
-  let transferEntityId = generateTransferEntityId(event.transaction.hash, event.transactionLogIndex, 0) 
+  let transferEntityId = generateTransferEntityId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    0
+  );
 
   let transfer = new NativeTransfer(transferEntityId);
   transfer.from = from;

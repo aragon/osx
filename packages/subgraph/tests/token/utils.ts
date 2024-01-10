@@ -11,6 +11,7 @@ import {
   ProposalExecuted,
   MembershipContractAnnounced,
 } from '../../generated/templates/TokenVoting/TokenVoting';
+import {generateMemberEntityId} from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
@@ -29,7 +30,6 @@ import {
 } from '../constants';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
-import { generateMemberEntityId } from '../../src/utils/ids';
 
 // events
 
@@ -394,7 +394,7 @@ export function createTokenVotingMember(
   const memberEntityId = generateMemberEntityId(
     Address.fromString(address),
     Address.fromString(plugin) // uses other plugin address to make sure that the code reuses the entity
-  )
+  );
 
   const user = new TokenVotingMember(memberEntityId);
   user.address = Address.fromString(address);

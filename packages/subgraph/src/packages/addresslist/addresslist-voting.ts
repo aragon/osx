@@ -15,6 +15,7 @@ import {
   VotingSettingsUpdated,
 } from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
+import {generateMemberEntityId, generateVoteEntityId} from '../../utils/ids';
 import {
   generateActionEntityId,
   generateEntityIdFromAddress,
@@ -23,7 +24,6 @@ import {
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
-import { generateMemberEntityId, generateVoteEntityId } from '../../utils/ids';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();

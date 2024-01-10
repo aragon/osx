@@ -110,7 +110,7 @@ export function handleGranted(event: Granted): void {
 
 export function handleRevoked(event: Revoked): void {
   // permission
-  const contractAddress = event.address
+  const contractAddress = event.address;
   const where = event.params.where;
   const permissionId = event.params.permissionId;
   const who = event.params.who;
@@ -121,7 +121,7 @@ export function handleRevoked(event: Revoked): void {
     where,
     who
   );
-  
+
   const permissionEntity = Permission.load(permissionEntityId);
   if (permissionEntity) {
     store.remove('Permission', permissionEntityId);

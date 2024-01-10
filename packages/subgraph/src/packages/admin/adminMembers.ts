@@ -3,12 +3,12 @@ import {
   AdministratorAdminPlugin,
 } from '../../../generated/schema';
 import {Granted, Revoked} from '../../../generated/templates/Admin/DAO';
+import {generateAdministratorAdminPluginEntityId} from '../../utils/ids';
 import {
   generateEntityIdFromAddress,
   generatePluginEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {dataSource, store} from '@graphprotocol/graph-ts';
-import { generateAdministratorAdminPluginEntityId } from '../../utils/ids';
 
 export function handleGranted(event: Granted): void {
   if (

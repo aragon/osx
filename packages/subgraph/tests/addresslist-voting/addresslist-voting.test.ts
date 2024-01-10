@@ -11,7 +11,11 @@ import {
   _handleProposalCreated,
 } from '../../src/packages/addresslist/addresslist-voting';
 import {VOTING_MODES} from '../../src/utils/constants';
-import {generateMemberEntityId, generateVoteEntityId, generateVoterEntityId} from '../../src/utils/ids';
+import {
+  generateMemberEntityId,
+  generateVoteEntityId,
+  generateVoterEntityId,
+} from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,

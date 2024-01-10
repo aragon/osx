@@ -3,7 +3,7 @@ import {
   handleGranted,
   handleRevoked,
 } from '../../src/packages/admin/adminMembers';
-import { generateAdministratorAdminPluginEntityId } from '../../src/utils/ids';
+import {generateAdministratorAdminPluginEntityId} from '../../src/utils/ids';
 import {ADDRESS_ONE, ADDRESS_TWO, DAO_ADDRESS} from '../constants';
 import {createGrantedEvent, createRevokedEvent} from './utils';
 import {generateEntityIdFromAddress} from '@aragon/osx-commons-subgraph';

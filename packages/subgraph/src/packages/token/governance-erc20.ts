@@ -5,8 +5,8 @@ import {
   DelegateVotesChanged,
 } from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
+import {generateMemberEntityId} from '../../utils/ids';
 import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
-import { generateMemberEntityId } from '../../utils/ids';
 
 function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
   let memberEntityId = generateMemberEntityId(

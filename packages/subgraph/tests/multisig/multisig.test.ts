@@ -7,7 +7,10 @@ import {
   _handleProposalCreated,
   handleMultisigSettingsUpdated,
 } from '../../src/packages/multisig/multisig';
-import {generateMemberEntityId, generateVoterEntityId} from '../../src/utils/ids';
+import {
+  generateMemberEntityId,
+  generateVoterEntityId,
+} from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,

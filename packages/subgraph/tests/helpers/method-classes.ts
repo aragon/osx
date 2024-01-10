@@ -47,7 +47,7 @@ import {
   VOTING_MODES,
   VOTING_MODE_INDEXES,
 } from '../../src/utils/constants';
-import { generateMemberEntityId } from '../../src/utils/ids';
+import {generateMemberEntityId} from '../../src/utils/ids';
 import {
   getBalanceId,
   getERC1155TransferId,

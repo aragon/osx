@@ -3,7 +3,7 @@ import {
   handleDelegateVotesChanged,
   handleTransfer,
 } from '../../src/packages/token/governance-erc20';
-import { generateMemberEntityId } from '../../src/utils/ids';
+import {generateMemberEntityId} from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   ADDRESS_SIX,

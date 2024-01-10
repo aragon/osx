@@ -10,13 +10,13 @@ import {
   ProposalCreated,
   ProposalExecuted,
 } from '../../../generated/templates/Admin/Admin';
+import {generateAdministratorAdminPluginEntityId} from '../../utils/ids';
 import {
   generateActionEntityId,
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-import { generateAdministratorAdminPluginEntityId } from '../../utils/ids';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
