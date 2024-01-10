@@ -1,3 +1,4 @@
+import { generateDaoEntityId } from '@aragon/osx-commons-subgraph';
 import {DAORegistered} from '../../generated/DAORegistry/DAORegistry';
 import {Dao} from '../../generated/schema';
 import {DaoTemplateV1_0_0, DaoTemplateV1_3_0} from '../../generated/templates';
@@ -10,10 +11,11 @@ const subdomain_blocklist_mainnet = [
 ];
 
 export function handleDAORegistered(event: DAORegistered): void {
-  let id = event.params.dao.toHexString(); // use dao address as id, because it should not repeat
-  let entity = new Dao(id);
+  let daoAddress = event.params.dao  // use dao address as id, because it should not repeat
+  let daoEntityId = generateDaoEntityId(daoAddress);
+  let entity = new Dao(daoEntityId);
 
-  if (!isInSubdomainBlocklist(id)) {
+  if (!isInSubdomainBlocklist(daoEntityId)) {
     entity.subdomain = event.params.subdomain;
   }
 
@@ -21,8 +23,8 @@ export function handleDAORegistered(event: DAORegistered): void {
   entity.createdAt = event.block.timestamp;
 
   // subscribe to templates
-  DaoTemplateV1_0_0.create(event.params.dao);
-  DaoTemplateV1_3_0.create(event.params.dao);
+  DaoTemplateV1_0_0.create(daoAddress);
+  DaoTemplateV1_3_0.create(daoAddress);
 
   entity.save();
 }

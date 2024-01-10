@@ -6,12 +6,16 @@ import {
 } from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
+import { generateMemberEntityId } from '../../utils/ids';
 
 function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
-  let id = [user.toHexString(), pluginId].join('_');
-  let member = TokenVotingMember.load(id);
+  let memberEntityId = generateMemberEntityId(
+    user,
+    Address.fromString(pluginId)
+  );
+  let member = TokenVotingMember.load(memberEntityId);
   if (!member) {
-    member = new TokenVotingMember(id);
+    member = new TokenVotingMember(memberEntityId);
     member.address = user;
     member.balance = BigInt.zero();
     member.plugin = pluginId;

@@ -47,6 +47,7 @@ import {
   VOTING_MODES,
   VOTING_MODE_INDEXES,
 } from '../../src/utils/constants';
+import { generateMemberEntityId } from '../../src/utils/ids';
 import {
   getBalanceId,
   getERC1155TransferId,
@@ -90,7 +91,7 @@ import {
 import {
   createNewGrantedEvent,
   createNewRevokedEvent,
-} from '../permission-mamager/utils';
+} from '../permission-manager/utils';
 import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
@@ -109,6 +110,11 @@ import {
   createWrappedTokenCalls,
   createERC1155TokenCalls,
 } from '../utils';
+import {
+  generateEntityIdFromAddress,
+  generatePermissionEntityId,
+  generatePluginEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {
   Address,
   BigInt,
@@ -130,22 +136,23 @@ class PermissionMethods extends Permission {
       crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION'))
     );
 
-    const where = Address.fromString(ADDRESS_ONE);
-    const who = Address.fromString(ADDRESS_TWO);
-    const actor = Address.fromString(ADDRESS_THREE);
-    const condition = Address.fromString(ADDRESS_FOUR);
+    const emittingContractAddress = Address.fromString(emittingContract);
+    const whereAddress = Address.fromString(ADDRESS_ONE);
+    const whoAddress = Address.fromString(ADDRESS_TWO);
+    const actorAddress = Address.fromString(ADDRESS_THREE);
+    const conditionAddress = Address.fromString(ADDRESS_FOUR);
 
-    this.id = [
-      emittingContract,
-      permissionId.toHexString(),
-      where.toHexString(),
-      who.toHexString(),
-    ].join('_');
-    this.where = where;
+    this.id = generatePermissionEntityId(
+      emittingContractAddress,
+      permissionId,
+      whereAddress,
+      whoAddress
+    );
+    this.where = whereAddress;
     this.permissionId = permissionId;
-    this.who = who;
-    this.actor = actor;
-    this.condition = condition;
+    this.who = whoAddress;
+    this.actor = actorAddress;
+    this.condition = conditionAddress;
 
     this.dao = null;
     this.pluginRepo = null;
@@ -536,12 +543,13 @@ class DaoMethods extends Dao {
 // Token Voting
 class TokenVotingVoterMethods extends TokenVotingVoter {
   withDefaultValues(): TokenVotingVoterMethods {
-    this.id = Address.fromHexString(CONTRACT_ADDRESS)
-      .toHexString()
-      .concat('_')
-      .concat(ADDRESS_ONE);
-    this.address = ADDRESS_ONE;
-    this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
+    const memberAddress = Address.fromString(ADDRESS_ONE);
+    const memberId = generateEntityIdFromAddress(memberAddress);
+    const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+    const pluginEntityId = generatePluginEntityId(pluginAddress);
+    this.id = generateMemberEntityId(pluginAddress, memberAddress);
+    this.address = memberId;
+    this.plugin = pluginEntityId;
     this.lastUpdated = BigInt.zero();
 
     return this;
@@ -708,10 +716,10 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     // we use casting here to remove autocompletion complaint
     // since we know it will be captured by the previous check
     let votingMode = VOTING_MODES.get(votingModeIndex) as string;
+    const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+    const pluginEntityId = generatePluginEntityId(pluginAddress);
 
-    const pluginAddress = Address.fromHexString(CONTRACT_ADDRESS);
-
-    this.id = pluginAddress.toHexString();
+    this.id = pluginEntityId;
     this.dao = DAO_ADDRESS;
     this.pluginAddress = pluginAddress;
     this.votingMode = votingMode;

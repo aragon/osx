@@ -4,6 +4,11 @@ import {
 } from '../../src/plugin/pluginRepo';
 import {ADDRESS_ONE, ONE} from '../constants';
 import {createReleaseMetadataUpdatedEvent, createVersionCreated} from './utils';
+import {
+  generatePluginReleaseEntityId,
+  generatePluginRepoEntityId,
+  generatePluginVersionEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {Bytes} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
@@ -22,40 +27,46 @@ test('PluginRepo (handleVersionCreated) mappings with mock event', () => {
 
   handleVersionCreated(event);
 
-  let pluginRepoId = event.address.toHexString();
+  let pluginVersionEntityId = generatePluginVersionEntityId(
+    event.address,
+    parseInt(release) as i32,
+    parseInt(build) as i32
+  );
 
-  let pluginVersionId = pluginRepoId
-    .concat('_')
-    .concat(release)
-    .concat('_')
-    .concat(build);
-
-  let pluginReleaseId = pluginRepoId.concat('_').concat(release);
+  let pluginReleaseEntityId = generatePluginReleaseEntityId(
+    event.address,
+    parseInt(release) as i32
+  );
 
   assert.entityCount('PluginVersion', 1);
-  assert.fieldEquals('PluginVersion', pluginVersionId, 'id', pluginVersionId);
   assert.fieldEquals(
     'PluginVersion',
-    pluginVersionId,
+    pluginVersionEntityId,
+    'id',
+    pluginVersionEntityId
+  );
+  assert.fieldEquals(
+    'PluginVersion',
+    pluginVersionEntityId,
     'pluginRepo',
     event.address.toHexString()
   );
   assert.fieldEquals(
     'PluginVersion',
-    pluginVersionId,
+    pluginVersionEntityId,
     'release',
-    pluginReleaseId
+    pluginReleaseEntityId
   );
-  assert.fieldEquals('PluginVersion', pluginVersionId, 'build', build);
+  assert.fieldEquals('PluginVersion', pluginVersionEntityId, 'build', build);
   assert.fieldEquals(
     'PluginVersion',
-    pluginVersionId,
+    pluginVersionEntityId,
     'pluginSetup',
     pluginSetup
   );
   assert.fieldEquals(
     'PluginVersion',
-    pluginVersionId,
+    pluginVersionEntityId,
     'metadata',
     buildMetadata
   );
@@ -79,8 +90,11 @@ test('PluginRepo (handleReleaseMetadataUpdated) mappings with mock event', () =>
 
   assert.entityCount('PluginRelease', 1);
 
-  let pluginRepoId = event.address.toHexString();
-  let pluginReleaseEntityId = pluginRepoId.concat('_').concat(release);
+  let pluginRepoEntityId = generatePluginRepoEntityId(event.address);
+  let pluginReleaseEntityId = generatePluginReleaseEntityId(
+    event.address,
+    parseInt(release) as i32
+  );
 
   assert.fieldEquals(
     'PluginRelease',
@@ -92,7 +106,7 @@ test('PluginRepo (handleReleaseMetadataUpdated) mappings with mock event', () =>
     'PluginRelease',
     pluginReleaseEntityId,
     'pluginRepo',
-    pluginRepoId
+    pluginRepoEntityId
   );
   assert.fieldEquals(
     'PluginRelease',

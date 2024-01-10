@@ -16,18 +16,22 @@ import {
 } from '../../src/plugin/pluginRepo';
 import {CONTRACT_ADDRESS, DAO_ADDRESS} from '../constants';
 import {ExtendedPermission} from '../helpers/extended-schema';
+import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 import {Address} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
-const daoId = Address.fromString(DAO_ADDRESS).toHexString();
-const pluginRepoId = Address.fromString(CONTRACT_ADDRESS).toHexString();
+const daoAddress = Address.fromString(DAO_ADDRESS);
+const pluginRepoAddress = Address.fromString(CONTRACT_ADDRESS);
+const daoEntityId = generateDaoEntityId(daoAddress);
+const pluginRepoEntityId = generateDaoEntityId(pluginRepoAddress);
 
 // DAO
 test('Run dao (handleGranted) mappings with mock event', () => {
-  let permission = new ExtendedPermission().withDefaultValues(daoId);
-  permission.dao = daoId;
+  let permission = new ExtendedPermission().withDefaultValues(daoEntityId);
+  permission.dao = daoEntityId;
 
-  let grantedEvent = permission.createEvent_Granted<DaoGrantedEvent>(daoId);
+  let grantedEvent =
+    permission.createEvent_Granted<DaoGrantedEvent>(daoEntityId);
 
   // handle event
   daoHandleGranted(grantedEvent);
@@ -39,8 +43,8 @@ test('Run dao (handleGranted) mappings with mock event', () => {
 });
 
 test('Run dao (handleRevoked) mappings with mock event', () => {
-  let permission = new ExtendedPermission().withDefaultValues(daoId);
-  permission.dao = daoId;
+  let permission = new ExtendedPermission().withDefaultValues(daoEntityId);
+  permission.dao = daoEntityId;
 
   permission.save();
 
@@ -48,7 +52,8 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   permission.assertEntity();
 
   // create event and run it's handler
-  let revokedEvent = permission.createEvent_Revoked<DaoRevokedEvent>(daoId);
+  let revokedEvent =
+    permission.createEvent_Revoked<DaoRevokedEvent>(daoEntityId);
 
   // handle event
   daoHandleRevoked(revokedEvent);
@@ -61,11 +66,13 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
 
 // PluginRepo
 test('Run PluginRepo (handleGranted) mappings with mock event', () => {
-  let permission = new ExtendedPermission().withDefaultValues(pluginRepoId);
-  permission.pluginRepo = pluginRepoId;
+  let permission = new ExtendedPermission().withDefaultValues(
+    pluginRepoEntityId
+  );
+  permission.pluginRepo = pluginRepoEntityId;
 
   let grantedEvent =
-    permission.createEvent_Granted<RepoGrantedEvent>(pluginRepoId);
+    permission.createEvent_Granted<RepoGrantedEvent>(pluginRepoEntityId);
 
   // handle event
   repoHandleGranted(grantedEvent);
@@ -77,8 +84,10 @@ test('Run PluginRepo (handleGranted) mappings with mock event', () => {
 });
 
 test('Run PluginRepo (handleRevoked) mappings with mock event', () => {
-  let permission = new ExtendedPermission().withDefaultValues(pluginRepoId);
-  permission.pluginRepo = pluginRepoId;
+  let permission = new ExtendedPermission().withDefaultValues(
+    pluginRepoEntityId
+  );
+  permission.pluginRepo = pluginRepoEntityId;
 
   permission.save();
 
@@ -87,7 +96,7 @@ test('Run PluginRepo (handleRevoked) mappings with mock event', () => {
 
   // create event and run it's handler
   let revokedEvent =
-    permission.createEvent_Revoked<RepoRevokedEvent>(pluginRepoId);
+    permission.createEvent_Revoked<RepoRevokedEvent>(pluginRepoEntityId);
 
   // handle event
   repoHandleRevoked(revokedEvent);

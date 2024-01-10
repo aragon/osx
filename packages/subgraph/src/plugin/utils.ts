@@ -26,6 +26,7 @@ import {
   fetchOrCreateWrappedERC20Entity,
   supportsERC20Wrapped,
 } from '../utils/tokens/erc20';
+import {generatePluginEntityId} from '@aragon/osx-commons-subgraph';
 import {
   Address,
   Bytes,
@@ -92,9 +93,10 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
 }
 
 function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
+  let pluginEntityId = generatePluginEntityId(plugin);
+  let packageEntity = AddresslistVotingPlugin.load(pluginEntityId);
   if (!packageEntity) {
-    packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    packageEntity = new AddresslistVotingPlugin(pluginEntityId);
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
     packageEntity.proposalCount = BigInt.zero();

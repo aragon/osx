@@ -11,11 +11,18 @@ import {
   Revoked,
 } from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {getPluginVersionId} from './utils';
+import {
+  generatePermissionEntityId,
+  generatePluginReleaseEntityId,
+  generatePluginRepoEntityId,
+  generatePluginSetupEntityId,
+  generatePluginVersionEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {store} from '@graphprotocol/graph-ts';
 
 export function handleVersionCreated(event: VersionCreated): void {
   // PluginSetup
-  let pluginSetupId = event.params.pluginSetup.toHexString();
+  let pluginSetupId = generatePluginSetupEntityId(event.params.pluginSetup);
 
   let pluginSetupEntity = PluginSetup.load(pluginSetupId);
   if (!pluginSetupEntity) {
@@ -24,23 +31,25 @@ export function handleVersionCreated(event: VersionCreated): void {
   }
 
   // PluginVersion
-  let pluginRepoId = event.address.toHexString();
-  let pluginReleaseId = pluginRepoId
-    .concat('_')
-    .concat(event.params.release.toString());
-
-  let pluginVersionId = getPluginVersionId(
-    pluginRepoId,
-    event.params.release,
-    event.params.build
+  const pluginRepoAddress = event.address;
+  const build = event.params.build;
+  const release = event.params.release;
+  let pluginReleaseId = generatePluginReleaseEntityId(
+    pluginRepoAddress,
+    release
+  );
+  let pluginVersionId = generatePluginVersionEntityId(
+    pluginRepoAddress,
+    release,
+    build
   );
 
   let entity = new PluginVersion(pluginVersionId);
-  entity.pluginRepo = event.address.toHexString();
+  entity.pluginRepo = pluginRepoAddress.toHexString();
   entity.pluginSetup = pluginSetupId;
 
   entity.release = pluginReleaseId;
-  entity.build = event.params.build;
+  entity.build = build;
 
   entity.metadata = event.params.buildMetadata.toString();
   entity.save();
@@ -49,13 +58,15 @@ export function handleVersionCreated(event: VersionCreated): void {
 export function handleReleaseMetadataUpdated(
   event: ReleaseMetadataUpdated
 ): void {
-  let pluginRepoId = event.address.toHexString();
+  let pluginRepoAddress = event.address;
+  let pluginRepoId = generatePluginRepoEntityId(pluginRepoAddress);
   let pluginRelease = event.params.release;
   let releaseMetadata = event.params.releaseMetadata.toString();
 
-  let pluginReleaseEntityId = pluginRepoId
-    .concat('_')
-    .concat(pluginRelease.toString());
+  let pluginReleaseEntityId = generatePluginReleaseEntityId(
+    pluginRepoAddress,
+    pluginRelease
+  );
 
   let pluginReleaseEntity = PluginRelease.load(pluginReleaseEntityId);
   if (!pluginReleaseEntity) {
@@ -69,19 +80,17 @@ export function handleReleaseMetadataUpdated(
 }
 
 export function handleGranted(event: Granted): void {
-  const contractAddress = event.address.toHexString();
+  const contractAddress = event.address;
   const where = event.params.where;
   const permissionId = event.params.permissionId;
   const who = event.params.who;
 
-  const permissionEntityId = [
+  const permissionEntityId = generatePermissionEntityId(
     contractAddress,
-    permissionId.toHexString(),
-    where.toHexString(),
-    who.toHexString(),
-  ].join('_');
-
-  const pluginRepo = contractAddress;
+    permissionId,
+    where,
+    who
+  );
 
   // Permission
   let permissionEntity = Permission.load(permissionEntityId);
@@ -93,7 +102,7 @@ export function handleGranted(event: Granted): void {
     permissionEntity.actor = event.params.here;
     permissionEntity.condition = event.params.condition;
 
-    permissionEntity.pluginRepo = pluginRepo;
+    permissionEntity.pluginRepo = contractAddress.toHexString();
 
     permissionEntity.save();
   }
@@ -101,18 +110,18 @@ export function handleGranted(event: Granted): void {
 
 export function handleRevoked(event: Revoked): void {
   // permission
-  const contractAddress = event.address.toHexString();
+  const contractAddress = event.address
   const where = event.params.where;
   const permissionId = event.params.permissionId;
   const who = event.params.who;
 
-  const permissionEntityId = [
+  const permissionEntityId = generatePermissionEntityId(
     contractAddress,
-    permissionId.toHexString(),
-    where.toHexString(),
-    who.toHexString(),
-  ].join('_');
-
+    permissionId,
+    where,
+    who
+  );
+  
   const permissionEntity = Permission.load(permissionEntityId);
   if (permissionEntity) {
     store.remove('Permission', permissionEntityId);

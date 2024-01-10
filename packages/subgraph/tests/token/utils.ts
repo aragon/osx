@@ -29,6 +29,7 @@ import {
 } from '../constants';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
+import { generateMemberEntityId } from '../../src/utils/ids';
 
 // events
 
@@ -390,16 +391,19 @@ export function createTokenVotingMember(
   plugin: string,
   balance: string
 ): string {
-  const fromUserId = address.concat('_').concat(plugin);
+  const memberEntityId = generateMemberEntityId(
+    Address.fromString(address),
+    Address.fromString(plugin) // uses other plugin address to make sure that the code reuses the entity
+  )
 
-  const user = new TokenVotingMember(fromUserId);
+  const user = new TokenVotingMember(memberEntityId);
   user.address = Address.fromString(address);
   user.plugin = plugin; // uses other plugin address to make sure that the code reuses the entity
   user.balance = BigInt.fromString(balance);
 
-  user.delegatee = fromUserId;
+  user.delegatee = memberEntityId;
   user.votingPower = BigInt.zero();
   user.save();
 
-  return fromUserId;
+  return memberEntityId;
 }

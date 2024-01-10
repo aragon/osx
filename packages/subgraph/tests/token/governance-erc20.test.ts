@@ -3,6 +3,7 @@ import {
   handleDelegateVotesChanged,
   handleTransfer,
 } from '../../src/packages/token/governance-erc20';
+import { generateMemberEntityId } from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   ADDRESS_SIX,
@@ -13,7 +14,11 @@ import {
 } from '../constants';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 import {createNewERC20TransferEvent, createTokenVotingMember} from './utils';
-import {BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
+import {
+  generateEntityIdFromAddress,
+  generatePluginEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {Address, BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
 import {
   assert,
   afterEach,
@@ -24,10 +29,19 @@ import {
   describe,
 } from 'matchstick-as';
 
+const pluginAddress = Address.fromString(ADDRESS_SIX);
+const pluginEntityId = generatePluginEntityId(pluginAddress);
+const fromAddress = Address.fromString(ADDRESS_ONE);
+const memberAddress = fromAddress;
+const toAddress = Address.fromString(ADDRESS_TWO);
+const fromId = generateEntityIdFromAddress(fromAddress);
+const memberId = fromId;
+const toId = generateEntityIdFromAddress(toAddress);
+
 describe('Governance ERC20', () => {
   beforeAll(() => {
     const context = new DataSourceContext();
-    context.setString('pluginId', ADDRESS_SIX);
+    context.setString('pluginId', pluginEntityId);
     dataSourceMock.setContext(context);
   });
 
@@ -37,107 +51,131 @@ describe('Governance ERC20', () => {
 
   describe('handleTransfer', () => {
     test('it should create a new member of from', () => {
-      const mockEvent = createNewERC20TransferEvent(
-        ADDRESS_ONE,
-        ADDRESS_TWO,
-        ONE_ETH
-      );
+      const mockEvent = createNewERC20TransferEvent(fromId, toId, ONE_ETH);
 
       handleTransfer(mockEvent);
 
-      const fromUserId = ADDRESS_ONE.concat('_').concat(ADDRESS_SIX);
-      assert.fieldEquals('TokenVotingMember', fromUserId, 'id', fromUserId);
+      const memberEntityId = generateMemberEntityId(fromAddress, pluginAddress);
       assert.fieldEquals(
         'TokenVotingMember',
-        fromUserId,
+        memberEntityId,
+        'id',
+        memberEntityId
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
         'address',
-        ADDRESS_ONE
+        fromId
       );
       assert.fieldEquals(
         'TokenVotingMember',
-        fromUserId,
+        memberEntityId,
         'plugin',
-        ADDRESS_SIX
+        pluginEntityId
       );
       assert.fieldEquals(
         'TokenVotingMember',
-        fromUserId,
+        memberEntityId,
         'balance',
         `-${ONE_ETH}`
       );
     });
 
     test('it should create a new member of to', () => {
-      const mockEvent = createNewERC20TransferEvent(
-        ADDRESS_ONE,
-        ADDRESS_TWO,
-        ONE_ETH
-      );
+      const mockEvent = createNewERC20TransferEvent(fromId, toId, ONE_ETH);
 
       handleTransfer(mockEvent);
 
-      const toUserId = ADDRESS_TWO.concat('_').concat(ADDRESS_SIX);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'id', toUserId);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'address', ADDRESS_TWO);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'plugin', ADDRESS_SIX);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'balance', ONE_ETH);
+      const memberEntityId = generateMemberEntityId(toAddress, pluginAddress);
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
+        'id',
+        memberEntityId
+      );
+      assert.fieldEquals('TokenVotingMember', memberEntityId, 'address', toId);
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
+        'plugin',
+        pluginEntityId
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
+        'balance',
+        ONE_ETH
+      );
     });
 
     test('it should update an existing from entity', () => {
-      const fromUserId = createTokenVotingMember(
-        ADDRESS_ONE,
-        ADDRESS_SIX,
+      const memberEntityId = createTokenVotingMember(
+        fromId,
+        pluginEntityId,
         ONE_ETH + '0'
       );
 
-      const mockEvent = createNewERC20TransferEvent(
-        ADDRESS_ONE,
-        ADDRESS_TWO,
-        ONE_ETH
-      );
+      const mockEvent = createNewERC20TransferEvent(fromId, toId, ONE_ETH);
 
       handleTransfer(mockEvent);
-      assert.fieldEquals('TokenVotingMember', fromUserId, 'id', fromUserId);
       assert.fieldEquals(
         'TokenVotingMember',
-        fromUserId,
+        memberEntityId,
+        'id',
+        memberEntityId
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
         'address',
-        ADDRESS_ONE
+        fromId
       );
       assert.fieldEquals(
         'TokenVotingMember',
-        fromUserId,
+        memberEntityId,
         'plugin',
-        ADDRESS_SIX
+        pluginEntityId
       );
       assert.fieldEquals(
         'TokenVotingMember',
-        fromUserId,
+        memberEntityId,
         'balance',
         BigInt.fromString(ONE_ETH).times(BigInt.fromString('9')).toString()
       );
     });
 
     test('it should update an existing to entity', () => {
-      const toUserId = createTokenVotingMember(
-        ADDRESS_TWO,
-        ADDRESS_SIX,
+      const memberEntityId = createTokenVotingMember(
+        toId,
+        pluginEntityId,
         ONE_ETH + '0'
       );
 
-      const mockEvent = createNewERC20TransferEvent(
-        ADDRESS_ONE,
-        ADDRESS_TWO,
-        ONE_ETH
-      );
+      const mockEvent = createNewERC20TransferEvent(fromId, toId, ONE_ETH);
 
       handleTransfer(mockEvent);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'id', toUserId);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'address', ADDRESS_TWO);
-      assert.fieldEquals('TokenVotingMember', toUserId, 'plugin', ADDRESS_SIX);
       assert.fieldEquals(
         'TokenVotingMember',
-        toUserId,
+        memberEntityId,
+        'id',
+        memberEntityId
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
+        'address',
+        ADDRESS_TWO
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
+        'plugin',
+        ADDRESS_SIX
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityId,
         'balance',
         BigInt.fromString(ONE_ETH).times(BigInt.fromString('11')).toString()
       );
@@ -146,11 +184,9 @@ describe('Governance ERC20', () => {
 
   describe('handleDelegateChanged', () => {
     test('it should create a member from `fromDelegate`.', () => {
-      let memberAddress = ADDRESS_ONE;
-      let pluginAddress = ADDRESS_SIX;
       let member = new ExtendedTokenVotingMember().withDefaultValues(
-        memberAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
 
       let event = member.createEvent_DelegateChanged();
@@ -158,97 +194,103 @@ describe('Governance ERC20', () => {
       handleDelegateChanged(event);
 
       // expected changes
-      member.delegatee = [memberAddress, pluginAddress].join('_');
+      member.delegatee = generateMemberEntityId(memberAddress, pluginAddress);
 
       member.assertEntity();
       assert.entityCount('TokenVotingMember', 1);
     });
 
     test('it should create a member from `toDelegate`.', () => {
-      let memberAddress = ADDRESS_ONE;
-      let pluginAddress = ADDRESS_SIX;
+      const memberTwoAddress = Address.fromString(ADDRESS_TWO);
+      const memberTwoId = generateEntityIdFromAddress(memberTwoAddress);
       let member = new ExtendedTokenVotingMember().withDefaultValues(
-        memberAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
 
       let event = member.createEvent_DelegateChanged(
-        memberAddress,
-        ADDRESS_ONE,
-        ADDRESS_TWO
+        memberId,
+        memberId,
+        memberTwoId
       );
 
       handleDelegateChanged(event);
 
       // assert
       // expected changes
-      member.delegatee = ADDRESS_TWO.concat('_').concat(pluginAddress);
+      member.delegatee = generateMemberEntityId(
+        memberTwoAddress,
+        pluginAddress
+      );
       member.assertEntity();
       assert.entityCount('TokenVotingMember', 2);
     });
 
     test('it should create a member for `delegator`, `fromDelegate` and `toDelegate`, and set delegatee as `toDelegate`.', () => {
-      let memberAddress = ADDRESS_ONE;
-      let pluginAddress = ADDRESS_SIX;
       let member = new ExtendedTokenVotingMember().withDefaultValues(
-        memberAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
+      const oldDelegateeId = ADDRESS_TWO;
+      const newDelegateeAddress = Address.fromString(ADDRESS_THREE);
+      const newDelegateeId = generateEntityIdFromAddress(newDelegateeAddress);
 
-      let delegateeAddress = ADDRESS_THREE;
       let event = member.createEvent_DelegateChanged(
-        memberAddress,
-        ADDRESS_TWO,
-        delegateeAddress
+        memberId,
+        oldDelegateeId,
+        newDelegateeId
       );
 
       handleDelegateChanged(event);
 
       // assert
       // expected changes
-      member.delegatee = delegateeAddress.concat('_').concat(pluginAddress);
+      member.delegatee = generateMemberEntityId(
+        newDelegateeAddress,
+        pluginAddress
+      );
       member.assertEntity();
       assert.entityCount('TokenVotingMember', 3);
     });
 
     test('it should update delegatee of an existing member', () => {
-      let memberAddress = ADDRESS_ONE;
-      let pluginAddress = ADDRESS_SIX;
       let member = new ExtendedTokenVotingMember().withDefaultValues(
-        memberAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
 
       member.buildOrUpdate();
       // there should be one member in the store
       assert.entityCount('TokenVotingMember', 1);
 
-      let fromDelegate = memberAddress;
-      let delegateeAddress = ADDRESS_TWO;
+      let fromDelegate = memberId;
+      let delegateeAddress = Address.fromString(ADDRESS_TWO);
+      let delegateeId = generateEntityIdFromAddress(delegateeAddress);
       let event = member.createEvent_DelegateChanged(
-        memberAddress,
+        memberId,
         fromDelegate,
-        delegateeAddress
+        delegateeId
       );
 
       handleDelegateChanged(event);
 
       // assert
       // expected changes
-      member.delegatee = delegateeAddress.concat('_').concat(pluginAddress);
+      member.delegatee = generateMemberEntityId(
+        delegateeAddress,
+        pluginAddress
+      );
       member.assertEntity();
       // there must be the second member in the store for the delegatee
       assert.entityCount('TokenVotingMember', 2);
     });
   });
 
-  describe('handleDelegateChanged', () => {
+  describe('handleDelegatevotesChanged', () => {
     test('it should create member for delegate address', () => {
-      let memberAddress = ADDRESS_ONE;
-      let pluginAddress = ADDRESS_SIX;
       let member = new ExtendedTokenVotingMember().withDefaultValues(
-        memberAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
       member.votingPower = BigInt.fromString('100');
       let event = member.createEvent_DelegateVotesChanged('100', '0');
@@ -260,11 +302,9 @@ describe('Governance ERC20', () => {
     });
 
     test('it should update delegateVotes of members', () => {
-      let memberAddress = ADDRESS_ONE;
-      let pluginAddress = ADDRESS_SIX;
       let member = new ExtendedTokenVotingMember().withDefaultValues(
-        memberAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
 
       let newBalance = '111';
@@ -280,16 +320,16 @@ describe('Governance ERC20', () => {
     });
 
     test('it should delete a member without voting power and balance and not delegating to another address', () => {
-      let memberOneAddress = ADDRESS_ONE;
-      let memberTwoAddress = ADDRESS_TWO;
-      let pluginAddress = ADDRESS_SIX;
+      const memberTwoAddress = Address.fromString(ADDRESS_TWO);
+      const memberTwoId = generateEntityIdFromAddress(memberTwoAddress);
+
       let memberOne = new ExtendedTokenVotingMember().withDefaultValues(
-        memberOneAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
       let memberTwo = new ExtendedTokenVotingMember().withDefaultValues(
-        memberTwoAddress,
-        pluginAddress
+        memberTwoId,
+        pluginEntityId
       );
       /* member one has 100 token delegated to member two*/
       memberOne.balance = BigInt.fromString('100');
@@ -310,8 +350,8 @@ describe('Governance ERC20', () => {
 
       memberTwo.mockCall_delegatesCall(
         DAO_TOKEN_ADDRESS,
-        ADDRESS_TWO,
-        ADDRESS_TWO
+        memberTwoId,
+        memberTwoId
       );
 
       handleDelegateVotesChanged(eventOne);
@@ -327,16 +367,15 @@ describe('Governance ERC20', () => {
     });
 
     test('it should not delete a member without voting power and balance, but delegating to another address', () => {
-      let memberOneAddress = ADDRESS_ONE;
-      let memberTwoAddress = ADDRESS_TWO;
-      let pluginAddress = ADDRESS_SIX;
+      const memberTwoAddress = Address.fromString(ADDRESS_TWO);
+      const memberTwoId = generateEntityIdFromAddress(memberTwoAddress);
       let memberOne = new ExtendedTokenVotingMember().withDefaultValues(
-        memberOneAddress,
-        pluginAddress
+        memberId,
+        pluginEntityId
       );
       let memberTwo = new ExtendedTokenVotingMember().withDefaultValues(
-        memberTwoAddress,
-        pluginAddress
+        memberTwoId,
+        pluginEntityId
       );
       /* member one has 100 token delegated to member two*/
       memberOne.balance = BigInt.fromString('100');
@@ -357,8 +396,8 @@ describe('Governance ERC20', () => {
 
       memberTwo.mockCall_delegatesCall(
         DAO_TOKEN_ADDRESS,
-        ADDRESS_TWO,
-        ADDRESS_ONE
+        memberTwoId,
+        memberId
       );
 
       handleDelegateVotesChanged(eventOne);
