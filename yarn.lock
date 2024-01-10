@@ -6,6 +6,12 @@
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.0.2.tgz#8350da88c8fb93724de875589ba51eb7caa30936"
   integrity sha512-RCTig39oTekBF+M5FVLY8vKlNb8CW/RPRMpZtp5llTW1AOsPwVHj8SzmVSIHDdUAcbY1f34kLYEgJJBn7AwQrQ==
+"@aragon/osx-commons-subgraph@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-subgraph/-/osx-commons-subgraph-0.0.3.tgz#27abe61e3cbae2c73faa8731edb43050ce229fe4"
+  integrity sha512-3p/1tXg5xySebYQ2T8+M/2zpfRSf+uXrtHywXgfZEa7okr9NmnoqCkl8HawRiGJ745Sw34ZDMsjUzONAJCbSeQ==
+  dependencies:
+    "@graphprotocol/graph-ts" "0.31.0"
 
 "@aragon/osx-ethers-v1.2.0@npm:@aragon/osx-ethers@1.2.0":
   version "1.2.0"
@@ -1442,6 +1448,13 @@
     web3-eth-abi "1.7.0"
     which "2.0.2"
     yaml "1.10.2"
+
+"@graphprotocol/graph-ts@0.31.0":
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.31.0.tgz#730668c0369828b31bef81e8d9bc66b9b48e3480"
+  integrity sha512-xreRVM6ho2BtolyOh2flDkNoGZximybnzUnF53zJVp0+Ed0KnAlO1/KOCUYw06euVI9tk0c9nA2Z/D5SIQV2Rg==
+  dependencies:
+    assemblyscript "0.19.10"
 
 "@graphprotocol/graph-ts@^0.27.0":
   version "0.27.0"

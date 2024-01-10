@@ -33,6 +33,6 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@aragon/osx-commons-subgraph": "^0.0.2"
+    "@aragon/osx-commons-subgraph": "^0.0.3"
   }
 }
