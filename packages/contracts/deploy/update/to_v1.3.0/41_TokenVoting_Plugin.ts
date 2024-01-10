@@ -116,7 +116,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: tx.to,
     data: tx.data,
     value: 0,
-    description: `Creates a new build for release 1 in the TokenVotingRepo (${tokenVotingRepoAddress}) with TokenVotingSetup (${deployResult.address})`,
+    description: `Creates a new build for release 1 in the <strong>TokenVoting PluginRepo</strong> (<code>${tokenVotingRepoAddress}</code>) with <strong>TokenVotingSetup</strong> (<code>${deployResult.address}</code>).`,
   });
 };
 export default func;
