@@ -16,6 +16,7 @@
     "./typechain",
     "./deploy",
     "./utils",
+    "./artifacts",
     "types/hardhat.d.ts"
   ]
 }
