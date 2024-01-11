@@ -89,7 +89,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
         createdDao = _createDAO(_daoSettings);
 
         // Register DAO.
-        daoRegistry.register(IDAO(createdDao), msg.sender, _daoSettings.subdomain);
+        daoRegistry.register(createdDao, msg.sender, _daoSettings.subdomain);
 
         // Get Permission IDs
         bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
