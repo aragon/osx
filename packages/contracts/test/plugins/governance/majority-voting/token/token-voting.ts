@@ -1679,7 +1679,7 @@ describe('TokenVoting', function () {
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {
-        time.increaseTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
@@ -1786,7 +1786,7 @@ describe('TokenVoting', function () {
 
       it('does not execute with 0 votes', async () => {
         // does not execute early
-        time.increaseTo(startDate);
+        await time.increaseTo(startDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;

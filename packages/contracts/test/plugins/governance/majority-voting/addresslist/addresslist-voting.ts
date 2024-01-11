@@ -1549,7 +1549,7 @@ describe('AddresslistVoting', function () {
 
       it('does not execute with 0 votes', async () => {
         // does not execute early
-        time.increaseTo(startDate);
+        await time.increaseTo(startDate);
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
