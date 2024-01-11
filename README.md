@@ -221,18 +221,6 @@ You can find more details about [our deployment checklist here](https://github.c
    - Create a PR to `main` with the release labels
 6. Unmark the Release as a draft and deploy the NPM packages
 
-## Releasing NPM packages
-
-To release a new version of the NPM packages and the contracts add one of these labels `release:patch`, `release:minor` and `release:major`.
-This triggers the deployment of the contracts to the networks defined under `packages/contracts/networks.json`. Merges to `develop` triggers a release to testnets and merges to `main` releases to the mainnets.
-The labels also indicate how the npm packages will be bumped to the next version:
-
-| Label         | Version bump                                          |
-| ------------- | ----------------------------------------------------- |
-| release:patch | patch bump for `@aragon/osx` and `@aragon/osx-ethers` |
-| release:minor | minor bump for `@aragon/osx` and `@aragon/osx-ethers` |
-| release:major | major bump for `@aragon/osx` and `@aragon/osx-ethers` |
-
 ## Pull request commands
 
 Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.

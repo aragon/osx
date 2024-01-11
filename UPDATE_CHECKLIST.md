@@ -14,7 +14,7 @@ This checklist is seen as a guide to update the existing deployment.
     - [ ] decrement the storage gap correctly
     - [ ] do not corrupt pre-existing storage
     - [ ] initialize the storage correctly
-- [ ] Make sure that the `deploy` property in `packages/contracts/networks.json` points to the correct update
+- [ ] Make sure that the `deploy` property in `packages/contracts/networks.ts` points to the correct update
 - [ ] Run `yarn` in the repository root to install the dependencies
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed

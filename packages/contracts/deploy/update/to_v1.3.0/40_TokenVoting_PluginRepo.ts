@@ -40,7 +40,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,
-    description: `Upgrade the "token-voting-repo" PluginRepo (${tokenVotingPluginRepoAddress}) to the new implementation (${newPluginRepoImplementation})`,
+    description: `Upgrade the <strong>TokenVoting PluginRepo</strong> (<code>${tokenVotingPluginRepoAddress}</code>) to the new <strong>implementation</strong> (<code>${newPluginRepoImplementation}</code>).`,
   });
 };
 export default func;

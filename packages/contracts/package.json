@@ -44,6 +44,7 @@
     "@openzeppelin/contracts-upgradeable": "4.9.5"
   },
   "devDependencies": {
+    "@aragon/osx-commons-configs": "^0.0.2",
     "@aragon/osx-commons-sdk": "0.0.1-alpha.3",
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
     "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",

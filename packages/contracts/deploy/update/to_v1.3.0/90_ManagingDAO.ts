@@ -33,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,
-    description: `Upgrade the managing DAO to the new implementation (${newDaoImplementation})`,
+    description: `Upgrade the <strong>management DAO</strong> (<code>${managingDAOAddress}</code>) to the new <strong>implementation</strong> (<code>${newDaoImplementation}</code>).`,
   });
 };
 export default func;

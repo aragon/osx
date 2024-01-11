@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@aragon/osx-commons-configs@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.0.2.tgz#8350da88c8fb93724de875589ba51eb7caa30936"
+  integrity sha512-RCTig39oTekBF+M5FVLY8vKlNb8CW/RPRMpZtp5llTW1AOsPwVHj8SzmVSIHDdUAcbY1f34kLYEgJJBn7AwQrQ==
+
 "@aragon/osx-commons-contracts@^1.4.0-alpha.2":
   version "1.4.0-alpha.2"
   resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.2.tgz#4b70f826be3fffb1f0f0a90d4b06992485958c87"

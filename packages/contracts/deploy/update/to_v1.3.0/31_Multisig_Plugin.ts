@@ -79,7 +79,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: tx.to,
     data: tx.data,
     value: 0,
-    description: `Creates a new build for release 1 in the MultisigRepo (${multisigRepoAddress}) with MultisigSetup (${deployResult.address})`,
+    description: `Creates a new build for release 1 in the <strong>Multisig PluginRepo</strong> (<code>${multisigRepoAddress}</code>) with <strong>MultisigSetup</strong> (<code>${deployResult.address}</code>).`,
   });
 };
 export default func;
