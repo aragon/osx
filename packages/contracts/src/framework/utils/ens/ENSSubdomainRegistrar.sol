@@ -8,7 +8,7 @@ import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol";
-import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/auth/DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 /// @title ENSSubdomainRegistrar

@@ -553,9 +553,7 @@ describe('AddresslistVoting', function () {
         false
       );
 
-      const currentTime = (
-        await ethers.provider.getBlock((await creationTx.wait()).blockNumber)
-      ).timestamp;
+      const currentTime = await time.latest();
 
       const expectedStartDate = currentTime;
       const expectedEndDate = expectedStartDate + votingSettings.minDuration;

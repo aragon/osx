@@ -143,7 +143,7 @@ describe('DAO Upgrade', function () {
         // Upgrade and call `initializeFrom`.
         await daoV100Proxy.upgradeToAndCall(
           daoV130Implementation.address,
-          daoV130Implementation.interface.encodeFunctionData('initializeFrom', [
+          daoV130Implementation.interface.encodeFunctionData(, [
             IMPLICIT_INITIAL_PROTOCOL_VERSION,
             EMPTY_DATA,
           ])
