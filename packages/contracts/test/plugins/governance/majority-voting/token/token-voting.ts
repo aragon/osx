@@ -1858,7 +1858,7 @@ describe('TokenVoting', function () {
       });
 
       it('early support criterium is sharp by 1 vote', async () => {
-        time.increaseTo(startDate);
+        await time.increaseTo(startDate);
 
         // 99.9999% of the voting power voted for yes
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
@@ -1931,7 +1931,7 @@ describe('TokenVoting', function () {
       });
 
       it('early support criterium is sharp by 1 vote', async () => {
-        time.increaseTo(startDate);
+        await time.increaseTo(startDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 

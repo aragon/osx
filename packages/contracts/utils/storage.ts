@@ -12,7 +12,7 @@ export async function readStorage(
   location: number | string,
   types: string[]
 ): Promise<string> {
-  return await ethers.provider
+  return ethers.provider
     .getStorageAt(contractAddress, location)
     .then(encoded => defaultAbiCoder.decode(types, encoded)[0]);
 }
