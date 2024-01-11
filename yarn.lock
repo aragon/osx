@@ -2,18 +2,18 @@
 # yarn lockfile v1
 
 
-"@aragon/osx-commons-contracts@^1.4.0-alpha.1":
-  version "1.4.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.1.tgz#ce405a8cfa1af8f978f79242818f94f6432c1bec"
-  integrity sha512-2zAOyUMd0UEq5LmE9vbYSDC22Fw5fv8/uzs9sn2WF1LApt5DUZFApLLtqVHX2PHIqXrWj6XwhmRjLY3wpxS4GQ==
+"@aragon/osx-commons-contracts@^1.4.0-alpha.2":
+  version "1.4.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.2.tgz#4b70f826be3fffb1f0f0a90d4b06992485958c87"
+  integrity sha512-goN/iKObUxiEdNxDc10ltv5qZAKzb1tdFx750UWmj8BPGI7EDnGA3O/vORHGiTvHx9zIrx0xBhXNrkEZMjZZVw==
   dependencies:
     "@openzeppelin/contracts" "4.9.5"
     "@openzeppelin/contracts-upgradeable" "4.9.5"
 
-"@aragon/osx-commons-sdk@0.0.1-alpha.2":
-  version "0.0.1-alpha.2"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.0.1-alpha.2.tgz#4491276b72981814169d76cfce0a7805ab2f17f3"
-  integrity sha512-Vt71lMowO7WWV1v1MD+1Jcbmd+zqWMrEg1fMK5EbhqJ6IEZ7LlxDj2/13+KGN+M+0TsTtBEPs6WNUnedMYKIWg==
+"@aragon/osx-commons-sdk@0.0.1-alpha.3":
+  version "0.0.1-alpha.3"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.0.1-alpha.3.tgz#c8ca71702cc404f7ad82cc327fb2355807a84801"
+  integrity sha512-7ibaTyNouYiPOQuMYFvfonl4Ts/87XPh2XerrqkdwQAEcdRGEkQjmwAd4XO4cHXC8yJh8u9JCTt604muuRJehA==
   dependencies:
     "@aragon/osx-ethers" "^1.3.0-rc0.4"
     "@aragon/osx-ethers-v1.0.0" "npm:@aragon/osx-ethers@1.2.1"
@@ -1708,7 +1708,6 @@
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@jridgewell/resolve-uri/-/resolve-uri-3.1.1.tgz#c08679063f279615a3326583ba3a90d1d82cc721"
   integrity sha512-dSYZh7HhCDtCKm4QakX0xFpsRDqjjtZf/kjI/v3T3Nwt5r8/qz/M19F9ySyOqU94SXBmeG9ttTul+YnR4LOxFA==
-
 
 "@jridgewell/set-array@^1.0.1":
   version "1.1.2"

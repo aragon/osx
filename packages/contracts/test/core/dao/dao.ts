@@ -1,11 +1,11 @@
 import {
   DAO,
-  TestERC20,
-  TestERC20__factory,
-  TestERC721,
-  TestERC721__factory,
-  TestERC1155,
-  TestERC1155__factory,
+  ERC20Mock,
+  ERC20Mock__factory,
+  ERC721Mock,
+  ERC721Mock__factory,
+  ERC1155Mock,
+  ERC1155Mock__factory,
   GasConsumer__factory,
   DAO__factory,
   IDAO__factory,
@@ -757,11 +757,11 @@ describe('DAO', function () {
       });
 
       describe('ERC20 Transfer', async () => {
-        let erc20Token: TestERC20;
+        let erc20Token: ERC20Mock;
 
         beforeEach(async () => {
-          const TestERC20 = new TestERC20__factory(signers[0]);
-          erc20Token = await TestERC20.deploy('name', 'symbol');
+          const ERC20Mock = new ERC20Mock__factory(signers[0]);
+          erc20Token = await ERC20Mock.deploy('name', 'symbol');
         });
 
         it('reverts if transfers more ERC20 than dao has', async () => {
@@ -797,11 +797,11 @@ describe('DAO', function () {
       });
 
       describe('ERC721 Transfer', async () => {
-        let erc721Token: TestERC721;
+        let erc721Token: ERC721Mock;
 
         beforeEach(async () => {
-          const TestERC721 = new TestERC721__factory(signers[0]);
-          erc721Token = await TestERC721.deploy('name', 'symbol');
+          const ERC721Mock = new ERC721Mock__factory(signers[0]);
+          erc721Token = await ERC721Mock.deploy('name', 'symbol');
         });
 
         it('reverts if transfers more ERC721 than dao has', async () => {
@@ -840,11 +840,11 @@ describe('DAO', function () {
       });
 
       describe('ERC1155 Transfer', async () => {
-        let erc1155Token: TestERC1155;
+        let erc1155Token: ERC1155Mock;
 
         beforeEach(async () => {
-          const TestERC1155 = new TestERC1155__factory(signers[0]);
-          erc1155Token = await TestERC1155.deploy('URI');
+          const ERC1155Mock = new ERC1155Mock__factory(signers[0]);
+          erc1155Token = await ERC1155Mock.deploy('URI');
         });
 
         it('reverts if transfers more ERC1155 than dao has', async () => {
@@ -900,15 +900,15 @@ describe('DAO', function () {
   });
 
   describe('Deposit through direct transfer:', async () => {
-    let erc721Token: TestERC721;
-    let erc1155Token: TestERC1155;
+    let erc721Token: ERC721Mock;
+    let erc1155Token: ERC1155Mock;
 
     beforeEach(async () => {
-      const TestERC1155 = new TestERC1155__factory(signers[0]);
-      erc1155Token = await TestERC1155.deploy('URI');
+      const ERC1155Mock = new ERC1155Mock__factory(signers[0]);
+      erc1155Token = await ERC1155Mock.deploy('URI');
 
-      const TestERC721 = new TestERC721__factory(signers[0]);
-      erc721Token = await TestERC721.deploy('name', 'symbol');
+      const ERC721Mock = new ERC721Mock__factory(signers[0]);
+      erc721Token = await ERC721Mock.deploy('name', 'symbol');
 
       await erc721Token.mint(ownerAddress, 1);
       await erc1155Token.mint(ownerAddress, 1, 2);
@@ -1026,11 +1026,11 @@ describe('DAO', function () {
 
   describe('Deposit through deposit function:', async () => {
     const amount = ethers.utils.parseEther('1.23');
-    let token: TestERC20;
+    let token: ERC20Mock;
 
     beforeEach(async () => {
-      const TestERC20 = new TestERC20__factory(signers[0]);
-      token = await TestERC20.deploy('name', 'symbol');
+      const ERC20Mock = new ERC20Mock__factory(signers[0]);
+      token = await ERC20Mock.deploy('name', 'symbol');
     });
 
     it('reverts if amount is zero', async () => {

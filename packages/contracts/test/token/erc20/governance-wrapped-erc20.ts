@@ -1,6 +1,6 @@
 import {
-  TestERC20,
-  TestERC20__factory,
+  ERC20Mock,
+  ERC20Mock__factory,
   GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
   IERC165Upgradeable__factory,
@@ -37,8 +37,8 @@ let toDelegate: string;
 describe('GovernanceWrappedERC20', function () {
   let signers: SignerWithAddress[];
   let governanceToken: GovernanceWrappedERC20;
-  let erc20: TestERC20;
-  let TestERC20: TestERC20__factory;
+  let erc20: ERC20Mock;
+  let ERC20Mock: ERC20Mock__factory;
   let GovernanceWrappedERC20: GovernanceWrappedERC20__factory;
   let defaultBalances: AccountBalance[];
 
@@ -48,7 +48,7 @@ describe('GovernanceWrappedERC20', function () {
   before(async () => {
     signers = await ethers.getSigners();
 
-    TestERC20 = new TestERC20__factory(signers[0]);
+    ERC20Mock = new ERC20Mock__factory(signers[0]);
     GovernanceWrappedERC20 = new GovernanceWrappedERC20__factory(signers[0]);
     defaultBalances = [
       {account: signers[0].address, amount: 123},
@@ -63,7 +63,7 @@ describe('GovernanceWrappedERC20', function () {
 
   beforeEach(async function () {
     defaultExistingERC20InitData = [existingErc20Name, existingErc20Symbol];
-    erc20 = await TestERC20.deploy(...defaultExistingERC20InitData);
+    erc20 = await ERC20Mock.deploy(...defaultExistingERC20InitData);
 
     const promises = defaultBalances.map(balance =>
       erc20.setBalance(balance.account, balance.amount)

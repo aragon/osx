@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IMembership} from "@aragon/osx-commons-contracts/src/plugin/extensions/membership/IMembership.sol";
-import {Addresslist} from "@aragon/osx-commons-contracts/src/governance/Addresslist.sol";
+import {Addresslist} from "@aragon/osx-commons-contracts/src/plugin/extensions/governance/Addresslist.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons-contracts/src/utils/math/Ratio.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 

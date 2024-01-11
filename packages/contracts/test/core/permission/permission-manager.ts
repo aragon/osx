@@ -4,7 +4,7 @@ import {
   PermissionManagerTest__factory,
   PermissionConditionMock__factory,
 } from '../../../typechain';
-import {Operation} from '@aragon/osx-commons-sdk';
+import {MultiTargetPermission, Operation} from '@aragon/osx-commons-sdk';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -33,14 +33,6 @@ let conditionMock: PermissionConditionMock;
 interface SingleTargetPermission {
   operation: Operation;
   who: string;
-  permissionId: string;
-}
-
-interface MultiTargetPermission {
-  operation: Operation;
-  where: string;
-  who: string;
-  condition: string;
   permissionId: string;
 }
 

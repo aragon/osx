@@ -56,11 +56,6 @@ import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_0_0} from "@aragon/o
 import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_3_0} from "@aragon/osx-v1.3.0/token/ERC20/governance/GovernanceWrappedERC20.sol";
 
 // Integration Testing
-import {CloneFactory} from "@aragon/osx-commons-contracts/src/mocks/plugin/CloneFactory.sol";
-import {TestERC20} from "@aragon/osx-commons-contracts/src/mocks/token/TestERC20.sol";
-import {TestERC721} from "@aragon/osx-commons-contracts/src/mocks/token/TestERC721.sol";
-import {TestERC1155} from "@aragon/osx-commons-contracts/src/mocks/token/TestERC1155.sol";
-
-import {PermissionConditionMock} from "@aragon/osx-commons-contracts/src/mocks/permission/PermissionConditionMock.sol";
+import {CloneFactory} from "@aragon/osx-commons-contracts/src/utils/deployment/CloneFactory.sol";
 
 /* solhint-enable no-unused-import */
