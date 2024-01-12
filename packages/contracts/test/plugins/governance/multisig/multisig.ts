@@ -1207,7 +1207,9 @@ describe('Multisig', function () {
             DAO__factory.createInterface(),
             IDAO_EVENTS.EXECUTED
           )
-        ).to.rejectedWith('No logs found for the topic of event "Executed".');
+        ).to.rejectedWith(
+          `Event "${IDAO_EVENTS.EXECUTED}" could not be found in transaction ${tx.hash}.`
+        );
 
         expect(await multisig.canExecute(id)).to.equal(false);
 
@@ -1219,7 +1221,9 @@ describe('Multisig', function () {
             DAO__factory.createInterface(),
             IDAO_EVENTS.EXECUTED
           )
-        ).to.rejectedWith('No logs found for the topic of event "Executed".');
+        ).to.rejectedWith(
+          `Event "${IDAO_EVENTS.EXECUTED}" could not be found in transaction ${tx.hash}.`
+        );
 
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
