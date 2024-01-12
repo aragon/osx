@@ -1,6 +1,5 @@
 import {
   Action,
-  ERC20Transfer,
   ERC721Balance,
   TransactionActionsProposal,
 } from '../../generated/schema';

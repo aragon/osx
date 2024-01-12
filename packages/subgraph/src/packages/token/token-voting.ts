@@ -16,12 +16,12 @@ import {
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {generateMemberEntityId, generateVoteEntityId} from '../../utils/ids';
-import {getProposalId} from '../../utils/proposals';
 import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
 import {
   generateActionEntityId,
   generatePluginEntityId,
   generateProposalEntityId,
+  generateEntityIdFromAddress,
 } from '@aragon/osx-commons-subgraph';
 import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
@@ -121,6 +121,7 @@ export function _handleProposalCreated(
 export function handleVoteCast(event: VoteCast): void {
   let pluginAddress = event.address;
   let voterAddress = event.params.voter;
+  let voterId = generateEntityIdFromAddress(voterAddress);
   let voterEntityId = generateMemberEntityId(pluginAddress, voterAddress);
   let pluginProposalId = event.params.proposalId;
   let proposalEntityId = generateProposalEntityId(
@@ -141,7 +142,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalVoteEntity.updatedAt = event.block.timestamp;
   } else {
     voterProposalVoteEntity = new TokenVotingVote(voterVoteEntityId);
-    voterProposalVoteEntity.voter = voterEntityId;
+    voterProposalVoteEntity.voter = voterId;
     voterProposalVoteEntity.proposal = proposalEntityId;
     voterProposalVoteEntity.createdAt = event.block.timestamp;
     voterProposalVoteEntity.voteReplaced = false;

@@ -6,7 +6,10 @@ import {
 import {Executed} from '../../generated/templates/DaoTemplateV1_3_0/DAO';
 import {handleExecuted} from '../../src/dao/dao_v1_3_0';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
-import {generateERC1155TransferEntityId} from '../../src/utils/ids';
+import {
+  generateERC1155TransferEntityId,
+  generateTokenEntityId,
+} from '../../src/utils/ids';
 import {
   ERC20_transfer,
   ERC20_transferFrom,
@@ -67,8 +70,7 @@ const eq = assert.fieldEquals;
 let daoAddress = Address.fromString(DAO_ADDRESS);
 let tokenAddress = Address.fromString(DAO_TOKEN_ADDRESS);
 let daoEntityId = generateDaoEntityId(daoAddress);
-// TODD: generateTokenEntityId
-let tokenEntityId = tokenAddress.toHexString(); // generateTokenEntityId(tokenEntity)
+let tokenEntityId = generateTokenEntityId(tokenAddress);
 let balanceEntityId = generateBalanceEntityId(daoAddress, tokenAddress);
 
 describe('handleExecuted', () => {
