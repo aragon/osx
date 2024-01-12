@@ -13,7 +13,7 @@ import {Addresslist} from "../../utils/Addresslist.sol";
 import {IMultisig} from "./IMultisig.sol";
 
 /// @title Multisig - Release 1, Build 2
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @custom:security-contact sirt@aragon.org
 contract Multisig is

@@ -199,6 +199,13 @@ export function handleVoteCast(event: VoteCast): void {
   }
 }
 
+if (
+  approvals >= minApprovalsStruct.minApprovals &&
+  !proposalEntity.potentiallyExecutable
+) {
+  proposalEntity.potentiallyExecutable = true;
+}
+
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
   let proposalId = getProposalId(event.address, pluginProposalId);

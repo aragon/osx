@@ -8,7 +8,7 @@ import {IDAO} from "../../dao/IDAO.sol";
 import {_auth} from "../../utils/auth.sol";
 
 /// @title DaoAuthorizable
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An abstract contract providing a meta-transaction compatible modifier for non-upgradeable contracts instantiated via the `new` keyword to authorize function calls through an associated DAO.
 /// @custom:security-contact sirt@aragon.org
 abstract contract DaoAuthorizable is Context {

@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 import {IDAO} from "../../../core/dao/IDAO.sol";
 
 /// @title IMultisig
-/// @author Aragon Association - 2023
+/// @author Aragon - 2023
 /// @notice An interface for an on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @custom:security-contact sirt@aragon.org
 interface IMultisig {

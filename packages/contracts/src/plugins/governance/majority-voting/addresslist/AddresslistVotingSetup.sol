@@ -10,7 +10,7 @@ import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice The setup contract of the `AddresslistVoting` plugin.
 /// @custom:security-contact sirt@aragon.org
 contract AddresslistVotingSetup is PluginSetup {

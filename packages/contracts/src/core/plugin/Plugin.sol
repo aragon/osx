@@ -10,7 +10,7 @@ import {DaoAuthorizable} from "./dao-authorizable/DaoAuthorizable.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title Plugin
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the `new` keyword.
 /// @custom:security-contact sirt@aragon.org
 abstract contract Plugin is IPlugin, ERC165, DaoAuthorizable, ProtocolVersion {

@@ -9,7 +9,7 @@ import {PluginSetup, IPluginSetup} from "../../../framework/plugin/setup/PluginS
 import {Multisig} from "./Multisig.sol";
 
 /// @title MultisigSetup - Release 1, Build 2
-/// @author Aragon Association - 2022-2023
+/// @author Aragon - 2022-2023
 /// @notice The setup contract of the `Multisig` plugin.
 /// @custom:security-contact sirt@aragon.org
 contract MultisigSetup is PluginSetup {
