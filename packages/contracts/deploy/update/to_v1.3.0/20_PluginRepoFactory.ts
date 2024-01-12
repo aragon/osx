@@ -11,7 +11,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const managementDAOAddress = getLatestContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = getLatestContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
   const pluginRepoRegistryAddress = getLatestContractAddress(
     'PluginRepoRegistryProxy',
     hre

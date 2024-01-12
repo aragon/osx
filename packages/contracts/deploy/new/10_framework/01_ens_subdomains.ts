@@ -67,7 +67,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Registration is now complete. Lets move the ownership of all domains to the management DAO
-  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
   await transferSubnodeChain(
     daoDomain,
     managementDAOAddress,

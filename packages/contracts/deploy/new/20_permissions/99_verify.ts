@@ -12,7 +12,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get `ManagementDAOProxy` address.
-  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
   // Get `ManagementDAOProxy` contract.
   const managementDaoContract = DAO__factory.connect(
@@ -82,7 +85,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // PLUGIN REPO REGISTRY PERMISSIONS
   await checkPermission(managementDaoContract, {
     operation: Operation.Grant,
-    where: {name: 'PluginRepoRegistryProxy', address: pluginRepoRegistryAddress},
+    where: {
+      name: 'PluginRepoRegistryProxy',
+      address: pluginRepoRegistryAddress,
+    },
     who: {name: 'PluginRepoFactory', address: pluginRepoFactoryAddress},
     permission: 'REGISTER_PLUGIN_REPO_PERMISSION',
   });

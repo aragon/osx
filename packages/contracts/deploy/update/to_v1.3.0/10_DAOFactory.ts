@@ -11,16 +11,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const managementDAOAddress = getLatestContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = getLatestContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
   const pluginSetupProcessorAddress = getLatestContractAddress(
     'PluginSetupProcessor',
     hre
   );
   const daoRegistryAddress = getLatestContractAddress('DAORegistryProxy', hre);
-  const previousDAOFactoryAddress = getLatestContractAddress(
-    'DAOFactory',
-    hre
-  );
+  const previousDAOFactoryAddress = getLatestContractAddress('DAOFactory', hre);
   console.log(`Using managementDAO ${managementDAOAddress}`);
   console.log(`Using PluginSetupProcessor ${pluginSetupProcessorAddress}`);
   console.log(`Using DAORegistry ${daoRegistryAddress}`);

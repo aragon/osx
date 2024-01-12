@@ -38,7 +38,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   hre.aragonToVerifyContracts.push({
     contract:
       'src/framework/utils/ens/ENSSubdomainRegistrar.sol:ENSSubdomainRegistrar',
-    ...(await deployments.get('PluginENSSubdomainRegistrarProxy_Implementation')),
+    ...(await deployments.get(
+      'PluginENSSubdomainRegistrarProxy_Implementation'
+    )),
   });
 };
 

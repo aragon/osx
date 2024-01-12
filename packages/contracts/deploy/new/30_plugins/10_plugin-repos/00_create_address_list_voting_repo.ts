@@ -33,7 +33,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  await createPluginRepo(hre, 'AddresslistVotingRepoProxy', 'address-list-voting');
+  await createPluginRepo(
+    hre,
+    'AddresslistVotingRepoProxy',
+    'address-list-voting'
+  );
   await populatePluginRepo(hre, 'AddresslistVotingRepoProxy', [
     {
       versionTag: [1, 2],

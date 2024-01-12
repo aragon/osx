@@ -17,7 +17,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
 
   // Get `ManagementDAOProxy` address.
-  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
   // Get `DAO` contract.
   const managementDaoContract = DAO__factory.connect(

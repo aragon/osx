@@ -11,7 +11,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Granting ${deployer.address} temp execute permissions`);
 
   // Get `managementDAO` address.
-  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
   // Get `DAO` contract.
   const managementDaoContract = DAO__factory.connect(
     managementDAOAddress,

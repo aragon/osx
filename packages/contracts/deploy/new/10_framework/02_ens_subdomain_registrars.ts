@@ -11,7 +11,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get `managementDAO` address.
-  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
   const managementDAO = DAO__factory.connect(managementDAOAddress, deployer);
 
   const ensRegistryAddress = await getENSAddress(hre);
