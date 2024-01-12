@@ -30,8 +30,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const multisigSetupContract = await getContractAddress('MultisigSetup', hre);
 
-  await createPluginRepo(hre, 'multisig');
-  await populatePluginRepo(hre, 'multisig', [
+  await createPluginRepo(hre, 'MultisigRepoProxy', 'multisig');
+  await populatePluginRepo(hre, 'MultisigRepoProxy', [
     {
       versionTag: [1, 2],
       pluginSetupContract: multisigSetupContract,

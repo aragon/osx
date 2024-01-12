@@ -20,33 +20,36 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (network.name !== 'localhost' && network.name !== 'hardhat') {
     if (
-      !('MANAGINGDAO_MULTISIG_LISTEDONLY' in process.env) ||
-      !('MANAGINGDAO_MULTISIG_MINAPPROVALS' in process.env) ||
-      !('MANAGINGDAO_MULTISIG_APPROVERS' in process.env)
+      !('MANAGEMENTDAO_MULTISIG_LISTEDONLY' in process.env) ||
+      !('MANAGEMENTDAO_MULTISIG_MINAPPROVALS' in process.env) ||
+      !('MANAGEMENTDAO_MULTISIG_APPROVERS' in process.env)
     ) {
-      throw new Error('Managing DAO Multisig settings not set in .env');
+      throw new Error('Management DAO Multisig settings not set in .env');
     }
   }
 
-  const approvers = process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') || [
-    deployer.address,
-  ];
+  const approvers = process.env.MANAGEMENTDAO_MULTISIG_APPROVERS?.split(
+    ','
+  ) || [deployer.address];
   const minApprovals = parseInt(
-    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '1'
+    process.env.MANAGEMENTDAO_MULTISIG_MINAPPROVALS || '1'
   );
-  // In case `MANAGINGDAO_MULTISIG_LISTEDONLY` not present in .env
+  // In case `MANAGEMENTDAO_MULTISIG_LISTEDONLY` not present in .env
   // which applies only hardhat/localhost, use `true` setting for extra safety for tests.
   const listedOnly =
-    'MANAGINGDAO_MULTISIG_LISTEDONLY' in process.env
-      ? process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true'
+    'MANAGEMENTDAO_MULTISIG_LISTEDONLY' in process.env
+      ? process.env.MANAGEMENTDAO_MULTISIG_LISTEDONLY === 'true'
       : true;
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `ManagementDAOProxy` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
   // Get `DAO` contract.
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
 
@@ -60,7 +63,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Install multisig build 2
-  const multisigRepoAddress = hre.aragonPluginRepos['multisig'];
+  const multisigRepoAddress = hre.aragonPluginRepos.MultisigRepoProxy;
   const versionTag = {
     release: 1,
     build: 2,
@@ -70,17 +73,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     versionTag,
   };
 
-  // Prepare multisig plugin for managingDAO
+  // Prepare multisig plugin for managementDAO
   const data = ethers.utils.defaultAbiCoder.encode(
     getNamedTypesFromMetadata(
       buildMetadataJson.pluginSetup.prepareInstallation.inputs
     ),
     [approvers, [listedOnly, minApprovals]]
   );
-  const prepareTx = await pspContract.prepareInstallation(managingDAOAddress, {
-    data,
-    pluginSetupRef,
-  });
+  const prepareTx = await pspContract.prepareInstallation(
+    managementDAOAddress,
+    {
+      data,
+      pluginSetupRef,
+    }
+  );
   await prepareTx.wait();
 
   // extract info from prepare event
@@ -90,10 +96,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const installationPreparedEvent = event.args;
 
-  hre.managingDAOMultisigPluginAddress = installationPreparedEvent.plugin;
+  hre.managementDAOMultisigPluginAddress = installationPreparedEvent.plugin;
 
   console.log(
-    `Prepared (Multisig: ${installationPreparedEvent.plugin} version (release: ${versionTag.release} / build: ${versionTag.build}) to be applied on (ManagingDAO: ${managingDAOAddress}), see (tx: ${prepareTx.hash})`
+    `Prepared (Multisig: ${installationPreparedEvent.plugin} version (release: ${versionTag.release} / build: ${versionTag.build}) to be applied on (ManagementDAO: ${managementDAOAddress}), see (tx: ${prepareTx.hash})`
   );
 
   // Adding plugin to verify array
@@ -107,7 +113,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       await multisigSetup.implementation(),
       Multisig__factory.createInterface().encodeFunctionData('initialize', [
-        managingDAOAddress,
+        managementDAOAddress,
         approvers,
         {
           onlyListed: listedOnly,
@@ -117,8 +123,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
   });
 
-  // Apply multisig plugin to the managingDAO
-  const applyTx = await pspContract.applyInstallation(managingDAOAddress, {
+  // Apply multisig plugin to the managementDAO
+  const applyTx = await pspContract.applyInstallation(managementDAOAddress, {
     helpersHash: hashHelpers(
       installationPreparedEvent.preparedSetupData.helpers
     ),
@@ -128,16 +134,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
   await applyTx.wait();
 
-  await checkPermission(managingDaoContract, {
+  await checkPermission(managementDaoContract, {
     operation: Operation.Grant,
-    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    where: {name: 'ManagementDAO', address: managementDAOAddress},
     who: {name: 'Multisig plugin', address: installationPreparedEvent.plugin},
     permission: 'EXECUTE_PERMISSION',
   });
 
   console.log(
-    `Applied (Multisig: ${installationPreparedEvent.plugin}) on (ManagingDAO: ${managingDAOAddress}), see (tx: ${applyTx.hash})`
+    `Applied (Multisig: ${installationPreparedEvent.plugin}) on (ManagementDAO: ${managementDAOAddress}), see (tx: ${applyTx.hash})`
   );
 };
 export default func;
-func.tags = ['New', 'InstallMultisigOnManagingDAO'];
+func.tags = ['New', 'InstallMultisigOnManagementDAO'];

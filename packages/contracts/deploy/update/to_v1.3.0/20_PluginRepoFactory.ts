@@ -1,7 +1,7 @@
 import pluginRepoFactoryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
 import {PluginRepo__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
-import {getActiveContractAddress} from '../../helpers';
+import {getLatestContractAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -11,16 +11,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  const managingDAOAddress = await getActiveContractAddress('managingDAO', hre);
-  const pluginRepoRegistryAddress = await getActiveContractAddress(
-    'PluginRepoRegistry',
+  const managementDAOAddress = getLatestContractAddress('ManagementDAOProxy', hre);
+  const pluginRepoRegistryAddress = getLatestContractAddress(
+    'PluginRepoRegistryProxy',
     hre
   );
-  const previousPluginRepoFactoryAddress = await getActiveContractAddress(
+  const previousPluginRepoFactoryAddress = getLatestContractAddress(
     'PluginRepoFactory',
     hre
   );
-  console.log(`Using managingDAO ${managingDAOAddress}`);
+  console.log(`Using managementDAO ${managementDAOAddress}`);
   console.log(`Using PluginRepoRegistry ${pluginRepoRegistryAddress}`);
   console.log(
     `Using PreviousPluginRepoFactory ${previousPluginRepoFactoryAddress}`
@@ -56,8 +56,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ]
   );
   // update permissions actions
-  hre.managingDAOActions.push({
-    to: managingDAOAddress,
+  hre.managementDAOActions.push({
+    to: managementDAOAddress,
     value: 0,
     data: calldata,
     description: `Moves the <strong>REGISTER_PLUGIN_REPO_PERMISSION</strong> permission on the <strong>PluginRepoRegistry</strong> (<code>${pluginRepoRegistryAddress}</code>) from the old <strong>PluginRepoFactory</strong> (<code>${previousPluginRepoFactoryAddress}</code>) to the new <strong>PluginRepoFactory</strong> (<code>${deployResult.address}</code>).`,

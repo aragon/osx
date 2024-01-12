@@ -9,23 +9,26 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoSubdomain = process.env.MANAGEMENTDAO_SUBDOMAIN || '';
 
   if (!daoSubdomain)
-    throw new Error('ManagingDAO subdomain has not been set in .env');
+    throw new Error('ManagementDAO subdomain has not been set in .env');
 
-  // Get `DAORegistry` address.
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+  // Get `DAORegistryProxy` address.
+  const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
 
   // Get `PluginSetupProcessor` address.
   const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `ManagementDAOProxy` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
-  // Get `DAO` contract.
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  // Get `ManagementDAOProxy` contract.
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
 
@@ -36,13 +39,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const revokePermissions = [
     {
       operation: Operation.Revoke,
-      where: {name: 'DAORegistry', address: daoRegistryAddress},
+      where: {name: 'DAORegistryProxy', address: daoRegistryAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'REGISTER_DAO_PERMISSION',
     },
     {
       operation: Operation.Revoke,
-      where: {name: 'DAO', address: managingDAOAddress},
+      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'PluginSetupProcessor', address: pspAddress},
       permission: 'ROOT_PERMISSION',
     },
@@ -54,24 +57,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     {
       operation: Operation.Revoke,
-      where: {name: 'managingDAO', address: managingDAOAddress},
+      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'ROOT_PERMISSION',
     },
     {
       operation: Operation.Revoke,
-      where: {name: 'DAO', address: managingDAOAddress},
+      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
     },
     {
       operation: Operation.Revoke,
-      where: {name: 'DAO', address: managingDAOAddress},
+      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'EXECUTE_PERMISSION',
     },
   ];
-  await managePermissions(managingDaoContract, revokePermissions);
+  await managePermissions(managementDaoContract, revokePermissions);
 
   // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer` on the permission manager of each PluginRepo.
   for (const repoName in hre.aragonPluginRepos) {
@@ -114,9 +117,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   console.log(
-    `\nManagingDao is no longer owned by the (Deployer: ${deployer.address}),` +
-      ` and all future actions of the (managingDAO: ${managingDAOAddress}) will be handled by the newly installed (Multisig plugin).`
+    `\nManagementDao is no longer owned by the (Deployer: ${deployer.address}),` +
+      ` and all future actions of the (managementDAO: ${managementDAOAddress}) will be handled by the newly installed (Multisig plugin).`
   );
 };
 export default func;
-func.tags = ['New', 'RevokeManagingPermissionsDAO'];
+func.tags = ['New', 'RevokeManagementPermissionsDAO'];

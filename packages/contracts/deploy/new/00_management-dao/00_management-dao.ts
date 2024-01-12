@@ -3,19 +3,19 @@ import {ArtifactData, DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 /** NOTE:
- * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
+ * Create a (Management DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(`\nDeploying ManagingDao.`);
+  console.log(`\nDeploying ManagementDAO.`);
 
   const {deployments, ethers} = hre;
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
   console.log(
-    `ManagingDAO will be owned by the (Deployer: ${deployer.address}) temporarily, while the entire framework is getting deployed.` +
-      ` At the final step when Multisig is available, it will be installed on managingDAO and all roles for the Deployer will be revoked.`
+    `ManagementDAO will be owned by the (Deployer: ${deployer.address}) temporarily, while the entire framework is getting deployed.` +
+      ` At the final step when Multisig is available, it will be installed on managementDAO and all roles for the Deployer will be revoked.`
   );
 
   const initializeParams = {
@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const daoArtifactData = daoArtifactJson as ArtifactData;
 
-  await deploy('DAO', {
+  await deploy('ManagementDAOProxy', {
     contract: daoArtifactData,
     from: deployer.address,
     args: [],
@@ -51,4 +51,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['New', 'ManagingDao'];
+func.tags = ['New', 'ManagementDao'];

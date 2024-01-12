@@ -9,16 +9,16 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nSetting ManagingDao permissions.');
+  console.log('\nSetting ManagementDao permissions.');
   const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `managementDAO` address.
+  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
 
   // Get `DAO` contract.
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
 
@@ -26,13 +26,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const permissions = DAO_PERMISSIONS.map(permission => {
     return {
       operation: Operation.Grant,
-      where: {name: 'managingDAO', address: managingDAOAddress},
-      who: {name: 'managingDAO', address: managingDAOAddress},
+      where: {name: 'managementDAO', address: managementDAOAddress},
+      who: {name: 'managementDAO', address: managementDAOAddress},
       permission: permission,
     };
   });
 
-  await managePermissions(managingDaoContract, permissions);
+  await managePermissions(managementDaoContract, permissions);
 };
 export default func;
-func.tags = ['New', 'SetManagingDaoPermissions'];
+func.tags = ['New', 'SetManagementDaoPermissions'];

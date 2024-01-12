@@ -30,8 +30,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const adminSetupContract = await getContractAddress('AdminSetup', hre);
 
-  await createPluginRepo(hre, 'admin');
-  await populatePluginRepo(hre, 'admin', [
+  await createPluginRepo(hre, 'AdminRepoProxy', 'admin');
+  await populatePluginRepo(hre, 'AdminRepoProxy', [
     {
       versionTag: [1, 1],
       pluginSetupContract: adminSetupContract,

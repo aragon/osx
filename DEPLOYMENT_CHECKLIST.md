@@ -24,9 +24,9 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Set the chosen DAO ENS domain (in step 1) to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
 - [ ] Set the chosen Plugin ENS domain (in step 2) to `NETWORK_PLUGIN_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_PLUGIN_ENS_DOMAIN`)
-- [ ] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
-- [ ] Set the multisig members of the managing DAO as a comma (`,`) separated list to `MANAGINGDAO_MULTISIG_APPROVERS` in `.env`
-- [ ] Set the amount of minimum approvals the managing DAO needs to `MANAGINGDAO_MULTISIG_MINAPPROVALS` in `.env`
+- [ ] Set the subdomain to be used of the management DAO to `MANAGEMENTDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
+- [ ] Set the multisig members of the management DAO as a comma (`,`) separated list to `MANAGEMENTDAO_MULTISIG_APPROVERS` in `.env`
+- [ ] Set the amount of minimum approvals the management DAO needs to `MANAGEMENTDAO_MULTISIG_MINAPPROVALS` in `.env`
 - [ ] If new plugin builds are released
   - [ ] Double-check that the build- and release-metadata is published correctly by the deploy script and contracts
 
@@ -39,9 +39,9 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 ### Configuration updates
 
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
-- [ ] Update `active_contracts.json` with the new deployed addresses
+- [ ] Add the new deployment to the `@aragon/osx-commons-config` package found here: [https://github.com/aragon/osx-commons/tree/develop/configs](https://github.com/aragon/osx-commons/tree/develop/configs)
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
-- [ ] Add the managing DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
+- [ ] Add the management DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGEMENTDAO_MULTISIG`
 - [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
 ### Verification
@@ -58,12 +58,12 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Configurations
 
-- [ ] Check that all managing DAO signers are members of the managing DAO multisig and no one else.
-- [ ] Check if the managing DAO is set in the `DAO_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO is set in the `Plugin_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO is set in the `DAORegistry`
+- [ ] Check that all management DAO signers are members of the management DAO multisig and no one else.
+- [ ] Check if the management DAO is set in the `DAO_ENSSubdomainRegistrar`
+- [ ] Check if the management DAO is set in the `Plugin_ENSSubdomainRegistrar`
+- [ ] Check if the management DAO is set in the `DAORegistry`
 - [ ] Check if the `DAO_ENSSubdomainRegistrar` is set in the `DAORegistry`
-- [ ] Check if the managing DAO set in the `PluginRepoRegistry`
+- [ ] Check if the management DAO set in the `PluginRepoRegistry`
 - [ ] Check if the `Plugin_ENSSubdomainRegistrar` is set in the `PluginRepoRegistry`
 - [ ] Check if the `PluginRepoRegistry` is set in the `PluginRepoFactory`
 - [ ] Check if the `PluginRepoRegistry` is set in the `PluginSetupProcessor`
@@ -73,9 +73,9 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Permissions
 
-- [ ] Check that the deployer has not the ROOT permission on the managing DAO
-- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `DAO_ENSSubdomainRegistrar` as the operator.
-- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `Plugin_ENSSubdomainRegistrar` as the operator.
+- [ ] Check that the deployer has not the ROOT permission on the management DAO
+- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the management DAO as the owner and the `DAO_ENSSubdomainRegistrar` as the operator.
+- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry with the management DAO as the owner and the `Plugin_ENSSubdomainRegistrar` as the operator.
 - [ ] Check if the `DAORegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `DAO_ENSSubdomainRegistrar`
 - [ ] Check if the `PluginRepoRegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `Plugin_ENSSubdomainRegistrar`
 - [ ] Check if the `DAOFactory` has `REGISTER_DAO_PERMISSION` on `DAORegistry`

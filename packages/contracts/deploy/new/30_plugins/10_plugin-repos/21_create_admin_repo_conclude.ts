@@ -6,7 +6,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(`Concluding TokenVotingSetup deployment.\n`);
+  console.log(`Concluding AdminSetup deployment.\n`);
   const [deployer] = await hre.ethers.getSigners();
 
   const {deployments} = hre;
@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const pluginRepoBase = await pluginRepoFactory.pluginRepoBase();
 
   hre.aragonToVerifyContracts.push({
-    address: hre.aragonPluginRepos['admin'],
+    address: hre.aragonPluginRepos.AdminRepoProxy,
     args: [pluginRepoBase, initializeData],
   });
 };

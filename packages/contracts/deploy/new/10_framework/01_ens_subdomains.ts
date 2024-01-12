@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
-  // Check if domains are owned by the managingDAO
+  // Check if domains are owned by the managementDAO
   const daoNode = ethers.utils.namehash(daoDomain);
   const pluginNode = ethers.utils.namehash(pluginDomain);
 
@@ -66,17 +66,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
-  // Registration is now complete. Lets move the ownership of all domains to the managing DAO
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Registration is now complete. Lets move the ownership of all domains to the management DAO
+  const managementDAOAddress = await getContractAddress('ManagementDAOProxy', hre);
   await transferSubnodeChain(
     daoDomain,
-    managingDAOAddress,
+    managementDAOAddress,
     deployer.address,
     await getENSAddress(hre)
   );
   await transferSubnodeChain(
     pluginDomain,
-    managingDAOAddress,
+    managementDAOAddress,
     deployer.address,
     await getENSAddress(hre)
   );

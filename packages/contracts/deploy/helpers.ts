@@ -9,9 +9,15 @@ import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
 import {findEvent, findEventTopicLog} from '../utils/event';
 import {Operation} from '../utils/types';
+import {
+  SupportedNetworks,
+  getNetworkNameByAlias,
+  getLatestNetworkDeployment,
+  SupportedVerions,
+  getNetworkDeploymentForVersion,
+} from '@aragon/osx-commons-configs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {Contract} from 'ethers';
-import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
@@ -30,10 +36,10 @@ export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
   sepolia: '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD',
 };
 
-export const MANAGING_DAO_METADATA = {
-  name: 'Aragon Managing DAO',
+export const MANAGEMENT_DAO_METADATA = {
+  name: 'Aragon Management DAO',
   description:
-    'Aragon OSx includes a group of global smart contracts that allow for a DAO ecosystem to be built on top. These contracts will require future improvements and general maintenance. The Managing DAO is intended to perform such maintenance tasks and holds the permissions to deliver any new capabilities that are added in the future.',
+    'Aragon OSx includes a group of global smart contracts that allow for a DAO ecosystem to be built on top. These contracts will require future improvements and general maintenance. The Management DAO is intended to perform such maintenance tasks and holds the permissions to deliver any new capabilities that are added in the future.',
   avatar:
     'https://ipfs.eth.aragon.network/ipfs/QmVyy3ci7F2zHG6JUJ1XbcwLKuxWrQ6hqNvSnjmDmdYJzP/',
   links: [
@@ -112,62 +118,32 @@ export async function getContractAddress(
     }
   } catch (e) {}
 
-  return getActiveContractAddressInNetwork(contractName, networkName);
+  return getLatestContractAddress(contractName, hre);
 }
 
-export async function getActiveContractAddress(
+export function getLatestContractAddress(
   contractName: string,
   hre: HardhatRuntimeEnvironment
-): Promise<string> {
+): string {
   let networkName = hre.network.name;
 
   if (hre.testingFork.network) {
     networkName = hre.testingFork.network;
   }
 
-  return getActiveContractAddressInNetwork(contractName, networkName);
-}
-
-export async function getActiveContractAddressInNetwork(
-  contractName: string,
-  networkName: string
-): Promise<string> {
-  const activeContracts = await getActiveContractsJSON();
-  try {
-    return activeContracts[networkName][contractName];
-  } catch (e) {
-    console.error(e);
-    return '';
+  const osxNetworkName = getNetworkNameByAlias(networkName);
+  if (!osxNetworkName) {
+    if (networkName === 'hardhat') {
+      return '';
+    }
+    throw new Error(`Failed to find network ${networkName}`);
   }
-}
 
-export async function getActiveContractsJSON(): Promise<{
-  [index: string]: {[index: string]: string};
-}> {
-  const repoPath = process.env.GITHUB_WORKSPACE || '../../';
-  const activeContractsFile = await fs.readFile(
-    `${repoPath}/active_contracts.json`
-  );
-  const activeContracts = JSON.parse(activeContractsFile.toString());
-  return activeContracts;
-}
-
-export async function updateActiveContractsJSON(payload: {
-  [index: string]: {[index: string]: string};
-}): Promise<void> {
-  const repoPath = process.env.GITHUB_WORKSPACE || '../../';
-  const activeContractsFile = await fs.readFile(
-    `${repoPath}/active_contracts.json`
-  );
-  const activeContracts = JSON.parse(activeContractsFile.toString());
-  Object.keys(payload).forEach(key => {
-    activeContracts[key] = {...activeContracts[key], ...payload[key]};
-  });
-
-  await fs.writeFile(
-    `${repoPath}/active_contracts.json`,
-    JSON.stringify(activeContracts, null, 2)
-  );
+  const latestNetworkDeployment = getLatestNetworkDeployment(osxNetworkName);
+  if (latestNetworkDeployment && contractName in latestNetworkDeployment) {
+    return latestNetworkDeployment[contractName].address;
+  }
+  return '';
 }
 
 export async function detemineDeployerNextAddress(
@@ -185,7 +161,8 @@ export async function detemineDeployerNextAddress(
 
 export async function createPluginRepo(
   hre: HardhatRuntimeEnvironment,
-  pluginName: string
+  pluginName: string,
+  subdomain: string
 ): Promise<void> {
   const {network} = hre;
   const signers = await ethers.getSigners();
@@ -194,14 +171,14 @@ export async function createPluginRepo(
     process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
   if (
     await isENSDomainRegistered(
-      `${pluginName}.${pluginDomain}`,
+      `${subdomain}.${pluginDomain}`,
       await getENSAddress(hre),
       signers[0]
     )
   ) {
     // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
     // Either a frontrun happened or something else. Thus we abort here
-    throw new Error(`${pluginName} is already present! Aborting...`);
+    throw new Error(`${subdomain} is already present! Aborting...`);
   }
 
   const pluginRepoFactoryAddress = await getContractAddress(
@@ -217,7 +194,7 @@ export async function createPluginRepo(
   const {deployer} = await hre.getNamedAccounts();
 
   const tx = await pluginRepoFactoryContract.createPluginRepo(
-    pluginName,
+    subdomain,
     deployer
   );
   console.log(
@@ -347,7 +324,7 @@ export async function populatePluginRepo(
   }
 }
 
-export async function checkSetManagingDao(
+export async function checkSetManagementDao(
   contract: Contract,
   expectedDaoAddress: string
 ) {
@@ -593,25 +570,22 @@ export async function transferSubnodeChain(
 }
 
 /**
- * Returns the managing DAO' multisig address defined in the environment variables. Throws if not found
+ * Returns the management DAO' multisig address defined in the environment variables. Throws if not found
  *
  * @export
  * @param {HardhatRuntimeEnvironment} hre
  * @return {string}
  */
-export function getManagingDAOMultisigAddress(
+export function getManagementDAOMultisigAddress(
   hre: HardhatRuntimeEnvironment
 ): string {
   const {network} = hre;
   const address =
-    process.env[`${network.name.toUpperCase()}_MANAGINGDAO_MULTISIG`];
+    process.env[`${network.name.toUpperCase()}_MANAGEMENTDAO_MULTISIG`];
   if (!address) {
     throw new Error(
-      `Failed to find managing DAO multisig address in env variables for ${network.name}`
+      `Failed to find management DAO multisig address in env variables for ${network.name}`
     );
   }
   return address;
 }
-
-// exports dummy function for hardhat-deploy. Otherwise we would have to move this file
-export default function () {}

@@ -20,7 +20,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre.ethers.provider
   ).pluginRepoBase();
 
-  const adminPluginRepoAddress = await getContractAddress('admin-repo', hre);
+  const adminPluginRepoAddress = await getContractAddress(
+    'AdminRepoProxy',
+    hre
+  );
   const adminPluginRepo = PluginRepo__factory.connect(
     adminPluginRepoAddress,
     hre.ethers.provider
@@ -33,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error(`Failed to populate upgradeTo transaction`);
   }
 
-  hre.managingDAOActions.push({
+  hre.managementDAOActions.push({
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,

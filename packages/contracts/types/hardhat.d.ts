@@ -11,7 +11,7 @@ declare module 'hardhat/types' {
     aragonToVerifyContracts: AragonVerifyEntry[];
     managingDAOMultisigPluginAddress: string;
     placeholderBuildCIDPath: string;
-    managingDAOActions: {
+    managementDAOActions: {
       to: string;
       value: BigNumberish;
       data: BytesLike;

@@ -108,7 +108,7 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
 
 1. **The DAO contract:** The DAO contract is where the **core functionality** of the DAO lies. It is the contract in charge of:
    - Representing the identity and metadata of the DAO (ENS name, logo, description, other metadata)
-   - Holding and managing the treasury assets
+   - Holding and management the treasury assets
    - Executing arbitrary actions to:
      - transfer assets
      - call its own functions
@@ -192,34 +192,7 @@ You can find more details about [our deployment checklist here](https://github.c
 
 ## Publishing protocol upgrades
 
-**Testnets**
-
-1. Merge `develop` into `main`
-2. Deploy the new contracts version to the testnets
-3. Update the `active_contracts.json` file on `main`
-4. Create a **draft** prerelease (e.g. `1.3.0-rc0`) on GitHub
-5. Wait for the managing DAO to approve on the testnets
-6. Update the NPM package version
-   - Create a PR to `main` with the release labels
-7. Unmark the Release as a draft and deploy the NPM packages
-
-**Fixes during Testing**
-
-1. Branch out from `main`
-2. Fix in in merged out branch
-3. Merge back into `main`
-4. Merge `main` back to `develop`
-5. Follow the `Testnets` release steps with `rc0` increment (e.g rc0 → rc1 or rc1 → rc2)
-
-**Mainnets**
-
-1. Deploy the new contracts version to both mainnets and testnets
-2. Update the `active_contracts.json` file on `main`
-3. Create a **draft** release (e.g. `1.3.0`) on GitHub
-4. Wait for the managing DAO to approve on mainnets and testnets
-5. Update the NPM package version (see [Releasing NPM packages](#releasing-npm-packages))
-   - Create a PR to `main` with the release labels
-6. Unmark the Release as a draft and deploy the NPM packages
+Follow [our update cheklist here](https://github.com/aragon/osx/blob/develop/UPDATE_CHECKLIST.md).
 
 ## Pull request commands
 

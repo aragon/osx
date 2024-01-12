@@ -1,4 +1,3 @@
-import activeContracts from '../../../active_contracts.json';
 // JSON artifacts of the contracts
 // core
 //// dao
@@ -37,8 +36,6 @@ import * as MultisigSetup from '../artifacts/src/plugins/governance/multisig/Mul
 ////// Governance
 import * as GovernanceERC20 from '../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
 import * as GovernanceWrappedERC20 from '../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
-
-export const activeContractsList = activeContracts;
 
 export default {
   DAO,

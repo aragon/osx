@@ -3,7 +3,7 @@ import {
   getContractAddress,
   getENSAddress,
   isENSDomainRegistered,
-  MANAGING_DAO_METADATA,
+  MANAGEMENT_DAO_METADATA,
   uploadToIPFS,
 } from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
@@ -14,20 +14,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoSubdomain = process.env.MANAGEMENTDAO_SUBDOMAIN || '';
   const daoDomain =
     process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
 
   if (!daoSubdomain)
-    throw new Error('ManagingDAO subdomain has not been set in .env');
+    throw new Error('ManagementDAO subdomain has not been set in .env');
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `ManagementDAOProxy` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
-  // Get `DAORegistry` address.
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+  // Get `DAORegistryProxy` address.
+  const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
 
-  // Get `DAORegistry` contract.
+  // Get `DAORegistryProxy` contract.
   const daoRegistryContract = DAORegistry__factory.connect(
     daoRegistryAddress,
     deployer
@@ -40,37 +43,37 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       deployer
     )
   ) {
-    // not beeing able to register the managing DAO means that something is not right with the framework deployment used.
+    // not beeing able to register the management DAO means that something is not right with the framework deployment used.
     // Either a fruntrun happened or something else. Thus we abort here
     throw new Error(
       `A DAO with ${daoSubdomain}.${daoDomain} is already registered! Aborting...`
     );
   }
-  // Register `managingDAO` on `DAORegistry`.
+  // Register `managementDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
-    managingDAOAddress,
+    managementDAOAddress,
     deployer.address,
     daoSubdomain
   );
   await registerTx.wait();
   console.log(
-    `Registered the (managingDAO: ${managingDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
+    `Registered the (ManagementDAOProxy: ${managementDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
   );
 
-  // Set Metadata for the Managing DAO
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  // Set Metadata for the Management DAO
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
   const metadataCIDPath = await uploadToIPFS(
-    JSON.stringify(MANAGING_DAO_METADATA),
+    JSON.stringify(MANAGEMENT_DAO_METADATA),
     network.name
   );
 
-  const setMetadataTX = await managingDaoContract.setMetadata(
+  const setMetadataTX = await managementDaoContract.setMetadata(
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`))
   );
   await setMetadataTX.wait();
 };
 export default func;
-func.tags = ['New', 'RegisterManagingDAO'];
+func.tags = ['New', 'RegisterManagementDAO'];

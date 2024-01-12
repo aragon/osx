@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ).pluginRepoBase();
 
   const tokenVotingPluginRepoAddress = await getContractAddress(
-    'token-voting-repo',
+    'TokenVotingRepoProxy',
     hre
   );
   const tokenVotingPluginRepo = PluginRepo__factory.connect(
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error(`Failed to populate upgradeTo transaction`);
   }
 
-  hre.managingDAOActions.push({
+  hre.managementDAOActions.push({
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,

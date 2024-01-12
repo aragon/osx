@@ -1,10 +1,8 @@
 export type AragonPluginRepos = {
-  'address-list-voting': string;
-  'token-voting': string;
-  // prettier-ignore
-  'admin': string;
-  // prettier-ignore
-  'multisig': string;
+  AddresslistVotingRepoProxy: string;
+  TokenVotingRepoProxy: string;
+  AdminRepoProxy: string;
+  MultisigRepoProxy: string;
   [index: string]: string;
 };
 

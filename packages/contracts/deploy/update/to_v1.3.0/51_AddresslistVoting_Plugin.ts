@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const addresslistVotingRepoAddress = await getContractAddress(
-    'address-list-voting-repo',
+    'AddresslistVotingRepoProxy',
     hre
   );
   const addresslistVotingRepo = PluginRepo__factory.connect(
@@ -78,9 +78,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   console.log(
-    `Deployer has no permission to create a new version. Adding managingDAO action`
+    `Deployer has no permission to create a new version. Adding managementDAO action`
   );
-  hre.managingDAOActions.push({
+  hre.managementDAOActions.push({
     to: tx.to,
     data: tx.data,
     value: 0,

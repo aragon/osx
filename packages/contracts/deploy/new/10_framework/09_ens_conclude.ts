@@ -25,20 +25,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   hre.aragonToVerifyContracts.push(
-    await deployments.get('DAO_ENSSubdomainRegistrar')
+    await deployments.get('DAOENSSubdomainRegistrarProxy')
   );
   hre.aragonToVerifyContracts.push({
     contract:
       'src/framework/utils/ens/ENSSubdomainRegistrar.sol:ENSSubdomainRegistrar',
-    ...(await deployments.get('DAO_ENSSubdomainRegistrar_Implementation')),
+    ...(await deployments.get('DAOENSSubdomainRegistrarProxy_Implementation')),
   });
   hre.aragonToVerifyContracts.push(
-    await deployments.get('Plugin_ENSSubdomainRegistrar')
+    await deployments.get('PluginENSSubdomainRegistrarProxy')
   );
   hre.aragonToVerifyContracts.push({
     contract:
       'src/framework/utils/ens/ENSSubdomainRegistrar.sol:ENSSubdomainRegistrar',
-    ...(await deployments.get('Plugin_ENSSubdomainRegistrar_Implementation')),
+    ...(await deployments.get('PluginENSSubdomainRegistrarProxy_Implementation')),
   });
 };
 
