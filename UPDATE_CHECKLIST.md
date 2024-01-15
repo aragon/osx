@@ -5,6 +5,9 @@ This checklist is seen as a guide to update the existing deployment.
 ## Pre-Update
 
 - [ ] Make sure you are using Node v16
+- [ ] Make sure you are using the intended `@aragon/osx-commons-contracts` package version.
+- [ ] Make sure that the OSx protocol version in `@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol` is bumped correctly.
+- [ ] Make sure that the semver number in `osx/packages/contracts/src/package.json` matches with that of `@aragon/osx-commons-contracts`. The pre-release suffix is allowed to differ.
 - [ ] Verify that all changes of this update are reflected in [contracts/CHANGELOG.md](packages/contracts/CHANGELOG.md) by comparing the diff with the previous release commit.
 - [ ] Check that storage corruption tests using OZ's `hardhat-upgrades` package (e.g., by using the methods in [uups-upgradeable.ts](packages/contracts/test/test-utils/uups-upgradeable.ts)) exist for every upgradeable contract and test the upgrade from all prior versions to the current version.
 - [ ] Check that all contracts that undergo an upgrade and
