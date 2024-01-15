@@ -24,6 +24,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Moved
+
+  - interfaces `IDAO`, `IPermissionCondition`, `IPlugin`, `IMembership`, `IProposal`, `IPluginSetup`, `IProtocolVersion`,
+  - abstract contracts `DaoAuthorizable`, `DaoAuthorizableUpgradeable`, `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable`, `PermissionCondition`, `PermissionConditionUpgradeable`, `Addresslist`, `Proposal`, `ProposalUpgradeable`, `PluginSetup`
+  - contracts `CloneFactory`
+  - libraries `PermissionLib`, `VersionComparisonLib`
+  - free functions `auth`, `Proxy`, `BitMap`, `Ratio`, `UncheckedMath`
+
+  to the `osx-commons-contracts` repo.
+
 - Removed unused `MerkleMinter` and `MerkleDistributor` contracts.
 - Removed unused `TokenFactory` contract.
 - Removed the `SignatureValidatorSet` event from `IDAO`.

@@ -5,8 +5,8 @@ import {
   PluginCloneableSetupV1Mock,
   PluginCloneableSetupV1Mock__factory,
 } from '../../../typechain';
-import {getInterfaceID} from '../../test-utils/interfaces';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
@@ -27,19 +27,19 @@ describe('PluginSetup', function () {
 
     it('supports the `IERC165` interface', async () => {
       const iface = IERC165__factory.createInterface();
-      expect(await setupMock.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await setupMock.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IPluginSetup` interface', async () => {
       const iface = IPluginSetup__factory.createInterface();
-      expect(await setupMock.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await setupMock.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await setupMock.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await setupMock.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
   });
@@ -47,7 +47,7 @@ describe('PluginSetup', function () {
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await setupMock.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });

@@ -10,19 +10,14 @@ import {
   TokenVotingSetup__factory,
   TokenVoting__factory,
 } from '../../../../../typechain';
-import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
-import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {
-  TOKEN_VOTING_INTERFACE,
-  getInterfaceID,
-} from '../../../../test-utils/interfaces';
-import {
-  VotingSettings,
-  VotingMode,
-  pctToRatio,
-  ONE_HOUR,
-} from '../../../../test-utils/voting';
+import {VotingMode, VotingSettings} from '../voting-helpers';
+import {TOKEN_VOTING_INTERFACE} from './token-voting-constants';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
+import {TIME} from '@aragon/osx-commons-sdk';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
+import {pctToRatio} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -70,7 +65,7 @@ describe('TokenVotingSetup', function () {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
       minParticipation: pctToRatio(20),
-      minDuration: ONE_HOUR,
+      minDuration: TIME.HOUR,
       minProposerVotingPower: 0,
     };
 
@@ -138,7 +133,7 @@ describe('TokenVotingSetup', function () {
 
     expect(
       await tokenVoting.supportsInterface(
-        getInterfaceID(TOKEN_VOTING_INTERFACE)
+        getInterfaceId(TOKEN_VOTING_INTERFACE)
       )
     ).to.be.eq(true);
   });

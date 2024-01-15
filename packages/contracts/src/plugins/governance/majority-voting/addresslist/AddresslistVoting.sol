@@ -4,13 +4,13 @@ pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IDAO} from "../../../../core/dao/IDAO.sol";
-import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
+import {IMembership} from "@aragon/osx-commons-contracts/src/plugin/extensions/membership/IMembership.sol";
+import {Addresslist} from "@aragon/osx-commons-contracts/src/plugin/extensions/governance/Addresslist.sol";
+import {RATIO_BASE, _applyRatioCeiled} from "@aragon/osx-commons-contracts/src/utils/math/Ratio.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
-import {IMembership} from "../../../../core/plugin/membership/IMembership.sol";
-import {Addresslist} from "../../../utils/Addresslist.sol";
-import {IMajorityVoting} from "../IMajorityVoting.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
+import {IMajorityVoting} from "../IMajorityVoting.sol";
 
 /// @title AddresslistVoting
 /// @author Aragon Association - 2021-2023.

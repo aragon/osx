@@ -2,11 +2,13 @@
 
 pragma solidity ^0.8.8;
 
-/*
+/**
  * @title Migration
  *
- * @dev This contract serves as a collection of imports from different versions of Aragon OSx contracts.
- * It facilitates testing and interaction with contracts from various versions of Aragon OSx.
+ * @dev This file imports contracts from
+ * - previous versions of `@aragon/osx`
+ * - the current or previous versions of @aragon/osx-commons
+ * with the purpose of integration and regression testing
  *
  * Each imported contract is aliased as `<contract-name>_<versions_name>` for clarity and to avoid
  * name collisions when the same contract is imported from different versions. This aliasing is only
@@ -16,9 +18,14 @@ pragma solidity ^0.8.8;
  * generated inside artifacts/@aragon/{version-name}/*,
  * and TypeChain typings will be generated inside typechain/osx-version/{version-name}/* for type-safe interactions with the contract
  * in our tests.
- *
  */
 
+/* solhint-disable no-unused-import */
+
+// Deploy Script
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+// Regression Testing
 import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";
 import {DAO as DAO_v1_3_0} from "@aragon/osx-v1.3.0/core/dao/DAO.sol";
 import {DAORegistry as DAORegistry_v1_0_0} from "@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol";
@@ -47,3 +54,8 @@ import {GovernanceERC20 as GovernanceERC20_v1_3_0} from "@aragon/osx-v1.3.0/toke
 
 import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceWrappedERC20.sol";
 import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_3_0} from "@aragon/osx-v1.3.0/token/ERC20/governance/GovernanceWrappedERC20.sol";
+
+// Integration Testing
+import {CloneFactory} from "@aragon/osx-commons-contracts/src/utils/deployment/CloneFactory.sol";
+
+/* solhint-enable no-unused-import */

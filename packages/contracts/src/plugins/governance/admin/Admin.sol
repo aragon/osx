@@ -4,10 +4,10 @@ pragma solidity ^0.8.8;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
-import {IMembership} from "../../../core/plugin/membership/IMembership.sol";
-import {PluginCloneable} from "../../../core/plugin/PluginCloneable.sol";
-import {IDAO} from "../../../core/dao/IDAO.sol";
+import {IMembership} from "@aragon/osx-commons-contracts/src/plugin/extensions/membership/IMembership.sol";
+import {ProposalUpgradeable} from "@aragon/osx-commons-contracts/src/plugin/extensions/proposal/ProposalUpgradeable.sol";
+import {PluginCloneable} from "@aragon/osx-commons-contracts/src/plugin/PluginCloneable.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022-2023

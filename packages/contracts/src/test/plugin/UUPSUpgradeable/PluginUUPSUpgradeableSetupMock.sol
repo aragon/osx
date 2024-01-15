@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+/* solhint-disable one-contract-per-file */
 pragma solidity ^0.8.8;
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {IDAO} from "../../../core/dao/IDAO.sol";
-import {PluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
-import {IPluginSetup} from "../../../framework/plugin/setup/IPluginSetup.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
 

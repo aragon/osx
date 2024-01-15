@@ -1,10 +1,10 @@
 import {DAO__factory} from '../../../typechain';
-import {Operation} from '../../../utils/types';
 import {
   DAO_PERMISSIONS,
   getContractAddress,
   managePermissions,
 } from '../../helpers';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 

@@ -12,26 +12,18 @@ import {ENSSubdomainRegistrar__factory as ENSSubdomainRegistrar_V1_3_0__factory}
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {setupResolver} from '../../../test-utils/ens';
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../../test-utils/protocol-version';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
+import {ENS_REGISTRAR_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
-
-const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-);
 
 // Setup ENS with signers[0] owning the ENS root node (''), the resolver node ('resolver'), the managing DAO, and the subdomain registrar
 async function setupENS(
@@ -164,7 +156,7 @@ describe('ENSSubdomainRegistrar', function () {
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+        ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
 
       // signers[0] can't register subdomains
@@ -187,7 +179,7 @@ describe('ENSSubdomainRegistrar', function () {
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+        ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
 
       // signers[1] can register subdomain
@@ -249,7 +241,7 @@ describe('ENSSubdomainRegistrar', function () {
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+        ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
 
       // signers[1] can register subdomain
@@ -277,7 +269,7 @@ describe('ENSSubdomainRegistrar', function () {
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+        ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
     });
 
@@ -314,7 +306,7 @@ describe('ENSSubdomainRegistrar', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+        ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
         managingDao
       );
     });
@@ -332,7 +324,7 @@ describe('ENSSubdomainRegistrar', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+          ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           managingDao
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -345,10 +337,8 @@ describe('ENSSubdomainRegistrar', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -364,7 +354,7 @@ describe('ENSSubdomainRegistrar', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+          ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           managingDao
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -377,10 +367,8 @@ describe('ENSSubdomainRegistrar', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 
@@ -432,7 +420,7 @@ describe('ENSSubdomainRegistrar', function () {
             ens.address,
             ensDomainHash('foo')
           )
-        ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+        ).to.be.revertedWith('Initializable: contract is already initialized');
       });
 
       it('reverts subnode registration if the calling address lacks permission of the managing DAO', async () => {
@@ -449,7 +437,7 @@ describe('ENSSubdomainRegistrar', function () {
             managingDao.address,
             registrar.address,
             signers[1].address,
-            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+            ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
       });
 
@@ -465,7 +453,7 @@ describe('ENSSubdomainRegistrar', function () {
             managingDao.address,
             registrar.address,
             signers[1].address,
-            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+            ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
       });
 
@@ -475,12 +463,12 @@ describe('ENSSubdomainRegistrar', function () {
           await managingDao.grant(
             registrar.address,
             await signers[1].getAddress(),
-            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+            ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
           await managingDao.grant(
             registrar.address,
             await signers[2].getAddress(),
-            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+            ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
         });
 

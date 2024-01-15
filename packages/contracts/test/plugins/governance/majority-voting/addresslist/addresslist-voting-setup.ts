@@ -4,19 +4,14 @@ import {
   AddresslistVotingSetup__factory,
   AddresslistVoting__factory,
 } from '../../../../../typechain';
-import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
-import {Operation} from '../../../../../utils/types';
 import {deployNewDAO} from '../../../../test-utils/dao';
-import {
-  ADDRESSLIST_VOTING_INTERFACE,
-  getInterfaceID,
-} from '../../../../test-utils/interfaces';
-import {
-  VotingSettings,
-  VotingMode,
-  pctToRatio,
-  ONE_HOUR,
-} from '../../../../test-utils/voting';
+import {VotingSettings, VotingMode} from '../voting-helpers';
+import {ADDRESSLIST_VOTING_INTERFACE} from './addresslist-voting-constants';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
+import {TIME} from '@aragon/osx-commons-sdk';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
+import {pctToRatio} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -53,7 +48,7 @@ describe('AddresslistVotingSetup', function () {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
       minParticipation: pctToRatio(20),
-      minDuration: ONE_HOUR,
+      minDuration: TIME.HOUR,
       minProposerVotingPower: 0,
     };
     defaultMembers = [signers[0].address];
@@ -84,7 +79,7 @@ describe('AddresslistVotingSetup', function () {
 
     expect(
       await addresslistVotingContract.supportsInterface(
-        getInterfaceID(ADDRESSLIST_VOTING_INTERFACE)
+        getInterfaceId(ADDRESSLIST_VOTING_INTERFACE)
       )
     ).to.be.eq(true);
   });

@@ -2,17 +2,20 @@
 
 pragma solidity ^0.8.8;
 
-import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {createERC1967Proxy} from "../../utils/Proxy.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {createERC1967Proxy} from "@aragon/osx-commons-contracts/src/utils/deployment/Proxy.sol";
 
 address constant NO_CONDITION = address(0);
+
+error ConflictingValues();
 
 function mockPermissions(
     uint160 start,
     uint160 end,
     PermissionLib.Operation op
 ) pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-    require(end > start);
+    if (start > end) revert ConflictingValues();
+
     permissions = new PermissionLib.MultiTargetPermission[](end - start);
 
     for (uint160 i = start; i < end; i++) {

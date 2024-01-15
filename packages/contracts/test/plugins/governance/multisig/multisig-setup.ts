@@ -17,17 +17,22 @@ import {
   InstallationPreparedEvent,
   UpdatePreparedEvent,
 } from '../../../../typechain/PluginSetupProcessor';
-import {findEvent} from '../../../../utils/event';
-import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
 import {hashHelpers} from '../../../../utils/psp';
-import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   MULTISIG_INTERFACE,
-  getInterfaceID,
-} from '../../../test-utils/interfaces';
-import {deployWithProxy} from '../../../test-utils/proxy';
-import {MultisigSettings} from './multisig';
+  MultisigSettings,
+  UPDATE_MULTISIG_SETTINGS_PERMISSION_ID,
+} from './multisig-constants';
+import {
+  getInterfaceId,
+  findEvent,
+  Operation,
+  DAO_PERMISSIONS,
+  PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
+  getNamedTypesFromMetadata,
+} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -37,15 +42,6 @@ const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
 let defaultMultisigSettings: MultisigSettings;
-
-// Permissions
-const UPDATE_MULTISIG_SETTINGS_PERMISSION_ID = ethers.utils.id(
-  'UPDATE_MULTISIG_SETTINGS_PERMISSION'
-);
-const UPGRADE_PLUGIN_PERMISSION_ID_ID = ethers.utils.id(
-  'UPGRADE_PLUGIN_PERMISSION'
-);
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('MultisigSetup', function () {
   let signers: SignerWithAddress[];
@@ -89,7 +85,7 @@ describe('MultisigSetup', function () {
 
     expect(
       await multisigContract.supportsInterface(
-        getInterfaceID(MULTISIG_INTERFACE)
+        getInterfaceId(MULTISIG_INTERFACE)
       )
     ).to.be.true;
   });
@@ -241,14 +237,14 @@ describe('MultisigSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPGRADE_PLUGIN_PERMISSION_ID_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         ],
         [
           Operation.Grant,
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });
@@ -326,14 +322,14 @@ describe('MultisigSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPGRADE_PLUGIN_PERMISSION_ID_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         ],
         [
           Operation.Revoke,
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });
@@ -366,7 +362,7 @@ describe('MultisigSetup', function () {
       pluginRepoRegistry = await pluginRepoRegistryFactory.deploy();
       pluginRepoRegistry.initialize(
         managingDAO.address,
-        getInterfaceID(IPluginRepo__factory.createInterface())
+        getInterfaceId(IPluginRepo__factory.createInterface())
       );
 
       // Grant the owner full rights on the registry

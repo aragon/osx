@@ -9,31 +9,15 @@ import {
   MajorityVotingMock__factory,
   IProtocolVersion__factory,
 } from '../../../../typechain';
-import {VOTING_EVENTS} from '../../../../utils/event';
-import {daoExampleURI} from '../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {getInterfaceID} from '../../../test-utils/interfaces';
 import {deployWithProxy} from '../../../test-utils/proxy';
-import {
-  VotingSettings,
-  VotingMode,
-  pctToRatio,
-  ONE_HOUR,
-  ONE_YEAR,
-} from '../../../test-utils/voting';
+import {MAJORITY_VOTING_BASE_INTERFACE} from './majority-voting-constants';
+import {VotingSettings, VotingMode} from './voting-helpers';
+import {TIME} from '@aragon/osx-commons-sdk';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
+import {pctToRatio} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-
-export const majorityVotingBaseInterface = new ethers.utils.Interface([
-  'function minDuration()',
-  'function minProposerVotingPower()',
-  'function votingMode()',
-  'function totalVotingPower(uint256)',
-  'function getProposal(uint256)',
-  'function updateVotingSettings(tuple(uint8,uint32,uint32,uint64,uint256))',
-  'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
-]);
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -46,13 +30,12 @@ describe('MajorityVotingMock', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = new DAO__factory(signers[0]);
-    dao = await deployWithProxy(DAO);
+    dao = await deployWithProxy<DAO>(new DAO__factory(signers[0]));
     await dao.initialize(
-      '0x',
+      [],
       ownerAddress,
       ethers.constants.AddressZero,
-      daoExampleURI
+      'examplURI'
     );
   });
 
@@ -61,13 +44,13 @@ describe('MajorityVotingMock', function () {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
       minParticipation: pctToRatio(20),
-      minDuration: ONE_HOUR,
+      minDuration: TIME.HOUR,
       minProposerVotingPower: 0,
     };
 
-    const MajorityVotingBase = new MajorityVotingMock__factory(signers[0]);
+    const MajorityVotingMock = new MajorityVotingMock__factory(signers[0]);
 
-    votingBase = await deployWithProxy(MajorityVotingBase);
+    votingBase = await deployWithProxy<MajorityVotingMock>(MajorityVotingMock);
     await dao.grant(
       votingBase.address,
       ownerAddress,
@@ -81,7 +64,7 @@ describe('MajorityVotingMock', function () {
 
       await expect(
         votingBase.initializeMock(dao.address, votingSettings)
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
   });
 
@@ -92,38 +75,38 @@ describe('MajorityVotingMock', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await votingBase.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await votingBase.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await votingBase.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await votingBase.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IMajorityVoting` interface', async () => {
       const iface = IMajorityVoting__factory.createInterface();
-      expect(await votingBase.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await votingBase.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `MajorityVotingBase` interface', async () => {
       expect(
         await votingBase.supportsInterface(
-          getInterfaceID(majorityVotingBaseInterface)
+          getInterfaceId(MAJORITY_VOTING_BASE_INTERFACE)
         )
       ).to.be.true;
     });
@@ -164,22 +147,22 @@ describe('MajorityVotingMock', function () {
     });
 
     it('reverts if the minimal duration is shorter than one hour', async () => {
-      votingSettings.minDuration = ONE_HOUR - 1;
+      votingSettings.minDuration = TIME.HOUR - 1;
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
-        .withArgs(ONE_HOUR, votingSettings.minDuration);
+        .withArgs(TIME.HOUR, votingSettings.minDuration);
     });
 
     it('reverts if the minimal duration is longer than one year', async () => {
-      votingSettings.minDuration = ONE_YEAR + 1;
+      votingSettings.minDuration = TIME.YEAR + 1;
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
-        .withArgs(ONE_YEAR, votingSettings.minDuration);
+        .withArgs(TIME.YEAR, votingSettings.minDuration);
     });
 
     it('should change the voting settings successfully', async () => {
       await expect(votingBase.updateVotingSettings(votingSettings))
-        .to.emit(votingBase, VOTING_EVENTS.VOTING_SETTINGS_UPDATED)
+        .to.emit(votingBase, 'VotingSettingsUpdated')
         .withArgs(
           votingSettings.votingMode,
           votingSettings.supportThreshold,
@@ -191,7 +174,7 @@ describe('MajorityVotingMock', function () {
 
     it('should change the voting settings successfully', async () => {
       await expect(votingBase.updateVotingSettings(votingSettings))
-        .to.emit(votingBase, VOTING_EVENTS.VOTING_SETTINGS_UPDATED)
+        .to.emit(votingBase, 'VotingSettingsUpdated')
         .withArgs(
           votingSettings.votingMode,
           votingSettings.supportThreshold,

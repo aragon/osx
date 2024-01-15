@@ -2,8 +2,10 @@
 
 pragma solidity ^0.8.8;
 
-import "../../core/permission/PermissionCondition.sol";
+import {PermissionCondition} from "@aragon/osx-commons-contracts/src/permission/condition/PermissionCondition.sol";
 
+/// @notice A mock permission condition that can be set to permit or deny every call.
+/// @dev DO NOT USE IN PRODUCTION!
 contract PermissionConditionMock is PermissionCondition {
     bool public answer;
 

@@ -5,7 +5,6 @@ import {
   PluginRepo__factory,
   PluginUUPSUpgradeableSetupV1Mock,
   PlaceholderSetup__factory,
-  TestPlugin__factory,
   IERC165__factory,
   IPluginRepo__factory,
   IProtocolVersion__factory,
@@ -13,12 +12,7 @@ import {
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
 import {ZERO_BYTES32} from '../../test-utils/dao';
-import {getInterfaceID} from '../../test-utils/interfaces';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {tagHash} from '../../test-utils/psp/hash-helpers';
 import {
   deployMockPluginSetup,
@@ -29,6 +23,8 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {PLUGIN_REPO_PERMISSIONS, getInterfaceId} from '@aragon/osx-commons-sdk';
+import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -98,7 +94,7 @@ describe('PluginRepo', function () {
           initArgs,
           'initialize',
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+          PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
         );
       });
 
@@ -113,7 +109,7 @@ describe('PluginRepo', function () {
             'initialize',
             legacyContractFactory,
             currentContractFactory,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
         expect(toImplementation).to.not.equal(fromImplementation);
 
@@ -125,10 +121,8 @@ describe('PluginRepo', function () {
         );
 
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-        expect(fromProtocolVersion).to.deep.equal(
-          IMPLICIT_INITIAL_PROTOCOL_VERSION
-        );
-        expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+        expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+        expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
       });
 
       it('from v1.3.0', async () => {
@@ -142,7 +136,7 @@ describe('PluginRepo', function () {
             'initialize',
             legacyContractFactory,
             currentContractFactory,
-            UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
+            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
         expect(toImplementation).to.not.equal(fromImplementation);
 
@@ -155,7 +149,7 @@ describe('PluginRepo', function () {
 
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
         expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
-        expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+        expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
       });
     });
 
@@ -166,20 +160,20 @@ describe('PluginRepo', function () {
 
       it('supports the `IERC165` interface', async () => {
         const iface = IERC165__factory.createInterface();
-        expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
 
       it('supports the `IPluginRepo` interface', async () => {
         const iface = IPluginRepo__factory.createInterface();
-        expect(getInterfaceID(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
-        expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        expect(getInterfaceId(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
+        expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
 
       it('supports the `IProtocolVersion` interface', async () => {
         const iface = IProtocolVersion__factory.createInterface();
-        expect(await pluginRepo.supportsInterface(getInterfaceID(iface))).to.be
+        expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
     });
@@ -187,7 +181,7 @@ describe('PluginRepo', function () {
     describe('Protocol version', async () => {
       it('returns the current protocol version', async () => {
         expect(await pluginRepo.protocolVersion()).to.deep.equal(
-          CURRENT_PROTOCOL_VERSION
+          osxContractsVersion()
         );
       });
     });
@@ -230,7 +224,7 @@ describe('PluginRepo', function () {
         );
 
         // If a contract is passed, but doesn't have `supportsInterface` signature described in the contract.
-        const randomContract = await new TestPlugin__factory(
+        const randomContract = await new PluginUUPSUpgradeableV1Mock__factory(
           signers[0]
         ).deploy();
         await expect(

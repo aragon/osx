@@ -10,11 +10,7 @@ import {PluginRepoRegistry__factory as PluginRepoRegistry_V1_3_0__factory} from 
 import {ensDomainHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
@@ -22,6 +18,7 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {PLUGIN_REGISTRY_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -38,14 +35,6 @@ describe('PluginRepoRegistry', function () {
   let ownerAddress: string;
   let managingDAO: DAO;
   let pluginRepo: PluginRepo;
-
-  const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
-    'REGISTER_PLUGIN_REPO_PERMISSION'
-  );
-
-  const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-    'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-  );
 
   const topLevelDomain = 'dao.eth';
   const pluginRepoSubdomain = 'my-plugin-repo';
@@ -84,14 +73,15 @@ describe('PluginRepoRegistry', function () {
     await managingDAO.grant(
       pluginRepoRegistry.address,
       ownerAddress,
-      REGISTER_PLUGIN_REPO_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // grant REGISTER_ENS_SUBDOMAIN_PERMISSION_ID to pluginRepoRegistry
     await managingDAO.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
-      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.ENS_REGISTRAR_PERMISSIONS
+        .REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
   });
 
@@ -125,7 +115,7 @@ describe('PluginRepoRegistry', function () {
     await managingDAO.revoke(
       pluginRepoRegistry.address,
       ownerAddress,
-      REGISTER_PLUGIN_REPO_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // deploy a pluginRepo
@@ -142,7 +132,7 @@ describe('PluginRepoRegistry', function () {
         managingDAO.address,
         pluginRepoRegistry.address,
         ownerAddress,
-        REGISTER_PLUGIN_REPO_PERMISSION_ID
+        PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
       );
   });
 
@@ -264,7 +254,7 @@ describe('PluginRepoRegistry', function () {
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await pluginRepoRegistry.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });
@@ -292,7 +282,7 @@ describe('PluginRepoRegistry', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+        PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
         managingDAO
       );
     });
@@ -310,7 +300,7 @@ describe('PluginRepoRegistry', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDAO
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -323,10 +313,8 @@ describe('PluginRepoRegistry', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -342,7 +330,7 @@ describe('PluginRepoRegistry', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+          PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDAO
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -355,10 +343,8 @@ describe('PluginRepoRegistry', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 });

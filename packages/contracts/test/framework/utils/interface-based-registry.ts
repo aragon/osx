@@ -6,8 +6,8 @@ import {
   PluginRepo__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {getInterfaceID} from '../../test-utils/interfaces';
 import {deployWithProxy} from '../../test-utils/proxy';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -44,7 +44,7 @@ describe('InterfaceBasedRegistry', function () {
     // Let the interface registry register `DAO` contracts for testing purposes
     await interfaceBasedRegistryMock.initialize(
       dao.address,
-      getInterfaceID(IDAO__factory.createInterface())
+      getInterfaceId(IDAO__factory.createInterface())
     );
 
     // grant REGISTER_PERMISSION_ID to registrer

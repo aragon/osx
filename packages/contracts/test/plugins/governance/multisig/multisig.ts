@@ -20,25 +20,8 @@ import {
   ApprovedEvent,
   ProposalExecutedEvent,
 } from '../../../../typechain/Multisig';
-import {
-  findEvent,
-  findEventTopicLog,
-  DAO_EVENTS,
-  PROPOSAL_EVENTS,
-  MULTISIG_EVENTS,
-  MEMBERSHIP_EVENTS,
-} from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {
-  MULTISIG_INTERFACE,
-  getInterfaceID,
-} from '../../../test-utils/interfaces';
-import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
-import {
-  CURRENT_PROTOCOL_VERSION,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../../test-utils/protocol-version';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   getProtocolVersion,
@@ -46,21 +29,26 @@ import {
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
 import {
-  advanceTime,
-  getTime,
-  setTimeForNextBlock,
-  timestampIn,
-  toBytes32,
-} from '../../../test-utils/voting';
+  MULTISIG_EVENTS,
+  MULTISIG_INTERFACE,
+  MultisigSettings,
+} from './multisig-constants';
+import {
+  getInterfaceId,
+  proposalIdToBytes32,
+  IDAO_EVENTS,
+  PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
+  IMEMBERSHIP_EVENTS,
+  IPROPOSAL_EVENTS,
+  findEvent,
+  findEventTopicLog,
+  TIME,
+} from '@aragon/osx-commons-sdk';
+import {time} from '@nomicfoundation/hardhat-network-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
-
-export type MultisigSettings = {
-  minApprovals: number;
-  onlyListed: boolean;
-};
 
 export async function approveWithSigners(
   multisigContract: Contract,
@@ -81,6 +69,8 @@ describe('Multisig', function () {
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
+  let startDate: number;
+  let endDate: number;
   let multisigSettings: MultisigSettings;
 
   const id = 0;
@@ -102,6 +92,9 @@ describe('Multisig', function () {
   });
 
   beforeEach(async function () {
+    startDate = (await time.latest()) + 1000;
+    endDate = startDate + 1000;
+
     multisigSettings = {
       minApprovals: 3,
       onlyListed: true,
@@ -136,7 +129,7 @@ describe('Multisig', function () {
           signers.slice(0, 5).map(s => s.address),
           multisigSettings
         )
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
 
     it('adds the initial addresses to the address list', async () => {
@@ -221,7 +214,7 @@ describe('Multisig', function () {
         initArgs,
         'initialize',
         currentContractFactory,
-        UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+        PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
         dao
       );
     });
@@ -237,7 +230,7 @@ describe('Multisig', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
@@ -250,10 +243,8 @@ describe('Multisig', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
     it('from v1.3.0', async () => {
@@ -267,7 +258,7 @@ describe('Multisig', function () {
           'initialize',
           legacyContractFactory,
           currentContractFactory,
-          UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
           dao
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -280,10 +271,8 @@ describe('Multisig', function () {
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
-      expect(fromProtocolVersion).to.deep.equal(
-        IMPLICIT_INITIAL_PROTOCOL_VERSION
-      );
-      expect(toProtocolVersion).to.deep.equal(CURRENT_PROTOCOL_VERSION);
+      expect(fromProtocolVersion).to.deep.equal([1, 0, 0]);
+      expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
   });
 
@@ -294,48 +283,48 @@ describe('Multisig', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IMembership` interface', async () => {
       const iface = IMembership__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `Addresslist` interface', async () => {
       const iface = Addresslist__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IMultisig` interface', async () => {
       const iface = IMultisig__factory.createInterface();
-      expect(await multisig.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await multisig.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `Multisig` interface', async () => {
-      const iface = getInterfaceID(MULTISIG_INTERFACE);
+      const iface = getInterfaceId(MULTISIG_INTERFACE);
       expect(iface).to.equal(MULTISIG_INTERFACE_ID); // checks that it didn't change
       expect(await multisig.supportsInterface(iface)).to.be.true;
     });
@@ -417,7 +406,7 @@ describe('Multisig', function () {
 
       // add a new member
       await expect(multisig.addAddresses([signers[1].address]))
-        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
+        .to.emit(multisig, IMEMBERSHIP_EVENTS.MEMBERS_ADDED)
         .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -439,7 +428,7 @@ describe('Multisig', function () {
 
       // remove an existing member
       await expect(multisig.removeAddresses([signers[1].address]))
-        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
+        .to.emit(multisig, IMEMBERSHIP_EVENTS.MEMBERS_REMOVED)
         .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -504,7 +493,7 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(1000)
+          startDate
         )
       ).not.to.be.reverted;
 
@@ -526,7 +515,7 @@ describe('Multisig', function () {
         false,
         false,
         0,
-        await timestampIn(1000)
+        endDate
       );
       // create a new proposal for the proposalCounter to be incremented
       await expect(
@@ -537,7 +526,7 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(1000)
+          startDate
         )
       ).not.to.be.reverted;
 
@@ -548,7 +537,7 @@ describe('Multisig', function () {
         false,
         false,
         0,
-        await timestampIn(1000)
+        endDate
       );
 
       expect(proposalId0).to.equal(0); // To be removed when proposal ID is generated as a hash.
@@ -566,8 +555,6 @@ describe('Multisig', function () {
 
       const allowFailureMap = 1;
 
-      const startDate = await timestampIn(1000);
-      const endDate = await timestampIn(5000);
       await expect(
         multisig
           .connect(signers[0])
@@ -581,7 +568,7 @@ describe('Multisig', function () {
             endDate
           )
       )
-        .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
         .withArgs(
           id,
           signers[0].address,
@@ -606,8 +593,6 @@ describe('Multisig', function () {
       );
 
       await ethers.provider.send('evm_setAutomine', [false]);
-
-      const endDate = await timestampIn(5000);
 
       await multisig.connect(signers[0]).createProposal(
         dummyMetadata,
@@ -655,9 +640,6 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal when unlisted accounts are allowed', async () => {
-        const startDate = await timestampIn(1000);
-        const endDate = await timestampIn(5000);
-
         await expect(
           multisig
             .connect(signers[1]) // not listed
@@ -671,7 +653,7 @@ describe('Multisig', function () {
               endDate
             )
         )
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
             id,
             signers[1].address,
@@ -699,15 +681,7 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[1]) // not listed
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              false,
-              false,
-              0,
-              await timestampIn(1000)
-            )
+            .createProposal(dummyMetadata, [], 0, false, false, 0, startDate)
         )
           .to.be.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
           .withArgs(signers[1].address);
@@ -715,15 +689,7 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[0])
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              false,
-              false,
-              0,
-              await timestampIn(1000)
-            )
+            .createProposal(dummyMetadata, [], 0, false, false, 0, startDate)
         ).not.to.be.reverted;
       });
 
@@ -741,15 +707,7 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[0])
-            .createProposal(
-              dummyMetadata,
-              [],
-              0,
-              false,
-              false,
-              0,
-              await timestampIn(1000)
-            )
+            .createProposal(dummyMetadata, [], 0, false, false, 0, startDate)
         )
           .to.be.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
           .withArgs(signers[0].address);
@@ -757,15 +715,7 @@ describe('Multisig', function () {
         // Transaction 4: Create the proposal as signers[1]
         const tx4 = await multisig
           .connect(signers[1])
-          .createProposal(
-            dummyMetadata,
-            [],
-            0,
-            false,
-            false,
-            0,
-            await timestampIn(1000)
-          );
+          .createProposal(dummyMetadata, [], 0, false, false, 0, startDate);
 
         // Check the listed members before the block is mined
         expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -804,10 +754,7 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
-        const startDate = await timestampIn(1000);
-        const endDate = await timestampIn(5000);
-
-        await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
+        await time.setNextBlockTimestamp(startDate);
 
         await expect(
           multisig.createProposal(
@@ -820,7 +767,7 @@ describe('Multisig', function () {
             endDate
           )
         )
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
             id,
             signers[0].address,
@@ -850,12 +797,9 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and approves if specified', async () => {
-        const startDate = await timestampIn(3000);
-        const endDate = await timestampIn(5000);
-
         const allowFailureMap = 1;
 
-        await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
+        await time.setNextBlockTimestamp(startDate);
 
         await expect(
           multisig.createProposal(
@@ -868,7 +812,7 @@ describe('Multisig', function () {
             endDate
           )
         )
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
             id,
             signers[0].address,
@@ -905,7 +849,7 @@ describe('Multisig', function () {
           true,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
         expect(await multisig.proposalCount()).to.equal(1);
 
@@ -916,19 +860,22 @@ describe('Multisig', function () {
           true,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
         expect(await multisig.proposalCount()).to.equal(2);
       });
     });
 
     it('should revert if startDate is < than now', async () => {
-      // set next block time & mine a block with this time.
-      const block1Timestamp = (await getTime()) + 12;
-      await ethers.provider.send('evm_mine', [block1Timestamp]);
-      // set next block's timestamp
-      const block2Timestamp = block1Timestamp + 12;
-      await setTimeForNextBlock(block2Timestamp);
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address], // signers[0] is listed
+        multisigSettings
+      );
+
+      const currentDate = await time.latest();
+      const startDateInThePast = currentDate - 1;
+      const endDate = 0; // startDate + minDuration
 
       await expect(
         multisig.createProposal(
@@ -937,21 +884,26 @@ describe('Multisig', function () {
           0,
           true,
           false,
-          5,
-          0
+          startDateInThePast,
+          endDate
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(block2Timestamp, 5);
+        .withArgs(
+          currentDate + 1, // await takes one second
+          startDateInThePast
+        );
     });
 
     it('should revert if endDate is < than startDate', async () => {
-      // set next block time & mine a block with this time.
-      const nextBlockTime = (await getTime()) + 500;
-      await ethers.provider.send('evm_mine', [nextBlockTime]);
-      // set next block's timestamp
-      const nextTimeStamp = nextBlockTime + 500;
-      await setTimeForNextBlock(nextTimeStamp);
+      await multisig.initialize(
+        dao.address,
+        [signers[0].address], // signers[0] is listed
+        multisigSettings
+      );
+
+      const startDate = (await time.latest()) + TIME.MINUTE;
+      const endDate = startDate - 1; // endDate < startDate
       await expect(
         multisig.createProposal(
           dummyMetadata,
@@ -959,12 +911,12 @@ describe('Multisig', function () {
           0,
           true,
           false,
-          0,
-          5
+          startDate,
+          endDate
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(nextTimeStamp, 5);
+        .withArgs(startDate, endDate);
     });
   });
 
@@ -984,7 +936,7 @@ describe('Multisig', function () {
         false,
         false,
         0,
-        await timestampIn(1000)
+        endDate
       );
     });
 
@@ -1020,13 +972,13 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(2000),
-          await timestampIn(5000)
+          startDate,
+          endDate
         );
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
 
-        await advanceTime(2000);
+        await time.increaseTo(startDate);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
       });
@@ -1039,12 +991,12 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
 
-        await advanceTime(5000);
+        await time.increaseTo(endDate + 1);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
       });
@@ -1099,8 +1051,8 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(5000),
-          await timestampIn(10000)
+          startDate,
+          endDate
         );
 
         await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
@@ -1108,7 +1060,7 @@ describe('Multisig', function () {
           'ApprovalCastForbidden'
         );
 
-        await advanceTime(7000);
+        await time.increaseTo(startDate);
 
         await expect(multisig.approve(1, false)).not.to.be.reverted;
       });
@@ -1121,14 +1073,13 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
-        await advanceTime(2000);
 
         await expect(multisig.connect(signers[1]).approve(1, false)).not.to.be
           .reverted;
 
-        await advanceTime(10000);
+        await time.increaseTo(endDate + 1);
 
         await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
           multisig,
@@ -1169,13 +1120,13 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(1000),
-          await timestampIn(10000)
+          startDate,
+          endDate
         );
 
         expect(await multisig.canExecute(1)).to.be.false;
 
-        await advanceTime(2000);
+        await time.increaseTo(startDate);
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
@@ -1191,10 +1142,8 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
-
-        await advanceTime(2000);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -1202,7 +1151,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(1)).to.be.true;
 
-        await advanceTime(5000);
+        await time.increaseTo(endDate + 1);
 
         expect(await multisig.canExecute(1)).to.be.false;
       });
@@ -1256,9 +1205,11 @@ describe('Multisig', function () {
           findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           )
-        ).to.rejectedWith('No logs found for the topic of event "Executed".');
+        ).to.rejectedWith(
+          `Event "${IDAO_EVENTS.EXECUTED}" could not be found in transaction ${tx.hash}.`
+        );
 
         expect(await multisig.canExecute(id)).to.equal(false);
 
@@ -1268,9 +1219,11 @@ describe('Multisig', function () {
           findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           )
-        ).to.rejectedWith('No logs found for the topic of event "Executed".');
+        ).to.rejectedWith(
+          `Event "${IDAO_EVENTS.EXECUTED}" could not be found in transaction ${tx.hash}.`
+        );
 
         // `tryEarlyExecution` is turned on and the vote is decided
         tx = await multisig.connect(signers[3]).approve(id, true);
@@ -1278,11 +1231,11 @@ describe('Multisig', function () {
           const event = await findEventTopicLog<ExecutedEvent>(
             tx,
             DAO__factory.createInterface(),
-            DAO_EVENTS.EXECUTED
+            IDAO_EVENTS.EXECUTED
           );
 
           expect(event.args.actor).to.equal(multisig.address);
-          expect(event.args.callId).to.equal(toBytes32(id));
+          expect(event.args.callId).to.equal(proposalIdToBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -1297,7 +1250,7 @@ describe('Multisig', function () {
         {
           const event = await findEvent<ProposalExecutedEvent>(
             tx,
-            PROPOSAL_EVENTS.PROPOSAL_EXECUTED
+            IPROPOSAL_EVENTS.PROPOSAL_EXECUTED
           );
           expect(event.args.proposalId).to.equal(id);
         }
@@ -1312,8 +1265,8 @@ describe('Multisig', function () {
         await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         await expect(multisig.connect(signers[3]).execute(id))
-          .to.emit(dao, DAO_EVENTS.EXECUTED)
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+          .to.emit(dao, IDAO_EVENTS.EXECUTED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.not.emit(multisig, MULTISIG_EVENTS.APPROVED);
       });
 
@@ -1321,8 +1274,8 @@ describe('Multisig', function () {
         await approveWithSigners(multisig, id, signers, [0, 1]);
 
         await expect(multisig.connect(signers[2]).approve(id, true))
-          .to.emit(dao, DAO_EVENTS.EXECUTED)
-          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+          .to.emit(dao, IDAO_EVENTS.EXECUTED)
+          .to.emit(multisig, IPROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.emit(multisig, MULTISIG_EVENTS.APPROVED);
       });
 
@@ -1333,8 +1286,8 @@ describe('Multisig', function () {
           0,
           false,
           false,
-          await timestampIn(1000),
-          await timestampIn(5000)
+          startDate,
+          endDate
         );
 
         await expect(multisig.execute(1)).to.be.revertedWithCustomError(
@@ -1342,7 +1295,7 @@ describe('Multisig', function () {
           'ProposalExecutionForbidden'
         );
 
-        await advanceTime(2000);
+        await time.increaseTo(startDate);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -1359,13 +1312,13 @@ describe('Multisig', function () {
           false,
           false,
           0,
-          await timestampIn(5000)
+          endDate
         );
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
 
-        await advanceTime(10000);
+        await time.increase(10000);
         await expect(
           multisig.connect(signers[1]).execute(1)
         ).to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden');

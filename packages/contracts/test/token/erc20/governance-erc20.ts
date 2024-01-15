@@ -9,8 +9,7 @@ import {
   IVotesUpgradeable__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {OZ_ERRORS} from '../../test-utils/error';
-import {getInterfaceID} from '../../test-utils/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -67,7 +66,7 @@ describe('GovernanceERC20', function () {
   describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(token.initialize(...defaultInitData)).to.be.revertedWith(
-        OZ_ERRORS.ALREADY_INITIALIZED
+        'Initializable: contract is already initialized'
       );
     });
 
@@ -104,7 +103,7 @@ describe('GovernanceERC20', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await token.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await token.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('it supports all inherited interfaces', async () => {
@@ -115,7 +114,7 @@ describe('GovernanceERC20', function () {
           IVotesUpgradeable__factory.createInterface(),
           IERC20MintableUpgradeable__factory.createInterface(),
         ].map(async interfaceName => {
-          expect(await token.supportsInterface(getInterfaceID(interfaceName)))
+          expect(await token.supportsInterface(getInterfaceId(interfaceName)))
             .to.be.true;
         })
       );
@@ -126,7 +125,7 @@ describe('GovernanceERC20', function () {
         'function decimals()',
       ]);
       expect(
-        await token.supportsInterface(getInterfaceID(ierc20MetadataInterface))
+        await token.supportsInterface(getInterfaceId(ierc20MetadataInterface))
       ).to.be.true;
     });
   });

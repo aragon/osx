@@ -45,14 +45,10 @@ You may want to have a publishing script directly off of your Hardhat project. I
 ```js
 import buildMetadata1 from '../../contracts/release1/build1/build-metadata.json';
 import releaseMetadata1 from '../../contracts/release1/release-metadata.json';
-import {
-  networkNameMapping,
-  osxContracts,
-  findEventTopicLog,
-  addDeployedContract,
-} from '../../utils/helpers';
+import {networkNameMapping, osxContracts, addDeployedContract} from '../../utils/helpers';
 import {toHex} from '../../utils/ipfs-upload';
 import {uploadToIPFS} from '../../utils/ipfs-upload';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk';
 import {
   PluginRepoFactory__factory,
   PluginRepoRegistry__factory,
@@ -116,9 +112,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     PluginRepoRegistry__factory.createInterface(),
     'PluginRepoRegistered'
   );
-  if (!eventLog) {
-    throw new Error('Failed to get PluginRepoRegistered event log');
-  }
 
   const pluginRepo = PluginRepo__factory.connect(eventLog.args.pluginRepo, deployer);
 

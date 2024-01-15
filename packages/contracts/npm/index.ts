@@ -3,7 +3,6 @@ import activeContracts from '../../../active_contracts.json';
 // core
 //// dao
 import * as DAO from '../artifacts/src/core/dao/DAO.sol/DAO.json';
-import * as PermissionLib from '../artifacts/src/core/permission/PermissionLib.sol/PermissionLib.json';
 //// Permission
 import * as PermissionManager from '../artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json';
 // framework
@@ -43,7 +42,6 @@ export const activeContractsList = activeContracts;
 export default {
   DAO,
   PermissionManager,
-  PermissionLib,
 
   DAOFactory,
   DAORegistry,

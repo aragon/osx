@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {IDAO} from "../../../core/dao/IDAO.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 /// @title IMultisig
 /// @author Aragon Association - 2023
