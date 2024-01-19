@@ -12,9 +12,10 @@ import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {IMultisig} from "./IMultisig.sol";
 
-/// @title Multisig - Release 1, Build 2
+/// @title Multisig
 /// @author Aragon Association - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
+/// @dev v1.2 (Release 1, Build 2)
 /// @custom:security-contact sirt@aragon.org
 contract Multisig is
     IMultisig,

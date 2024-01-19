@@ -12,6 +12,7 @@ import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 /// @title Admin
 /// @author Aragon Association - 2022-2023
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
+/// @dev v1.1 (Release 1, Build 1)
 /// @custom:security-contact sirt@aragon.org
 contract Admin is IMembership, PluginCloneable, ProposalUpgradeable {
     using SafeCastUpgradeable for uint256;
