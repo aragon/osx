@@ -6,8 +6,11 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 
 - [ ] Verify that the deployers wallet has enough funds.
 - [ ] Check that the subgraph hoster supports the network OSx is deployed to.
-- [ ] Make sure you are using Node v16
-- [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
+- [ ] Check that you are using Node v16
+- [ ] Check that you are using the intended `@aragon/osx-commons-contracts` package version.
+- [ ] Check that the OSx protocol version in `@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol` is bumped correctly.
+- [ ] Check that the semver number in `osx/packages/contracts/src/package.json` matches with that of `@aragon/osx-commons-contracts`. The pre-release suffix is allowed to differ.
+- [ ] Check that the version tags in the `/// @dev vX.Y (Release X, Build Y)` NatSpec comments of the plugin implementation and setup contracts are correct.
 - [ ] Check that version tags are set correctly in the plugin repo deploy scripts `packages/contracts/deploy/new/30_plugins/10_plugin-repos` to ensure synchronized version numbers across all supported networks.
 - [ ] Choose an ENS domain for DAOs
 - [ ] Choose an ENS domain for plugins

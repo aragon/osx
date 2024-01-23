@@ -1,11 +1,5 @@
-import {Operation} from '../../../utils/types';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {BytesLike} from 'ethers';
-
-export enum PluginType {
-  UUPS,
-  Cloneable,
-  Constructable,
-}
 
 export type PermissionOperation = {
   operation: Operation;

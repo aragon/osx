@@ -4,15 +4,17 @@ pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
-import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {IProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/IProtocolVersion.sol";
+import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol";
+import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {createERC1967Proxy} from "@aragon/osx-commons-contracts/src/utils/deployment/Proxy.sol";
+
 import {DAO} from "../../core/dao/DAO.sol";
-import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {createERC1967Proxy} from "../../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/repo/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/setup/PluginSetupProcessor.sol";
 import {hashHelpers, PluginSetupRef} from "../plugin/setup/PluginSetupProcessorHelpers.sol";
-import {IPluginSetup} from "../plugin/setup/IPluginSetup.sol";
 import {DAORegistry} from "./DAORegistry.sol";
 
 /// @title DAOFactory

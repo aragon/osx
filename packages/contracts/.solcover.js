@@ -1,3 +1,3 @@
 module.exports = {
-  skipFiles: ['test', 'plugins/counter-example'],
+  skipFiles: ['test', 'exampleplugins/counter-'],
 };

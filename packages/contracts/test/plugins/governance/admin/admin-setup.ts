@@ -4,22 +4,21 @@ import {
   AdminSetup__factory,
   Admin__factory,
 } from '../../../../typechain';
-import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
-import {Operation} from '../../../../utils/types';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
+import {
+  ADMIN_INTERFACE,
+  EXECUTE_PROPOSAL_PERMISSION_ID,
+} from './admin-constants';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {getNamedTypesFromMetadata} from '@aragon/osx-commons-sdk';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
-
-// Permissions
-const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
-  'EXECUTE_PROPOSAL_PERMISSION'
-);
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('AdminSetup', function () {
   let ownerAddress: string;
@@ -57,7 +56,7 @@ describe('AdminSetup', function () {
 
     expect(
       await adminAddressContract.supportsInterface(
-        getInterfaceID(ADMIN_INTERFACE)
+        getInterfaceId(ADMIN_INTERFACE)
       )
     ).to.be.eq(true);
   });
@@ -128,7 +127,7 @@ describe('AdminSetup', function () {
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });
@@ -173,7 +172,7 @@ describe('AdminSetup', function () {
           targetDao.address,
           plugin,
           AddressZero,
-          EXECUTE_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
         ],
       ]);
     });

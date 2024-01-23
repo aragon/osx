@@ -7,15 +7,11 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
-import {findEvent, findEventTopicLog} from '../utils/event';
-import {Operation} from '../utils/types';
 import {
-  SupportedNetworks,
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
-  SupportedVerions,
-  getNetworkDeploymentForVersion,
 } from '@aragon/osx-commons-configs';
+import {findEvent, findEventTopicLog, Operation} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {Contract} from 'ethers';
 import {ethers} from 'hardhat';

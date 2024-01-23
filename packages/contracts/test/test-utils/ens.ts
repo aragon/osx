@@ -9,8 +9,8 @@ import {
   ENSSubdomainRegistrar__factory,
   PublicResolver__factory,
 } from '../../typechain';
-import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
-import {deployWithProxy} from './proxy';
+import {ensDomainHash, ensLabelHash} from '../../utils/ens';
+import {deployWithProxy} from '../test-utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 

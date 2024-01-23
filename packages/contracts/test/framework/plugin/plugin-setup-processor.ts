@@ -1,4 +1,4 @@
-import pluginUUPSUpgradeableArtifact from '../../../artifacts/src/core/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
+import pluginUUPSUpgradeableArtifact from '../../../artifacts/@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
 import {
   PluginSetupProcessor,
   PluginUUPSUpgradeableSetupV1Mock,
@@ -28,13 +28,10 @@ import {
   PluginCloneableSetupV1MockBad__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
-import {findEventTopicLog} from '../../../utils/event';
-import {Operation} from '../../../utils/types';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {
   installPlugin,
   updatePlugin,
@@ -75,6 +72,15 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk';
+import {Operation} from '@aragon/osx-commons-sdk';
+import {
+  DAO_PERMISSIONS,
+  ENS_REGISTRAR_PERMISSIONS,
+  PLUGIN_REGISTRY_PERMISSIONS,
+  PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
+  PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
+} from '@aragon/osx-commons-sdk';
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -99,25 +105,7 @@ const EMPTY_DATA = '0x';
 
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
-const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
-const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
-  'APPLY_INSTALLATION_PERMISSION'
-);
-const APPLY_UPDATE_PERMISSION_ID = ethers.utils.id('APPLY_UPDATE_PERMISSION');
-const APPLY_UNINSTALLATION_PERMISSION_ID = ethers.utils.id(
-  'APPLY_UNINSTALLATION_PERMISSION'
-);
-const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_PLUGIN_REPO_PERMISSION'
-);
-
-const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-);
-
-const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
-
-describe('Plugin Setup Processor', function () {
+describe('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -218,14 +206,14 @@ describe('Plugin Setup Processor', function () {
     await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      REGISTER_PLUGIN_REPO_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` to `PluginRepoFactory`.
     await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
-      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      ENS_REGISTRAR_PERMISSIONS.REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
 
     const releaseMetadata = '0x11';
@@ -283,7 +271,11 @@ describe('Plugin Setup Processor', function () {
     targetDao = await deployNewDAO(signers[0]);
 
     // Grant
-    await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);
+    await targetDao.grant(
+      targetDao.address,
+      psp.address,
+      DAO_PERMISSIONS.ROOT_PERMISSION_ID
+    );
   });
 
   // They end up in the same pluginRepo with
@@ -323,9 +315,7 @@ describe('Plugin Setup Processor', function () {
 
   describe('Protocol version', async () => {
     it('returns the current protocol version', async () => {
-      expect(await psp.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
-      );
+      expect(await psp.protocolVersion()).to.deep.equal(osxContractsVersion());
     });
   });
 
@@ -335,7 +325,7 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_INSTALLATION_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
       );
     });
 
@@ -417,7 +407,7 @@ describe('Plugin Setup Processor', function () {
         await targetDao.grant(
           psp.address,
           ownerAddress,
-          APPLY_UNINSTALLATION_PERMISSION_ID
+          PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UNINSTALLATION_PERMISSION_ID
         );
 
         const {plugin, helpers} = await installPlugin(
@@ -514,7 +504,7 @@ describe('Plugin Setup Processor', function () {
         await targetDao.revoke(
           psp.address,
           ownerAddress,
-          APPLY_INSTALLATION_PERMISSION_ID
+          PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
         );
 
         await expect(
@@ -532,7 +522,7 @@ describe('Plugin Setup Processor', function () {
           .withArgs(
             targetDao.address,
             ownerAddress,
-            APPLY_INSTALLATION_PERMISSION_ID
+            PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
           );
       });
 
@@ -540,7 +530,7 @@ describe('Plugin Setup Processor', function () {
         await targetDao.revoke(
           targetDao.address,
           psp.address,
-          ROOT_PERMISSION_ID
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
         );
 
         const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
@@ -567,7 +557,11 @@ describe('Plugin Setup Processor', function () {
           )
         )
           .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
-          .withArgs(targetDao.address, psp.address, ROOT_PERMISSION_ID);
+          .withArgs(
+            targetDao.address,
+            psp.address,
+            DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          );
       });
 
       it("reverts if setupId wasn't prepared by `prepareInstallation` first", async () => {
@@ -808,12 +802,12 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_INSTALLATION_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
       );
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_UNINSTALLATION_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UNINSTALLATION_PERMISSION_ID
       );
 
       pluginRepoPointer = [repoU.address, 1, 1];
@@ -1101,7 +1095,7 @@ describe('Plugin Setup Processor', function () {
         await targetDao.revoke(
           psp.address,
           ownerAddress,
-          APPLY_UNINSTALLATION_PERMISSION_ID
+          PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UNINSTALLATION_PERMISSION_ID
         );
 
         await expect(
@@ -1118,7 +1112,7 @@ describe('Plugin Setup Processor', function () {
           .withArgs(
             targetDao.address,
             ownerAddress,
-            APPLY_UNINSTALLATION_PERMISSION_ID
+            PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UNINSTALLATION_PERMISSION_ID
           );
       });
 
@@ -1126,7 +1120,7 @@ describe('Plugin Setup Processor', function () {
         await targetDao.revoke(
           targetDao.address,
           psp.address,
-          ROOT_PERMISSION_ID
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
         );
 
         const {permissions} = await prepareUninstallation(
@@ -1149,7 +1143,11 @@ describe('Plugin Setup Processor', function () {
           )
         )
           .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
-          .withArgs(targetDao.address, psp.address, ROOT_PERMISSION_ID);
+          .withArgs(
+            targetDao.address,
+            psp.address,
+            DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          );
       });
 
       it('reverts if uninstallation is not prepared first', async () => {
@@ -1292,12 +1290,12 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_INSTALLATION_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
       );
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_UPDATE_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UPDATE_PERMISSION_ID
       );
     });
 
@@ -1716,12 +1714,12 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_INSTALLATION_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
       );
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_UPDATE_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UPDATE_PERMISSION_ID
       );
 
       currentPluginRepoPointer = [repoU.address, ...currentVersion];
@@ -1739,14 +1737,18 @@ describe('Plugin Setup Processor', function () {
         EMPTY_DATA
       ));
 
-      await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
+      await targetDao.grant(
+        proxy,
+        psp.address,
+        PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      );
     });
 
     it('reverts if caller does not have `APPLY_UPDATE_PERMISSION` permission', async () => {
       await targetDao.revoke(
         psp.address,
         ownerAddress,
-        APPLY_UPDATE_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UPDATE_PERMISSION_ID
       );
 
       await expect(
@@ -1762,14 +1764,18 @@ describe('Plugin Setup Processor', function () {
         )
       )
         .to.be.revertedWithCustomError(psp, 'SetupApplicationUnauthorized')
-        .withArgs(targetDao.address, ownerAddress, APPLY_UPDATE_PERMISSION_ID);
+        .withArgs(
+          targetDao.address,
+          ownerAddress,
+          PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UPDATE_PERMISSION_ID
+        );
     });
 
     it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
       await targetDao.revoke(
         targetDao.address,
         psp.address,
-        ROOT_PERMISSION_ID
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
       );
 
       const {
@@ -1799,11 +1805,19 @@ describe('Plugin Setup Processor', function () {
         )
       )
         .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
-        .withArgs(targetDao.address, psp.address, ROOT_PERMISSION_ID);
+        .withArgs(
+          targetDao.address,
+          psp.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
 
     it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
-      await targetDao.revoke(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
+      await targetDao.revoke(
+        proxy,
+        psp.address,
+        PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+      );
 
       const {
         preparedSetupData: {permissions, helpers},
@@ -2112,12 +2126,12 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_INSTALLATION_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID
       );
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        APPLY_UPDATE_PERMISSION_ID
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_UPDATE_PERMISSION_ID
       );
     });
 
@@ -2143,7 +2157,11 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         ));
 
-        await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
+        await targetDao.grant(
+          proxy,
+          psp.address,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
       });
 
       it('points to the V1 implementation', async () => {
@@ -2364,7 +2382,11 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         ));
 
-        await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
+        await targetDao.grant(
+          proxy,
+          psp.address,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
       });
 
       it('points to the V2 implementation', async () => {
@@ -2470,7 +2492,11 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         ));
 
-        await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
+        await targetDao.grant(
+          proxy,
+          psp.address,
+          PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
+        );
       });
 
       it('points to the V3 implementation', async () => {

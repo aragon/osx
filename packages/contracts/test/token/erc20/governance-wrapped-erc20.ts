@@ -1,6 +1,6 @@
 import {
-  TestERC20,
-  TestERC20__factory,
+  ERC20Mock,
+  ERC20Mock__factory,
   GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
   IERC165Upgradeable__factory,
@@ -8,10 +8,8 @@ import {
   IERC20Upgradeable__factory,
   IERC20PermitUpgradeable__factory,
   IVotesUpgradeable__factory,
-  IERC20MetadataUpgradeable__factory,
 } from '../../../typechain';
-import {OZ_ERRORS} from '../../test-utils/error';
-import {getInterfaceID} from '../../test-utils/interfaces';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -39,18 +37,18 @@ let toDelegate: string;
 describe('GovernanceWrappedERC20', function () {
   let signers: SignerWithAddress[];
   let governanceToken: GovernanceWrappedERC20;
-  let erc20: TestERC20;
-  let TestERC20: TestERC20__factory;
+  let erc20: ERC20Mock;
+  let ERC20Mock: ERC20Mock__factory;
   let GovernanceWrappedERC20: GovernanceWrappedERC20__factory;
   let defaultBalances: AccountBalance[];
 
-  let defaultExistingERC20InitData: [string, string, number];
+  let defaultExistingERC20InitData: [string, string];
   let defaultGovernanceWrappedERC20InitData: [string, string, string];
 
   before(async () => {
     signers = await ethers.getSigners();
 
-    TestERC20 = new TestERC20__factory(signers[0]);
+    ERC20Mock = new ERC20Mock__factory(signers[0]);
     GovernanceWrappedERC20 = new GovernanceWrappedERC20__factory(signers[0]);
     defaultBalances = [
       {account: signers[0].address, amount: 123},
@@ -64,8 +62,8 @@ describe('GovernanceWrappedERC20', function () {
   });
 
   beforeEach(async function () {
-    defaultExistingERC20InitData = [existingErc20Name, existingErc20Symbol, 0];
-    erc20 = await TestERC20.deploy(...defaultExistingERC20InitData);
+    defaultExistingERC20InitData = [existingErc20Name, existingErc20Symbol];
+    erc20 = await ERC20Mock.deploy(...defaultExistingERC20InitData);
 
     const promises = defaultBalances.map(balance =>
       erc20.setBalance(balance.account, balance.amount)
@@ -87,7 +85,7 @@ describe('GovernanceWrappedERC20', function () {
     it('reverts if trying to re-initialize', async () => {
       await expect(
         governanceToken.initialize(...defaultGovernanceWrappedERC20InitData)
-      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
 
     it('sets the wrapped token name and symbol', async () => {
@@ -120,31 +118,31 @@ describe('GovernanceWrappedERC20', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IGovernanceWrappedERC20` interface', async () => {
       const iface = IGovernanceWrappedERC20__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IERC20Upgradeable` interface', async () => {
       const iface = IERC20Upgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IERC20PermitUpgradeable` interface', async () => {
       const iface = IERC20PermitUpgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
     it('supports the `IVotesUpgradeable` interface', async () => {
       const iface = IVotesUpgradeable__factory.createInterface();
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
 
@@ -155,7 +153,7 @@ describe('GovernanceWrappedERC20', function () {
         'function symbol()',
         'function decimals()',
       ]);
-      expect(await governanceToken.supportsInterface(getInterfaceID(iface))).to
+      expect(await governanceToken.supportsInterface(getInterfaceId(iface))).to
         .be.true;
     });
   });
@@ -165,7 +163,7 @@ describe('GovernanceWrappedERC20', function () {
       const erc20Balance = await erc20.balanceOf(signers[0].address);
       await expect(
         governanceToken.depositFor(signers[0].address, erc20Balance)
-      ).to.be.revertedWith(OZ_ERRORS.ERC20_INSUFFICIENT_ALLOWANCE);
+      ).to.be.revertedWith('ERC20: insufficient allowance');
     });
 
     it('deposits an amount of tokens', async () => {

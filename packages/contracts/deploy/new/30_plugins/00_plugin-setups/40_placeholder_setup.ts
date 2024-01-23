@@ -1,5 +1,5 @@
-import placeholderSetupArtifact from '../../../../artifacts/src/plugins/placeholder-version/PlaceholderSetup.sol/PlaceholderSetup.json';
-import placeholderBuildMetadata from '../../../../src/plugins/placeholder-version/build-metadata.json';
+import placeholderSetupArtifact from '../../../../artifacts/src/framework/plugin/repo/placeholder/PlaceholderSetup.sol/PlaceholderSetup.json';
+import placeholderBuildMetadata from '../../../../src/framework/plugin/repo/placeholder/placeholder-build-metadata.json';
 import {uploadToIPFS} from '../../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';

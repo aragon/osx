@@ -7,7 +7,6 @@ import {
   UpdateAppliedEvent,
   UpdatePreparedEvent,
 } from '../../../typechain/PluginSetupProcessor';
-import {findEvent} from '../../../utils/event';
 import {
   createApplyInstallationParams,
   createApplyUninstallationParams,
@@ -17,6 +16,7 @@ import {
   createPrepareUpdateParams,
 } from './create-params';
 import {PermissionOperation, PluginRepoPointer} from './types';
+import {findEvent} from '@aragon/osx-commons-sdk';
 import {BytesLike} from 'ethers';
 
 export async function prepareInstallation(
@@ -29,10 +29,12 @@ export async function prepareInstallation(
     daoAddress,
     createPrepareInstallationParams(pluginRepoPointer, data)
   );
+
   const event = await findEvent<InstallationPreparedEvent>(
     tx,
     'InstallationPrepared'
   );
+
   return event.args;
 }
 
@@ -58,6 +60,7 @@ export async function applyInstallation(
     tx,
     'InstallationApplied'
   );
+
   return event.args;
 }
 
@@ -84,6 +87,7 @@ export async function prepareUpdate(
   );
 
   const event = await findEvent<UpdatePreparedEvent>(tx, 'UpdatePrepared');
+
   return event.args;
 }
 
@@ -108,6 +112,7 @@ export async function applyUpdate(
   );
 
   const event = await findEvent<UpdateAppliedEvent>(tx, 'UpdateApplied');
+
   return event.args;
 }
 
@@ -128,6 +133,7 @@ export async function prepareUninstallation(
     tx,
     'UninstallationPrepared'
   );
+
   return event.args;
 }
 
@@ -147,5 +153,6 @@ export async function applyUninstallation(
     tx,
     'UninstallationApplied'
   );
+
   return event.args;
 }

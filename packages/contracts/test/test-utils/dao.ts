@@ -1,9 +1,9 @@
 import {
   DAO,
   ActionExecute__factory,
-  TestERC721__factory,
+  ERC721Mock__factory,
   GovernanceERC20__factory,
-  TestERC1155__factory,
+  ERC1155Mock__factory,
   DAO__factory,
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
@@ -24,8 +24,7 @@ export const TOKEN_INTERFACE_IDS = {
 };
 
 export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
-  const DAO = new DAO__factory(signer);
-  const dao = await deployWithProxy<DAO>(DAO);
+  const dao = await deployWithProxy<DAO>(new DAO__factory(signer));
 
   await dao.initialize(
     '0x00',
@@ -69,7 +68,7 @@ export function getERC721TransferAction(
   tokenId: number,
   issafe: boolean = true
 ) {
-  const iface = new ethers.utils.Interface(TestERC721__factory.abi);
+  const iface = new ethers.utils.Interface(ERC721Mock__factory.abi);
 
   const functionName = issafe
     ? 'safeTransferFrom(address, address, uint256)'
@@ -110,7 +109,7 @@ export function getERC1155TransferAction(
   tokenId: number,
   amount: number | BigNumber
 ) {
-  const iface = new ethers.utils.Interface(TestERC1155__factory.abi);
+  const iface = new ethers.utils.Interface(ERC1155Mock__factory.abi);
 
   const encodedData = iface.encodeFunctionData('safeTransferFrom', [
     from,

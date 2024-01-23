@@ -8,13 +8,13 @@ import {
   DAO__factory as DAO_V1_3_0__factory,
 } from '../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
 import {UpgradedEvent} from '../../typechain/DAO';
-import {findEventTopicLog} from '../../utils/event';
-import {readImplementationValueFromSlot} from '../../utils/storage';
+import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {getInterfaceID} from '../test-utils/interfaces';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
 import {deployWithProxy} from '../test-utils/proxy';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -57,14 +57,16 @@ describe('DAO Upgrade', function () {
 
         // Store the v1.0.0 implementation
         daoV100Implementation = new DAO_V1_0_0__factory(signers[0]).attach(
-          await readImplementationValueFromSlot(daoV100Proxy.address)
+          await readStorage(daoV100Proxy.address, ERC1967_IMPLEMENTATION_SLOT, [
+            'address',
+          ])
         );
 
         // Grant the upgrade permission
         await daoV100Proxy.grant(
           daoV100Proxy.address,
           signers[0].address,
-          UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+          DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
       });
 
@@ -79,8 +81,11 @@ describe('DAO Upgrade', function () {
         );
 
         // Check the stored implementation.
-        const implementationAfterUpgrade =
-          await readImplementationValueFromSlot(daoV100Proxy.address);
+        const implementationAfterUpgrade = await readStorage(
+          daoV100Proxy.address,
+          ERC1967_IMPLEMENTATION_SLOT,
+          ['address']
+        );
         expect(implementationAfterUpgrade).to.equal(
           daoV130Implementation.address
         );
@@ -145,8 +150,11 @@ describe('DAO Upgrade', function () {
         );
 
         // Check the stored implementation.
-        const implementationAfterUpgrade =
-          await readImplementationValueFromSlot(daoV100Proxy.address);
+        const implementationAfterUpgrade = await readStorage(
+          daoV100Proxy.address,
+          ERC1967_IMPLEMENTATION_SLOT,
+          ['address']
+        );
         expect(implementationAfterUpgrade).to.equal(
           daoV130Implementation.address
         );
@@ -224,9 +232,12 @@ describe('DAO Upgrade', function () {
           ])
         );
 
-        // Check that the stored implementatio has changed.
-        const implementationAfterUpgrade =
-          await readImplementationValueFromSlot(daoV100Proxy.address);
+        // Check that the stored implementation has changed.
+        const implementationAfterUpgrade = await readStorage(
+          daoV100Proxy.address,
+          ERC1967_IMPLEMENTATION_SLOT,
+          ['address']
+        );
         expect(implementationAfterUpgrade).to.equal(
           daoV130Implementation.address
         );
@@ -273,7 +284,7 @@ describe('DAO Upgrade', function () {
       await daoV100Proxy.grant(
         daoV100Proxy.address,
         signers[0].address,
-        UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
+        DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
       );
     });
 
@@ -320,7 +331,7 @@ describe('DAO Upgrade', function () {
 
         expect(
           await daoV100Proxy.supportsInterface(
-            getInterfaceID(protocolVersionInterface)
+            getInterfaceId(protocolVersionInterface)
           )
         ).to.be.eq(false);
 
@@ -336,7 +347,7 @@ describe('DAO Upgrade', function () {
         // check the interface is registered.
         expect(
           await daoV100Proxy.supportsInterface(
-            getInterfaceID(protocolVersionInterface)
+            getInterfaceId(protocolVersionInterface)
           )
         ).to.be.eq(true);
       });

@@ -2,6 +2,7 @@ import networks, {ContractsNetworkConfig} from './networks';
 import {AragonPluginRepos, TestingFork} from './utils/types';
 import {NetworkConfigs} from '@aragon/osx-commons-configs';
 import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-verify';
 import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';

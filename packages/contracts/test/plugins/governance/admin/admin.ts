@@ -12,26 +12,24 @@ import {
 } from '../../../../typechain';
 import {ProposalCreatedEvent} from '../../../../typechain/Admin';
 import {ExecutedEvent} from '../../../../typechain/IDAO';
-import {
-  findEvent,
-  DAO_EVENTS,
-  PROPOSAL_EVENTS,
-  MEMBERSHIP_EVENTS,
-  findEventTopicLog,
-} from '../../../../utils/event';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {OZ_ERRORS} from '../../../test-utils/error';
-import {ADMIN_INTERFACE, getInterfaceID} from '../../../test-utils/interfaces';
-import {toBytes32} from '../../../test-utils/voting';
+import {
+  ADMIN_INTERFACE,
+  EXECUTE_PROPOSAL_PERMISSION_ID,
+} from './admin-constants';
+import {
+  IDAO_EVENTS,
+  IMEMBERSHIP_EVENTS,
+  IPROPOSAL_EVENTS,
+  findEvent,
+  findEventTopicLog,
+} from '@aragon/osx-commons-sdk';
+import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {proposalIdToBytes32} from '@aragon/osx-commons-sdk';
+import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-
-// Permissions
-const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
-  'EXECUTE_PROPOSAL_PERMISSION'
-);
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('Admin', function () {
   let signers: SignerWithAddress[];
@@ -79,7 +77,11 @@ describe('Admin', function () {
     await adminCloneFactory.deployClone();
     plugin = AdminFactory.attach(anticipatedPluginAddress);
 
-    await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
+    await dao.grant(
+      dao.address,
+      plugin.address,
+      DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+    );
     await dao.grant(
       plugin.address,
       ownerAddress,
@@ -96,13 +98,13 @@ describe('Admin', function () {
       await initializePlugin();
 
       await expect(initializePlugin()).to.be.revertedWith(
-        OZ_ERRORS.ALREADY_INITIALIZED
+        'Initializable: contract is already initialized'
       );
     });
 
     it('emits the `MembershipContractAnnounced` event and returns the admin as a member afterwards', async () => {
       await expect(plugin.initialize(dao.address))
-        .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .to.emit(plugin, IMEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
         .withArgs(dao.address);
 
       expect(await plugin.isMember(signers[0].address)).to.be.true; // signer[0] has `EXECUTE_PROPOSAL_PERMISSION_ID`
@@ -117,31 +119,31 @@ describe('Admin', function () {
 
     it('supports the `IERC165Upgradeable` interface', async () => {
       const iface = IERC165Upgradeable__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IPlugin` interface', async () => {
       const iface = IPlugin__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IProposal` interface', async () => {
       const iface = IProposal__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `IMembership` interface', async () => {
       const iface = IMembership__factory.createInterface();
-      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.true;
+      expect(await plugin.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
     it('supports the `Admin` interface', async () => {
-      const iface = getInterfaceID(ADMIN_INTERFACE);
+      const iface = getInterfaceId(ADMIN_INTERFACE);
       expect(iface).to.equal(ADMIN_INTERFACE_ID); // checks that it didn't change
       expect(await plugin.supportsInterface(iface)).to.be.true;
     });
@@ -153,11 +155,19 @@ describe('Admin', function () {
     });
 
     it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
-      await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
+      await dao.revoke(
+        dao.address,
+        plugin.address,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
+        .withArgs(
+          dao.address,
+          plugin.address,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+        );
     });
 
     it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {
@@ -188,11 +198,11 @@ describe('Admin', function () {
         allowFailureMap
       );
 
-      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      await expect(tx).to.emit(plugin, IPROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       const event = await findEvent<ProposalCreatedEvent>(
         tx,
-        PROPOSAL_EVENTS.PROPOSAL_CREATED
+        IPROPOSAL_EVENTS.PROPOSAL_CREATED
       );
 
       expect(event.args.proposalId).to.equal(currentExpectedProposalId);
@@ -209,7 +219,7 @@ describe('Admin', function () {
       const currentExpectedProposalId = 0;
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
-        .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+        .to.emit(plugin, IPROPOSAL_EVENTS.PROPOSAL_EXECUTED)
         .withArgs(currentExpectedProposalId);
     });
 
@@ -222,11 +232,11 @@ describe('Admin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
 
-      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      await expect(tx).to.emit(plugin, IPROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       const event = await findEvent<ProposalCreatedEvent>(
         tx,
-        PROPOSAL_EVENTS.PROPOSAL_CREATED
+        IPROPOSAL_EVENTS.PROPOSAL_CREATED
       );
 
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
@@ -246,11 +256,11 @@ describe('Admin', function () {
         const event = await findEventTopicLog<ExecutedEvent>(
           tx,
           DAO__factory.createInterface(),
-          DAO_EVENTS.EXECUTED
+          IDAO_EVENTS.EXECUTED
         );
 
         expect(event.args.actor).to.equal(plugin.address);
-        expect(event.args.callId).to.equal(toBytes32(proposalId));
+        expect(event.args.callId).to.equal(proposalIdToBytes32(proposalId));
         expect(event.args.actions.length).to.equal(1);
         expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
         expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -267,9 +277,9 @@ describe('Admin', function () {
         const event = await findEventTopicLog<ExecutedEvent>(
           tx,
           DAO__factory.createInterface(),
-          DAO_EVENTS.EXECUTED
+          IDAO_EVENTS.EXECUTED
         );
-        expect(event.args.callId).to.equal(toBytes32(proposalId));
+        expect(event.args.callId).to.equal(proposalIdToBytes32(proposalId));
       }
     });
   });

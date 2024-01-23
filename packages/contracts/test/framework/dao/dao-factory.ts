@@ -27,12 +27,10 @@ import {
 import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
-import {findEventTopicLog} from '../../../utils/event';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
-import {getInterfaceID} from '../../test-utils/interfaces';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
-import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {
   createApplyInstallationParams,
@@ -51,6 +49,14 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {
+  findEventTopicLog,
+  DAO_PERMISSIONS,
+  DAO_REGISTRY_PERMISSIONS,
+  PLUGIN_REGISTRY_PERMISSIONS,
+  PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
+  getInterfaceId,
+} from '@aragon/osx-commons-sdk';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -69,31 +75,6 @@ const EVENTS = {
   Revoked: 'Revoked',
   Granted: 'Granted',
 };
-
-const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
-  'APPLY_INSTALLATION_PERMISSION'
-);
-const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
-const UPGRADE_DAO_PERMISSION_ID = ethers.utils.id('UPGRADE_DAO_PERMISSION');
-const SET_SIGNATURE_VALIDATOR_PERMISSION_ID = ethers.utils.id(
-  'SET_SIGNATURE_VALIDATOR_PERMISSION'
-);
-const SET_TRUSTED_FORWARDER_PERMISSION_ID = ethers.utils.id(
-  'SET_TRUSTED_FORWARDER_PERMISSION'
-);
-const SET_METADATA_PERMISSION_ID = ethers.utils.id('SET_METADATA_PERMISSION');
-const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_PLUGIN_REPO_PERMISSION'
-);
-const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
-);
-
-const REGISTER_STANDARD_CALLBACK_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_STANDARD_CALLBACK_PERMISSION'
-);
-
-const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
 const ALLOW_FLAG = '0x0000000000000000000000000000000000000002';
 const daoDummySubdomain = 'dao1';
@@ -209,28 +190,30 @@ describe('DAOFactory: ', function () {
     await managingDao.grant(
       daoRegistry.address,
       daoFactory.address,
-      REGISTER_DAO_PERMISSION_ID
+      DAO_REGISTRY_PERMISSIONS.REGISTER_DAO_PERMISSION_ID
     );
 
     // Grant the `REGISTER_ENS_SUBDOMAIN_PERMISSION` permission on the ENS subdomain registrar to the DAO registry contract
     await managingDao.grant(
       ensSubdomainRegistrar.address,
       daoRegistry.address,
-      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      DAO_REGISTRY_PERMISSIONS.ENS_REGISTRAR_PERMISSIONS
+        .REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
 
     // Grant `PLUGIN_REGISTER_PERMISSION` to `pluginRepoFactory`.
     await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      REGISTER_PLUGIN_REPO_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` to `PluginRepoFactory`.
     await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
-      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      PLUGIN_REGISTRY_PERMISSIONS.ENS_REGISTRAR_PERMISSIONS
+        .REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
 
     // Create and register a plugin on the `PluginRepoRegistry`.
@@ -284,13 +267,13 @@ describe('DAOFactory: ', function () {
 
     it('supports the `IERC165` interface', async () => {
       const iface = IERC165__factory.createInterface();
-      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await daoFactory.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
 
     it('supports the `IProtocolVersion` interface', async () => {
       const iface = IProtocolVersion__factory.createInterface();
-      expect(await daoFactory.supportsInterface(getInterfaceID(iface))).to.be
+      expect(await daoFactory.supportsInterface(getInterfaceId(iface))).to.be
         .true;
     });
   });
@@ -298,7 +281,7 @@ describe('DAOFactory: ', function () {
   context('Protocol version', async () => {
     it('returns the current protocol version', async () => {
       expect(await daoFactory.protocolVersion()).to.deep.equal(
-        CURRENT_PROTOCOL_VERSION
+        osxContractsVersion()
       );
     });
   });
@@ -408,10 +391,8 @@ describe('DAOFactory: ', function () {
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Granted)
-      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, dao, dao, ALLOW_FLAG)
-      .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
-        UPGRADE_DAO_PERMISSION_ID,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
         daoFactory.address,
         dao,
         dao,
@@ -419,7 +400,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
-        SET_TRUSTED_FORWARDER_PERMISSION_ID,
+        DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
         daoFactory.address,
         dao,
         dao,
@@ -427,7 +408,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
-        SET_METADATA_PERMISSION_ID,
+        DAO_PERMISSIONS.SET_TRUSTED_FORWARDER_PERMISSION_ID,
         daoFactory.address,
         dao,
         dao,
@@ -435,7 +416,15 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
-        REGISTER_STANDARD_CALLBACK_PERMISSION_ID,
+        DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        ALLOW_FLAG
+      )
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        DAO_PERMISSIONS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID,
         daoFactory.address,
         dao,
         dao,
@@ -455,12 +444,17 @@ describe('DAOFactory: ', function () {
     // Check that events were emitted.
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
-      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, dao, psp.address);
+      .withArgs(
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        psp.address
+      );
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(
-        APPLY_INSTALLATION_PERMISSION_ID,
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID,
         daoFactory.address,
         psp.address,
         daoFactory.address
@@ -469,7 +463,7 @@ describe('DAOFactory: ', function () {
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(
-        ROOT_PERMISSION_ID,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
         daoFactory.address,
         dao,
         daoFactory.address
@@ -480,7 +474,7 @@ describe('DAOFactory: ', function () {
       await daoContract.hasPermission(
         dao,
         daoFactory.address,
-        ROOT_PERMISSION_ID,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
         '0x'
       )
     ).to.be.false;
@@ -488,7 +482,7 @@ describe('DAOFactory: ', function () {
       await daoContract.hasPermission(
         dao,
         psp.address,
-        ROOT_PERMISSION_ID,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
         '0x'
       )
     ).to.be.false;
@@ -497,7 +491,7 @@ describe('DAOFactory: ', function () {
       await daoContract.hasPermission(
         psp.address,
         daoFactory.address,
-        APPLY_INSTALLATION_PERMISSION_ID,
+        PLUGIN_SETUP_PROCESSOR_PERMISSIONS.APPLY_INSTALLATION_PERMISSION_ID,
         '0x'
       )
     ).to.be.false;
