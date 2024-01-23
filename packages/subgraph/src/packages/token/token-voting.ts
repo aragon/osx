@@ -121,7 +121,6 @@ export function _handleProposalCreated(
 export function handleVoteCast(event: VoteCast): void {
   let pluginAddress = event.address;
   let voterAddress = event.params.voter;
-  let voterId = generateEntityIdFromAddress(voterAddress);
   let voterEntityId = generateMemberEntityId(pluginAddress, voterAddress);
   let pluginProposalId = event.params.proposalId;
   let proposalEntityId = generateProposalEntityId(
@@ -142,7 +141,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalVoteEntity.updatedAt = event.block.timestamp;
   } else {
     voterProposalVoteEntity = new TokenVotingVote(voterVoteEntityId);
-    voterProposalVoteEntity.voter = voterId;
+    voterProposalVoteEntity.voter = voterEntityId;
     voterProposalVoteEntity.proposal = proposalEntityId;
     voterProposalVoteEntity.createdAt = event.block.timestamp;
     voterProposalVoteEntity.voteReplaced = false;
