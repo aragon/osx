@@ -67,7 +67,7 @@ const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
 const pluginEntityId = generatePluginEntityId(pluginAddress);
 const memberOneAddress = Address.fromString(ADDRESS_ONE);
 const memberTwoAddress = Address.fromString(ADDRESS_TWO);
-const memberOneId = generateEntityIdFromAddress(memberOneAddress);
+const memberOneHexString = memberOneAddress.toHexString();
 
 test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
@@ -276,7 +276,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   // create event
   let event = createNewVoteCastEvent(
     PLUGIN_PROPOSAL_ID,
-    memberOneId,
+    memberOneHexString,
     '2', // yes
     '1', // votingPower
     pluginEntityId
@@ -347,7 +347,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   // create event
   let event2 = createNewVoteCastEvent(
     PLUGIN_PROPOSAL_ID,
-    memberOneId,
+    memberOneHexString,
     '3', // No
     '1', // votingPower
     pluginEntityId
@@ -455,7 +455,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
   // create event
   let event = createNewVoteCastEvent(
     PLUGIN_PROPOSAL_ID,
-    memberOneId,
+    memberOneHexString,
     '0', // none
     '1', // votingPower
     pluginEntityId
@@ -605,7 +605,7 @@ test('Run AddresslistVoting (handleMembersAdded) mappings with mock event', () =
     'AddresslistVotingVoter',
     memberEntityId,
     'address',
-    memberOneId
+    memberOneHexString
   );
   assert.fieldEquals(
     'AddresslistVotingVoter',

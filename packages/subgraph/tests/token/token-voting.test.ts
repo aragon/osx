@@ -59,7 +59,6 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // // check TokenVotingProposal
   proposal.assertEntity();
 
-  // // check TokenVotingPlugin
   tokenVotingPlugin.assertEntity();
 
   clearStore();

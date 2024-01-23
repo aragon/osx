@@ -47,10 +47,10 @@ describe('DAORegistry', () => {
 
   test("Don't store subdomain for blocklisted DAO", () => {
     // Using an already blocklisted address for mainnet. This is unlikely to change
-    let blacklistedEntityId = '0x16070493aa513f91fc8957f14b7b7c6c0c41fbac';
+    let denylistedEntityId = '0x16070493aa513f91fc8957f14b7b7c6c0c41fbac';
     // create event.
     let newDaoEvent = createNewDaoEvent(
-      blacklistedEntityId,
+      denylistedEntityId,
       ADDRESS_ONE,
       'mock-Dao'
     );
@@ -59,21 +59,21 @@ describe('DAORegistry', () => {
     handleDAORegistered(newDaoEvent);
 
     // checks
-    assert.fieldEquals('Dao', blacklistedEntityId, 'id', blacklistedEntityId);
+    assert.fieldEquals('Dao', denylistedEntityId, 'id', denylistedEntityId);
     assert.fieldEquals(
       'Dao',
-      blacklistedEntityId,
+      denylistedEntityId,
       'creator',
       Address.fromString(ADDRESS_ONE).toHexString()
     );
     assert.fieldEquals(
       'Dao',
-      blacklistedEntityId,
+      denylistedEntityId,
       'createdAt',
       newDaoEvent.block.timestamp.toString()
     );
 
-    const daoEntity = Dao.load(blacklistedEntityId);
+    const daoEntity = Dao.load(denylistedEntityId);
     assert.assertNull(daoEntity!.subdomain);
   });
 });
