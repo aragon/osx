@@ -10,9 +10,10 @@ import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 import {DAO} from "../../../core/dao/DAO.sol";
 import {Multisig} from "./Multisig.sol";
 
-/// @title MultisigSetup - Release 1, Build 2
+/// @title MultisigSetup
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Multisig` plugin.
+/// @dev v1.2 (Release 1, Build 2)
 /// @custom:security-contact sirt@aragon.org
 contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.

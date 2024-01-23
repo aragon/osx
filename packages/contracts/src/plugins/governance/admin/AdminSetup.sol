@@ -15,6 +15,7 @@ import {Admin} from "./Admin.sol";
 /// @title AdminAddressSetup
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Admin` plugin.
+/// @dev v1.1 (Release 1, Build 1)
 /// @custom:security-contact sirt@aragon.org
 contract AdminSetup is PluginSetup {
     using Clones for address;
