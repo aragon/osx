@@ -223,7 +223,7 @@ describe('Governance ERC20', () => {
 
     test('it should create a member from `toDelegate`.', () => {
       const memberTwoAddress = Address.fromString(ADDRESS_TWO);
-      const memberTwoAddressHexString = memberAddress.toHexString();
+      const memberTwoAddressHexString = memberTwoAddress.toHexString();
       let member = new ExtendedTokenVotingMember().withDefaultValues(
         memberAddressHexString,
         pluginEntityId
