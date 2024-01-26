@@ -56,10 +56,9 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // expected changes
   proposal.creationBlockNumber = BigInt.fromString(ONE);
   proposal.votingMode = VOTING_MODES.get(parseInt(VOTING_MODE)) as string;
-  // check TokenVotingProposal
+  // // check TokenVotingProposal
   proposal.assertEntity();
 
-  // check TokenVotingPlugin
   tokenVotingPlugin.assertEntity();
 
   clearStore();

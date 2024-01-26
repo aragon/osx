@@ -7,6 +7,7 @@ import {
 import {ERC1155} from '../../../generated/templates/DaoTemplateV1_0_0/ERC1155';
 import {getMethodSignature} from '../bytes';
 import {supportsInterface} from '../erc165';
+import {generateTokenEntityId} from '../ids';
 import {
   DECODE_OFFSET,
   ERC1155_INTERFACE_ID,
@@ -18,6 +19,7 @@ import {
   getERC1155TransferId,
   getTokenIdBalanceId,
 } from './common';
+import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 export function supportsERC1155(token: Address): bool {
@@ -340,13 +342,15 @@ function createErc1155Transfer(
   txHash: Bytes,
   timestamp: BigInt
 ): void {
+  let daoEntityId = generateDaoEntityId(dao);
+  let tokenEntityId = generateTokenEntityId(token);
   // create transfer
   let transfer = new ERC1155Transfer(transferId);
   transfer.from = from;
   transfer.to = to;
   transfer.operator = operator;
-  transfer.dao = dao.toHexString();
-  transfer.token = token.toHexString();
+  transfer.dao = daoEntityId;
+  transfer.token = tokenEntityId;
   transfer.amount = amount;
   transfer.tokenId = tokenId;
   transfer.proposal = proposalId;
@@ -371,8 +375,8 @@ function createErc1155Transfer(
     // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
     transfer.type = 'Deposit';
     updateERC1155Balance(
-      dao.toHexString(),
-      token.toHexString(),
+      daoEntityId,
+      tokenEntityId,
       tokenId,
       amount,
       timestamp,
@@ -382,8 +386,8 @@ function createErc1155Transfer(
     transfer.type = 'Withdraw';
 
     updateERC1155Balance(
-      dao.toHexString(),
-      token.toHexString(),
+      daoEntityId,
+      tokenEntityId,
       tokenId,
       amount,
       timestamp,

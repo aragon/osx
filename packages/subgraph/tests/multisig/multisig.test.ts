@@ -7,7 +7,10 @@ import {
   _handleProposalCreated,
   handleMultisigSettingsUpdated,
 } from '../../src/packages/multisig/multisig';
-import {getProposalId} from '../../src/utils/proposals';
+import {
+  generateMemberEntityId,
+  generateVoterEntityId,
+} from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -37,10 +40,20 @@ import {
   createNewMultisigSettingsUpdatedEvent,
   createMultisigPluginState,
 } from './utils';
+import {
+  generatePluginEntityId,
+  generateProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+
+const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+const pluginEntityId = generatePluginEntityId(pluginAddress);
+const daoAddress = Address.fromString(DAO_ADDRESS);
+const daoEntityId = generatePluginEntityId(daoAddress);
+const pluginProposalId = BigInt.fromString(PLUGIN_PROPOSAL_ID);
 
 test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   // create state
@@ -82,51 +95,74 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID = getProposalId(
-    Address.fromString(CONTRACT_ADDRESS),
-    BigInt.fromString(PLUGIN_PROPOSAL_ID)
+  let proposalEntityId = generateProposalEntityId(
+    pluginAddress,
+    pluginProposalId
   );
 
-  let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
-
   // checks
-  assert.fieldEquals('MultisigProposal', entityID, 'id', entityID);
-  assert.fieldEquals('MultisigProposal', entityID, 'dao', DAO_ADDRESS);
-  assert.fieldEquals('MultisigProposal', entityID, 'plugin', packageId);
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    proposalEntityId,
+    'id',
+    proposalEntityId
+  );
+  assert.fieldEquals('MultisigProposal', proposalEntityId, 'dao', DAO_ADDRESS);
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposalEntityId,
+    'plugin',
+    pluginEntityId
+  );
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposalEntityId,
     'pluginProposalId',
     PLUGIN_PROPOSAL_ID
   );
-  assert.fieldEquals('MultisigProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals('MultisigProposal', entityID, 'startDate', START_DATE);
-  assert.fieldEquals('MultisigProposal', entityID, 'endDate', END_DATE);
-  assert.fieldEquals('MultisigProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    proposalEntityId,
+    'creator',
+    ADDRESS_ONE
+  );
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposalEntityId,
+    'startDate',
+    START_DATE
+  );
+  assert.fieldEquals('MultisigProposal', proposalEntityId, 'endDate', END_DATE);
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposalEntityId,
+    'metadata',
+    STRING_DATA
+  );
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposalEntityId,
     'createdAt',
     event.block.timestamp.toString()
   );
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    proposalEntityId,
     'creationBlockNumber',
     event.block.number.toString()
   );
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    proposalEntityId,
     'snapshotBlock',
     SNAPSHOT_BLOCK
   );
-  assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
-  assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
-  assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
+  assert.fieldEquals('MultisigProposal', proposalEntityId, 'minApprovals', ONE);
+  assert.fieldEquals('MultisigProposal', proposalEntityId, 'approvals', ONE);
+  assert.fieldEquals('MultisigProposal', proposalEntityId, 'executed', 'false');
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    proposalEntityId,
     'allowFailureMap',
     ALLOW_FAILURE_MAP
   );
@@ -180,33 +216,33 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   handleApproved(event);
 
   // checks
-  const member = Address.fromString(ADDRESS_ONE).toHexString();
-  const pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
-  const memberId = pluginId + '_' + member;
+  const memberAddress = Address.fromString(ADDRESS_ONE);
 
+  const memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
+
+  const voterEntityId = generateVoterEntityId(memberEntityId, proposal.id);
   // check proposalVoter
-  let proposalVoterId = member + '_' + proposal.id;
   assert.fieldEquals(
     'MultisigProposalApprover',
-    proposalVoterId,
+    voterEntityId,
     'id',
-    proposalVoterId
+    voterEntityId
   );
   assert.fieldEquals(
     'MultisigProposalApprover',
-    proposalVoterId,
+    voterEntityId,
     'approver',
-    memberId
+    memberEntityId
   );
   assert.fieldEquals(
     'MultisigProposalApprover',
-    proposalVoterId,
+    voterEntityId,
     'proposal',
     proposal.id
   );
   assert.fieldEquals(
     'MultisigProposalApprover',
-    proposalVoterId,
+    voterEntityId,
     'createdAt',
     event.block.timestamp.toString()
   );
