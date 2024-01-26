@@ -1,5 +1,5 @@
 import networks, {ContractsNetworkConfig} from './networks';
-import {AragonPluginRepos, TestingFork} from './utils/types';
+import {AragonPluginRepos, TestingFork} from './types/hardhat';
 import {NetworkConfigs} from '@aragon/osx-commons-configs';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
