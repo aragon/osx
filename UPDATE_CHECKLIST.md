@@ -46,7 +46,7 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
 - [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
-### ManagementDAO
+### Management DAO Proposal
 
 If the deployer **is not** allowed to create a new proposal in the management DAOs' multisig the script creates a new file `packages/contracts/managementDAOTX.json`
 

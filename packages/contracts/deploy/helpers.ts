@@ -577,7 +577,7 @@ export function getManagementDAOMultisigAddress(
 ): string {
   const {network} = hre;
   const address =
-    process.env[`${network.name.toUpperCase()}_MANAGEMENTDAO_MULTISIG`];
+    process.env[`${network.name.toUpperCase()}_MANAGEMENT_DAO_MULTISIG`];
   if (!address) {
     throw new Error(
       `Failed to find management DAO multisig address in env variables for ${network.name}`

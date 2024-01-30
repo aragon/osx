@@ -72,7 +72,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
   });
 
-  // Get PluginRepoRegistry's `PluginENSSubdomainRegistrarProxy` contract.
+  // Get the `ENSSubdomainRegistrar` proxy contract of the PluginRepoRegistry.
   const pluginSubdomainRegistrarAddress = await getContractAddress(
     'PluginENSSubdomainRegistrarProxy',
     hre

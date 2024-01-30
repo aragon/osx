@@ -64,20 +64,20 @@ describe('Management DAO', function () {
     await deployAll();
 
     if (
-      process.env.MANAGEMENTDAO_MULTISIG_APPROVERS === undefined ||
-      process.env.MANAGEMENTDAO_MULTISIG_MINAPPROVALS === undefined ||
-      process.env.MANAGEMENTDAO_MULTISIG_LISTEDONLY === undefined
+      process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS === undefined ||
+      process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS === undefined ||
+      process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === undefined
     ) {
       throw new Error('Management DAO Multisig settings not set in .env');
     }
 
-    listedOnly = process.env.MANAGEMENTDAO_MULTISIG_LISTEDONLY === 'true';
+    listedOnly = process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === 'true';
 
-    minApprovals = parseInt(process.env.MANAGEMENTDAO_MULTISIG_MINAPPROVALS);
+    minApprovals = parseInt(process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS);
 
     // Get approver addresses
     const approverAddresses =
-      process.env.MANAGEMENTDAO_MULTISIG_APPROVERS.split(',');
+      process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS.split(',');
 
     // Impersonate them as signers
     approvers = await Promise.all(

@@ -108,7 +108,7 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
 
 1. **The DAO contract:** The DAO contract is where the **core functionality** of the DAO lies. It is the contract in charge of:
    - Representing the identity and metadata of the DAO (ENS name, logo, description, other metadata)
-   - Holding and management the treasury assets
+   - Holding and managing the treasury assets
    - Executing arbitrary actions to:
      - transfer assets
      - call its own functions
@@ -192,7 +192,7 @@ You can find more details about [our deployment checklist here](https://github.c
 
 ## Publishing protocol upgrades
 
-Follow [our update cheklist here](https://github.com/aragon/osx/blob/develop/UPDATE_CHECKLIST.md).
+Follow [our update checklist here](https://github.com/aragon/osx/blob/develop/UPDATE_CHECKLIST.md).
 
 ## Pull request commands
 
