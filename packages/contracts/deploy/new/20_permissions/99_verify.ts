@@ -11,33 +11,36 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const [deployer] = await ethers.getSigners();
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `ManagementDAOProxy` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
-  // Get `DAO` contract.
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  // Get `ManagementDAOProxy` contract.
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
 
-  // Get `DAORegistry` address.
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+  // Get `DAORegistryProxy` address.
+  const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
 
-  // Get `PluginRepoRegistry` address.
+  // Get `PluginRepoRegistryProxy` address.
   const pluginRepoRegistryAddress = await getContractAddress(
-    'PluginRepoRegistry',
+    'PluginRepoRegistryProxy',
     hre
   );
 
-  // Get DAO's `ENSSubdomainRegistrar` address.
+  // Get DAO's `DAOENSSubdomainRegistrarProxy` address.
   const daoEnsSubdomainRegistrarAddress = await getContractAddress(
-    'DAO_ENSSubdomainRegistrar',
+    'DAOENSSubdomainRegistrarProxy',
     hre
   );
 
-  // Get Plugin's `ENSSubdomainRegistrar` address.
+  // Get Plugin's `PluginENSSubdomainRegistrarProxy` address.
   const pluginEnsSubdomainRegistrarAddress = await getContractAddress(
-    'Plugin_ENSSubdomainRegistrar',
+    'PluginENSSubdomainRegistrarProxy',
     hre
   );
 
@@ -51,39 +54,42 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // ENS PERMISSIONS
-  await checkPermission(managingDaoContract, {
+  await checkPermission(managementDaoContract, {
     operation: Operation.Grant,
     where: {
-      name: 'DAOSubdomainRegistrar',
+      name: 'DAOENSSubdomainRegistrarProxy',
       address: daoEnsSubdomainRegistrarAddress,
     },
-    who: {name: 'DAORegistry', address: daoRegistryAddress},
+    who: {name: 'DAORegistryProxy', address: daoRegistryAddress},
     permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
   });
 
-  await checkPermission(managingDaoContract, {
+  await checkPermission(managementDaoContract, {
     operation: Operation.Grant,
     where: {
-      name: 'PluginSubdomainRegistrar',
+      name: 'PluginENSSubdomainRegistrarProxy',
       address: pluginEnsSubdomainRegistrarAddress,
     },
-    who: {name: 'RepoRegistry', address: pluginRepoRegistryAddress},
+    who: {name: 'PluginRepoRegistryProxy', address: pluginRepoRegistryAddress},
     permission: 'REGISTER_ENS_SUBDOMAIN_PERMISSION',
   });
 
   // DAO REGISTRY PERMISSIONS
-  await checkPermission(managingDaoContract, {
+  await checkPermission(managementDaoContract, {
     operation: Operation.Grant,
-    where: {name: 'DAORegistry', address: daoRegistryAddress},
+    where: {name: 'DAORegistryProxy', address: daoRegistryAddress},
     who: {name: 'DAOFactory', address: daoFactoryAddress},
     permission: 'REGISTER_DAO_PERMISSION',
   });
 
   // PLUGIN REPO REGISTRY PERMISSIONS
-  await checkPermission(managingDaoContract, {
+  await checkPermission(managementDaoContract, {
     operation: Operation.Grant,
-    where: {name: 'RepoRegistry', address: pluginRepoRegistryAddress},
-    who: {name: 'RepoFactory', address: pluginRepoFactoryAddress},
+    where: {
+      name: 'PluginRepoRegistryProxy',
+      address: pluginRepoRegistryAddress,
+    },
+    who: {name: 'PluginRepoFactory', address: pluginRepoFactoryAddress},
     permission: 'REGISTER_PLUGIN_REPO_PERMISSION',
   });
 

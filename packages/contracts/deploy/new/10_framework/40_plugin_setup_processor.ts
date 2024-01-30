@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get `PluginRepoRegistry` address.
   const pluginRepoRegistryAddress = await getContractAddress(
-    'PluginRepoRegistry',
+    'PluginRepoRegistryProxy',
     hre
   );
 

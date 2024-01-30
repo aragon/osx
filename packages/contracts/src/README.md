@@ -22,7 +22,7 @@ Copy `.env.example` into a file called `.env` or create a new one with these 3 k
 # keys used for running tests
 HARDHAT_DAO_ENS_DOMAIN=dao.eth
 HARDHAT_PLUGIN_ENS_DOMAIN=plugin.eth
-MANAGINGDAO_SUBDOMAIN=management
+MANAGEMENT_DAO_SUBDOMAIN=management
 ```
 
 Run these commands on the project's root folder in your terminal:

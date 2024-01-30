@@ -30,7 +30,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  const multisigRepoAddress = await getContractAddress('multisig-repo', hre);
+  const multisigRepoAddress = await getContractAddress(
+    'MultisigRepoProxy',
+    hre
+  );
   const multisigRepo = PluginRepo__factory.connect(
     multisigRepoAddress,
     ethers.provider
@@ -73,9 +76,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   console.log(
-    `Deployer has no permission to create a new version. Adding managingDAO action`
+    `Deployer has no permission to create a new version. Adding managementDAO action`
   );
-  hre.managingDAOActions.push({
+  hre.managementDAOActions.push({
     to: tx.to,
     data: tx.data,
     value: 0,

@@ -31,10 +31,10 @@ for (const network of Object.keys(networks)) {
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   const aragonPluginRepos: AragonPluginRepos = {
-    'address-list-voting': '',
-    'token-voting': '',
-    admin: '',
-    multisig: '',
+    AddresslistVotingRepoProxy: '',
+    TokenVotingRepoProxy: '',
+    AdminRepoProxy: '',
+    MultisigRepoProxy: '',
   };
   const testingFork: TestingFork = {
     network: '',
@@ -43,8 +43,8 @@ extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   };
   hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];
-  hre.managingDAOMultisigPluginAddress = '';
-  hre.managingDAOActions = [];
+  hre.managementDAOMultisigPluginAddress = '';
+  hre.managementDAOActions = [];
   hre.testingFork = testingFork;
 });
 

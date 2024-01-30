@@ -5,23 +5,26 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(`\nFinalizing ManagingDao.`);
+  console.log(`\nFinalizing ManagementDao.`);
 
   const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
-  // Get `DAORegistry` address.
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+  // Get `DAORegistryProxy` address.
+  const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
 
   // Get `PluginSetupProcessor` address.
   const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `ManagementDAOProxy` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
   // Get `DAO` contract.
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
 
@@ -32,13 +35,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const grantPermissions = [
     {
       operation: Operation.Grant,
-      where: {name: 'DAORegistry', address: daoRegistryAddress},
+      where: {name: 'DAORegistryProxy', address: daoRegistryAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'REGISTER_DAO_PERMISSION',
     },
     {
       operation: Operation.Grant,
-      where: {name: 'DAO', address: managingDAOAddress},
+      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'PluginSetupProcessor', address: pspAddress},
       permission: 'ROOT_PERMISSION',
     },
@@ -50,45 +53,45 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     {
       operation: Operation.Grant,
-      where: {name: 'DAO', address: managingDAOAddress},
+      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
     },
   ];
 
-  await managePermissions(managingDaoContract, grantPermissions);
+  await managePermissions(managementDaoContract, grantPermissions);
 
-  // Grant `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `managingDao` on the permission manager of each PluginRepo.
+  // Grant `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `managementDao` on the permission manager of each PluginRepo.
   for (const repoName in hre.aragonPluginRepos) {
     const repoAddress = hre.aragonPluginRepos[repoName];
     const grantPluginRepoPermissions: Permission[] = [];
     grantPluginRepoPermissions.push({
       operation: Operation.Grant,
       where: {
-        name: repoName + ' PluginRepo',
+        name: repoName,
         address: repoAddress,
       },
-      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      who: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       permission: 'ROOT_PERMISSION',
     });
 
     grantPluginRepoPermissions.push({
       operation: Operation.Grant,
       where: {
-        name: repoName + ' PluginRepo',
+        name: repoName,
         address: repoAddress,
       },
-      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      who: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       permission: 'MAINTAINER_PERMISSION',
     });
 
     grantPluginRepoPermissions.push({
       operation: Operation.Grant,
       where: {
-        name: repoName + ' PluginRepo',
+        name: repoName,
         address: repoAddress,
       },
-      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      who: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       permission: 'UPGRADE_REPO_PERMISSION',
     });
     await managePermissions(
@@ -98,4 +101,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['New', 'RegisterManagingDAO'];
+func.tags = ['New', 'RegisterManagementDAO'];

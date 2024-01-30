@@ -5,7 +5,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log('\nUpgrade the managing DAO to new Implementation');
+  console.log('\nUpgrade the management DAO to new Implementation');
 
   const daoFactoryAddress = await getContractAddress('DAOFactory', hre);
   const newDaoImplementation = await DAOFactory__factory.connect(
@@ -13,14 +13,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre.ethers.provider
   ).daoBase();
 
-  const managingDAOAddress = await getContractAddress('managingDAO', hre);
-  const managingDAO = DAO__factory.connect(
-    managingDAOAddress,
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
+  const managementDAO = DAO__factory.connect(
+    managementDAOAddress,
     hre.ethers.provider
   );
-  const upgradeTX = await managingDAO.populateTransaction.upgradeToAndCall(
+  const upgradeTX = await managementDAO.populateTransaction.upgradeToAndCall(
     newDaoImplementation,
-    managingDAO.interface.encodeFunctionData('initializeFrom', [
+    managementDAO.interface.encodeFunctionData('initializeFrom', [
       IMPLICIT_INITIAL_PROTOCOL_VERSION,
       [],
     ])
@@ -29,12 +32,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!upgradeTX.to || !upgradeTX.data) {
     throw new Error(`Failed to populate upgradeToAndCall transaction`);
   }
-  hre.managingDAOActions.push({
+  hre.managementDAOActions.push({
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,
-    description: `Upgrade the <strong>management DAO</strong> (<code>${managingDAOAddress}</code>) to the new <strong>implementation</strong> (<code>${newDaoImplementation}</code>).`,
+    description: `Upgrade the <strong>management DAO</strong> (<code>${managementDAOAddress}</code>) to the new <strong>implementation</strong> (<code>${newDaoImplementation}</code>).`,
   });
 };
 export default func;
-func.tags = ['ManagingDAO', 'v1.3.0'];
+func.tags = ['ManagementDAO', 'v1.3.0'];

@@ -10,45 +10,48 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
+  // Get `managementDAO` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
 
   // Get `DAO` contract.
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
+  const managementDaoContract = DAO__factory.connect(
+    managementDAOAddress,
     deployer
   );
 
   // Get `DAORegistry` address.
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+  const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
 
   // Get `PluginRepoRegistry` address.
   const pluginRepoRegistryAddress = await getContractAddress(
-    'PluginRepoRegistry',
+    'PluginRepoRegistryProxy',
     hre
   );
 
   // Get DAO's `ENSSubdomainRegistrar` address.
   const daoEnsSubdomainRegistrarAddress = await getContractAddress(
-    'DAO_ENSSubdomainRegistrar',
+    'DAOENSSubdomainRegistrarProxy',
     hre
   );
 
   // Get Plugin's `ENSSubdomainRegistrar` address.
   const pluginEnsSubdomainRegistrarAddress = await getContractAddress(
-    'Plugin_ENSSubdomainRegistrar',
+    'PluginENSSubdomainRegistrarProxy',
     hre
   );
 
-  // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` of `DAO_ENSSubdomainRegistrar` to `DAORegistry`.
-  // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` of `Plugin_ENSSubdomainRegistrar` to `PluginRepoRegistry`.
-  // Grant `UPGRADE_REGISTRAR_PERMISSION` of `DAO_ENSSubdomainRegistrar` to `ManagingDAO`.
-  // Grant `UPGRADE_REGISTRAR_PERMISSION` of `Plugin_ENSSubdomainRegistrar` to `ManagingDAO`.
+  // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` of `DAOENSSubdomainRegistrarProxy` to `DAORegistry`.
+  // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` of `PluginENSSubdomainRegistrarProxy` to `PluginRepoRegistry`.
+  // Grant `UPGRADE_REGISTRAR_PERMISSION` of `DAOENSSubdomainRegistrarProxy` to `ManagementDAO`.
+  // Grant `UPGRADE_REGISTRAR_PERMISSION` of `PluginENSSubdomainRegistrarProxy` to `ManagementDAO`.
   const grantPermissions = [
     {
       operation: Operation.Grant,
       where: {
-        name: 'DAO_ENSSubdomainRegistrar',
+        name: 'DAOENSSubdomainRegistrarProxy',
         address: daoEnsSubdomainRegistrarAddress,
       },
       who: {name: 'DAORegistry', address: daoRegistryAddress},
@@ -57,7 +60,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'Plugin_ENSSubdomainRegistrar',
+        name: 'PluginENSSubdomainRegistrarProxy',
         address: pluginEnsSubdomainRegistrarAddress,
       },
       who: {name: 'PluginRepoRegistry', address: pluginRepoRegistryAddress},
@@ -66,23 +69,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {
       operation: Operation.Grant,
       where: {
-        name: 'DAO_ENSSubdomainRegistrar',
+        name: 'DAOENSSubdomainRegistrarProxy',
         address: daoEnsSubdomainRegistrarAddress,
       },
-      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      who: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       permission: 'UPGRADE_REGISTRAR_PERMISSION',
     },
     {
       operation: Operation.Grant,
       where: {
-        name: 'Plugin_ENSSubdomainRegistrar',
+        name: 'PluginENSSubdomainRegistrarProxy',
         address: pluginEnsSubdomainRegistrarAddress,
       },
-      who: {name: 'ManagingDAO', address: managingDAOAddress},
+      who: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       permission: 'UPGRADE_REGISTRAR_PERMISSION',
     },
   ];
-  await managePermissions(managingDaoContract, grantPermissions);
+  await managePermissions(managementDaoContract, grantPermissions);
 };
 export default func;
 func.tags = ['New', 'ENS_Permissions'];

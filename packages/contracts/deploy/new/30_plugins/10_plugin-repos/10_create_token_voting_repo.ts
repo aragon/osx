@@ -33,8 +33,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  await createPluginRepo(hre, 'token-voting');
-  await populatePluginRepo(hre, 'token-voting', [
+  await createPluginRepo(hre, 'TokenVotingRepoProxy', 'token-voting');
+  await populatePluginRepo(hre, 'TokenVotingRepoProxy', [
     {
       versionTag: [1, 2],
       pluginSetupContract: tokenVotingSetupContract,

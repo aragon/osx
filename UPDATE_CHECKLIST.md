@@ -25,11 +25,11 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
 - [ ] Set `ETH_KEY` in `.env` to the deployers private key. It doesn't have to be the previous deployer
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
-- [ ] Copy the managing DAO multisig env variables from `packages/contracts/.env-example` into `packages/contracts/.env`
+- [ ] Copy the management DAO multisig env variables from `packages/contracts/.env-example` into `packages/contracts/.env`
 - [ ] Follow the version specific tasks in the section `Version tasks`
 - [ ] If new plugin builds are released
   - [ ] Double-check that the build- and release-metadata is published and updated correctly by the deploy script and contracts
-  - [ ] If the plugin is used by the managing DAO and the new build includes security relevant changes it must be applied immediately
+  - [ ] If the plugin is used by the management DAO and the new build includes security relevant changes it must be applied immediately
 
 ## Update
 
@@ -42,13 +42,13 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 ### Configuration updates
 
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
-- [ ] Update `active_contracts.json` with the new deployed addresses
+- [ ] Update the deployment in the `@aragon/osx-commons-config` package found here: [https://github.com/aragon/osx-commons/tree/develop/configs](https://github.com/aragon/osx-commons/tree/develop/configs)
 - [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
 - [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
-### ManagingDAO
+### Management DAO Proposal
 
-If the deployer **is not** allowed to create a new proposal in the managing DAOs' multisig the script creates a new file `packages/contracts/managingDAOTX.json`
+If the deployer **is not** allowed to create a new proposal in the management DAOs' multisig the script creates a new file `packages/contracts/managementDAOTX.json`
 
 - [ ] Verify the transaction to include the necessary actions
 - [ ] Take this file and send it to a party that can create a proposal and let them create it
@@ -71,13 +71,13 @@ If the deployer **is** allowed to create a proposal
 
 ### Configuration
 
-- [ ] Check if all permissions (if) given to the deployer are revoked and transfered to the managing DAO
-- [ ] Check if the `dao` parameter is set to the managing DAO where it can be set
+- [ ] Check if all permissions (if) given to the deployer are revoked and transfered to the management DAO
+- [ ] Check if the `dao` parameter is set to the management DAO where it can be set
 - [ ] Check that the permissions are set correctly for the framework to function
 
 ### Packages
 
-Wait until the managing DAO has made the necessary changes and then:
+Wait until the management DAO has made the necessary changes and then:
 
 - [ ] Publish a new version of `@aragon/osx-artifacts` (`./packages/contracts`) to NPM
 - [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts-ethers`) to NPM
@@ -113,15 +113,15 @@ Nothing to do.
 
 #### After-Update
 
-Wait until the managing DAO has made the necessary changes and then:
+Wait until the management DAO has made the necessary changes and then:
 
 - [ ] Verify that the `DAO` base contract in the `DAOFactory` has been updated
-- [ ] Verify that the managing DAO implementation has been updated to the new implementation
-- [ ] Verify that the managing DAO is reinitialized to `_initialized = 2`
+- [ ] Verify that the management DAO implementation has been updated to the new implementation
+- [ ] Verify that the management DAO is reinitialized to `_initialized = 2`
 - [ ] Verify that the old `DAOFactory` has no permissions on the `DAORegistry`
 - [ ] Verify that the new `DAOFactory` has the `REGISTER_DAO_PERMISSION_ID` permission on the `DAORegistry`
 - [ ] Verify that the `PluginRepo` base contract in the `PluginRepoFactory` has been updated
-- [ ] Verify that all `PluginRepo`s controlled by the managing DAO have been updated to the new implementation and are still initialized with `_initialized = 1`
+- [ ] Verify that all `PluginRepo`s controlled by the management DAO have been updated to the new implementation and are still initialized with `_initialized = 1`
   - [ ] 'multisig-repo'
   - [ ] 'admin-repo'
   - [ ] 'token-voting-repo'

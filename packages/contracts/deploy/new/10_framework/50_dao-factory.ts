@@ -8,8 +8,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  // Get `DAORegistry` address.
-  const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+  // Get `DAORegistryProxy` address.
+  const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
 
   // Get `PluginSetupProcessor` address.
   const pluginSetupProcessorAddress = await getContractAddress(

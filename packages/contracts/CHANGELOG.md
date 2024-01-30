@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
 - Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.
+- Renamed `managingDAO` during deployment to `managmentDAO`.
+- Aligned contract names during deployment with the names given in `@aragon/osx-commons-configs`.
 
 ### Removed
 
@@ -37,7 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed unused `MerkleMinter` and `MerkleDistributor` contracts.
 - Removed unused `TokenFactory` contract.
 - Removed the `SignatureValidatorSet` event from `IDAO`.
-- Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place..
+- Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place.
+- Removed `active_contracts.json` file and replaced it with `@aragon/osx-commons-configs` package.
 
 ## v1.3.0
 

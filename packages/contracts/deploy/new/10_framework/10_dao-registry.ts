@@ -8,16 +8,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const [deployer] = await ethers.getSigners();
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
-
-  // Get DAO's `ENSSubdomainRegistrar` contract.
-  const ensSubdomainRegistrarAddress = await getContractAddress(
-    'DAO_ENSSubdomainRegistrar',
+  // Get `managementDAO` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
     hre
   );
 
-  await deploy('DAORegistry', {
+  // Get DAO's `ENSSubdomainRegistrar` contract.
+  const ensSubdomainRegistrarAddress = await getContractAddress(
+    'DAOENSSubdomainRegistrarProxy',
+    hre
+  );
+
+  await deploy('DAORegistryProxy', {
     contract: daoRegistryArtifact,
     from: deployer.address,
     args: [],
@@ -29,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managingDAOAddress, ensSubdomainRegistrarAddress],
+          args: [managementDAOAddress, ensSubdomainRegistrarAddress],
         },
       },
     },

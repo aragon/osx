@@ -13,16 +13,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // skip proxies because they are included twice
     if (!deployment.endsWith('_Proxy')) {
       switch (deployment) {
-        case 'DAO':
-          deployedContractAddresses['managingDAO'] =
-            deployedContracts[deployment].address;
-          console.log(`Managing DAO: ${deployedContracts[deployment].address}`);
-          break;
-        case 'DAO_Implementation':
-          deployedContractAddresses['managingDAOImplementation'] =
+        case 'ManagementDAOProxy':
+          deployedContractAddresses['ManagementDAOProxy'] =
             deployedContracts[deployment].address;
           console.log(
-            `Managing DAO Implementation: ${deployedContracts[deployment].address}`
+            `Management DAO: ${deployedContracts[deployment].address}`
+          );
+          break;
+        case 'ManagementDAOProxy_Implementation':
+          deployedContractAddresses['ManagementDAOProxyImplementation'] =
+            deployedContracts[deployment].address;
+          console.log(
+            `Management DAO Implementation: ${deployedContracts[deployment].address}`
           );
           break;
         default:
@@ -36,9 +38,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   for (const pluginRepo in aragonPluginRepos) {
-    deployedContractAddresses[`${pluginRepo}-repo`] =
-      aragonPluginRepos[pluginRepo];
-    console.log(`${pluginRepo}-repo: ${aragonPluginRepos[pluginRepo]}`);
+    deployedContractAddresses[pluginRepo] = aragonPluginRepos[pluginRepo];
+    console.log(`${pluginRepo}: ${aragonPluginRepos[pluginRepo]}`);
   }
 
   await fs.writeFile(

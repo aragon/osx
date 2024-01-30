@@ -10,9 +10,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const [deployer] = await ethers.getSigners();
 
-  // Get `managingDAO` address.
-  const managingDAOAddress = await getContractAddress('DAO', hre);
-  const managingDAO = DAO__factory.connect(managingDAOAddress, deployer);
+  // Get `managementDAO` address.
+  const managementDAOAddress = await getContractAddress(
+    'ManagementDAOProxy',
+    hre
+  );
+  const managementDAO = DAO__factory.connect(managementDAOAddress, deployer);
 
   const ensRegistryAddress = await getENSAddress(hre);
 
@@ -27,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error('DAO or Plugin ENS domains have not been set in .env');
   }
 
-  await deploy('DAO_ENSSubdomainRegistrar', {
+  await deploy('DAOENSSubdomainRegistrarProxy', {
     contract: ensSubdomainRegistrarArtifact,
     from: deployer.address,
     args: [],
@@ -39,19 +42,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managingDAOAddress, ensRegistryAddress, daoNode],
+          args: [managementDAOAddress, ensRegistryAddress, daoNode],
         },
       },
     },
   });
 
-  // Get DAO's `ENSSubdomainRegistrar` contract.
+  // Get DAO's `DAOENSSubdomainRegistrarProxy` contract.
   const daoSubdomainRegistrarAddress = await getContractAddress(
-    'DAO_ENSSubdomainRegistrar',
+    'DAOENSSubdomainRegistrarProxy',
     hre
   );
 
-  await deploy('Plugin_ENSSubdomainRegistrar', {
+  await deploy('PluginENSSubdomainRegistrarProxy', {
     contract: ensSubdomainRegistrarArtifact,
     from: deployer.address,
     args: [],
@@ -63,15 +66,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managingDAOAddress, ensRegistryAddress, pluginNode],
+          args: [managementDAOAddress, ensRegistryAddress, pluginNode],
         },
       },
     },
   });
 
-  // Get PluginRepoRegistry's `ENSSubdomainRegistrar` contract.
+  // Get the `ENSSubdomainRegistrar` proxy contract of the PluginRepoRegistry.
   const pluginSubdomainRegistrarAddress = await getContractAddress(
-    'Plugin_ENSSubdomainRegistrar',
+    'PluginENSSubdomainRegistrarProxy',
     hre
   );
 
@@ -96,7 +99,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       true
     );
 
-  const tx = await managingDAO.execute(
+  const tx = await managementDAO.execute(
     ethers.utils.hexlify(ethers.utils.formatBytes32String('ENS_Permissions')),
     [
       {

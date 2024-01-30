@@ -29,14 +29,14 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Managing DAO', function () {
+describe('Management DAO', function () {
   let deployer: SignerWithAddress;
   let approvers: SignerWithAddress[];
   let minApprovals: number;
   let listedOnly: boolean;
 
-  let managingDaoDeployment: Deployment;
-  let managingDao: DAO;
+  let managementDaoDeployment: Deployment;
+  let managementDao: DAO;
   let multisig: Multisig;
   let daoRegistryDeployment: Deployment;
   let daoRegistry: DAORegistry;
@@ -64,20 +64,20 @@ describe('Managing DAO', function () {
     await deployAll();
 
     if (
-      process.env.MANAGINGDAO_MULTISIG_APPROVERS === undefined ||
-      process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS === undefined ||
-      process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === undefined
+      process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS === undefined ||
+      process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS === undefined ||
+      process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === undefined
     ) {
-      throw new Error('Managing DAO Multisig settings not set in .env');
+      throw new Error('Management DAO Multisig settings not set in .env');
     }
 
-    listedOnly = process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true';
+    listedOnly = process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === 'true';
 
-    minApprovals = parseInt(process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS);
+    minApprovals = parseInt(process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS);
 
     // Get approver addresses
     const approverAddresses =
-      process.env.MANAGINGDAO_MULTISIG_APPROVERS.split(',');
+      process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS.split(',');
 
     // Impersonate them as signers
     approvers = await Promise.all(
@@ -96,9 +96,12 @@ describe('Managing DAO', function () {
       )
     );
 
-    // ManagingDAO
-    managingDaoDeployment = await deployments.get('DAO');
-    managingDao = DAO__factory.connect(managingDaoDeployment.address, deployer);
+    // ManagementDAO
+    managementDaoDeployment = await deployments.get('DAO');
+    managementDao = DAO__factory.connect(
+      managementDaoDeployment.address,
+      deployer
+    );
 
     // DAORegistry
     daoRegistryDeployment = await deployments.get('DAORegistry');
@@ -128,25 +131,25 @@ describe('Managing DAO', function () {
 
     pluginsRepos = {
       tokenVoting: PluginRepo__factory.connect(
-        hre.aragonPluginRepos['token-voting'],
+        hre.aragonPluginRepos.TokenVotingRepoProxy,
         deployer
       ),
       addresslistVoting: PluginRepo__factory.connect(
-        hre.aragonPluginRepos['address-list-voting'],
+        hre.aragonPluginRepos.AddresslistVotingRepoProxy,
         deployer
       ),
       admin: PluginRepo__factory.connect(
-        hre.aragonPluginRepos['admin'],
+        hre.aragonPluginRepos.AdminRepoProxy,
         deployer
       ),
       multisig: PluginRepo__factory.connect(
-        hre.aragonPluginRepos['multisig'],
+        hre.aragonPluginRepos.MultisigRepoProxy,
         deployer
       ),
     };
 
     multisig = Multisig__factory.connect(
-      hre.managingDAOMultisigPluginAddress,
+      hre.managementDAOMultisigPluginAddress,
       deployer
     );
   });
@@ -157,9 +160,9 @@ describe('Managing DAO', function () {
 
   it('has the `ROOT_PERMISSION_ID` permission on itself', async function () {
     expect(
-      await managingDao.hasPermission(
-        managingDao.address,
-        managingDao.address,
+      await managementDao.hasPermission(
+        managementDao.address,
+        managementDao.address,
         DAO_PERMISSIONS.ROOT_PERMISSION_ID,
         []
       )
@@ -169,8 +172,8 @@ describe('Managing DAO', function () {
   describe('Associated Multisig Plugin', function () {
     it('has the `EXECUTE_PERMISSION_ID` permission on the DAO', async function () {
       expect(
-        await managingDao.hasPermission(
-          managingDao.address,
+        await managementDao.hasPermission(
+          managementDao.address,
           multisig.address,
           DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
           []
@@ -197,9 +200,9 @@ describe('Managing DAO', function () {
   describe('permissions', function () {
     it('has permission to upgrade itself', async function () {
       expect(
-        await managingDao.hasPermission(
-          managingDao.address,
-          managingDao.address,
+        await managementDao.hasPermission(
+          managementDao.address,
+          managementDao.address,
           DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
           []
         )
@@ -208,9 +211,9 @@ describe('Managing DAO', function () {
 
     it('has permission to upgrade DaoRegistry', async function () {
       expect(
-        await managingDao.hasPermission(
+        await managementDao.hasPermission(
           daoRegistry.address,
-          managingDao.address,
+          managementDao.address,
           DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           []
         )
@@ -219,9 +222,9 @@ describe('Managing DAO', function () {
 
     it('has permission to upgrade PluginRepoRegistry', async function () {
       expect(
-        await managingDao.hasPermission(
+        await managementDao.hasPermission(
           pluginRepoRegistry.address,
-          managingDao.address,
+          managementDao.address,
           PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           []
         )
@@ -230,9 +233,9 @@ describe('Managing DAO', function () {
 
     it('has permission to upgrade DAO_ENSSubdomainRegistrar', async function () {
       expect(
-        await managingDao.hasPermission(
+        await managementDao.hasPermission(
           ensSubdomainRegistrars.daoRegistrar.address,
-          managingDao.address,
+          managementDao.address,
           ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           []
         )
@@ -240,9 +243,9 @@ describe('Managing DAO', function () {
     });
     it('has permission to upgrade Plugin_ENSSubdomainRegistrar', async function () {
       expect(
-        await managingDao.hasPermission(
+        await managementDao.hasPermission(
           ensSubdomainRegistrars.pluginRegistrar.address,
-          managingDao.address,
+          managementDao.address,
           ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           []
         )
@@ -254,7 +257,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.tokenVoting.isGranted(
             pluginsRepos.tokenVoting.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
@@ -265,7 +268,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.tokenVoting.isGranted(
             pluginsRepos.tokenVoting.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
@@ -278,7 +281,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.addresslistVoting.isGranted(
             pluginsRepos.addresslistVoting.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
@@ -288,7 +291,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.addresslistVoting.isGranted(
             pluginsRepos.addresslistVoting.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
@@ -301,7 +304,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.admin.isGranted(
             pluginsRepos.admin.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
@@ -311,7 +314,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.admin.isGranted(
             pluginsRepos.admin.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
@@ -324,7 +327,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.multisig.isGranted(
             pluginsRepos.multisig.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
             []
           )
@@ -335,7 +338,7 @@ describe('Managing DAO', function () {
         expect(
           await pluginsRepos.multisig.isGranted(
             pluginsRepos.multisig.address,
-            managingDao.address,
+            managementDao.address,
             PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
           )
