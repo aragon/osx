@@ -1,4 +1,7 @@
-import {getProposalId} from '../src/utils/proposals';
+import {
+  generatePluginEntityId,
+  generateProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
@@ -64,10 +67,11 @@ export const PLUGIN_SETUP_ID =
 export const APPLIED_PLUGIN_SETUP_ID =
   '0x00000000cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 
-export const PROPOSAL_ENTITY_ID = getProposalId(
+export const PROPOSAL_ENTITY_ID = generateProposalEntityId(
   Address.fromString(CONTRACT_ADDRESS),
   BigInt.fromString(PLUGIN_PROPOSAL_ID)
 );
 
-export const PLUGIN_ENTITY_ID =
-  Address.fromString(CONTRACT_ADDRESS).toHexString();
+export const PLUGIN_ENTITY_ID = generatePluginEntityId(
+  Address.fromString(CONTRACT_ADDRESS)
+);

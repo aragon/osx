@@ -23,6 +23,7 @@ import {handleERC20Action} from '../utils/tokens/erc20';
 import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
 import {handleNativeAction} from '../utils/tokens/eth';
+import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 import {BigInt} from '@graphprotocol/graph-ts';
 
 // AssemblyScript struggles having multiple return types. Due to this,
@@ -104,7 +105,7 @@ function getOrCreateActionEntity<
     entity.value = action.value;
     entity.data = action.data;
     entity.proposal = proposalId;
-    entity.dao = event.address.toHexString();
+    entity.dao = generateDaoEntityId(event.address);
   }
 
   return entity;

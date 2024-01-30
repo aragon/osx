@@ -6,12 +6,17 @@ import {
 import {ERC721} from '../../../generated/templates/DaoTemplateV1_0_0/ERC721';
 import {getMethodSignature} from '../bytes';
 import {supportsInterface} from '../erc165';
-import {DECODE_OFFSET, getTransferId, TransferType} from './common';
+import {generateTokenEntityId} from '../ids';
+import {DECODE_OFFSET, TransferType} from './common';
 import {
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
   ERC721_transferFrom,
 } from './common';
+import {
+  generateDaoEntityId,
+  generateTransferEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 function supportsERC721(token: Address): bool {
@@ -104,26 +109,26 @@ export function handleERC721Received(
   let from = tuple[1].toAddress();
   let tokenId = tuple[2].toBigInt();
 
-  let daoId = dao.toHexString();
+  let daoEntityId = generateDaoEntityId(dao);
 
   updateERC721Balance(
-    daoId,
-    token.toHexString(),
+    daoEntityId,
+    generateTokenEntityId(token),
     tokenId,
     event.block.timestamp,
     TransferType.Deposit
   );
 
-  let transferId = getTransferId(
+  let transferEntityId = generateTransferEntityId(
     event.transaction.hash,
     event.transactionLogIndex,
     0
   );
 
-  let transfer = new ERC721Transfer(transferId);
+  let transfer = new ERC721Transfer(transferEntityId);
   transfer.from = from;
   transfer.to = dao;
-  transfer.dao = daoId;
+  transfer.dao = daoEntityId;
   transfer.token = contract.id;
   transfer.tokenId = tokenId;
   transfer.txHash = event.transaction.hash;
@@ -224,16 +229,16 @@ function createERC721Transfer(
   proposalId: string,
   actionIndex: number
 ): ERC721Transfer {
-  let transferId = getTransferId(
+  let transferEntityId = generateTransferEntityId(
     event.transaction.hash,
     event.transactionLogIndex,
-    actionIndex
+    actionIndex as i32
   );
-
-  let transfer = new ERC721Transfer(transferId);
+  let daoEntityId = generateDaoEntityId(dao);
+  let transfer = new ERC721Transfer(transferEntityId);
   transfer.from = tuple[0].toAddress();
   transfer.to = tuple[1].toAddress();
-  transfer.dao = dao.toHexString();
+  transfer.dao = daoEntityId;
   transfer.token = contract.id;
   transfer.tokenId = tuple[2].toBigInt();
   transfer.proposal = proposalId;

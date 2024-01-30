@@ -1,4 +1,7 @@
-import {PluginPreparation} from '../../generated/schema';
+import {
+  PluginInstallationLoader,
+  PluginPreparation,
+} from '../../generated/schema';
 import {
   handleInstallationApplied,
   handleInstallationPrepared,
@@ -39,22 +42,41 @@ import {
   createUpdateAppliedEvent,
   createUpdatePreparedEvent,
 } from './utils';
+import {
+  generateDaoEntityId,
+  generatePermissionEntityId,
+  generatePluginEntityId,
+  generatePluginInstallationEntityId,
+  generatePluginPermissionEntityId,
+  generatePluginPreparationEntityId,
+  generatePluginRepoEntityId,
+  generatePluginVersionEntityId,
+} from '@aragon/osx-commons-subgraph';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as';
 
+const daoAddress = Address.fromString(DAO_ADDRESS);
+const daoEntityId = generateDaoEntityId(daoAddress);
+const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+const pluginEntityId = generatePluginEntityId(pluginAddress);
+const setupId = PLUGIN_SETUP_ID;
+const pluginRepoAddress = Address.fromString(ADDRESS_TWO);
+const pluginRepoEntityId = generatePluginRepoEntityId(pluginRepoAddress);
+
 test('InstallationPrepared event', function () {
-  let dao = DAO_ADDRESS;
-  let plugin = CONTRACT_ADDRESS;
-  let setupId = PLUGIN_SETUP_ID;
-  let pluginSetupRepo = ADDRESS_TWO;
-  let pluginVersionId = `${pluginSetupRepo}_1_1`;
-  let installationId = getPluginInstallationId(dao, plugin);
-  if (!installationId) {
+  let pluginVersionId = generatePluginVersionEntityId(pluginRepoAddress, 1, 1);
+  let pluginInstallationEntityId = generatePluginInstallationEntityId(
+    daoAddress,
+    pluginAddress
+  );
+  if (!pluginInstallationEntityId) {
     throw new Error('Failed to get installationId');
   }
-
-  let installationIdString = installationId.toHexString();
-  let preparationId = `${installationIdString}_${setupId}`;
+  pluginInstallationEntityId = pluginInstallationEntityId as string;
+  let pluginPreparationEntityId = generatePluginPreparationEntityId(
+    pluginInstallationEntityId,
+    Bytes.fromHexString(setupId)
+  );
 
   let versionTuple = new ethereum.Tuple();
   versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('1')));
@@ -63,32 +85,32 @@ test('InstallationPrepared event', function () {
   let permissions = [
     [
       ethereum.Value.fromSignedBigInt(BigInt.fromString('0')),
-      ethereum.Value.fromAddress(Address.fromString(dao)),
-      ethereum.Value.fromAddress(Address.fromString(plugin)),
+      ethereum.Value.fromAddress(daoAddress),
+      ethereum.Value.fromAddress(pluginAddress),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_ZERO)),
       ethereum.Value.fromBytes(Bytes.fromHexString('0x1234')),
     ],
 
     [
       ethereum.Value.fromSignedBigInt(BigInt.fromString('2')),
-      ethereum.Value.fromAddress(Address.fromString(dao)),
-      ethereum.Value.fromAddress(Address.fromString(plugin)),
+      ethereum.Value.fromAddress(daoAddress),
+      ethereum.Value.fromAddress(pluginAddress),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_SIX)),
       ethereum.Value.fromBytes(Bytes.fromHexString('0x5678')),
     ],
   ];
 
-  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(plugin, ADMIN_INTERFACE_ID, false);
-  getSupportsInterface(plugin, MULTISIG_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, TOKEN_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, ADDRESSLIST_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, ADMIN_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, MULTISIG_INTERFACE_ID, false);
 
   let event = createInstallationPreparedEvent(
     ADDRESS_THREE,
-    dao,
-    plugin,
+    daoEntityId,
+    pluginEntityId,
     Bytes.fromHexString(setupId),
-    pluginSetupRepo,
+    pluginRepoEntityId,
     versionTuple,
     Bytes.fromHexString('0x00'),
     [ADDRESS_FOUR, ADDRESS_FIVE],
@@ -98,53 +120,63 @@ test('InstallationPrepared event', function () {
   handleInstallationPrepared(event);
 
   assert.entityCount('PluginPreparation', 1);
-  assert.fieldEquals('PluginPreparation', preparationId, 'id', preparationId);
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
-    'installation',
-    installationIdString
+    pluginPreparationEntityId,
+    'id',
+    pluginPreparationEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
+    'installation',
+    pluginInstallationEntityId
+  );
+  assert.fieldEquals(
+    'PluginPreparation',
+    pluginPreparationEntityId,
     'creator',
     ADDRESS_THREE
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'preparedSetupId',
     setupId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'pluginRepo',
-    pluginSetupRepo
+    pluginRepoEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'pluginVersion',
     pluginVersionId
   );
-  assert.fieldEquals('PluginPreparation', preparationId, 'data', '0x00');
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
-    'pluginAddress',
-    plugin.toLowerCase()
+    pluginPreparationEntityId,
+    'data',
+    '0x00'
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
+    'pluginAddress',
+    pluginEntityId
+  );
+  assert.fieldEquals(
+    'PluginPreparation',
+    pluginPreparationEntityId,
     'type',
     'Installation'
   );
@@ -153,9 +185,11 @@ test('InstallationPrepared event', function () {
     Address.fromString(ADDRESS_FOUR),
     Address.fromString(ADDRESS_FIVE),
   ];
-  let pluginPreparation = PluginPreparation.load(preparationId);
+  let pluginPreparation = PluginPreparation.load(pluginPreparationEntityId);
   if (!pluginPreparation) {
-    throw new Error(`PluginPrepation with id ${preparationId} not found`);
+    throw new Error(
+      `PluginPrepation with id ${pluginPreparationEntityId} not found`
+    );
   }
 
   assert.equals(
@@ -166,45 +200,47 @@ test('InstallationPrepared event', function () {
   assert.entityCount('PluginPermission', permissions.length);
   for (let i = 0; i < permissions.length; i++) {
     let permission = permissions[i];
-    let operation = PERMISSION_OPERATIONS.get(permission[0].toI32());
-    let permissionEntityId = `${preparationId}_${operation}_${permission[1]
-      .toAddress()
-      .toHexString()}_${permission[2].toAddress().toHexString()}_${permission[4]
-      .toBytes()
-      .toHexString()}`;
+    let operation = permission[0].toI32();
+    let pluginPermissionEntityId = generatePluginPermissionEntityId(
+      pluginPreparationEntityId,
+      operation,
+      permission[1].toAddress(),
+      permission[2].toAddress(),
+      permission[4].toBytes()
+    );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'id',
-      permissionEntityId
+      pluginPermissionEntityId
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'operation',
-      operation || ''
+      PERMISSION_OPERATIONS.get(operation) || ''
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'where',
       permission[1].toAddress().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'who',
       permission[2].toAddress().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'permissionId',
       permission[4].toBytes().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'condition',
       permission[3].toAddress().toHexString()
     );
@@ -213,13 +249,13 @@ test('InstallationPrepared event', function () {
   assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'state',
     'InstallationPrepared'
   );
@@ -233,19 +269,22 @@ test('InstallationPrepared event', function () {
 });
 
 test('InstallationApplied event', function () {
-  let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
-  let setupId = PLUGIN_SETUP_ID;
-  let installationId = getPluginInstallationId(dao, plugin);
-  if (!installationId) {
+  let pluginInstallationEntityId = generatePluginInstallationEntityId(
+    daoAddress,
+    pluginAddress
+  );
+  if (!pluginInstallationEntityId) {
     throw new Error('Failed to get installationId');
   }
-  let installationIdString = installationId.toHexString();
-  let preparationId = `${installationIdString}_${setupId}`;
+  pluginInstallationEntityId = pluginInstallationEntityId as string;
+  let pluginPreparationEntityId = generatePluginPreparationEntityId(
+    pluginInstallationEntityId,
+    Bytes.fromHexString(setupId)
+  );
 
   let event = createInstallationAppliedEvent(
-    dao,
-    plugin,
+    daoEntityId,
+    pluginEntityId,
     Bytes.fromHexString(setupId),
     Bytes.fromHexString(APPLIED_PLUGIN_SETUP_ID)
   );
@@ -254,37 +293,37 @@ test('InstallationApplied event', function () {
   assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'id',
-    installationIdString
+    pluginInstallationEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'plugin',
-    plugin.toLowerCase()
+    pluginEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'appliedPreparation',
-    preparationId
+    pluginPreparationEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'appliedSetupId',
     APPLIED_PLUGIN_SETUP_ID
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'state',
     'Installed'
   );
@@ -293,35 +332,43 @@ test('InstallationApplied event', function () {
 });
 
 test('UpdatePrepared event', function () {
-  let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
-  let setupId = PLUGIN_SETUP_ID;
-  let pluginSetupRepo = ADDRESS_TWO;
-  let pluginVersionId = `${pluginSetupRepo}_1_2`;
-  let installationId = getPluginInstallationId(dao, plugin);
-  if (!installationId) {
+  const build = 1;
+  const release = 2;
+  const pluginVersionEntityId = generatePluginVersionEntityId(
+    pluginRepoAddress,
+    build,
+    release
+  );
+  let pluginInstallationEntityId = generatePluginInstallationEntityId(
+    daoAddress,
+    pluginAddress
+  );
+  if (!pluginInstallationEntityId) {
     throw new Error('Failed to get installationId');
   }
-  let installationIdString = installationId.toHexString();
-  let preparationId = `${installationIdString}_${setupId}`;
+  pluginInstallationEntityId = pluginInstallationEntityId as string;
+  const pluginPreparationEntityId = generatePluginPreparationEntityId(
+    pluginInstallationEntityId,
+    Bytes.fromHexString(setupId)
+  );
 
   let versionTuple = new ethereum.Tuple();
-  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('1')));
-  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('2')));
+  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromI32(build)));
+  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromI32(release)));
 
   let permissions = [
     [
       ethereum.Value.fromSignedBigInt(BigInt.fromString('0')),
-      ethereum.Value.fromAddress(Address.fromString(dao)),
-      ethereum.Value.fromAddress(Address.fromString(plugin)),
+      ethereum.Value.fromAddress(daoAddress),
+      ethereum.Value.fromAddress(pluginAddress),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_ZERO)),
       ethereum.Value.fromBytes(Bytes.fromHexString('0x1234')),
     ],
 
     [
       ethereum.Value.fromSignedBigInt(BigInt.fromString('2')),
-      ethereum.Value.fromAddress(Address.fromString(dao)),
-      ethereum.Value.fromAddress(Address.fromString(plugin)),
+      ethereum.Value.fromAddress(daoAddress),
+      ethereum.Value.fromAddress(pluginAddress),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_SIX)),
       ethereum.Value.fromBytes(Bytes.fromHexString('0x5678')),
     ],
@@ -329,10 +376,10 @@ test('UpdatePrepared event', function () {
 
   let event = createUpdatePreparedEvent(
     ADDRESS_THREE,
-    dao,
-    plugin,
+    daoEntityId,
+    pluginEntityId,
     Bytes.fromHexString(setupId),
-    pluginSetupRepo,
+    pluginRepoEntityId,
     versionTuple,
     [],
     [ADDRESS_FOUR, ADDRESS_FIVE],
@@ -343,53 +390,70 @@ test('UpdatePrepared event', function () {
   handleUpdatePrepared(event);
 
   assert.entityCount('PluginPreparation', 1);
-  assert.fieldEquals('PluginPreparation', preparationId, 'id', preparationId);
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
-    'installation',
-    installationIdString
+    pluginPreparationEntityId,
+    'id',
+    pluginPreparationEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
+    'installation',
+    pluginInstallationEntityId
+  );
+  assert.fieldEquals(
+    'PluginPreparation',
+    pluginPreparationEntityId,
     'creator',
     ADDRESS_THREE
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'preparedSetupId',
     setupId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'pluginRepo',
-    pluginSetupRepo
+    pluginRepoEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'pluginVersion',
-    pluginVersionId
+    pluginVersionEntityId
   );
-  assert.fieldEquals('PluginPreparation', preparationId, 'data', '0x12');
-  assert.fieldEquals('PluginPreparation', preparationId, 'type', 'Update');
+  assert.fieldEquals(
+    'PluginPreparation',
+    pluginPreparationEntityId,
+    'data',
+    '0x12'
+  );
+  assert.fieldEquals(
+    'PluginPreparation',
+    pluginPreparationEntityId,
+    'type',
+    'Update'
+  );
 
   let helpers = [
     Address.fromString(ADDRESS_FOUR),
     Address.fromString(ADDRESS_FIVE),
   ];
-  let pluginPreparation = PluginPreparation.load(preparationId);
+  let pluginPreparation = PluginPreparation.load(pluginPreparationEntityId);
   if (!pluginPreparation) {
-    throw new Error(`PluginPrepation with id ${preparationId} not found`);
+    throw new Error(
+      `PluginPrepation with id ${pluginPreparationEntityId} not found`
+    );
   }
 
   assert.equals(
@@ -401,45 +465,47 @@ test('UpdatePrepared event', function () {
 
   for (let i = 0; i < permissions.length; i++) {
     let permission = permissions[i];
-    let operation = PERMISSION_OPERATIONS.get(permission[0].toI32());
-    let permissionEntityId = `${preparationId}_${operation}_${permission[1]
-      .toAddress()
-      .toHexString()}_${permission[2].toAddress().toHexString()}_${permission[4]
-      .toBytes()
-      .toHexString()}`;
+    let operation = permission[0].toI32();
+    const pluginPermissionEntityId = generatePluginPermissionEntityId(
+      pluginPreparationEntityId,
+      operation,
+      permission[1].toAddress(),
+      permission[2].toAddress(),
+      permission[4].toBytes()
+    );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'id',
-      permissionEntityId
+      pluginPermissionEntityId
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'operation',
-      operation || ''
+      PERMISSION_OPERATIONS.get(operation) || ''
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'where',
       permission[1].toAddress().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'who',
       permission[2].toAddress().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'permissionId',
       permission[4].toBytes().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'condition',
       permission[3].toAddress().toHexString()
     );
@@ -448,13 +514,13 @@ test('UpdatePrepared event', function () {
   assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'state',
     'UpdatePrepared'
   );
@@ -463,24 +529,27 @@ test('UpdatePrepared event', function () {
 });
 
 test('UpdateApplied event', function () {
-  let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
-  let setupId = PLUGIN_SETUP_ID;
-  let installationId = getPluginInstallationId(dao, plugin);
-  if (!installationId) {
+  let pluginInstallationEntityId = generatePluginInstallationEntityId(
+    daoAddress,
+    pluginAddress
+  );
+  if (!pluginInstallationEntityId) {
     throw new Error('Failed to get installationId');
   }
-  let installationIdString = installationId.toHexString();
-  let preparationId = `${installationIdString}_${setupId}`;
+  pluginInstallationEntityId = pluginInstallationEntityId as string;
+  const pluginPreparationEntityId = generatePluginPreparationEntityId(
+    pluginInstallationEntityId,
+    Bytes.fromHexString(setupId)
+  );
 
-  getSupportsInterface(plugin, TOKEN_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(plugin, ADDRESSLIST_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(plugin, ADMIN_INTERFACE_ID, false);
-  getSupportsInterface(plugin, MULTISIG_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, TOKEN_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, ADDRESSLIST_VOTING_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, ADMIN_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, MULTISIG_INTERFACE_ID, false);
 
   let event = createUpdateAppliedEvent(
-    dao,
-    plugin,
+    daoEntityId,
+    pluginEntityId,
     Bytes.fromHexString(setupId),
     Bytes.fromHexString(APPLIED_PLUGIN_SETUP_ID)
   );
@@ -489,37 +558,37 @@ test('UpdateApplied event', function () {
   assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'id',
-    installationIdString
+    pluginInstallationEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'plugin',
-    plugin.toLowerCase()
+    pluginEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'appliedPreparation',
-    preparationId
+    pluginPreparationEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'appliedSetupId',
     APPLIED_PLUGIN_SETUP_ID
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'state',
     'Installed'
   );
@@ -528,35 +597,42 @@ test('UpdateApplied event', function () {
 });
 
 test('UninstallationPrepared event', function () {
-  let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
-  let setupId = PLUGIN_SETUP_ID;
-  let pluginSetupRepo = ADDRESS_TWO;
-  let installationId = getPluginInstallationId(dao, plugin);
-  if (!installationId) {
+  let pluginInstallationEntityId = generatePluginInstallationEntityId(
+    daoAddress,
+    pluginAddress
+  );
+  if (!pluginInstallationEntityId) {
     throw new Error('Failed to get installationId');
   }
-  let installationIdString = installationId.toHexString();
-  let preparationId = `${installationIdString}_${setupId}`;
-
-  let pluginVersionId = `${pluginSetupRepo}_1_2`;
+  pluginInstallationEntityId = pluginInstallationEntityId as string;
+  const build = 1;
+  const release = 2;
+  const pluginPreparationEntityId = generatePluginPreparationEntityId(
+    pluginInstallationEntityId,
+    Bytes.fromHexString(setupId)
+  );
+  const pluginVersionEntityId = generatePluginVersionEntityId(
+    pluginRepoAddress,
+    build,
+    release
+  );
   let versionTuple = new ethereum.Tuple();
-  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('1')));
-  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString('2')));
+  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromI32(build)));
+  versionTuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromI32(release)));
 
   let permissions = [
     [
       ethereum.Value.fromSignedBigInt(BigInt.fromString('0')),
-      ethereum.Value.fromAddress(Address.fromString(dao)),
-      ethereum.Value.fromAddress(Address.fromString(plugin)),
+      ethereum.Value.fromAddress(daoAddress),
+      ethereum.Value.fromAddress(pluginAddress),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_ZERO)),
       ethereum.Value.fromBytes(Bytes.fromHexString('0x1234')),
     ],
 
     [
       ethereum.Value.fromSignedBigInt(BigInt.fromString('2')),
-      ethereum.Value.fromAddress(Address.fromString(dao)),
-      ethereum.Value.fromAddress(Address.fromString(plugin)),
+      ethereum.Value.fromAddress(daoAddress),
+      ethereum.Value.fromAddress(pluginAddress),
       ethereum.Value.fromAddress(Address.fromString(ADDRESS_SIX)),
       ethereum.Value.fromBytes(Bytes.fromHexString('0x5678')),
     ],
@@ -564,11 +640,11 @@ test('UninstallationPrepared event', function () {
 
   let event = createUninstallationPreparedEvent(
     ADDRESS_THREE,
-    dao,
+    daoEntityId,
     Bytes.fromHexString(setupId),
-    pluginSetupRepo,
+    pluginRepoEntityId,
     versionTuple,
-    plugin,
+    pluginEntityId,
     [ADDRESS_FOUR, ADDRESS_FIVE],
     Bytes.fromHexString('0x00'),
     permissions
@@ -576,53 +652,60 @@ test('UninstallationPrepared event', function () {
   handleUninstallationPrepared(event);
 
   assert.entityCount('PluginPreparation', 1);
-  assert.fieldEquals('PluginPreparation', preparationId, 'id', preparationId);
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
-    'installation',
-    installationIdString
+    pluginPreparationEntityId,
+    'id',
+    pluginPreparationEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
+    'installation',
+    pluginInstallationEntityId
+  );
+  assert.fieldEquals(
+    'PluginPreparation',
+    pluginPreparationEntityId,
     'creator',
     ADDRESS_THREE
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'preparedSetupId',
     setupId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'pluginRepo',
-    pluginSetupRepo
+    pluginRepoEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'pluginVersion',
-    pluginVersionId
+    pluginVersionEntityId
   );
   assert.fieldEquals(
     'PluginPreparation',
-    preparationId,
+    pluginPreparationEntityId,
     'type',
     'Uninstallation'
   );
 
-  let pluginPreparation = PluginPreparation.load(preparationId);
+  let pluginPreparation = PluginPreparation.load(pluginPreparationEntityId);
   if (!pluginPreparation) {
-    throw new Error(`PluginPrepation with id ${preparationId} not found`);
+    throw new Error(
+      `PluginPrepation with id ${pluginPreparationEntityId} not found`
+    );
   }
   assert.equals(
     ethereum.Value.fromBytesArray(pluginPreparation.helpers),
@@ -632,46 +715,48 @@ test('UninstallationPrepared event', function () {
   assert.entityCount('PluginPermission', 2);
 
   for (let i = 0; i < permissions.length; i++) {
-    let permission = permissions[i];
-    let operation = PERMISSION_OPERATIONS.get(permission[0].toI32());
-    let permissionEntityId = `${preparationId}_${operation}_${permission[1]
-      .toAddress()
-      .toHexString()}_${permission[2].toAddress().toHexString()}_${permission[4]
-      .toBytes()
-      .toHexString()}`;
+    const permission = permissions[i];
+    const operation = permission[0].toI32();
+    const pluginPermissionEntityId = generatePluginPermissionEntityId(
+      pluginPreparationEntityId,
+      operation,
+      permission[1].toAddress(),
+      permission[2].toAddress(),
+      permission[4].toBytes()
+    );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'id',
-      permissionEntityId
+      pluginPermissionEntityId
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'operation',
-      operation || ''
+      PERMISSION_OPERATIONS.get(operation) || ''
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'where',
       permission[1].toAddress().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'who',
       permission[2].toAddress().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'permissionId',
       permission[4].toBytes().toHexString()
     );
     assert.fieldEquals(
       'PluginPermission',
-      permissionEntityId,
+      pluginPermissionEntityId,
       'condition',
       permission[3].toAddress().toHexString()
     );
@@ -680,13 +765,13 @@ test('UninstallationPrepared event', function () {
   assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'state',
     'UninstallPrepared'
   );
@@ -695,35 +780,42 @@ test('UninstallationPrepared event', function () {
 });
 
 test('UninstallationApplied event', function () {
-  let dao = DAO_ADDRESS;
-  let plugin = ADDRESS_ONE;
-  let setupId = PLUGIN_SETUP_ID;
-  let installationId = getPluginInstallationId(dao, plugin);
-  if (!installationId) {
-    throw new Error('Failed to get installationId');
+  let pluginInstallationEntityId = generatePluginInstallationEntityId(
+    daoAddress,
+    pluginAddress
+  );
+  if (!pluginInstallationEntityId) {
+    throw new Error('Failed to get pluginInstallationEntityId');
   }
-  let installationIdString = installationId.toHexString();
-  let preparationId = `${installationIdString}_${setupId}`;
+  pluginInstallationEntityId = pluginInstallationEntityId as string;
+  const pluginPreparationEntityId = generatePluginPreparationEntityId(
+    pluginInstallationEntityId,
+    Bytes.fromHexString(setupId)
+  );
 
-  let event = createUninstallationAppliedEvent(dao, plugin, setupId);
+  let event = createUninstallationAppliedEvent(
+    daoEntityId,
+    pluginEntityId,
+    setupId
+  );
   handleUninstallationApplied(event);
 
   assert.entityCount('PluginInstallation', 1);
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'dao',
-    dao.toLowerCase()
+    daoEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'appliedPreparation',
-    preparationId
+    pluginPreparationEntityId
   );
   assert.fieldEquals(
     'PluginInstallation',
-    installationIdString,
+    pluginInstallationEntityId,
     'state',
     'Uninstalled'
   );
