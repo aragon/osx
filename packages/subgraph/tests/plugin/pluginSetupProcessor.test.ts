@@ -1,7 +1,4 @@
-import {
-  PluginInstallationLoader,
-  PluginPreparation,
-} from '../../generated/schema';
+import {PluginPreparation} from '../../generated/schema';
 import {
   handleInstallationApplied,
   handleInstallationPrepared,
@@ -10,10 +7,7 @@ import {
   handleUpdateApplied,
   handleUpdatePrepared,
 } from '../../src/plugin/pluginSetupProcessor';
-import {
-  getPluginInstallationId,
-  PERMISSION_OPERATIONS,
-} from '../../src/plugin/utils';
+import {PERMISSION_OPERATIONS} from '../../src/plugin/utils';
 import {
   ADMIN_INTERFACE_ID,
   TOKEN_VOTING_INTERFACE_ID,
@@ -22,7 +16,6 @@ import {
 } from '../../src/utils/constants';
 import {getSupportsInterface} from '../../tests/dao/utils';
 import {
-  ADDRESS_ONE,
   ADDRESS_TWO,
   ADDRESS_THREE,
   DAO_ADDRESS,
@@ -44,7 +37,6 @@ import {
 } from './utils';
 import {
   generateDaoEntityId,
-  generatePermissionEntityId,
   generatePluginEntityId,
   generatePluginInstallationEntityId,
   generatePluginPermissionEntityId,

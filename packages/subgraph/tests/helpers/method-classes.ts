@@ -103,17 +103,14 @@ import {
   delegatesCall,
   getProposalCountCall,
 } from '../token/utils';
-import {
-  createGetProposalCall,
-  createTotalVotingPowerCall,
-  createTokenCalls,
-  createWrappedTokenCalls,
-  createERC1155TokenCalls,
-} from '../utils';
+import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
 import {
   generateEntityIdFromAddress,
   generatePermissionEntityId,
   generatePluginEntityId,
+  createERC20TokenCalls,
+  createERC1155TokenCalls,
+  createWrappedERC20TokenCalls,
 } from '@aragon/osx-commons-subgraph';
 import {
   Address,
@@ -276,12 +273,11 @@ class ERC721ContractMethods extends ERC721Contract {
       throw new Error('Symbol is null');
     }
     // we cast to string only for stoping rust compiler complaints.
-    createTokenCalls(
-      this.id,
+    createERC20TokenCalls(
+      DAO_TOKEN_ADDRESS,
+      '10',
       this.name as string,
-      this.symbol as string,
-      null,
-      null
+      this.symbol as string
     );
   }
 }
@@ -341,13 +337,17 @@ class ERC20WrapperContractMethods extends ERC20WrapperContract {
     } else if (!this.underlyingToken) {
       throw new Error('Underlying token is null');
     }
+    let supply = '10';
+    if (totalSupply) {
+      supply = totalSupply;
+    }
 
-    createWrappedTokenCalls(
+    createWrappedERC20TokenCalls(
       this.id,
-      this.name as string,
-      this.symbol as string,
       this.underlyingToken,
-      totalSupply
+      supply,
+      this.name as string,
+      this.symbol as string
     );
   }
 
@@ -378,13 +378,17 @@ class ERC20ContractMethods extends ERC20Contract {
     if (!this.symbol) {
       throw new Error('Symbol is null');
     }
+    let supply = '10';
+    if (totalSupply) {
+      supply = totalSupply;
+    }
     // we cast to string only for stoping rust compiler complaints.
-    createTokenCalls(
+    createERC20TokenCalls(
       this.id,
+      supply,
       this.name as string,
       this.symbol as string,
-      this.decimals.toString(),
-      totalSupply
+      this.decimals.toString()
     );
   }
 

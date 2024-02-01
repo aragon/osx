@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Removed token call generators and used the ones from `@aragon/sdk-commons-subgraph`
+- Used `createDummyAction` from `@aragon/sdk-commons-subgraph`
+
 ## 1.4.0
 
 ### Added

@@ -19,7 +19,6 @@ import {generateMemberEntityId, generateVoteEntityId} from '../../utils/ids';
 import {
   generateActionEntityId,
   generateEntityIdFromAddress,
-  generatePermissionEntityId,
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
@@ -117,7 +116,6 @@ export function handleVoteCast(event: VoteCast): void {
   const pluginProposalId = event.params.proposalId;
   const memberAddress = event.params.voter;
   const pluginAddress = event.address;
-  const pluginEntityId = generatePluginEntityId(pluginAddress);
   const memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
 
   let proposalId = generateProposalEntityId(pluginAddress, pluginProposalId);

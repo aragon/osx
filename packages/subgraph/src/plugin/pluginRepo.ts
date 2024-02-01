@@ -10,7 +10,6 @@ import {
   Granted,
   Revoked,
 } from '../../generated/templates/PluginRepoTemplate/PluginRepo';
-import {getPluginVersionId} from './utils';
 import {
   generatePermissionEntityId,
   generatePluginReleaseEntityId,
