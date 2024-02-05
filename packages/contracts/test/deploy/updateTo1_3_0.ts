@@ -3,7 +3,7 @@ import {
   initForkForOsxVersion,
   initializeDeploymentFixture,
 } from '../test-utils/fixture';
-import {activeContractsList as v1_2_0_activeContracts} from '@aragon/osx-ethers-v1.2.0';
+import {activeContractsList as v1_0_0_activeContracts} from '@aragon/osx-ethers-v1.2.0';
 import {expect} from 'chai';
 import {deployments} from 'hardhat';
 
@@ -15,7 +15,7 @@ if (enableTest) {
     before(async () => {
       const previousOsxVersion: ForkOsxVersion = {
         version: 'v1.0.1',
-        activeContracts: v1_2_0_activeContracts,
+        activeContracts: v1_0_0_activeContracts,
         forkBlockNumber: 16722881,
       };
 
@@ -37,7 +37,7 @@ if (enableTest) {
       const allDeployments = await deployments.all();
 
       changedContracts.forEach((contractName: string) => {
-        const previous = (v1_2_0_activeContracts as any)[network][contractName];
+        const previous = (v1_0_0_activeContracts as any)[network][contractName];
         const current = allDeployments[contractName].address;
 
         expect(previous).to.not.be.empty;

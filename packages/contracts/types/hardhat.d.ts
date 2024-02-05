@@ -33,7 +33,7 @@ declare module 'hardhat/types' {
   interface HardhatRuntimeEnvironment {
     aragonPluginRepos: AragonPluginRepos;
     aragonToVerifyContracts: AragonVerifyEntry[];
-    managingDAOMultisigPluginAddress: string;
+    managementDAOMultisigPluginAddress: string;
     placeholderBuildCIDPath: string;
     managementDAOActions: {
       to: string;
