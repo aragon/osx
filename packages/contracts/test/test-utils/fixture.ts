@@ -1,4 +1,5 @@
 import networks from '../../networks';
+import {getNetworkByNameOrAlias} from '@aragon/osx-commons-configs';
 import hre, {network, deployments} from 'hardhat';
 
 export interface ForkOsxVersion {
@@ -11,7 +12,7 @@ export async function initializeFork(
   forkNetwork: string,
   blockNumber: number
 ): Promise<void> {
-  if (!networks[forkNetwork]) {
+  if (getNetworkByNameOrAlias(forkNetwork) === null) {
     throw new Error(`No info found for network '${forkNetwork}'.`);
   }
 
