@@ -1,4 +1,8 @@
-import {PluginSetupProcessor} from '../../types/framework/plugin/setup/PluginSetupProcessor';
+import {
+  PluginSetupProcessor,
+  PluginSetupRefStruct as PluginSetupRefStruct_,
+  PluginSetupRefStructOutput as PluginSetupRefStructOutput_,
+} from '../../types/framework/plugin/setup/PluginSetupProcessor';
 
 export type ApplyInstallationParamsStruct =
   PluginSetupProcessor.ApplyInstallationParamsStruct;
@@ -16,3 +20,7 @@ export type PrepareUninstallationParamsStruct =
 
 export type PrepareUpdateParamsStructOutput =
   PluginSetupProcessor.PrepareUpdateParamsStructOutput;
+
+export type PluginSetupRefStruct = PluginSetupRefStruct_;
+
+export type PluginSetupRefStructOutput = PluginSetupRefStructOutput_;
