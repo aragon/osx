@@ -97,21 +97,23 @@ describe('Management DAO', function () {
     );
 
     // ManagementDAO
-    managementDaoDeployment = await deployments.get('DAO');
+    managementDaoDeployment = await deployments.get('ManagementDAOProxy');
     managementDao = DAO__factory.connect(
       managementDaoDeployment.address,
       deployer
     );
 
     // DAORegistry
-    daoRegistryDeployment = await deployments.get('DAORegistry');
+    daoRegistryDeployment = await deployments.get('DAORegistryProxy');
     daoRegistry = DAORegistry__factory.connect(
       daoRegistryDeployment.address,
       deployer
     );
 
     // PluginRepoRegistry
-    pluginRepoRegistryDeployment = await deployments.get('PluginRepoRegistry');
+    pluginRepoRegistryDeployment = await deployments.get(
+      'PluginRepoRegistryProxy'
+    );
     pluginRepoRegistry = PluginRepoRegistry__factory.connect(
       pluginRepoRegistryDeployment.address,
       deployer
@@ -120,11 +122,11 @@ describe('Management DAO', function () {
     // ENSSubdomainRegistrar
     ensSubdomainRegistrars = {
       daoRegistrar: ENSSubdomainRegistrar__factory.connect(
-        (await deployments.get('DAO_ENSSubdomainRegistrar')).address,
+        (await deployments.get('DAOENSSubdomainRegistrarProxy')).address,
         deployer
       ),
       pluginRegistrar: ENSSubdomainRegistrar__factory.connect(
-        (await deployments.get('Plugin_ENSSubdomainRegistrar')).address,
+        (await deployments.get('PluginENSSubdomainRegistrarProxy')).address,
         deployer
       ),
     };
