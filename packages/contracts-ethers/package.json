@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-ethers",
-  "version": "1.4.0-rc0.alpha.1",
+  "version": "1.4.0-alpha.0",
   "description": "The Aragon OSx contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
