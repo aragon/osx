@@ -15,7 +15,7 @@ jobs:
     outputs:
       matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Prepare
         id: prepare
         run: node .github/helpers/subgraph/buildMatrix.js '${{ github.ref }}'
@@ -29,9 +29,9 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: 'yarn'
           node-version: 16
@@ -48,12 +48,12 @@ jobs:
       run:
         working-directory: ${{env.working-directory}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: 'yarn'
           node-version: 16

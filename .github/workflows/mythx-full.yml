@@ -34,21 +34,21 @@ jobs:
     outputs:
       group_id: ${{ steps.comment_prepare.outputs.group_id }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: ${{ inputs.pr_number != '' }}
         with:
           ref: refs/pull/${{ inputs.pr_number }}/merge
           fetch-depth: 0
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: ${{ inputs.pr_number == '' }}
         with:
           fetch-depth: 0
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: 'yarn'
           node-version: 16
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
       - name: Install mythx-cli
         run: pip install mythx-cli
       - name: Install deps
@@ -72,7 +72,7 @@ jobs:
     steps:
       - name: Comment a pull_request
         if: ${{ inputs.pr_number != '' }}
-        uses: thollander/actions-comment-pull-request@v1
+        uses: thollander/actions-comment-pull-request@v2
         with:
           pr_number: ${{ inputs.pr_number }}
           message: 'Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ needs.mythx.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ needs.mythx.outputs.group_id }})'
