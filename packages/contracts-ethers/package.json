@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-ethers",
-  "version": "1.4.0-rc0",
+  "version": "1.4.0-alpha.0",
   "description": "The Aragon OSx contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build:contracts": "cd ../contracts && yarn build",
-    "build": "find ../contracts/artifacts/src/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./types",
+    "build": "find ../contracts/artifacts/src/ ../contracts/artifacts/@ensdomains/ens-contracts/contracts/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./types",
     "build:npm": "rollup --config rollup.config.ts",
     "prepublishOnly": "yarn build:contracts && yarn build && yarn build:npm"
   },

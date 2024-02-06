@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Added the `@ensdomains/ens-contracts`.
+- Re-exported structs and events for the `DAO`, `DAORegistry`, `PluginRepo`, `PluginRepoRegistry`, and `PluginSetupProcessor`.
 - Refactored import statements.
 
 ## v0.2.1-alpha
