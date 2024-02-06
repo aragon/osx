@@ -111,6 +111,7 @@ import {
   createERC20TokenCalls,
   createERC1155TokenCalls,
   createWrappedERC20TokenCalls,
+  createTokenCalls,
 } from '@aragon/osx-commons-subgraph';
 import {
   Address,
@@ -272,10 +273,9 @@ class ERC721ContractMethods extends ERC721Contract {
     if (!this.symbol) {
       throw new Error('Symbol is null');
     }
-    // we cast to string only for stoping rust compiler complaints.
-    createERC20TokenCalls(
+    // we cast to string only for stopping rust compiler complaints.
+    createTokenCalls(
       DAO_TOKEN_ADDRESS,
-      '10',
       this.name as string,
       this.symbol as string
     );

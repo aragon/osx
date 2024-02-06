@@ -258,14 +258,8 @@ describe('handleNativeTokenDeposited', () => {
 describe('handleDeposited: ', () => {
   beforeAll(() => {
     daoTokenContract = new ExtendedERC20Contract().withDefaultValues();
-
-    createERC20TokenCalls(
-      DAO_TOKEN_ADDRESS,
-      ERC20_AMOUNT_FULL,
-      'DAO Token',
-      'DAOT',
-      '6'
-    );
+    let totalSupply = '10';
+    daoTokenContract.mockCall_createTokenCalls(totalSupply);
     daoTokenContract.mockCall_balanceOf(DAO_ADDRESS, ERC20_AMOUNT_HALF);
     daoTokenContract.mockCall_balanceOf(DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
 
