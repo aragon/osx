@@ -498,7 +498,7 @@ contract PluginSetupProcessor is ProtocolVersion {
 
     /// @notice Applies the permissions of a prepared update of an UUPS upgradeable proxy contract to a DAO.
     /// @param _dao The address of the updating DAO.
-    /// @param _params The struct containing the parameters for the `applyInstallation` function.
+    /// @param _params The struct containing the parameters for the `applyUpdate` function.
     function applyUpdate(
         address _dao,
         ApplyUpdateParams calldata _params

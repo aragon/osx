@@ -231,7 +231,7 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('reverts if the approval of the registrar is removed', async () => {
       // Initialize the registrar with the 'test' domain
-      registrar.initialize(
+      await registrar.initialize(
         managingDao.address,
         ens.address,
         ensDomainHash('test')
