@@ -11,9 +11,10 @@ jobs:
     permissions: read-all
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup nodejs
+        uses: actions/setup-node@v4
         with:
           cache: 'yarn'
           node-version: 16
@@ -22,7 +23,7 @@ jobs:
       - name: Clean the contracts directory
         run: yarn clean
         working-directory: packages/contracts/
-      - name: Generate Docs
+      - name: Generate docs
         run: yarn run docgen
         working-directory: packages/contracts/
       - name: Remove Framework Lifecycle docs
@@ -31,7 +32,7 @@ jobs:
       - name: Format with prettier
         run: yarn run prettier 'packages/contracts/docs/developer-portal/03-reference-guide/**/*.md' --write
       - name: Checkout developer-portal
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: aragon/developer-portal
           ref: staging
@@ -56,4 +57,4 @@ jobs:
           title: Update the Aragon OSx docs
           body: 'Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/osx/actions/runs/${{ github.run_id }}))'
           reviewers: ${{ github.actor }}
-          team-reviewers: devrel
+          team-reviewers: Ara-Team-OSX
