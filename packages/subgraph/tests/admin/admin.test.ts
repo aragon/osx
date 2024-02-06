@@ -43,14 +43,14 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   adminPlugin.save();
 
   // create event
-  let action = createDummyAction(ADDRESS_TWO, actionValue, actionData);
+  let actions = [createDummyAction(ADDRESS_TWO, actionValue, actionData)];
   let event = createNewProposalCreatedEvent(
     PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,
     START_DATE,
     START_DATE,
     STRING_DATA,
-    [action],
+    actions,
     ALLOW_FAILURE_MAP,
     pluginEntityId
   );
@@ -107,7 +107,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   );
 
   // check actions
-  for (let index = 0; index < [action].length; index++) {
+  for (let index = 0; index < actions.length; index++) {
     const actionEntityId = generateActionEntityId(proposalEntityId, index);
     const actionEntity = Action.load(actionEntityId);
     if (actionEntity) {
