@@ -12,7 +12,7 @@ There are many ways to contribute! Some ideas are:
 - refactoring code,
 - or even writing new functionality to incorporate into the project.
 
-All members of our community are expected to follow our [Code of Conduct](https://discord.com/channels/672466989217873929/953988031713534022/1037740253080997918). Please make sure you are welcoming and friendly in all of our spaces. This is a non-negotiable 💙
+All community members are expected to adhere to our community guidelines. Please familiarize yourself with our [Terms and Conditions](https://aragon.org/terms-and-conditions) to ensure a welcoming and friendly environment across all our platforms. Adhering to these principles is essential. 💙
 
 ## Your first contribution
 
@@ -56,7 +56,7 @@ If the answer to either of those two questions are "yes", then you're probably d
 ## Fixing issues
 
 1. [Find an issue](https://github.com/aragon/osx/issues) that you are interested in.
-   - You may want to ask on the GitHub issue or in our [developer channel](https://discord.com/channels/672466989217873929/1036683514525003796) if anyone has already started working on the issue.
+   - You may want to ask on the GitHub issue or in our [developer channel](https://discord.com/channels/672466989217873929/742442842474938478) if anyone has already started working on the issue.
 2. Fork and clone a local copy of the repository.
 3. Make the appropriate changes for the issue you are trying to address or the feature that you want to add.
 4. Push the changes to the remote repository.
@@ -126,4 +126,4 @@ As `next` becomes ready, merge `next` onto `master` with a rebase.
 
 ## Community
 
-If you need help, please reach out to Aragon core contributors and community members in our [Discord](https://discord.com/channels/672466989217873929/1036683514525003796). We'd love to hear from you and know what you're working on!
+If you need help, please reach out to Aragon core contributors and community members in our [Discord](https://discord.gg/aragon-672466989217873929). We'd love to hear from you and know what you're working on!

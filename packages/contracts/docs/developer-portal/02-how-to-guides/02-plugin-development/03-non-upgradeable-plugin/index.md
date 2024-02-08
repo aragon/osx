@@ -339,7 +339,7 @@ To publish new versions in the future,
 
 ## Conclusion
 
-Hope this tutorial is useful to get you started developing for Aragon! If you need any additional support or questions, feel free to hop into our [Discord](https://discord.gg/Wpk36QRdMN) and ask away.
+Hope this tutorial is useful to get you started developing for Aragon! If you need any additional support or questions, feel free to hop into our [Discord](https://discord.com/channels/672466989217873929/742442842474938478) and ask away.
 
 Excited to see what you build! 🔥
 
