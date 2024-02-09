@@ -26,6 +26,9 @@ jobs:
       - name: Generate docs
         run: yarn run docgen
         working-directory: packages/contracts/
+      - name: Remove the plugins & token contracts
+        run: rm -rf plugins token
+        working-directory: packages/contracts/docs/developer-portal/03-reference-guide/
       - name: Remove Framework Lifecycle docs
         run: rm -rf 04-framework-lifecycle
         working-directory: packages/contracts/docs/developer-portal/
