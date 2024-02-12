@@ -72,13 +72,7 @@ Please do not use the issue tracker for security issues.
 
 Ensure you have Node and Yarn installed.
 
-The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. Use [nvm](https://github.com/nvm-sh/nvm) to switch:
-
-```sh
-nvm install 16
-nvm use 16
-npm i -g yarn
-```
+The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. It's recommended to use a tool such as [nvm](https://github.com/nvm-sh/nvm) to manage different node environments. Please see the relevant documentation for details.
 
 Start by running `yarn install` in the project root in your terminal.
 
