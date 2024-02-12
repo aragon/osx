@@ -70,11 +70,21 @@ Please do not use the issue tracker for security issues.
 
 ## Setup
 
+Ensure you have Node and Yarn installed.
+
+The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. Use [nvm](https://github.com/nvm-sh/nvm) to switch:
+
+```sh
+nvm install 16
+nvm use 16
+npm i -g yarn
+```
+
 Start by running `yarn install` in the project root in your terminal.
 
 ### Dependencies
 
-Since the repo is set up as yarn workspace, all the linking is done automatically.
+Since the repo is set up as yarn workspace, all the linking is done automatically. When contributing, we recommend to `cd` into each package, as this mirrors the workflow of the development team.
 
 ## How the Aragon OSx protocol works
 
