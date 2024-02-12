@@ -70,6 +70,8 @@ let tokenAddress = Address.fromString(DAO_TOKEN_ADDRESS);
 let daoEntityId = generateDaoEntityId(daoAddress);
 let tokenEntityId = generateTokenEntityId(tokenAddress);
 let balanceEntityId = generateBalanceEntityId(daoAddress, tokenAddress);
+const totalSupply = '10';
+const decimals = '6';
 
 describe('handleExecuted', () => {
   afterEach(() => {
@@ -248,8 +250,6 @@ describe('handleExecuted', () => {
 
   describe('ERC20 action', () => {
     beforeAll(() => {
-      const totalSupply = '10';
-      const decimals = '6';
       createERC20TokenCalls(
         DAO_TOKEN_ADDRESS,
         totalSupply,
@@ -273,7 +273,7 @@ describe('handleExecuted', () => {
 
     describe('ERC20 transfer action', () => {
       beforeAll(() => {
-        createERC20TokenCalls(DAO_TOKEN_ADDRESS, '10', 'name', 'symbol');
+        createERC20TokenCalls(DAO_TOKEN_ADDRESS, totalSupply, 'name', 'symbol');
 
         getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
         getSupportsInterface(
@@ -516,7 +516,7 @@ describe('handleExecuted', () => {
 
   describe('ERC721 action', () => {
     beforeAll(() => {
-      createERC20TokenCalls(DAO_TOKEN_ADDRESS, '10', 'name', 'symbol');
+      createERC20TokenCalls(DAO_TOKEN_ADDRESS, totalSupply, 'name', 'symbol');
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
