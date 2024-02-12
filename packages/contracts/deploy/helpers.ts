@@ -137,7 +137,9 @@ export function getLatestContractAddress(
 
   const latestNetworkDeployment = getLatestNetworkDeployment(osxNetworkName);
   if (latestNetworkDeployment && contractName in latestNetworkDeployment) {
-    return latestNetworkDeployment[contractName].address;
+    // safe cast due to conditional above, but we return the fallback string anyhow
+    const key = contractName as keyof typeof latestNetworkDeployment;
+    return latestNetworkDeployment[key]?.address ?? '';
   }
   return '';
 }

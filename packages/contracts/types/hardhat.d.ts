@@ -1,12 +1,17 @@
 import {BigNumberish, BytesLike} from 'ethers';
 
 export type AragonPluginRepos = {
-  'address-list-voting': string;
-  'token-voting': string;
-  // prettier-ignore
-  'admin': string;
-  // prettier-ignore
-  'multisig': string;
+  AddresslistVotingRepoProxy: string;
+  TokenVotingRepoProxy: string;
+  AdminRepoProxy: string;
+  MultisigRepoProxy: string;
+  // DEPRECATED KEYS
+  // 'address-list-voting': string;
+  // 'token-voting': string;
+  // // prettier-ignore
+  // 'admin': string;
+  // // prettier-ignore
+  // 'multisig': string;
   [index: string]: string;
 };
 
@@ -28,8 +33,7 @@ export type TestingFork = {
   activeContracts: any;
 };
 
-
-declare module 'hardhat/types' {
+declare module 'hardhat/types/runtime' {
   interface HardhatRuntimeEnvironment {
     aragonPluginRepos: AragonPluginRepos;
     aragonToVerifyContracts: AragonVerifyEntry[];
