@@ -8,7 +8,7 @@ import {Network} from 'hardhat/types';
  * @param defaultValue the fallback value to be used if not set and in development mode
  * @returns the value of the environment variable, or a fallback if possible
  */
-export function envOr(
+export function env(
   network: Network,
   name: string,
   defaultValue: string
@@ -21,8 +21,28 @@ export function envOr(
   return process.env[name] || defaultValue;
 }
 
-export const ensOr = (
-  network: Network,
-  name: string,
-  defaultValue: string
-): string => envOr(network, name, defaultValue);
+/// fallback values for the environment variables
+
+export const daoDomainEnv = (network: Network): string =>
+  env(network, `${network.name.toUpperCase()}_DAO_ENS_DOMAIN`, 'dao.eth');
+
+export const pluginDomainEnv = (network: Network): string =>
+  env(network, `${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`, 'plugin.eth');
+
+export const managementDaoSubdomainEnv = (network: Network): string =>
+  env(network, 'MANAGEMENT_DAO_SUBDOMAIN', 'management');
+
+export const managementDaoMultisigApproversEnv = (network: Network): string =>
+  env(
+    network,
+    'MANAGEMENT_DAO_MULTISIG_APPROVERS',
+    // random address
+    '0x6B2b5d4F0a40134189330e2d46a9CDD01C01AECD'
+  );
+
+export const managementDaoMultisigMinApprovalsEnv = (
+  network: Network
+): string => env(network, 'MANAGEMENT_DAO_MULTISIG_MINAPPROVALS', '1');
+
+export const managementDaoMultisigListedOnlyEnv = (network: Network): string =>
+  env(network, 'MANAGEMENT_DAO_MULTISIG_LISTEDONLY', 'true');

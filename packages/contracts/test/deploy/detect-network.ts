@@ -1,23 +1,15 @@
+import {
+  daoDomainEnv,
+  env,
+  managementDaoMultisigApproversEnv,
+  managementDaoMultisigListedOnlyEnv,
+  managementDaoMultisigMinApprovalsEnv,
+  managementDaoSubdomainEnv,
+  pluginDomainEnv,
+} from '../../deploy/environment';
 import {expect} from 'chai';
 import {network} from 'hardhat';
 import {Network} from 'hardhat/types';
-
-/**
- * Provides default values for environment variables if running against a hardhat node
- * else requires that the environment variables are set
- * @param network the hardhat network object
- * @param name of the environment variable
- * @param defaultValue the fallback value to be used if not set and in development mode
- * @returns the value of the environment variable, or a fallback if possible
- */
-function envOr(network: Network, name: string, defaultValue: string): string {
-  const value = process.env[name];
-  const isHardhat = network.name === 'hardhat';
-  if (!isHardhat && !value) {
-    throw new Error(`Missing env var: ${name}`);
-  }
-  return process.env[name] || defaultValue;
-}
 
 describe('detect network', () => {
   it('should detect the hardhat network', () => {
@@ -25,20 +17,20 @@ describe('detect network', () => {
   });
 
   it('provides default values for env vars if using the hardhat network', () => {
-    const daoDomain = envOr(network, 'DAO_ENS_DOMAIN', 'dao.eth');
+    const daoDomain = env(network, 'DAO_ENS_DOMAIN', 'dao.eth');
     expect(daoDomain).to.equal('dao.eth');
   });
 
   it('uses the environment variable if set', () => {
     process.env['DAO_ENS_DOMAIN'] = 'mydao.eth';
-    const daoDomain = envOr(network, 'DAO_ENS_DOMAIN', 'dao.eth');
+    const daoDomain = env(network, 'DAO_ENS_DOMAIN', 'dao.eth');
     expect(daoDomain).to.equal('mydao.eth');
   });
 
   it("Throws if env vars aren't set for the network other than hardhat", () => {
     const network = {name: 'mainnet'} as unknown as Network;
     delete process.env['DAO_ENS_DOMAIN'];
-    expect(() => envOr(network, 'DAO_ENS_DOMAIN', 'dao.eth')).to.throw(
+    expect(() => env(network, 'DAO_ENS_DOMAIN', 'dao.eth')).to.throw(
       'Missing env var: DAO_ENS_DOMAIN'
     );
   });
@@ -46,7 +38,26 @@ describe('detect network', () => {
   it("Doesn't throw if env vars are set for the network other than hardhat", () => {
     const network: Network = {name: 'mainnet'} as unknown as Network;
     process.env['DAO_ENS_DOMAIN'] = 'mydao.eth';
-    const daoDomain = envOr(network, 'DAO_ENS_DOMAIN', 'dao.eth');
+    const daoDomain = env(network, 'DAO_ENS_DOMAIN', 'dao.eth');
     expect(daoDomain).to.equal('mydao.eth');
+  });
+
+  it('sets the correct fallbacks for each environment variable', () => {
+    expect(daoDomainEnv(network)).to.equal('dao.eth');
+    expect(pluginDomainEnv(network)).to.equal('plugin.eth');
+    expect(managementDaoSubdomainEnv(network)).to.equal('management');
+    expect(managementDaoMultisigApproversEnv(network)).to.equal(
+      '0x6B2b5d4F0a40134189330e2d46a9CDD01C01AECD'
+    );
+    expect(managementDaoMultisigMinApprovalsEnv(network)).to.equal('1');
+    expect(managementDaoMultisigListedOnlyEnv(network)).to.equal('true');
+  });
+
+  it('string interpolates the ENS subdomains', () => {
+    const network: Network = {name: 'FakeNet'} as unknown as Network;
+    process.env['FAKENET_DAO_ENS_DOMAIN'] = 'mydao.eth';
+    process.env['FAKENET_PLUGIN_ENS_DOMAIN'] = 'myplugin.eth';
+    expect(daoDomainEnv(network)).to.equal('mydao.eth');
+    expect(pluginDomainEnv(network)).to.equal('myplugin.eth');
   });
 });
