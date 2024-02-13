@@ -5,13 +5,6 @@ export type AragonPluginRepos = {
   TokenVotingRepoProxy: string;
   AdminRepoProxy: string;
   MultisigRepoProxy: string;
-  // DEPRECATED KEYS
-  // 'address-list-voting': string;
-  // 'token-voting': string;
-  // // prettier-ignore
-  // 'admin': string;
-  // // prettier-ignore
-  // 'multisig': string;
   [index: string]: string;
 };
 

@@ -85,12 +85,8 @@ import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import chai from 'chai';
 import {BytesLike} from 'ethers';
 import {ethers} from 'hardhat';
-
-// TODO: this should be the default behaviour
-chai.use(smock.matchers);
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
