@@ -149,12 +149,13 @@ Please replace 'MyContract' with the actual name of your contract, and follow th
 Example of usage in a test:
 
 ```ts
+// chai-setup imports additional matchers used for mocking
+import {expect} from './chai-setup';
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0_factory,
 } from '@aragon/osx-ethers-v1.3.0/contracts/core/dao/DAO.sol';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 describe('Legacy Test Example', function () {
