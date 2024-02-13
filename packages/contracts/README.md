@@ -176,6 +176,8 @@ describe('Legacy Test Example', function () {
 
 # Performance optimizations
 
+Tests using `yarn test` will, by default run in parallel. See the [hardhat docs](https://hardhat.org/hardhat-runner/docs/guides/test-contracts#running-tests-in-parallel) for more information about parallelized testing. If you want to run the tests sequentially, use `yarn test:sequential`. Parallel tests may require increasing the timeout, you can set this in the `mocha` settings of the [hardhat config file](./hardhat.config.ts).
+
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
 
 # Releases
