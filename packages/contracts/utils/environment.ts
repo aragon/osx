@@ -4,10 +4,10 @@ import {Network} from 'hardhat/types';
 /**
  * Provides default values for environment variables if running against a hardhat node
  * else requires that the environment variables are set
- * @param network the hardhat network object
- * @param name of the environment variable
- * @param defaultValue the fallback value to be used if not set and in development mode
- * @returns the value of the environment variable, or a fallback if possible
+ * @param network The hardhat network object.
+ * @param name The name of the environment variable.
+ * @param defaultValue The fallback value to be used if not set and in development mode.
+ * @returns The value of the environment variable, or a fallback if possible.
  */
 export function env(
   network: Network,
