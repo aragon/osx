@@ -28,6 +28,10 @@ import {
   ERC20_AMOUNT_FULL,
   CONTRACT_ADDRESS,
   ZERO_BYTES32,
+  TOKEN_NAME,
+  TOKEN_SYMBOL,
+  ERC20_TOTAL_SUPPLY,
+  ERC20_DECIMALS,
 } from '../constants';
 import {
   ExtendedERC1155Balance,
@@ -70,8 +74,6 @@ let tokenAddress = Address.fromString(DAO_TOKEN_ADDRESS);
 let daoEntityId = generateDaoEntityId(daoAddress);
 let tokenEntityId = generateTokenEntityId(tokenAddress);
 let balanceEntityId = generateBalanceEntityId(daoAddress, tokenAddress);
-const totalSupply = '10';
-const decimals = '6';
 
 describe('handleExecuted', () => {
   afterEach(() => {
@@ -252,10 +254,10 @@ describe('handleExecuted', () => {
     beforeAll(() => {
       createERC20TokenCalls(
         DAO_TOKEN_ADDRESS,
-        totalSupply,
-        'name',
-        'symbol',
-        decimals
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL,
+        ERC20_DECIMALS
       );
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_HALF);
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
@@ -273,7 +275,12 @@ describe('handleExecuted', () => {
 
     describe('ERC20 transfer action', () => {
       beforeAll(() => {
-        createERC20TokenCalls(DAO_TOKEN_ADDRESS, totalSupply, 'name', 'symbol');
+        createERC20TokenCalls(
+          DAO_TOKEN_ADDRESS,
+          ERC20_TOTAL_SUPPLY,
+          TOKEN_NAME,
+          TOKEN_SYMBOL
+        );
 
         getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
         getSupportsInterface(
@@ -321,8 +328,8 @@ describe('handleExecuted', () => {
 
         // check ERC20Contract entity
         eq('ERC20Contract', tokenEntityId, 'id', tokenEntityId);
-        eq('ERC20Contract', tokenEntityId, 'name', 'name');
-        eq('ERC20Contract', tokenEntityId, 'symbol', 'symbol');
+        eq('ERC20Contract', tokenEntityId, 'name', TOKEN_NAME);
+        eq('ERC20Contract', tokenEntityId, 'symbol', TOKEN_SYMBOL);
         assert.entityCount('ERC20Contract', 1);
 
         // check ERC20Balance entity
@@ -437,8 +444,8 @@ describe('handleExecuted', () => {
 
         // check ERC20Contract entity
         eq('ERC20Contract', tokenEntityId, 'id', tokenEntityId);
-        eq('ERC20Contract', tokenEntityId, 'name', 'name');
-        eq('ERC20Contract', tokenEntityId, 'symbol', 'symbol');
+        eq('ERC20Contract', tokenEntityId, 'name', TOKEN_NAME);
+        eq('ERC20Contract', tokenEntityId, 'symbol', TOKEN_SYMBOL);
         assert.entityCount('ERC20Contract', 1);
 
         // check ERC20Balance entity
@@ -516,7 +523,12 @@ describe('handleExecuted', () => {
 
   describe('ERC721 action', () => {
     beforeAll(() => {
-      createERC20TokenCalls(DAO_TOKEN_ADDRESS, totalSupply, 'name', 'symbol');
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL
+      );
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
@@ -576,8 +588,8 @@ describe('handleExecuted', () => {
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
-        eq('ERC721Contract', tokenEntityId, 'name', 'name');
-        eq('ERC721Contract', tokenEntityId, 'symbol', 'symbol');
+        eq('ERC721Contract', tokenEntityId, 'name', TOKEN_NAME);
+        eq('ERC721Contract', tokenEntityId, 'symbol', TOKEN_SYMBOL);
         assert.entityCount('ERC721Contract', 1);
 
         // check ERC721Balance entity
@@ -683,8 +695,8 @@ describe('handleExecuted', () => {
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
-        eq('ERC721Contract', tokenEntityId, 'name', 'name');
-        eq('ERC721Contract', tokenEntityId, 'symbol', 'symbol');
+        eq('ERC721Contract', tokenEntityId, 'name', TOKEN_NAME);
+        eq('ERC721Contract', tokenEntityId, 'symbol', TOKEN_SYMBOL);
         assert.entityCount('ERC721Contract', 1);
 
         // check ERC721Balance entity

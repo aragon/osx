@@ -29,6 +29,10 @@ export const HALF_ETH = '500000000000000000';
 
 export const ERC20_AMOUNT_HALF = '10000';
 export const ERC20_AMOUNT_FULL = '20000';
+export const ERC20_TOTAL_SUPPLY = '10';
+export const ERC20_DECIMALS = '6';
+export const TOKEN_SYMBOL = 'symbol';
+export const TOKEN_NAME = 'name';
 
 export const HOUR = '3600';
 
