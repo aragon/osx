@@ -1,3 +1,4 @@
+import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
 import {Network} from 'hardhat/types';
 
 /**
@@ -14,7 +15,7 @@ export function env(
   defaultValue: string
 ): string {
   const value = process.env[name];
-  const isHardhat = network.name === 'hardhat';
+  const isHardhat = network.name === HARDHAT_NETWORK_NAME;
   if (!isHardhat && !value) {
     throw new Error(`Missing env var: ${name}`);
   }
