@@ -7,6 +7,10 @@ import {
 } from '../../../typechain';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../utils/psp';
+import {
+  managementDaoMultisigApproversEnv,
+  managementDaoMultisigMinApprovalsEnv,
+} from '../../environment';
 import {checkPermission, getContractAddress} from '../../helpers';
 import {findEvent} from '@aragon/osx-commons-sdk';
 import {Operation} from '@aragon/osx-commons-sdk';
@@ -18,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
   const [deployer] = await ethers.getSigners();
 
-  if (network.name !== 'localhost' && network.name !== 'hardhat') {
+  if (!['localhost', 'hardhat'].includes(network.name)) {
     if (
       !('MANAGEMENT_DAO_MULTISIG_LISTEDONLY' in process.env) ||
       !('MANAGEMENT_DAO_MULTISIG_MINAPPROVALS' in process.env) ||
@@ -28,11 +32,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  const approvers = process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS?.split(
-    ','
-  ) || [deployer.address];
+  const approvers = managementDaoMultisigApproversEnv(network).split(',') || [
+    deployer.address,
+  ];
   const minApprovals = parseInt(
-    process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS || '1'
+    managementDaoMultisigMinApprovalsEnv(hre.network)
   );
   // In case `MANAGEMENT_DAO_MULTISIG_LISTEDONLY` not present in .env
   // which applies only hardhat/localhost, use `true` setting for extra safety for tests.
