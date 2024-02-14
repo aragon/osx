@@ -130,7 +130,7 @@ export function getLatestContractAddress(
 
   const osxNetworkName = getNetworkNameByAlias(networkName);
   if (!osxNetworkName) {
-    if (networkName === 'hardhat') {
+    if (networkName === 'hardhat' || networkName === 'localhost') {
       return '';
     }
     throw new Error(`Failed to find network ${networkName}`);

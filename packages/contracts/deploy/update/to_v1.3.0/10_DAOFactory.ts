@@ -65,3 +65,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['DAOFactory', 'v1.3.0'];
+func.dependencies = ['Env'];

@@ -15,8 +15,9 @@ export function env(
   defaultValue: string
 ): string {
   const value = process.env[name];
-  const isHardhat = network.name === HARDHAT_NETWORK_NAME;
-  if (!isHardhat && !value) {
+  const isLocal =
+    network.name === HARDHAT_NETWORK_NAME || network.name === 'localhost';
+  if (!isLocal && !value) {
     throw new Error(`Missing env var: ${name}`);
   }
   return process.env[name] || defaultValue;
@@ -47,3 +48,11 @@ export const managementDaoMultisigMinApprovalsEnv = (
 
 export const managementDaoMultisigListedOnlyEnv = (network: Network): string =>
   env(network, 'MANAGEMENT_DAO_MULTISIG_LISTEDONLY', 'true');
+
+// corresponds to known hardhat account 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+export const ethKeyEnv = (network: Network): string =>
+  env(
+    network,
+    'ETH_KEY',
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  );
