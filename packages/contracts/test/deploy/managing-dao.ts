@@ -71,7 +71,6 @@ describe('Management DAO', function () {
     const approversEnv = managementDaoMultisigApproversEnv(hre.network);
 
     minApprovals = parseInt(managementDaoMultisigMinApprovalsEnv(hre.network));
-
     listedOnly = managementDaoMultisigListedOnlyEnv(hre.network) === 'true';
 
     if (!approversEnv || !minApprovals || !listedOnly) {
@@ -81,9 +80,7 @@ describe('Management DAO', function () {
     }
 
     // Get approver addresses
-    const approverAddresses = managementDaoMultisigApproversEnv(
-      hre.network
-    ).split(',');
+    const approverAddresses = approversEnv.split(',');
 
     // Impersonate them as signers
     approvers = await Promise.all(
