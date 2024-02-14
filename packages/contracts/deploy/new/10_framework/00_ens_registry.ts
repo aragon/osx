@@ -1,4 +1,5 @@
 import {setupENS} from '../../../utils/ens';
+import {daoDomainEnv, pluginDomainEnv} from '../../environment';
 import {ENS_ADDRESSES} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -9,15 +10,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {network} = hre;
 
-  // Prepare ENS.
-  const daoDomain =
-    process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
-  const pluginDomain =
-    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
-
-  if (!daoDomain || !pluginDomain) {
-    throw new Error('DAO or Plugin ENS domains have not been set in .env');
-  }
+  const daoDomain = daoDomainEnv(network);
+  const pluginDomain = pluginDomainEnv(network);
 
   const officialEnsRegistryAddress = ENS_ADDRESSES[network.name];
 

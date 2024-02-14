@@ -12,6 +12,10 @@ import {network} from 'hardhat';
 import {Network} from 'hardhat/types';
 
 describe('detect network', () => {
+  beforeEach(() => {
+    process.env = {};
+  });
+
   it('should detect the hardhat network', () => {
     expect(network.name).to.equal('hardhat');
   });

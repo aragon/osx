@@ -7,6 +7,7 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {pluginDomainEnv} from './environment';
 import {
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
@@ -163,8 +164,7 @@ export async function createPluginRepo(
   const {network} = hre;
   const signers = await ethers.getSigners();
 
-  const pluginDomain =
-    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
+  const pluginDomain = pluginDomainEnv(network);
   if (
     await isENSDomainRegistered(
       `${subdomain}.${pluginDomain}`,

@@ -21,7 +21,7 @@ export function env(
   return process.env[name] || defaultValue;
 }
 
-/// fallback values for the environment variables
+/// Specific environment variables with hardcoded defaults
 
 export const daoDomainEnv = (network: Network): string =>
   env(network, `${network.name.toUpperCase()}_DAO_ENS_DOMAIN`, 'dao.eth');

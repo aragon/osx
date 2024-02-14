@@ -7,6 +7,7 @@ import {
   PluginRepoRegistry__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
+import {daoDomainEnv, pluginDomainEnv} from '../../environment';
 import {checkSetManagementDao, getContractAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -48,9 +49,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 
     const node = await DAOENSSubdomainRegistrar.node();
-    const expectedNode = ethers.utils.namehash(
-      process.env[`${hre.network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || ''
-    );
+    const expectedNode = ethers.utils.namehash(daoDomainEnv(hre.network));
     if (node !== expectedNode) {
       throw new Error(
         `DAOENSSubdomainRegistrar node (${node}) doesn't match expected node (${expectedNode})`
@@ -86,9 +85,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 
     const node = await PluginENSSubdomainRegistrar.node();
-    const expectedNode = ethers.utils.namehash(
-      process.env[`${hre.network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || ''
-    );
+    const expectedNode = ethers.utils.namehash(pluginDomainEnv(hre.network));
     if (node !== expectedNode) {
       throw new Error(
         `PluginENSSubdomainRegistrar node (${node}) doesn't match expected node (${expectedNode})`
