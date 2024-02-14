@@ -1,6 +1,6 @@
 import ensSubdomainRegistrarArtifact from '../../../artifacts/src/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
 import {DAO__factory, ENSRegistry__factory} from '../../../typechain';
-import {daoDomainEnv, pluginDomainEnv} from '../../environment';
+import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {getContractAddress, getENSAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';

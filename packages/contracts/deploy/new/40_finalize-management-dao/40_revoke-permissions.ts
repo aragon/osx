@@ -1,5 +1,5 @@
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
-import {managementDaoSubdomainEnv} from '../../environment';
+import {managementDaoSubdomainEnv} from '../../../utils/environment';
 import {getContractAddress, managePermissions, Permission} from '../../helpers';
 import {Operation} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';

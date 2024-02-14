@@ -7,7 +7,7 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
-import {pluginDomainEnv} from './environment';
+import {pluginDomainEnv} from '../utils/environment';
 import {
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
@@ -585,3 +585,6 @@ export function getManagementDAOMultisigAddress(
   }
   return address;
 }
+
+// hh-deploy cannot process files without default exports
+export default async () => {};

@@ -1,5 +1,8 @@
 import {DAO__factory, DAORegistry__factory} from '../../../typechain';
-import {daoDomainEnv, managementDaoSubdomainEnv} from '../../environment';
+import {
+  daoDomainEnv,
+  managementDaoSubdomainEnv,
+} from '../../../utils/environment';
 import {
   getContractAddress,
   getENSAddress,

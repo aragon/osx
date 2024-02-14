@@ -1,5 +1,5 @@
 import {setupENS} from '../../../utils/ens';
-import {daoDomainEnv, pluginDomainEnv} from '../../environment';
+import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {ENS_ADDRESSES} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';

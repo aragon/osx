@@ -6,11 +6,11 @@ import {
   PluginSetupProcessor__factory,
 } from '../../../typechain';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
-import {hashHelpers} from '../../../utils/psp';
 import {
   managementDaoMultisigApproversEnv,
   managementDaoMultisigMinApprovalsEnv,
-} from '../../environment';
+} from '../../../utils/environment';
+import {hashHelpers} from '../../../utils/psp';
 import {checkPermission, getContractAddress} from '../../helpers';
 import {findEvent} from '@aragon/osx-commons-sdk';
 import {Operation} from '@aragon/osx-commons-sdk';

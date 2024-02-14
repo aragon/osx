@@ -1,9 +1,4 @@
 import {
-  managementDaoMultisigApproversEnv,
-  managementDaoMultisigListedOnlyEnv,
-  managementDaoMultisigMinApprovalsEnv,
-} from '../../deploy/environment';
-import {
   DAO,
   DAORegistry,
   DAORegistry__factory,
@@ -17,6 +12,11 @@ import {
   PluginRepoRegistry__factory,
   PluginRepo__factory,
 } from '../../typechain';
+import {
+  managementDaoMultisigApproversEnv,
+  managementDaoMultisigListedOnlyEnv,
+  managementDaoMultisigMinApprovalsEnv,
+} from '../../utils/environment';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
 import {
   DAO_PERMISSIONS,

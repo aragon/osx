@@ -6,7 +6,7 @@ import {
   managementDaoMultisigMinApprovalsEnv,
   managementDaoSubdomainEnv,
   pluginDomainEnv,
-} from '../../deploy/environment';
+} from '../../utils/environment';
 import {expect} from 'chai';
 import {network} from 'hardhat';
 import {Network} from 'hardhat/types';

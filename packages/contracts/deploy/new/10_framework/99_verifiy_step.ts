@@ -7,7 +7,7 @@ import {
   PluginRepoRegistry__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
-import {daoDomainEnv, pluginDomainEnv} from '../../environment';
+import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {checkSetManagementDao, getContractAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';

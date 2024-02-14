@@ -1,5 +1,5 @@
 import {ENSRegistry__factory} from '../../../typechain';
-import {daoDomainEnv, pluginDomainEnv} from '../../environment';
+import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {
   getContractAddress,
   getENSAddress,
