@@ -7,6 +7,7 @@ import {
 } from '../../../typechain';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
 import {
+  isLocal,
   managementDaoMultisigApproversEnv,
   managementDaoMultisigMinApprovalsEnv,
 } from '../../../utils/environment';
@@ -22,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
   const [deployer] = await ethers.getSigners();
 
-  if (!['localhost', 'hardhat'].includes(network.name)) {
+  if (!isLocal(network)) {
     if (
       !('MANAGEMENT_DAO_MULTISIG_LISTEDONLY' in process.env) ||
       !('MANAGEMENT_DAO_MULTISIG_MINAPPROVALS' in process.env) ||

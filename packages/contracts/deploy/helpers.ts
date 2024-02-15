@@ -7,7 +7,7 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
-import {pluginDomainEnv} from '../utils/environment';
+import {isLocal, pluginDomainEnv} from '../utils/environment';
 import {
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
@@ -130,7 +130,7 @@ export function getLatestContractAddress(
 
   const osxNetworkName = getNetworkNameByAlias(networkName);
   if (!osxNetworkName) {
-    if (networkName === 'hardhat' || networkName === 'localhost') {
+    if (isLocal(hre.network)) {
       return '';
     }
     throw new Error(`Failed to find network ${networkName}`);

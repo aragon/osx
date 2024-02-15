@@ -1,6 +1,9 @@
 import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
 import {Network} from 'hardhat/types';
 
+export const isLocal = (network: Network): boolean =>
+  [HARDHAT_NETWORK_NAME, 'localhost', 'coverage'].includes(network.name);
+
 /**
  * Provides default values for environment variables if running against a hardhat node
  * else requires that the environment variables are set
@@ -15,9 +18,7 @@ export function env(
   defaultValue: string
 ): string {
   const value = process.env[name];
-  const isLocal =
-    network.name === HARDHAT_NETWORK_NAME || network.name === 'localhost';
-  if (!isLocal && !value) {
+  if (!isLocal(network) && !value) {
     throw new Error(`Missing env var: ${name}`);
   }
   return process.env[name] || defaultValue;
