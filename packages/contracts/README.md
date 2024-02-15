@@ -46,6 +46,8 @@ npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
 ```
 
+> Tests can be sped up if needed. See [the test performance optimization](#performance-optimizations) section for more info.
+
 ## Documentation
 
 You can find all documentation regarding how to use this protocol in [Aragon's Developer Portal here](https://devs.aragon.org).
@@ -176,6 +178,14 @@ describe('Legacy Test Example', function () {
 ```
 
 # Performance optimizations
+
+There are 3 ways to run tests:
+
+1. `yarn test` runs tests in sequence. Can take a while but is the default.
+
+2. `yarn test:parallel`, depending on your hardware can be significantly faster and is generally good for most cases. See the [hardhat docs](https://hardhat.org/hardhat-runner/docs/guides/test-contracts#running-tests-in-parallel) for more information about parallelized testing. Not suitable for gas reports (see below)
+
+3. `yarn test:gas-report` outputs a gas report. Cannot be run in parallel mode.
 
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
 
