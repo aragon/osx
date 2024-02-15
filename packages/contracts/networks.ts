@@ -37,8 +37,12 @@ const networkExtensions: NetworkConfigs<ContractsNetworkConfig> = {
     ...networks.arbitrum,
     deploy: ['./deploy/new', './deploy/verification'],
   },
-  arbitrumGoerli: {
-    ...networks.arbitrumGoerli,
+  baseSepolia: {
+    ...networks.baseSepolia,
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  arbitrumSepolia: {
+    ...networks.arbitrumSepolia,
     deploy: ['./deploy/new', './deploy/verification'],
   },
 };

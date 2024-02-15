@@ -28,6 +28,7 @@ import {
   PluginCloneableSetupV1MockBad__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
+import {expect} from '../../chai-setup';
 import {deployNewDAO, ZERO_BYTES32} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
@@ -84,7 +85,6 @@ import {
 import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {expect} from 'chai';
 import {BytesLike} from 'ethers';
 import {ethers} from 'hardhat';
 

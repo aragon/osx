@@ -38,6 +38,8 @@ Default values for all required environment variables are provided when running 
 
 The private key provided by default is a hardhat publically known key for `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. Don't use it outside of a local development context.
 
+> Tests can be sped up if needed. See [the test performance optimization](#performance-optimizations) section for more info.
+
 ## Documentation
 
 You can find all documentation regarding how to use this protocol in [Aragon's Developer Portal here](https://devs.aragon.org).
@@ -141,12 +143,13 @@ Please replace 'MyContract' with the actual name of your contract, and follow th
 Example of usage in a test:
 
 ```ts
+// chai-setup imports additional matchers used for mocking
+import {expect} from './chai-setup';
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0_factory,
 } from '@aragon/osx-ethers-v1.3.0/contracts/core/dao/DAO.sol';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 describe('Legacy Test Example', function () {
@@ -167,6 +170,14 @@ describe('Legacy Test Example', function () {
 ```
 
 # Performance optimizations
+
+There are 3 ways to run tests:
+
+1. `yarn test` runs tests in sequence. Can take a while but is the default.
+
+2. `yarn test:parallel`, depending on your hardware can be significantly faster and is generally good for most cases. See the [hardhat docs](https://hardhat.org/hardhat-runner/docs/guides/test-contracts#running-tests-in-parallel) for more information about parallelized testing. Not suitable for gas reports (see below)
+
+3. `yarn test:gas-report` outputs a gas report. Cannot be run in parallel mode.
 
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
 
