@@ -1,4 +1,5 @@
 import {
+  HARDHAT_ACCOUNTS,
   daoDomainEnv,
   env,
   ethKeyEnv,
@@ -52,13 +53,11 @@ describe('detect network', () => {
     expect(pluginDomainEnv(network)).to.equal('plugin.eth');
     expect(managementDaoSubdomainEnv(network)).to.equal('management');
     expect(managementDaoMultisigApproversEnv(network)).to.equal(
-      '0x6B2b5d4F0a40134189330e2d46a9CDD01C01AECD'
+      HARDHAT_ACCOUNTS[0].ADDRESS
     );
     expect(managementDaoMultisigMinApprovalsEnv(network)).to.equal('1');
     expect(managementDaoMultisigListedOnlyEnv(network)).to.equal('true');
-    expect(ethKeyEnv(network)).to.equal(
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-    );
+    expect(ethKeyEnv(network)).to.equal(HARDHAT_ACCOUNTS[1].KEY);
   });
 
   it('string interpolates the ENS subdomains', () => {

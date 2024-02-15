@@ -1992,14 +1992,11 @@ describe('PluginSetupProcessor', function () {
       ).to.be.reverted;
     });
 
-    describe.only('Whether upgrade functions of proxy get called the right way', async () => {
+    describe('Whether upgrade functions of proxy get called the right way', async () => {
       let fake: any;
 
       beforeEach(async () => {
         // create a fake on the same plugin(proxy) address.
-
-        console.log({proxy, pluginUUPSUpgradeableArtifact});
-
         fake = await smock.fake(pluginUUPSUpgradeableArtifact, {
           address: proxy,
         });
@@ -2008,9 +2005,9 @@ describe('PluginSetupProcessor', function () {
         // Solidity default values, the below overrides them with the correct data
         // So when PSP calls it, it can expect the same information as if it would call
         // the normal/original `proxy/plugin`.
-        // fake.supportsInterface.whenCalledWith('0xffffffff').returns(false);
-        // fake.supportsInterface.whenCalledWith('0x01ffc9a7').returns(true);
-        // fake.supportsInterface.whenCalledWith('0x41de6830').returns(true);
+        fake.supportsInterface.whenCalledWith('0xffffffff').returns(false);
+        fake.supportsInterface.whenCalledWith('0x01ffc9a7').returns(true);
+        fake.supportsInterface.whenCalledWith('0x41de6830').returns(true);
       });
 
       it('correctly applies updates when plugin setups are same, but UI different', async () => {
