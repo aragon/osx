@@ -33,9 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  const approvers = managementDaoMultisigApproversEnv(network).split(',') || [
-    deployer.address,
-  ];
+  const approvers = managementDaoMultisigApproversEnv(network).split(',');
   const minApprovals = parseInt(
     managementDaoMultisigMinApprovalsEnv(hre.network)
   );
