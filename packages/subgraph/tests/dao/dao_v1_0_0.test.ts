@@ -43,6 +43,10 @@ import {
   ADDRESS_FOUR,
   ERC20_AMOUNT_HALF,
   ERC20_AMOUNT_FULL,
+  ERC20_TOTAL_SUPPLY,
+  TOKEN_NAME,
+  TOKEN_SYMBOL,
+  ERC20_DECIMALS,
 } from '../constants';
 import {
   ExtendedDao,
@@ -989,7 +993,13 @@ describe('handleExecuted', () => {
 
   describe('ERC20 action', () => {
     beforeAll(() => {
-      createERC20TokenCalls(DAO_TOKEN_ADDRESS, '10', 'name', 'symbol', '6');
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL,
+        ERC20_DECIMALS
+      );
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_HALF);
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
 
@@ -1243,7 +1253,12 @@ describe('handleExecuted', () => {
 
   describe('ERC721 action', () => {
     beforeAll(() => {
-      createERC20TokenCalls(DAO_TOKEN_ADDRESS, '10', 'name', 'symbol');
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL
+      );
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
