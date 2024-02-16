@@ -9,7 +9,7 @@ import {GovernanceWrappedERC20} from '../../../generated/templates/TokenVoting/G
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../utils/constants';
 import {supportsInterface} from '../erc165';
 import {generateTokenEntityId} from '../ids';
-import {ERC20_transfer, ERC20_transferFrom, getTransferId} from './common';
+import {ERC20_transfer, ERC20_transferFrom} from './common';
 import {
   generateBalanceEntityId,
   generateDaoEntityId,

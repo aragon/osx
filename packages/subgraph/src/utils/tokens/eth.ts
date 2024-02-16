@@ -1,6 +1,6 @@
 import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
-import {getTransferId, TransferType} from './common';
+import {TransferType} from './common';
 import {
   generateBalanceEntityId,
   generateDaoEntityId,

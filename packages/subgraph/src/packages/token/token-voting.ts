@@ -21,7 +21,6 @@ import {
   generateActionEntityId,
   generatePluginEntityId,
   generateProposalEntityId,
-  generateEntityIdFromAddress,
 } from '@aragon/osx-commons-subgraph';
 import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 

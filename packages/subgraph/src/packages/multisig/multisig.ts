@@ -15,7 +15,6 @@ import {
   MultisigSettingsUpdated,
 } from '../../../generated/templates/Multisig/Multisig';
 import {generateMemberEntityId, generateVoterEntityId} from '../../utils/ids';
-import {getProposalId} from '../../utils/proposals';
 import {
   generateActionEntityId,
   generatePluginEntityId,

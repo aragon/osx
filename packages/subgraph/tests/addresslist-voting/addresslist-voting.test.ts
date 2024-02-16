@@ -14,7 +14,6 @@ import {VOTING_MODES} from '../../src/utils/constants';
 import {
   generateMemberEntityId,
   generateVoteEntityId,
-  generateVoterEntityId,
 } from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
@@ -37,11 +36,7 @@ import {
   ALLOW_FAILURE_MAP,
   PROPOSAL_ENTITY_ID,
 } from '../constants';
-import {
-  createDummyActions,
-  createGetProposalCall,
-  createTotalVotingPowerCall,
-} from '../utils';
+import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
 import {
   createNewMembersAddedEvent,
   createNewVoteCastEvent,
@@ -53,13 +48,13 @@ import {
   createAddresslistVotingProposalEntityState,
 } from './utils';
 import {
-  generateEntityIdFromAddress,
   generatePluginEntityId,
+  createDummyAction,
 } from '@aragon/osx-commons-subgraph';
-import {Address, BigInt, Bytes, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
-let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+let actions = [createDummyAction(DAO_TOKEN_ADDRESS, '0', '0x00000000')];
 
 const daoAddress = Address.fromString(DAO_ADDRESS);
 const daoEntityId = generatePluginEntityId(daoAddress);
