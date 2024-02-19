@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['New', 'Verify'];
+func.tags = ['New', 'Verify', 'VerifyContracts'];
 func.runAtTheEnd = true;
 func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(
