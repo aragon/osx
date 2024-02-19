@@ -7,6 +7,7 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {isLocal, pluginDomainEnv} from '../utils/environment';
 import {
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
@@ -129,7 +130,7 @@ export function getLatestContractAddress(
 
   const osxNetworkName = getNetworkNameByAlias(networkName);
   if (!osxNetworkName) {
-    if (networkName === 'hardhat') {
+    if (isLocal(hre.network)) {
       return '';
     }
     throw new Error(`Failed to find network ${networkName}`);
@@ -165,8 +166,7 @@ export async function createPluginRepo(
   const {network} = hre;
   const signers = await ethers.getSigners();
 
-  const pluginDomain =
-    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
+  const pluginDomain = pluginDomainEnv(network);
   if (
     await isENSDomainRegistered(
       `${subdomain}.${pluginDomain}`,
@@ -587,3 +587,6 @@ export function getManagementDAOMultisigAddress(
   }
   return address;
 }
+
+// hh-deploy cannot process files without default exports
+export default async () => {};

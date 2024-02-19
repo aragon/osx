@@ -1,5 +1,6 @@
 import ensSubdomainRegistrarArtifact from '../../../artifacts/src/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
 import {DAO__factory, ENSRegistry__factory} from '../../../typechain';
+import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {getContractAddress, getENSAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -19,16 +20,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const ensRegistryAddress = await getENSAddress(hre);
 
-  const daoDomain =
-    process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
-  const pluginDomain =
-    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
+  const daoDomain = daoDomainEnv(network);
+  const pluginDomain = pluginDomainEnv(network);
+
   const daoNode = ethers.utils.namehash(daoDomain);
   const pluginNode = ethers.utils.namehash(pluginDomain);
-
-  if (!daoDomain || !pluginDomain) {
-    throw new Error('DAO or Plugin ENS domains have not been set in .env');
-  }
 
   await deploy('DAOENSSubdomainRegistrarProxy', {
     contract: ensSubdomainRegistrarArtifact,

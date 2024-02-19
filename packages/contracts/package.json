@@ -24,6 +24,7 @@
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
+    "deploy:local": "yarn deploy --network localhost --reset",
     "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",

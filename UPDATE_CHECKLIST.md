@@ -30,6 +30,7 @@ This checklist is seen as a guide to update the existing deployment.
 - [ ] If new plugin builds are released
   - [ ] Double-check that the build- and release-metadata is published and updated correctly by the deploy script and contracts
   - [ ] If the plugin is used by the management DAO and the new build includes security relevant changes it must be applied immediately
+- [ ] Check all the tags and `func.dependencies` to ensure the `00-env-check.ts` file is executed at the beginning of the deployment.
 
 ## Update
 

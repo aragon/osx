@@ -1,4 +1,5 @@
 import {ENSRegistry__factory} from '../../../typechain';
+import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {
   getContractAddress,
   getENSAddress,
@@ -14,14 +15,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get ENS subdomains
-  const daoDomain =
-    process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
-  const pluginDomain =
-    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
-
-  if (!daoDomain || !pluginDomain) {
-    throw new Error('DAO or Plugin ENS domains have not been set in .env');
-  }
+  const daoDomain = daoDomainEnv(network);
+  const pluginDomain = pluginDomainEnv(network);
 
   const ensRegistryAddress = await getENSAddress(hre);
   const ensRegistryContract = ENSRegistry__factory.connect(
