@@ -16,35 +16,27 @@ yarn add @aragon/osx-artifacts
 
 To get started running your repository locally:
 
-Copy `.env.example` into a file called `.env` or create a new one with these 3 keys defined:
+1. Install packages from the root folder with `yarn`
+2. Change directory into this package (`/pacakages/contracts`)
+3. Run `yarn build` to compile the contracts
+4. Run `yarn test` to execute the test suite (this can take a while, so see [performance optimizations](#performance-optimizations) for ways to speed up the tests).
 
-```sh
-# keys used for running tests
-HARDHAT_DAO_ENS_DOMAIN=dao.eth
-HARDHAT_PLUGIN_ENS_DOMAIN=plugin.eth
-MANAGEMENT_DAO_SUBDOMAIN=management
-```
+## Deployment
 
-Run these commands on the project's root folder in your terminal:
+Deployments use [hardhat-deploy](https://github.com/wighawag/hardhat-deploy), and follow most of the conventions in the HH deploy docs.
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
-```
+See the [deployment checklist](../../DEPLOYMENT_CHECKLIST.md) for full details on how to deploy the contracts to a proper network.
+
+When testing locally:
+
+1. `yarn deploy` will run the test scripts against the local hardhat node.
+2. `yarn dev` will spin up a persistent hardhat node and execute the deploy script against it automatically.
+3. `yarn deploy:reset` will clear any prior deploy state stored by hardhat deploy.
+4. `yarn deploy:local` will deploy a against a persistent localhost fork, clearing the deploy state between runs
+
+Default values for all required environment variables are provided when running against hardhat, check the [`.env.example`](./.env.example) for details of what these are and what they mean.
+
+The private key provided by default is a hardhat publically known key for `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. Don't use it outside of a local development context.
 
 > Tests can be sped up if needed. See [the test performance optimization](#performance-optimizations) section for more info.
 

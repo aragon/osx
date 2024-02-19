@@ -63,7 +63,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get the plugin factory address
   let pluginRepoFactoryAddr: string;
-  if (network.name === 'localhost' || network.name === 'hardhat' || network.name === 'coverage') {
+  if (isLocal(network)) {
     const hardhatForkNetwork = process.env.HARDHAT_FORK_NETWORK
       ? process.env.HARDHAT_FORK_NETWORK
       : 'mainnet';

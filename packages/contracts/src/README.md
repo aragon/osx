@@ -14,37 +14,20 @@ yarn add @aragon/osx-artifacts
 
 ## Get Started
 
-To get started running your repository locally:
-
-Copy `.env.example` into a file called `.env` or create a new one with these 3 keys defined:
+To get started running your repository locally, run these commands on the project's root folder in your terminal:
 
 ```sh
-# keys used for running tests
-HARDHAT_DAO_ENS_DOMAIN=dao.eth
-HARDHAT_PLUGIN_ENS_DOMAIN=plugin.eth
-MANAGEMENT_DAO_SUBDOMAIN=management
+# compile contracts
+yarn build
+
+# run tests
+yarn test
+
+# deploy locally
+yarn deploy
 ```
 
-Run these commands on the project's root folder in your terminal:
-
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
-```
+See the [package.json](./package.json) for all available scripts. Alternatively, consult the hardhat documentation for additional tasks and commands.
 
 ## Documentation
 

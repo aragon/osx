@@ -13,7 +13,6 @@ import {
   START_DATE,
   ALLOW_FAILURE_MAP,
 } from '../constants';
-import {createDummyActions} from '../utils';
 import {
   createNewProposalCreatedEvent,
   createProposalExecutedEvent,
@@ -23,6 +22,7 @@ import {
   generateDaoEntityId,
   generatePluginEntityId,
   generateProposalEntityId,
+  createDummyAction,
 } from '@aragon/osx-commons-subgraph';
 import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
@@ -43,7 +43,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   adminPlugin.save();
 
   // create event
-  let actions = createDummyActions(ADDRESS_TWO, actionValue, actionData);
+  let actions = [createDummyAction(ADDRESS_TWO, actionValue, actionData)];
   let event = createNewProposalCreatedEvent(
     PLUGIN_PROPOSAL_ID,
     ADDRESS_ONE,

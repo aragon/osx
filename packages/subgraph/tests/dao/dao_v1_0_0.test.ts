@@ -43,6 +43,10 @@ import {
   ADDRESS_FOUR,
   ERC20_AMOUNT_HALF,
   ERC20_AMOUNT_FULL,
+  ERC20_TOTAL_SUPPLY,
+  TOKEN_NAME,
+  TOKEN_SYMBOL,
+  ERC20_DECIMALS,
 } from '../constants';
 import {
   ExtendedDao,
@@ -60,11 +64,6 @@ import {
   ExtendedNativeTransfer,
 } from '../helpers/extended-schema';
 import {
-  createDummyActions,
-  createERC1155TokenCalls,
-  createTokenCalls,
-} from '../utils';
-import {
   getBalanceOf,
   createNewExecutedEvent,
   createDaoEntityState,
@@ -81,6 +80,9 @@ import {
   generateTokenIdBalanceEntityId,
   generateTransactionActionsProposalEntityId,
   generateTransferEntityId,
+  createDummyAction,
+  createERC20TokenCalls,
+  createERC1155TokenCalls,
 } from '@aragon/osx-commons-subgraph';
 import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
 import {
@@ -120,13 +122,13 @@ function createExecutedEvent(
       isDynamic
     );
 
-    let action = createDummyActions(
+    let action = createDummyAction(
       DAO_TOKEN_ADDRESS,
       '0',
       functionData.toHexString()
     );
 
-    actions.push(action[0]);
+    actions.push(action);
   }
 
   if (execResults.length == 0) {
@@ -264,8 +266,6 @@ describe('handleDeposited: ', () => {
     daoTokenContract.mockCall_createTokenCalls(totalSupply);
     daoTokenContract.mockCall_balanceOf(DAO_ADDRESS, ERC20_AMOUNT_HALF);
     daoTokenContract.mockCall_balanceOf(DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
-
-    createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', null, null);
 
     getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
     getSupportsInterface(
@@ -993,7 +993,13 @@ describe('handleExecuted', () => {
 
   describe('ERC20 action', () => {
     beforeAll(() => {
-      createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', '6', '10');
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL,
+        ERC20_DECIMALS
+      );
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_HALF);
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
 
@@ -1247,7 +1253,12 @@ describe('handleExecuted', () => {
 
   describe('ERC721 action', () => {
     beforeAll(() => {
-      createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', null, null);
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL
+      );
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);

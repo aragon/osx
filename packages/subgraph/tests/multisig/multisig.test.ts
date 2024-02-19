@@ -27,7 +27,6 @@ import {
   END_DATE,
   ALLOW_FAILURE_MAP,
 } from '../constants';
-import {createDummyActions} from '../utils';
 import {
   createNewMembersAddedEvent,
   createNewApprovedEvent,
@@ -43,16 +42,15 @@ import {
 import {
   generatePluginEntityId,
   generateProposalEntityId,
+  createDummyAction,
 } from '@aragon/osx-commons-subgraph';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
-let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+let actions = [createDummyAction(DAO_TOKEN_ADDRESS, '0', '0x00000000')];
 
 const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
 const pluginEntityId = generatePluginEntityId(pluginAddress);
-const daoAddress = Address.fromString(DAO_ADDRESS);
-const daoEntityId = generatePluginEntityId(daoAddress);
 const pluginProposalId = BigInt.fromString(PLUGIN_PROPOSAL_ID);
 
 test('Run Multisig (handleProposalCreated) mappings with mock event', () => {

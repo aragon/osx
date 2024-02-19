@@ -32,6 +32,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 - [ ] Set the amount of minimum approvals the management DAO needs to `MANAGEMENT_DAO_MULTISIG_MINAPPROVALS` in `.env`
 - [ ] If new plugin builds are released
   - [ ] Double-check that the build- and release-metadata is published correctly by the deploy script and contracts
+- [ ] Check all the tags and `func.dependencies` to ensure the `00-env-check.ts` file is executed at the beginning of the deployment.
 
 ## Deployment
 

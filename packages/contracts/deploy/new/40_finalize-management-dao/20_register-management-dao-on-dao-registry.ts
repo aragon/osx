@@ -1,5 +1,9 @@
 import {DAO__factory, DAORegistry__factory} from '../../../typechain';
 import {
+  daoDomainEnv,
+  managementDaoSubdomainEnv,
+} from '../../../utils/environment';
+import {
   getContractAddress,
   getENSAddress,
   isENSDomainRegistered,
@@ -14,9 +18,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGEMENT_DAO_SUBDOMAIN || '';
-  const daoDomain =
-    process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
+  const daoSubdomain = managementDaoSubdomainEnv(network);
+  const daoDomain = daoDomainEnv(network);
 
   if (!daoSubdomain)
     throw new Error('ManagementDAO subdomain has not been set in .env');

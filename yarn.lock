@@ -9,13 +9,6 @@
   dependencies:
     tslib "^2.6.2"
 
-"@aragon/osx-commons-subgraph@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-subgraph/-/osx-commons-subgraph-0.0.3.tgz#27abe61e3cbae2c73faa8731edb43050ce229fe4"
-  integrity sha512-3p/1tXg5xySebYQ2T8+M/2zpfRSf+uXrtHywXgfZEa7okr9NmnoqCkl8HawRiGJ745Sw34ZDMsjUzONAJCbSeQ==
-  dependencies:
-    "@graphprotocol/graph-ts" "0.31.0"
-
 "@aragon/osx-commons-contracts@^1.4.0-alpha.2":
   version "1.4.0-alpha.2"
   resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.2.tgz#4b70f826be3fffb1f0f0a90d4b06992485958c87"
@@ -43,6 +36,13 @@
     graphql-request "^4.3.0"
     ipfs-http-client "^51.0.0"
     yup "^1.2.0"
+
+"@aragon/osx-commons-subgraph@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-subgraph/-/osx-commons-subgraph-0.0.4.tgz#2aa52f3089d21189c9152d2f3d14c0d7c66d129f"
+  integrity sha512-cqhusJ3HNvMx+t9lXfN+Hy/5ipefNs1Tdxe+y0GvD4qgBMVU4tCbsxOpB9U2JEJNBCzFQj4E/872FFLpIErB4w==
+  dependencies:
+    "@graphprotocol/graph-ts" "0.31.0"
 
 "@aragon/osx-ethers-v1.0.0@npm:@aragon/osx-ethers@1.2.1":
   version "1.2.1"

@@ -12,6 +12,11 @@ import {
   PluginRepoRegistry__factory,
   PluginRepo__factory,
 } from '../../typechain';
+import {
+  managementDaoMultisigApproversEnv,
+  managementDaoMultisigListedOnlyEnv,
+  managementDaoMultisigMinApprovalsEnv,
+} from '../../utils/environment';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
 import {
   DAO_PERMISSIONS,
@@ -63,21 +68,19 @@ describe('Management DAO', function () {
     // deploy framework
     await deployAll();
 
-    if (
-      process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS === undefined ||
-      process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS === undefined ||
-      process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === undefined
-    ) {
-      throw new Error('Management DAO Multisig settings not set in .env');
+    const approversEnv = managementDaoMultisigApproversEnv(hre.network);
+
+    minApprovals = parseInt(managementDaoMultisigMinApprovalsEnv(hre.network));
+    listedOnly = managementDaoMultisigListedOnlyEnv(hre.network) === 'true';
+
+    if (!approversEnv || !minApprovals || !listedOnly) {
+      throw new Error(
+        'Management DAO Multisig settings not set in .env or fallbacks'
+      );
     }
 
-    listedOnly = process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === 'true';
-
-    minApprovals = parseInt(process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS);
-
     // Get approver addresses
-    const approverAddresses =
-      process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS.split(',');
+    const approverAddresses = approversEnv.split(',');
 
     // Impersonate them as signers
     approvers = await Promise.all(
