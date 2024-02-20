@@ -42,7 +42,11 @@ export const daoDomainEnv = (network: Network): string =>
   env(network, `${network.name.toUpperCase()}_DAO_ENS_DOMAIN`, 'dao.eth');
 
 export const pluginDomainEnv = (network: Network): string =>
-  env(network, `${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`, 'plugin.eth');
+  env(
+    network,
+    `${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`,
+    'plugin.dao.eth'
+  );
 
 export const managementDaoSubdomainEnv = (network: Network): string =>
   env(network, 'MANAGEMENT_DAO_SUBDOMAIN', 'management');
