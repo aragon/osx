@@ -50,7 +50,7 @@ describe('detect network', () => {
 
   it('sets the correct fallbacks for each environment variable', () => {
     expect(daoDomainEnv(network)).to.equal('dao.eth');
-    expect(pluginDomainEnv(network)).to.equal('plugin.eth');
+    expect(pluginDomainEnv(network)).to.equal('plugin.dao.eth');
     expect(managementDaoSubdomainEnv(network)).to.equal('management');
     expect(managementDaoMultisigApproversEnv(network)).to.equal(
       HARDHAT_ACCOUNTS[0].ADDRESS
@@ -63,8 +63,8 @@ describe('detect network', () => {
   it('string interpolates the ENS subdomains', () => {
     const network: Network = {name: 'FakeNet'} as unknown as Network;
     process.env['FAKENET_DAO_ENS_DOMAIN'] = 'mydao.eth';
-    process.env['FAKENET_PLUGIN_ENS_DOMAIN'] = 'myplugin.eth';
+    process.env['FAKENET_PLUGIN_ENS_DOMAIN'] = 'myplugin.dao.eth';
     expect(daoDomainEnv(network)).to.equal('mydao.eth');
-    expect(pluginDomainEnv(network)).to.equal('myplugin.eth');
+    expect(pluginDomainEnv(network)).to.equal('myplugin.dao.eth');
   });
 });
