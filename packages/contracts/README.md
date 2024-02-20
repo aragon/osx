@@ -58,19 +58,15 @@ Please do not use the issue tracker for security issues.
 
 ## Etherscan verification
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum testnet that's supported by Etherscan, such as [goerli](https://goerli.etherscan.io) or [sepolia](https://sepolia.etherscan.io).
+Verification of contracts is currently handled by the etherscan verify plugin, invoked as a hardhat deploy stage. Contracts are bound to the HRE during deployment and then used as part of verification.
 
-In this project, copy the `.env.example` file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Goerli node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+Make sure you have your Etherscan key setup in the HH config before running the deploy script.
 
-```shell
-hardhat run --network goerli scripts/sample-script.ts
-```
+### Proxy Verification
 
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
+To avoid having to manually set 'Is this a Proxy?' in etherscan, you may call the Proxy Verification script, once your contracts have been verified. To do this run: `yarn verifyProxies --network <network>`.
 
-```shell
-npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
-```
+This can be run multiple times provided you haven't used the `--reset` flag to clear the deployment data. The etherscan API can be a little flaky at times so be patient with it and try multiple times if necessary.
 
 ## Testing with Previous Contract Versions
 
