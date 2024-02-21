@@ -1,9 +1,13 @@
 import networks from '../networks';
+import {
+  AllDeployments,
+  NameAndAddress,
+  CollectedProxyWithImplementation,
+} from '../types/etherscan';
 import {ChainConfig} from '@nomicfoundation/hardhat-verify/dist/src/types';
 import axios, {AxiosRequestConfig} from 'axios';
 import fs from 'fs';
 import HRE from 'hardhat';
-import {Deployment} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import qs from 'qs';
 import {file} from 'tmp-promise';
@@ -83,8 +87,6 @@ export const runTaskWithRetry = async (
   }
 };
 
-export type AllDeployments = {[name: string]: Deployment};
-
 /**
  * @returns All contracts with the name containing 'Proxy' from the deployments stored on disk
  */
@@ -105,11 +107,6 @@ export const fetchImplementations = (deployments: AllDeployments) =>
     .map(([name, deploy]) => ({name, address: deploy.address.toLowerCase()}))
     .filter(deployment => deployment.name.match(/Implementation$/g));
 
-export type CollectedProxyWithImplementation = {
-  name: string;
-  proxy: {name: string; address: string};
-  implementation: {name: string; address: string} | undefined;
-};
 export const collectProxyWithImplementation = (
   deployments: AllDeployments
 ): CollectedProxyWithImplementation[] => {
@@ -222,8 +219,8 @@ export const generateVerifyRequest = (
  */
 export const handleLinkProxyRequest = async (
   url: string,
-  proxy: {address: string; name: string},
-  implementation: {address: string; name: string} | undefined
+  proxy: NameAndAddress,
+  implementation: NameAndAddress | undefined
 ): Promise<void> => {
   if (!implementation) {
     console.warn(
