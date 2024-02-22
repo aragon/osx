@@ -6,8 +6,8 @@ title: Creating a DAO
 
 Two framework contracts manage the `DAO` contract creation process:
 
-- The [`DAOFactory`](../../../03-reference-guide/framework/dao/DAOFactory.md)
-- The [`DAORegistry`](../../../03-reference-guide/framework/dao/DAORegistry.md).
+- The [`DAOFactory`](../../../reference-guide/framework/dao/DAOFactory)
+- The [`DAORegistry`](../../../reference-guide/framework/dao/DAORegistry).
 
 <!-- Add subgraphic from the framework overview main graphic-->
 
@@ -28,11 +28,11 @@ The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegis
 
 2. Registers the new contract in the [`DAORegistry`](#daoregistry).
 
-3. Installs the plugins using the `PluginSetupProcessor` (see also the section about [the plugin setup process](../02-plugin-management/02-plugin-setup/index.md).
+3. Installs the plugins using the `PluginSetupProcessor` (see also the section about [the plugin setup process](../plugin-management/plugin-setup/)).
 
-4. Sets the [native permissions](../../01-core/02-permissions/index.md/#permissions-native-to-the-dao-contract) of the `DAO` and revokes its own ownership.
+4. Sets the [native permissions](../../core/permissions#permissions-native-to-the-dao-contract) of the `DAO` and revokes its own ownership.
 
-For more details visit the [`DAOFactory` reference guide entry](../../../03-reference-guide/framework/dao/DAOFactory.md).
+For more details visit the [`DAOFactory` reference guide entry](../../../reference-guide/framework/dao/DAOFactory).
 
 ### `DAORegistry`
 
@@ -48,8 +48,8 @@ function register(
 
 requiring the `REGISTER_DAO_PERMISSION_ID` permission currently held only by the `DAOFactory`.
 
-If the requested ENS `subdomain` name [is valid](../03-ens-names.md) and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
+If the requested ENS `subdomain` name [is valid](../ens-names) and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
 If the `subdomain` parameter is non-empty (not `""`) and still available, the ENS name will be registered.
 If the registration was successful, the DAO name, contract and creator addresses are emitted in an event.
 
-For more details visit the [`DAORegistry` reference guide entry](../../../03-reference-guide/framework/dao/DAORegistry.md).
+For more details visit the [`DAORegistry` reference guide entry](../../../reference-guide/framework/dao/DAORegistry).

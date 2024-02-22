@@ -4,10 +4,10 @@ title: ENS Names
 
 ## Unique DAO and Plugin Repo Names
 
-To make DAOs and plugin repositories easily identifiable in the Aragon OSx ecosystem, we assign unique ENS names to them upon registration during the [DAO creation](./01-dao-creation/index.md/) and [plugin publishing](./02-plugin-management/01-plugin-repo/01-plugin-repo-creation.md) processes.
+To make DAOs and plugin repositories easily identifiable in the Aragon OSx ecosystem, we assign unique ENS names to them upon registration during the [DAO creation](./dao-creation/) and [plugin publishing](./plugin-management/plugin-repo/plugin-repo-creation) processes.
 
 :::info
-You can skip registering an ENS name for your DAO under the `dao.eth` by leaving the [`DAOSettings.subdomain` field](../../03-reference-guide/framework/dao/DAOFactory.md#public-struct-daosettings) empty when calling the [`createDao`](../../03-reference-guide/framework/dao/DAOFactory.md#external-function-createdao) function.
+You can skip registering an ENS name for your DAO under the `dao.eth` by leaving the [`DAOSettings.subdomain` field](../../reference-guide/framework/dao/DAOFactory#public-struct-daosettings) empty when calling the [`createDao`](../../reference-guide/framework/dao/DAOFactory#external-function-createdao) function.
 :::
 
 ### Allowed Character Set
