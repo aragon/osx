@@ -392,8 +392,8 @@ export function createTokenVotingMember(
   balance: string
 ): string {
   const memberEntityId = generateMemberEntityId(
-    Address.fromString(address),
-    Address.fromString(plugin) // uses other plugin address to make sure that the code reuses the entity
+    Address.fromString(plugin), // uses other plugin address to make sure that the code reuses the entity
+    Address.fromString(address)
   );
 
   const user = new TokenVotingMember(memberEntityId);
@@ -406,4 +406,35 @@ export function createTokenVotingMember(
   user.save();
 
   return memberEntityId;
+}
+
+export function getDelegatee(
+  contractAddress: string,
+  account: string,
+  returns: string | null
+): void {
+  const returnsValue = returns
+    ? ethereum.Value.fromAddress(Address.fromString(returns))
+    : ethereum.Value.fromAddress(Address.zero());
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([returnsValue]);
+}
+
+export function getVotes(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'getVotes',
+    'getVotes(address):(uint256)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }

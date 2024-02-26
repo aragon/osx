@@ -5,23 +5,64 @@ import {
   DelegateVotesChanged,
 } from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
+import {ADDRESS_ZERO} from '../../utils/constants';
 import {generateMemberEntityId} from '../../utils/ids';
-import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
+import {Address, BigInt, dataSource, log, store} from '@graphprotocol/graph-ts';
 
-function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
+function getERC20Balance(user: Address, tokenAddress: Address): BigInt {
+  let contract = GovernanceERC20Contract.bind(tokenAddress);
+  let balance = contract.balanceOf(user);
+  return balance;
+}
+
+function getDelegation(user: Address, tokenAddress: Address): string | null {
+  let contract = GovernanceERC20Contract.bind(tokenAddress);
+  let delegate = contract.delegates(user);
+
+  return delegate === Address.fromString(ADDRESS_ZERO)
+    ? null
+    : delegate.toHexString();
+}
+
+function getDelegateeId(
+  user: Address,
+  tokenAddress: Address,
+  pluginId: string
+): string | null {
+  let delegatee = getDelegation(user, tokenAddress);
+  return delegatee
+    ? generateMemberEntityId(
+        Address.fromString(pluginId),
+        Address.fromString(user.toHexString())
+      )
+    : null;
+}
+
+function getVotingPower(user: Address, tokenAddress: Address): BigInt {
+  let contract = GovernanceERC20Contract.bind(tokenAddress);
+  let votingPower = contract.getVotes(user);
+  return votingPower;
+}
+
+function getOrCreateMember(
+  user: Address,
+  pluginId: string,
+  tokenAddress: Address
+): TokenVotingMember {
   let memberEntityId = generateMemberEntityId(
-    user,
-    Address.fromString(pluginId)
+    Address.fromString(pluginId),
+    user
   );
   let member = TokenVotingMember.load(memberEntityId);
+
   if (!member) {
     member = new TokenVotingMember(memberEntityId);
     member.address = user;
-    member.balance = BigInt.zero();
+    member.balance = getERC20Balance(user, tokenAddress);
     member.plugin = pluginId;
 
-    member.delegatee = null;
-    member.votingPower = BigInt.zero();
+    member.delegatee = getDelegateeId(user, tokenAddress, pluginId);
+    member.votingPower = getVotingPower(user, tokenAddress);
   }
 
   return member;
@@ -30,15 +71,20 @@ function getOrCreateMember(user: Address, pluginId: string): TokenVotingMember {
 export function handleTransfer(event: Transfer): void {
   let context = dataSource.context();
   let pluginId = context.getString('pluginId');
+  let tokenAddress = Address.fromString(context.getString('tokenAddress'));
 
   if (event.params.from != Address.zero()) {
-    let fromMember = getOrCreateMember(event.params.from, pluginId);
+    let fromMember = getOrCreateMember(
+      event.params.from,
+      pluginId,
+      tokenAddress
+    );
     fromMember.balance = fromMember.balance.minus(event.params.value);
     fromMember.save();
   }
 
   if (event.params.to != Address.zero()) {
-    let toMember = getOrCreateMember(event.params.to, pluginId);
+    let toMember = getOrCreateMember(event.params.to, pluginId, tokenAddress);
     toMember.balance = toMember.balance.plus(event.params.value);
     toMember.save();
   }
@@ -47,30 +93,51 @@ export function handleTransfer(event: Transfer): void {
 export function handleDelegateChanged(event: DelegateChanged): void {
   let context = dataSource.context();
   let pluginId = context.getString('pluginId');
+  let tokenAddress = Address.fromString(context.getString('tokenAddress'));
+
+  log.info('DelegateChanged delegator: {}', [
+    event.params.delegator.toHexString(),
+  ]);
+  log.info('DelegateChanged fromDelegate: {}', [
+    event.params.fromDelegate.toHexString(),
+  ]);
+  log.info('DelegateChanged toDelegate: {}', [
+    event.params.toDelegate.toHexString(),
+  ]);
+
   const toDelegate = event.params.toDelegate;
 
   // make sure `fromDelegate` &  `toDelegate`are members
   if (event.params.fromDelegate != Address.zero()) {
-    let fromMember = getOrCreateMember(event.params.fromDelegate, pluginId);
+    let fromMember = getOrCreateMember(
+      event.params.fromDelegate,
+      pluginId,
+      tokenAddress
+    );
+    log.info('saving from member {}', [fromMember.id]);
     fromMember.save();
-  }
-  if (toDelegate != Address.zero()) {
-    let toMember = getOrCreateMember(toDelegate, pluginId);
-    toMember.save();
   }
 
   // make sure `delegator` is member and set delegatee
   if (event.params.delegator != Address.zero()) {
-    let delegator = getOrCreateMember(event.params.delegator, pluginId);
+    let delegator = getOrCreateMember(
+      event.params.delegator,
+      pluginId,
+      tokenAddress
+    );
 
     // set delegatee
-    let delegatee: string | null = null;
     if (toDelegate != Address.zero()) {
-      delegatee = [toDelegate.toHexString(), pluginId].join('_');
-
-      delegator.delegatee = delegatee;
+      const delegatee = getOrCreateMember(toDelegate, pluginId, tokenAddress);
+      const delegateeId = generateMemberEntityId(
+        Address.fromString(pluginId),
+        Address.fromBytes(delegatee.address)
+      );
+      log.info('saving delegatee {}', [delegateeId]);
+      delegatee.save();
+      delegator.delegatee = delegateeId;
     }
-
+    log.info('saving delegator {}', [delegator.id]);
     delegator.save();
   }
 }
@@ -82,7 +149,9 @@ export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
 
   const context = dataSource.context();
   const pluginId = context.getString('pluginId');
-  let member = getOrCreateMember(delegate, pluginId);
+  const tokenAddress = Address.fromString(context.getString('tokenAddress'));
+
+  let member = getOrCreateMember(delegate, pluginId, tokenAddress);
 
   if (isZeroBalanceAndVotingPower(member.balance, newVotingPower)) {
     if (shouldRemoveMember(event.address, delegate)) {

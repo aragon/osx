@@ -271,13 +271,15 @@ export function handleMembershipContractAnnounced(
       return;
     }
     packageEntity.token = tokenAddress as string;
-
     packageEntity.save();
 
     // Both GovernanceWrappedERC20/GovernanceERC20 use the `Transfer` event, so
     // It's safe to create the same type of template for them.
     let context = new DataSourceContext();
     context.setString('pluginId', pluginEntityId);
+
+    // add the token address so we can fetch the user's balance on initialization
+    context.setString('tokenAddress', token.toHexString());
     GovernanceERC20.createWithContext(event.params.definingContract, context);
   }
 }
