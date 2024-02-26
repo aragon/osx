@@ -7,7 +7,7 @@ import {
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 import {ADDRESS_ZERO} from '../../utils/constants';
 import {generateMemberEntityId} from '../../utils/ids';
-import {Address, BigInt, dataSource, log, store} from '@graphprotocol/graph-ts';
+import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 function getERC20Balance(user: Address, tokenAddress: Address): BigInt {
   let contract = GovernanceERC20Contract.bind(tokenAddress);
@@ -44,7 +44,14 @@ function getVotingPower(user: Address, tokenAddress: Address): BigInt {
   return votingPower;
 }
 
-class MemberResult {
+/**
+ * A container for the result of the `getOrCreateMember` function.
+ * @param entity - The `TokenVotingMember` entity.
+ * @param createdNew - A boolean indicating whether the entity was created new
+ * or if false it was previously created. If the entity was created new, it already
+ * has the latest balance of the user, so no need to then update the balance.
+ */
+class TokenVotingMemberResult {
   entity: TokenVotingMember;
   createdNew: boolean;
 
@@ -58,7 +65,7 @@ function getOrCreateMember(
   user: Address,
   pluginId: string,
   tokenAddress: Address
-): MemberResult {
+): TokenVotingMemberResult {
   let memberEntityId = generateMemberEntityId(
     Address.fromString(pluginId),
     user
@@ -77,7 +84,7 @@ function getOrCreateMember(
     member.votingPower = getVotingPower(user, tokenAddress);
   }
 
-  return new MemberResult(member, createdNew);
+  return new TokenVotingMemberResult(member, createdNew);
 }
 
 export function handleTransfer(event: Transfer): void {
