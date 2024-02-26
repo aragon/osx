@@ -12,10 +12,12 @@ import {
   ADDRESS_THREE,
   DAO_TOKEN_ADDRESS,
   ADDRESS_SEVEN,
+  ADDRESS_ZERO,
 } from '../constants';
 import {getBalanceOf} from '../dao/utils';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 import {
+  createNewDelegateChangedEvent,
   createNewERC20TransferEvent,
   createTokenVotingMember,
   getDelegatee,
@@ -349,6 +351,11 @@ describe('Governance ERC20', () => {
       getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
       getBalanceOf(DAO_TOKEN_ADDRESS, thirdAddress.toHexString(), '0');
       getVotes(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
+      getVotes(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getVotes(DAO_TOKEN_ADDRESS, thirdAddress.toHexString(), '0');
+      getDelegatee(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), null);
+      getDelegatee(DAO_TOKEN_ADDRESS, toAddress.toHexString(), null);
+      getDelegatee(DAO_TOKEN_ADDRESS, thirdAddress.toHexString(), null);
     });
 
     test('it should create a member from `fromDelegate`.', () => {
@@ -390,7 +397,7 @@ describe('Governance ERC20', () => {
       member.delegatee = expectedDelegatee;
       member.assertEntity();
 
-      assert.entityCount('TokenVotingMember', 1);
+      assert.entityCount('TokenVotingMember', 2);
       assert.fieldEquals(
         'TokenVotingMember',
         member.id,
@@ -602,6 +609,92 @@ describe('Governance ERC20', () => {
       // memberTwo should not be deleted because it has no (balance and voting power), but it delegates to another address.
       assert.fieldEquals('TokenVotingMember', memberTwo.id, 'id', memberTwo.id);
       assert.entityCount('TokenVotingMember', 2);
+    });
+
+    test("It should initialize with the user's existing voting power and delegation, if she has any", () => {
+      // constants
+      const STARTING_BALANCE = '10';
+      const TRANSFER = '3';
+      const REMAINING = '7';
+
+      // mocked calls
+      getBalanceOf(
+        DAO_TOKEN_ADDRESS,
+        fromAddress.toHexString(),
+        STARTING_BALANCE
+      );
+      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getVotes(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), STARTING_BALANCE);
+      getVotes(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getDelegatee(
+        DAO_TOKEN_ADDRESS,
+        fromAddress.toHexString(),
+        fromAddress.toHexString()
+      );
+      getDelegatee(DAO_TOKEN_ADDRESS, toAddress.toHexString(), null);
+
+      const memberEntityIdFrom = generateMemberEntityId(
+        pluginAddress,
+        fromAddress
+      );
+
+      const memberEntityIdFromSecondPlugin = generateMemberEntityId(
+        pluginAddressSecond,
+        Address.fromString(fromAddressHexString)
+      );
+
+      const memberEntityIdTo = generateMemberEntityId(
+        pluginAddressSecond,
+        Address.fromString(toAddressHexString)
+      );
+
+      const memberEntityIdToSecondPlugin = generateMemberEntityId(
+        pluginAddressSecond,
+        Address.fromString(toAddressHexString)
+      );
+
+      // delegate to self
+      const delegateChangedEvent = createNewDelegateChangedEvent(
+        fromAddressHexString,
+        fromAddressHexString,
+        fromAddressHexString,
+        DAO_TOKEN_ADDRESS
+      );
+
+      handleDelegateChanged(delegateChangedEvent);
+
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityIdFrom,
+        'votingPower',
+        STARTING_BALANCE
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityIdFrom,
+        'delegatee',
+        memberEntityIdFrom
+      );
+
+      // now do the delegation in the context of the second plugin
+      setContext(pluginEntityIdSecond, DAO_TOKEN_ADDRESS);
+      handleDelegateChanged(delegateChangedEvent);
+
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityIdFromSecondPlugin,
+        'votingPower',
+        STARTING_BALANCE
+      );
+      assert.fieldEquals(
+        'TokenVotingMember',
+        memberEntityIdFromSecondPlugin,
+        'delegatee',
+        memberEntityIdFromSecondPlugin
+      );
+
+      // set the context back to the first plugin
+      setContext(pluginEntityId, DAO_TOKEN_ADDRESS);
     });
   });
 });

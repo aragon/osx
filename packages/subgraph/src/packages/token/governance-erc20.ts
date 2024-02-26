@@ -95,16 +95,6 @@ export function handleDelegateChanged(event: DelegateChanged): void {
   let pluginId = context.getString('pluginId');
   let tokenAddress = Address.fromString(context.getString('tokenAddress'));
 
-  log.info('DelegateChanged delegator: {}', [
-    event.params.delegator.toHexString(),
-  ]);
-  log.info('DelegateChanged fromDelegate: {}', [
-    event.params.fromDelegate.toHexString(),
-  ]);
-  log.info('DelegateChanged toDelegate: {}', [
-    event.params.toDelegate.toHexString(),
-  ]);
-
   const toDelegate = event.params.toDelegate;
 
   // make sure `fromDelegate` &  `toDelegate`are members
@@ -114,7 +104,6 @@ export function handleDelegateChanged(event: DelegateChanged): void {
       pluginId,
       tokenAddress
     );
-    log.info('saving from member {}', [fromMember.id]);
     fromMember.save();
   }
 
@@ -133,11 +122,9 @@ export function handleDelegateChanged(event: DelegateChanged): void {
         Address.fromString(pluginId),
         Address.fromBytes(delegatee.address)
       );
-      log.info('saving delegatee {}', [delegateeId]);
       delegatee.save();
       delegator.delegatee = delegateeId;
     }
-    log.info('saving delegator {}', [delegator.id]);
     delegator.save();
   }
 }
