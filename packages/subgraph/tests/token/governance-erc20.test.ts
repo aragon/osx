@@ -12,7 +12,6 @@ import {
   ADDRESS_THREE,
   DAO_TOKEN_ADDRESS,
   ADDRESS_SEVEN,
-  ADDRESS_ZERO,
 } from '../constants';
 import {getBalanceOf} from '../dao/utils';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
@@ -36,7 +35,6 @@ import {
   dataSourceMock,
   test,
   describe,
-  mockFunction,
 } from 'matchstick-as';
 
 // mock plugins
@@ -81,12 +79,12 @@ describe('Governance ERC20', () => {
         ONE_ETH
       );
 
-      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), ONE_ETH);
-      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), ONE_ETH);
       getDelegatee(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), null);
       getDelegatee(DAO_TOKEN_ADDRESS, toAddress.toHexString(), null);
-      getVotes(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), ONE_ETH);
-      getVotes(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getVotes(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
+      getVotes(DAO_TOKEN_ADDRESS, toAddress.toHexString(), ONE_ETH);
 
       handleTransfer(mockEvent);
 
@@ -119,8 +117,8 @@ describe('Governance ERC20', () => {
         ONE_ETH
       );
 
-      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), ONE_ETH);
-      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), ONE_ETH);
 
       handleTransfer(mockEvent);
 
@@ -164,8 +162,8 @@ describe('Governance ERC20', () => {
         ONE_ETH
       );
 
-      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), ONE_ETH + '0');
-      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), ONE_ETH + '0');
 
       handleTransfer(mockEvent);
       assert.fieldEquals(
@@ -244,12 +242,8 @@ describe('Governance ERC20', () => {
       const REMAINING = '7';
 
       // mocked calls
-      getBalanceOf(
-        DAO_TOKEN_ADDRESS,
-        fromAddress.toHexString(),
-        STARTING_BALANCE
-      );
-      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), '0');
+      getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), REMAINING);
+      getBalanceOf(DAO_TOKEN_ADDRESS, toAddress.toHexString(), TRANSFER);
 
       const memberEntityIdFrom = createTokenVotingMember(
         fromAddressHexString,

@@ -44,18 +44,30 @@ function getVotingPower(user: Address, tokenAddress: Address): BigInt {
   return votingPower;
 }
 
+class MemberResult {
+  entity: TokenVotingMember;
+  createdNew: boolean;
+
+  constructor(entity: TokenVotingMember, createNew: boolean) {
+    this.entity = entity;
+    this.createdNew = createNew;
+  }
+}
+
 function getOrCreateMember(
   user: Address,
   pluginId: string,
   tokenAddress: Address
-): TokenVotingMember {
+): MemberResult {
   let memberEntityId = generateMemberEntityId(
     Address.fromString(pluginId),
     user
   );
+  let createdNew = false;
   let member = TokenVotingMember.load(memberEntityId);
 
   if (!member) {
+    createdNew = true;
     member = new TokenVotingMember(memberEntityId);
     member.address = user;
     member.balance = getERC20Balance(user, tokenAddress);
@@ -65,7 +77,7 @@ function getOrCreateMember(
     member.votingPower = getVotingPower(user, tokenAddress);
   }
 
-  return member;
+  return new MemberResult(member, createdNew);
 }
 
 export function handleTransfer(event: Transfer): void {
@@ -74,18 +86,24 @@ export function handleTransfer(event: Transfer): void {
   let tokenAddress = Address.fromString(context.getString('tokenAddress'));
 
   if (event.params.from != Address.zero()) {
-    let fromMember = getOrCreateMember(
-      event.params.from,
-      pluginId,
-      tokenAddress
-    );
-    fromMember.balance = fromMember.balance.minus(event.params.value);
+    let result = getOrCreateMember(event.params.from, pluginId, tokenAddress);
+    let fromMember = result.entity;
+
+    // in the case of an existing member, update the balance
+    if (!result.createdNew) {
+      fromMember.balance = fromMember.balance.minus(event.params.value);
+    }
     fromMember.save();
   }
 
   if (event.params.to != Address.zero()) {
-    let toMember = getOrCreateMember(event.params.to, pluginId, tokenAddress);
-    toMember.balance = toMember.balance.plus(event.params.value);
+    let result = getOrCreateMember(event.params.to, pluginId, tokenAddress);
+    let toMember = result.entity;
+
+    // in the case of an existing member, update the balance
+    if (!result.createdNew) {
+      toMember.balance = toMember.balance.plus(event.params.value);
+    }
     toMember.save();
   }
 }
@@ -99,25 +117,31 @@ export function handleDelegateChanged(event: DelegateChanged): void {
 
   // make sure `fromDelegate` &  `toDelegate`are members
   if (event.params.fromDelegate != Address.zero()) {
-    let fromMember = getOrCreateMember(
+    let resultFromDelegate = getOrCreateMember(
       event.params.fromDelegate,
       pluginId,
       tokenAddress
     );
-    fromMember.save();
+    resultFromDelegate.entity.save();
   }
 
   // make sure `delegator` is member and set delegatee
   if (event.params.delegator != Address.zero()) {
-    let delegator = getOrCreateMember(
+    let resultDelegator = getOrCreateMember(
       event.params.delegator,
       pluginId,
       tokenAddress
     );
+    let delegator = resultDelegator.entity;
 
     // set delegatee
     if (toDelegate != Address.zero()) {
-      const delegatee = getOrCreateMember(toDelegate, pluginId, tokenAddress);
+      const resultDelegatee = getOrCreateMember(
+        toDelegate,
+        pluginId,
+        tokenAddress
+      );
+      const delegatee = resultDelegatee.entity;
       const delegateeId = generateMemberEntityId(
         Address.fromString(pluginId),
         Address.fromBytes(delegatee.address)
@@ -138,7 +162,8 @@ export function handleDelegateVotesChanged(event: DelegateVotesChanged): void {
   const pluginId = context.getString('pluginId');
   const tokenAddress = Address.fromString(context.getString('tokenAddress'));
 
-  let member = getOrCreateMember(delegate, pluginId, tokenAddress);
+  let result = getOrCreateMember(delegate, pluginId, tokenAddress);
+  let member = result.entity;
 
   if (isZeroBalanceAndVotingPower(member.balance, newVotingPower)) {
     if (shouldRemoveMember(event.address, delegate)) {
