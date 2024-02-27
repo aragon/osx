@@ -7,7 +7,7 @@ import {
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 import {ADDRESS_ZERO} from '../../utils/constants';
 import {generateMemberEntityId} from '../../utils/ids';
-import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
+import {Address, BigInt, dataSource, log, store} from '@graphprotocol/graph-ts';
 
 function getERC20Balance(user: Address, tokenAddress: Address): BigInt {
   let contract = GovernanceERC20Contract.bind(tokenAddress);

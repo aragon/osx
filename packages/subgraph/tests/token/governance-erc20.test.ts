@@ -1,3 +1,4 @@
+import {TokenVotingMember} from '../../generated/schema';
 import {
   handleDelegateChanged,
   handleDelegateVotesChanged,
