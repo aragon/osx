@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 1.5.0
+
+### Changed
+
+- Fixed bug with negative number balances and missing delegation history for existing ERC20 tokens using `TokenVoting`
+- Fixed bugs regarding inconsistent memberIds in various parts of the codebase. This primarily affects delegation.
+
 ### Changed
 
 - Removed `createERC1155TokenCalls`, `createTokenCalls`, `createWrappedTokenCalls` and `createDummyActions` and use the equivalent functions `createERC20TokenCalls`, `createERC1155TokenCalls` and `createDummyAction` from `@aragon/sdk-commons-subgraph`
