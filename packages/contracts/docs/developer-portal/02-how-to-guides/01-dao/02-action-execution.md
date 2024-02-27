@@ -6,7 +6,7 @@ title: Executing actions on behalf of the DAO
 
 Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to [pass an array of actions)](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol) to be executed by the DAO contract itself.
 
-However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the [`EXECUTE_PERMISSION`](../../how-it-works/core/permissions#permissions-native-to-the-dao-contract). This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
+However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the [`EXECUTE_PERMISSION`](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract). This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
 
 ## How to grant the Execute Permission
 
@@ -27,7 +27,7 @@ You probably don't want to grant `EXECUTE_PERMISSION` to any random address, sin
 
 ### Calling a DAO Function
 
-Imagine you want to call an internal function inside the `DAO` contract, for example, to manually [grant or revoke a permission](../../how-it-works/core/permissions). The corresponding `Action` and `execute` function call look as follows:
+Imagine you want to call an internal function inside the `DAO` contract, for example, to manually [grant or revoke a permission](../../01-how-it-works/01-core/02-permissions/index.md). The corresponding `Action` and `execute` function call look as follows:
 
 ```solidity
 function exampleGrantCall(
@@ -54,9 +54,9 @@ function exampleGrantCall(
 }
 ```
 
-Here we use the selector of the [`grant` function](../../reference-guide/core/permission/PermissionManager#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../reference-guide/core/permission/PermissionManager#external-function-revoke) must be used.
+Here we use the selector of the [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-revoke) must be used.
 
-If the caller possesses the [`ROOT_PERMISSION_ID` permission](../../how-it-works/core/permissions#permissions-native-to-the-dao-contract) on the DAO contract, the call becomes simpler and cheaper:
+If the caller possesses the [`ROOT_PERMISSION_ID` permission](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) on the DAO contract, the call becomes simpler and cheaper:
 
 :::caution
 Granting the `ROOT_PERMISSION_ID` permission to other contracts other than the `DAO` contract is dangerous and considered as an anti-pattern.
