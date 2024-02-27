@@ -32,7 +32,7 @@ In the future, more advanced asset management and finance functionality can be a
 
 ### 3. Upgradeability
 
-Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/01-dao/03-protocol-upgrades.md) if a new version of Aragon OSx is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
+Your DAO contract has the ability to be upgraded to a newer version (see [Upgrade your DAO](../../../02-how-to-guides/01-dao/03-protocol-upgrades.md)) if a new version of Aragon OSx is released in the future. These upgrades allow your DAO to smoothly transition to a new protocol version unlocking new features.
 
 <!-- Add a subsection explaining how to upgrade your dao -->
 

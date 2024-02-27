@@ -12,7 +12,7 @@ Different versions might contain:
 - new features
 - breaking changes
 
-`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the Aragon OSx [`PluginRepoRegistry`](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) and carry their own [ENS name](../../03-ens-names.md) that the creator chooses. The [`PluginRepoRegistry` contract](./01-plugin-repo-creation.md/#the-pluginreporegistry-contract) is described in the upcoming subsection.
+`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the Aragon OSx [`PluginRepoRegistry`](./01-plugin-repo-creation.md#the-pluginreporegistry-contract) and carry their own [ENS name](../../03-ens-names.md) that the creator chooses. The [`PluginRepoRegistry` contract](./01-plugin-repo-creation.md#the-pluginreporegistry-contract) is described in the upcoming subsection.
 
 <div class="center-column">
 
