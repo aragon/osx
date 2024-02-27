@@ -72,7 +72,7 @@ describe('Verifying Proxies', () => {
     expect(fetchProxies(deployments)).to.deep.eq(expectedProxies);
   });
 
-  it('Same for implementations', () => {
+  it('Finds a list of implementations in the correct format', () => {
     expect(fetchImplementations(deployments)).to.deep.eq(
       expectedImplementations
     );
