@@ -17,11 +17,11 @@ Currently, two kinds of metadata exist:
 
 ### Release Metadata
 
-The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the [PluginRepo](../../../how-it-works/framework/plugin-management/plugin-repo) (see also the section about [versioning](../publication/versioning)).
+The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the [PluginRepo](../../../01-how-it-works/02-framework/02-plugin-management/01-plugin-repo/index.md) (see also the section about [versioning](../07-publication/01-versioning.md/#)).
 
 The intention is to provide an appealing overview of each releases functionality.
-It can be updated with each call to [`createVersion()`](../../../reference-guide/framework/plugin/repo/IPluginRepo#external-function-createversion) in `IPluginRepo` by the repo maintainer.
-It can be replaced at any time with [`updateReleaseMetadata()`](../../../reference-guide/framework/plugin/repo/IPluginRepo#external-function-updatereleasemetadata) in `IPluginRepo` by the repo maintainer.
+It can be updated with each call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-createversion) in `IPluginRepo` by the repo maintainer.
+It can be replaced at any time with [`updateReleaseMetadata()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-updatereleasemetadata) in `IPluginRepo` by the repo maintainer.
 
 The `release-metadata.json` file consists of the following entries:
 
@@ -43,10 +43,10 @@ The `release-metadata.json` file consists of the following entries:
 
 ### Build Metadata
 
-The build metadata is a `.json` file stored on IPFS with its IPFS CID published for each build **only once** in the [PluginRepo](../../../how-it-works/framework/plugin-management/plugin-repo) (see also the section about [versioning](../publication/versioning#)).
+The build metadata is a `.json` file stored on IPFS with its IPFS CID published for each build **only once** in the [PluginRepo](../../../01-how-it-works/02-framework/02-plugin-management/01-plugin-repo/index.md) (see also the section about [versioning](../07-publication/01-versioning.md/#)).
 
 The intention is to inform about the changes that were introduced in this build compared to the previous one and give instructions to the App frontend and other users on how to interact with the plugin setup and implementation contract.
-It can be published **only once** with the call to [`createVersion()`](../../../reference-guide/framework/plugin/repo/IPluginRepo#external-function-createversion) in `IPluginRepo` by the repo maintainer.
+It can be published **only once** with the call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md/#external-function-createversion) in `IPluginRepo` by the repo maintainer.
 
 | Key         | Type        | Description                                                                                               |
 | ----------- | ----------- | --------------------------------------------------------------------------------------------------------- |
