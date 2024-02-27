@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Moved `Admin`, `AdminSetup` and related metadata to the [aragon/admin-plugin](https://github.com/aragon/admin-plugin) repo.
 - Moved
 
   - interfaces `IDAO`, `IPermissionCondition`, `IPlugin`, `IMembership`, `IProposal`, `IPluginSetup`, `IProtocolVersion`,
