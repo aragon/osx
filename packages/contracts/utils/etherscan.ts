@@ -125,7 +125,7 @@ export const collectProxyWithImplementation = (
 };
 
 /**
- * @returns the block explorer chain config for the current network the hre is connected to.
+ * @returns The block explorer chain config for the current network the hre is connected to.
  * The chain config comes from the hardhat config or the user config, paired with the default
  * chain details exported from the hardhat-verify package.
  */
