@@ -17,9 +17,6 @@ import * as PluginRepoRegistry from '../artifacts/src/framework/plugin/repo/Plug
 import * as PluginSetupProcessor from '../artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
 // Plugins
 //// Governance
-////// Admin
-import * as Admin from '../artifacts/src/plugins/governance/admin/Admin.sol/Admin.json';
-import * as AdminSetup from '../artifacts/src/plugins/governance/admin/AdminSetup.sol/AdminSetup.json';
 ////// MajorityVoting
 //////// AddresslistVoting
 import * as AddresslistVoting from '../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
@@ -49,8 +46,6 @@ export default {
 
   PluginSetupProcessor,
 
-  Admin,
-  AdminSetup,
   AddresslistVoting,
   AddresslistVotingSetup,
   TokenVoting,

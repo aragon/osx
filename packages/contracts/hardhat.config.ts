@@ -33,7 +33,6 @@ extendEnvironment(hre => {
   const aragonPluginRepos: AragonPluginRepos = {
     AddresslistVotingRepoProxy: '',
     TokenVotingRepoProxy: '',
-    AdminRepoProxy: '',
     MultisigRepoProxy: '',
   };
   const testingFork: TestingFork = {

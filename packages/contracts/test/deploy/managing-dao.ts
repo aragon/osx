@@ -55,7 +55,6 @@ describe('Management DAO', function () {
   let pluginsRepos: {
     tokenVoting: PluginRepo;
     addresslistVoting: PluginRepo;
-    admin: PluginRepo;
     multisig: PluginRepo;
   };
 
@@ -141,10 +140,6 @@ describe('Management DAO', function () {
       ),
       addresslistVoting: PluginRepo__factory.connect(
         hre.aragonPluginRepos.AddresslistVotingRepoProxy,
-        deployer
-      ),
-      admin: PluginRepo__factory.connect(
-        hre.aragonPluginRepos.AdminRepoProxy,
         deployer
       ),
       multisig: PluginRepo__factory.connect(
@@ -296,29 +291,6 @@ describe('Management DAO', function () {
         expect(
           await pluginsRepos.addresslistVoting.isGranted(
             pluginsRepos.addresslistVoting.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-    });
-
-    context('Admin Repo', async function () {
-      it('has permission to upgrade the repo', async function () {
-        expect(
-          await pluginsRepos.admin.isGranted(
-            pluginsRepos.admin.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-      it('has permission to maintain the repo', async function () {
-        expect(
-          await pluginsRepos.admin.isGranted(
-            pluginsRepos.admin.address,
             managementDao.address,
             PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
             []
