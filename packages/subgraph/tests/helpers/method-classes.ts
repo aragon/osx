@@ -790,8 +790,9 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     memberAddress: string = ADDRESS_ONE,
     pluginAddress: string = CONTRACT_ADDRESS
   ): TokenVotingMemberMethods {
-    const plugin = Address.fromHexString(pluginAddress);
-    let id = memberAddress.concat('_').concat(plugin.toHexString());
+    const plugin = Address.fromBytes(Bytes.fromHexString(pluginAddress));
+    const member = Address.fromBytes(Bytes.fromHexString(memberAddress));
+    let id = generateMemberEntityId(plugin, member);
 
     this.id = id;
     this.address = Address.fromHexString(memberAddress);
