@@ -30,6 +30,7 @@ import {
   DelegateChanged,
   DelegateVotesChanged
 } from '../../generated/templates/GovernanceERC20/GovernanceERC20';
+import {generateMemberEntityId} from '../../src/utils/ids';
 
 // events
 
@@ -376,16 +377,65 @@ export function createTokenVotingMember(
   plugin: string,
   balance: string
 ): string {
-  const fromUserId = address.concat('_').concat(plugin);
+  const memberEntityId = generateMemberEntityId(
+    Address.fromString(plugin), // uses other plugin address to make sure that the code reuses the entity
+    Address.fromString(address)
+  );
 
-  const user = new TokenVotingMember(fromUserId);
+  const user = new TokenVotingMember(memberEntityId);
+
   user.address = Address.fromString(address);
   user.plugin = plugin; // uses other plugin address to make sure that the code reuses the entity
   user.balance = BigInt.fromString(balance);
 
-  user.delegatee = fromUserId;
+  user.delegatee = memberEntityId;
   user.votingPower = BigInt.zero();
   user.save();
 
-  return fromUserId;
+  return memberEntityId;
+}
+
+export function getDelegatee(
+  contractAddress: string,
+  account: string,
+  returns: string | null
+): void {
+  const returnsValue = returns
+    ? ethereum.Value.fromAddress(Address.fromString(returns))
+    : ethereum.Value.fromAddress(Address.zero());
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([returnsValue]);
+}
+
+export function getVotes(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'getVotes',
+    'getVotes(address):(uint256)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
+}
+
+export function delegatesCall(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }

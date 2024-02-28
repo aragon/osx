@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+### Changed
+
+- Fixed bug with negative number balances and missing delegation history for existing ERC20 tokens using `TokenVoting`
+- Fixed bugs regarding inconsistent memberIds in various parts of the codebase. This primarily affects delegation.
+
 ### Removed
 
 ## [1.3.0]

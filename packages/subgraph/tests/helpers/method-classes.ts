@@ -95,6 +95,7 @@ import {
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
   createNewVotingSettingsUpdatedEvent,
+  delegatesCall,
   getProposalCountCall
 } from '../token/utils';
 import {
@@ -104,6 +105,7 @@ import {
   createWrappedTokenCalls,
   createERC1155TokenCalls
 } from '../utils';
+import {generateMemberEntityId} from '../../src/utils/ids';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
 //  ERC1155Contract
@@ -692,9 +694,9 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     memberAddress: string = ADDRESS_ONE,
     pluginAddress: string = CONTRACT_ADDRESS
   ): TokenVotingMemberMethods {
-    const plugin = Address.fromHexString(pluginAddress);
-    let id = memberAddress.concat('_').concat(plugin.toHexString());
-
+    const plugin = Address.fromBytes(Bytes.fromHexString(pluginAddress));
+    const member = Address.fromBytes(Bytes.fromHexString(memberAddress));
+    let id = generateMemberEntityId(plugin, member);
     this.id = id;
     this.address = Address.fromHexString(memberAddress);
     this.balance = BigInt.zero();
@@ -703,6 +705,14 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     this.votingPower = BigInt.zero();
 
     return this;
+  }
+
+  mockCall_delegatesCall(
+    tokenContractAddress: string,
+    account: string,
+    returns: string
+  ): void {
+    delegatesCall(tokenContractAddress, account, returns);
   }
 
   createEvent_DelegateChanged(
