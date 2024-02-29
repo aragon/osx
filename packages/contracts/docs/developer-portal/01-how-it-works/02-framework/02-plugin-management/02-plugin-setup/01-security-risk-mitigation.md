@@ -29,7 +29,7 @@ that might be carelessly or intentionally caused, a malicious plugin can hide **
 
 #### Permissions
 
-Examples for elevated permissions, are the [permissions native to the DAO contract](../../../01-core/02-permissions/index.md/#permissions-native-to-the-dao-contract) such as
+Examples for elevated permissions, are the [permissions native to the DAO contract](../../../01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) such as
 
 - `ROOT_PERMISSION_ID`
 - `EXECUTE_PERMISSION_ID`

@@ -54,7 +54,7 @@ function exampleGrantCall(
 }
 ```
 
-Here we use the selector of the [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md/#external-function-revoke) must be used.
+Here we use the selector of the [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md#external-function-revoke) must be used.
 
 If the caller possesses the [`ROOT_PERMISSION_ID` permission](../../01-how-it-works/01-core/02-permissions/index.md#permissions-native-to-the-dao-contract) on the DAO contract, the call becomes simpler and cheaper:
 
