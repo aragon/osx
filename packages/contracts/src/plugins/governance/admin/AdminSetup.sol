@@ -6,6 +6,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
 import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {DAO} from "../../../core/dao/DAO.sol";
@@ -18,19 +19,14 @@ import {Admin} from "./Admin.sol";
 /// @dev v1.1 (Release 1, Build 1)
 /// @custom:security-contact sirt@aragon.org
 contract AdminSetup is PluginSetup {
-    using Clones for address;
-
-    /// @notice The address of the `Admin` plugin logic contract to be cloned.
-    address private immutable implementation_;
+    using ProxyLib for address;
 
     /// @notice Thrown if the admin address is zero.
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
 
     /// @notice The constructor setting the `Admin` implementation contract to clone from.
-    constructor() {
-        implementation_ = address(new Admin());
-    }
+    constructor() PluginSetup(address(new Admin())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -44,11 +40,8 @@ contract AdminSetup is PluginSetup {
             revert AdminAddressInvalid({admin: admin});
         }
 
-        // Clone plugin contract.
-        plugin = implementation_.clone();
-
-        // Initialize cloned plugin contract.
-        Admin(plugin).initialize(IDAO(_dao));
+        // Deploy and initialize the plugin minimal proxy.
+        plugin = IMPLEMENTATION.deployMinimalProxy(abi.encodeCall(Admin.initialize, (IDAO(_dao))));
 
         // Prepare permissions
         PermissionLib.MultiTargetPermission[]
@@ -91,10 +84,5 @@ contract AdminSetup is PluginSetup {
             condition: PermissionLib.NO_CONDITION,
             permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         });
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view returns (address) {
-        return implementation_;
     }
 }

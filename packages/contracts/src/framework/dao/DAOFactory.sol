@@ -9,7 +9,7 @@ import {IProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioni
 import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
-import {createERC1967Proxy} from "@aragon/osx-commons-contracts/src/utils/deployment/Proxy.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
 
 import {DAO} from "../../core/dao/DAO.sol";
 import {PluginRepo} from "../plugin/repo/PluginRepo.sol";
@@ -22,6 +22,8 @@ import {DAORegistry} from "./DAORegistry.sol";
 /// @notice This contract is used to create a DAO.
 /// @custom:security-contact sirt@aragon.org
 contract DAOFactory is ERC165, ProtocolVersion {
+    using ProxyLib for address;
+
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
     address public immutable daoBase;
 
@@ -156,7 +158,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // create dao
-        dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
+        dao = DAO(payable(daoBase.deployUUPSProxy("")));
 
         // initialize the DAO and give the `ROOT_PERMISSION_ID` permission to this contract.
         dao.initialize(
