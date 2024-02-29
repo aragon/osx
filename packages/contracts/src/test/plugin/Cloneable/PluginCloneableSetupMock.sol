@@ -6,74 +6,78 @@ pragma solidity ^0.8.8;
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
 import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
-import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
-import {PluginCloneableV1Mock, PluginCloneableV1MockBad, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";
+import {mockPermissions, mockHelpers} from "../PluginSetupMockData.sol";
+import {PluginCloneableMockBuild1, PluginCloneableMockBuild2} from "./PluginCloneableMock.sol";
 
-contract PluginCloneableSetupV1Mock is PluginSetup {
-    address internal pluginBase;
+/// @notice A mock plugin setup of a cloneable plugin to be deployed via the minimal proxy pattern.
+/// v1.1 (Release 1, Build 1)
+/// @dev DO NOT USE IN PRODUCTION!
+contract PluginCloneableSetupMockBuild1 is PluginSetup {
+    using ProxyLib for address;
 
-    constructor() {
-        pluginBase = address(new PluginCloneableV1Mock());
-    }
+    uint16 internal constant THIS_BUILD = 1;
+
+    constructor() PluginSetup(address(new PluginCloneableMockBuild1())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
-        preparedSetupData.helpers = mockHelpers(1);
-        preparedSetupData.permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+        bytes memory initData = abi.encodeCall(PluginCloneableMockBuild1.initialize, (IDAO(_dao)));
+        plugin = implementation().deployMinimalProxy(initData);
+        preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+        preparedSetupData.permissions = mockPermissions(
+            0,
+            THIS_BUILD,
+            PermissionLib.Operation.Grant
+        );
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
-    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    ) external pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _payload);
-        permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view virtual override returns (address) {
-        return address(pluginBase);
+        permissions = mockPermissions(0, THIS_BUILD, PermissionLib.Operation.Revoke);
     }
 }
 
-contract PluginCloneableSetupV1MockBad is PluginCloneableSetupV1Mock {
-    constructor() {
-        pluginBase = address(new PluginCloneableV1MockBad());
-    }
-}
+/// @notice A mock plugin setup of a cloneable plugin to be deployed via the minimal proxy pattern.
+/// v1.2 (Release 1, Build 2)
+/// @dev DO NOT USE IN PRODUCTION!
+contract PluginCloneableSetupMockBuild2 is PluginSetup {
+    using ProxyLib for address;
 
-contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
-    constructor() {
-        pluginBase = address(new PluginCloneableV2Mock());
-    }
+    uint16 internal constant THIS_BUILD = 2;
+
+    constructor() PluginSetup(address(new PluginCloneableMockBuild2())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
-        preparedSetupData.helpers = mockHelpers(1);
-        preparedSetupData.permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+        bytes memory initData = abi.encodeCall(PluginCloneableMockBuild2.initialize, (IDAO(_dao)));
+        plugin = implementation().deployMinimalProxy(initData);
+        preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+        preparedSetupData.permissions = mockPermissions(
+            0,
+            THIS_BUILD,
+            PermissionLib.Operation.Grant
+        );
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
-    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    ) external pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _payload);
-        permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view virtual override returns (address) {
-        return address(pluginBase);
+        permissions = mockPermissions(0, THIS_BUILD, PermissionLib.Operation.Revoke);
     }
 }
