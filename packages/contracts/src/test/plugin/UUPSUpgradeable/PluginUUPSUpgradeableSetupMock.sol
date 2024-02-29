@@ -5,180 +5,193 @@ pragma solidity ^0.8.8;
 
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {PluginUpgradeableSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginUpgradeableSetup.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
-import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
-import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
+import {mockPermissions, mockHelpers} from "../PluginSetupMockData.sol";
+import {PluginUUPSUpgradeableMockBuild1, PluginUUPSUpgradeableMockBuild2, PluginUUPSUpgradeableMockBuild3} from "./PluginUUPSUpgradeableMock.sol";
 
-contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
-    address internal pluginBase;
+/// @notice A mock plugin setup of an upgradeable plugin to be deployed via the UUPS pattern.
+/// v1.1 (Release 1, Build 1)
+/// @dev DO NOT USE IN PRODUCTION!
+contract PluginUUPSUpgradeableSetupMockBuild1 is PluginUpgradeableSetup {
+    using ProxyLib for address;
 
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV1Mock());
-    }
+    uint16 internal constant THIS_BUILD = 1;
+
+    constructor() PluginUpgradeableSetup(address(new PluginUUPSUpgradeableMockBuild1())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
-        preparedSetupData.helpers = mockHelpers(2);
-        preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
+    ) public returns (address plugin, PreparedSetupData memory preparedSetupData) {
+        bytes memory initData = abi.encodeCall(
+            PluginUUPSUpgradeableMockBuild1.initialize,
+            (IDAO(_dao))
+        );
+        plugin = implementation().deployUUPSProxy(initData);
+        preparedSetupData.helpers = mockHelpers(1);
+        preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
+    }
+
+    /// @inheritdoc IPluginSetup
+    /// @dev The default implementation for the initial build 1 that reverts because no earlier build exists.
+    function prepareUpdate(
+        address _dao,
+        uint16 _fromBuild,
+        SetupPayload calldata _payload
+    ) external pure virtual returns (bytes memory, PreparedSetupData memory) {
+        (_dao, _fromBuild, _payload);
+        revert InvalidUpdatePath({fromBuild: 0, thisBuild: THIS_BUILD});
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
-    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    ) external pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _payload);
-        permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view virtual override returns (address) {
-        return address(pluginBase);
+        permissions = mockPermissions(0, THIS_BUILD, PermissionLib.Operation.Revoke);
     }
 }
 
-contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
-    function prepareInstallation(
-        address _dao,
-        bytes memory
-    ) public pure override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        (_dao);
-        plugin = address(0); // The bad behaviour is returning the same address over and over again
-        preparedSetupData.helpers = mockHelpers(1);
-        preparedSetupData.permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
-    }
-}
+/// @notice A mock plugin setup of an upgradeable plugin to be deployed via the UUPS pattern.
+/// v1.2 (Release 1, Build 2)
+/// @dev DO NOT USE IN PRODUCTION!
+contract PluginUUPSUpgradeableSetupMockBuild2 is PluginUpgradeableSetup {
+    using ProxyLib for address;
 
-contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV2Mock());
-    }
+    uint16 internal constant THIS_BUILD = 2;
+
+    constructor() PluginUpgradeableSetup(address(new PluginUUPSUpgradeableMockBuild2())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
-        preparedSetupData.helpers = mockHelpers(2);
-        preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+        bytes memory initData = abi.encodeCall(
+            PluginUUPSUpgradeableMockBuild2.initialize,
+            (IDAO(_dao))
+        );
+        plugin = implementation().deployUUPSProxy(initData);
+        preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+        preparedSetupData.permissions = mockPermissions(
+            0,
+            THIS_BUILD,
+            PermissionLib.Operation.Grant
+        );
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
-        uint16 _currentBuild,
+        uint16 _fromBuild,
         SetupPayload calldata _payload
     )
-        public
-        virtual
+        external
+        pure
         override
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
     {
         (_dao, _payload);
 
-        // Update from V1
-        if (_currentBuild == 1) {
-            preparedSetupData.helpers = mockHelpers(2);
-            initData = abi.encodeCall(PluginUUPSUpgradeableV2Mock.initializeV1toV2, ());
-            preparedSetupData.permissions = mockPermissions(1, 2, PermissionLib.Operation.Grant);
+        // Update from Build 1
+        if (_fromBuild == 1) {
+            preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+            initData = abi.encodeCall(PluginUUPSUpgradeableMockBuild2.initializeFrom, (_fromBuild));
+            preparedSetupData.permissions = mockPermissions(
+                _fromBuild,
+                THIS_BUILD,
+                PermissionLib.Operation.Grant
+            );
         }
+    }
+
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+        (_dao, _payload);
+        permissions = mockPermissions(0, THIS_BUILD, PermissionLib.Operation.Revoke);
     }
 }
 
-contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV3Mock());
-    }
+/// @notice A mock plugin setup of an upgradeable plugin to be deployed via the UUPS pattern.
+/// v1.3 (Release 1, Build 3)
+contract PluginUUPSUpgradeableSetupMockBuild3 is PluginUpgradeableSetup {
+    using ProxyLib for address;
+
+    uint16 internal constant THIS_BUILD = 3;
+
+    constructor() PluginUpgradeableSetup(address(new PluginUUPSUpgradeableMockBuild3())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
-        preparedSetupData.helpers = mockHelpers(3);
-        preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
+        bytes memory initData = abi.encodeCall(
+            PluginUUPSUpgradeableMockBuild3.initialize,
+            (IDAO(_dao))
+        );
+        plugin = implementation().deployUUPSProxy(initData);
+        preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+        preparedSetupData.permissions = mockPermissions(
+            0,
+            THIS_BUILD,
+            PermissionLib.Operation.Grant
+        );
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
-        uint16 _currentBuild,
+        uint16 _fromBuild,
         SetupPayload calldata _payload
     )
-        public
-        virtual
+        external
+        pure
         override
         returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
     {
         (_dao, _payload);
 
-        // Update from V1
-        if (_currentBuild == 1) {
-            preparedSetupData.helpers = mockHelpers(3);
-            initData = abi.encodeCall(PluginUUPSUpgradeableV3Mock.initializeV1toV3, ());
-            preparedSetupData.permissions = mockPermissions(1, 3, PermissionLib.Operation.Grant);
+        // Update from Build 1
+        if (_fromBuild == 1) {
+            preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+            initData = abi.encodeCall(PluginUUPSUpgradeableMockBuild3.initializeFrom, (_fromBuild));
+            preparedSetupData.permissions = mockPermissions(
+                _fromBuild,
+                THIS_BUILD,
+                PermissionLib.Operation.Grant
+            );
+
+            // If this update path should not be supported, you can revert with an error, e.g.,
+            // revert InvalidUpdatePath({fromBuild: _fromBuild, thisBuild: THIS_BUILD});
         }
 
-        // Update from V2
-        if (_currentBuild == 2) {
-            preparedSetupData.helpers = mockHelpers(3);
-            initData = abi.encodeCall(PluginUUPSUpgradeableV3Mock.initializeV2toV3, ());
-            preparedSetupData.permissions = mockPermissions(2, 3, PermissionLib.Operation.Grant);
+        // Update from Build 2
+        if (_fromBuild == 2) {
+            preparedSetupData.helpers = mockHelpers(THIS_BUILD);
+            initData = abi.encodeCall(PluginUUPSUpgradeableMockBuild3.initializeFrom, (_fromBuild));
+            preparedSetupData.permissions = mockPermissions(
+                _fromBuild,
+                THIS_BUILD,
+                PermissionLib.Operation.Grant
+            );
         }
-    }
-}
-
-/// @dev With this plugin setup, the plugin base implementation doesn't change.
-/// This setup is a good example when you want to design a new plugin setup
-/// which uses the same base implementation(doesn't update the logic contract)
-/// but applies new/modifier permissions on it.
-
-contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
-    constructor(address _pluginUUPSUpgradeableV3) {
-        pluginBase = _pluginUUPSUpgradeableV3;
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(
+    function prepareUninstallation(
         address _dao,
-        bytes memory
-    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
-        preparedSetupData.helpers = mockHelpers(3);
-        preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
-    }
-
-    function prepareUpdate(
-        address _dao,
-        uint16 _currentBuild,
         SetupPayload calldata _payload
-    )
-        public
-        virtual
-        override
-        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
-    {
-        // If one tries to upgrade from v3 to this(v4), developer of this v4
-        // knows that logic contract doesn't change as he specified the same address
-        // in `implementation()`. This means this update should only include returning
-        // the desired updated permissions. PluginSetupProcessor will take care of
-        // not calling `upgradeTo` on the plugin in such cases.
-        if (_currentBuild == 3) {
-            preparedSetupData.permissions = mockPermissions(3, 4, PermissionLib.Operation.Grant);
-        }
-        // If the update happens from those that have different implementation addresses(v1,v2)
-        // proxy(plugin) contract should be upgraded to the new base implementation which requires(not always though)
-        // returning the `initData` that will be called upon `upradeToAndCall` by plugin setup processor.
-        // NOTE that dev is free to do what he wishes.
-        else if (_currentBuild == 1 || _currentBuild == 2) {
-            (initData, preparedSetupData) = super.prepareUpdate(_dao, _currentBuild, _payload);
-            // Even for this case, dev might decide to modify the permissions..
-            preparedSetupData.permissions = mockPermissions(4, 5, PermissionLib.Operation.Grant);
-        }
+    ) external pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+        (_dao, _payload);
+        permissions = mockPermissions(0, THIS_BUILD, PermissionLib.Operation.Revoke);
     }
 }
