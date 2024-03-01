@@ -30,12 +30,13 @@ import {
   getDelegatee,
   getVotes
 } from './utils';
+
+import {getBalanceOf} from '../dao/utils';
 import {
+  generateMemberEntityId,
   generateEntityIdFromAddress,
   generatePluginEntityId
-} from '@aragon/osx-commons-subgraph';
-import {getBalanceOf} from '../dao/utils';
-import {generateMemberEntityId} from '../../src/utils/ids';
+} from '../../src/utils/ids';
 
 // mock plugins
 const pluginAddress = Address.fromString(ADDRESS_SIX);
