@@ -33,7 +33,6 @@ extendEnvironment(hre => {
   const aragonPluginRepos: AragonPluginRepos = {
     AddresslistVotingRepoProxy: '',
     TokenVotingRepoProxy: '',
-    MultisigRepoProxy: '',
   };
   const testingFork: TestingFork = {
     network: '',
@@ -42,7 +41,7 @@ extendEnvironment(hre => {
   };
   hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];
-  hre.managementDAOMultisigPluginAddress = '';
+  hre.managementDAOMultisigPluginAddress = ''; // TODO
   hre.managementDAOActions = [];
   hre.testingFork = testingFork;
 });
