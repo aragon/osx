@@ -1,14 +1,14 @@
 import pluginUUPSUpgradeableArtifact from '../../../artifacts/@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol/PluginUUPSUpgradeable.json';
 import {
   PluginSetupProcessor,
-  PluginUUPSUpgradeableSetupV1Mock,
-  PluginUUPSUpgradeableSetupV1MockBad,
-  PluginUUPSUpgradeableSetupV2Mock,
-  PluginUUPSUpgradeableSetupV3Mock,
+  PluginUUPSUpgradeableSetupMockBuild1,
+  PluginUUPSUpgradeableSetupMockBuild1Bad,
+  PluginUUPSUpgradeableSetupMockBuild2,
+  PluginUUPSUpgradeableSetupMockBuild3,
   PluginUUPSUpgradeableSetupV4Mock,
-  PluginCloneableSetupV1Mock,
-  PluginCloneableSetupV1MockBad,
-  PluginCloneableSetupV2Mock,
+  PluginCloneableSetupMockBuild1,
+  PluginCloneableSetupMockBuild1Bad,
+  PluginCloneableSetupMockBuild2,
   PluginRepoFactory,
   PluginRepoRegistry,
   PluginRepo,
@@ -16,16 +16,16 @@ import {
   PluginRepo__factory,
   PluginRepoRegistry__factory,
   PluginUUPSUpgradeable__factory,
-  PluginUUPSUpgradeableV1Mock__factory,
-  PluginUUPSUpgradeableV2Mock__factory,
-  PluginUUPSUpgradeableV3Mock__factory,
-  PluginUUPSUpgradeableSetupV1Mock__factory,
-  PluginUUPSUpgradeableSetupV1MockBad__factory,
-  PluginUUPSUpgradeableSetupV2Mock__factory,
+  PluginUUPSUpgradeableMockBuild1__factory,
+  PluginUUPSUpgradeableMockBuild2__factory,
+  PluginUUPSUpgradeableMockBuild3__factory,
+  PluginUUPSUpgradeableSetupMockBuild1__factory,
+  PluginUUPSUpgradeableSetupMockBuild1Bad__factory,
+  PluginUUPSUpgradeableSetupMockBuild2__factory,
   PluginUUPSUpgradeableSetupV4Mock__factory,
-  PluginCloneableSetupV1Mock__factory,
-  PluginCloneableSetupV2Mock__factory,
-  PluginCloneableSetupV1MockBad__factory,
+  PluginCloneableSetupMockBuild1__factory,
+  PluginCloneableSetupMockBuild2__factory,
+  PluginCloneableSetupMockBuild1Bad__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {expect} from '../../chai-setup';
@@ -109,18 +109,18 @@ describe('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
-  let PluginUV1: PluginUUPSUpgradeableV1Mock__factory;
-  let PluginUV2: PluginUUPSUpgradeableV2Mock__factory;
-  let PluginUV3: PluginUUPSUpgradeableV3Mock__factory;
-  let setupUV1: MockContract<PluginUUPSUpgradeableSetupV1Mock>;
-  let setupUV2: MockContract<PluginUUPSUpgradeableSetupV2Mock>;
-  let setupUV3: MockContract<PluginUUPSUpgradeableSetupV3Mock>;
+  let PluginUV1: PluginUUPSUpgradeableMockBuild1__factory;
+  let PluginUV2: PluginUUPSUpgradeableMockBuild2__factory;
+  let PluginUV3: PluginUUPSUpgradeableMockBuild3__factory;
+  let setupUV1: MockContract<PluginUUPSUpgradeableSetupMockBuild1>;
+  let setupUV2: MockContract<PluginUUPSUpgradeableSetupMockBuild2>;
+  let setupUV3: MockContract<PluginUUPSUpgradeableSetupMockBuild3>;
   let setupUV4: MockContract<PluginUUPSUpgradeableSetupV4Mock>;
-  let setupUV1Bad: MockContract<PluginUUPSUpgradeableSetupV1MockBad>;
+  let setupUV1Bad: MockContract<PluginUUPSUpgradeableSetupMockBuild1Bad>;
   let repoC: PluginRepo;
-  let setupCV1: MockContract<PluginCloneableSetupV1Mock>;
-  let setupCV1Bad: MockContract<PluginCloneableSetupV1MockBad>;
-  let setupCV2: MockContract<PluginCloneableSetupV2Mock>;
+  let setupCV1: MockContract<PluginCloneableSetupMockBuild1>;
+  let setupCV1Bad: MockContract<PluginCloneableSetupMockBuild1Bad>;
+  let setupCV2: MockContract<PluginCloneableSetupMockBuild2>;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -131,30 +131,32 @@ describe('PluginSetupProcessor', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    PluginUV1 = new PluginUUPSUpgradeableV1Mock__factory(signers[0]);
-    PluginUV2 = new PluginUUPSUpgradeableV2Mock__factory(signers[0]);
-    PluginUV3 = new PluginUUPSUpgradeableV3Mock__factory(signers[0]);
+    PluginUV1 = new PluginUUPSUpgradeableMockBuild1__factory(signers[0]);
+    PluginUV2 = new PluginUUPSUpgradeableMockBuild2__factory(signers[0]);
+    PluginUV3 = new PluginUUPSUpgradeableMockBuild3__factory(signers[0]);
 
     // Deploy PluginUUPSUpgradeableSetupMock
 
-    const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
-      'PluginUUPSUpgradeableSetupV1Mock'
-    );
+    const SetupV1 =
+      await smock.mock<PluginUUPSUpgradeableSetupMockBuild1__factory>(
+        'PluginUUPSUpgradeableSetupMockBuild1'
+      );
     setupUV1 = await SetupV1.deploy();
 
-    const PluginUUPSUpgradeableSetupV1MockBad =
-      await smock.mock<PluginUUPSUpgradeableSetupV1MockBad__factory>(
-        'PluginUUPSUpgradeableSetupV1MockBad'
+    const PluginUUPSUpgradeableSetupMockBuild1Bad =
+      await smock.mock<PluginUUPSUpgradeableSetupMockBuild1Bad__factory>(
+        'PluginUUPSUpgradeableSetupMockBuild1Bad'
       );
-    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
+    setupUV1Bad = await PluginUUPSUpgradeableSetupMockBuild1Bad.deploy();
 
-    const SetupV2 = await smock.mock<PluginUUPSUpgradeableSetupV2Mock__factory>(
-      'PluginUUPSUpgradeableSetupV2Mock'
-    );
+    const SetupV2 =
+      await smock.mock<PluginUUPSUpgradeableSetupMockBuild2__factory>(
+        'PluginUUPSUpgradeableSetupMockBuild2'
+      );
     setupUV2 = await SetupV2.deploy();
 
-    const SetupV3 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
-      'PluginUUPSUpgradeableSetupV3Mock'
+    const SetupV3 = await smock.mock<PluginCloneableSetupMockBuild2__factory>(
+      'PluginUUPSUpgradeableSetupMockBuild3'
     );
     setupUV3 = await SetupV3.deploy();
 
@@ -164,18 +166,19 @@ describe('PluginSetupProcessor', function () {
     setupUV4 = await SetupV4.deploy(await setupUV3.implementation());
 
     // Deploy PluginCloneableSetupMock
-    const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
-      'PluginCloneableSetupV1Mock'
+    const SetupC1 = await smock.mock<PluginCloneableSetupMockBuild1__factory>(
+      'PluginCloneableSetupMockBuild1'
     );
     setupCV1 = await SetupC1.deploy();
 
-    const SetupC1Bad = await smock.mock<PluginCloneableSetupV1MockBad__factory>(
-      'PluginCloneableSetupV1MockBad'
-    );
+    const SetupC1Bad =
+      await smock.mock<PluginCloneableSetupMockBuild1Bad__factory>(
+        'PluginCloneableSetupMockBuild1Bad'
+      );
     setupCV1Bad = await SetupC1Bad.deploy();
 
-    const SetupC2 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
-      'PluginCloneableSetupV2Mock'
+    const SetupC2 = await smock.mock<PluginCloneableSetupMockBuild2__factory>(
+      'PluginCloneableSetupMockBuild2'
     );
     setupCV2 = await SetupC2.deploy();
 
@@ -2575,7 +2578,7 @@ async function updateAndValidatePluginUpdate(
     build: newVersionTag[1],
   });
 
-  const PluginSetupFactory = new PluginUUPSUpgradeableSetupV1Mock__factory(
+  const PluginSetupFactory = new PluginUUPSUpgradeableSetupMockBuild1__factory(
     signers[0]
   );
 

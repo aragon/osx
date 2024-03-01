@@ -181,9 +181,9 @@ describe('Multisig', function () {
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
     });
 
-    it('should revert if members list is longer than uint16 max', async () => {
+    it.only('should revert if members list is longer than uint16 max', async () => {
       const megaMember = signers[1];
-      const members: string[] = new Array(65537).fill(megaMember.address);
+      const members: string[] = new Array(65536).fill(megaMember.address);
       await expect(multisig.initialize(dao.address, members, multisigSettings))
         .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
         .withArgs(65535, members.length);

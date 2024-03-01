@@ -2,12 +2,12 @@ import adminMetadata from '../../../src/plugins/governance/admin/build-metadata.
 import {
   DAORegistry,
   PluginSetupProcessor,
-  PluginUUPSUpgradeableSetupV1Mock,
+  PluginUUPSUpgradeableSetupMockBuild1,
   PluginRepoRegistry,
   DAOFactory,
   DAOFactory__factory,
   PluginRepoFactory,
-  PluginUUPSUpgradeableSetupV2Mock,
+  PluginUUPSUpgradeableSetupMockBuild2,
   AdminSetup,
   PluginSetupProcessor__factory,
   DAO__factory,
@@ -16,8 +16,8 @@ import {
   DAO,
   Admin__factory,
   AdminSetup__factory,
-  PluginUUPSUpgradeableSetupV2Mock__factory,
-  PluginUUPSUpgradeableSetupV1Mock__factory,
+  PluginUUPSUpgradeableSetupMockBuild2__factory,
+  PluginUUPSUpgradeableSetupMockBuild1__factory,
   DAORegistry__factory,
   PluginRepo__factory,
   IProtocolVersion__factory,
@@ -130,7 +130,7 @@ describe('DAOFactory: ', function () {
   let psp: PluginSetupProcessor;
   let pluginRepoRegistry: PluginRepoRegistry;
 
-  let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
+  let pluginSetupV1Mock: PluginUUPSUpgradeableSetupMockBuild1;
   let pluginRepoMock: PluginRepo;
   let pluginSetupMockRepoAddress: any;
 
@@ -218,9 +218,9 @@ describe('DAOFactory: ', function () {
 
     // Create and register a plugin on the `PluginRepoRegistry`.
     // PluginSetupV1
-    const PluginUUPSUpgradeableSetupV1Mock =
-      new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
-    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
+    const PluginUUPSUpgradeableSetupMockBuild1 =
+      new PluginUUPSUpgradeableSetupMockBuild1__factory(signers[0]);
+    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupMockBuild1.deploy();
 
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       'plugin-uupsupgradeable-setup-v1-mock',
@@ -535,7 +535,7 @@ describe('DAOFactory: ', function () {
   });
 
   describe('E2E: Install,Update,Uninstall Plugin through Admin Plugin', async () => {
-    let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
+    let pluginSetupV2Mock: PluginUUPSUpgradeableSetupMockBuild2;
     let adminPluginSetup: AdminSetup;
     let adminPluginRepoAddress: string;
     let adminPlugin: Admin;
@@ -543,9 +543,9 @@ describe('DAOFactory: ', function () {
 
     beforeEach(async () => {
       // create 2nd version of PluginUUPSUpgradeableSetupV1.
-      const PluginUUPSUpgradeableSetupV2Mock =
-        new PluginUUPSUpgradeableSetupV2Mock__factory(signers[0]);
-      pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
+      const PluginUUPSUpgradeableSetupMockBuild2 =
+        new PluginUUPSUpgradeableSetupMockBuild2__factory(signers[0]);
+      pluginSetupV2Mock = await PluginUUPSUpgradeableSetupMockBuild2.deploy();
       {
         await pluginRepoMock.createVersion(
           1,
