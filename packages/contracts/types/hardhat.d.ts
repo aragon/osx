@@ -3,7 +3,6 @@ import {BigNumberish, BytesLike} from 'ethers';
 export type AragonPluginRepos = {
   AddresslistVotingRepoProxy: string;
   TokenVotingRepoProxy: string;
-  MultisigRepoProxy: string;
   [index: string]: string;
 };
 
