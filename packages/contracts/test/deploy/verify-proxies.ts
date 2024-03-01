@@ -1,5 +1,5 @@
+import {AllDeployments} from '../../types/etherscan';
 import {
-  AllDeployments,
   collectProxyWithImplementation,
   fetchImplementations,
   fetchProxies,
@@ -9,7 +9,7 @@ import {
 } from '../../utils/etherscan';
 import {expect} from '../chai-setup';
 import _mockDeployments from './mocks/mock-deployments.json';
-import {ChainConfig} from '@nomicfoundation/hardhat-verify/dist/src/types';
+import {ChainConfig} from '@nomicfoundation/hardhat-verify/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 describe('Verifying Proxies', () => {

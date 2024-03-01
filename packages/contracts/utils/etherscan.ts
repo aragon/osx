@@ -4,12 +4,10 @@ import {
   NameAndAddress,
   CollectedProxyWithImplementation,
 } from '../types/etherscan';
-import {ChainConfig} from '@nomicfoundation/hardhat-verify/dist/src/types';
-import axios, {AxiosRequestConfig} from 'axios';
+import {ChainConfig} from '@nomicfoundation/hardhat-verify/types';
 import fs from 'fs';
 import HRE from 'hardhat';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import qs from 'qs';
 import {file} from 'tmp-promise';
 
 function delay(ms: number) {
@@ -194,18 +192,28 @@ export const generateExplorerIsThisAProxyURL = (
   );
 };
 
+type RequestConfig = {
+  method: 'POST' | 'GET' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+  headers: Record<string, string>;
+  body?: string;
+  url: string;
+};
+
 export const generateVerifyRequest = (
   url: string,
   proxy: string,
   implementation: string
-): AxiosRequestConfig => {
+): RequestConfig => {
+  const params = new URLSearchParams();
+  params.append('address', proxy);
+  params.append('expectedimplementation', implementation);
+
+  console.log(params.toString());
+
   return {
     method: 'POST',
-    headers: {'content-type': 'application/x-www-form-urlencoded'},
-    data: qs.stringify({
-      address: proxy,
-      expectedimplementation: implementation,
-    }),
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: params.toString(),
     url,
   };
 };
@@ -238,15 +246,25 @@ export const handleLinkProxyRequest = async (
     proxy.address,
     implementation.address
   );
-  const {
-    data: {message, result},
-  } = await axios(options);
 
-  if (message === 'NOTOK') {
-    console.warn(`Verification failed. Reason: ${result}`);
-  } else {
-    console.log(`Verification request sent.`);
-    console.log(`To check the request status, use ${result} as GUID.`);
+  try {
+    const response = await fetch(options.url, {
+      method: options.method,
+      headers: options.headers,
+      body: options.body,
+    });
+    const data = await response.json();
+
+    if (data.message === 'NOTOK') {
+      console.warn(`Verification failed. Reason: ${data.result}`);
+    } else {
+      console.log(`Verification request sent.`);
+      console.log(`To check the request status, use ${data.result} as GUID.`);
+    }
+  } catch (error) {
+    console.error(
+      `An error occurred while sending the verification request: ${error}`
+    );
   }
 };
 
