@@ -9,11 +9,13 @@ import {
 } from '../../utils/etherscan';
 import {expect} from '../chai-setup';
 import _mockDeployments from './mocks/mock-deployments.json';
-import {ChainConfig} from '@nomicfoundation/hardhat-verify/types';
+import {ChainConfig} from '@nomicfoundation/hardhat-verify/dist/src/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-describe('Verifying Proxies', () => {
+describe.only('Verifying Proxies', () => {
+  // a list of addresses from an actual fork deployment
   const deployments = _mockDeployments as unknown as AllDeployments;
+
   const expectedProxies = [
     {
       name: 'ManagementDAOProxy',
