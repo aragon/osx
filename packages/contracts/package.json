@@ -24,7 +24,7 @@
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
-    "verifyProxies": "VERIFY_PROXIES=true yarn deploy --tags VerifyProxies",
+    "linkProxies": "LINK_PROXIES=true yarn deploy --tags LinkProxies",
     "deploy:local": "yarn deploy --network localhost --reset",
     "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",

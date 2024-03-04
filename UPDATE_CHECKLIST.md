@@ -65,7 +65,7 @@ If the deployer **is** allowed to create a proposal
 - [ ] Go to the blockchain explorer and verify that each address is verified
   - [ ] If it is not try to verfiy it with `npx hardhat verify --network NETWORK ADDRESS CONTRUCTOR-ARGS`. More infos on how to use this command can be found here: [https://hardhat.org/hardhat-runner/docs/guides/verifying](https://hardhat.org/hardhat-runner/docs/guides/verifying)
   - [ ] If it is a proxy try to activate the blockchain explorer's proxy feature
-    - [ ] Try running `yarn verifyProxies --network <network>` to automate this
+    - [ ] Try running `yarn linkProxies --network <network>` to automate this
   - [ ] If the proxies are not verified with the `Similar Match Source Code` feature
     - [ ] Remove `import '@openzeppelin/hardhat-upgrades'` from `packages/contracts/hardhat.config.ts`
     - [ ] Verify one of the proxies

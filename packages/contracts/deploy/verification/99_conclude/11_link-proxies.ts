@@ -9,7 +9,7 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 /**
  * This script can be run manually after the deployment of the contracts and contract verification,
- * call `yarn verifyProxies --network <network>` to run this script.
+ * call `yarn linkProxies --network <network>` to run this script.
  *
  * It searches deployments for proxies and their implementations and links them on Etherscan.
  * This avoids the need to call 'Is this a proxy?' for each contract using the UI.
@@ -36,11 +36,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 
-func.tags = ['New', 'Verify', 'VerifyProxies'];
+func.tags = ['New', 'Verify', 'LinkProxies'];
 func.dependencies = ['VerifyContracts'];
 func.runAtTheEnd = true;
 
 func.skip = (hre: HardhatRuntimeEnvironment) => {
-  const verifyProxies = process.env.VERIFY_PROXIES === 'true';
+  const verifyProxies = process.env.LINK_PROXIES === 'true';
   return Promise.resolve(isLocal(hre.network) || !verifyProxies);
 };
