@@ -26,6 +26,7 @@ import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 import {
   createNewDelegateChangedEvent,
   createNewERC20TransferEvent,
+  createNewERC20TransferEventWithAddress,
   createTokenVotingMember,
   getDelegatee,
   getVotes
@@ -73,10 +74,11 @@ describe('Governance ERC20', () => {
 
   describe('handleTransfer', () => {
     test('it should create a new member of from', () => {
-      const mockEvent = createNewERC20TransferEvent(
+      const mockEvent = createNewERC20TransferEventWithAddress(
         fromAddressHexString,
         toAddressHexString,
-        ONE_ETH
+        ONE_ETH,
+        DAO_TOKEN_ADDRESS
       );
 
       getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
@@ -98,10 +100,11 @@ describe('Governance ERC20', () => {
     });
 
     test('it should create a new member of to', () => {
-      const mockEvent = createNewERC20TransferEvent(
+      const mockEvent = createNewERC20TransferEventWithAddress(
         fromAddressHexString,
         toAddressHexString,
-        ONE_ETH
+        ONE_ETH,
+        DAO_TOKEN_ADDRESS
       );
 
       getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), '0');
@@ -138,14 +141,15 @@ describe('Governance ERC20', () => {
 
     test('it should update an existing from entity', () => {
       const memberEntityId = createTokenVotingMember(
-        toAddressHexString,
+        fromAddressHexString,
         pluginEntityId,
         ONE_ETH + '0'
       );
-      const mockEvent = createNewERC20TransferEvent(
+      const mockEvent = createNewERC20TransferEventWithAddress(
         fromAddressHexString,
         toAddressHexString,
-        ONE_ETH
+        ONE_ETH,
+        DAO_TOKEN_ADDRESS
       );
 
       getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), ONE_ETH + '0');
@@ -187,10 +191,11 @@ describe('Governance ERC20', () => {
         pluginEntityId,
         ONE_ETH + '0'
       );
-      const mockEvent = createNewERC20TransferEvent(
+      const mockEvent = createNewERC20TransferEventWithAddress(
         fromAddressHexString,
         toAddressHexString,
-        ONE_ETH
+        ONE_ETH,
+        DAO_TOKEN_ADDRESS
       );
 
       getBalanceOf(DAO_TOKEN_ADDRESS, fromAddress.toHexString(), ONE_ETH + '0');
@@ -256,10 +261,11 @@ describe('Governance ERC20', () => {
       );
 
       // handle a transfer to another user
-      const transferEvent = createNewERC20TransferEvent(
+      const transferEvent = createNewERC20TransferEventWithAddress(
         fromAddressHexString,
         toAddressHexString,
-        TRANSFER
+        TRANSFER,
+        DAO_TOKEN_ADDRESS
       );
 
       assert.fieldEquals(
@@ -419,7 +425,10 @@ describe('Governance ERC20', () => {
 
       // assert
       // expected changes
-      member.delegatee = delegateeAddress.concat('_').concat(pluginAddress);
+      member.delegatee = generateMemberEntityId(
+        Address.fromString(pluginAddress),
+        Address.fromString(delegateeAddress)
+      );
       member.assertEntity();
       assert.entityCount('TokenVotingMember', 3);
     });
@@ -448,7 +457,10 @@ describe('Governance ERC20', () => {
 
       // assert
       // expected changes
-      member.delegatee = delegateeAddress.concat('_').concat(pluginAddress);
+      member.delegatee = generateMemberEntityId(
+        Address.fromString(pluginAddress),
+        Address.fromString(delegateeAddress)
+      );
       member.assertEntity();
       // there must be the second member in the store for the delegatee
       assert.entityCount('TokenVotingMember', 2);

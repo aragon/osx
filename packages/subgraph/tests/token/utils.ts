@@ -23,7 +23,8 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
+  DEFAULT_MOCK_EVENT_ADDRESS
 } from '../constants';
 import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
 import {
@@ -350,8 +351,21 @@ export function createNewERC20TransferEvent(
   to: string,
   amount: string
 ): ERC20TransferEvent {
-  let transferEvent = changetype<ERC20TransferEvent>(newMockEvent());
+  return createNewERC20TransferEventWithAddress(
+    from,
+    to,
+    amount,
+    DEFAULT_MOCK_EVENT_ADDRESS
+  );
+}
 
+export function createNewERC20TransferEventWithAddress(
+  from: string,
+  to: string,
+  amount: string,
+  contractAddress: string
+): ERC20TransferEvent {
+  let transferEvent = changetype<ERC20TransferEvent>(newMockEvent());
   let fromParam = new ethereum.EventParam(
     'from',
     ethereum.Value.fromAddress(Address.fromString(from))
@@ -364,11 +378,10 @@ export function createNewERC20TransferEvent(
     'amount',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(amount))
   );
-
+  transferEvent.address = Address.fromString(contractAddress);
   transferEvent.parameters.push(fromParam);
   transferEvent.parameters.push(toParam);
   transferEvent.parameters.push(amountParam);
-
   return transferEvent;
 }
 

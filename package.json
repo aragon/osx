@@ -16,9 +16,7 @@
       "**/@graphprotocol/graph-cli",
       "**/@graphprotocol/graph-cli/**",
       "**/matchstick-as",
-      "**/matchstick-as/**",
-      "**/@aragon/osx-commons-subgraph",
-      "**/@aragon/osx-commons-subgraph/**"
+      "**/matchstick-as/**"
     ]
   }
 }
