@@ -183,7 +183,7 @@ GreeterSetup address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 
 Lastly, we can call the [`createPluginRepoWithFirstVersion` function from Aragon's `PluginRepoFactory`](../../03-reference-guide/framework/plugin/repo/PluginRepoFactory.md) passing it the address of your deployed `GreeterSetup` contract and the first version of your Plugin will be published into the protocol!
 
-We can do this directly by calling the function on Etherscan ([make sure to get the right scan and contract address based on your network](https://github.com/aragon/osx/blob/develop/active_contracts.json)) or through locally calling on the method from your project using Ethers.
+We can do this directly by calling the function on Etherscan ([make sure to get the right scan and contract address based on your network](https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json)) or through locally calling on the method from your project using Ethers.
 
 ![Etherscan](https://res.cloudinary.com/dacofvu8m/image/upload/v1682466427/Screen_Shot_2023-04-25_at_19.46.58_nlo9p1.png)
 

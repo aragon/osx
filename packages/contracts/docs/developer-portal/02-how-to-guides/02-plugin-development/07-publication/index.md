@@ -8,7 +8,7 @@ Once you've deployed your Plugin Setup contract, you will be able to publish you
 
 ### 1. Make sure your plugin is deployed in the right network
 
-Make sure your Plugin Setup contract is deployed in your network of choice (you can find all of the networks we support [here](https://github.com/aragon/osx/blob/develop/active_contracts.json)). You will need the address of your Plugin Setup contract to be able to publish the plugin into the protocol.
+Make sure your Plugin Setup contract is deployed in your network of choice (you can find all of the networks we support [here](https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json)). You will need the address of your Plugin Setup contract to be able to publish the plugin into the protocol.
 
 ### 2. Publishing your plugin
 
@@ -16,7 +16,7 @@ Every plugin in Aragon can have future versions, so when publishing a plugin to 
 
 To publish a plugin, we will use Aragon's `PluginRepoFactory` contract - in charge of creating `PluginRepo` instances containing your plugin's versions. To do this, we will call its `createPluginRepoWithFirstVersion` function, which will [create the first version of a plugin](https://github.com/aragon/core/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepoFactory.sol#L48) and add that new `PluginRepo` address into the `PluginRepoRegistry` containing all available plugins within the protocol.
 
-You can find all of the addresses of `PluginRepoFactory` contracts by network [here](https://github.com/aragon/osx/blob/develop/active_contracts.json).
+You can find all of the addresses of `PluginRepoFactory` contracts by network [here](https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json).
 
 To create more versions of your plugin in the future, you'll call on the [`createVersion` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L128) from the `PluginRepo` instance of your plugin. When you publish your plugin, you'll be able to find the address of your plugin's `PluginRepo` instance within the transaction data.
 
@@ -24,7 +24,7 @@ Having that said, there's a few ways to publish your plugin into Aragon's protoc
 
 #### Option A: Etherscan
 
-Go directly to Etherscan and search for the address of the `PluginRepoFactory` as found in [this list](https://github.com/aragon/osx/blob/develop/active_contracts.json).
+Go directly to Etherscan and search for the address of the `PluginRepoFactory` as found in [this list](https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json).
 
 Then, go to the "Write Contract" tab and add the attributes requested to call on the `createPluginRepoWithFirstVersion` function. Make sure you "Connect your Wallet" before hitting "Write" and signing the transaction.
 
