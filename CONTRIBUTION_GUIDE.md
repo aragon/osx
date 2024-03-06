@@ -120,7 +120,7 @@ Due to the unconventional release process of smart contracts, this repo utilizes
 
 The main challenge is that smart contracts should be heavily scrutinized before a release, making the process cumbersome and unlike the release process for "normal" dependencies or apps. [See here](https://forum.aragon.org/t/git-branch-convention-for-aragon-repos/298/3) for a more detailed explanation.
 
-Thus, we use the following convention: any change that can be release immediately, base it on the [develop branch](https://github.com/aragon/osx/develop).
+Thus, we use the following convention: any change that can be release immediately, base it on the [develop branch](https://github.com/aragon/osx/tree/develop).
 
 As `next` becomes ready, merge `next` onto `master` with a rebase.
 

@@ -23,7 +23,7 @@ Additionally, the way we deploy our contracts is directly correlated with how th
 
 ### Option A: Deployment via Solidity's `new` Keyword
 
-To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template Aragon created. You can find it [here](https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/plugin/Plugin.sol).
+To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template Aragon created. You can find it [here](https://github.com/aragon/osx-commons/blob/develop/contracts/src/plugin/Plugin.sol).
 
 In this case, the compiler will force you to write a `constructor` function calling the `Plugin` parent `constructor` and provide it with a contract of type `IDAO`. Inside the constructor, you might want to initialize the storage variables that you have added yourself, such as the `admin` address in the example below.
 
