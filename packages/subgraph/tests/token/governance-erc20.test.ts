@@ -1,4 +1,3 @@
-import {TokenVotingMember} from '../../generated/schema';
 import {
   handleDelegateChanged,
   handleDelegateVotesChanged,
@@ -44,9 +43,6 @@ const pluginEntityId = generatePluginEntityId(pluginAddress);
 const pluginAddressSecond = Address.fromString(ADDRESS_SEVEN);
 const pluginEntityIdSecond = generatePluginEntityId(pluginAddressSecond);
 
-// mock tokens
-const tokenAddress = Address.fromString(DAO_TOKEN_ADDRESS);
-
 // mock members
 const fromAddress = Address.fromString(ADDRESS_ONE);
 const memberAddress = fromAddress;
@@ -56,16 +52,15 @@ const memberAddressHexString = fromAddressHexString;
 const toAddressHexString = toAddress.toHexString();
 const thirdAddress = Address.fromString(ADDRESS_THREE);
 
-function setContext(pluginId: string, tokenAddress: string): void {
+function setContext(pluginId: string): void {
   const context = new DataSourceContext();
   context.setString('pluginId', pluginId);
-  context.setString('tokenAddress', tokenAddress);
   dataSourceMock.setContext(context);
 }
 
 describe('Governance ERC20', () => {
   beforeAll(() => {
-    setContext(pluginEntityId, DAO_TOKEN_ADDRESS);
+    setContext(pluginEntityId);
   });
 
   afterEach(() => {
@@ -301,7 +296,7 @@ describe('Governance ERC20', () => {
 
       // execute the transfer in the context of both plugins
       handleTransfer(transferEvent);
-      setContext(pluginEntityIdSecond, DAO_TOKEN_ADDRESS);
+      setContext(pluginEntityIdSecond);
       handleTransfer(transferEvent);
 
       // we should see:
@@ -336,7 +331,7 @@ describe('Governance ERC20', () => {
       );
 
       // set the context back to the first plugin
-      setContext(pluginEntityId, DAO_TOKEN_ADDRESS);
+      setContext(pluginEntityId);
     });
   });
 
@@ -672,7 +667,7 @@ describe('Governance ERC20', () => {
       );
 
       // now do the delegation in the context of the second plugin
-      setContext(pluginEntityIdSecond, DAO_TOKEN_ADDRESS);
+      setContext(pluginEntityIdSecond);
       handleDelegateChanged(delegateChangedEvent);
 
       assert.fieldEquals(
@@ -689,7 +684,7 @@ describe('Governance ERC20', () => {
       );
 
       // set the context back to the first plugin
-      setContext(pluginEntityId, DAO_TOKEN_ADDRESS);
+      setContext(pluginEntityId);
     });
   });
 });

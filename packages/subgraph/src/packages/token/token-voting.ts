@@ -277,9 +277,6 @@ export function handleMembershipContractAnnounced(
     // It's safe to create the same type of template for them.
     let context = new DataSourceContext();
     context.setString('pluginId', pluginEntityId);
-
-    // add the token address so we can fetch the user's balance on initialization
-    context.setString('tokenAddress', token.toHexString());
     GovernanceERC20.createWithContext(event.params.definingContract, context);
   }
 }
