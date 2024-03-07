@@ -20,7 +20,7 @@ interface Token {
 }
 
 """
-An [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20), type of Token.
+An [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20), of type Token.
 """
 type ERC20Contract implements Token @entity(immutable: true) {
   " The address of the [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20). "
@@ -57,7 +57,7 @@ type ERC20WrapperContract implements Token @entity(immutable: true) {
 }
 
 """
-[ERC721 Token Standard](https://eips.ethereum.org/EIPS/eip-721), Non-Fungible Token (NFT), type of Token.
+[ERC721 Token Standard](https://eips.ethereum.org/EIPS/eip-721), Non-Fungible Token (NFT), of type Token.
 """
 type ERC721Contract implements Token @entity(immutable: true) {
   " The address of the [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721). "
@@ -212,7 +212,7 @@ type ERC1155TokenIdBalance @entity {
 ###########################
 
 """
-Classify the types of transfers from the DAO's point of view.
+Classifies the types of transfers from the DAO's point of view.
 """
 enum TransferType {
   """
@@ -221,10 +221,10 @@ enum TransferType {
   """
   ExternalTransfer
 
-  " When there's a withdrawal form the DAO treasury. "
+  " A withdrawal form the DAO treasury. "
   Withdraw
 
-  " When there's a deposit to the DAO treasury. "
+  " A deposit to the DAO treasury. "
   Deposit
 }
 
@@ -435,7 +435,7 @@ type Action @entity {
 }
 
 """
-The supported callbacks functions for ERC standards registered with [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
+The supported callback functions for ERC standards registered with [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
 """
 type StandardCallback @entity {
   " Concatenation of the DAO address and the interfaceID. Joined by '_'. "
