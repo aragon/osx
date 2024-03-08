@@ -271,7 +271,6 @@ export function handleMembershipContractAnnounced(
       return;
     }
     packageEntity.token = tokenAddress as string;
-
     packageEntity.save();
 
     // Both GovernanceWrappedERC20/GovernanceERC20 use the `Transfer` event, so
