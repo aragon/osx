@@ -5,8 +5,7 @@
 #############################
 
 """
-Interface representing a generic token.
-Tokens implementing this interface are expected to provide certain standard properties and functionalities.
+Interface representing a generic token. Each entity implementing this interface can be queried as Token.
 """
 interface Token {
   " The address of the Token Smart Contract. "
@@ -63,10 +62,10 @@ type ERC721Contract implements Token @entity(immutable: true) {
   " The address of the [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721). "
   id: ID!
 
-  " The name of the [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721). "
+  " The name of the token, mirrored from the smart contract. "
   name: String
 
-  " The symbol of the [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721). "
+  " The symbol of the token, mirrored from the smart contract. "
   symbol: String
 }
 
@@ -90,8 +89,7 @@ type ERC1155Contract implements Token @entity(immutable: true) {
 ###########################
 
 """
-Interface representing a generic token balance.
-Balances implementing this interface are expected to provide certain standard properties and functionalities.
+Balance of the DAO for any kind of token. Each entity implementing this interface can be queried as TokenBalance.
 """
 interface TokenBalance {
   " The concatenation of DAO Smart contract address and Token Smart Contract address. Joined by '_'. "
@@ -175,7 +173,7 @@ type ERC1155Balance implements TokenBalance @entity {
   " The DAO that holds tokens from a [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   dao: Dao!
 
-  " The amount and related information of the DAO held tokens per [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
+  " Balance for each token ID from an [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   balances: [ERC1155TokenIdBalance!]! @derivedFrom(field: "balance")
 
   " The URI of the [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
@@ -189,11 +187,9 @@ type ERC1155Balance implements TokenBalance @entity {
 The DAO token balance for each token within an [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155)
 """
 type ERC1155TokenIdBalance @entity {
-  # daoAddress_tokenAddress_tokenID"
   " The concatenation of DAO Smart Contract address, [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155) and token ID. Joined by '_'. "
   id: ID!
 
-  #daoAddress+tokenAddress
   " One to Many relationship linking with ERC1155Balance entity. "
   balance: ERC1155Balance!
 
@@ -216,8 +212,8 @@ Classifies the types of transfers from the DAO's point of view.
 """
 enum TransferType {
   """
-  When a DAO is involved in a transfer and the source and destination addresses are both NOT equal to the DAO.
-  The DAO must have been approved for the token, and it's moving the token as an intermediary.
+  When a DAO facilitates a transfer and neither the source nor the destination addresses match the DAO's. The DAO must
+  have token approval to execute the transfer, acting as an intermediary in the process.
   """
   ExternalTransfer
 
@@ -229,8 +225,7 @@ enum TransferType {
 }
 
 """
-Interface representing a generic token transfer.
-Token transfers implementing this interface are expected to provide certain standard properties and functionalities.
+Interface representing a generic token transfer associated with the DAO. Each entity implementing this interface can be queried as TokenTransfer.
 """
 interface TokenTransfer {
   " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
@@ -409,7 +404,7 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
 #############################
 
 """
-Actions are executed by the DAO's `execute` function, resulting in an external call.
+Actions are represented by solidity struct and executed by the DAO's `execute` function, resulting in an external call.
 """
 type Action @entity {
   " Concatenation of the proposalID and the index of the action. Joined by '_'. "
