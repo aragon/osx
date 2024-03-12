@@ -213,19 +213,20 @@ Classifies the types of transfers from the DAO's point of view.
 enum TransferType {
   """
   When a DAO facilitates a transfer and neither the source nor the destination addresses match the DAO's. The DAO must
-  have token approval to execute the transfer, acting as an intermediary in the process.
+  have token approval to execute the transfer via proposal, acting as an intermediary in the process.
   """
   ExternalTransfer
 
-  " A withdrawal form the DAO treasury. "
+  " A withdrawal form the DAO treasury. Executed by the DAO via proposal calling `transfer`. "
   Withdraw
 
-  " A deposit to the DAO treasury. "
+  " A deposit to the DAO treasury. Using either the DAO `deposit` function or executed by the DAO via proposal calling `transferFrom` as an action to transfer to itself. The DAO must
+  have token approval. "
   Deposit
 }
 
 """
-Interface representing a generic token transfer associated with the DAO. Each entity implementing this interface can be queried as TokenTransfer.
+Interface representing a generic token transfer associated with the DAO. Each entity implementing this interface can be queried as TokenTransfer (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
 """
 interface TokenTransfer {
   " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
@@ -243,7 +244,7 @@ interface TokenTransfer {
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
 
-  " The associated DAO proposal, if applicable. "
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
 
   " The hash of the transfer to track the transaction. "
@@ -254,7 +255,7 @@ interface TokenTransfer {
 }
 
 """
-Transfers of ERC20 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO.
+Transfers of ERC20 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
 """
 type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
@@ -275,7 +276,7 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC20 tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. "
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
@@ -289,7 +290,7 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
 }
 
 """
-Transfers of ERC721 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO.
+Transfers of ERC721 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
 """
 type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
@@ -310,7 +311,7 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC721 token. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. "
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
@@ -324,7 +325,7 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
 }
 
 """
-Transfers of ERC1155 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO.
+Transfers of ERC1155 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
 """
 type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
@@ -351,7 +352,7 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. "
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
@@ -365,7 +366,7 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
 }
 
 """
-Transfers of Native token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO.
+Transfers of Native token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
 """
 type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   " The concatenation of the transfer transaction hash, the log index and the action index (set to 0). Joined by '_'. "
@@ -386,7 +387,7 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   " The reference describing the deposit reason. "
   reference: String!
 
-  " The associated DAO proposal, if applicable. "
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
