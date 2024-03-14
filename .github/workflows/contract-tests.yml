@@ -39,6 +39,7 @@ jobs:
           MANAGEMENT_DAO_MULTISIG_LISTEDONLY: ${{ vars.MANAGEMENT_DAO_MULTISIG_LISTEDONLY }}
           MANAGEMENT_DAO_MULTISIG_APPROVERS: ${{ vars.MANAGEMENT_DAO_MULTISIG_APPROVERS }}
           MANAGEMENT_DAO_MULTISIG_MINAPPROVALS: ${{ vars.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: yarn run test
       - name: Run solidity-docgen
         run: yarn run docgen
