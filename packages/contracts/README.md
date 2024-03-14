@@ -15,6 +15,7 @@ yarn add @aragon/osx-artifacts
 ## Get Started
 
 Before starting make sure that you have created an `.env` file from the `.env.example` file and filled in the Alchemy API key. Feel free to add other API keys for the services that you want to use.
+
 Now you can get started running your repository locally:
 
 1. Install packages from the root folder with `yarn`
