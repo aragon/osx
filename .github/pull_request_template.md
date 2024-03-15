@@ -1,6 +1,6 @@
 ## Description
 
-Please include a summary of the change and be sure you follow the contributions rules we do provide [here](./CONTRIBUTIONS.md)
+Please include a summary of the change and be sure you follow the contributions rules we do provide [here](../CONTRIBUTIONS.md)
 
 Task ID: [OS-?](https://aragonassociation.atlassian.net/browse/OS-?)
 
@@ -25,3 +25,4 @@ See the framework lifecylce in `packages/contracts/docs/framework-lifecycle` to 
 - [ ] I have updated the `CHANGELOG.md` file in the root folder.
 - [ ] I have updated the `DEPLOYMENT_CHECKLIST` file in the root folder.
 - [ ] I have updated the `UPDATE_CHECKLIST` file in the root folder.
+- [ ] I have updated the Subgraph and added a QA URL to the description of this PR.
