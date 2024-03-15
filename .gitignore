@@ -40,3 +40,7 @@ generated
 subgraph.yaml
 .bin
 mythx.json
+
+# docs
+packages/subgraph/docs/developer-portal/01-query-examples/*
+!packages/subgraph/docs/developer-portal/01-query-examples/index.md
