@@ -1,7 +1,10 @@
-import networks, {ContractsNetworkConfig} from './networks';
+import {networkExtensions} from './networks';
 import {AragonPluginRepos, TestingFork} from './types/hardhat';
-import {NetworkConfigs} from '@aragon/osx-commons-configs';
-import {SupportedNetworks} from '@aragon/osx-commons-configs';
+import {
+  networks as commonNetworkConfigs,
+  SupportedNetworks,
+  addRpcUrlToNetwork,
+} from '@aragon/osx-commons-configs';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-verify';
@@ -10,22 +13,31 @@ import * as dotenv from 'dotenv';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
-
-type HardhatNetworksExtension = ContractsNetworkConfig & {
-  accounts?: string[];
-};
 
 dotenv.config();
 
 const ETH_KEY = process.env.ETH_KEY;
 const accounts = ETH_KEY ? ETH_KEY.split(',') : [];
 
+// check alchemy Api key existence
+if (process.env.ALCHEMY_API_KEY) {
+  addRpcUrlToNetwork(process.env.ALCHEMY_API_KEY);
+} else {
+  throw new Error('ALCHEMY_API_KEY in .env not set');
+}
+
 // add accounts to network configs
-const hardhatNetworks: NetworkConfigs<HardhatNetworksExtension> = networks;
-for (const network of Object.keys(networks)) {
-  hardhatNetworks[network as SupportedNetworks].accounts = accounts;
+const hardhatNetworks: {[index: string]: NetworkUserConfig} =
+  commonNetworkConfigs;
+for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
+  if (network === SupportedNetworks.LOCAL) {
+    continue;
+  }
+  hardhatNetworks[network].accounts = accounts;
+  hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
 
 // Extend HardhatRuntimeEnvironment

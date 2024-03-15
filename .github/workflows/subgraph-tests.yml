@@ -61,6 +61,8 @@ jobs:
         run: yarn
       - name: Build contracts
         run: yarn run build:contracts
+        env:
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Build manifest
         run: yarn run manifest
         env:
