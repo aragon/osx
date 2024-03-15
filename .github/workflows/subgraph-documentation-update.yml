@@ -13,6 +13,7 @@ on:
       - main
     paths:
       - 'packages/subgraph/schema.graphql'
+      - 'packages/subgraph/src/examples'
       - '.github/workflows/subgraph-deploy.yaml'
 
 jobs:
