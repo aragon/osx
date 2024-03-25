@@ -34,6 +34,7 @@ export const QueryDao = gql`
     }
   }
 `;
+
 export const QueryDaos = gql`
   query Daos(
     $limit: Int!
