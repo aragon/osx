@@ -78,8 +78,11 @@ If the answer to either of those two questions are "yes", then you're probably d
    [ ] My changes generate no new warnings.
    [ ] Any dependent changes have been merged and published in downstream modules.
    [ ] I ran all tests with success and extended them if necessary.
-   [ ] I have updated the CHANGELOG.md file in the root folder of the package after the [UPCOMING] title and before the latest version.
    [ ] I have tested my code on the test network.
+   [ ] I have updated the `CHANGELOG.md` file in the root folder.
+   [ ] I have updated the `DEPLOYMENT_CHECKLIST` file in the root folder.
+   [ ] I have updated the `UPDATE_CHECKLIST` file in the root folder.
+   [ ] I have updated the Subgraph and added a QA URL to the description of this PR.
    ```
 
 6. Wait for the pull request to be reviewed by the team.
