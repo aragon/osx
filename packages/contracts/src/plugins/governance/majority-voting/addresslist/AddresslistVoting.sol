@@ -76,8 +76,8 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function totalVotingPower(uint256 _blockNumber) public view override returns (uint256) {
-        return addresslistLengthAtBlock(_blockNumber);
+    function totalVotingPower(uint256 _timepoint) public view override returns (uint256) {
+        return addresslistLengthAtBlock(_timepoint);
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -94,9 +94,9 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        uint64 snapshotBlock;
+        uint64 snapshotTimepoint;
         unchecked {
-            snapshotBlock = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
+            snapshotTimepoint = block.number.toUint64() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
         }
 
         (_startDate, _endDate) = _validateProposalDates(_startDate, _endDate);
@@ -115,11 +115,11 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
-        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.snapshotTimepoint = snapshotTimepoint;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minVotingPower = _applyRatioCeiled(
-            totalVotingPower(snapshotBlock),
+            totalVotingPower(snapshotTimepoint),
             minParticipation()
         );
 
@@ -207,7 +207,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         }
 
         // The voter has no voting power.
-        if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
+        if (!isListedAtBlock(_account, proposal_.parameters.snapshotTimepoint)) {
             return false;
         }
 
