@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - develop
+      - fix/workflow-for-update-documentation
 
 jobs:
   update_docs:
