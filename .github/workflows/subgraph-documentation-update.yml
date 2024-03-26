@@ -5,12 +5,10 @@ name: Subgraph Documentation Update
 
 on:
   workflow_dispatch:
-  pull_request:
-    types:
-      - closed
+  workflow_call:
+  push:
     branches:
       - develop
-      - main
     paths:
       - 'packages/subgraph/schema.graphql'
       - 'packages/subgraph/src/examples'
