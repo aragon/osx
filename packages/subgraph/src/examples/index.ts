@@ -1,3 +1,4 @@
+/* MARKDOWN
 ---
 title: Aragon Subgraph [WIP]
 sidebar_label: Introduction
@@ -17,3 +18,4 @@ You can use the [Aragon subgraph-satsuma playground](https://subgraph.satsuma-pr
 ### Walkthrough
 
 This documentation includes some [example queries](./01-query-examples/index.md) to get you familiarized with subgraph protocol and the [Reference Guide](./reference-guide/index.md) generated from the latest version of our `@aragon/osx` [subgraph schema](https://github.com/aragon/osx/blob/develop/packages/subgraph/schema.graphql).
+*/

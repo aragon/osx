@@ -43,5 +43,4 @@ mythx.json
 schema-introspection.json
 
 # docs
-packages/subgraph/docs/developer-portal/01-query-examples/*
-!packages/subgraph/docs/developer-portal/01-query-examples/index.md
+packages/subgraph/docs/developer-portal/
