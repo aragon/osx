@@ -1,20 +1,29 @@
-import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
 import {NativeBalance, NativeTransfer} from '../../../generated/schema';
 import {ADDRESS_ZERO} from '../constants';
-import {getTransferId, TransferType} from './common';
+import {TransferType} from './common';
+import {
+  generateBalanceEntityId,
+  generateDaoEntityId,
+  generateTransferEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
 
 export function updateNativeBalance(
-  daoId: string,
+  dao: Address,
   amount: BigInt,
   timestamp: BigInt,
   type: TransferType
 ): void {
-  let balanceId = daoId.concat('_').concat(ADDRESS_ZERO);
-  let nativeBalance = NativeBalance.load(balanceId);
+  let balanceEntityId = generateBalanceEntityId(
+    dao,
+    Address.fromString(ADDRESS_ZERO)
+  );
+  let daoEntityId = generateDaoEntityId(dao);
+  let nativeBalance = NativeBalance.load(balanceEntityId);
 
   if (!nativeBalance) {
-    nativeBalance = new NativeBalance(balanceId);
-    nativeBalance.dao = daoId;
+    nativeBalance = new NativeBalance(balanceEntityId);
+    nativeBalance.dao = daoEntityId;
     nativeBalance.balance = BigInt.zero();
   }
 
@@ -33,14 +42,18 @@ export function handleNativeDeposit(
   reference: string,
   event: ethereum.Event
 ): void {
-  let daoId = dao.toHexString();
+  let daoEntityId = generateDaoEntityId(dao);
 
-  let id = getTransferId(event.transaction.hash, event.transactionLogIndex, 0);
+  let transferEntityId = generateTransferEntityId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    0
+  );
 
-  let transfer = new NativeTransfer(id);
+  let transfer = new NativeTransfer(transferEntityId);
   transfer.from = from;
   transfer.to = dao;
-  transfer.dao = daoId;
+  transfer.dao = daoEntityId;
   transfer.amount = amount;
   transfer.reference = reference;
   transfer.txHash = event.transaction.hash;
@@ -52,12 +65,7 @@ export function handleNativeDeposit(
     return;
   }
 
-  updateNativeBalance(
-    daoId,
-    amount,
-    event.block.timestamp,
-    TransferType.Deposit
-  );
+  updateNativeBalance(dao, amount, event.block.timestamp, TransferType.Deposit);
 }
 
 export function handleNativeAction(
@@ -69,18 +77,18 @@ export function handleNativeAction(
   actionIndex: number,
   event: ethereum.Event
 ): void {
-  let daoId = dao.toHexString();
+  let daoEntityId = generateDaoEntityId(dao);
 
-  let id = getTransferId(
+  let transferEntityId = generateTransferEntityId(
     event.transaction.hash,
     event.transactionLogIndex,
-    actionIndex
+    actionIndex as i32
   );
 
-  let transfer = new NativeTransfer(id);
+  let transfer = new NativeTransfer(transferEntityId);
   transfer.from = dao;
   transfer.to = to;
-  transfer.dao = daoId;
+  transfer.dao = daoEntityId;
   transfer.amount = amount;
   transfer.reference = reference;
   transfer.txHash = event.transaction.hash;
@@ -94,7 +102,7 @@ export function handleNativeAction(
   }
 
   updateNativeBalance(
-    daoId,
+    dao,
     amount,
     event.block.timestamp,
     TransferType.Withdraw
