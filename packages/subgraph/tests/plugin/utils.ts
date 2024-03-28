@@ -1,9 +1,3 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {newMockEvent} from 'matchstick-as';
-import {
-  ReleaseMetadataUpdated,
-  VersionCreated
-} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 import {
   InstallationApplied,
   InstallationPrepared,
@@ -13,8 +7,14 @@ import {
   UpdateApplied,
   UpdatePrepared,
   UpdatePreparedPreparedSetupDataStruct,
-  UpdatePreparedSetupPayloadStruct
+  UpdatePreparedSetupPayloadStruct,
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
+import {
+  ReleaseMetadataUpdated,
+  VersionCreated,
+} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {newMockEvent} from 'matchstick-as';
 
 export function createReleaseMetadataUpdatedEvent(
   release: string,

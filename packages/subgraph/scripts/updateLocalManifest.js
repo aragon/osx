@@ -5,7 +5,7 @@ const path = require('path');
 
 async function main() {
   const networks = await fs.readdir('../contracts/deployments', {
-    withFileTypes: true
+    withFileTypes: true,
   });
   for (const network of networks) {
     if (network.isDirectory()) {
@@ -14,10 +14,9 @@ async function main() {
 
       const contracts = await fs.readdir(networkPath, {withFileTypes: true});
       const manifest = {
-        info:
-          '# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest',
+        info: '# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest',
         network: networkName,
-        dataSources: {}
+        dataSources: {},
       };
 
       for (const contract of contracts) {
@@ -47,7 +46,7 @@ async function main() {
           manifest.dataSources[dataSourceName] = {
             name,
             address: contractJson.address,
-            startBlock: contractJson.receipt.blockNumber
+            startBlock: contractJson.receipt.blockNumber,
           };
         }
       }

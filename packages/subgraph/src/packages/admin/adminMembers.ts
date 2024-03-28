@@ -1,9 +1,14 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
 import {
   Administrator,
-  AdministratorAdminPlugin
+  AdministratorAdminPlugin,
 } from '../../../generated/schema';
 import {Granted, Revoked} from '../../../generated/templates/Admin/DAO';
+import {generateAdministratorAdminPluginEntityId} from '../../utils/ids';
+import {
+  generateEntityIdFromAddress,
+  generatePluginEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleGranted(event: Granted): void {
   if (
@@ -12,16 +17,22 @@ export function handleGranted(event: Granted): void {
       event.params.where.toHexString()
     )
   ) {
-    let pluginAddress = event.params.where.toHexString();
-    let administratorAddress = event.params.who.toHexString();
-    let administrator = Administrator.load(administratorAddress);
+    let pluginAddress = event.params.where;
+    let administratorAddress = event.params.who;
+    let pluginEntityId = generatePluginEntityId(pluginAddress);
+    let administratorEntityId =
+      generateEntityIdFromAddress(administratorAddress);
+    let administrator = Administrator.load(administratorEntityId);
     if (!administrator) {
-      administrator = new Administrator(administratorAddress);
-      administrator.address = administratorAddress;
+      administrator = new Administrator(administratorEntityId);
+      administrator.address = administratorEntityId;
       administrator.save();
     }
 
-    let administratorMappingId = `${pluginAddress}_${administratorAddress}`;
+    let administratorMappingId = generateAdministratorAdminPluginEntityId(
+      pluginAddress,
+      administratorAddress
+    );
     let administratorPluginMapping = AdministratorAdminPlugin.load(
       administratorMappingId
     );
@@ -29,8 +40,8 @@ export function handleGranted(event: Granted): void {
       administratorPluginMapping = new AdministratorAdminPlugin(
         administratorMappingId
       );
-      administratorPluginMapping.administrator = administratorAddress;
-      administratorPluginMapping.plugin = pluginAddress;
+      administratorPluginMapping.administrator = administratorEntityId;
+      administratorPluginMapping.plugin = pluginEntityId;
       administratorPluginMapping.save();
     }
   }
@@ -43,7 +54,12 @@ export function handleRevoked(event: Revoked): void {
       event.params.where.toHexString()
     )
   ) {
-    let mappingId = `${event.params.where.toHexString()}_${event.params.who.toHexString()}`;
+    // where is the plugin address
+    // who is the administrator address
+    let mappingId = generateAdministratorAdminPluginEntityId(
+      event.params.where,
+      event.params.who
+    );
     if (AdministratorAdminPlugin.load(mappingId)) {
       store.remove('AdministratorAdminPlugin', mappingId);
     }

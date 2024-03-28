@@ -1,23 +1,32 @@
 import {TransactionActionsProposal} from '../../generated/schema';
 import {
   Executed,
-  ExecutedActionsStruct
+  ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_3_0/DAO';
 import {handleAction} from './utils';
+import {
+  generateDaoEntityId,
+  generateProposalEntityId,
+  generateTransactionActionsProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {BigInt} from '@graphprotocol/graph-ts';
 
 export function handleExecuted(event: Executed): void {
-  let proposalId = event.params.actor
-    .toHexString()
-    .concat('_')
-    .concat(event.params.callId.toHexString());
+  let proposalEntityId = generateProposalEntityId(
+    event.params.actor,
+    BigInt.fromByteArray(event.params.callId)
+  );
 
-  proposalId = proposalId
-    .concat('_')
-    .concat(event.transaction.hash.toHexString())
-    .concat('_')
-    .concat(event.transactionLogIndex.toHexString());
-  let proposal = new TransactionActionsProposal(proposalId);
-  proposal.dao = event.address.toHexString();
+  let transactionActionsProposalEntityId =
+    generateTransactionActionsProposalEntityId(
+      proposalEntityId,
+      event.transaction.hash,
+      event.transactionLogIndex
+    );
+  let proposal = new TransactionActionsProposal(
+    transactionActionsProposalEntityId
+  );
+  proposal.dao = generateDaoEntityId(event.address);
   proposal.createdAt = event.block.timestamp;
   proposal.endDate = event.block.timestamp;
   proposal.startDate = event.block.timestamp;
@@ -33,7 +42,7 @@ export function handleExecuted(event: Executed): void {
   for (let index = 0; index < actions.length; index++) {
     handleAction<ExecutedActionsStruct, Executed>(
       actions[index],
-      proposalId,
+      transactionActionsProposalEntityId,
       index,
       event
     );

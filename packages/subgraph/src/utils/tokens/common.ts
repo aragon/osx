@@ -15,7 +15,7 @@ export const ERC1155_safeBatchTransferFrom = '0x2eb2c2d6'; // `bytes4(keccak256(
 
 export enum TransferType {
   Withdraw,
-  Deposit
+  Deposit,
 }
 
 export const DECODE_OFFSET =
@@ -49,11 +49,7 @@ export function getTokenIdBalanceId(
   token: string,
   tokenId: BigInt
 ): string {
-  return daoId
-    .concat('_')
-    .concat(token)
-    .concat('_')
-    .concat(tokenId.toString());
+  return daoId.concat('_').concat(token).concat('_').concat(tokenId.toString());
 }
 
 // Unique ID generation for ERC1155 transfers

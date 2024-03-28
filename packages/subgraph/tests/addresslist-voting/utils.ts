@@ -1,6 +1,3 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {createMockedFunction, newMockEvent} from 'matchstick-as';
-
 import {AddresslistVotingProposal} from '../../generated/schema';
 import {
   ProposalCreated,
@@ -8,7 +5,7 @@ import {
   ProposalExecuted,
   VotingSettingsUpdated,
   MembersAdded,
-  MembersRemoved
+  MembersRemoved,
 } from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   ADDRESS_ONE,
@@ -24,8 +21,10 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
 } from '../constants';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 // events
 
@@ -282,13 +281,14 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.startDate = BigInt.fromString(startDate);
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  addresslistProposal.isSignaling = false;
 
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   addresslistProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
 
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
   addresslistProposal.creationBlockNumber = creationBlockNumber;
-  addresslistProposal.potentiallyExecutable = executable;
+  addresslistProposal.approvalReached = executable;
   addresslistProposal.earlyExecutable = earlyExecutable;
 
   addresslistProposal.save();

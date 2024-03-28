@@ -23,10 +23,10 @@ export const VOTING_MODE_INDEXES = new Map<string, string>()
   .set('EarlyExecution', '1')
   .set('VoteReplacement', '2');
 
-export const TOKEN_VOTING_INTERFACE = '0x50eb001e';
-export const ADDRESSLIST_VOTING_INTERFACE = '0x5f21eb8b';
-export const ADMIN_INTERFACE = '0xa5793356';
-export const MULTISIG_INTERFACE = '0x8f852786';
-export const WRAPPED_ERC20_INTERFACE = '0x0f13099a';
+export const TOKEN_VOTING_INTERFACE_ID = '0x50eb001e';
+export const ADDRESSLIST_VOTING_INTERFACE_ID = '0x5f21eb8b';
+export const ADMIN_INTERFACE_ID = '0xa5793356';
+export const MULTISIG_INTERFACE_ID = '0x8f852786';
+export const GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID = '0x0f13099a';
 
 export const RATIO_BASE = '1000000'; // 10**6

@@ -1,14 +1,12 @@
-import {assert, clearStore, describe, test} from 'matchstick-as/assembly/index';
-import {bigInt, BigInt} from '@graphprotocol/graph-ts';
-
 import {
   handleVoteCast,
   handleProposalExecuted,
   handleVotingSettingsUpdated,
   _handleProposalCreated,
-  handleMembershipContractAnnounced
+  handleMembershipContractAnnounced,
 } from '../../src/packages/token/token-voting';
-import {VOTING_MODES, WRAPPED_ERC20_INTERFACE} from '../../src/utils/constants';
+import {VOTING_MODES} from '../../src/utils/constants';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   DAO_TOKEN_ADDRESS,
   STRING_DATA,
@@ -16,20 +14,21 @@ import {
   ONE,
   ZERO,
   TWO,
-  ERC20_AMOUNT_FULL
+  ERC20_AMOUNT_FULL,
 } from '../constants';
-
-import {createDummyActions} from '../utils';
 import {
   ExtendedERC20Contract,
   ExtendedERC20WrapperContract,
   ExtendedTokenVotingPlugin,
   ExtendedTokenVotingProposal,
   ExtendedTokenVotingVote,
-  ExtendedTokenVotingVoter
+  ExtendedTokenVotingVoter,
 } from '../helpers/extended-schema';
+import {createDummyAction} from '@aragon/osx-commons-subgraph';
+import {bigInt, BigInt} from '@graphprotocol/graph-ts';
+import {assert, clearStore, describe, test} from 'matchstick-as/assembly/index';
 
-let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+let actions = [createDummyAction(DAO_TOKEN_ADDRESS, '0', '0x00000000')];
 
 test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
@@ -57,10 +56,9 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // expected changes
   proposal.creationBlockNumber = BigInt.fromString(ONE);
   proposal.votingMode = VOTING_MODES.get(parseInt(VOTING_MODE)) as string;
-  // check TokenVotingProposal
+  // // check TokenVotingProposal
   proposal.assertEntity();
 
-  // check TokenVotingPlugin
   tokenVotingPlugin.assertEntity();
 
   clearStore();
@@ -75,7 +73,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // check proposal entity
   proposal.assertEntity();
 
-  // // create calls
+  // create calls
   proposal.yes = bigInt.fromString(ONE);
   proposal.mockCall_getProposal(actions);
   proposal.mockCall_totalVotingPower();
@@ -103,7 +101,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // check proposal
   // expected changes to the proposal entity
   proposal.castedVotingPower = BigInt.fromString(ONE);
-  proposal.potentiallyExecutable = false;
+  proposal.approvalReached = false;
   // assert proposal entity
   proposal.assertEntity();
 
@@ -147,7 +145,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event3);
 
   // expected changes to the proposal entity
-  proposal.potentiallyExecutable = true;
+  proposal.approvalReached = true;
   proposal.castedVotingPower = BigInt.fromString(TWO);
 
   proposal.assertEntity();
@@ -228,7 +226,10 @@ describe('handleMembershipContractAnnounced', () => {
     let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
     erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
-    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface(
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+      false
+    );
     erc20Contract.mockCall_supportsInterface('ffffffff', false);
 
     tokenVotingPlugin.token = erc20Contract.id;
@@ -249,10 +250,14 @@ describe('handleMembershipContractAnnounced', () => {
     // create entities
     let tokenVotingPlugin = new ExtendedTokenVotingPlugin().withDefaultValues();
     let erc20Contract = new ExtendedERC20Contract().withDefaultValues();
-    let erc20WrappedContract = new ExtendedERC20WrapperContract().withDefaultValues();
+    let erc20WrappedContract =
+      new ExtendedERC20WrapperContract().withDefaultValues();
     erc20Contract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
     erc20Contract.mockCall_balanceOf(erc20Contract.id, ERC20_AMOUNT_FULL);
-    erc20Contract.mockCall_supportsInterface(WRAPPED_ERC20_INTERFACE, false);
+    erc20Contract.mockCall_supportsInterface(
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+      false
+    );
     erc20Contract.mockCall_supportsInterface('ffffffff', false);
 
     erc20WrappedContract.mockCall_createTokenCalls(ERC20_AMOUNT_FULL);
@@ -261,7 +266,7 @@ describe('handleMembershipContractAnnounced', () => {
       ERC20_AMOUNT_FULL
     );
     erc20WrappedContract.mockCall_supportsInterface(
-      WRAPPED_ERC20_INTERFACE,
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
       true
     );
     erc20WrappedContract.mockCall_supportsInterface('ffffffff', false);

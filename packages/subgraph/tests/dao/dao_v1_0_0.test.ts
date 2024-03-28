@@ -1,25 +1,35 @@
 import {
-  afterEach,
-  assert,
-  beforeAll,
-  beforeEach,
-  clearStore,
-  describe,
-  test
-} from 'matchstick-as/assembly/index';
-import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
-
+  Action,
+  ERC721Balance,
+  TransactionActionsProposal,
+} from '../../generated/schema';
+import {Executed} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   handleNativeTokenDeposited,
   handleDeposited,
   handleExecuted,
   _handleMetadataSet,
   handleTrustedForwarderSet,
-  handleSignatureValidatorSet,
   handleStandardCallbackRegistered,
   handleCallbackReceived,
-  handleNewURI
+  handleNewURI,
 } from '../../src/dao/dao_v1_0_0';
+import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
+import {
+  generateERC1155TransferEntityId,
+  generateTokenEntityId,
+} from '../../src/utils/ids';
+import {
+  ERC1155_INTERFACE_ID,
+  ERC165_INTERFACE_ID,
+  ERC20_transfer,
+  ERC20_transferFrom,
+  ERC721_safeTransferFromWithData,
+  ERC721_transferFrom,
+  onERC1155BatchReceived,
+  onERC1155Received,
+  onERC721Received,
+} from '../../src/utils/tokens/common';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -32,42 +42,12 @@ import {
   ADDRESS_THREE,
   ADDRESS_FOUR,
   ERC20_AMOUNT_HALF,
-  ERC20_AMOUNT_FULL
+  ERC20_AMOUNT_FULL,
+  ERC20_TOTAL_SUPPLY,
+  TOKEN_NAME,
+  TOKEN_SYMBOL,
+  ERC20_DECIMALS,
 } from '../constants';
-import {
-  createDummyActions,
-  createERC1155TokenCalls,
-  createTokenCalls
-} from '../utils';
-import {
-  getBalanceOf,
-  createNewExecutedEvent,
-  createDaoEntityState,
-  createTrustedForwarderSetEvent,
-  createSignatureValidatorSetEvent,
-  createStandardCallbackRegisteredEvent,
-  getSupportsInterface,
-  encodeWithFunctionSelector
-} from './utils';
-import {
-  ERC1155_INTERFACE_ID,
-  ERC20_transfer,
-  ERC20_transferFrom,
-  ERC721_safeTransferFromWithData,
-  ERC721_transferFrom,
-  getERC1155TransferId,
-  getTokenIdBalanceId,
-  getTransferId,
-  onERC1155BatchReceived,
-  onERC1155Received,
-  onERC721Received
-} from '../../src/utils/tokens/common';
-import {
-  Action,
-  ERC721Balance,
-  TransactionActionsProposal
-} from '../../generated/schema';
-import {Executed} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   ExtendedDao,
   ExtendedERC1155Balance,
@@ -81,14 +61,47 @@ import {
   ExtendedERC721Contract,
   ExtendedERC721Transfer,
   ExtendedNativeBalance,
-  ExtendedNativeTransfer
+  ExtendedNativeTransfer,
 } from '../helpers/extended-schema';
+import {
+  getBalanceOf,
+  createNewExecutedEvent,
+  createDaoEntityState,
+  createTrustedForwarderSetEvent,
+  createStandardCallbackRegisteredEvent,
+  getSupportsInterface,
+  encodeWithFunctionSelector,
+} from './utils';
+import {
+  generateActionEntityId,
+  generateBalanceEntityId,
+  generateDaoEntityId,
+  generateProposalEntityId,
+  generateTokenIdBalanceEntityId,
+  generateTransactionActionsProposalEntityId,
+  generateTransferEntityId,
+  createDummyAction,
+  createERC20TokenCalls,
+  createERC1155TokenCalls,
+} from '@aragon/osx-commons-subgraph';
+import {Address, Bytes, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {
+  afterEach,
+  assert,
+  beforeAll,
+  beforeEach,
+  clearStore,
+  describe,
+  test,
+} from 'matchstick-as/assembly/index';
 
 const eq = assert.fieldEquals;
 
-let daoId = Address.fromString(DAO_ADDRESS).toHexString();
-let tokenId = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
-let balanceId = daoId.concat('_').concat(tokenId);
+let daoAddress = Address.fromString(DAO_ADDRESS);
+let tokenAddress = Address.fromString(DAO_TOKEN_ADDRESS);
+let daoEntityId = generateDaoEntityId(daoAddress);
+let tokenEntityId = generateTokenEntityId(tokenAddress);
+let balanceEntityId = generateBalanceEntityId(daoAddress, tokenAddress);
 
 let daoTokenContract: ExtendedERC20Contract;
 let erc721Contract: ExtendedERC721Contract;
@@ -109,13 +122,13 @@ function createExecutedEvent(
       isDynamic
     );
 
-    let action = createDummyActions(
+    let action = createDummyAction(
       DAO_TOKEN_ADDRESS,
       '0',
       functionData.toHexString()
     );
 
-    actions.push(action[0]);
+    actions.push(action);
   }
 
   if (execResults.length == 0) {
@@ -155,7 +168,7 @@ test('Run dao (handleNewURI) mappings with mock event', () => {
   dao.daoURI = newDAOURI;
 
   // Assert dao entity
-  dao.assertEntity(true);
+  dao.assertEntity();
 
   clearStore();
 });
@@ -204,9 +217,9 @@ describe('handleNativeTokenDeposited', () => {
     let txHash = newEvent.transaction.hash;
     let logIndex = newEvent.transactionLogIndex;
 
-    let transferId = getTransferId(txHash, logIndex, 0);
+    let transferEntityId = generateTransferEntityId(txHash, logIndex, 0);
     let nativeTransfer = new ExtendedNativeTransfer().withDefaultValues(
-      transferId
+      transferEntityId
     );
     // expected changes
     nativeTransfer.amount = balance;
@@ -253,6 +266,14 @@ describe('handleDeposited: ', () => {
     daoTokenContract.mockCall_createTokenCalls(totalSupply);
     daoTokenContract.mockCall_balanceOf(DAO_ADDRESS, ERC20_AMOUNT_HALF);
     daoTokenContract.mockCall_balanceOf(DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
+
+    getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
+    getSupportsInterface(
+      DAO_TOKEN_ADDRESS,
+      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
+      false
+    );
+    getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
   });
 
   afterEach(() => {
@@ -274,7 +295,7 @@ describe('handleDeposited: ', () => {
 
     handleDeposited(newEvent);
 
-    let transferId = getTransferId(txHash, logIndex, 0);
+    let transferEntityId = generateTransferEntityId(txHash, logIndex, 0);
 
     // check ERC20Contract entity
     daoTokenContract.assertEntity();
@@ -292,7 +313,7 @@ describe('handleDeposited: ', () => {
 
     // Check ERC20Transfer
     let erc20Transfer = new ExtendedERC20Transfer().withDefaultValue(
-      transferId
+      transferEntityId
     );
     // expected changes
     erc20Transfer.amount = balance;
@@ -359,9 +380,9 @@ describe('handleDeposited: ', () => {
     nativeBalance.assertEntity();
 
     // Check NativeTransfer
-    let transferId = getTransferId(txHash, logIndex, 0);
+    let transferEntityId = generateTransferEntityId(txHash, logIndex, 0);
     let nativeTransfer = new ExtendedNativeTransfer().withDefaultValues(
-      transferId
+      transferEntityId
     );
     // expected changes
     nativeTransfer.amount = balance;
@@ -417,7 +438,7 @@ describe('handleCallbackReceived: ', () => {
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_FOUR)),
         ethereum.Value.fromUnsignedBigInt(tokenId),
-        ethereum.Value.fromBytes(Bytes.fromHexString('0x'))
+        ethereum.Value.fromBytes(Bytes.fromHexString('0x')),
       ];
 
       let functionData = encodeWithFunctionSelector(
@@ -432,16 +453,15 @@ describe('handleCallbackReceived: ', () => {
         onERC721Received,
         functionData
       );
-
       handleCallbackReceived(newEvent);
 
       let txHash = newEvent.transaction.hash;
       let logIndex = newEvent.transactionLogIndex;
       let timestamp = newEvent.block.timestamp;
 
-      let transferId = getTransferId(txHash, logIndex, 0);
+      let transferId = generateTransferEntityId(txHash, logIndex, 0);
 
-      // check ERC721Contract entity
+      // // check ERC721Contract entity
       erc721Contract.assertEntity();
       assert.entityCount('ERC721Contract', 1);
 
@@ -473,7 +493,7 @@ describe('handleCallbackReceived: ', () => {
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_FOUR)),
         ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(1)),
-        ethereum.Value.fromBytes(Bytes.fromHexString('0x'))
+        ethereum.Value.fromBytes(Bytes.fromHexString('0x')),
       ];
 
       let functionData = encodeWithFunctionSelector(
@@ -561,7 +581,7 @@ describe('handleCallbackReceived: ', () => {
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
         ethereum.Value.fromUnsignedBigInt(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigInt(amount), // amount
-        ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+        ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
       ];
 
       let functionData = encodeWithFunctionSelector(
@@ -585,7 +605,7 @@ describe('handleCallbackReceived: ', () => {
       let timestamp = newEvent.block.timestamp;
       let txHash = newEvent.transaction.hash;
       let logIndex = newEvent.transactionLogIndex;
-      let transferId = getERC1155TransferId(txHash, logIndex, 0, 0);
+      let transferId = generateERC1155TransferEntityId(txHash, logIndex, 0, 0);
       assert.entityCount('ERC1155Transfer', 1);
       let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
       erc1155Transfer.id = transferId;
@@ -603,10 +623,11 @@ describe('handleCallbackReceived: ', () => {
       erc1155Balance.assertEntity();
       // check ERC1155TokenIdBalance entity
       assert.entityCount('ERC1155TokenIdBalance', 1);
-      let erc1155TokenIdBalance = new ExtendedERC1155TokenIdBalance().withDefaultValues();
+      let erc1155TokenIdBalance =
+        new ExtendedERC1155TokenIdBalance().withDefaultValues();
       erc1155TokenIdBalance.amount = amount;
       erc1155TokenIdBalance.lastUpdated = timestamp;
-      erc1155TokenIdBalance.balance = balanceId;
+      erc1155TokenIdBalance.balance = balanceEntityId;
       erc1155TokenIdBalance.assertEntity();
     });
     test('correctly handles multiple events and updates balance', () => {
@@ -618,7 +639,7 @@ describe('handleCallbackReceived: ', () => {
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
         ethereum.Value.fromUnsignedBigInt(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigInt(amount), // amount
-        ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+        ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
       ];
 
       let functionData = encodeWithFunctionSelector(
@@ -648,7 +669,8 @@ describe('handleCallbackReceived: ', () => {
       assert.entityCount('ERC1155Transfer', 2);
       assert.entityCount('ERC1155Balance', 1);
       assert.entityCount('ERC1155TokenIdBalance', 1);
-      let erc1155TokenIdBalance = new ExtendedERC1155TokenIdBalance().withDefaultValues();
+      let erc1155TokenIdBalance =
+        new ExtendedERC1155TokenIdBalance().withDefaultValues();
       erc1155TokenIdBalance.amount = amount.times(BigInt.fromU32(2));
       erc1155TokenIdBalance.lastUpdated = newEvent.block.timestamp;
       erc1155TokenIdBalance.assertEntity();
@@ -686,7 +708,7 @@ describe('handleCallbackReceived: ', () => {
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
         ethereum.Value.fromUnsignedBigIntArray(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigIntArray(amount), // amount
-        ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+        ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
       ];
 
       let functionData = encodeWithFunctionSelector(
@@ -706,7 +728,11 @@ describe('handleCallbackReceived: ', () => {
       let erc1155TokenIdBalances: string[] = [];
       for (let i = 0; i < transferToken.length; i++) {
         erc1155TokenIdBalances.push(
-          balanceId.concat('_').concat(transferToken[i].toString())
+          generateTokenIdBalanceEntityId(
+            daoAddress,
+            tokenAddress,
+            transferToken[i]
+          )
         );
       }
       // check ERC1155Contract entity
@@ -720,7 +746,12 @@ describe('handleCallbackReceived: ', () => {
       let logIndex = newEvent.transactionLogIndex;
       for (let i = 0; i < transferToken.length; i++) {
         let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
-        erc1155Transfer.id = getERC1155TransferId(txHash, logIndex, 0, i);
+        erc1155Transfer.id = generateERC1155TransferEntityId(
+          txHash,
+          logIndex,
+          0,
+          i
+        );
         erc1155Transfer.from = Address.fromString(ADDRESS_THREE);
         erc1155Transfer.to = Address.fromString(DAO_ADDRESS);
         erc1155Transfer.operator = Address.fromString(ADDRESS_THREE);
@@ -738,8 +769,9 @@ describe('handleCallbackReceived: ', () => {
       // check ERC1155TokenIdBalance entity
       assert.entityCount('ERC1155TokenIdBalance', 2);
       for (let i = 0; i < transferToken.length; i++) {
-        let erc1155TokenIdBalance = new ExtendedERC1155TokenIdBalance().withDefaultValues();
-        erc1155TokenIdBalance.balance = balanceId;
+        let erc1155TokenIdBalance =
+          new ExtendedERC1155TokenIdBalance().withDefaultValues();
+        erc1155TokenIdBalance.balance = balanceEntityId;
         erc1155TokenIdBalance.id = erc1155TokenIdBalances[i];
         erc1155TokenIdBalance.amount = amount[i];
         erc1155TokenIdBalance.tokenId = transferToken[i];
@@ -756,7 +788,7 @@ describe('handleCallbackReceived: ', () => {
         ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)), // from
         ethereum.Value.fromUnsignedBigIntArray(transferToken), // tokenId
         ethereum.Value.fromUnsignedBigIntArray(amount), // amount
-        ethereum.Value.fromBytes(Bytes.fromHexString('0x')) // data
+        ethereum.Value.fromBytes(Bytes.fromHexString('0x')), // data
       ];
 
       let functionData = encodeWithFunctionSelector(
@@ -784,14 +816,15 @@ describe('handleCallbackReceived: ', () => {
       assert.entityCount('ERC1155Balance', 1);
       assert.entityCount('ERC1155TokenIdBalance', 2);
       for (let i = 0; i < transferToken.length; i++) {
-        let erc1155TokenIdBalance = new ExtendedERC1155TokenIdBalance().withDefaultValues();
-        erc1155TokenIdBalance.id = getTokenIdBalanceId(
-          daoId,
-          tokenId,
+        let erc1155TokenIdBalance =
+          new ExtendedERC1155TokenIdBalance().withDefaultValues();
+        erc1155TokenIdBalance.id = generateTokenIdBalanceEntityId(
+          daoAddress,
+          tokenAddress,
           transferToken[i]
         );
         erc1155TokenIdBalance.tokenId = transferToken[i];
-        erc1155TokenIdBalance.balance = balanceId;
+        erc1155TokenIdBalance.balance = balanceEntityId;
         erc1155TokenIdBalance.amount = amount[i].times(BigInt.fromU32(2));
         erc1155TokenIdBalance.lastUpdated = newEvent.block.timestamp;
         erc1155TokenIdBalance.assertEntity();
@@ -811,7 +844,7 @@ describe('handleExecuted', () => {
 
     let execResults = [
       Bytes.fromHexString('0x11'),
-      Bytes.fromHexString('0x22')
+      Bytes.fromHexString('0x22'),
     ];
 
     let failureMap = '2';
@@ -826,31 +859,51 @@ describe('handleExecuted', () => {
 
     handleExecuted(event);
 
-    let proposalId = event.params.actor
-      .toHexString()
-      .concat('_')
-      .concat(event.params.callId.toHexString())
-      .concat('_')
-      .concat(event.transaction.hash.toHexString())
-      .concat('_')
-      .concat(event.transactionLogIndex.toHexString());
+    let proposalEntityId = generateProposalEntityId(
+      event.params.actor,
+      BigInt.fromByteArray(event.params.callId)
+    );
+    let transactionActionsProposalEntityId =
+      generateTransactionActionsProposalEntityId(
+        proposalEntityId,
+        event.transaction.hash,
+        event.transactionLogIndex
+      );
 
     assert.entityCount('TransactionActionsProposal', 1);
     assert.entityCount('Action', 2);
 
-    eq('TransactionActionsProposal', proposalId, 'id', proposalId);
-    eq('TransactionActionsProposal', proposalId, 'failureMap', failureMap);
+    eq(
+      'TransactionActionsProposal',
+      transactionActionsProposalEntityId,
+      'id',
+      transactionActionsProposalEntityId
+    );
+    eq(
+      'TransactionActionsProposal',
+      transactionActionsProposalEntityId,
+      'failureMap',
+      failureMap
+    );
 
     for (let i = 0; i < event.params.actions.length; i++) {
-      let actionId = proposalId.concat('_').concat(i.toString());
+      let actionEntityId = generateActionEntityId(
+        transactionActionsProposalEntityId,
+        i
+      );
 
-      eq('Action', actionId, 'id', actionId);
-      eq('Action', actionId, 'execResult', execResults[i].toHexString());
-      eq('Action', actionId, 'dao', DAO_ADDRESS);
-      eq('Action', actionId, 'proposal', proposalId);
+      eq('Action', actionEntityId, 'id', actionEntityId);
+      eq('Action', actionEntityId, 'execResult', execResults[i].toHexString());
+      eq('Action', actionEntityId, 'dao', DAO_ADDRESS);
       eq(
         'Action',
-        actionId,
+        actionEntityId,
+        'proposal',
+        transactionActionsProposalEntityId
+      );
+      eq(
+        'Action',
+        actionEntityId,
         'data',
         encodeWithFunctionSelector(tuple, selector).toHexString()
       );
@@ -871,19 +924,25 @@ describe('handleExecuted', () => {
       failureMap
     );
 
-    let proposalId = event.params.actor
-      .toHexString()
-      .concat('_')
-      .concat(event.params.callId.toHexString())
-      .concat('_')
-      .concat(event.transaction.hash.toHexString())
-      .concat('_')
-      .concat(event.transactionLogIndex.toHexString());
-
-    let actionId = proposalId.concat('_').concat('0');
+    let proposalEntityId = generateProposalEntityId(
+      event.params.actor,
+      BigInt.fromUnsignedBytes(event.params.callId)
+    );
+    let transactionActionsProposalEntityId =
+      generateTransactionActionsProposalEntityId(
+        proposalEntityId,
+        event.transaction.hash,
+        event.transactionLogIndex
+      );
+    let actionEntityId = generateActionEntityId(
+      transactionActionsProposalEntityId,
+      0
+    );
 
     // create proposal
-    let proposal = new TransactionActionsProposal(proposalId);
+    let proposal = new TransactionActionsProposal(
+      transactionActionsProposalEntityId
+    );
     proposal.dao = event.address.toHexString();
     proposal.createdAt = event.block.timestamp;
     proposal.endDate = event.block.timestamp;
@@ -895,7 +954,7 @@ describe('handleExecuted', () => {
     proposal.save();
 
     // create action
-    let action = new Action(actionId);
+    let action = new Action(actionEntityId);
     action.to = Address.fromString(DAO_TOKEN_ADDRESS);
     action.data = Bytes.fromHexString('0x');
     action.value = BigInt.zero();
@@ -915,16 +974,32 @@ describe('handleExecuted', () => {
     assert.entityCount('Action', 1);
     assert.entityCount('TransactionActionsProposal', 1);
 
-    eq('Action', actionId, 'id', actionId);
-    eq('Action', actionId, 'execResult', execResult.toHexString());
+    eq('Action', actionEntityId, 'id', actionEntityId);
+    eq('Action', actionEntityId, 'execResult', execResult.toHexString());
 
-    eq('TransactionActionsProposal', proposalId, 'id', proposalId);
-    eq('TransactionActionsProposal', proposalId, 'failureMap', failureMap);
+    eq(
+      'TransactionActionsProposal',
+      transactionActionsProposalEntityId,
+      'id',
+      transactionActionsProposalEntityId
+    );
+    eq(
+      'TransactionActionsProposal',
+      transactionActionsProposalEntityId,
+      'failureMap',
+      failureMap
+    );
   });
 
   describe('ERC20 action', () => {
     beforeAll(() => {
-      createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', '6', '10');
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL,
+        ERC20_DECIMALS
+      );
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_HALF);
       getBalanceOf(DAO_TOKEN_ADDRESS, DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
 
@@ -944,7 +1019,7 @@ describe('handleExecuted', () => {
         let transferToken = BigInt.fromU32(10);
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(transferToken)
+          ethereum.Value.fromUnsignedBigInt(transferToken),
         ];
 
         let event = createExecutedEvent(
@@ -957,52 +1032,74 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalId = event.params.actor
-          .toHexString()
-          .concat('_')
-          .concat(event.params.callId.toHexString())
-          .concat('_')
-          .concat(event.transaction.hash.toHexString())
-          .concat('_')
-          .concat(event.transactionLogIndex.toHexString());
+        let proposalEntityId = generateProposalEntityId(
+          event.params.actor,
+          BigInt.fromByteArray(event.params.callId)
+        );
+        let transactionActionsProposalEntityId =
+          generateTransactionActionsProposalEntityId(
+            proposalEntityId,
+            event.transaction.hash,
+            event.transactionLogIndex
+          );
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
         let timestamp = event.block.timestamp;
 
-        let transferId = getTransferId(txHash, logIndex, 0);
+        let transferEntityId = generateTransferEntityId(txHash, logIndex, 0);
 
         // check ERC20Contract entity
-        eq('ERC20Contract', tokenId, 'id', tokenId);
-        eq('ERC20Contract', tokenId, 'name', 'name');
-        eq('ERC20Contract', tokenId, 'symbol', 'symbol');
+        eq('ERC20Contract', tokenEntityId, 'id', tokenEntityId);
+        eq('ERC20Contract', tokenEntityId, 'name', 'name');
+        eq('ERC20Contract', tokenEntityId, 'symbol', 'symbol');
         assert.entityCount('ERC20Contract', 1);
 
         // check ERC20Balance entity
-        eq('ERC20Balance', balanceId, 'id', balanceId);
-        eq('ERC20Balance', balanceId, 'token', tokenId);
-        eq('ERC20Balance', balanceId, 'dao', daoId);
-        eq('ERC20Balance', balanceId, 'balance', ERC20_AMOUNT_HALF);
-        eq('ERC20Balance', balanceId, 'lastUpdated', timestamp.toString());
+        eq('ERC20Balance', balanceEntityId, 'id', balanceEntityId);
+        eq('ERC20Balance', balanceEntityId, 'token', tokenEntityId);
+        eq('ERC20Balance', balanceEntityId, 'dao', daoEntityId);
+        eq('ERC20Balance', balanceEntityId, 'balance', ERC20_AMOUNT_HALF);
+        eq(
+          'ERC20Balance',
+          balanceEntityId,
+          'lastUpdated',
+          timestamp.toString()
+        );
         assert.entityCount('ERC20Balance', 1);
 
         // Check ERC20Transfer
-        eq('ERC20Transfer', transferId, 'id', transferId);
-        eq('ERC20Transfer', transferId, 'dao', daoId);
-        eq('ERC20Transfer', transferId, 'amount', transferToken.toString());
-        eq('ERC20Transfer', transferId, 'from', DAO_ADDRESS);
-        eq('ERC20Transfer', transferId, 'to', ADDRESS_THREE);
-        eq('ERC20Transfer', transferId, 'proposal', proposalId);
-        eq('ERC20Transfer', transferId, 'type', 'Withdraw');
-        eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
-        eq('ERC20Transfer', transferId, 'createdAt', timestamp.toString());
+        eq('ERC20Transfer', transferEntityId, 'id', transferEntityId);
+        eq('ERC20Transfer', transferEntityId, 'dao', daoEntityId);
+        eq(
+          'ERC20Transfer',
+          transferEntityId,
+          'amount',
+          transferToken.toString()
+        );
+        eq('ERC20Transfer', transferEntityId, 'from', DAO_ADDRESS);
+        eq('ERC20Transfer', transferEntityId, 'to', ADDRESS_THREE);
+        eq(
+          'ERC20Transfer',
+          transferEntityId,
+          'proposal',
+          transactionActionsProposalEntityId
+        );
+        eq('ERC20Transfer', transferEntityId, 'type', 'Withdraw');
+        eq('ERC20Transfer', transferEntityId, 'txHash', txHash.toHexString());
+        eq(
+          'ERC20Transfer',
+          transferEntityId,
+          'createdAt',
+          timestamp.toString()
+        );
         assert.entityCount('ERC20Transfer', 1);
       });
 
       test('correctly handles multiple events and updates balance', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
+          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10)),
         ];
 
         let event = createExecutedEvent(
@@ -1019,7 +1116,7 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC20Contract', 1);
         assert.entityCount('ERC20Transfer', 1);
         assert.entityCount('ERC20Balance', 1);
-        eq('ERC20Balance', balanceId, 'balance', ERC20_AMOUNT_HALF);
+        eq('ERC20Balance', balanceEntityId, 'balance', ERC20_AMOUNT_HALF);
 
         // Mock balance of with different amount
         getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_FULL);
@@ -1033,7 +1130,7 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC20Contract', 1);
         assert.entityCount('ERC20Transfer', 2);
         assert.entityCount('ERC20Balance', 1);
-        eq('ERC20Balance', balanceId, 'balance', ERC20_AMOUNT_FULL);
+        eq('ERC20Balance', balanceEntityId, 'balance', ERC20_AMOUNT_FULL);
 
         // Mock balance to get it back to the same before running this test
         getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_HALF);
@@ -1046,7 +1143,7 @@ describe('handleExecuted', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(transferToken)
+          ethereum.Value.fromUnsignedBigInt(transferToken),
         ];
 
         let event = createExecutedEvent(
@@ -1059,42 +1156,54 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalId = event.params.actor
-          .toHexString()
-          .concat('_')
-          .concat(event.params.callId.toHexString())
-          .concat('_')
-          .concat(event.transaction.hash.toHexString())
-          .concat('_')
-          .concat(event.transactionLogIndex.toHexString());
+        let proposalEntityId = generateProposalEntityId(
+          event.params.actor,
+          BigInt.fromUnsignedBytes(event.params.callId)
+        );
+        let transactionActionsProposalEntityId =
+          generateTransactionActionsProposalEntityId(
+            proposalEntityId,
+            event.transaction.hash,
+            event.transactionLogIndex
+          );
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
         let timestamp = event.block.timestamp;
 
-        let transferId = getTransferId(txHash, logIndex, 0);
+        let transferId = generateTransferEntityId(txHash, logIndex, 0);
 
         // check ERC20Contract entity
-        eq('ERC20Contract', tokenId, 'id', tokenId);
-        eq('ERC20Contract', tokenId, 'name', 'name');
-        eq('ERC20Contract', tokenId, 'symbol', 'symbol');
+        eq('ERC20Contract', tokenEntityId, 'id', tokenEntityId);
+        eq('ERC20Contract', tokenEntityId, 'name', 'name');
+        eq('ERC20Contract', tokenEntityId, 'symbol', 'symbol');
         assert.entityCount('ERC20Contract', 1);
 
         // check ERC20Balance entity
-        eq('ERC20Balance', balanceId, 'id', balanceId);
-        eq('ERC20Balance', balanceId, 'token', tokenId);
-        eq('ERC20Balance', balanceId, 'dao', daoId);
-        eq('ERC20Balance', balanceId, 'balance', ERC20_AMOUNT_HALF);
-        eq('ERC20Balance', balanceId, 'lastUpdated', timestamp.toString());
+        eq('ERC20Balance', balanceEntityId, 'id', balanceEntityId);
+        eq('ERC20Balance', balanceEntityId, 'token', tokenEntityId);
+        eq('ERC20Balance', balanceEntityId, 'dao', daoEntityId);
+        eq('ERC20Balance', balanceEntityId, 'balance', ERC20_AMOUNT_HALF);
+        eq(
+          'ERC20Balance',
+          balanceEntityId,
+          'lastUpdated',
+          timestamp.toString()
+        );
         assert.entityCount('ERC20Balance', 1);
 
         // Check ERC20Transfer
         eq('ERC20Transfer', transferId, 'id', transferId);
-        eq('ERC20Transfer', transferId, 'dao', daoId);
+        eq('ERC20Transfer', transferId, 'dao', daoEntityId);
         eq('ERC20Transfer', transferId, 'amount', transferToken.toString());
         eq('ERC20Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC20Transfer', transferId, 'to', ADDRESS_THREE);
-        eq('ERC20Transfer', transferId, 'proposal', proposalId);
+        eq(
+          'ERC20Transfer',
+          transferId,
+          'proposal',
+          transactionActionsProposalEntityId
+        );
         eq('ERC20Transfer', transferId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC20Transfer', transferId, 'createdAt', timestamp.toString());
@@ -1105,7 +1214,7 @@ describe('handleExecuted', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10))
+          ethereum.Value.fromUnsignedBigInt(BigInt.fromU32(10)),
         ];
 
         let event = createExecutedEvent(
@@ -1121,7 +1230,7 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC20Contract', 1);
         assert.entityCount('ERC20Balance', 1);
         assert.entityCount('ERC20Transfer', 1);
-        eq('ERC20Balance', balanceId, 'balance', ERC20_AMOUNT_HALF);
+        eq('ERC20Balance', balanceEntityId, 'balance', ERC20_AMOUNT_HALF);
 
         // Mock balance of with different amount
         getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_FULL);
@@ -1134,7 +1243,7 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC20Contract', 1);
         assert.entityCount('ERC20Balance', 1);
         assert.entityCount('ERC20Transfer', 2);
-        eq('ERC20Balance', balanceId, 'balance', ERC20_AMOUNT_FULL);
+        eq('ERC20Balance', balanceEntityId, 'balance', ERC20_AMOUNT_FULL);
 
         // Mock balance to get it back to the same before running this test
         getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ERC20_AMOUNT_HALF);
@@ -1144,7 +1253,12 @@ describe('handleExecuted', () => {
 
   describe('ERC721 action', () => {
     beforeAll(() => {
-      createTokenCalls(DAO_TOKEN_ADDRESS, 'name', 'symbol', null, null);
+      createERC20TokenCalls(
+        DAO_TOKEN_ADDRESS,
+        ERC20_TOTAL_SUPPLY,
+        TOKEN_NAME,
+        TOKEN_SYMBOL
+      );
 
       getSupportsInterface(DAO_TOKEN_ADDRESS, '0x01ffc9a7', true);
       getSupportsInterface(DAO_TOKEN_ADDRESS, '80ac58cd', true);
@@ -1152,15 +1266,15 @@ describe('handleExecuted', () => {
     });
 
     beforeEach(() => {
-      let entity = new ERC721Balance(balanceId);
-      entity.dao = daoId;
+      let entity = new ERC721Balance(balanceEntityId);
+      entity.dao = daoEntityId;
       entity.tokenIds = [
         BigInt.fromI32(4),
         BigInt.fromI32(8),
-        BigInt.fromI32(12)
+        BigInt.fromI32(12),
       ];
       entity.lastUpdated = BigInt.fromI32(2);
-      entity.token = tokenId;
+      entity.token = tokenEntityId;
       entity.save();
     });
 
@@ -1171,7 +1285,7 @@ describe('handleExecuted', () => {
         let tupleArray: Array<ethereum.Value> = [
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
-          ethereum.Value.fromUnsignedBigInt(transferToKen)
+          ethereum.Value.fromUnsignedBigInt(transferToKen),
         ];
 
         let event = createExecutedEvent(
@@ -1186,40 +1300,52 @@ describe('handleExecuted', () => {
         let logIndex = event.transactionLogIndex;
         let timestamp = event.block.timestamp;
 
-        let transferId = getTransferId(txHash, logIndex, 0);
+        let transferId = generateTransferEntityId(txHash, logIndex, 0);
 
         handleExecuted(event);
 
-        let proposalId = event.params.actor
-          .toHexString()
-          .concat('_')
-          .concat(event.params.callId.toHexString())
-          .concat('_')
-          .concat(event.transaction.hash.toHexString())
-          .concat('_')
-          .concat(event.transactionLogIndex.toHexString());
+        let proposalEntityId = generateProposalEntityId(
+          event.params.actor,
+          BigInt.fromUnsignedBytes(event.params.callId)
+        );
+        let transactionActionsProposalEntityId =
+          generateTransactionActionsProposalEntityId(
+            proposalEntityId,
+            event.transaction.hash,
+            event.transactionLogIndex
+          );
 
         // check ERC721Contract entity
-        eq('ERC721Contract', tokenId, 'id', tokenId);
-        eq('ERC721Contract', tokenId, 'name', 'name');
-        eq('ERC721Contract', tokenId, 'symbol', 'symbol');
+        eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
+        eq('ERC721Contract', tokenEntityId, 'name', 'name');
+        eq('ERC721Contract', tokenEntityId, 'symbol', 'symbol');
         assert.entityCount('ERC721Contract', 1);
 
         // check ERC721Balance entity
-        eq('ERC721Balance', balanceId, 'id', balanceId);
-        eq('ERC721Balance', balanceId, 'token', tokenId);
-        eq('ERC721Balance', balanceId, 'dao', daoId);
-        eq('ERC721Balance', balanceId, 'tokenIds', '[4, 12]');
-        eq('ERC721Balance', balanceId, 'lastUpdated', timestamp.toString());
+        eq('ERC721Balance', balanceEntityId, 'id', balanceEntityId);
+        eq('ERC721Balance', balanceEntityId, 'token', tokenEntityId);
+        eq('ERC721Balance', balanceEntityId, 'dao', daoEntityId);
+        eq('ERC721Balance', balanceEntityId, 'tokenIds', '[4, 12]');
+        eq(
+          'ERC721Balance',
+          balanceEntityId,
+          'lastUpdated',
+          timestamp.toString()
+        );
         assert.entityCount('ERC721Balance', 1);
 
         // Check ERC721Transfer
         eq('ERC721Transfer', transferId, 'id', transferId);
-        eq('ERC721Transfer', transferId, 'dao', daoId);
+        eq('ERC721Transfer', transferId, 'dao', daoEntityId);
         eq('ERC721Transfer', transferId, 'tokenId', transferToKen.toString());
         eq('ERC721Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC721Transfer', transferId, 'to', ADDRESS_THREE);
-        eq('ERC721Transfer', transferId, 'proposal', proposalId);
+        eq(
+          'ERC721Transfer',
+          transferId,
+          'proposal',
+          transactionActionsProposalEntityId
+        );
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC721Transfer', transferId, 'createdAt', timestamp.toString());
@@ -1252,7 +1378,7 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC721Contract', 1);
         assert.entityCount('ERC721Balance', 1);
         assert.entityCount('ERC721Transfer', 2);
-        eq('ERC721Balance', balanceId, 'tokenIds', '[4]');
+        eq('ERC721Balance', balanceEntityId, 'tokenIds', '[4]');
       });
     });
 
@@ -1264,7 +1390,7 @@ describe('handleExecuted', () => {
           ethereum.Value.fromAddress(Address.fromString(DAO_ADDRESS)),
           ethereum.Value.fromAddress(Address.fromString(ADDRESS_THREE)),
           ethereum.Value.fromUnsignedBigInt(transferToKen),
-          ethereum.Value.fromBytes(Bytes.fromHexString('0x'))
+          ethereum.Value.fromBytes(Bytes.fromHexString('0x')),
         ];
 
         let event = createExecutedEvent(
@@ -1279,40 +1405,52 @@ describe('handleExecuted', () => {
         let logIndex = event.transactionLogIndex;
         let timestamp = event.block.timestamp;
 
-        let transferId = getTransferId(txHash, logIndex, 0);
+        let transferId = generateTransferEntityId(txHash, logIndex, 0);
 
         handleExecuted(event);
 
-        let proposalId = event.params.actor
-          .toHexString()
-          .concat('_')
-          .concat(event.params.callId.toHexString())
-          .concat('_')
-          .concat(event.transaction.hash.toHexString())
-          .concat('_')
-          .concat(event.transactionLogIndex.toHexString());
+        let proposalEntityId = generateProposalEntityId(
+          event.params.actor,
+          BigInt.fromUnsignedBytes(event.params.callId)
+        );
+        let transactionActionsProposalEntityId =
+          generateTransactionActionsProposalEntityId(
+            proposalEntityId,
+            event.transaction.hash,
+            event.transactionLogIndex
+          );
 
         // check ERC721Contract entity
-        eq('ERC721Contract', tokenId, 'id', tokenId);
-        eq('ERC721Contract', tokenId, 'name', 'name');
-        eq('ERC721Contract', tokenId, 'symbol', 'symbol');
+        eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
+        eq('ERC721Contract', tokenEntityId, 'name', 'name');
+        eq('ERC721Contract', tokenEntityId, 'symbol', 'symbol');
         assert.entityCount('ERC721Contract', 1);
 
         // check ERC721Balance entity
-        eq('ERC721Balance', balanceId, 'id', balanceId);
-        eq('ERC721Balance', balanceId, 'token', tokenId);
-        eq('ERC721Balance', balanceId, 'dao', daoId);
-        eq('ERC721Balance', balanceId, 'tokenIds', '[4, 12]');
-        eq('ERC721Balance', balanceId, 'lastUpdated', timestamp.toString());
+        eq('ERC721Balance', balanceEntityId, 'id', balanceEntityId);
+        eq('ERC721Balance', balanceEntityId, 'token', tokenEntityId);
+        eq('ERC721Balance', balanceEntityId, 'dao', daoEntityId);
+        eq('ERC721Balance', balanceEntityId, 'tokenIds', '[4, 12]');
+        eq(
+          'ERC721Balance',
+          balanceEntityId,
+          'lastUpdated',
+          timestamp.toString()
+        );
         assert.entityCount('ERC721Balance', 1);
 
         // Check ERC721Transfer
         eq('ERC721Transfer', transferId, 'id', transferId);
-        eq('ERC721Transfer', transferId, 'dao', daoId);
+        eq('ERC721Transfer', transferId, 'dao', daoEntityId);
         eq('ERC721Transfer', transferId, 'tokenId', transferToKen.toString());
         eq('ERC721Transfer', transferId, 'from', DAO_ADDRESS);
         eq('ERC721Transfer', transferId, 'to', ADDRESS_THREE);
-        eq('ERC721Transfer', transferId, 'proposal', proposalId);
+        eq(
+          'ERC721Transfer',
+          transferId,
+          'proposal',
+          transactionActionsProposalEntityId
+        );
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
         eq('ERC721Transfer', transferId, 'createdAt', timestamp.toString());
@@ -1347,7 +1485,7 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC721Contract', 1);
         assert.entityCount('ERC721Balance', 1);
         assert.entityCount('ERC721Transfer', 2);
-        eq('ERC721Balance', balanceId, 'tokenIds', '[4]');
+        eq('ERC721Balance', balanceEntityId, 'tokenIds', '[4]');
       });
     });
   });
@@ -1370,32 +1508,6 @@ test('Run dao (handleTrustedForwarderSet) mappings with mock event', () => {
     'Dao',
     entityID,
     'trustedForwarder',
-    Address.fromString(ADDRESS_ONE).toHexString()
-  );
-
-  clearStore();
-});
-
-test('Run dao (handleSignatureValidatorSet) mappings with mock event', () => {
-  // create state
-  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
-  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
-
-  let signatureValidator = ADDRESS_ONE;
-
-  let newEvent = createSignatureValidatorSetEvent(
-    signatureValidator,
-    DAO_ADDRESS
-  );
-  // handle event
-  handleSignatureValidatorSet(newEvent);
-
-  // checks
-  assert.fieldEquals('Dao', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'Dao',
-    entityID,
-    'signatureValidator',
     Address.fromString(ADDRESS_ONE).toHexString()
   );
 

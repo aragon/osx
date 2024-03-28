@@ -1,24 +1,23 @@
 {
-    "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
-    "network": "arbitrum-sepolia",
-    "dataSources": {
-      "DAORegistry": {
-        "name": "DAORegistry",
-        "address": "0x308a1DC5020c4B5d992F5543a7236c465997fecB",
-        "startBlock": 2827166
-      },
-      "PluginRepoRegistry": {
-        "name": "PluginRepoRegistry",
-        "address": "0x35B62715459cB60bf6dC17fF8cfe138EA305E7Ee",
-        "startBlock": 2827170
-      },
-      "PluginSetupProcessors": [
-        {
-          "name": "PluginSetupProcessor",
-          "address": "0xC24188a73dc09aA7C721f96Ad8857B469C01dC9f",
-          "startBlock": 2827173
-        }
-      ]
-    }
+  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
+  "network": "arbitrum-sepolia",
+  "dataSources": {
+    "DAORegistry": {
+      "name": "DAORegistry",
+      "address": "0x308a1DC5020c4B5d992F5543a7236c465997fecB",
+      "startBlock": 2827166
+    },
+    "PluginRepoRegistry": {
+      "name": "PluginRepoRegistry",
+      "address": "0x35B62715459cB60bf6dC17fF8cfe138EA305E7Ee",
+      "startBlock": 2827170
+    },
+    "PluginSetupProcessors": [
+      {
+        "name": "PluginSetupProcessor",
+        "address": "0xC24188a73dc09aA7C721f96Ad8857B469C01dC9f",
+        "startBlock": 2827173
+      }
+    ]
   }
-  
+}

@@ -1,5 +1,9 @@
-import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
-
+import {
+  Dao,
+  Permission,
+  StandardCallback,
+  TransactionActionsProposal,
+} from '../../generated/schema';
 import {
   MetadataSet,
   Executed,
@@ -8,37 +12,35 @@ import {
   Granted,
   Revoked,
   TrustedForwarderSet,
-  SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived,
-  NewURI
+  NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
-import {
-  Dao,
-  ContractPermissionId,
-  Permission,
-  StandardCallback,
-  TransactionActionsProposal
-} from '../../generated/schema';
-
 import {ADDRESS_ZERO} from '../utils/constants';
-
-import {handleERC721Received} from '../utils/tokens/erc721';
-import {handleERC20Deposit} from '../utils/tokens/erc20';
-import {handleNativeDeposit} from '../utils/tokens/eth';
 import {
   onERC1155BatchReceived,
   onERC1155Received,
-  onERC721Received
+  onERC721Received,
 } from '../utils/tokens/common';
-import {handleAction, updateProposalWithFailureMap} from './utils';
+import {handleERC20Deposit} from '../utils/tokens/erc20';
+import {handleERC721Received} from '../utils/tokens/erc721';
 import {
   handleERC1155BatchReceived,
-  handleERC1155Received
+  handleERC1155Received,
 } from '../utils/tokens/erc1155';
+import {handleNativeDeposit} from '../utils/tokens/eth';
+import {handleAction, updateProposalWithFailureMap} from './utils';
+import {
+  generateDaoEntityId,
+  generatePermissionEntityId,
+  generateProposalEntityId,
+  generateStandardCallbackEntityId,
+  generateTransactionActionsProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
 
 export function handleMetadataSet(event: MetadataSet): void {
-  let daoId = event.address.toHexString();
+  let daoId = generateDaoEntityId(event.address);
   let metadata = event.params.metadata.toString();
   _handleMetadataSet(daoId, metadata);
 }
@@ -81,16 +83,16 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
-  let proposalId = event.params.actor
-    .toHexString()
-    .concat('_')
-    .concat(event.params.callId.toHexString());
+  let proposalEntityId = generateProposalEntityId(
+    event.params.actor,
+    BigInt.fromByteArray(event.params.callId)
+  );
 
   // Not an effective solution, until each plugin has
   // its own subgraph separately.
   // If proposal found, update its failureMap.
   let wasUpdated = updateProposalWithFailureMap(
-    proposalId,
+    proposalEntityId,
     event.params.failureMap
   );
 
@@ -105,13 +107,14 @@ export function handleExecuted(event: Executed): void {
     // might be a case when 2 different tx might end up having the same
     // proposal ID which will cause overwrite. In case of plugins,
     // It's plugin's responsibility to pass unique callId per execute.
-    proposalId = proposalId
-      .concat('_')
-      .concat(event.transaction.hash.toHexString())
-      .concat('_')
-      .concat(event.transactionLogIndex.toHexString());
-    let proposal = new TransactionActionsProposal(proposalId);
-    proposal.dao = event.address.toHexString();
+    proposalEntityId = generateTransactionActionsProposalEntityId(
+      proposalEntityId,
+      event.transaction.hash,
+      event.logIndex
+    );
+
+    let proposal = new TransactionActionsProposal(proposalEntityId);
+    proposal.dao = generateDaoEntityId(event.address);
     proposal.createdAt = event.block.timestamp;
     proposal.endDate = event.block.timestamp;
     proposal.startDate = event.block.timestamp;
@@ -128,7 +131,7 @@ export function handleExecuted(event: Executed): void {
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
-    handleAction(actions[index], proposalId, index, event);
+    handleAction(actions[index], proposalEntityId, index, event);
   }
 }
 
@@ -164,54 +167,55 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
 }
 
 export function handleGranted(event: Granted): void {
-  // ContractPermissionId
-  let daoId = event.address.toHexString();
-  let contractPermissionIdEntityId =
-    event.params.where.toHexString() +
-    '_' +
-    event.params.permissionId.toHexString();
-  let contractPermissionIdEntity = ContractPermissionId.load(
-    contractPermissionIdEntityId
+  const contractAddress = event.address;
+  const where = event.params.where;
+  const permissionId = event.params.permissionId;
+  const who = event.params.who;
+
+  const permissionEntityId = generatePermissionEntityId(
+    contractAddress,
+    permissionId,
+    where,
+    who
   );
-  if (!contractPermissionIdEntity) {
-    contractPermissionIdEntity = new ContractPermissionId(
-      contractPermissionIdEntityId
-    );
-    contractPermissionIdEntity.dao = daoId;
-    contractPermissionIdEntity.where = event.params.where;
-    contractPermissionIdEntity.permissionId = event.params.permissionId;
-    contractPermissionIdEntity.save();
-  }
 
   // Permission
-  let permissionId =
-    contractPermissionIdEntityId + '_' + event.params.who.toHexString();
-  let permissionEntity = new Permission(permissionId);
-  permissionEntity.dao = daoId;
-  permissionEntity.contractPermissionId = contractPermissionIdEntityId;
-  permissionEntity.where = event.params.where;
-  permissionEntity.who = event.params.who;
-  permissionEntity.actor = event.params.here;
-  permissionEntity.condition = event.params.condition;
-  permissionEntity.save();
+  let permissionEntity = Permission.load(permissionEntityId);
+  if (!permissionEntity) {
+    permissionEntity = new Permission(permissionEntityId);
+    permissionEntity.where = where;
+    permissionEntity.permissionId = permissionId;
+    permissionEntity.who = who;
+    permissionEntity.actor = event.params.here;
+    permissionEntity.condition = event.params.condition;
+
+    permissionEntity.dao = generateDaoEntityId(contractAddress);
+    permissionEntity.save();
+  }
 }
 
 export function handleRevoked(event: Revoked): void {
   // permission
-  let permissionId =
-    event.params.where.toHexString() +
-    '_' +
-    event.params.permissionId.toHexString() +
-    '_' +
-    event.params.who.toHexString();
-  let permissionEntity = Permission.load(permissionId);
+  const contractAddress = event.address;
+  const where = event.params.where;
+  const permissionId = event.params.permissionId;
+  const who = event.params.who;
+
+  const permissionEntityId = generatePermissionEntityId(
+    contractAddress,
+    permissionId,
+    where,
+    who
+  );
+
+  let permissionEntity = Permission.load(permissionEntityId);
   if (permissionEntity) {
-    store.remove('Permission', permissionId);
+    store.remove('Permission', permissionEntityId);
   }
 }
 
 export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
-  let daoId = event.address.toHexString();
+  let daoId = generateDaoEntityId(event.address);
   let entity = Dao.load(daoId);
   if (entity) {
     entity.trustedForwarder = event.params.forwarder;
@@ -219,36 +223,28 @@ export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
   }
 }
 
-export function handleSignatureValidatorSet(
-  event: SignatureValidatorSet
-): void {
-  let daoId = event.address.toHexString();
-  let entity = Dao.load(daoId);
-  if (entity) {
-    entity.signatureValidator = event.params.signatureValidator;
-    entity.save();
-  }
-}
-
 export function handleStandardCallbackRegistered(
   event: StandardCallbackRegistered
 ): void {
-  let daoId = event.address.toHexString();
-  let entityId = `${daoId}_${event.params.interfaceId.toHexString()}`;
+  let daoAddress = event.address;
+  let interfaceId = event.params.interfaceId;
+
+  let daoId = generateDaoEntityId(daoAddress);
+  let entityId = generateStandardCallbackEntityId(daoAddress, interfaceId);
   let entity = StandardCallback.load(entityId);
   if (!entity) {
     entity = new StandardCallback(entityId);
     entity.dao = daoId;
   }
-  entity.interfaceId = event.params.interfaceId;
+  entity.interfaceId = interfaceId;
   entity.callbackSelector = event.params.callbackSelector;
   entity.magicNumber = event.params.magicNumber;
   entity.save();
 }
 
 export function handleNewURI(event: NewURI): void {
-  let daoId = event.address.toHexString();
-  let entity = Dao.load(daoId);
+  let daoEntityId = generateDaoEntityId(event.address);
+  let entity = Dao.load(daoEntityId);
   if (entity) {
     entity.daoURI = event.params.daoURI;
     entity.save();

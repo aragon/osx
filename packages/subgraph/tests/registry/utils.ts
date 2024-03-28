@@ -1,8 +1,7 @@
-import {Address, ethereum} from '@graphprotocol/graph-ts';
-import {newMockEvent} from 'matchstick-as/assembly/index';
-
 import {DAORegistered} from '../../generated/DAORegistry/DAORegistry';
 import {PluginRepoRegistered} from '../../generated/PluginRepoRegistry/PluginRepoRegistry';
+import {Address, ethereum} from '@graphprotocol/graph-ts';
+import {newMockEvent} from 'matchstick-as/assembly/index';
 
 // events
 

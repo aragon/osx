@@ -1,23 +1,28 @@
-import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
-
-import {
-  VoteCast,
-  ProposalCreated,
-  ProposalExecuted,
-  VotingSettingsUpdated,
-  MembersAdded,
-  MembersRemoved,
-  AddresslistVoting
-} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   Action,
   AddresslistVotingPlugin,
   AddresslistVotingProposal,
+  AddresslistVotingVote,
   AddresslistVotingVoter,
-  AddresslistVotingVote
 } from '../../../generated/schema';
+import {
+  AddresslistVoting,
+  MembersAdded,
+  MembersRemoved,
+  ProposalCreated,
+  ProposalExecuted,
+  VoteCast,
+  VotingSettingsUpdated,
+} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
-import {getProposalId} from '../../utils/proposals';
+import {generateMemberEntityId, generateVoteEntityId} from '../../utils/ids';
+import {
+  generateActionEntityId,
+  generateEntityIdFromAddress,
+  generatePluginEntityId,
+  generateProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -33,19 +38,20 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginAddress = event.address;
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(pluginAddress, pluginProposalId);
+  let proposalId = generateProposalEntityId(pluginAddress, pluginProposalId);
 
   let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = pluginAddress.toHexString();
+  proposalEntity.plugin = pluginEntityId;
   proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
-  proposalEntity.potentiallyExecutable = false;
+  proposalEntity.approvalReached = false;
 
   let contract = AddresslistVoting.bind(pluginAddress);
   let proposal = contract.try_getProposal(pluginProposalId);
@@ -76,10 +82,7 @@ export function _handleProposalCreated(
     let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
-
-      let actionId = getProposalId(pluginAddress, pluginProposalId)
-        .concat('_')
-        .concat(index.toString());
+      let actionId = generateActionEntityId(proposalId, index);
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -89,7 +92,7 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
-
+    proposalEntity.isSignaling = actions.length == 0;
     // totalVotingPower
     proposalEntity.totalVotingPower = contract.try_totalVotingPower(
       parameters.snapshotBlock
@@ -111,12 +114,12 @@ export function _handleProposalCreated(
 
 export function handleVoteCast(event: VoteCast): void {
   const pluginProposalId = event.params.proposalId;
-  const member = event.params.voter.toHexString();
+  const memberAddress = event.params.voter;
   const pluginAddress = event.address;
-  const pluginId = pluginAddress.toHexString();
-  const memberId = pluginId.concat('_').concat(member);
-  let proposalId = getProposalId(pluginAddress, pluginProposalId);
-  let voterVoteId = member.concat('_').concat(proposalId);
+  const memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
+
+  let proposalId = generateProposalEntityId(pluginAddress, pluginProposalId);
+  let voterVoteId = generateVoteEntityId(memberAddress, proposalId);
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
   if (voteOption === 'None') {
@@ -129,7 +132,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalVoteEntity.updatedAt = event.block.timestamp;
   } else {
     voterProposalVoteEntity = new AddresslistVotingVote(voterVoteId);
-    voterProposalVoteEntity.voter = memberId;
+    voterProposalVoteEntity.voter = memberEntityId;
     voterProposalVoteEntity.proposal = proposalId;
     voterProposalVoteEntity.createdAt = event.block.timestamp;
     voterProposalVoteEntity.voteReplaced = false;
@@ -186,7 +189,7 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.potentiallyExecutable =
+        proposalEntity.approvalReached =
           supportThresholdReached && minParticipationReached;
 
         // Used when proposal has not ended.
@@ -202,12 +205,12 @@ export function handleVoteCast(event: VoteCast): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
+  let proposalId = generateProposalEntityId(event.address, pluginProposalId);
 
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;
@@ -218,7 +221,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVotingSettingsUpdated(
   event: VotingSettingsUpdated
 ): void {
-  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
+  let pluginAddress = event.address;
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
+  let packageEntity = AddresslistVotingPlugin.load(pluginEntityId);
   if (packageEntity) {
     packageEntity.votingMode = VOTING_MODES.get(event.params.votingMode);
     packageEntity.supportThreshold = event.params.supportThreshold;
@@ -232,15 +237,15 @@ export function handleVotingSettingsUpdated(
 export function handleMembersAdded(event: MembersAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index].toHexString();
-    const pluginId = event.address.toHexString();
-    const memberId = pluginId + '_' + member;
-
-    let voterEntity = AddresslistVotingVoter.load(memberId);
+    const memberAddress = members[index];
+    const pluginAddress = event.address;
+    const pluginEntityId = generatePluginEntityId(pluginAddress);
+    const memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
+    let voterEntity = AddresslistVotingVoter.load(memberEntityId);
     if (!voterEntity) {
-      voterEntity = new AddresslistVotingVoter(memberId);
-      voterEntity.address = member;
-      voterEntity.plugin = pluginId;
+      voterEntity = new AddresslistVotingVoter(memberEntityId);
+      voterEntity.address = generateEntityIdFromAddress(memberAddress);
+      voterEntity.plugin = pluginEntityId;
       voterEntity.save();
     }
   }
@@ -249,13 +254,13 @@ export function handleMembersAdded(event: MembersAdded): void {
 export function handleMembersRemoved(event: MembersRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index].toHexString();
-    const pluginId = event.address.toHexString();
-    const memberId = pluginId + '_' + member;
+    const memberAddress = members[index];
+    let pluginAddress = event.address;
+    const memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
 
-    let voterEntity = AddresslistVotingVoter.load(memberId);
+    let voterEntity = AddresslistVotingVoter.load(memberEntityId);
     if (voterEntity) {
-      store.remove('AddresslistVotingVoter', memberId);
+      store.remove('AddresslistVotingVoter', memberEntityId);
     }
   }
 }

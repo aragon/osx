@@ -1,14 +1,17 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {createMockedFunction, newMockEvent} from 'matchstick-as';
-
+import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
+import {
+  DelegateChanged,
+  DelegateVotesChanged,
+} from '../../generated/templates/GovernanceERC20/GovernanceERC20';
+import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
 import {
   VotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  MembershipContractAnnounced
+  MembershipContractAnnounced,
 } from '../../generated/templates/TokenVoting/TokenVoting';
-import {TokenVotingMember, TokenVotingProposal} from '../../generated/schema';
+import {generateMemberEntityId} from '../../src/utils/ids';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
@@ -23,13 +26,11 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  ALLOW_FAILURE_MAP
+  ALLOW_FAILURE_MAP,
+  DEFAULT_MOCK_EVENT_ADDRESS,
 } from '../constants';
-import {Transfer as ERC20TransferEvent} from '../../generated/templates/TokenVoting/ERC20';
-import {
-  DelegateChanged,
-  DelegateVotesChanged
-} from '../../generated/templates/GovernanceERC20/GovernanceERC20';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 // events
 
@@ -290,6 +291,20 @@ export function getProposalCountCall(
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
 
+export function delegatesCall(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
+}
+
 // state
 
 export function createTokenVotingProposalEntityState(
@@ -331,12 +346,13 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.startDate = BigInt.fromString(startDate);
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  tokenVotingProposal.isSignaling = false;
 
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   tokenVotingProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
   tokenVotingProposal.creationBlockNumber = creationBlockNumber;
-  tokenVotingProposal.potentiallyExecutable = executable;
+  tokenVotingProposal.approvalReached = executable;
   tokenVotingProposal.earlyExecutable = earlyExecutable;
 
   tokenVotingProposal.save();
@@ -349,8 +365,21 @@ export function createNewERC20TransferEvent(
   to: string,
   amount: string
 ): ERC20TransferEvent {
-  let transferEvent = changetype<ERC20TransferEvent>(newMockEvent());
+  return createNewERC20TransferEventWithAddress(
+    from,
+    to,
+    amount,
+    DEFAULT_MOCK_EVENT_ADDRESS
+  );
+}
 
+export function createNewERC20TransferEventWithAddress(
+  from: string,
+  to: string,
+  amount: string,
+  contractAddress: string
+): ERC20TransferEvent {
+  let transferEvent = changetype<ERC20TransferEvent>(newMockEvent());
   let fromParam = new ethereum.EventParam(
     'from',
     ethereum.Value.fromAddress(Address.fromString(from))
@@ -363,11 +392,10 @@ export function createNewERC20TransferEvent(
     'amount',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(amount))
   );
-
+  transferEvent.address = Address.fromString(contractAddress);
   transferEvent.parameters.push(fromParam);
   transferEvent.parameters.push(toParam);
   transferEvent.parameters.push(amountParam);
-
   return transferEvent;
 }
 
@@ -376,16 +404,50 @@ export function createTokenVotingMember(
   plugin: string,
   balance: string
 ): string {
-  const fromUserId = address.concat('_').concat(plugin);
+  const memberEntityId = generateMemberEntityId(
+    Address.fromString(plugin), // uses other plugin address to make sure that the code reuses the entity
+    Address.fromString(address)
+  );
 
-  const user = new TokenVotingMember(fromUserId);
+  const user = new TokenVotingMember(memberEntityId);
   user.address = Address.fromString(address);
   user.plugin = plugin; // uses other plugin address to make sure that the code reuses the entity
   user.balance = BigInt.fromString(balance);
 
-  user.delegatee = fromUserId;
+  user.delegatee = memberEntityId;
   user.votingPower = BigInt.zero();
   user.save();
 
-  return fromUserId;
+  return memberEntityId;
+}
+
+export function getDelegatee(
+  contractAddress: string,
+  account: string,
+  returns: string | null
+): void {
+  const returnsValue = returns
+    ? ethereum.Value.fromAddress(Address.fromString(returns))
+    : ethereum.Value.fromAddress(Address.zero());
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'delegates',
+    'delegates(address):(address)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([returnsValue]);
+}
+
+export function getVotes(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'getVotes',
+    'getVotes(address):(uint256)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
