@@ -1,20 +1,16 @@
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
-import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {Dao} from '../../generated/schema';
-
 import {
   MetadataSet,
   NativeTokenDeposited,
   Deposited,
-  Granted,
-  Revoked,
   Executed,
   TrustedForwarderSet,
-  SignatureValidatorSet,
   StandardCallbackRegistered,
   CallbackReceived,
-  NewURI
+  NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 
 // events
 
@@ -109,27 +105,6 @@ export function createTrustedForwarderSetEvent(
   return newTrustedForwarderSetEvent;
 }
 
-export function createSignatureValidatorSetEvent(
-  signatureValidator: string,
-  contractAddress: string
-): SignatureValidatorSet {
-  let newSignatureValidatorSetEvent = changetype<SignatureValidatorSet>(
-    newMockEvent()
-  );
-
-  newSignatureValidatorSetEvent.address = Address.fromString(contractAddress);
-  newSignatureValidatorSetEvent.parameters = [];
-
-  let trustedForwarderParam = new ethereum.EventParam(
-    'signatureValidator',
-    ethereum.Value.fromAddress(Address.fromString(signatureValidator))
-  );
-
-  newSignatureValidatorSetEvent.parameters.push(trustedForwarderParam);
-
-  return newSignatureValidatorSetEvent;
-}
-
 export function createNewNativeTokenDepositedEvent(
   sender: string,
   amount: string,
@@ -190,86 +165,6 @@ export function createNewDepositedEvent(
   newEvent.parameters.push(referenceParam);
 
   return newEvent;
-}
-
-export function createNewGrantedEvent(
-  contractPermissionId: Bytes,
-  actor: string,
-  where: string,
-  who: string,
-  condition: string,
-  contractAddress: string
-): Granted {
-  let newGrantedEvent = changetype<Granted>(newMockEvent());
-
-  newGrantedEvent.address = Address.fromString(contractAddress);
-  newGrantedEvent.parameters = [];
-
-  let contractPermissionIdParam = new ethereum.EventParam(
-    'contractPermissionId',
-    ethereum.Value.fromBytes(contractPermissionId)
-  );
-  let actorParam = new ethereum.EventParam(
-    'actor',
-    ethereum.Value.fromAddress(Address.fromString(actor))
-  );
-  let whereParam = new ethereum.EventParam(
-    'where',
-    ethereum.Value.fromAddress(Address.fromString(where))
-  );
-  let whoParam = new ethereum.EventParam(
-    'who',
-    ethereum.Value.fromAddress(Address.fromString(who))
-  );
-  let conditionParam = new ethereum.EventParam(
-    'condition',
-    ethereum.Value.fromAddress(Address.fromString(condition))
-  );
-
-  newGrantedEvent.parameters.push(contractPermissionIdParam);
-  newGrantedEvent.parameters.push(actorParam);
-  newGrantedEvent.parameters.push(whereParam);
-  newGrantedEvent.parameters.push(whoParam);
-  newGrantedEvent.parameters.push(conditionParam);
-
-  return newGrantedEvent;
-}
-
-export function createNewRevokedEvent(
-  contractPermissionId: Bytes,
-  actor: string,
-  where: string,
-  who: string,
-  contractAddress: string
-): Revoked {
-  let newGrantedEvent = changetype<Revoked>(newMockEvent());
-
-  newGrantedEvent.address = Address.fromString(contractAddress);
-  newGrantedEvent.parameters = [];
-
-  let contractPermissionIdParam = new ethereum.EventParam(
-    'contractPermissionId',
-    ethereum.Value.fromBytes(contractPermissionId)
-  );
-  let actorParam = new ethereum.EventParam(
-    'actor',
-    ethereum.Value.fromAddress(Address.fromString(actor))
-  );
-  let whereParam = new ethereum.EventParam(
-    'where',
-    ethereum.Value.fromAddress(Address.fromString(where))
-  );
-  let whoParam = new ethereum.EventParam(
-    'who',
-    ethereum.Value.fromAddress(Address.fromString(who))
-  );
-
-  newGrantedEvent.parameters.push(contractPermissionIdParam);
-  newGrantedEvent.parameters.push(actorParam);
-  newGrantedEvent.parameters.push(whereParam);
-  newGrantedEvent.parameters.push(whoParam);
-
-  return newGrantedEvent;
 }
 
 export function createNewExecutedEvent<T extends Executed>(
@@ -480,7 +375,7 @@ export function getIsUserAllowed(
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.zero())
+      ethereum.Value.fromUnsignedBigInt(BigInt.zero()),
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
@@ -509,7 +404,7 @@ export function getSupportsInterface(
     'supportsInterface(bytes4):(bool)'
   )
     .withArgs([
-      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes),
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }

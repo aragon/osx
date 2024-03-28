@@ -2,8 +2,6 @@
  * IMPORTANT: Do not export classes from this file.
  * The classes of this file are meant to be incorporated into the classes of ./extended-schema.ts
  */
-
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   Dao,
   ERC20Balance,
@@ -23,36 +21,38 @@ import {
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVote,
-  TokenVotingVoter
+  TokenVotingVoter,
+  Permission,
 } from '../../generated/schema';
 import {
   CallbackReceived,
   Deposited,
   NativeTokenDeposited,
-  NewURI
+  NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   DelegateChanged,
-  DelegateVotesChanged
+  DelegateVotesChanged,
 } from '../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   MembershipContractAnnounced,
   ProposalCreated,
   ProposalExecuted,
   VoteCast,
-  VotingSettingsUpdated
+  VotingSettingsUpdated,
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {
   VOTER_OPTIONS,
   VOTE_OPTIONS,
   VOTING_MODES,
-  VOTING_MODE_INDEXES
+  VOTING_MODE_INDEXES,
 } from '../../src/utils/constants';
+import {generateMemberEntityId} from '../../src/utils/ids';
 import {
   getBalanceId,
   getERC1155TransferId,
   getTokenIdBalanceId,
-  getTransferId
+  getTransferId,
 } from '../../src/utils/tokens/common';
 import {
   ADDRESS_ONE,
@@ -77,7 +77,8 @@ import {
   STRING_DATA,
   ADDRESS_TWO,
   ADDRESS_THREE,
-  ADDRESS_ZERO
+  ADDRESS_ZERO,
+  ADDRESS_FOUR,
 } from '../constants';
 import {
   createCallbackReceivedEvent,
@@ -85,8 +86,12 @@ import {
   createNewNativeTokenDepositedEvent,
   createNewURIEvent,
   getBalanceOf,
-  getSupportsInterface
+  getSupportsInterface,
 } from '../dao/utils';
+import {
+  createNewGrantedEvent,
+  createNewRevokedEvent,
+} from '../permission-manager/utils';
 import {
   createNewDelegateChangedEvent,
   createNewDelegateVotesChangedEvent,
@@ -95,17 +100,103 @@ import {
   createNewProposalExecutedEvent,
   createNewVoteCastEvent,
   createNewVotingSettingsUpdatedEvent,
-  getProposalCountCall
+  delegatesCall,
+  getProposalCountCall,
 } from '../token/utils';
+import {createGetProposalCall, createTotalVotingPowerCall} from '../utils';
 import {
-  createGetProposalCall,
-  createTotalVotingPowerCall,
+  generateEntityIdFromAddress,
+  generatePermissionEntityId,
+  generatePluginEntityId,
+  createERC20TokenCalls,
+  createERC1155TokenCalls,
+  createWrappedERC20TokenCalls,
   createTokenCalls,
-  createWrappedTokenCalls,
-  createERC1155TokenCalls
-} from '../utils';
+} from '@aragon/osx-commons-subgraph';
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  crypto,
+  ethereum,
+} from '@graphprotocol/graph-ts';
 
 /* eslint-disable  @typescript-eslint/no-unused-vars */
+// PermissionManager
+class PermissionMethods extends Permission {
+  withDefaultValues(
+    emittingContract: string = Address.fromString(
+      CONTRACT_ADDRESS
+    ).toHexString()
+  ): PermissionMethods {
+    const permissionId = Bytes.fromByteArray(
+      crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION'))
+    );
+
+    const emittingContractAddress = Address.fromString(emittingContract);
+    const whereAddress = Address.fromString(ADDRESS_ONE);
+    const whoAddress = Address.fromString(ADDRESS_TWO);
+    const actorAddress = Address.fromString(ADDRESS_THREE);
+    const conditionAddress = Address.fromString(ADDRESS_FOUR);
+
+    this.id = generatePermissionEntityId(
+      emittingContractAddress,
+      permissionId,
+      whereAddress,
+      whoAddress
+    );
+    this.where = whereAddress;
+    this.permissionId = permissionId;
+    this.who = whoAddress;
+    this.actor = actorAddress;
+    this.condition = conditionAddress;
+
+    this.dao = null;
+    this.pluginRepo = null;
+
+    return this;
+  }
+
+  // events
+  createEvent_Granted<T>(
+    emittingContract: string = Address.fromString(
+      CONTRACT_ADDRESS
+    ).toHexString()
+  ): T {
+    if (this.condition === null) {
+      throw new Error('Condition is null');
+    }
+
+    let event = createNewGrantedEvent<T>(
+      this.permissionId,
+      this.actor.toHexString(),
+      this.where.toHexString(),
+      this.who.toHexString(),
+      (this.condition as Bytes).toHexString(),
+      emittingContract
+    );
+
+    return event as T;
+  }
+
+  createEvent_Revoked<T>(
+    emittingContract: string = Address.fromString(
+      CONTRACT_ADDRESS
+    ).toHexString()
+  ): T {
+    let event = createNewRevokedEvent<T>(
+      this.permissionId,
+      this.actor.toHexString(),
+      this.where.toHexString(),
+      this.who.toHexString(),
+      emittingContract
+    );
+
+    return event as T;
+  }
+}
+
 //  ERC1155Contract
 class ERC1155ContractMethods extends ERC1155Contract {
   withDefaultValues(): ERC1155ContractMethods {
@@ -182,13 +273,11 @@ class ERC721ContractMethods extends ERC721Contract {
     if (!this.symbol) {
       throw new Error('Symbol is null');
     }
-    // we cast to string only for stoping rust compiler complaints.
+    // we cast to string only for stopping rust compiler complaints.
     createTokenCalls(
-      this.id,
+      DAO_TOKEN_ADDRESS,
       this.name as string,
-      this.symbol as string,
-      null,
-      null
+      this.symbol as string
     );
   }
 }
@@ -235,9 +324,8 @@ class ERC20WrapperContractMethods extends ERC20WrapperContract {
     this.name = 'Wrapped Test Token';
     this.symbol = 'WTT';
     this.decimals = 18;
-    this.underlyingToken = Address.fromHexString(
-      DAO_TOKEN_ADDRESS
-    ).toHexString();
+    this.underlyingToken =
+      Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString();
     return this;
   }
   // calls
@@ -249,13 +337,17 @@ class ERC20WrapperContractMethods extends ERC20WrapperContract {
     } else if (!this.underlyingToken) {
       throw new Error('Underlying token is null');
     }
+    let supply = '10';
+    if (totalSupply) {
+      supply = totalSupply;
+    }
 
-    createWrappedTokenCalls(
+    createWrappedERC20TokenCalls(
       this.id,
-      this.name as string,
-      this.symbol as string,
       this.underlyingToken,
-      totalSupply
+      supply,
+      this.name as string,
+      this.symbol as string
     );
   }
 
@@ -286,13 +378,17 @@ class ERC20ContractMethods extends ERC20Contract {
     if (!this.symbol) {
       throw new Error('Symbol is null');
     }
+    let supply = '10';
+    if (totalSupply) {
+      supply = totalSupply;
+    }
     // we cast to string only for stoping rust compiler complaints.
-    createTokenCalls(
+    createERC20TokenCalls(
       this.id,
+      supply,
       this.name as string,
       this.symbol as string,
-      this.decimals.toString(),
-      totalSupply
+      this.decimals.toString()
     );
   }
 
@@ -451,12 +547,13 @@ class DaoMethods extends Dao {
 // Token Voting
 class TokenVotingVoterMethods extends TokenVotingVoter {
   withDefaultValues(): TokenVotingVoterMethods {
-    this.id = Address.fromHexString(CONTRACT_ADDRESS)
-      .toHexString()
-      .concat('_')
-      .concat(ADDRESS_ONE);
-    this.address = ADDRESS_ONE;
-    this.plugin = Address.fromHexString(CONTRACT_ADDRESS).toHexString();
+    const memberAddress = Address.fromString(ADDRESS_ONE);
+    const memberId = generateEntityIdFromAddress(memberAddress);
+    const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+    const pluginEntityId = generatePluginEntityId(pluginAddress);
+    this.id = generateMemberEntityId(pluginAddress, memberAddress);
+    this.address = memberId;
+    this.plugin = pluginEntityId;
     this.lastUpdated = BigInt.zero();
 
     return this;
@@ -491,7 +588,8 @@ class TokenVotingProposalMethods extends TokenVotingProposal {
     this.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
     this.createdAt = BigInt.fromString(CREATED_AT);
     this.creationBlockNumber = BigInt.fromString(ZERO);
-    this.potentiallyExecutable = false;
+    this.approvalReached = false;
+    this.isSignaling = false;
 
     return this;
   }
@@ -622,10 +720,10 @@ class TokenVotingPluginMethods extends TokenVotingPlugin {
     // we use casting here to remove autocompletion complaint
     // since we know it will be captured by the previous check
     let votingMode = VOTING_MODES.get(votingModeIndex) as string;
+    const pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+    const pluginEntityId = generatePluginEntityId(pluginAddress);
 
-    const pluginAddress = Address.fromHexString(CONTRACT_ADDRESS);
-
-    this.id = pluginAddress.toHexString();
+    this.id = pluginEntityId;
     this.dao = DAO_ADDRESS;
     this.pluginAddress = pluginAddress;
     this.votingMode = votingMode;
@@ -692,23 +790,32 @@ class TokenVotingMemberMethods extends TokenVotingMember {
     memberAddress: string = ADDRESS_ONE,
     pluginAddress: string = CONTRACT_ADDRESS
   ): TokenVotingMemberMethods {
-    const plugin = Address.fromHexString(pluginAddress);
-    let id = memberAddress.concat('_').concat(plugin.toHexString());
+    const plugin = Address.fromBytes(Bytes.fromHexString(pluginAddress));
+    const member = Address.fromBytes(Bytes.fromHexString(memberAddress));
+    let id = generateMemberEntityId(plugin, member);
 
     this.id = id;
     this.address = Address.fromHexString(memberAddress);
     this.balance = BigInt.zero();
     this.plugin = plugin.toHexString();
-    this.delegatee = id;
+    this.delegatee = null;
     this.votingPower = BigInt.zero();
 
     return this;
   }
 
+  mockCall_delegatesCall(
+    tokenContractAddress: string,
+    account: string,
+    returns: string
+  ): void {
+    delegatesCall(tokenContractAddress, account, returns);
+  }
+
   createEvent_DelegateChanged(
     delegator: string = this.address.toHexString(),
-    fromDelegate: string = ADDRESS_ONE,
-    toDelegate: string = ADDRESS_ONE,
+    fromDelegate: string = this.address.toHexString(),
+    toDelegate: string = this.address.toHexString(),
     tokenContract: string = Address.fromHexString(
       DAO_TOKEN_ADDRESS
     ).toHexString()
