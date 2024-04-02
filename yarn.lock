@@ -10,10 +10,10 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.24"
 
-"@aragon/osx-commons-configs@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.1.0.tgz#21bbc5a964eb144e30033a44cc352d35c62982f9"
-  integrity sha512-qTs/loihwqALBGmhZngORb+p7pjuQJY5UEd8TLNiEW/BGHEpAJPp4GeQu7GSnigRGEKWpPD5W96kfEsaPtLkuQ==
+"@aragon/osx-commons-configs@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.4.0.tgz#5b6ae025de1ccf7f9a135bfbcb0aa822c774acf9"
+  integrity sha512-/2wIQCbv/spMRdOjRXK0RrXG1TK5aMcbD73RvMgMwQwSrKcA1dCntUuSxmTm2W8eEtOzs8E1VPjqZk0cXL4SSQ==
   dependencies:
     tslib "^2.6.2"
 
