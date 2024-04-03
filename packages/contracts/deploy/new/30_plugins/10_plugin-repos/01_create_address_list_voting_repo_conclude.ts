@@ -1,9 +1,10 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {
   PluginRepoFactory__factory,
   PluginRepo__factory,
 } from '../../../../typechain';
+import {skipDeploy} from '../../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding AddresslistVotingSetup deployment.\n`);
@@ -34,3 +35,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateAddressListVotingRepo', 'Verify'];
+func.skip = skipDeploy;

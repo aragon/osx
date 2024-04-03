@@ -1,7 +1,8 @@
+import {AddresslistVotingSetup__factory} from '../../../../typechain';
+import {skipDeploy} from '../../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {setTimeout} from 'timers/promises';
-import {AddresslistVotingSetup__factory} from '../../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding addresslist voting setup deployment.\n`);
@@ -37,3 +38,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'AddresslistVotingSetup', 'Verify'];
+func.skip = skipDeploy;
