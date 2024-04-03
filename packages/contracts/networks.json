@@ -12,10 +12,10 @@
     "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
   },
   "sepolia": {
-    "url": "https://sepolia.infura.io/v3/78739e9ae61641ca87ad847790cf42de",
+    "url": "https://sepolia.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": true,
     "chainId": 11155111,
-    "deploy": ["./deploy/new"]
+    "deploy": ["./deploy/new", "./deploy/verification"]
   },
   "polygon": {
     "url": "https://polygon-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",

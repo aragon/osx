@@ -31,9 +31,6 @@ async function registerAndTransferDomain(
     );
   }
 
-  // TODO: GIO Test cases: 1. use non-existing ens names 2. use existing ens names with wrapped functionality
-  // 3. use existing ens names with unwrapped functionality 4. use the network where ens doesn't exist
-
   if (owner !== managingDAOAddress && owner !== deployer.address) {
     throw new Error(
       `${domain} is not owned either by deployer: ${deployer.address} or management dao: ${managingDAOAddress}. 
