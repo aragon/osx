@@ -1,7 +1,7 @@
 import {
   Action,
   ERC721Balance,
-  TransactionActionsProposal,
+  TransactionActions as TransactionActionsProposal,
 } from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
@@ -128,7 +128,7 @@ function createExecutedEvent(
       functionData.toHexString()
     );
 
-    actions.push(action);
+    actions.push(action as ethereum.Tuple);
   }
 
   if (execResults.length == 0) {

@@ -2,7 +2,7 @@ import {
   Dao,
   Permission,
   StandardCallback,
-  TransactionActionsProposal,
+  TransactionActions as TransactionActionsProposal,
 } from '../../generated/schema';
 import {
   MetadataSet,

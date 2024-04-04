@@ -1,5 +1,5 @@
 import {
-  TransactionActionsProposal,
+  TransactionActions as TransactionActionsProposal,
   Action,
   ERC721Balance,
 } from '../../generated/schema';
@@ -1072,7 +1072,7 @@ function createExecutedEvent(
       functionData.toHexString()
     );
 
-    actions.push(action);
+    actions.push(action as ethereum.Tuple);
   }
 
   if (execResults.length == 0) {

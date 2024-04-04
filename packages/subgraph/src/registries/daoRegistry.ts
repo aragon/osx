@@ -22,7 +22,9 @@ export function handleDAORegistered(event: DAORegistered): void {
   entity.creator = event.params.creator;
   entity.createdAt = event.block.timestamp;
 
-  // subscribe to templates
+  // subscribe to both templates for different execution handling
+  // check manifest file for details on how event handling is
+  // differentiated between templates
   DaoTemplateV1_0_0.create(daoAddress);
   DaoTemplateV1_3_0.create(daoAddress);
 

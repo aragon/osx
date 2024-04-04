@@ -617,15 +617,18 @@ interface IPlugin {
   # state: PluginPreparationState!
 }
 
-### Entities below should move to there respective subgraph once plugin is seperated from the Aragon OSx
-# Proposal
-
-interface IProposal {
-  id: ID! # package + proposalId
+"""
+A container for actions executed in batches by the DAO's `execute` function.
+TODO: Decide if renaming "ExecutionActions" is desirable
+"""
+type TransactionActions @entity {
+  id: ID!
+  # ID without Tx information
+  deterministicId: Bytes!
   dao: Dao!
   creator: Bytes!
   metadata: String
-  actions: [Action!]! @derivedFrom(field: "proposal")
+  actions: [TransactionAction!]! @derivedFrom(field: "transactionActions")
   allowFailureMap: BigInt!
   failureMap: BigInt
   executed: Boolean!
@@ -635,8 +638,26 @@ interface IProposal {
   executionTxHash: Bytes
 }
 
-type TransactionActionsProposal implements IProposal @entity {
+"""
+Temporary entity until Actions have been removed as part of the split
+"""
+type TransactionAction @entity {
   id: ID!
+  # ID without Tx information
+  deterministicId: Bytes!
+  transactionActions: TransactionActions!
+  dao: Dao!
+  to: Bytes!
+  value: BigInt!
+  data: Bytes!
+  execResult: Bytes
+}
+
+### Entities below should move to there respective subgraph once plugin is seperated from the Aragon OSx
+# Proposal
+
+interface IProposal {
+  id: ID! # package + proposalId
   dao: Dao!
   creator: Bytes!
   metadata: String
