@@ -2,7 +2,7 @@ import {
   Dao,
   Permission,
   StandardCallback,
-  TransactionActions as TransactionActionsProposal,
+  TransactionActions,
 } from '../../generated/schema';
 import {
   MetadataSet,
@@ -33,11 +33,14 @@ import {handleAction, updateProposalWithFailureMap} from './utils';
 import {
   generateDaoEntityId,
   generatePermissionEntityId,
-  generateProposalEntityId,
   generateStandardCallbackEntityId,
-  generateTransactionActionsProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
+import {
+  generateTransactionActionsDeterministicId,
+  generateTransactionActionsEntityId,
+} from './ids';
+import {stringToBytes} from '../utils/bytes';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = generateDaoEntityId(event.address);
@@ -83,16 +86,19 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
-  let proposalEntityId = generateProposalEntityId(
-    event.params.actor,
-    BigInt.fromByteArray(event.params.callId)
+  const transactionActionsEntityId = generateTransactionActionsEntityId(
+    event.address /* daoAddress */,
+    event.params.actor /* caller */,
+    event.params.callId,
+    event.transaction.hash,
+    event.logIndex
   );
 
   // Not an effective solution, until each plugin has
   // its own subgraph separately.
   // If proposal found, update its failureMap.
-  let wasUpdated = updateProposalWithFailureMap(
-    proposalEntityId,
+  const wasUpdated = updateProposalWithFailureMap(
+    transactionActionsEntityId,
     event.params.failureMap
   );
 
@@ -101,37 +107,34 @@ export function handleExecuted(event: Executed): void {
   // Subgraph doesn't index, in which case, we still create
   // proposal entity in order to group its actions together.
   if (!wasUpdated) {
-    // The id generation must include hash + logindex
-    // This is important to not allow overwriting. since
-    // the uniqueness of callId isn't checked in DAO, there
-    // might be a case when 2 different tx might end up having the same
-    // proposal ID which will cause overwrite. In case of plugins,
-    // It's plugin's responsibility to pass unique callId per execute.
-    proposalEntityId = generateTransactionActionsProposalEntityId(
-      proposalEntityId,
-      event.transaction.hash,
-      event.logIndex
+    const deterministicId = generateTransactionActionsDeterministicId(
+      event.address /* daoAddress */,
+      event.params.actor /* caller */,
+      event.params.callId
     );
 
-    let proposal = new TransactionActionsProposal(proposalEntityId);
-    proposal.dao = generateDaoEntityId(event.address);
-    proposal.createdAt = event.block.timestamp;
-    proposal.endDate = event.block.timestamp;
-    proposal.startDate = event.block.timestamp;
-    proposal.creator = event.params.actor;
-    proposal.executionTxHash = event.transaction.hash;
+    const transactionActions = new TransactionActions(
+      transactionActionsEntityId
+    );
+    transactionActions.dao = generateDaoEntityId(event.address);
+    transactionActions.deterministicId = deterministicId;
+    transactionActions.createdAt = event.block.timestamp;
+    transactionActions.endDate = event.block.timestamp;
+    transactionActions.startDate = event.block.timestamp;
+    transactionActions.creator = event.params.actor;
+    transactionActions.executionTxHash = event.transaction.hash;
     // Since DAO doesn't emit allowFailureMap by mistake, we got no choice now.
     // In such case, `allowFailureMap` shouldn't be fully trusted.
-    proposal.allowFailureMap = BigInt.zero();
-    proposal.executed = true;
-    proposal.failureMap = event.params.failureMap;
-    proposal.save();
+    transactionActions.allowFailureMap = BigInt.zero();
+    transactionActions.executed = true;
+    transactionActions.failureMap = event.params.failureMap;
+    transactionActions.save();
   }
 
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
-    handleAction(actions[index], proposalEntityId, index, event);
+    handleAction(actions[index], transactionActionsEntityId, index, event);
   }
 }
 

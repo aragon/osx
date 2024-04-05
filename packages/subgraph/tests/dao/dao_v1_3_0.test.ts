@@ -1,6 +1,5 @@
 import {
   TransactionActions as TransactionActions,
-  Action,
   ERC721Balance,
   TransactionAction,
 } from '../../generated/schema';
@@ -10,6 +9,7 @@ import {
   generateTransactionActionEntityId,
   generateDeterministicActionId,
   generateTransactionActionsEntityId,
+  generateTransactionActionsDeterministicId,
 } from '../../src/dao/ids';
 import {stringToBytes} from '../../src/utils/bytes';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
@@ -41,7 +41,6 @@ import {
   ERC20_DECIMALS,
   ADDRESS_ONE,
   ADDRESS_TWO,
-  ADDRESS_ZERO,
 } from '../constants';
 import {
   ExtendedERC1155Balance,
@@ -66,14 +65,7 @@ import {
   createERC1155TokenCalls,
   generateTransactionActionsProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {
-  ethereum,
-  Bytes,
-  Address,
-  BigInt,
-  log,
-  ByteArray,
-} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
@@ -82,6 +74,7 @@ import {
   clearStore,
   assert,
   beforeAll,
+  log,
 } from 'matchstick-as';
 
 const eq = assert.fieldEquals;
@@ -119,6 +112,12 @@ describe('handleExecuted', () => {
 
     handleExecuted(event);
 
+    const deterministicID = generateTransactionActionsDeterministicId(
+      event.address,
+      event.params.actor,
+      event.params.callId
+    );
+
     let transactionActionsEntityId = generateTransactionActionsEntityId(
       event.address,
       event.params.actor,
@@ -149,7 +148,21 @@ describe('handleExecuted', () => {
       allowFailureMap
     );
 
+    assert.fieldEquals(
+      'TransactionActions',
+      transactionActionsEntityId,
+      'deterministicId',
+      deterministicID
+    );
+
     for (let i = 0; i < event.params.actions.length; i++) {
+      const deterministicActionID = generateDeterministicActionId(
+        event.address,
+        event.params.actor,
+        event.params.callId,
+        i
+      );
+
       let actionEntityId = generateTransactionActionEntityId(
         event.address,
         event.params.actor,
@@ -172,6 +185,12 @@ describe('handleExecuted', () => {
         actionEntityId,
         'transactionActions',
         transactionActionsEntityId
+      );
+      eq(
+        'TransactionAction',
+        actionEntityId,
+        'deterministicId',
+        deterministicActionID
       );
       eq(
         'TransactionAction',
@@ -232,9 +251,7 @@ describe('handleExecuted', () => {
     let transactionActions = new TransactionActions(transactionActionsEntityId);
     transactionActions.dao = event.address.toHexString();
     transactionActions.createdAt = event.block.timestamp;
-    transactionActions.deterministicId = stringToBytes(
-      deterministicTransactionActionsId
-    );
+    transactionActions.deterministicId = deterministicTransactionActionsId;
     transactionActions.endDate = event.block.timestamp;
     transactionActions.startDate = event.block.timestamp;
     transactionActions.allowFailureMap = BigInt.fromString(allowFailureMap);
@@ -250,7 +267,7 @@ describe('handleExecuted', () => {
     action.value = BigInt.zero();
     action.dao = event.address.toHexString();
     action.transactionActions = transactionActions.id;
-    action.deterministicId = stringToBytes(deterministicActionID);
+    action.deterministicId = deterministicActionID;
     action.save();
 
     // Check that before `handleExecute`, execResults are empty

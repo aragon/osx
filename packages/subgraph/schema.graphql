@@ -624,7 +624,7 @@ TODO: Decide if renaming "ExecutionActions" is desirable
 type TransactionActions @entity {
   id: ID!
   # ID without Tx information
-  deterministicId: Bytes!
+  deterministicId: String!
   dao: Dao!
   creator: Bytes!
   metadata: String
@@ -644,7 +644,7 @@ Temporary entity until Actions have been removed as part of the split
 type TransactionAction @entity {
   id: ID!
   # ID without Tx information
-  deterministicId: Bytes!
+  deterministicId: String!
   transactionActions: TransactionActions!
   dao: Dao!
   to: Bytes!

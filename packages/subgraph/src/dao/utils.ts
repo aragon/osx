@@ -9,7 +9,7 @@ import {
   Executed,
   ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
-import {getMethodSignature} from '../utils/bytes';
+import {getMethodSignature, stringToBytes} from '../utils/bytes';
 import {
   ERC721_transferFrom,
   ERC721_safeTransferFromNoData,
@@ -125,7 +125,7 @@ function getOrCreateActionEntity<
 
   if (!entity) {
     entity = new TransactionAction(actionId);
-    entity.deterministicId = Bytes.fromHexString(deterministicActionId);
+    entity.deterministicId = deterministicActionId;
     entity.to = action.to;
     entity.value = action.value;
     entity.data = action.data;

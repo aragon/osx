@@ -9,7 +9,6 @@ import {
   generateTransactionActionsDeterministicId,
   generateTransactionActionsEntityId,
 } from './ids';
-import {Bytes} from '@graphprotocol/graph-ts';
 
 export function handleExecuted(event: Executed): void {
   let transactionActionsEntityId = generateTransactionActionsEntityId(
@@ -29,7 +28,7 @@ export function handleExecuted(event: Executed): void {
   let transactionActions = new TransactionActions(transactionActionsEntityId);
 
   transactionActions.dao = generateDaoEntityId(event.address);
-  transactionActions.deterministicId = Bytes.fromHexString(deterministicId);
+  transactionActions.deterministicId = deterministicId;
   transactionActions.createdAt = event.block.timestamp;
   transactionActions.endDate = event.block.timestamp;
   transactionActions.startDate = event.block.timestamp;
