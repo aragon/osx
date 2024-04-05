@@ -13,17 +13,17 @@ import {Bytes} from '@graphprotocol/graph-ts';
 
 export function handleExecuted(event: Executed): void {
   let transactionActionsEntityId = generateTransactionActionsEntityId(
-    event.address.toHexString(),
-    event.params.actor.toHexString(),
-    event.params.callId.toString(),
+    event.address,
+    event.params.actor,
+    event.params.callId,
     event.transaction.hash,
     event.transactionLogIndex
   );
 
   let deterministicId = generateTransactionActionsDeterministicId(
-    event.address.toHexString(),
-    event.params.actor.toHexString(),
-    event.params.callId.toString()
+    event.address,
+    event.params.actor,
+    event.params.callId
   );
 
   let transactionActions = new TransactionActions(transactionActionsEntityId);

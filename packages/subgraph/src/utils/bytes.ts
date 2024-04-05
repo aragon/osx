@@ -1,4 +1,4 @@
-import {BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {BigInt, ByteArray, Bytes} from '@graphprotocol/graph-ts';
 
 export function bigIntToBytes32(input: BigInt): string {
   const hexString = input
@@ -10,4 +10,8 @@ export function bigIntToBytes32(input: BigInt): string {
 
 export function getMethodSignature(data: Bytes): string {
   return data.toHexString().slice(0, 10);
+}
+
+export function stringToBytes(input: string): Bytes {
+  return Bytes.fromByteArray(ByteArray.fromUTF8(input));
 }

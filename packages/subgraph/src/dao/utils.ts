@@ -24,8 +24,11 @@ import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
 import {handleNativeAction} from '../utils/tokens/eth';
 import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
-import {BigInt, Bytes} from '@graphprotocol/graph-ts';
-import {generateActionEntityId, generateDeterministicActionId} from './ids';
+import {BigInt, Bytes, log} from '@graphprotocol/graph-ts';
+import {
+  generateTransactionActionEntityId,
+  generateDeterministicActionId,
+} from './ids';
 
 // AssemblyScript struggles having multiple return types. Due to this,
 // The below seems most effective way.
@@ -67,8 +70,13 @@ export function updateProposalWithFailureMap(
 export function handleAction<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, proposalId: string, index: i32, event: R): void {
-  let actionEntity = getOrCreateActionEntity(action, proposalId, index, event);
+>(action: T, transactionActionId: string, index: i32, event: R): void {
+  let actionEntity = getOrCreateActionEntity(
+    action,
+    transactionActionId,
+    index,
+    event
+  );
   actionEntity.execResult = event.params.execResults[index];
   actionEntity.save();
 
@@ -78,14 +86,14 @@ export function handleAction<
       action.to,
       action.value,
       'Native Token Withdraw',
-      proposalId,
+      transactionActionId,
       index,
       event
     );
     return;
   }
 
-  checkForAndHandleTokenTransfers(action, proposalId, index, event);
+  checkForAndHandleTokenTransfers(action, transactionActionId, index, event);
 }
 
 function getOrCreateActionEntity<
@@ -98,15 +106,15 @@ function getOrCreateActionEntity<
   event: R
 ): TransactionAction {
   const deterministicActionId = generateDeterministicActionId(
-    event.address.toHexString(),
-    event.params.actor.toHexString(),
-    event.params.callId.toString(),
+    event.address,
+    event.params.actor,
+    event.params.callId,
     index
   );
-  const actionId = generateActionEntityId(
-    event.address.toHexString(),
-    event.params.actor.toHexString(),
-    event.params.callId.toString(),
+  const actionId = generateTransactionActionEntityId(
+    event.address,
+    event.params.actor,
+    event.params.callId,
     index,
     event.transaction.hash,
     event.transactionLogIndex

@@ -1,10 +1,17 @@
 import {
-  TransactionActions as TransactionActionsProposal,
+  TransactionActions as TransactionActions,
   Action,
   ERC721Balance,
+  TransactionAction,
 } from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplateV1_3_0/DAO';
 import {handleExecuted} from '../../src/dao/dao_v1_3_0';
+import {
+  generateTransactionActionEntityId,
+  generateDeterministicActionId,
+  generateTransactionActionsEntityId,
+} from '../../src/dao/ids';
+import {stringToBytes} from '../../src/utils/bytes';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   generateERC1155TransferEntityId,
@@ -32,6 +39,9 @@ import {
   TOKEN_SYMBOL,
   ERC20_TOTAL_SUPPLY,
   ERC20_DECIMALS,
+  ADDRESS_ONE,
+  ADDRESS_TWO,
+  ADDRESS_ZERO,
 } from '../constants';
 import {
   ExtendedERC1155Balance,
@@ -46,18 +56,24 @@ import {
   getSupportsInterface,
 } from './utils';
 import {
-  generateActionEntityId,
   generateBalanceEntityId,
   generateDaoEntityId,
   generateProposalEntityId,
   generateTokenIdBalanceEntityId,
-  generateTransactionActionsProposalEntityId,
   generateTransferEntityId,
   createDummyAction,
   createERC20TokenCalls,
   createERC1155TokenCalls,
+  generateTransactionActionsProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {
+  ethereum,
+  Bytes,
+  Address,
+  BigInt,
+  log,
+  ByteArray,
+} from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
@@ -103,56 +119,62 @@ describe('handleExecuted', () => {
 
     handleExecuted(event);
 
-    let proposalEntityId = generateProposalEntityId(
+    let transactionActionsEntityId = generateTransactionActionsEntityId(
+      event.address,
       event.params.actor,
-      BigInt.fromUnsignedBytes(event.params.callId)
+      event.params.callId,
+      event.transaction.hash,
+      event.transactionLogIndex
     );
-    let transactionActionsProposalEntityId =
-      generateTransactionActionsProposalEntityId(
-        proposalEntityId,
-        event.transaction.hash,
-        event.transactionLogIndex
-      );
 
-    assert.entityCount('TransactionActionsProposal', 1);
-    assert.entityCount('Action', 2);
+    assert.entityCount('TransactionActions', 1);
+    assert.entityCount('TransactionAction', 2);
 
     eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
+      'TransactionActions',
+      transactionActionsEntityId,
       'id',
-      transactionActionsProposalEntityId
+      transactionActionsEntityId
     );
     eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
+      'TransactionActions',
+      transactionActionsEntityId,
       'failureMap',
       failureMap
     );
     eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
+      'TransactionActions',
+      transactionActionsEntityId,
       'allowFailureMap',
       allowFailureMap
     );
 
     for (let i = 0; i < event.params.actions.length; i++) {
-      let actionEntityId = generateActionEntityId(
-        transactionActionsProposalEntityId,
-        i
+      let actionEntityId = generateTransactionActionEntityId(
+        event.address,
+        event.params.actor,
+        event.params.callId,
+        i,
+        event.transaction.hash,
+        event.transactionLogIndex
       );
 
-      eq('Action', actionEntityId, 'id', actionEntityId);
-      eq('Action', actionEntityId, 'execResult', execResults[i].toHexString());
-      eq('Action', actionEntityId, 'dao', DAO_ADDRESS);
+      eq('TransactionAction', actionEntityId, 'id', actionEntityId);
       eq(
-        'Action',
+        'TransactionAction',
         actionEntityId,
-        'proposal',
-        transactionActionsProposalEntityId
+        'execResult',
+        execResults[i].toHexString()
+      );
+      eq('TransactionAction', actionEntityId, 'dao', DAO_ADDRESS);
+      eq(
+        'TransactionAction',
+        actionEntityId,
+        'transactionActions',
+        transactionActionsEntityId
       );
       eq(
-        'Action',
+        'TransactionAction',
         actionEntityId,
         'data',
         encodeWithFunctionSelector(tuple, selector).toHexString()
@@ -176,75 +198,96 @@ describe('handleExecuted', () => {
       failureMap
     );
 
-    let proposalEntityId = generateProposalEntityId(
+    let deterministicTransactionActionsId = generateDeterministicActionId(
+      event.address,
       event.params.actor,
-      BigInt.fromUnsignedBytes(event.params.callId)
-    );
-    let transactionActionsProposalEntityId =
-      generateTransactionActionsProposalEntityId(
-        proposalEntityId,
-        event.transaction.hash,
-        event.transactionLogIndex
-      );
-
-    let actionEntityId = generateActionEntityId(
-      transactionActionsProposalEntityId,
+      event.params.callId,
       0
     );
 
-    // create proposal
-    let proposal = new TransactionActionsProposal(
-      transactionActionsProposalEntityId
+    let transactionActionsEntityId = generateTransactionActionsEntityId(
+      event.address,
+      event.params.actor,
+      event.params.callId,
+      event.transaction.hash,
+      event.transactionLogIndex
     );
-    proposal.dao = event.address.toHexString();
-    proposal.createdAt = event.block.timestamp;
-    proposal.endDate = event.block.timestamp;
-    proposal.startDate = event.block.timestamp;
-    proposal.allowFailureMap = BigInt.fromString(allowFailureMap);
-    proposal.creator = event.params.actor;
-    proposal.executionTxHash = event.transaction.hash;
-    proposal.executed = true;
-    proposal.save();
+
+    let deterministicActionID = generateDeterministicActionId(
+      event.address,
+      event.params.actor,
+      event.params.callId,
+      0
+    );
+
+    let actionEntityId = generateTransactionActionEntityId(
+      event.address,
+      event.params.actor,
+      event.params.callId,
+      0,
+      event.transaction.hash,
+      event.transactionLogIndex
+    );
+    // create proposal
+    let transactionActions = new TransactionActions(transactionActionsEntityId);
+    transactionActions.dao = event.address.toHexString();
+    transactionActions.createdAt = event.block.timestamp;
+    transactionActions.deterministicId = stringToBytes(
+      deterministicTransactionActionsId
+    );
+    transactionActions.endDate = event.block.timestamp;
+    transactionActions.startDate = event.block.timestamp;
+    transactionActions.allowFailureMap = BigInt.fromString(allowFailureMap);
+    transactionActions.creator = event.params.actor;
+    transactionActions.executionTxHash = event.transaction.hash;
+    transactionActions.executed = true;
+    transactionActions.save();
 
     // create action
-    let action = new Action(actionEntityId);
+    let action = new TransactionAction(actionEntityId);
     action.to = Address.fromString(DAO_TOKEN_ADDRESS);
     action.data = Bytes.fromHexString('0x');
     action.value = BigInt.zero();
     action.dao = event.address.toHexString();
-    action.proposal = proposal.id;
+    action.transactionActions = transactionActions.id;
+    action.deterministicId = stringToBytes(deterministicActionID);
     action.save();
 
     // Check that before `handleExecute`, execResults are empty
-    assert.entityCount('Action', 1);
-    assert.entityCount('TransactionActionsProposal', 1);
+    assert.entityCount('TransactionAction', 1);
+    assert.entityCount('TransactionActions', 1);
     assert.assertTrue(action.execResult === null);
-    assert.assertTrue(proposal.failureMap === null);
+    assert.assertTrue(transactionActions.failureMap === null);
 
     handleExecuted(event);
 
-    // The action and proposal count should be the same.
-    assert.entityCount('Action', 1);
-    assert.entityCount('TransactionActionsProposal', 1);
+    // The TA and TAs count should be the same.
+    assert.entityCount('TransactionAction', 1);
+    assert.entityCount('TransactionActions', 1);
 
-    eq('Action', actionEntityId, 'id', actionEntityId);
-    eq('Action', actionEntityId, 'execResult', execResult.toHexString());
+    eq('TransactionAction', actionEntityId, 'id', actionEntityId);
+    eq(
+      'TransactionAction',
+      actionEntityId,
+      'execResult',
+      execResult.toHexString()
+    );
 
     eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
+      'TransactionActions',
+      transactionActionsEntityId,
       'id',
-      transactionActionsProposalEntityId
+      transactionActionsEntityId
     );
     eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
+      'TransactionActions',
+      transactionActionsEntityId,
       'failureMap',
       failureMap
     );
     eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
+      'TransactionActions',
+      transactionActionsEntityId,
       'allowFailureMap',
       allowFailureMap
     );
@@ -1046,6 +1089,64 @@ describe('handleExecuted', () => {
         assert.entityCount('ERC1155TokenIdBalance', 3);
       });
     });
+  });
+});
+
+describe('Testing ID generation', () => {
+  test('Deterministic ID generation', () => {
+    const caller = Address.fromString(ADDRESS_ONE);
+    const daoAddress = Address.fromString(ADDRESS_TWO);
+    const callId = '0xc0ffee';
+    const index = 255;
+
+    const actionId = generateDeterministicActionId(
+      caller,
+      daoAddress,
+      Bytes.fromHexString(callId),
+      index
+    );
+
+    assert.stringEquals(
+      actionId,
+      [
+        caller.toHexString(),
+        daoAddress.toHexString(),
+        callId,
+        index.toString(),
+      ].join('_')
+    );
+  });
+
+  test('ID generation with Tx data', () => {
+    const caller = Address.fromString(ADDRESS_ONE);
+    const daoAddress = Address.fromString(ADDRESS_TWO);
+    const callId = ZERO_BYTES32;
+    const index = 255;
+    const txHash = Bytes.fromHexString('0x1234567890abcdef');
+    const logIndex = BigInt.fromI32(12345);
+
+    const actionId = generateTransactionActionEntityId(
+      caller,
+      daoAddress,
+      Bytes.fromHexString(callId),
+      index,
+      txHash,
+      logIndex
+    );
+
+    // Assemblyscript can only concat if all are strings
+    // make sure your bytes are casted correctly
+    assert.stringEquals(
+      actionId,
+      [
+        caller.toHexString(),
+        daoAddress.toHexString(),
+        callId,
+        index.toString(),
+        txHash.toHexString(),
+        logIndex.toString(),
+      ].join('_')
+    );
   });
 });
 

@@ -2,23 +2,27 @@ import {
   generateEntityIdFromBigInt,
   generateEntityIdFromBytes,
 } from '@aragon/osx-commons-subgraph';
-import {BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 /**
  * TODO move to osx-commons
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
- * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
+ * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @returns A string representing a deterministic identifier for the transaction action entity.
  * This should be unique but due to callId being passed by the user, it is not guaranteed.
  * Clients can use this ID to filter to specific executions, but should check for duplicates.
  */
 export function generateTransactionActionsDeterministicId(
-  daoAddress: string,
-  caller: string,
-  callId: string
+  daoAddress: Address,
+  caller: Address,
+  callId: Bytes
 ): string {
-  return [daoAddress, caller, callId].join('_');
+  return [
+    daoAddress.toHexString(),
+    caller.toHexString(),
+    callId.toHexString(),
+  ].join('_');
 }
 
 /**
@@ -33,9 +37,9 @@ export function generateTransactionActionsDeterministicId(
  * to inclusion of Tx data.
  */
 export function generateTransactionActionsEntityId(
-  daoAddress: string,
-  caller: string,
-  callId: string,
+  daoAddress: Address,
+  caller: Address,
+  callId: Bytes,
   txHash: Bytes,
   logIndex: BigInt
 ): string {
@@ -50,26 +54,31 @@ export function generateTransactionActionsEntityId(
  * TODO move to osx-commons
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
- * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
+ * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @param actionIndex - The index of the action within the call
  * @returns A string representing a deterministic identifier for the action entity.
  * This should be unique but due to callId being passed by the user, it is not guaranteed.
  * Clients can use this ID to filter to specific executions, but should check for duplicates.
  */
 export function generateDeterministicActionId(
-  daoAddress: string,
-  caller: string,
-  callId: string,
+  daoAddress: Address,
+  caller: Address,
+  callId: Bytes,
   actionIndex: i32
 ): string {
-  return [daoAddress, caller, callId, actionIndex.toString()].join('_');
+  return [
+    daoAddress.toHexString(),
+    caller.toHexString(),
+    callId.toHexString(),
+    actionIndex.toString(),
+  ].join('_');
 }
 
 /**
  * TODO decide whether to move to OSX commons
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
- * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
+ * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @param actionIndex - The index of the action within the call
  * @param txHash - The hash of the transaction.
  * @param logIndex - The index of the log.
@@ -77,10 +86,10 @@ export function generateDeterministicActionId(
  * This will be globally unique to avoid data loss but cannot be known ahead of execution due
  * to inclusion of Tx data.
  */
-export function generateActionEntityId(
-  daoAddress: string,
-  caller: string,
-  callId: string,
+export function generateTransactionActionEntityId(
+  daoAddress: Address,
+  caller: Address,
+  callId: Bytes,
   actionIndex: i32,
   txHash: Bytes,
   logIndex: BigInt
