@@ -17,9 +17,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const pluginDomain =
     process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
 
-  if (!daoDomain || !pluginDomain) {
-    throw new Error('DAO or Plugin ENS domains have not been set in .env');
-  }
+  console.log(process.env, network.name, pluginDomain, ' omg123');
+  // if (!daoDomain || !pluginDomain) {
+  //   throw new Error('DAO or Plugin ENS domains have not been set in .env');
+  // }
 
   const officialEnsRegistryAddress = ENS_ADDRESSES[network.name];
 

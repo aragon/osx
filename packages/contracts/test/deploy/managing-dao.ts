@@ -295,7 +295,9 @@ describe('Managing DAO', function () {
     }
   });
 
-  it('Should be able to upgrade `PluginRepo`s', async function () {
+  // The following test will be removed as plugin deployments
+  // are planned to be removed from osx as well.
+  it.skip('Should be able to upgrade `PluginRepo`s', async function () {
     // deploy a new implementation.
     const PluginRepo_v1_0_0_Deployment = await deployments.deploy(
       'PluginRepo_v1_0_0',

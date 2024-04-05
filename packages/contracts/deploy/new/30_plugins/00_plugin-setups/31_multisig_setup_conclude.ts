@@ -2,6 +2,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {MultisigSetup__factory} from '../../../../typechain';
 import {setTimeout} from 'timers/promises';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipDeploy} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding multisig setup deployment.\n`);
@@ -34,3 +35,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'MultisigSetup', 'Verify'];
+func.skip = skipDeploy;
