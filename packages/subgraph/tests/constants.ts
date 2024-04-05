@@ -2,7 +2,8 @@ import {
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {generateTransactionActionsEntityId} from '../src/dao/ids';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 export const ADDRESS_ONE = '0x0000000000000000000000000000000000000001';
@@ -61,6 +62,7 @@ export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 export const ONE_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
+
 export const HALF_UINT256_BYTES32 =
   '0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 export const MAX_UINT256_BYTES32 =
@@ -73,6 +75,14 @@ export const PLUGIN_SETUP_ID =
   '0xfb3fd2c4cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 export const APPLIED_PLUGIN_SETUP_ID =
   '0x00000000cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
+
+export const TRANSACTION_ACTIONS_ENTITY_ID = generateTransactionActionsEntityId(
+  Address.fromString(DAO_ADDRESS),
+  Address.fromString(CONTRACT_ADDRESS),
+  Bytes.fromHexString(ONE_BYTES32),
+  Bytes.fromHexString(HALF_UINT256_BYTES32),
+  BigInt.fromString('1')
+);
 
 export const PROPOSAL_ENTITY_ID = generateProposalEntityId(
   Address.fromString(CONTRACT_ADDRESS),

@@ -8,8 +8,8 @@ import {handleExecuted} from '../../src/dao/dao_v1_3_0';
 import {
   generateTransactionActionEntityId,
   generateDeterministicActionId,
-  generateTransactionActionsEntityId,
   generateTransactionActionsDeterministicId,
+  generateTransactionActionsEntityId,
 } from '../../src/dao/ids';
 import {stringToBytes} from '../../src/utils/bytes';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
@@ -63,7 +63,6 @@ import {
   createDummyAction,
   createERC20TokenCalls,
   createERC1155TokenCalls,
-  generateTransactionActionsProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {
@@ -369,17 +368,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
+          event.address,
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
-
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
         let timestamp = event.block.timestamp;
@@ -414,8 +409,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC20Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC20Transfer', transferId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
@@ -485,17 +480,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
+          event.address,
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
-
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
         let timestamp = event.block.timestamp;
@@ -530,8 +521,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC20Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC20Transfer', transferId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
@@ -635,16 +626,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
+          event.address,
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
@@ -674,8 +662,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC721Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
@@ -742,17 +730,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
+          event.address,
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
-
         // check ERC721Contract entity
         eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
         eq('ERC721Contract', tokenEntityId, 'name', TOKEN_NAME);
@@ -781,8 +765,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC721Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
@@ -899,23 +883,20 @@ describe('handleExecuted', () => {
           0,
           0
         );
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
+          event.address,
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
         assert.entityCount('ERC1155Transfer', 1);
         let erc1155Transfer = new ExtendedERC1155Transfer().withDefaultValues();
         erc1155Transfer.id = transferId;
         erc1155Transfer.amount = amount;
         erc1155Transfer.from = Address.fromHexString(daoEntityId);
         erc1155Transfer.to = Address.fromHexString(ADDRESS_THREE);
-        erc1155Transfer.proposal = transactionActionsProposalEntityId;
+        erc1155Transfer.transactionActions = transactionActionsEntityId;
         erc1155Transfer.type = 'Withdraw';
         erc1155Transfer.txHash = txHash;
         erc1155Transfer.createdAt = timestamp;
@@ -1027,16 +1008,13 @@ describe('handleExecuted', () => {
         // check ERC1155Transfer entity
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
+          event.address,
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
         for (let i = 0; i < tokenIds.length; i++) {
           let erc1155Transfer =
             new ExtendedERC1155Transfer().withDefaultValues();
@@ -1051,7 +1029,7 @@ describe('handleExecuted', () => {
           erc1155Transfer.from = Address.fromHexString(daoEntityId);
           erc1155Transfer.to = Address.fromHexString(ADDRESS_THREE);
           erc1155Transfer.tokenId = tokenIds[i];
-          erc1155Transfer.proposal = transactionActionsProposalEntityId;
+          erc1155Transfer.transactionActions = transactionActionsEntityId;
           erc1155Transfer.type = 'Withdraw';
           erc1155Transfer.txHash = txHash;
           erc1155Transfer.createdAt = timestamp;

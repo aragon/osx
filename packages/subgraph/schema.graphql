@@ -288,8 +288,8 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC20 tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -323,8 +323,8 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC721 token. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -364,8 +364,8 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -399,8 +399,8 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   " The reference describing the deposit reason. "
   reference: String!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!

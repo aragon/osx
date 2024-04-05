@@ -70,10 +70,10 @@ export function updateProposalWithFailureMap(
 export function handleAction<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, transactionActionId: string, index: i32, event: R): void {
+>(action: T, transactionActionsId: string, index: i32, event: R): void {
   let actionEntity = getOrCreateActionEntity(
     action,
-    transactionActionId,
+    transactionActionsId,
     index,
     event
   );
@@ -86,14 +86,14 @@ export function handleAction<
       action.to,
       action.value,
       'Native Token Withdraw',
-      transactionActionId,
+      transactionActionsId,
       index,
       event
     );
     return;
   }
 
-  checkForAndHandleTokenTransfers(action, transactionActionId, index, event);
+  checkForAndHandleTokenTransfers(action, transactionActionsId, index, event);
 }
 
 function getOrCreateActionEntity<
@@ -140,14 +140,14 @@ function getOrCreateActionEntity<
  * Determines if the action is an ERC20, ERC721 or ERC1155 transfer and calls the appropriate handler if so.
  * Does nothing if the action is not a recognised token transfer.
  * @param action the action to validate
- * @param proposalId TODO: change this
+ * @param transactionActionsId TODO: change this
  * @param actionIndex the index number of the action inside the executed batch
  * @param event the Executed event emitting the event
  */
 function checkForAndHandleTokenTransfers<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, proposalId: string, actionIndex: i32, event: R): void {
+>(action: T, transactionActionsId: string, actionIndex: i32, event: R): void {
   const methodSig = getMethodSignature(action.data);
 
   let handledByErc721: bool = false;
@@ -158,7 +158,7 @@ function checkForAndHandleTokenTransfers<
       action.to,
       event.address,
       action.data,
-      proposalId,
+      transactionActionsId,
       actionIndex,
       event
     );
@@ -169,7 +169,7 @@ function checkForAndHandleTokenTransfers<
       action.to,
       event.address,
       action.data,
-      proposalId,
+      transactionActionsId,
       actionIndex,
       event
     );
@@ -179,7 +179,7 @@ function checkForAndHandleTokenTransfers<
     handleERC20Action(
       action.to,
       event.address,
-      proposalId,
+      transactionActionsId,
       action.data,
       actionIndex,
       event
