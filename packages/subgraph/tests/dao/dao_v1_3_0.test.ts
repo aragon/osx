@@ -11,7 +11,6 @@ import {
   generateTransactionActionsDeterministicId,
   generateTransactionActionsEntityId,
 } from '../../src/dao/ids';
-import {stringToBytes} from '../../src/utils/bytes';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   generateERC1155TransferEntityId,
@@ -57,7 +56,6 @@ import {
 import {
   generateBalanceEntityId,
   generateDaoEntityId,
-  generateProposalEntityId,
   generateTokenIdBalanceEntityId,
   generateTransferEntityId,
   createDummyAction,
@@ -73,7 +71,6 @@ import {
   clearStore,
   assert,
   beforeAll,
-  log,
 } from 'matchstick-as';
 
 const eq = assert.fieldEquals;

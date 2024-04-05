@@ -9,7 +9,7 @@ import {
   Executed,
   ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
-import {getMethodSignature, stringToBytes} from '../utils/bytes';
+import {getMethodSignature} from '../utils/bytes';
 import {
   ERC721_transferFrom,
   ERC721_safeTransferFromNoData,
@@ -24,7 +24,7 @@ import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
 import {handleNativeAction} from '../utils/tokens/eth';
 import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
-import {BigInt, Bytes, log} from '@graphprotocol/graph-ts';
+import {BigInt} from '@graphprotocol/graph-ts';
 import {
   generateTransactionActionEntityId,
   generateDeterministicActionId,

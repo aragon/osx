@@ -40,7 +40,6 @@ import {
   generateTransactionActionsDeterministicId,
   generateTransactionActionsEntityId,
 } from './ids';
-import {stringToBytes} from '../utils/bytes';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = generateDaoEntityId(event.address);
