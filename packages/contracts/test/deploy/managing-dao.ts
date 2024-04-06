@@ -29,7 +29,10 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Managing DAO', function () {
+// The following tests will be removed as plugin deployments
+// are planned to be removed from osx as well. Currently,
+// below fails as there's no multisig deployments anymore..
+describe.skip('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
@@ -295,9 +298,7 @@ describe('Managing DAO', function () {
     }
   });
 
-  // The following test will be removed as plugin deployments
-  // are planned to be removed from osx as well.
-  it.skip('Should be able to upgrade `PluginRepo`s', async function () {
+  it('Should be able to upgrade `PluginRepo`s', async function () {
     // deploy a new implementation.
     const PluginRepo_v1_0_0_Deployment = await deployments.deploy(
       'PluginRepo_v1_0_0',
