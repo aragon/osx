@@ -183,7 +183,7 @@ There're a couple of things we achieved:
 - The default values are not scattered anymore and only live in their appropire extended entity classes.
 - There's no need to call `fieldEquals` multiple times for each field in the tests. Simply calling `assertEntity` is enough.
 - Creating the events is much simpler, because it uses the same default values that live in the same class which brings much more safety.
-- We can easily test to see if the saved entity in the database (fetched by the `id` field) matches the fields _currently_ on the Extended Entity. These will be the default values unless you overwrite them (see below for an example)  
+- We can easily test to see if the saved entity in the database (fetched by the `id` field) matches the fields _currently_ on the Extended Entity. These will be the default values unless you overwrite them (see below for an example)
 
 Usage of the extended class is the following:
 
@@ -208,6 +208,7 @@ After running `yarn test`, our script('schema-extender.ts') loops through the cl
 Setting properties on the extended entity (before saving) will allow you to run `assertEntity` to check that the properties _fetched from the database_ match the properties you've just set, else it will use the default values.
 
 In the above example we are asserting that the `creationsBlockNumber` and `votingMode` are set to specific values, while the rest of the entity will be checked against the defaults.
+
 ## Github Labels / Workflows
 
 ### Workflows
