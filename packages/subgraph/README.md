@@ -205,6 +205,9 @@ When you have a new entity in the schema, go to `/helpers/method-classes.ts` and
 
 After running `yarn test`, our script('schema-extender.ts') loops through the classes in method-classes and cleverly generates the `helpers/extended-schema.ts` which can be used in the tests to use Extended classes instead of the original entity classes.
 
+Setting properties on the extended entity (before saving) will allow you to run `assertEntity` to check that the properties _fetched from the database_ match the properties you've just set, else it will use the default values.
+
+In the above example we are asserting that the `creationsBlockNumber` and `votingMode` are set to specific values, while the rest of the entity will be checked against the defaults.
 ## Github Labels / Workflows
 
 ### Workflows
