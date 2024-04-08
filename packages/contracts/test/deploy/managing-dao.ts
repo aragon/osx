@@ -32,7 +32,6 @@ describe('Managing DAO', function () {
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
   let managingDao: DAO;
-  let multisig: Multisig;
   let daoRegistryDeployment: Deployment;
   let daoRegistry: DAORegistry;
   let pluginRepoRegistryDeployment: Deployment;
@@ -54,16 +53,6 @@ describe('Managing DAO', function () {
     });
 
     await managingDao.execute(ZERO_BYTES32, actions, 0);
-
-    // await multisig.createProposal(
-    //   '0x', // metadata
-    //   actions,
-    //   0, // allowFailureMap
-    //   true, // approve proposal
-    //   true, // execute proposal
-    //   0, // start date: now
-    //   Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
-    // );
   }
 
   before(async () => {
