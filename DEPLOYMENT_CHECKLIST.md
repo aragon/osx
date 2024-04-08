@@ -1,108 +1,69 @@
 # Deployment Checklist
 
-This checklist is seen as a guide to deploy the stack to a new chain.
+This checklist is seen as a guide to deploy the contracts to a new chain.
 
 ## Pre-Deployment
 
+- [ ] Run `yarn` in the repository root to install the dependencies.
+- [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
+- [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed.
 - [ ] Verify that the deployers wallet has enough funds.
-- [ ] Check that the subgraph hoster supports the network OSx is deployed to.
-- [ ] Make sure you are using Node v16
-- [ ] Bump the OSx protocol version in the `ProtocolVersion.sol` file.
-- [ ] Check that version tags are set correctly in the plugin repo deploy scripts `packages/contracts/deploy/new/30_plugins/10_plugin-repos` to ensure synchronized version numbers across all supported networks.
-- [ ] Choose an ENS domain for DAOs
-- [ ] Choose an ENS domain for plugins
-- [ ] Check if there is an official ENS deployment for the chosen chain and if yes:
-  - [ ] Check if there is already an entry for it in `packages/contracts/deploy/helpers.ts`
-  - [ ] Check that the owner of the DAO domain is the deployer
-  - [ ] Check that the owner of the plugin domain is the deployer
-- [ ] Run `yarn` in the repository root to install the dependencies
-- [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
-  - [ ] Check that the compiler version in `hardhat.config.ts` is set to at least `0.8.17` and on the [known solidity bugs page](https://docs.soliditylang.org/en/latest/bugs.html) that no relevant vulnerabilities exist that are fixed in later versions. If the latter is not the case, consider updating the compiler pragmas to a safe version and rolling out fixes for affected contracts.
-- [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
-- [ ] Run `yarn deploy --deploy-scripts deploy/new --network hardhat --reset` to make sure the deploy scripts work
-- [ ] Set `ETH_KEY` in `.env` to the deployers private key
-- [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
-- [ ] Set the chosen DAO ENS domain (in step 1) to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
-- [ ] Set the chosen Plugin ENS domain (in step 2) to `NETWORK_PLUGIN_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_PLUGIN_ENS_DOMAIN`)
-- [ ] Set the subdomain to be used of the managing DAO to `MANAGINGDAO_SUBDOMAIN` in `.env`. If you want to use `management.dao.eth` put only `management`
-- [ ] Set the multisig members of the managing DAO as a comma (`,`) separated list to `MANAGINGDAO_MULTISIG_APPROVERS` in `.env`
-- [ ] Set the amount of minimum approvals the managing DAO needs to `MANAGINGDAO_MULTISIG_MINAPPROVALS` in `.env`
-- [ ] If new plugin builds are released
-  - [ ] Double-check that the build- and release-metadata is published correctly by the deploy script and contracts
+- [ ] Go to `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
-## Deployment
+  If your chain doesn’t support contract verification:
 
-To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `yarn deploy --network mainnet`)
+  - Make sure that whatever custom network you add into this file, its `deploy` key looks exactly: <br>
+    `"deploy": ["./deploy/new"]`
 
-## After-Deployment
+  If your chain supports contract verification:
 
-### Configuration updates
+  - set `deploy` key such as: <br>
+    `"deploy": ["./deploy/new", "./deploy/verification"]` .
+    Not only that, you will need to provide the API_KEY or rpc url for contract verification, depending on the chain. Follow the guide https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify in such case.
 
-- [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
-- [ ] Update `active_contracts.json` with the new deployed addresses
-- [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
-- [ ] Add the managing DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGINGDAO_MULTISIG`
+- [ ] Management DAO is the dao that will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its values as you wish. This is deployed to the IPFS and its cid is stored in the managing dao so users can get information about what this managing dao does.
+- [ ] Ensure to add `ETH_KEY` in the `.env` which is your private key that will be used to deploy all the contracts. Example:
+  ```jsx
+  ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` suffix
+  ```
+- [ ] Our contracts use ENS, so it’s important that you safely add the following ENS names in the packages/contracts/.env file. <br>
 
-### Verification
+  - `NETWORK_DAO_ENS_DOMAIN`
+  - `NETWORK_PLUGIN_ENS_DOMAIN`
 
-- [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
-- [ ] Wait for the deployment script finishing verification
-- [ ] Go to the blockchain explorer and verify that each address is verified
-  - [ ] If it is not try to verfiy it with `npx hardhat verify --network NETWORK ADDRESS CONTRUCTOR-ARGS`. More infos on how to use this command can be found here: [https://hardhat.org/hardhat-runner/docs/guides/verifying](https://hardhat.org/hardhat-runner/docs/guides/verifying)
-  - [ ] If it is a proxy try to activate the blockchain explorer's proxy feature
-  - [ ] If the proxies are not verified with the `Similar Match Source Code` feature
-    - [ ] Verify one of the proxies
-    - [ ] Check if the other proxies are now verified with `Similar Match Source Code`
-  - [ ] If it is a `PluginSetup`, check that the implementation is verified.
+    NOTE that `NETWORK` must be replaced to the network name you’re trying to deploy to.
+    Example would be:
 
-### Configurations
+    ```jsx
+    SEPOLIA_DAO_ENS_DOMAIN = testdao.eth;
+    SEPOLIA_PLUGIN_ENS_DOMAIN = testplugin.eth;
+    ```
 
-- [ ] Check that all managing DAO signers are members of the managing DAO multisig and no one else.
-- [ ] Check if the managing DAO is set in the `DAO_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO is set in the `Plugin_ENSSubdomainRegistrar`
-- [ ] Check if the managing DAO is set in the `DAORegistry`
-- [ ] Check if the `DAO_ENSSubdomainRegistrar` is set in the `DAORegistry`
-- [ ] Check if the managing DAO set in the `PluginRepoRegistry`
-- [ ] Check if the `Plugin_ENSSubdomainRegistrar` is set in the `PluginRepoRegistry`
-- [ ] Check if the `PluginRepoRegistry` is set in the `PluginRepoFactory`
-- [ ] Check if the `PluginRepoRegistry` is set in the `PluginSetupProcessor`
-- [ ] Check if the `DAORegistry` is set in the `DAOFactory`
-- [ ] Check if the `PluginSetupProcessor` is set in the `DAOFactory`
-- [ ] Check that the versions (and eventual `PlaceholderSetup` builds) are published correctly in the `token-voting-repo`, `address-list-voting-repo`, `multisig-repo`, and `admin-repo` and are synchronized across all supported networks.
+    Make sure domains end up with domain suffix, such as .eth or .com or any other suffix that ENS supports).
 
-### Permissions
+  - If the chain you’re deploying to already has official ENS registry, then follow the below rules. <br>
+    - **IMPORTANT 1: The ENS domain(ex: testdao.eth and testplugin.eth**) must be owned by the deployer address, otherwise the script will fail miserably, so make sure that whatever domains you add, deployer owns those before running the deploy script. <br>
+    - **IMPORTANT 2:** Note that if you created the domains through ENS App website, that means they will be owned by a ENS wrapper which would also cause our script to fail, so make sure to go to ens app and click `unwrap` for each of these domains. `unwrap` can be found here - [https://app.ens.domains/morpheusplugin.eth?tab=more](https://app.ens.domains/morpheusplugin3.eth?tab=more)
+  - If the chain you’re deploying to doesn’t have the ENS registry, then: <br>
+    - The script will deploy ENS Registry and Resolver contracts. In this scenario, the domains don’t need to be owned by deployer and the domain and also .eth domain itself both get transferred to the managing dao. E.x: If you set a domain such as “test.eth”, managing dao will become the owner of both “test.eth” and “.eth”.
+      Every dao and plugin-repos(not plugins, but plugin-repos) that will be deployed by developers and users through your framework will automatically get ENS record such as:
+      daos will get: `dao_name.testdao.eth => daoAddress`
+      plugin-repos will get: `plugin_repo_name.testplugin.eth => pluginRepoAddress`
+      So basically, users’ domains are registered under your main domains.
 
-- [ ] Check that the deployer has not the ROOT permission on the managing DAO
-- [ ] Check if `DAO_ENSSubdomainRegistrar` is approved for all for the DAO' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `DAO_ENSSubdomainRegistrar` as the operator.
-- [ ] Check if `Plugin_ENSSubdomainRegistrar` is approved for all for the plugin' ENS domain. Call `isApprovedForAll` on the ENS registry with the managing DAO as the owner and the `Plugin_ENSSubdomainRegistrar` as the operator.
-- [ ] Check if the `DAORegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `DAO_ENSSubdomainRegistrar`
-- [ ] Check if the `PluginRepoRegistry` has `REGISTER_ENS_SUBDOMAIN_PERMISSION` on `Plugin_ENSSubdomainRegistrar`
-- [ ] Check if the `DAOFactory` has `REGISTER_DAO_PERMISSION` on `DAORegistry`
-- [ ] Check if the `PluginRepoFactory` has `REGISTER_PLUGIN_REPO_PERMISSION` on `PluginRepoRegistry`
+- [ ] The last thing is to add `MANAGINGDAO_SUBDOMAIN` in the packages/contracts/.env file as well. This will be the ENS name that your managing dao will get. Make sure to NOT add any suffix. <br>
+      Ex: your managing dao would get: `management.testdao.eth` ens name.
 
-### Packages
+```jsx
+MANAGINGDAO_SUBDOMAIN = management;
+```
 
-- [ ] Publish a new version of `@aragon/osx-artifacts` (`./packages/contracts`) to NPM
-- [ ] Publish a new version of `@aragon/osx` (`./packages/contracts/src`) to NPM
-- [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts-ethers`) to NPM
-- [ ] Update the changelog with the new version
+---
 
-### Subgraph
+Once all details are correctly set:
 
-- [ ] Update `packages/subgraph/manifest/data/NETWORK.json` where `NETWORK` is replaced with the deployed network with the new contract addresses. If the file doesn't exist create a new one.
-- [ ] Update the version in `packages/subgraph/package.json`
-- [ ] Update `packages/subgraph/.env` with the correct values
-  - [ ] set `NETWORK_NAME` to the deployed network
-  - [ ] set `SUBGRAPH_NAME` to `osx`
-  - [ ] set `GRAPH_KEY` with the value obtained from the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
-  - [ ] set the `SUBGRAPH_VERSION` to the same value as in `packages/subgraph/package.json`
-- [ ] Run `yarn manifest` in `packages/subgraph` to generate the manifest
-- [ ] Run `yarn build` in `packages/subgraph` to build the subgraph
-- [ ] Run `yarn test` in `packages/subgraph` to test the subgraph
-- [ ] Run `yarn deploy` in `packages/subgraph` to deploy the subgraph
-- [ ] Test the new deployed subgraph with the frontend team
-- [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
+run `yarn deploy --network NETWORK` in `packages/contracts` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `yarn deploy --network mainnet`).
 
-## Appendix
-
-- Changing the owner of the chosen ENS domains will also revoke the permissions of the `DAO_ENSSubdomainRegistrar` and `Plugin_ENSSubdomainRegistrar`. Therefore if the ownership gets transfered, restore the approval for these 2 contracts.
+- NOTE that after the script is run and finished, deployer will be the only one, having `EXECUTE_PERMISSION` on your managing dao. This allows you to deploy/install plugin separately, but note that the same deployer's private key must be used for the plugin deployment/installation. After the plugin is installed, it's important to revoke `EXECUTE_PERMISSION` on the deployer.
+- In case the script is failed in the middle, try to rerun it again, in which case, it won’t start deploying contracts from scratch, but re-use already deployed contracts.
+- If everything worked smoothly, all the deployed contracts' addresses can be found in the `packages/contracts/deployed_contracts.json`.

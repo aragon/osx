@@ -1,8 +1,3 @@
-import chai, {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
 import {
   DAO,
   TestERC20,
@@ -23,14 +18,9 @@ import {
   IProtocolVersion__factory,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
-
-import {
-  getProtocolVersion,
-  ozUpgradeCheckManagingContract,
-} from '../../test-utils/uups-upgradeable';
+import {ExecutedEvent} from '../../../typechain/DAO';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
-
 import {
   getActions,
   getERC1155TransferAction,
@@ -38,16 +28,22 @@ import {
   getERC721TransferAction,
   TOKEN_INTERFACE_IDS,
 } from '../../test-utils/dao';
-
-import {getInterfaceID} from '../../test-utils/interfaces';
-import {OZ_ERRORS} from '../../test-utils/error';
-import {smock} from '@defi-wonderland/smock';
-import {deployWithProxy} from '../../test-utils/proxy';
-import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {ExecutedEvent} from '../../../typechain/DAO';
+import {OZ_ERRORS} from '../../test-utils/error';
+import {getInterfaceID} from '../../test-utils/interfaces';
+import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {deployWithProxy} from '../../test-utils/proxy';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagingContract,
+} from '../../test-utils/uups-upgradeable';
+import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
+import {smock} from '@defi-wonderland/smock';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import chai, {expect} from 'chai';
+import {ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 
 chai.use(smock.matchers);
 
