@@ -15,7 +15,7 @@ on:
       - '.github/workflows/subgraph-deploy.yaml'
 
 jobs:
-  update_docs:
+  update_subgraph_docs:
     permissions: read-all
     runs-on: ubuntu-latest
     steps:
