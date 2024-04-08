@@ -103,11 +103,6 @@ describe('Managing DAO', function () {
 
     const {deployer} = await getNamedAccounts();
     ownerAddress = deployer;
-
-    // multisig = Multisig__factory.connect(
-    //   hre.managingDAOMultisigPluginAddress,
-    //   signers[0]
-    // );
   });
 
   it('should have deployments', async function () {
