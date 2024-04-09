@@ -10,6 +10,7 @@ on:
     paths:
       - 'packages/contracts/**'
       - '.github/workflows/contract-*.yml'
+  workflow_dispatch:
 
 env:
   working-directory: packages/contracts

@@ -12,6 +12,7 @@ on:
       - 'packages/subgraph/**'
       - '.github/workflows/subgraph-*.yml'
       - 'packages/contracts/**'
+  workflow_dispatch:
 
 env:
   working-directory: packages/subgraph
