@@ -1,13 +1,3 @@
-# This is just for generating introspection query purposes.
-" Byte array, represented as a hexadecimal string. Commonly used for Ethereum hashes and addresses. "
-scalar Bytes
-" Large integers. Used for Ethereum's `uint32`, `int64`, `uint64`, ..., `uint25`6 types. Note: Everything below `uint32`, such as `int32`, `uint24` or `int8` is represented as `i32`. "
-scalar BigInt
-" Query type, required to generate introspection query. "
-type Query @entity {
-  id: ID!
-}
-
 # Types
 
 #############################

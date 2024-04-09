@@ -24,10 +24,6 @@ echo ''
 echo '> Building subgraph'
 ./scripts/build-subgraph.sh
 
-if [ "$NETWORK_NAME" == 'localhost' ]
-then
-  NETWORK_NAME='goerli'
-fi
 
 # Prepare subgraph name
 FULLNAME=$SUBGRAPH_NAME-$NETWORK_NAME
