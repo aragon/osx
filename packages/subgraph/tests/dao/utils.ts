@@ -437,11 +437,16 @@ export function encodeWithFunctionSelector(
   // when the emitted event contains at least 1 dynamic type.
   let index = isDynamic == true ? 66 : 2;
 
-  let calldata = ethereum
-    .encode(ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tuple)))!
-    .toHexString()
-    .substring(index);
+  let encoded = ethereum.encode(
+    ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tuple))
+  );
 
+  if (!encoded)
+    throw new Error(
+      'encodeWithFunctionSelector::Could not encode ethereum tuple'
+    );
+
+  let calldata = encoded.toHexString().substring(index);
   let functionData = funcSelector.concat(calldata);
 
   return Bytes.fromHexString(functionData);

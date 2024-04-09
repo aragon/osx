@@ -62,7 +62,7 @@ import {
   createERC20TokenCalls,
   createERC1155TokenCalls,
 } from '@aragon/osx-commons-subgraph';
-import {ethereum, Bytes, Address, BigInt, log} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   describe,
   test,

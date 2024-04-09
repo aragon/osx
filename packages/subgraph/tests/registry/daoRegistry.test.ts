@@ -74,6 +74,9 @@ describe('DAORegistry', () => {
     );
 
     const daoEntity = Dao.load(denylistedEntityId);
-    assert.assertNull(daoEntity!.subdomain);
+
+    if (!daoEntity) throw new Error('daoEntity is null');
+
+    assert.assertNull(daoEntity.subdomain);
   });
 });
