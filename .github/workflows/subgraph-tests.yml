@@ -7,6 +7,11 @@ on:
       - 'packages/subgraph/**'
       - '.github/workflows/subgraph-*.yml'
       - 'packages/contracts/**'
+  pull_request:
+    paths:
+      - 'packages/subgraph/**'
+      - '.github/workflows/subgraph-*.yml'
+      - 'packages/contracts/**'
 
 env:
   working-directory: packages/subgraph

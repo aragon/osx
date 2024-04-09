@@ -6,6 +6,10 @@ on:
     paths:
       - 'packages/contracts/**'
       - '.github/workflows/contract-*.yml'
+  pull_request:
+    paths:
+      - 'packages/contracts/**'
+      - '.github/workflows/contract-*.yml'
 
 env:
   working-directory: packages/contracts
