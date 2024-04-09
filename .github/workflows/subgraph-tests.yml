@@ -1,6 +1,8 @@
 name: Subgraph Tests
 on:
   push:
+    branches:
+      - main
     paths:
       - 'packages/subgraph/**'
       - '.github/workflows/subgraph-*.yml'
