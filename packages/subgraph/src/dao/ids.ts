@@ -6,29 +6,29 @@ import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 /**
  * TODO move to osx-commons
- * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
+ * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @returns A string representing a deterministic identifier for the transaction action entity.
  * This should be unique but due to callId being passed by the user, it is not guaranteed.
  * Clients can use this ID to filter to specific executions, but should check for duplicates.
  */
 export function generateTransactionActionsDeterministicId(
-  daoAddress: Address,
   caller: Address,
+  daoAddress: Address,
   callId: Bytes
 ): string {
   return [
-    daoAddress.toHexString(),
     caller.toHexString(),
+    daoAddress.toHexString(),
     callId.toHexString(),
   ].join('_');
 }
 
 /**
  * TODO move to osx-commons to replace the TransactionActionsProposalEntityId
- * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
+ * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
  * @param txHash - The hash of the transaction.
  * @param logIndex - The index of the log.
@@ -37,14 +37,14 @@ export function generateTransactionActionsDeterministicId(
  * to inclusion of Tx data.
  */
 export function generateTransactionActionsEntityId(
-  daoAddress: Address,
   caller: Address,
+  daoAddress: Address,
   callId: Bytes,
   txHash: Bytes,
   logIndex: BigInt
 ): string {
   return [
-    generateTransactionActionsDeterministicId(daoAddress, caller, callId),
+    generateTransactionActionsDeterministicId(caller, daoAddress, callId),
     generateEntityIdFromBytes(txHash),
     generateEntityIdFromBigInt(logIndex),
   ].join('_');
@@ -52,8 +52,8 @@ export function generateTransactionActionsEntityId(
 
 /**
  * TODO move to osx-commons
- * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
+ * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @param actionIndex - The index of the action within the call
  * @returns A string representing a deterministic identifier for the action entity.
@@ -61,14 +61,14 @@ export function generateTransactionActionsEntityId(
  * Clients can use this ID to filter to specific executions, but should check for duplicates.
  */
 export function generateDeterministicActionId(
-  daoAddress: Address,
   caller: Address,
+  daoAddress: Address,
   callId: Bytes,
   actionIndex: i32
 ): string {
   return [
-    daoAddress.toHexString(),
     caller.toHexString(),
+    daoAddress.toHexString(),
     callId.toHexString(),
     actionIndex.toString(),
   ].join('_');
@@ -76,8 +76,8 @@ export function generateDeterministicActionId(
 
 /**
  * TODO decide whether to move to OSX commons
- * @param daoAddress - The address of the DAO in which the actions were executed
  * @param caller - The address (plugin or otherwise) that called `execute`
+ * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @param actionIndex - The index of the action within the call
  * @param txHash - The hash of the transaction.
@@ -87,15 +87,15 @@ export function generateDeterministicActionId(
  * to inclusion of Tx data.
  */
 export function generateTransactionActionEntityId(
-  daoAddress: Address,
   caller: Address,
+  daoAddress: Address,
   callId: Bytes,
   actionIndex: i32,
   txHash: Bytes,
   logIndex: BigInt
 ): string {
   return [
-    generateDeterministicActionId(daoAddress, caller, callId, actionIndex),
+    generateDeterministicActionId(caller, daoAddress, callId, actionIndex),
     txHash.toHexString(),
     logIndex.toString(),
   ].join('_');

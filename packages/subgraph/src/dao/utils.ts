@@ -93,7 +93,7 @@ export function handleAction<
     return;
   }
 
-  checkForAndHandleTokenTransfers(action, transactionActionsId, index, event);
+  handleTokenTransfers(action, transactionActionsId, index, event);
 }
 
 function getOrCreateActionEntity<
@@ -106,14 +106,14 @@ function getOrCreateActionEntity<
   event: R
 ): TransactionAction {
   const deterministicActionId = generateDeterministicActionId(
-    event.address,
     event.params.actor,
+    event.address,
     event.params.callId,
     index
   );
   const actionId = generateTransactionActionEntityId(
-    event.address,
     event.params.actor,
+    event.address,
     event.params.callId,
     index,
     event.transaction.hash,
@@ -144,7 +144,7 @@ function getOrCreateActionEntity<
  * @param actionIndex the index number of the action inside the executed batch
  * @param event the Executed event emitting the event
  */
-function checkForAndHandleTokenTransfers<
+function handleTokenTransfers<
   T extends ExecutedActionsStruct,
   R extends Executed
 >(action: T, transactionActionsId: string, actionIndex: i32, event: R): void {

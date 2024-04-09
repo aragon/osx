@@ -86,8 +86,8 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 
 export function handleExecuted(event: Executed): void {
   const transactionActionsEntityId = generateTransactionActionsEntityId(
-    event.address /* daoAddress */,
     event.params.actor /* caller */,
+    event.address /* daoAddress */,
     event.params.callId,
     event.transaction.hash,
     event.logIndex
@@ -107,8 +107,8 @@ export function handleExecuted(event: Executed): void {
   // proposal entity in order to group its actions together.
   if (!wasUpdated) {
     const deterministicId = generateTransactionActionsDeterministicId(
-      event.address /* daoAddress */,
       event.params.actor /* caller */,
+      event.address /* daoAddress */,
       event.params.callId
     );
 

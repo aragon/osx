@@ -12,16 +12,16 @@ import {
 
 export function handleExecuted(event: Executed): void {
   let transactionActionsEntityId = generateTransactionActionsEntityId(
-    event.address,
     event.params.actor,
+    event.address,
     event.params.callId,
     event.transaction.hash,
     event.transactionLogIndex
   );
 
   let deterministicId = generateTransactionActionsDeterministicId(
-    event.address,
     event.params.actor,
+    event.address,
     event.params.callId
   );
 

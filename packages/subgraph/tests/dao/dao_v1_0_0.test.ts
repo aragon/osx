@@ -863,14 +863,14 @@ describe('handleExecuted', () => {
     handleExecuted(event);
 
     let deterministicId = generateTransactionActionsDeterministicId(
-      event.address,
       event.params.actor,
+      event.address,
       event.params.callId
     );
 
     let transactionActionsEntityId = generateTransactionActionsEntityId(
-      event.address,
       event.params.actor,
+      event.address,
       event.params.callId,
       event.transaction.hash,
       event.transactionLogIndex
@@ -901,14 +901,14 @@ describe('handleExecuted', () => {
 
     for (let i = 0; i < event.params.actions.length; i++) {
       const deterministicActionId = generateDeterministicActionId(
-        event.address,
         event.params.actor,
+        event.address,
         event.params.callId,
         i
       );
       let actionEntityId = generateTransactionActionEntityId(
-        event.address,
         event.params.actor,
+        event.address,
         event.params.callId,
         i,
         event.transaction.hash,
@@ -944,6 +944,105 @@ describe('handleExecuted', () => {
     }
   });
 
+  test('Duplicate deterministic ids will point to different proposals and actions', () => {
+    let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
+    let selector = '0x11111111';
+    let execResult = Bytes.fromHexString('0x11');
+    let failureMap = '2';
+
+    let event0 = createExecutedEvent(
+      [tuple],
+      [selector],
+      false,
+      [execResult],
+      failureMap
+    );
+
+    let event1 = createExecutedEvent(
+      [tuple],
+      [selector],
+      false,
+      [execResult],
+      failureMap
+    );
+
+    // increment the log index to make sure the transaction actions are different
+    // for the two events even if they are in the same transaction
+    event1.logIndex = BigInt.fromI32(1);
+
+    let deterministicId = generateTransactionActionsDeterministicId(
+      event0.params.actor,
+      event0.address,
+      event0.params.callId
+    );
+
+    let transactionActionsEntityId = generateTransactionActionsEntityId(
+      event0.params.actor,
+      event0.address,
+      event0.params.callId,
+      event0.transaction.hash,
+      event0.transactionLogIndex
+    );
+
+    let deterministicActionId = generateDeterministicActionId(
+      event0.params.actor,
+      event0.address,
+      event0.params.callId,
+      0
+    );
+    let actionEntityId = generateTransactionActionEntityId(
+      event0.params.actor,
+      event0.address,
+      event0.params.callId,
+      0,
+      event0.transaction.hash,
+      event0.transactionLogIndex
+    );
+
+    assert.entityCount('TransactionAction', 0);
+    assert.entityCount('TransactionActions', 0);
+
+    handleExecuted(event0);
+    handleExecuted(event1);
+
+    // The action and proposal count should be the same.
+    assert.entityCount('TransactionAction', 2);
+    assert.entityCount('TransactionActions', 2);
+
+    // eq('TransactionAction', actionEntityId, 'id', actionEntityId);
+    // eq(
+    //   'TransactionAction',
+    //   actionEntityId,
+    //   'execResult',
+    //   execResult.toHexString()
+    // );
+
+    // eq(
+    //   'TransactionActions',
+    //   transactionActionsEntityId,
+    //   'id',
+    //   transactionActionsEntityId
+    // );
+    // eq(
+    //   'TransactionActions',
+    //   transactionActionsEntityId,
+    //   'failureMap',
+    //   failureMap
+    // );
+    // eq(
+    //   'TransactionAction',
+    //   actionEntityId,
+    //   'deterministicId',
+    //   deterministicActionId
+    // );
+    // eq(
+    //   'TransactionAction',
+    //   actionEntityId,
+    //   'transactionActions',
+    //   transactionActionsEntityId
+    // );
+  });
+
   test('successfuly updates action and proposal if found', () => {
     let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
     let selector = '0x11111111';
@@ -959,28 +1058,28 @@ describe('handleExecuted', () => {
     );
 
     let deterministicId = generateTransactionActionsDeterministicId(
-      event.address,
       event.params.actor,
+      event.address,
       event.params.callId
     );
 
     let transactionActionsEntityId = generateTransactionActionsEntityId(
-      event.address,
       event.params.actor,
+      event.address,
       event.params.callId,
       event.transaction.hash,
       event.transactionLogIndex
     );
 
     let deterministicActionId = generateDeterministicActionId(
-      event.address,
       event.params.actor,
+      event.address,
       event.params.callId,
       0
     );
     let actionEntityId = generateTransactionActionEntityId(
-      event.address,
       event.params.actor,
+      event.address,
       event.params.callId,
       0,
       event.transaction.hash,
@@ -1097,8 +1196,8 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
         let transactionActionsEntityId = generateTransactionActionsEntityId(
-          event.address,
           event.params.actor,
+          event.address,
           event.params.callId,
           event.transaction.hash,
           event.transactionLogIndex
@@ -1218,8 +1317,8 @@ describe('handleExecuted', () => {
         handleExecuted(event);
 
         let transactionActionsEntityId = generateTransactionActionsEntityId(
-          event.address,
           event.params.actor,
+          event.address,
           event.params.callId,
           event.transaction.hash,
           event.transactionLogIndex
@@ -1363,8 +1462,8 @@ describe('handleExecuted', () => {
         handleExecuted(event);
 
         let transactionActionsEntityId = generateTransactionActionsEntityId(
-          event.address,
           event.params.actor,
+          event.address,
           event.params.callId,
           event.transaction.hash,
           event.transactionLogIndex
@@ -1464,8 +1563,8 @@ describe('handleExecuted', () => {
         handleExecuted(event);
 
         let transactionActionsEntityId = generateTransactionActionsEntityId(
-          event.address,
           event.params.actor,
+          event.address,
           event.params.callId,
           event.transaction.hash,
           event.transactionLogIndex
