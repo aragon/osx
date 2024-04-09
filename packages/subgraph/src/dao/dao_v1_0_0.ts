@@ -93,42 +93,24 @@ export function handleExecuted(event: Executed): void {
     event.transactionLogIndex
   );
 
-  // Not an effective solution, until each plugin has
-  // its own subgraph separately.
-  // If proposal found, update its failureMap.
-  const wasUpdated = updateProposalWithFailureMap(
-    transactionActionsEntityId,
-    event.params.failureMap
+  const deterministicId = generateTransactionActionsDeterministicId(
+    event.params.actor /* caller */,
+    event.address /* daoAddress */,
+    event.params.callId
   );
 
-  // If not updated, proposal wasn't found which means,
-  // it was called by the address that
-  // Subgraph doesn't index, in which case, we still create
-  // proposal entity in order to group its actions together.
-  if (!wasUpdated) {
-    const deterministicId = generateTransactionActionsDeterministicId(
-      event.params.actor /* caller */,
-      event.address /* daoAddress */,
-      event.params.callId
-    );
-
-    const transactionActions = new TransactionActions(
-      transactionActionsEntityId
-    );
-    transactionActions.dao = generateDaoEntityId(event.address);
-    transactionActions.deterministicId = deterministicId;
-    transactionActions.createdAt = event.block.timestamp;
-    transactionActions.endDate = event.block.timestamp;
-    transactionActions.startDate = event.block.timestamp;
-    transactionActions.creator = event.params.actor;
-    transactionActions.executionTxHash = event.transaction.hash;
-    // Since DAO v1.0.0 doesn't emit allowFailureMap by mistake, we got no choice now.
-    // In such case, `allowFailureMap` shouldn't be fully trusted.
-    transactionActions.allowFailureMap = BigInt.zero();
-    transactionActions.executed = true;
-    transactionActions.failureMap = event.params.failureMap;
-    transactionActions.save();
-  }
+  const transactionActions = new TransactionActions(transactionActionsEntityId);
+  transactionActions.dao = generateDaoEntityId(event.address);
+  transactionActions.deterministicId = deterministicId;
+  transactionActions.createdAt = event.block.timestamp;
+  transactionActions.creator = event.params.actor;
+  transactionActions.executionTxHash = event.transaction.hash;
+  // Since DAO v1.0.0 doesn't emit allowFailureMap by mistake, we got no choice now.
+  // In such case, `allowFailureMap` shouldn't be fully trusted.
+  transactionActions.allowFailureMap = BigInt.zero();
+  transactionActions.executed = true;
+  transactionActions.failureMap = event.params.failureMap;
+  transactionActions.save();
 
   let actions = event.params.actions;
 

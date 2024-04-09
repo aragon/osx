@@ -621,7 +621,7 @@ interface IPlugin {
 A container for actions executed in batches by the DAO's `execute` function.
 TODO: Decide if renaming "ExecutionActions" is desirable
 """
-type TransactionActions @entity {
+type TransactionActions @entity(immutable: true) {
   id: ID!
   # ID without Tx information
   deterministicId: String!
@@ -633,15 +633,13 @@ type TransactionActions @entity {
   failureMap: BigInt
   executed: Boolean!
   createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
   executionTxHash: Bytes
 }
 
 """
 Temporary entity until Actions have been removed as part of the split
 """
-type TransactionAction @entity {
+type TransactionAction @entity(immutable: true) {
   id: ID!
   # ID without Tx information
   deterministicId: String!

@@ -30,8 +30,6 @@ export function handleExecuted(event: Executed): void {
   transactionActions.dao = generateDaoEntityId(event.address);
   transactionActions.deterministicId = deterministicId;
   transactionActions.createdAt = event.block.timestamp;
-  transactionActions.endDate = event.block.timestamp;
-  transactionActions.startDate = event.block.timestamp;
   transactionActions.creator = event.params.actor;
   transactionActions.executionTxHash = event.transaction.hash;
   transactionActions.allowFailureMap = event.params.allowFailureMap;

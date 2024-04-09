@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Split
 
+- Renamed Proposal to `TransactionActions` and made it immutable
 - Added deterministicID as field to `TransactionActions` and `TransactionAction`
-- Temp entity `TransactionAction` created while plugins (with actions) still live inside OSx. Includes `deterministicId` and swaps `proposal` foreign key in place of `transactionAction`
+- Temp immutable entity `TransactionAction` created while plugins (with actions) still live inside OSx. Includes `deterministicId` and swaps `proposal` foreign key in place of `transactionAction`
 - The `deterministicId` and `Id` fields now include the `daoAddress` inside executeActions
 - Renamed the `handleTokenTransfer` inside the `handleAction` to better reflect the fact that it checks _all_ actions.
 - Renamed `proposal` to `transactionActions` in ERC20Transfer, ERC721Transfer, ERC1155Transfer and NativeTransfer
+- Removed `startDate` and `endDate` from `TransactionActions`
 
 ## 1.4.1
 
