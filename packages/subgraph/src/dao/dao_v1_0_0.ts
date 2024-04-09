@@ -127,7 +127,7 @@ export function handleExecuted(event: Executed): void {
     transactionActions.startDate = event.block.timestamp;
     transactionActions.creator = event.params.actor;
     transactionActions.executionTxHash = event.transaction.hash;
-    // Since DAO doesn't emit allowFailureMap by mistake, we got no choice now.
+    // Since DAO v1.0.0 doesn't emit allowFailureMap by mistake, we got no choice now.
     // In such case, `allowFailureMap` shouldn't be fully trusted.
     transactionActions.allowFailureMap = BigInt.zero();
     transactionActions.executed = true;
