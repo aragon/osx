@@ -6,10 +6,7 @@ pragma solidity ^0.8.8;
 import {PluginUUPSUpgradeable} from "@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
-/// @notice A mock upgradeable plugin to be deployed via the UUPS proxy pattern.
-/// v1.1 (Release 1, Build 1)
-/// @dev DO NOT USE IN PRODUCTION!
-contract PluginUUPSUpgradeableMockBuild1 is PluginUUPSUpgradeable {
+contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
     uint256 public state1;
 
     function initialize(IDAO _dao) external initializer {
@@ -18,10 +15,7 @@ contract PluginUUPSUpgradeableMockBuild1 is PluginUUPSUpgradeable {
     }
 }
 
-/// @notice A mock upgradeable plugin to be deployed via the UUPS proxy pattern.
-/// v1.1 (Release 1, Build 2)
-/// @dev DO NOT USE IN PRODUCTION!
-contract PluginUUPSUpgradeableMockBuild2 is PluginUUPSUpgradeable {
+contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeable {
     uint256 public state1;
     uint256 public state2;
 
@@ -31,17 +25,12 @@ contract PluginUUPSUpgradeableMockBuild2 is PluginUUPSUpgradeable {
         state2 = 2;
     }
 
-    function initializeFrom(uint16 _previousBuild) external reinitializer(2) {
-        if (_previousBuild < 2) {
-            state2 = 2;
-        }
+    function initializeV1toV2() external reinitializer(2) {
+        state2 = 2;
     }
 }
 
-/// @notice A mock upgradeable plugin to be deployed via the UUPS proxy pattern.
-/// v1.1 (Release 1, Build 3)
-/// @dev DO NOT USE IN PRODUCTION!
-contract PluginUUPSUpgradeableMockBuild3 is PluginUUPSUpgradeable {
+contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeable {
     uint256 public state1;
     uint256 public state2;
     uint256 public state3;
@@ -53,23 +42,12 @@ contract PluginUUPSUpgradeableMockBuild3 is PluginUUPSUpgradeable {
         state3 = 3;
     }
 
-    function initializeFrom(uint16 _previousBuild) external reinitializer(3) {
-        if (_previousBuild < 2) {
-            state2 = 2;
-        }
-        if (_previousBuild < 3) {
-            state3 = 3;
-        }
+    function initializeV1toV3() external reinitializer(3) {
+        state2 = 2;
+        state3 = 3;
     }
-}
 
-/// @notice A mock upgradeable plugin missing an initializer function.
-/// @dev DO NOT USE IN PRODUCTION!
-contract PluginUUPSUpgradeableMockBad is PluginUUPSUpgradeable {
-    uint256 public state1;
-
-    function notAnInitializer(IDAO _dao) external {
-        __PluginUUPSUpgradeable_init(_dao);
-        state1 = 1;
+    function initializeV2toV3() external reinitializer(3) {
+        state3 = 3;
     }
 }
