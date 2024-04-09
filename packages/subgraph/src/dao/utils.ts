@@ -140,7 +140,7 @@ function getOrCreateActionEntity<
  * Determines if the action is an ERC20, ERC721 or ERC1155 transfer and calls the appropriate handler if so.
  * Does nothing if the action is not a recognised token transfer.
  * @param action the action to validate
- * @param transactionActionsId TODO: change this
+ * @param transactionActionsId the id container for a single set of executed actions
  * @param actionIndex the index number of the action inside the executed batch
  * @param event the Executed event emitting the event
  */
