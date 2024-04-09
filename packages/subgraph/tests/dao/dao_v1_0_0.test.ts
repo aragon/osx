@@ -967,37 +967,9 @@ describe('handleExecuted', () => {
     );
 
     // increment the log index to make sure the transaction actions are different
-    // for the two events even if they are in the same transaction
-    event1.logIndex = BigInt.fromI32(1);
-
-    let deterministicId = generateTransactionActionsDeterministicId(
-      event0.params.actor,
-      event0.address,
-      event0.params.callId
-    );
-
-    let transactionActionsEntityId = generateTransactionActionsEntityId(
-      event0.params.actor,
-      event0.address,
-      event0.params.callId,
-      event0.transaction.hash,
-      event0.transactionLogIndex
-    );
-
-    let deterministicActionId = generateDeterministicActionId(
-      event0.params.actor,
-      event0.address,
-      event0.params.callId,
-      0
-    );
-    let actionEntityId = generateTransactionActionEntityId(
-      event0.params.actor,
-      event0.address,
-      event0.params.callId,
-      0,
-      event0.transaction.hash,
-      event0.transactionLogIndex
-    );
+    // for the two events even if they are in the same block
+    event1.logIndex = event1.logIndex.plus(BigInt.fromI32(1));
+    event1.transactionLogIndex = event1.logIndex;
 
     assert.entityCount('TransactionAction', 0);
     assert.entityCount('TransactionActions', 0);
@@ -1008,39 +980,6 @@ describe('handleExecuted', () => {
     // The action and proposal count should be the same.
     assert.entityCount('TransactionAction', 2);
     assert.entityCount('TransactionActions', 2);
-
-    // eq('TransactionAction', actionEntityId, 'id', actionEntityId);
-    // eq(
-    //   'TransactionAction',
-    //   actionEntityId,
-    //   'execResult',
-    //   execResult.toHexString()
-    // );
-
-    // eq(
-    //   'TransactionActions',
-    //   transactionActionsEntityId,
-    //   'id',
-    //   transactionActionsEntityId
-    // );
-    // eq(
-    //   'TransactionActions',
-    //   transactionActionsEntityId,
-    //   'failureMap',
-    //   failureMap
-    // );
-    // eq(
-    //   'TransactionAction',
-    //   actionEntityId,
-    //   'deterministicId',
-    //   deterministicActionId
-    // );
-    // eq(
-    //   'TransactionAction',
-    //   actionEntityId,
-    //   'transactionActions',
-    //   transactionActionsEntityId
-    // );
   });
 
   test('successfuly updates action and proposal if found', () => {

@@ -31,7 +31,8 @@ export function generateTransactionActionsDeterministicId(
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
  * @param txHash - The hash of the transaction.
- * @param logIndex - The index of the log.
+ * @param transactionLogIndex - The index of the log within the transaction.
+ * We don't need the logIndex because the Tx hash is unique enough.
  * @returns A string representing the unique identifier for the transaction action entity.
  * This will be globally unique to avoid data loss but cannot be known ahead of execution due
  * to inclusion of Tx data.
@@ -41,12 +42,12 @@ export function generateTransactionActionsEntityId(
   daoAddress: Address,
   callId: Bytes,
   txHash: Bytes,
-  logIndex: BigInt
+  transactionLogIndex: BigInt
 ): string {
   return [
     generateTransactionActionsDeterministicId(caller, daoAddress, callId),
     generateEntityIdFromBytes(txHash),
-    generateEntityIdFromBigInt(logIndex),
+    generateEntityIdFromBigInt(transactionLogIndex),
   ].join('_');
 }
 
@@ -81,7 +82,8 @@ export function generateDeterministicActionId(
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
  * @param actionIndex - The index of the action within the call
  * @param txHash - The hash of the transaction.
- * @param logIndex - The index of the log.
+ * @param transactionLogIndex - The index of the log within the transaction.
+ * We don't need the logIndex because the Tx hash is unique enough.
  * @returns A string representing the unique identifier for the  action entity.
  * This will be globally unique to avoid data loss but cannot be known ahead of execution due
  * to inclusion of Tx data.
@@ -92,11 +94,11 @@ export function generateTransactionActionEntityId(
   callId: Bytes,
   actionIndex: i32,
   txHash: Bytes,
-  logIndex: BigInt
+  transactionLogIndex: BigInt
 ): string {
   return [
     generateDeterministicActionId(caller, daoAddress, callId, actionIndex),
     txHash.toHexString(),
-    logIndex.toString(),
+    transactionLogIndex.toString(),
   ].join('_');
 }

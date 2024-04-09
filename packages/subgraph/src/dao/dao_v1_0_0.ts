@@ -35,7 +35,7 @@ import {
   generatePermissionEntityId,
   generateStandardCallbackEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
+import {BigInt, Bytes, log, store} from '@graphprotocol/graph-ts';
 import {
   generateTransactionActionsDeterministicId,
   generateTransactionActionsEntityId,
@@ -90,8 +90,13 @@ export function handleExecuted(event: Executed): void {
     event.address /* daoAddress */,
     event.params.callId,
     event.transaction.hash,
-    event.logIndex
+    event.transactionLogIndex
   );
+
+  log.info('Log index {} id {}', [
+    event.logIndex.toString(),
+    transactionActionsEntityId,
+  ]);
 
   // Not an effective solution, until each plugin has
   // its own subgraph separately.
