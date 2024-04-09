@@ -1,5 +1,5 @@
 import {
-  TransactionActions as TransactionActions,
+  TransactionActions,
   ERC721Balance,
   TransactionAction,
 } from '../../generated/schema';

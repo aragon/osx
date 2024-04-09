@@ -29,6 +29,10 @@ import {
   handleERC1155Received,
 } from '../utils/tokens/erc1155';
 import {handleNativeDeposit} from '../utils/tokens/eth';
+import {
+  generateTransactionActionsDeterministicId,
+  generateTransactionActionsEntityId,
+} from './ids';
 import {handleAction, updateProposalWithFailureMap} from './utils';
 import {
   generateDaoEntityId,
@@ -36,10 +40,6 @@ import {
   generateStandardCallbackEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
-import {
-  generateTransactionActionsDeterministicId,
-  generateTransactionActionsEntityId,
-} from './ids';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = generateDaoEntityId(event.address);
