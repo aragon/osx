@@ -1,7 +1,3 @@
-import {
-  generateEntityIdFromBigInt,
-  generateEntityIdFromBytes,
-} from '@aragon/osx-commons-subgraph';
 import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 /**
@@ -46,8 +42,8 @@ export function generateTransactionActionsEntityId(
 ): string {
   return [
     generateTransactionActionsDeterministicId(caller, daoAddress, callId),
-    generateEntityIdFromBytes(txHash),
-    generateEntityIdFromBigInt(transactionLogIndex),
+    txHash.toHexString(),
+    transactionLogIndex.toHexString(),
   ].join('_');
 }
 

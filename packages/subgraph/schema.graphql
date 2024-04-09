@@ -256,8 +256,8 @@ interface TokenTransfer {
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated Execution container on the DAO, if applicable. If deposited using the DAO `deposit` function then will be empty. "
+  transctionActions: TransactionActions
 
   " The hash of the transfer to track the transaction. "
   txHash: Bytes!
@@ -619,7 +619,6 @@ interface IPlugin {
 
 """
 A container for actions executed in batches by the DAO's `execute` function.
-TODO: Decide if renaming "ExecutionActions" is desirable
 """
 type TransactionActions @entity {
   id: ID!
