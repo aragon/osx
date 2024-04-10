@@ -1,8 +1,8 @@
+import {generateTransactionActionsEntityId} from '../src/dao/ids';
 import {
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {generateTransactionActionsEntityId} from '../src/dao/ids';
 import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
