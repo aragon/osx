@@ -120,18 +120,13 @@ function getOrCreateActionEntity<
     event.transactionLogIndex
   );
 
-  /// we shouldn't need to load the entity as it should be created each time
-  let entity = TransactionAction.load(actionId);
-
-  if (!entity) {
-    entity = new TransactionAction(actionId);
-    entity.deterministicId = deterministicActionId;
-    entity.to = action.to;
-    entity.value = action.value;
-    entity.data = action.data;
-    entity.transactionActions = transactionActionId;
-    entity.dao = generateDaoEntityId(event.address);
-  }
+  const entity = new TransactionAction(actionId);
+  entity.deterministicId = deterministicActionId;
+  entity.to = action.to;
+  entity.value = action.value;
+  entity.data = action.data;
+  entity.transactionActions = transactionActionId;
+  entity.dao = generateDaoEntityId(event.address);
 
   return entity;
 }

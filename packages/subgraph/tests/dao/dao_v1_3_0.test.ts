@@ -85,7 +85,7 @@ describe('handleExecuted', () => {
     clearStore();
   });
 
-  test('successfuly creates action and proposal if not found', () => {
+  test('successfuly creates action and transactionAction', () => {
     let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
     let selector = '0x11111111';
 
@@ -243,115 +243,6 @@ describe('handleExecuted', () => {
     // The action and proposal count should be the same.
     assert.entityCount('TransactionActions', 2);
     assert.entityCount('TransactionAction', 3);
-  });
-
-  test('successfuly updates action and proposal if found', () => {
-    let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
-    let selector = '0x11111111';
-    let execResult = Bytes.fromHexString('0x11');
-    let allowFailureMap = '2';
-    let failureMap = '2';
-
-    let event = createExecutedEvent(
-      [tuple],
-      [selector],
-      allowFailureMap,
-      false,
-      [execResult],
-      failureMap
-    );
-
-    let deterministicTransactionActionsId = generateDeterministicActionId(
-      event.params.actor,
-      event.address,
-      event.params.callId,
-      0
-    );
-
-    let transactionActionsEntityId = generateTransactionActionsEntityId(
-      event.params.actor,
-      event.address,
-      event.params.callId,
-      event.transaction.hash,
-      event.transactionLogIndex
-    );
-
-    let deterministicActionID = generateDeterministicActionId(
-      event.params.actor,
-      event.address,
-      event.params.callId,
-      0
-    );
-
-    let actionEntityId = generateTransactionActionEntityId(
-      event.params.actor,
-      event.address,
-      event.params.callId,
-      0,
-      event.transaction.hash,
-      event.transactionLogIndex
-    );
-    // create proposal
-    let transactionActions = new TransactionActions(transactionActionsEntityId);
-    transactionActions.dao = event.address.toHexString();
-    transactionActions.createdAt = event.block.timestamp;
-    transactionActions.deterministicId = deterministicTransactionActionsId;
-    transactionActions.endDate = event.block.timestamp;
-    transactionActions.startDate = event.block.timestamp;
-    transactionActions.allowFailureMap = BigInt.fromString(allowFailureMap);
-    transactionActions.creator = event.params.actor;
-    transactionActions.executionTxHash = event.transaction.hash;
-    transactionActions.executed = true;
-    transactionActions.save();
-
-    // create action
-    let action = new TransactionAction(actionEntityId);
-    action.to = Address.fromString(DAO_TOKEN_ADDRESS);
-    action.data = Bytes.fromHexString('0x');
-    action.value = BigInt.zero();
-    action.dao = event.address.toHexString();
-    action.transactionActions = transactionActions.id;
-    action.deterministicId = deterministicActionID;
-    action.save();
-
-    // Check that before `handleExecute`, execResults are empty
-    assert.entityCount('TransactionAction', 1);
-    assert.entityCount('TransactionActions', 1);
-    assert.assertTrue(action.execResult === null);
-    assert.assertTrue(transactionActions.failureMap === null);
-
-    handleExecuted(event);
-
-    // The TA and TAs count should be the same.
-    assert.entityCount('TransactionAction', 1);
-    assert.entityCount('TransactionActions', 1);
-
-    eq('TransactionAction', actionEntityId, 'id', actionEntityId);
-    eq(
-      'TransactionAction',
-      actionEntityId,
-      'execResult',
-      execResult.toHexString()
-    );
-
-    eq(
-      'TransactionActions',
-      transactionActionsEntityId,
-      'id',
-      transactionActionsEntityId
-    );
-    eq(
-      'TransactionActions',
-      transactionActionsEntityId,
-      'failureMap',
-      failureMap
-    );
-    eq(
-      'TransactionActions',
-      transactionActionsEntityId,
-      'allowFailureMap',
-      allowFailureMap
-    );
   });
 
   describe('ERC20 action', () => {
