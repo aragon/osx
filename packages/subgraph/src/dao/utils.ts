@@ -101,7 +101,7 @@ function getOrCreateActionEntity<
   R extends Executed
 >(
   action: T,
-  transactionActionId: string,
+  transactionActionsId: string,
   index: i32,
   event: R
 ): TransactionAction {
