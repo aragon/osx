@@ -54,12 +54,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     {
       operation: Operation.Revoke,
-      where: {name: 'managingDAO', address: managingDAOAddress},
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'ROOT_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
       where: {name: 'DAO', address: managingDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
@@ -67,6 +61,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // The deployment of framework doesn't deploy/install any plugins in the script on the managing dao
     // This means that we leave the EXECUTE_PERMISSION to deployer on managing dao such that it can
     // install the plugin later on.
+    // {
+    //   operation: Operation.Revoke,
+    //   where: {name: 'managingDAO', address: managingDAOAddress},
+    //   who: {name: 'Deployer', address: deployer.address},
+    //   permission: 'ROOT_PERMISSION',
+    // },
     // {
     //   operation: Operation.Revoke,
     //   where: {name: 'DAO', address: managingDAOAddress},
