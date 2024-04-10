@@ -10,6 +10,7 @@ import {deployments} from 'hardhat';
 const enableTest = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 const network = 'mainnet';
 
+// TODO delete these tests
 if (enableTest) {
   describe('update/to_v1.3.0', function () {
     before(async () => {

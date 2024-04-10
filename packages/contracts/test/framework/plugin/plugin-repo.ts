@@ -3,7 +3,7 @@
 import {
   PluginRepo,
   PluginRepo__factory,
-  PluginUUPSUpgradeableSetupMockBuild1,
+  PluginUUPSUpgradeableSetupV1Mock,
   PlaceholderSetup__factory,
   IERC165__factory,
   IPluginRepo__factory,
@@ -24,7 +24,7 @@ import {
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {PLUGIN_REPO_PERMISSIONS, getInterfaceId} from '@aragon/osx-commons-sdk';
-import {PluginUUPSUpgradeableMockBuild1__factory} from '@aragon/osx-ethers-v1.2.0';
+import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -39,7 +39,7 @@ describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: SignerWithAddress[];
-  let pluginSetupMock: PluginUUPSUpgradeableSetupMockBuild1;
+  let pluginSetupMock: PluginUUPSUpgradeableSetupV1Mock;
   let initArgs: any;
 
   before(async () => {
@@ -224,10 +224,9 @@ describe('PluginRepo', function () {
         );
 
         // If a contract is passed, but doesn't have `supportsInterface` signature described in the contract.
-        const randomContract =
-          await new PluginUUPSUpgradeableMockBuild1__factory(
-            signers[0]
-          ).deploy();
+        const randomContract = await new PluginUUPSUpgradeableV1Mock__factory(
+          signers[0]
+        ).deploy();
         await expect(
           pluginRepo.createVersion(
             1,
@@ -531,9 +530,9 @@ describe('PluginRepo', function () {
 
     describe('Different types of getVersions:', async () => {
       // R - release, B - build
-      let pluginSetup_R1_B1: PluginUUPSUpgradeableSetupMockBuild1;
-      let pluginSetup_R1_B2: PluginUUPSUpgradeableSetupMockBuild1;
-      let pluginSetup_R2_B1: PluginUUPSUpgradeableSetupMockBuild1;
+      let pluginSetup_R1_B1: PluginUUPSUpgradeableSetupV1Mock;
+      let pluginSetup_R1_B2: PluginUUPSUpgradeableSetupV1Mock;
+      let pluginSetup_R2_B1: PluginUUPSUpgradeableSetupV1Mock;
       let BUILD_METADATA_R1_B1 = BUILD_METADATA;
       let BUILD_METADATA_R1_B2 = `${BUILD_METADATA}11`;
       let BUILD_METADATA_R2_B1 = `${BUILD_METADATA}1111`;

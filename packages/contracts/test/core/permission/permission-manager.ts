@@ -6,7 +6,7 @@ import {
 } from '../../../typechain';
 import {MultiTargetPermission, Operation} from '@aragon/osx-commons-sdk';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
-import {PluginUUPSUpgradeableMockBuild1__factory} from '@aragon/osx-ethers-v1.2.0';
+import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
@@ -190,7 +190,7 @@ describe('Core: PermissionManager', function () {
 
     it('reverts if the condition contract does not support `IPermissionConditon`', async () => {
       const nonConditionContract =
-        await new PluginUUPSUpgradeableMockBuild1__factory(signers[0]).deploy();
+        await new PluginUUPSUpgradeableV1Mock__factory(signers[0]).deploy();
 
       await expect(
         pm.grantWithCondition(
