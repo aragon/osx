@@ -24,6 +24,9 @@ import {
   PluginUUPSUpgradeableSetupV2Mock__factory,
   PluginUUPSUpgradeableSetupV3Mock__factory,
   PluginUUPSUpgradeableSetupV4Mock__factory,
+  PluginCloneableV1Mock__factory,
+  PluginCloneableV1MockBad__factory,
+  PluginCloneableV2Mock__factory,
   PluginCloneableSetupV1Mock__factory,
   PluginCloneableSetupV2Mock__factory,
   PluginCloneableSetupV1MockBad__factory,
@@ -136,49 +139,64 @@ describe('PluginSetupProcessor', function () {
     PluginUV2 = new PluginUUPSUpgradeableV2Mock__factory(signers[0]);
     PluginUV3 = new PluginUUPSUpgradeableV3Mock__factory(signers[0]);
 
+    const implUV1 = await PluginUV1.deploy();
+    const implUV2 = await PluginUV2.deploy();
+    const implUV3 = await PluginUV3.deploy();
+
     // Deploy PluginUUPSUpgradeableSetupMock
 
     const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
-    setupUV1 = await SetupV1.deploy();
+    setupUV1 = await SetupV1.deploy(implUV1.address);
 
     const PluginUUPSUpgradeableSetupV1MockBad =
       await smock.mock<PluginUUPSUpgradeableSetupV1MockBad__factory>(
         'PluginUUPSUpgradeableSetupV1MockBad'
       );
-    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
+    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy(
+      implUV1.address
+    );
 
     const SetupV2 = await smock.mock<PluginUUPSUpgradeableSetupV2Mock__factory>(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
-    setupUV2 = await SetupV2.deploy();
+    setupUV2 = await SetupV2.deploy(implUV2.address);
 
     const SetupV3 = await smock.mock<PluginUUPSUpgradeableSetupV3Mock__factory>(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
-    setupUV3 = await SetupV3.deploy();
+    setupUV3 = await SetupV3.deploy(implUV3.address);
 
     const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
       'PluginUUPSUpgradeableSetupV4Mock'
     );
-    setupUV4 = await SetupV4.deploy();
+    setupUV4 = await SetupV4.deploy(implUV3.address);
 
     // Deploy PluginCloneableSetupMock
+    const implCV1 = await new PluginCloneableV1Mock__factory(
+      signers[0]
+    ).deploy();
     const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
       'PluginCloneableSetupV1Mock'
     );
-    setupCV1 = await SetupC1.deploy();
+    setupCV1 = await SetupC1.deploy(implCV1.address);
 
+    const implCV1Bad = await new PluginCloneableV1MockBad__factory(
+      signers[0]
+    ).deploy();
     const SetupC1Bad = await smock.mock<PluginCloneableSetupV1MockBad__factory>(
       'PluginCloneableSetupV1MockBad'
     );
-    setupCV1Bad = await SetupC1Bad.deploy();
+    setupCV1Bad = await SetupC1Bad.deploy(implCV1Bad.address);
 
+    const implCV2 = await new PluginCloneableV2Mock__factory(
+      signers[0]
+    ).deploy();
     const SetupC2 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
       'PluginCloneableSetupV2Mock'
     );
-    setupCV2 = await SetupC2.deploy();
+    setupCV2 = await SetupC2.deploy(implCV2.address);
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(signers[0]);
@@ -1772,7 +1790,7 @@ describe('PluginSetupProcessor', function () {
         );
     });
 
-    it.only("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+    it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
       await targetDao.revoke(
         targetDao.address,
         psp.address,
@@ -1874,7 +1892,7 @@ describe('PluginSetupProcessor', function () {
         .withArgs(preparedSetupId);
     });
 
-    it.only('EDGE-CASE: reverts for both preparations once one of them gets applied', async () => {
+    it('EDGE-CASE: reverts for both preparations once one of them gets applied', async () => {
       // Prepare first which updates to `newVersion`
       const firstPreparationNewVersion = newVersion;
       const {
@@ -2086,7 +2104,7 @@ describe('PluginSetupProcessor', function () {
       });
     });
 
-    it.only('successfuly updates and emits the correct event arguments', async () => {
+    it('successfuly updates and emits the correct event arguments', async () => {
       const {
         preparedSetupId,
         initData,
@@ -2185,7 +2203,7 @@ describe('PluginSetupProcessor', function () {
         );
       });
 
-      it.only('updates to V2: Contract was actually updated', async () => {
+      it('updates to V2: Contract was actually updated', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2198,7 +2216,7 @@ describe('PluginSetupProcessor', function () {
         );
       });
 
-      it.only('updates to V3', async () => {
+      it('updates to V3', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2211,7 +2229,7 @@ describe('PluginSetupProcessor', function () {
         );
       });
 
-      context.only(`and updated to V2`, function () {
+      context(`and updated to V2`, function () {
         let helpersV2: string[];
         let permissionsUV1V2: PermissionOperation[];
         let initDataV1V2: BytesLike;
@@ -2240,7 +2258,7 @@ describe('PluginSetupProcessor', function () {
           ).to.equal(await setupUV2.callStatic.implementation());
         });
 
-        it.only('initializes the members', async () => {
+        it('initializes the members', async () => {
           expect(await PluginUV2.attach(proxy).state1()).to.equal(1);
           expect(await PluginUV2.attach(proxy).state2()).to.equal(2);
         });
@@ -2298,7 +2316,7 @@ describe('PluginSetupProcessor', function () {
             ).to.equal(await setupUV3.callStatic.implementation());
           });
 
-          it.only('initializes the members', async () => {
+          it('initializes the members', async () => {
             expect(await PluginUV3.attach(proxy).state1()).to.equal(1);
             expect(await PluginUV3.attach(proxy).state2()).to.equal(2);
             expect(await PluginUV3.attach(proxy).state3()).to.equal(3);

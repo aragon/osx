@@ -11,7 +11,7 @@ import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.s
 import {PluginCloneableV1Mock, PluginCloneableV1MockBad, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";
 
 contract PluginCloneableSetupV1Mock is PluginSetup {
-    constructor() PluginSetup(address(new PluginCloneableV1Mock())) {}
+    constructor(address implementation) PluginSetup(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -34,7 +34,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
 }
 
 contract PluginCloneableSetupV1MockBad is PluginSetup {
-    constructor() PluginSetup(address(new PluginCloneableV1MockBad())) {}
+    constructor(address implementation) PluginSetup(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -57,6 +57,8 @@ contract PluginCloneableSetupV1MockBad is PluginSetup {
 }
 
 contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
+    constructor(address implementation) PluginCloneableSetupV1Mock(implementation) {}
+
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,

@@ -11,7 +11,7 @@ import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.s
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
 
 contract PluginUUPSUpgradeableSetupV1Mock is PluginUpgradeableSetup {
-    constructor() PluginUpgradeableSetup(address(new PluginUUPSUpgradeableV1Mock())) {}
+    constructor(address implementation) PluginUpgradeableSetup(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -44,6 +44,8 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginUpgradeableSetup {
 }
 
 contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
+    constructor(address implementation) PluginUUPSUpgradeableSetupV1Mock(implementation) {}
+
     function prepareInstallation(
         address _dao,
         bytes memory
@@ -56,6 +58,8 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock
 }
 
 contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
+    constructor(address implementation) PluginUUPSUpgradeableSetupV1Mock(implementation) {}
+
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
@@ -88,6 +92,8 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
 }
 
 contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
+    constructor(address implementation) PluginUUPSUpgradeableSetupV2Mock(implementation) {}
+
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
@@ -132,6 +138,8 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
 /// but applies new/modifier permissions on it.
 
 contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
+    constructor(address implementation) PluginUUPSUpgradeableSetupV3Mock(implementation) {}
+
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
