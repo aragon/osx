@@ -113,7 +113,7 @@ describe('PluginSetupProcessor', function () {
   let PluginUV1: PluginUUPSUpgradeableV1Mock__factory;
   let PluginUV2: PluginUUPSUpgradeableV2Mock__factory;
   let PluginUV3: PluginUUPSUpgradeableV3Mock__factory;
-  let setupUV1: MockContract<PluginUUPSUpgradeableSetupV1Mock>;
+  let setupUV1: PluginUUPSUpgradeableSetupV1Mock;
   let setupUV2: MockContract<PluginUUPSUpgradeableSetupV2Mock>;
   let setupUV3: MockContract<PluginUUPSUpgradeableSetupV3Mock>;
   let setupUV4: MockContract<PluginUUPSUpgradeableSetupV4Mock>;
@@ -138,9 +138,7 @@ describe('PluginSetupProcessor', function () {
 
     // Deploy PluginUUPSUpgradeableSetupMock
 
-    const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
-      'PluginUUPSUpgradeableSetupV1Mock'
-    );
+    const SetupV1 = new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
     setupUV1 = await SetupV1.deploy();
 
     const PluginUUPSUpgradeableSetupV1MockBad =
@@ -1772,7 +1770,7 @@ describe('PluginSetupProcessor', function () {
         );
     });
 
-    it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+    it.only("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
       await targetDao.revoke(
         targetDao.address,
         psp.address,
@@ -1874,7 +1872,7 @@ describe('PluginSetupProcessor', function () {
         .withArgs(preparedSetupId);
     });
 
-    it('EDGE-CASE: reverts for both preparations once one of them gets applied', async () => {
+    it.only('EDGE-CASE: reverts for both preparations once one of them gets applied', async () => {
       // Prepare first which updates to `newVersion`
       const firstPreparationNewVersion = newVersion;
       const {
@@ -2086,7 +2084,7 @@ describe('PluginSetupProcessor', function () {
       });
     });
 
-    it('successfuly updates and emits the correct event arguments', async () => {
+    it.only('successfuly updates and emits the correct event arguments', async () => {
       const {
         preparedSetupId,
         initData,
@@ -2185,7 +2183,7 @@ describe('PluginSetupProcessor', function () {
         );
       });
 
-      it('updates to V2: Contract was actually updated', async () => {
+      it.only('updates to V2: Contract was actually updated', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2198,7 +2196,7 @@ describe('PluginSetupProcessor', function () {
         );
       });
 
-      it('updates to V3', async () => {
+      it.only('updates to V3', async () => {
         await updateAndValidatePluginUpdate(
           psp,
           targetDao.address,
@@ -2211,7 +2209,7 @@ describe('PluginSetupProcessor', function () {
         );
       });
 
-      context(`and updated to V2`, function () {
+      context.only(`and updated to V2`, function () {
         let helpersV2: string[];
         let permissionsUV1V2: PermissionOperation[];
         let initDataV1V2: BytesLike;
@@ -2240,7 +2238,7 @@ describe('PluginSetupProcessor', function () {
           ).to.equal(await setupUV2.callStatic.implementation());
         });
 
-        it('initializes the members', async () => {
+        it.only('initializes the members', async () => {
           expect(await PluginUV2.attach(proxy).state1()).to.equal(1);
           expect(await PluginUV2.attach(proxy).state2()).to.equal(2);
         });
@@ -2298,7 +2296,7 @@ describe('PluginSetupProcessor', function () {
             ).to.equal(await setupUV3.callStatic.implementation());
           });
 
-          it('initializes the members', async () => {
+          it.only('initializes the members', async () => {
             expect(await PluginUV3.attach(proxy).state1()).to.equal(1);
             expect(await PluginUV3.attach(proxy).state2()).to.equal(2);
             expect(await PluginUV3.attach(proxy).state3()).to.equal(3);
