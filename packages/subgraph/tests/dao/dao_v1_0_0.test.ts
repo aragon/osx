@@ -1,7 +1,7 @@
 import {
-  Action,
   ERC721Balance,
-  TransactionActionsProposal,
+  TransactionAction,
+  TransactionActions,
 } from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
@@ -14,6 +14,12 @@ import {
   handleCallbackReceived,
   handleNewURI,
 } from '../../src/dao/dao_v1_0_0';
+import {
+  generateDeterministicActionId,
+  generateTransactionActionEntityId,
+  generateTransactionActionsDeterministicId,
+  generateTransactionActionsEntityId,
+} from '../../src/dao/ids';
 import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   generateERC1155TransferEntityId,
@@ -73,12 +79,9 @@ import {
   encodeWithFunctionSelector,
 } from './utils';
 import {
-  generateActionEntityId,
   generateBalanceEntityId,
   generateDaoEntityId,
-  generateProposalEntityId,
   generateTokenIdBalanceEntityId,
-  generateTransactionActionsProposalEntityId,
   generateTransferEntityId,
   createDummyAction,
   createERC20TokenCalls,
@@ -128,7 +131,7 @@ function createExecutedEvent(
       functionData.toHexString()
     );
 
-    actions.push(action);
+    actions.push(action as ethereum.Tuple);
   }
 
   if (execResults.length == 0) {
@@ -838,7 +841,7 @@ describe('handleExecuted', () => {
     clearStore();
   });
 
-  test('successfuly creates action and proposal if not found', () => {
+  test('successfuly creates action and transactionAction', () => {
     let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
     let selector = '0x11111111';
 
@@ -859,50 +862,81 @@ describe('handleExecuted', () => {
 
     handleExecuted(event);
 
-    let proposalEntityId = generateProposalEntityId(
+    let deterministicId = generateTransactionActionsDeterministicId(
       event.params.actor,
-      BigInt.fromByteArray(event.params.callId)
+      event.address,
+      event.params.callId
     );
-    let transactionActionsProposalEntityId =
-      generateTransactionActionsProposalEntityId(
-        proposalEntityId,
+
+    let transactionActionsEntityId = generateTransactionActionsEntityId(
+      event.params.actor,
+      event.address,
+      event.params.callId,
+      event.transaction.hash,
+      event.transactionLogIndex
+    );
+
+    assert.entityCount('TransactionActions', 1);
+    assert.entityCount('TransactionAction', 2);
+
+    eq(
+      'TransactionActions',
+      transactionActionsEntityId,
+      'id',
+      transactionActionsEntityId
+    );
+    eq(
+      'TransactionActions',
+      transactionActionsEntityId,
+      'failureMap',
+      failureMap
+    );
+    eq('TransactionActions', transactionActionsEntityId, 'dao', DAO_ADDRESS);
+    eq(
+      'TransactionActions',
+      transactionActionsEntityId,
+      'deterministicId',
+      deterministicId
+    );
+
+    for (let i = 0; i < event.params.actions.length; i++) {
+      const deterministicActionId = generateDeterministicActionId(
+        event.params.actor,
+        event.address,
+        event.params.callId,
+        i
+      );
+      let actionEntityId = generateTransactionActionEntityId(
+        event.params.actor,
+        event.address,
+        event.params.callId,
+        i,
         event.transaction.hash,
         event.transactionLogIndex
       );
 
-    assert.entityCount('TransactionActionsProposal', 1);
-    assert.entityCount('Action', 2);
-
-    eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
-      'id',
-      transactionActionsProposalEntityId
-    );
-    eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
-      'failureMap',
-      failureMap
-    );
-
-    for (let i = 0; i < event.params.actions.length; i++) {
-      let actionEntityId = generateActionEntityId(
-        transactionActionsProposalEntityId,
-        i
-      );
-
-      eq('Action', actionEntityId, 'id', actionEntityId);
-      eq('Action', actionEntityId, 'execResult', execResults[i].toHexString());
-      eq('Action', actionEntityId, 'dao', DAO_ADDRESS);
+      eq('TransactionAction', actionEntityId, 'id', actionEntityId);
       eq(
-        'Action',
+        'TransactionAction',
         actionEntityId,
-        'proposal',
-        transactionActionsProposalEntityId
+        'execResult',
+        execResults[i].toHexString()
+      );
+      eq('TransactionAction', actionEntityId, 'dao', DAO_ADDRESS);
+      eq(
+        'TransactionAction',
+        actionEntityId,
+        'deterministicId',
+        deterministicActionId
       );
       eq(
-        'Action',
+        'TransactionAction',
+        actionEntityId,
+        'transactionActions',
+        transactionActionsEntityId
+      );
+      eq(
+        'TransactionAction',
         actionEntityId,
         'data',
         encodeWithFunctionSelector(tuple, selector).toHexString()
@@ -910,13 +944,13 @@ describe('handleExecuted', () => {
     }
   });
 
-  test('successfuly updates action and proposal if found', () => {
+  test('Duplicate deterministic ids will point to different proposals and actions', () => {
     let tuple: Array<ethereum.Value> = [ethereum.Value.fromString('')];
     let selector = '0x11111111';
     let execResult = Bytes.fromHexString('0x11');
     let failureMap = '2';
 
-    let event = createExecutedEvent(
+    let event0 = createExecutedEvent(
       [tuple],
       [selector],
       false,
@@ -924,71 +958,28 @@ describe('handleExecuted', () => {
       failureMap
     );
 
-    let proposalEntityId = generateProposalEntityId(
-      event.params.actor,
-      BigInt.fromUnsignedBytes(event.params.callId)
-    );
-    let transactionActionsProposalEntityId =
-      generateTransactionActionsProposalEntityId(
-        proposalEntityId,
-        event.transaction.hash,
-        event.transactionLogIndex
-      );
-    let actionEntityId = generateActionEntityId(
-      transactionActionsProposalEntityId,
-      0
-    );
-
-    // create proposal
-    let proposal = new TransactionActionsProposal(
-      transactionActionsProposalEntityId
-    );
-    proposal.dao = event.address.toHexString();
-    proposal.createdAt = event.block.timestamp;
-    proposal.endDate = event.block.timestamp;
-    proposal.startDate = event.block.timestamp;
-    proposal.allowFailureMap = BigInt.zero();
-    proposal.creator = event.params.actor;
-    proposal.executionTxHash = event.transaction.hash;
-    proposal.executed = true;
-    proposal.save();
-
-    // create action
-    let action = new Action(actionEntityId);
-    action.to = Address.fromString(DAO_TOKEN_ADDRESS);
-    action.data = Bytes.fromHexString('0x');
-    action.value = BigInt.zero();
-    action.dao = event.address.toHexString();
-    action.proposal = proposal.id;
-    action.save();
-
-    // Check that before `handleExecute`, execResults are empty
-    assert.entityCount('Action', 1);
-    assert.entityCount('TransactionActionsProposal', 1);
-    assert.assertTrue(action.execResult === null);
-    assert.assertTrue(proposal.failureMap === null);
-
-    handleExecuted(event);
-
-    // The action and proposal count should be the same.
-    assert.entityCount('Action', 1);
-    assert.entityCount('TransactionActionsProposal', 1);
-
-    eq('Action', actionEntityId, 'id', actionEntityId);
-    eq('Action', actionEntityId, 'execResult', execResult.toHexString());
-
-    eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
-      'id',
-      transactionActionsProposalEntityId
-    );
-    eq(
-      'TransactionActionsProposal',
-      transactionActionsProposalEntityId,
-      'failureMap',
+    let event1 = createExecutedEvent(
+      [tuple],
+      [selector],
+      false,
+      [execResult],
       failureMap
     );
+
+    // increment the log index to make sure the transaction actions are different
+    // for the two events even if they are in the same block
+    event1.logIndex = event1.logIndex.plus(BigInt.fromI32(1));
+    event1.transactionLogIndex = event1.logIndex;
+
+    assert.entityCount('TransactionAction', 0);
+    assert.entityCount('TransactionActions', 0);
+
+    handleExecuted(event0);
+    handleExecuted(event1);
+
+    // The action and proposal count should be the same.
+    assert.entityCount('TransactionAction', 2);
+    assert.entityCount('TransactionActions', 2);
   });
 
   describe('ERC20 action', () => {
@@ -1031,17 +1022,13 @@ describe('handleExecuted', () => {
         );
 
         handleExecuted(event);
-
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
           event.params.actor,
-          BigInt.fromByteArray(event.params.callId)
+          event.address,
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -1082,8 +1069,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC20Transfer',
           transferEntityId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC20Transfer', transferEntityId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferEntityId, 'txHash', txHash.toHexString());
@@ -1156,16 +1143,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.address,
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
 
         let txHash = event.transaction.hash;
         let logIndex = event.transactionLogIndex;
@@ -1201,8 +1185,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC20Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC20Transfer', transferId, 'type', 'Withdraw');
         eq('ERC20Transfer', transferId, 'txHash', txHash.toHexString());
@@ -1304,17 +1288,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.address,
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
-
         // check ERC721Contract entity
         eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
         eq('ERC721Contract', tokenEntityId, 'name', 'name');
@@ -1343,8 +1323,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC721Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());
@@ -1409,16 +1389,13 @@ describe('handleExecuted', () => {
 
         handleExecuted(event);
 
-        let proposalEntityId = generateProposalEntityId(
+        let transactionActionsEntityId = generateTransactionActionsEntityId(
           event.params.actor,
-          BigInt.fromUnsignedBytes(event.params.callId)
+          event.address,
+          event.params.callId,
+          event.transaction.hash,
+          event.transactionLogIndex
         );
-        let transactionActionsProposalEntityId =
-          generateTransactionActionsProposalEntityId(
-            proposalEntityId,
-            event.transaction.hash,
-            event.transactionLogIndex
-          );
 
         // check ERC721Contract entity
         eq('ERC721Contract', tokenEntityId, 'id', tokenEntityId);
@@ -1448,8 +1425,8 @@ describe('handleExecuted', () => {
         eq(
           'ERC721Transfer',
           transferId,
-          'proposal',
-          transactionActionsProposalEntityId
+          'transactionActions',
+          transactionActionsEntityId
         );
         eq('ERC721Transfer', transferId, 'type', 'Withdraw');
         eq('ERC721Transfer', transferId, 'txHash', txHash.toHexString());

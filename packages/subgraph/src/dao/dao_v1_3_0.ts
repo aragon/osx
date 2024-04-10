@@ -1,48 +1,48 @@
-import {TransactionActionsProposal} from '../../generated/schema';
+import {TransactionActions} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_3_0/DAO';
-import {handleAction} from './utils';
 import {
-  generateDaoEntityId,
-  generateProposalEntityId,
-  generateTransactionActionsProposalEntityId,
-} from '@aragon/osx-commons-subgraph';
-import {BigInt} from '@graphprotocol/graph-ts';
+  generateTransactionActionsDeterministicId,
+  generateTransactionActionsEntityId,
+} from './ids';
+import {handleAction} from './utils';
+import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 
 export function handleExecuted(event: Executed): void {
-  let proposalEntityId = generateProposalEntityId(
+  let transactionActionsEntityId = generateTransactionActionsEntityId(
     event.params.actor,
-    BigInt.fromByteArray(event.params.callId)
+    event.address,
+    event.params.callId,
+    event.transaction.hash,
+    event.transactionLogIndex
   );
 
-  let transactionActionsProposalEntityId =
-    generateTransactionActionsProposalEntityId(
-      proposalEntityId,
-      event.transaction.hash,
-      event.transactionLogIndex
-    );
-  let proposal = new TransactionActionsProposal(
-    transactionActionsProposalEntityId
+  let deterministicId = generateTransactionActionsDeterministicId(
+    event.params.actor,
+    event.address,
+    event.params.callId
   );
-  proposal.dao = generateDaoEntityId(event.address);
-  proposal.createdAt = event.block.timestamp;
-  proposal.endDate = event.block.timestamp;
-  proposal.startDate = event.block.timestamp;
-  proposal.creator = event.params.actor;
-  proposal.executionTxHash = event.transaction.hash;
-  proposal.allowFailureMap = event.params.allowFailureMap;
-  proposal.executed = true;
-  proposal.failureMap = event.params.failureMap;
-  proposal.save();
+
+  let transactionActions = new TransactionActions(transactionActionsEntityId);
+
+  transactionActions.dao = generateDaoEntityId(event.address);
+  transactionActions.deterministicId = deterministicId;
+  transactionActions.createdAt = event.block.timestamp;
+  transactionActions.creator = event.params.actor;
+  transactionActions.executionTxHash = event.transaction.hash;
+  transactionActions.allowFailureMap = event.params.allowFailureMap;
+  transactionActions.executed = true;
+  transactionActions.failureMap = event.params.failureMap;
+  transactionActions.save();
 
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
     handleAction<ExecutedActionsStruct, Executed>(
       actions[index],
-      transactionActionsProposalEntityId,
+      transactionActionsEntityId,
       index,
       event
     );

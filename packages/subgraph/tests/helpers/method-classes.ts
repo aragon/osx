@@ -79,6 +79,7 @@ import {
   ADDRESS_THREE,
   ADDRESS_ZERO,
   ADDRESS_FOUR,
+  TRANSACTION_ACTIONS_ENTITY_ID,
 } from '../constants';
 import {
   createCallbackReceivedEvent,
@@ -247,7 +248,7 @@ class ERC1155TransferMethods extends ERC1155Transfer {
     this.tokenId = BigInt.zero();
     this.from = Address.fromHexString(ADDRESS_ONE);
     this.to = Address.fromHexString(DAO_ADDRESS);
-    this.proposal = 'null';
+    this.transactionActions = 'null';
     this.type = 'Deposit';
     this.txHash = Bytes.empty();
     this.createdAt = BigInt.fromString(CREATED_AT);
@@ -309,7 +310,7 @@ class ERC721TransferMethods extends ERC721Transfer {
     this.tokenId = BigInt.zero();
     this.from = Address.fromHexString(ADDRESS_ONE);
     this.to = Address.fromHexString(DAO_ADDRESS);
-    this.proposal = PROPOSAL_ENTITY_ID;
+    this.transactionActions = TRANSACTION_ACTIONS_ENTITY_ID;
     this.type = 'Deposit';
     this.txHash = Bytes.empty();
     this.createdAt = BigInt.fromString(CREATED_AT);
@@ -427,7 +428,7 @@ class ERC20TransferMethods extends ERC20Transfer {
     this.amount = BigInt.zero();
     this.from = Address.fromHexString(ADDRESS_ONE);
     this.to = Address.fromHexString(DAO_ADDRESS);
-    this.proposal = PROPOSAL_ENTITY_ID;
+    this.transactionActions = TRANSACTION_ACTIONS_ENTITY_ID;
     this.type = 'Deposit';
     this.txHash = Bytes.empty();
     this.createdAt = BigInt.fromString(CREATED_AT);
@@ -447,7 +448,7 @@ class NativeTransferMethods extends NativeTransfer {
     this.from = Address.fromHexString(ADDRESS_ONE);
     this.to = Address.fromHexString(DAO_ADDRESS);
     this.reference = 'Native Deposit';
-    this.proposal = PROPOSAL_ENTITY_ID;
+    this.transactionActions = TRANSACTION_ACTIONS_ENTITY_ID;
     this.type = 'Deposit';
     this.txHash = Bytes.empty();
     this.createdAt = BigInt.fromString(CREATED_AT);

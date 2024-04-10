@@ -256,8 +256,8 @@ interface TokenTransfer {
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated Execution container on the DAO, if applicable. If deposited using the DAO `deposit` function then will be empty. "
+  transctionActions: TransactionActions
 
   " The hash of the transfer to track the transaction. "
   txHash: Bytes!
@@ -288,8 +288,8 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC20 tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -323,8 +323,8 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC721 token. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -364,8 +364,8 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -399,8 +399,8 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   " The reference describing the deposit reason. "
   reference: String!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  transactionActions: TransactionActions
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -617,26 +617,44 @@ interface IPlugin {
   # state: PluginPreparationState!
 }
 
+"""
+A container for actions executed in batches by the DAO's `execute` function.
+"""
+type TransactionActions @entity(immutable: true) {
+  id: ID!
+  # ID without Tx information
+  deterministicId: String!
+  dao: Dao!
+  creator: Bytes!
+  metadata: String
+  actions: [TransactionAction!]! @derivedFrom(field: "transactionActions")
+  allowFailureMap: BigInt!
+  failureMap: BigInt
+  executed: Boolean!
+  createdAt: BigInt!
+  executionTxHash: Bytes
+}
+
+"""
+Temporary entity until Actions have been removed as part of the split
+"""
+type TransactionAction @entity(immutable: true) {
+  id: ID!
+  # ID without Tx information
+  deterministicId: String!
+  transactionActions: TransactionActions!
+  dao: Dao!
+  to: Bytes!
+  value: BigInt!
+  data: Bytes!
+  execResult: Bytes
+}
+
 ### Entities below should move to there respective subgraph once plugin is seperated from the Aragon OSx
 # Proposal
 
 interface IProposal {
   id: ID! # package + proposalId
-  dao: Dao!
-  creator: Bytes!
-  metadata: String
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  executed: Boolean!
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  executionTxHash: Bytes
-}
-
-type TransactionActionsProposal implements IProposal @entity {
-  id: ID!
   dao: Dao!
   creator: Bytes!
   metadata: String

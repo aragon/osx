@@ -2,7 +2,7 @@ import {
   Dao,
   Permission,
   StandardCallback,
-  TransactionActionsProposal,
+  TransactionActions,
 } from '../../generated/schema';
 import {
   MetadataSet,
@@ -29,13 +29,15 @@ import {
   handleERC1155Received,
 } from '../utils/tokens/erc1155';
 import {handleNativeDeposit} from '../utils/tokens/eth';
+import {
+  generateTransactionActionsDeterministicId,
+  generateTransactionActionsEntityId,
+} from './ids';
 import {handleAction, updateProposalWithFailureMap} from './utils';
 import {
   generateDaoEntityId,
   generatePermissionEntityId,
-  generateProposalEntityId,
   generateStandardCallbackEntityId,
-  generateTransactionActionsProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {BigInt, Bytes, store} from '@graphprotocol/graph-ts';
 
@@ -83,55 +85,37 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
-  let proposalEntityId = generateProposalEntityId(
-    event.params.actor,
-    BigInt.fromByteArray(event.params.callId)
+  const transactionActionsEntityId = generateTransactionActionsEntityId(
+    event.params.actor /* caller */,
+    event.address /* daoAddress */,
+    event.params.callId,
+    event.transaction.hash,
+    event.transactionLogIndex
   );
 
-  // Not an effective solution, until each plugin has
-  // its own subgraph separately.
-  // If proposal found, update its failureMap.
-  let wasUpdated = updateProposalWithFailureMap(
-    proposalEntityId,
-    event.params.failureMap
+  const deterministicId = generateTransactionActionsDeterministicId(
+    event.params.actor /* caller */,
+    event.address /* daoAddress */,
+    event.params.callId
   );
 
-  // If not updated, proposal wasn't found which means,
-  // it was called by the address that
-  // Subgraph doesn't index, in which case, we still create
-  // proposal entity in order to group its actions together.
-  if (!wasUpdated) {
-    // The id generation must include hash + logindex
-    // This is important to not allow overwriting. since
-    // the uniqueness of callId isn't checked in DAO, there
-    // might be a case when 2 different tx might end up having the same
-    // proposal ID which will cause overwrite. In case of plugins,
-    // It's plugin's responsibility to pass unique callId per execute.
-    proposalEntityId = generateTransactionActionsProposalEntityId(
-      proposalEntityId,
-      event.transaction.hash,
-      event.logIndex
-    );
-
-    let proposal = new TransactionActionsProposal(proposalEntityId);
-    proposal.dao = generateDaoEntityId(event.address);
-    proposal.createdAt = event.block.timestamp;
-    proposal.endDate = event.block.timestamp;
-    proposal.startDate = event.block.timestamp;
-    proposal.creator = event.params.actor;
-    proposal.executionTxHash = event.transaction.hash;
-    // Since DAO doesn't emit allowFailureMap by mistake, we got no choice now.
-    // In such case, `allowFailureMap` shouldn't be fully trusted.
-    proposal.allowFailureMap = BigInt.zero();
-    proposal.executed = true;
-    proposal.failureMap = event.params.failureMap;
-    proposal.save();
-  }
+  const transactionActions = new TransactionActions(transactionActionsEntityId);
+  transactionActions.dao = generateDaoEntityId(event.address);
+  transactionActions.deterministicId = deterministicId;
+  transactionActions.createdAt = event.block.timestamp;
+  transactionActions.creator = event.params.actor;
+  transactionActions.executionTxHash = event.transaction.hash;
+  // Since DAO v1.0.0 doesn't emit allowFailureMap by mistake, we got no choice now.
+  // In such case, `allowFailureMap` shouldn't be fully trusted.
+  transactionActions.allowFailureMap = BigInt.zero();
+  transactionActions.executed = true;
+  transactionActions.failureMap = event.params.failureMap;
+  transactionActions.save();
 
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
-    handleAction(actions[index], proposalEntityId, index, event);
+    handleAction(actions[index], transactionActionsEntityId, index, event);
   }
 }
 

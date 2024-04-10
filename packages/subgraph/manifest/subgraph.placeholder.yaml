@@ -94,6 +94,10 @@ dataSources:
 # templates
 templates:
   # DAO
+  # subscribing to both dao templates needs care to avoid duplication.
+  # Below, the event signature for `Executed` differs slightly, so we can
+  # safely define two separate handlers and the graph will index based on the
+  # matching event.
   - name: DaoTemplateV1_0_0
     kind: ethereum/contract
     network: {{network}}
