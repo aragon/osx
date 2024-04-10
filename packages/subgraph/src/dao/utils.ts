@@ -125,7 +125,7 @@ function getOrCreateActionEntity<
   entity.to = action.to;
   entity.value = action.value;
   entity.data = action.data;
-  entity.transactionActions = transactionActionId;
+  entity.transactionActions = transactionActionsId;
   entity.dao = generateDaoEntityId(event.address);
 
   return entity;
