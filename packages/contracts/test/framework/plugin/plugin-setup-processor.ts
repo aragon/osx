@@ -113,7 +113,7 @@ describe('PluginSetupProcessor', function () {
   let PluginUV1: PluginUUPSUpgradeableV1Mock__factory;
   let PluginUV2: PluginUUPSUpgradeableV2Mock__factory;
   let PluginUV3: PluginUUPSUpgradeableV3Mock__factory;
-  let setupUV1: PluginUUPSUpgradeableSetupV1Mock;
+  let setupUV1: MockContract<PluginUUPSUpgradeableSetupV1Mock>;
   let setupUV2: MockContract<PluginUUPSUpgradeableSetupV2Mock>;
   let setupUV3: MockContract<PluginUUPSUpgradeableSetupV3Mock>;
   let setupUV4: MockContract<PluginUUPSUpgradeableSetupV4Mock>;
@@ -138,7 +138,9 @@ describe('PluginSetupProcessor', function () {
 
     // Deploy PluginUUPSUpgradeableSetupMock
 
-    const SetupV1 = new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
+    const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
+      'PluginUUPSUpgradeableSetupV1Mock'
+    );
     setupUV1 = await SetupV1.deploy();
 
     const PluginUUPSUpgradeableSetupV1MockBad =
