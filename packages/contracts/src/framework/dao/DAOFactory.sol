@@ -157,7 +157,8 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @notice Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the intial owner.
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
-        // Create a DAO and initialize it. This will give the `ROOT_PERMISSION_`ID` permission to `address(this))`.
+        // Create a DAO proxy and initialize it with the DAOFactory (`address(this)`) as the initial owner.
+        // As a result, the DAOFactory has `ROOT_PERMISSION_`ID` permission on the DAO.
         dao = DAO(
             payable(
                 daoBase.deployUUPSProxy(
