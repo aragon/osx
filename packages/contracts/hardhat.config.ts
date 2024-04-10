@@ -1,5 +1,5 @@
 import {networkExtensions} from './networks';
-import {AragonPluginRepos, TestingFork} from './types/hardhat';
+import {TestingFork} from './types/hardhat';
 import {
   networks as commonNetworkConfigs,
   SupportedNetworks,
@@ -42,16 +42,11 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
 
 // Extend HardhatRuntimeEnvironment
 extendEnvironment(hre => {
-  const aragonPluginRepos: AragonPluginRepos = {
-    AddresslistVotingRepoProxy: '',
-    TokenVotingRepoProxy: '',
-  };
   const testingFork: TestingFork = {
     network: '',
     osxVersion: '',
     activeContracts: {},
   };
-  hre.aragonPluginRepos = aragonPluginRepos;
   hre.aragonToVerifyContracts = [];
   hre.managementDAOMultisigPluginAddress = ''; // TODO
   hre.managementDAOActions = [];
