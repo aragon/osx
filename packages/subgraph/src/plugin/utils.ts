@@ -4,22 +4,12 @@ import {
   ethereum,
   crypto,
   ByteArray,
-  log,
 } from '@graphprotocol/graph-ts';
 
 export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(0, 'Grant')
   .set(1, 'Revoke')
   .set(2, 'GrantWithCondition');
-
-/**
- * TODO: this was decided to be looked at when we split the code
- * We are here now, so we need to decide what to do with adding plugins
- * in the general sense
- */
-export function addPlugin(daoId: string, plugin: Address): void {
-  log.error('Not implemented ', []);
-}
 
 export function getPluginInstallationId(
   dao: string,

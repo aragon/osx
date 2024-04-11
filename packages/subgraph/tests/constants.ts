@@ -39,13 +39,6 @@ export const TOKEN_SYMBOL = 'symbol';
 export const TOKEN_NAME = 'name';
 
 export const HOUR = '3600';
-
-export const VOTING_MODE: string = ONE; // EarlyExecution
-export const SUPPORT_THRESHOLD = '500000'; // 50*10**4 = 50%
-export const MIN_PARTICIPATION = '500000'; // 50*10**4 = 50%
-export const MIN_DURATION = HOUR;
-
-export const MIN_PROPOSER_VOTING_POWER = ZERO;
 export const START_DATE = '1644851000';
 export const END_DATE = '1644852000';
 export const SNAPSHOT_BLOCK = '100';
@@ -53,9 +46,6 @@ export const SNAPSHOT_BLOCK = '100';
 // Use 1 for testing as default value is anyways 0
 // and test might succeed even though it shouldn't
 export const ALLOW_FAILURE_MAP = '1';
-
-export const MIN_VOTING_POWER = TWO;
-export const TOTAL_VOTING_POWER = THREE;
 export const CREATED_AT = ONE;
 
 export const ZERO_BYTES32 =

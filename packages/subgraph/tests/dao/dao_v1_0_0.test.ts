@@ -1,8 +1,4 @@
-import {
-  ERC721Balance,
-  TransactionAction,
-  TransactionActions,
-} from '../../generated/schema';
+import {ERC721Balance} from '../../generated/schema';
 import {Executed} from '../../generated/templates/DaoTemplateV1_0_0/DAO';
 import {
   handleNativeTokenDeposited,
@@ -20,7 +16,6 @@ import {
   generateTransactionActionsDeterministicId,
   generateTransactionActionsEntityId,
 } from '../../src/dao/ids';
-import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../src/utils/constants';
 import {
   generateERC1155TransferEntityId,
   generateTokenEntityId,
@@ -271,11 +266,6 @@ describe('handleDeposited: ', () => {
     daoTokenContract.mockCall_balanceOf(DAO_TOKEN_ADDRESS, ERC20_AMOUNT_HALF);
 
     getSupportsInterface(DAO_TOKEN_ADDRESS, ERC165_INTERFACE_ID, true);
-    getSupportsInterface(
-      DAO_TOKEN_ADDRESS,
-      GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID,
-      false
-    );
     getSupportsInterface(DAO_TOKEN_ADDRESS, 'ffffffff', false);
   });
 
@@ -877,7 +867,7 @@ describe('handleExecuted', () => {
     );
 
     assert.entityCount('TransactionActions', 1);
-    assert.entityCount('TransactionAction', 2);
+    assert.entityCount('Action', 2);
 
     eq(
       'TransactionActions',
@@ -915,28 +905,18 @@ describe('handleExecuted', () => {
         event.transactionLogIndex
       );
 
-      eq('TransactionAction', actionEntityId, 'id', actionEntityId);
+      eq('Action', actionEntityId, 'id', actionEntityId);
+      eq('Action', actionEntityId, 'execResult', execResults[i].toHexString());
+      eq('Action', actionEntityId, 'dao', DAO_ADDRESS);
+      eq('Action', actionEntityId, 'deterministicId', deterministicActionId);
       eq(
-        'TransactionAction',
-        actionEntityId,
-        'execResult',
-        execResults[i].toHexString()
-      );
-      eq('TransactionAction', actionEntityId, 'dao', DAO_ADDRESS);
-      eq(
-        'TransactionAction',
-        actionEntityId,
-        'deterministicId',
-        deterministicActionId
-      );
-      eq(
-        'TransactionAction',
+        'Action',
         actionEntityId,
         'transactionActions',
         transactionActionsEntityId
       );
       eq(
-        'TransactionAction',
+        'Action',
         actionEntityId,
         'data',
         encodeWithFunctionSelector(tuple, selector).toHexString()
@@ -971,14 +951,14 @@ describe('handleExecuted', () => {
     event1.logIndex = event1.logIndex.plus(BigInt.fromI32(1));
     event1.transactionLogIndex = event1.logIndex;
 
-    assert.entityCount('TransactionAction', 0);
+    assert.entityCount('Action', 0);
     assert.entityCount('TransactionActions', 0);
 
     handleExecuted(event0);
     handleExecuted(event1);
 
     // The action and proposal count should be the same.
-    assert.entityCount('TransactionAction', 2);
+    assert.entityCount('Action', 2);
     assert.entityCount('TransactionActions', 2);
   });
 

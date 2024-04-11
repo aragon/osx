@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Split
 
 - Renamed Proposal to `TransactionActions` and made it immutable
-- Added deterministicID as field to `TransactionActions` and `TransactionAction`
-- Temp immutable entity `TransactionAction` created while plugins (with actions) still live inside OSx. Includes `deterministicId` and swaps `proposal` foreign key in place of `transactionAction`
+- Added deterministicID as field to `TransactionActions` and `Action`
+- `Action` swaps `proposal` foreign key in place of `transactionAction`
 - The `deterministicId` and `Id` fields now include the `daoAddress` inside executeActions
-- Renamed `proposal` to `transactionActions` in ERC20Transfer, ERC721Transfer, ERC1155Transfer and NativeTransfer
+- Renamed `proposal` to `transactionActions` in ERC20Transfer, ERC721Transfer, ERC1155Transfer and NativeTransfer and DAO
 - Removed `startDate` and `endDate` from `TransactionActions`
 
 - Removed `TokenVoting` `Multisig` `Admin` and `AddressList` from the schema

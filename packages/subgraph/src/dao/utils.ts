@@ -1,4 +1,4 @@
-import {Action as TransactionAction} from '../../generated/schema';
+import {Action} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct,
@@ -56,12 +56,7 @@ export function handleAction<
 function getOrCreateActionEntity<
   T extends ExecutedActionsStruct,
   R extends Executed
->(
-  action: T,
-  transactionActionsId: string,
-  index: i32,
-  event: R
-): TransactionAction {
+>(action: T, transactionActionsId: string, index: i32, event: R): Action {
   const deterministicActionId = generateDeterministicActionId(
     event.params.actor,
     event.address,
@@ -77,7 +72,7 @@ function getOrCreateActionEntity<
     event.transactionLogIndex
   );
 
-  const entity = new TransactionAction(actionId);
+  const entity = new Action(actionId);
   entity.deterministicId = deterministicActionId;
   entity.to = action.to;
   entity.value = action.value;

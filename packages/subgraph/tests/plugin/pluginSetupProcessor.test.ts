@@ -8,12 +8,6 @@ import {
   handleUpdatePrepared,
 } from '../../src/plugin/pluginSetupProcessor';
 import {PERMISSION_OPERATIONS} from '../../src/plugin/utils';
-import {
-  ADMIN_INTERFACE_ID,
-  TOKEN_VOTING_INTERFACE_ID,
-  ADDRESSLIST_VOTING_INTERFACE_ID,
-  MULTISIG_INTERFACE_ID,
-} from '../../src/utils/constants';
 import {getSupportsInterface} from '../../tests/dao/utils';
 import {
   ADDRESS_TWO,
@@ -92,10 +86,7 @@ test('InstallationPrepared event', function () {
     ],
   ];
 
-  getSupportsInterface(pluginEntityId, TOKEN_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(pluginEntityId, ADDRESSLIST_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(pluginEntityId, ADMIN_INTERFACE_ID, false);
-  getSupportsInterface(pluginEntityId, MULTISIG_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, '0xffffffff', false);
 
   let event = createInstallationPreparedEvent(
     ADDRESS_THREE,
@@ -534,10 +525,7 @@ test('UpdateApplied event', function () {
     Bytes.fromHexString(setupId)
   );
 
-  getSupportsInterface(pluginEntityId, TOKEN_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(pluginEntityId, ADDRESSLIST_VOTING_INTERFACE_ID, false);
-  getSupportsInterface(pluginEntityId, ADMIN_INTERFACE_ID, false);
-  getSupportsInterface(pluginEntityId, MULTISIG_INTERFACE_ID, false);
+  getSupportsInterface(pluginEntityId, '0xffffffff', false);
 
   let event = createUpdateAppliedEvent(
     daoEntityId,
