@@ -44,7 +44,7 @@ Some things that help us better understand:
 - Network: which network have you been testing on
 - Logs: any specific transaction error or log that may support us in reviewing the error
 
-### If you find a security vulnerability, do NOT open an issue. Email [security@aragon.org](mailto:security@aragon.org) instead.
+### If you find a security vulnerability, do NOT open an issue. Email [sirt@aragon.org](mailto:sirt@aragon.org) instead.
 
 In order to determine whether you are dealing with a security issue, ask yourself these two questions:
 
