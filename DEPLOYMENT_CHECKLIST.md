@@ -29,7 +29,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Management DAO is the dao that will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its values as you wish. This is deployed to the IPFS and its cid is stored in the managing dao so users can get information about what this managing dao does.
 - [ ] Ensure to add `ETH_KEY` in the `.env` which is your private key that will be used to deploy all the contracts. Example:
   ```jsx
-  ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` suffix
+  ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` prefix
   ```
 - [ ] Our contracts use ENS, so it’s important that you safely add the following ENS names in the packages/contracts/.env file. <br>
 
