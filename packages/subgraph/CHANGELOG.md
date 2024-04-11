@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Split
 
-- Renamed Proposal to `TransactionActions` and made it immutable
-- Added deterministicID as field to `TransactionActions` and `Action`
-- `Action` swaps `proposal` foreign key in place of `transactionAction`
+- Renamed Proposal to `ActionBatch` and made it immutable
+- Added deterministicID as field to `ActionBatch` and `Action`
+- `Action` swaps `proposal` foreign key in place of `actionBatch`
 - The `deterministicId` and `Id` fields now include the `daoAddress` inside executeActions
-- Renamed `proposal` to `transactionActions` in ERC20Transfer, ERC721Transfer, ERC1155Transfer and NativeTransfer and DAO
-- Removed `startDate` and `endDate` from `TransactionActions`
+- Renamed `proposal` to `actionBatch` in ERC20Transfer, ERC721Transfer, ERC1155Transfer and NativeTransfer and DAO
+- Removed `startDate` and `endDate` from `ActionBatch`
 
 - Removed `TokenVoting` `Multisig` `Admin` and `AddressList` from the schema
 - Deleted the corresponding handlers and references in code

@@ -17,20 +17,17 @@ import {handleERC20Action} from '../utils/tokens/erc20';
 import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
 import {handleNativeAction} from '../utils/tokens/eth';
-import {
-  generateTransactionActionEntityId,
-  generateDeterministicActionId,
-} from './ids';
+import {generateActionEntityId, generateDeterministicActionId} from './ids';
 import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 import {BigInt} from '@graphprotocol/graph-ts';
 
 export function handleAction<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, transactionActionsId: string, index: i32, event: R): void {
+>(action: T, actionBatchId: string, index: i32, event: R): void {
   let actionEntity = getOrCreateActionEntity(
     action,
-    transactionActionsId,
+    actionBatchId,
     index,
     event
   );
@@ -43,27 +40,27 @@ export function handleAction<
       action.to,
       action.value,
       'Native Token Withdraw',
-      transactionActionsId,
+      actionBatchId,
       index,
       event
     );
     return;
   }
 
-  handleTokenTransfers(action, transactionActionsId, index, event);
+  handleTokenTransfers(action, actionBatchId, index, event);
 }
 
 function getOrCreateActionEntity<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, transactionActionsId: string, index: i32, event: R): Action {
+>(action: T, actionBatchId: string, index: i32, event: R): Action {
   const deterministicActionId = generateDeterministicActionId(
     event.params.actor,
     event.address,
     event.params.callId,
     index
   );
-  const actionId = generateTransactionActionEntityId(
+  const actionId = generateActionEntityId(
     event.params.actor,
     event.address,
     event.params.callId,
@@ -77,7 +74,7 @@ function getOrCreateActionEntity<
   entity.to = action.to;
   entity.value = action.value;
   entity.data = action.data;
-  entity.transactionActions = transactionActionsId;
+  entity.actionBatch = actionBatchId;
   entity.dao = generateDaoEntityId(event.address);
 
   return entity;
@@ -87,14 +84,14 @@ function getOrCreateActionEntity<
  * Determines if the action is an ERC20, ERC721 or ERC1155 transfer and calls the appropriate handler if so.
  * Does nothing if the action is not a recognised token transfer.
  * @param action the action to validate
- * @param transactionActionsId the id container for a single set of executed actions
+ * @param actionBatchId the id container for a single set of executed actions
  * @param actionIndex the index number of the action inside the executed batch
  * @param event the Executed event emitting the event
  */
 function handleTokenTransfers<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, transactionActionsId: string, actionIndex: i32, event: R): void {
+>(action: T, actionBatchId: string, actionIndex: i32, event: R): void {
   const methodSig = getMethodSignature(action.data);
 
   let handledByErc721: bool = false;
@@ -105,7 +102,7 @@ function handleTokenTransfers<
       action.to,
       event.address,
       action.data,
-      transactionActionsId,
+      actionBatchId,
       actionIndex,
       event
     );
@@ -116,7 +113,7 @@ function handleTokenTransfers<
       action.to,
       event.address,
       action.data,
-      transactionActionsId,
+      actionBatchId,
       actionIndex,
       event
     );
@@ -126,7 +123,7 @@ function handleTokenTransfers<
     handleERC20Action(
       action.to,
       event.address,
-      transactionActionsId,
+      actionBatchId,
       action.data,
       actionIndex,
       event

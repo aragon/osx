@@ -9,7 +9,7 @@ import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
  * This should be unique but due to callId being passed by the user, it is not guaranteed.
  * Clients can use this ID to filter to specific executions, but should check for duplicates.
  */
-export function generateTransactionActionsDeterministicId(
+export function generateDeterministicActionBatchId(
   caller: Address,
   daoAddress: Address,
   callId: Bytes
@@ -22,7 +22,7 @@ export function generateTransactionActionsDeterministicId(
 }
 
 /**
- * TODO move to osx-commons to replace the TransactionActionsProposalEntityId
+ * TODO move to osx-commons to replace the ActionBatchProposalEntityId
  * @param caller - The address (plugin or otherwise) that called `execute`
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
@@ -33,7 +33,7 @@ export function generateTransactionActionsDeterministicId(
  * This will be globally unique to avoid data loss but cannot be known ahead of execution due
  * to inclusion of Tx data.
  */
-export function generateTransactionActionsEntityId(
+export function generateActionBatchEntityId(
   caller: Address,
   daoAddress: Address,
   callId: Bytes,
@@ -41,7 +41,7 @@ export function generateTransactionActionsEntityId(
   transactionLogIndex: BigInt
 ): string {
   return [
-    generateTransactionActionsDeterministicId(caller, daoAddress, callId),
+    generateDeterministicActionBatchId(caller, daoAddress, callId),
     txHash.toHexString(),
     transactionLogIndex.toHexString(),
   ].join('_');
@@ -84,7 +84,7 @@ export function generateDeterministicActionId(
  * This will be globally unique to avoid data loss but cannot be known ahead of execution due
  * to inclusion of Tx data.
  */
-export function generateTransactionActionEntityId(
+export function generateActionEntityId(
   caller: Address,
   daoAddress: Address,
   callId: Bytes,

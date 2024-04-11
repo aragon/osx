@@ -141,7 +141,7 @@ export function handleERC721Action(
   token: Address,
   dao: Address,
   data: Bytes,
-  transactionActionsId: string,
+  actionBatchId: string,
   actionIndex: number,
   event: ethereum.Event
 ): bool {
@@ -165,7 +165,7 @@ export function handleERC721Action(
     contract,
     dao,
     event,
-    transactionActionsId,
+    actionBatchId,
     actionIndex
   );
 
@@ -226,7 +226,7 @@ function createERC721Transfer(
   contract: ERC721Contract,
   dao: Address,
   event: ethereum.Event,
-  transactionActionsId: string,
+  actionBatchId: string,
   actionIndex: number
 ): ERC721Transfer {
   let transferEntityId = generateTransferEntityId(
@@ -241,7 +241,7 @@ function createERC721Transfer(
   transfer.dao = daoEntityId;
   transfer.token = contract.id;
   transfer.tokenId = tuple[2].toBigInt();
-  transfer.transactionActions = transactionActionsId;
+  transfer.actionBatch = actionBatchId;
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
 

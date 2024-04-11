@@ -1,13 +1,3 @@
-# This is just for generating introspection query purposes.
-" Byte array, represented as a hexadecimal string. Commonly used for Ethereum hashes and addresses. "
-scalar Bytes
-" Large integers. Used for Ethereum's `uint32`, `int64`, `uint64`, ..., `uint25`6 types. Note: Everything below `uint32`, such as `int32`, `uint24` or `int8` is represented as `i32`. "
-scalar BigInt
-" Query type, required to generate introspection query. "
-type Query @entity {
-  id: ID!
-}
-
 # Types
 
 #############################
@@ -237,7 +227,7 @@ interface TokenTransfer {
   type: TransferType!
 
   " The associated Execution container on the DAO, if applicable. If deposited using the DAO `deposit` function then will be empty. "
-  transctionActions: TransactionActions
+  actionBatch: ActionBatch
 
   " The hash of the transfer to track the transaction. "
   txHash: Bytes!
@@ -269,7 +259,7 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   to: Bytes!
 
   " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
-  transactionActions: TransactionActions
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -304,7 +294,7 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   to: Bytes!
 
   " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
-  transactionActions: TransactionActions
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -345,7 +335,7 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   to: Bytes!
 
   " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
-  transactionActions: TransactionActions
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -380,7 +370,7 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   reference: String!
 
   " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
-  transactionActions: TransactionActions
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -399,14 +389,14 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
 """
 A container for actions executed in batches by the DAO's `execute` function.
 """
-type TransactionActions @entity(immutable: true) {
+type ActionBatch @entity(immutable: true) {
   id: ID!
   # ID without Tx information
   deterministicId: String!
   dao: Dao!
   creator: Bytes!
   metadata: String
-  actions: [Action!]! @derivedFrom(field: "transactionActions")
+  actions: [Action!]! @derivedFrom(field: "actionBatch")
   allowFailureMap: BigInt!
   failureMap: BigInt
   executed: Boolean!
@@ -414,9 +404,6 @@ type TransactionActions @entity(immutable: true) {
   executionTxHash: Bytes
 }
 
-"""
-Temporary entity until Actions have been removed as part of the split
-"""
 type Action @entity(immutable: true) {
   " Concatenation caller, daoAddress, callId, actionIdx, transactionHash and txLogIndex. Joined by '_'. "
   id: ID!
@@ -425,7 +412,7 @@ type Action @entity(immutable: true) {
   deterministicId: String!
 
   " container for the actions executed in batches by the DAO's `execute` function. "
-  transactionActions: TransactionActions!
+  actionBatch: ActionBatch!
 
   " The DAO that executed the action. "
   dao: Dao!
@@ -477,7 +464,7 @@ type Dao @entity {
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  transactionActions: [TransactionActions!]! @derivedFrom(field: "dao")
+  actionBatch: [ActionBatch!]! @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")

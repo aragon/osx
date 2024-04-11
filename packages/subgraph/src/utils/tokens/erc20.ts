@@ -92,7 +92,7 @@ export function updateERC20Balance(
 export function handleERC20Action(
   token: Address,
   dao: Address,
-  transactionActionsId: string,
+  actionBatchId: string,
   data: Bytes,
   actionIndex: number,
   event: ethereum.Event
@@ -156,7 +156,7 @@ export function handleERC20Action(
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
   transfer.token = tokenAddress as string;
-  transfer.transactionActions = transactionActionsId;
+  transfer.actionBatch = actionBatchId;
 
   // If from/to both aren't equal to dao, it means
   // dao must have been approved for the `tokenId`

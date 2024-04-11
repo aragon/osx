@@ -1,4 +1,4 @@
-import {generateTransactionActionsEntityId} from '../src/dao/ids';
+import {generateActionBatchEntityId} from '../src/dao/ids';
 import {
   generatePluginEntityId,
   generateProposalEntityId,
@@ -66,7 +66,7 @@ export const PLUGIN_SETUP_ID =
 export const APPLIED_PLUGIN_SETUP_ID =
   '0x00000000cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 
-export const TRANSACTION_ACTIONS_ENTITY_ID = generateTransactionActionsEntityId(
+export const TRANSACTION_ACTIONS_ENTITY_ID = generateActionBatchEntityId(
   Address.fromString(CONTRACT_ADDRESS),
   Address.fromString(DAO_ADDRESS),
   Bytes.fromHexString(ONE_BYTES32),
