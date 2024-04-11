@@ -214,7 +214,7 @@ export async function createPluginRepo(
     let events = await pluginRepoRegistry.queryFilter(
       pluginRepoRegistry.filters.PluginRepoRegistered(null, null)
     );
-    const found = events.filter(event => event.args.subdomain == pluginName);
+    const found = events.filter(event => event?.args?.subdomain == pluginName);
     if (found && found.length == 1) {
       hre.aragonPluginRepos[pluginName] = found[0].args.pluginRepo;
       return;
