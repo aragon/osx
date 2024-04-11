@@ -39,8 +39,6 @@ export const TOKEN_SYMBOL = 'symbol';
 export const TOKEN_NAME = 'name';
 
 export const HOUR = '3600';
-export const START_DATE = '1644851000';
-export const END_DATE = '1644852000';
 export const SNAPSHOT_BLOCK = '100';
 
 // Use 1 for testing as default value is anyways 0
@@ -66,7 +64,7 @@ export const PLUGIN_SETUP_ID =
 export const APPLIED_PLUGIN_SETUP_ID =
   '0x00000000cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 
-export const TRANSACTION_ACTIONS_ENTITY_ID = generateActionBatchEntityId(
+export const ACTION_BATCH_ID = generateActionBatchEntityId(
   Address.fromString(CONTRACT_ADDRESS),
   Address.fromString(DAO_ADDRESS),
   Bytes.fromHexString(ONE_BYTES32),

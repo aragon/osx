@@ -1,7 +1,6 @@
 import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 /**
- * TODO move to osx-commons
  * @param caller - The address (plugin or otherwise) that called `execute`
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
@@ -22,7 +21,6 @@ export function generateDeterministicActionBatchId(
 }
 
 /**
- * TODO move to osx-commons to replace the ActionBatchProposalEntityId
  * @param caller - The address (plugin or otherwise) that called `execute`
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The ID of the call, passed by the caller - should be unique but not guaranteed
@@ -48,7 +46,6 @@ export function generateActionBatchEntityId(
 }
 
 /**
- * TODO move to osx-commons
  * @param caller - The address (plugin or otherwise) that called `execute`
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed
@@ -72,7 +69,6 @@ export function generateDeterministicActionId(
 }
 
 /**
- * TODO decide whether to move to OSX commons
  * @param caller - The address (plugin or otherwise) that called `execute`
  * @param daoAddress - The address of the DAO in which the actions were executed
  * @param callId - The bytes32 ID of the call, passed by the caller - should be unique but not guaranteed

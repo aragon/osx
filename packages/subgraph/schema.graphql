@@ -390,8 +390,10 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
 A container for actions executed in batches by the DAO's `execute` function.
 """
 type ActionBatch @entity(immutable: true) {
+  " generateActionBatchEntityId: Concatenation caller, daoAddress, callId, transactionHash and txLogIndex. Joined by '_'. "
   id: ID!
-  # ID without Tx information
+
+  " generateDeterministicActionBatchId: Concatenation caller, daoAddress, callId. Joined by '_'. "
   deterministicId: String!
   dao: Dao!
   creator: Bytes!
@@ -405,10 +407,10 @@ type ActionBatch @entity(immutable: true) {
 }
 
 type Action @entity(immutable: true) {
-  " Concatenation caller, daoAddress, callId, actionIdx, transactionHash and txLogIndex. Joined by '_'. "
+  " generateActionEntityId: Concatenation caller, daoAddress, callId, actionIdx, transactionHash and txLogIndex. Joined by '_'. "
   id: ID!
 
-  " ID as above without Tx information "
+  " generateDeterministicActionId: Concatenation caller, daoAddress, callId, actionIdx. Joined by '_'. "
   deterministicId: String!
 
   " container for the actions executed in batches by the DAO's `execute` function. "
