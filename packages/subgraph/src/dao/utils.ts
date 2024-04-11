@@ -1,10 +1,4 @@
-import {
-  AddresslistVotingProposal,
-  AdminProposal,
-  MultisigProposal,
-  TokenVotingProposal,
-  TransactionAction,
-} from '../../generated/schema';
+import {Action as TransactionAction} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct,
@@ -29,43 +23,6 @@ import {
 } from './ids';
 import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 import {BigInt} from '@graphprotocol/graph-ts';
-
-// AssemblyScript struggles having multiple return types. Due to this,
-// The below seems most effective way.
-export function updateProposalWithFailureMap(
-  proposalId: string,
-  failureMap: BigInt
-): boolean {
-  let tokenVotingProposal = TokenVotingProposal.load(proposalId);
-  if (tokenVotingProposal) {
-    tokenVotingProposal.failureMap = failureMap;
-    tokenVotingProposal.save();
-    return true;
-  }
-
-  let multisigProposal = MultisigProposal.load(proposalId);
-  if (multisigProposal) {
-    multisigProposal.failureMap = failureMap;
-    multisigProposal.save();
-    return true;
-  }
-
-  let addresslistProposal = AddresslistVotingProposal.load(proposalId);
-  if (addresslistProposal) {
-    addresslistProposal.failureMap = failureMap;
-    addresslistProposal.save();
-    return true;
-  }
-
-  let adminProposal = AdminProposal.load(proposalId);
-  if (adminProposal) {
-    adminProposal.failureMap = failureMap;
-    adminProposal.save();
-    return true;
-  }
-
-  return false;
-}
 
 export function handleAction<
   T extends ExecutedActionsStruct,

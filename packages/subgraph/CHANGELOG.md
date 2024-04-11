@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `proposal` to `transactionActions` in ERC20Transfer, ERC721Transfer, ERC1155Transfer and NativeTransfer
 - Removed `startDate` and `endDate` from `TransactionActions`
 
+- Removed `TokenVoting` `Multisig` `Admin` and `AddressList` from the schema
+- Deleted the corresponding handlers and references in code
+- Removed the concept of wrapped ERC20 as these are only relevant in the context of tokenVoting
+- identifyAndFetchOrCreateERC20Entity is just `fetchOrCreateERC20Entity`
+
 ## 1.4.1
 
 ## 1.5.0

@@ -33,7 +33,7 @@ import {
   generateTransactionActionsDeterministicId,
   generateTransactionActionsEntityId,
 } from './ids';
-import {handleAction, updateProposalWithFailureMap} from './utils';
+import {handleAction} from './utils';
 import {
   generateDaoEntityId,
   generatePermissionEntityId,
