@@ -49,6 +49,7 @@ services:
     depends_on:
       - ipfs
       - postgres
+      - hardhat-node
     ports:
       - 8000:${GRAPH_NODE_SERVER_PORT:-8000}
       - 8001:${GRAPH_NODE_SERVER_WS_PORT:-8001}
