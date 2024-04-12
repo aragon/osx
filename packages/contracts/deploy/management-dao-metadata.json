@@ -1,0 +1,15 @@
+{
+  "name": "Aragon Management DAO",
+  "description": "Aragon OSx includes a group of global smart contracts that allow for a DAO ecosystem to be built on top. These contracts will require future improvements and general maintenance. The Management DAO is intended to perform such maintenance tasks and holds the permissions to deliver any new capabilities that are added in the future.",
+  "avatar": "https://ipfs.eth.aragon.network/ipfs/QmVyy3ci7F2zHG6JUJ1XbcwLKuxWrQ6hqNvSnjmDmdYJzP/",
+  "links": [
+    {
+      "name": "Web site",
+      "url": "https://www.aragon.org"
+    },
+    {
+      "name": "Developer Portal",
+      "url": "https://devs.aragon.org/"
+    }
+  ]
+}

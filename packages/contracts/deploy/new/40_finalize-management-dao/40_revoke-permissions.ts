@@ -5,6 +5,9 @@ import {Operation} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
+// Revokes necessary permissions from deployer, but leaves EXECUTE
+// permission currently on the deployer. This is useful for a deployer
+// to install the plugin on managing dao at later time.
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
@@ -34,27 +37,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Revoke `REGISTER_DAO_PERMISSION` from `Deployer`.
-  // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
-  // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `Deployer`.
+  // Revoke `SET_METADATA_PERMISSION` from `Deployer`.
   const revokePermissions = [
     {
       operation: Operation.Revoke,
       where: {name: 'DAORegistryProxy', address: daoRegistryAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'REGISTER_DAO_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
-      who: {name: 'PluginSetupProcessor', address: pspAddress},
-      permission: 'ROOT_PERMISSION',
-    },
-    {
-      operation: Operation.Revoke,
-      where: {name: 'PluginSetupProcessor', address: pspAddress},
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'APPLY_INSTALLATION_PERMISSION',
     },
     {
       operation: Operation.Revoke,
@@ -68,59 +58,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
     },
-    {
-      operation: Operation.Revoke,
-      where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'EXECUTE_PERMISSION',
-    },
   ];
   await managePermissions(managementDaoContract, revokePermissions);
-
-  // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer` on the permission manager of each PluginRepo.
-  for (const repoName in hre.aragonPluginRepos) {
-    const repoAddress = hre.aragonPluginRepos[repoName];
-    const revokePluginRepoPermissions: Permission[] = [];
-    revokePluginRepoPermissions.push({
-      operation: Operation.Revoke,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'ROOT_PERMISSION',
-    });
-
-    revokePluginRepoPermissions.push({
-      operation: Operation.Revoke,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'MAINTAINER_PERMISSION',
-    });
-
-    revokePluginRepoPermissions.push({
-      operation: Operation.Revoke,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'UPGRADE_REPO_PERMISSION',
-    });
-
-    await managePermissions(
-      PluginRepo__factory.connect(repoAddress, deployer),
-      revokePluginRepoPermissions
-    );
-  }
-
-  console.log(
-    `\nManagementDao is no longer owned by the (Deployer: ${deployer.address}),` +
-      ` and all future actions of the (managementDAO: ${managementDAOAddress}) will be handled by the newly installed (Multisig plugin).`
-  );
 };
 export default func;
 func.tags = ['New', 'RevokeManagementPermissionsDAO'];
