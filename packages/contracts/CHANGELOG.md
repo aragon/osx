@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Use `ProxyLib` and `PluginUpgradeableSetup` from `osx-commons-contracts`.
 - Added `VersionComparisonLib` to compare semantic versioning numbers.
 - Inherit `ProtocolVersion` in `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable`, `PluginSetup`, `PermissionCondition`, `PermissionConditionUpgradeable` `PluginSetupProcessor`, `PluginRepoRegistry`, `DAORegistry`, and `ENSSubdomainRegistrar`.
 - Added the `FunctionDeprecated` error to `DAO`.
@@ -17,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for all files.
 - Improved type safety by using `abi.encodeCall` instead of `abi.encodeWithSelector` and the more explicit bracket syntax for permissions.
-- Bumped OpenZeppelin dependencies to `4.9.3`.
+- Bumped OpenZeppelin dependencies to `4.9.5`.
 - Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
 - Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.

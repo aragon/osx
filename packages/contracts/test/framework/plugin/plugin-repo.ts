@@ -8,6 +8,7 @@ import {
   IERC165__factory,
   IPluginRepo__factory,
   IProtocolVersion__factory,
+  PluginUUPSUpgradeableV1Mock__factory,
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
@@ -24,7 +25,6 @@ import {
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {PLUGIN_REPO_PERMISSIONS, getInterfaceId} from '@aragon/osx-commons-sdk';
-import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

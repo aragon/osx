@@ -4,7 +4,8 @@ pragma solidity ^0.8.8;
 
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {PluginUpgradeableSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginUpgradeableSetup.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {DAO} from "../../../../core/dao/DAO.sol";
@@ -14,16 +15,13 @@ import {AddresslistVoting} from "./AddresslistVoting.sol";
 /// @title AddresslistVotingSetup
 /// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `AddresslistVoting` plugin.
-/// @dev v1.2 (Release 1, Build 2)
+/// @dev v1.2 (Release 1, Build 3)
 /// @custom:security-contact sirt@aragon.org
-contract AddresslistVotingSetup is PluginSetup {
-    /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
-    AddresslistVoting private immutable addresslistVotingBase;
+contract AddresslistVotingSetup is PluginUpgradeableSetup {
+    using ProxyLib for address;
 
     /// @notice The contract constructor, that deploys the `AddresslistVoting` plugin logic contract.
-    constructor() {
-        addresslistVotingBase = new AddresslistVoting();
-    }
+    constructor() PluginUpgradeableSetup(address(new AddresslistVoting())) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
@@ -34,9 +32,8 @@ contract AddresslistVotingSetup is PluginSetup {
         (MajorityVotingBase.VotingSettings memory votingSettings, address[] memory members) = abi
             .decode(_data, (MajorityVotingBase.VotingSettings, address[]));
 
-        // Prepare and Deploy the plugin proxy.
-        plugin = createERC1967Proxy(
-            address(addresslistVotingBase),
+        // Deploy and initialize the plugin UUPS proxy.
+        plugin = IMPLEMENTATION.deployUUPSProxy(
             abi.encodeCall(AddresslistVoting.initialize, (IDAO(_dao), votingSettings, members))
         );
 
@@ -51,7 +48,7 @@ contract AddresslistVotingSetup is PluginSetup {
             where: plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
+            permissionId: AddresslistVoting(IMPLEMENTATION).UPDATE_ADDRESSES_PERMISSION_ID()
         });
 
         permissions[1] = PermissionLib.MultiTargetPermission({
@@ -59,7 +56,7 @@ contract AddresslistVotingSetup is PluginSetup {
             where: plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+            permissionId: AddresslistVoting(IMPLEMENTATION).UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         });
 
         permissions[2] = PermissionLib.MultiTargetPermission({
@@ -67,7 +64,7 @@ contract AddresslistVotingSetup is PluginSetup {
             where: plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            permissionId: AddresslistVoting(IMPLEMENTATION).UPGRADE_PLUGIN_PERMISSION_ID()
         });
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -83,6 +80,19 @@ contract AddresslistVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
+    /// @dev Nothing needs to happen for the update.
+    function prepareUpdate(
+        address _dao,
+        uint16 _currentBuild,
+        SetupPayload calldata _payload
+    )
+        external
+        pure
+        override
+        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
+    {}
+
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
@@ -96,7 +106,7 @@ contract AddresslistVotingSetup is PluginSetup {
             where: _payload.plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
+            permissionId: AddresslistVoting(IMPLEMENTATION).UPDATE_ADDRESSES_PERMISSION_ID()
         });
 
         permissions[1] = PermissionLib.MultiTargetPermission({
@@ -104,7 +114,7 @@ contract AddresslistVotingSetup is PluginSetup {
             where: _payload.plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+            permissionId: AddresslistVoting(IMPLEMENTATION).UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         });
 
         permissions[2] = PermissionLib.MultiTargetPermission({
@@ -112,7 +122,7 @@ contract AddresslistVotingSetup is PluginSetup {
             where: _payload.plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            permissionId: AddresslistVoting(IMPLEMENTATION).UPGRADE_PLUGIN_PERMISSION_ID()
         });
 
         permissions[3] = PermissionLib.MultiTargetPermission({
@@ -122,10 +132,5 @@ contract AddresslistVotingSetup is PluginSetup {
             condition: PermissionLib.NO_CONDITION,
             permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         });
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view returns (address) {
-        return address(addresslistVotingBase);
     }
 }

@@ -22,7 +22,11 @@ import {
   PluginUUPSUpgradeableSetupV1Mock__factory,
   PluginUUPSUpgradeableSetupV1MockBad__factory,
   PluginUUPSUpgradeableSetupV2Mock__factory,
+  PluginUUPSUpgradeableSetupV3Mock__factory,
   PluginUUPSUpgradeableSetupV4Mock__factory,
+  PluginCloneableV1Mock__factory,
+  PluginCloneableV1MockBad__factory,
+  PluginCloneableV2Mock__factory,
   PluginCloneableSetupV1Mock__factory,
   PluginCloneableSetupV2Mock__factory,
   PluginCloneableSetupV1MockBad__factory,
@@ -135,49 +139,64 @@ describe('PluginSetupProcessor', function () {
     PluginUV2 = new PluginUUPSUpgradeableV2Mock__factory(signers[0]);
     PluginUV3 = new PluginUUPSUpgradeableV3Mock__factory(signers[0]);
 
+    const implUV1 = await PluginUV1.deploy();
+    const implUV2 = await PluginUV2.deploy();
+    const implUV3 = await PluginUV3.deploy();
+
     // Deploy PluginUUPSUpgradeableSetupMock
 
     const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
-    setupUV1 = await SetupV1.deploy();
+    setupUV1 = await SetupV1.deploy(implUV1.address);
 
     const PluginUUPSUpgradeableSetupV1MockBad =
       await smock.mock<PluginUUPSUpgradeableSetupV1MockBad__factory>(
         'PluginUUPSUpgradeableSetupV1MockBad'
       );
-    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
+    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy(
+      implUV1.address
+    );
 
     const SetupV2 = await smock.mock<PluginUUPSUpgradeableSetupV2Mock__factory>(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
-    setupUV2 = await SetupV2.deploy();
+    setupUV2 = await SetupV2.deploy(implUV2.address);
 
-    const SetupV3 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
+    const SetupV3 = await smock.mock<PluginUUPSUpgradeableSetupV3Mock__factory>(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
-    setupUV3 = await SetupV3.deploy();
+    setupUV3 = await SetupV3.deploy(implUV3.address);
 
     const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
       'PluginUUPSUpgradeableSetupV4Mock'
     );
-    setupUV4 = await SetupV4.deploy(await setupUV3.implementation());
+    setupUV4 = await SetupV4.deploy(implUV3.address);
 
     // Deploy PluginCloneableSetupMock
+    const implCV1 = await new PluginCloneableV1Mock__factory(
+      signers[0]
+    ).deploy();
     const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
       'PluginCloneableSetupV1Mock'
     );
-    setupCV1 = await SetupC1.deploy();
+    setupCV1 = await SetupC1.deploy(implCV1.address);
 
+    const implCV1Bad = await new PluginCloneableV1MockBad__factory(
+      signers[0]
+    ).deploy();
     const SetupC1Bad = await smock.mock<PluginCloneableSetupV1MockBad__factory>(
       'PluginCloneableSetupV1MockBad'
     );
-    setupCV1Bad = await SetupC1Bad.deploy();
+    setupCV1Bad = await SetupC1Bad.deploy(implCV1Bad.address);
 
+    const implCV2 = await new PluginCloneableV2Mock__factory(
+      signers[0]
+    ).deploy();
     const SetupC2 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
       'PluginCloneableSetupV2Mock'
     );
-    setupCV2 = await SetupC2.deploy();
+    setupCV2 = await SetupC2.deploy(implCV2.address);
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(signers[0]);

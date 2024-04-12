@@ -8,14 +8,15 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
+import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
+import {PluginUpgradeableSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginUpgradeableSetup.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+
 import {GovernanceERC20} from "../../../../token/ERC20/governance/GovernanceERC20.sol";
 import {IGovernanceWrappedERC20} from "../../../../token/ERC20/governance/IGovernanceWrappedERC20.sol";
 import {GovernanceWrappedERC20} from "../../../../token/ERC20/governance/GovernanceWrappedERC20.sol";
-
-import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
-import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
-import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
 
 import {DAO} from "../../../../core/dao/DAO.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
@@ -26,13 +27,10 @@ import {TokenVoting} from "./TokenVoting.sol";
 /// @notice The setup contract of the `TokenVoting` plugin.
 /// @dev v1.2 (Release 1, Build 2)
 /// @custom:security-contact sirt@aragon.org
-contract TokenVotingSetup is PluginSetup {
+contract TokenVotingSetup is PluginUpgradeableSetup {
     using Address for address;
-    using Clones for address;
+    using ProxyLib for address;
     using ERC165Checker for address;
-
-    /// @notice The address of the `TokenVoting` base contract.
-    TokenVoting private immutable tokenVotingBase;
 
     /// @notice The address of the `GovernanceERC20` base contract.
     address public immutable governanceERC20Base;
@@ -68,8 +66,7 @@ contract TokenVotingSetup is PluginSetup {
     constructor(
         GovernanceERC20 _governanceERC20Base,
         GovernanceWrappedERC20 _governanceWrappedERC20Base
-    ) {
-        tokenVotingBase = new TokenVoting();
+    ) PluginUpgradeableSetup(address(new TokenVoting())) {
         governanceERC20Base = address(_governanceERC20Base);
         governanceWrappedERC20Base = address(_governanceWrappedERC20Base);
     }
@@ -117,32 +114,36 @@ contract TokenVotingSetup is PluginSetup {
                 // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
                 (supportedIds[0] && !supportedIds[1] && !supportedIds[2])
             ) {
-                token = governanceWrappedERC20Base.clone();
                 // User already has a token. We need to wrap it in
                 // GovernanceWrappedERC20 in order to make the token
                 // include governance functionality.
-                GovernanceWrappedERC20(token).initialize(
-                    IERC20Upgradeable(tokenSettings.addr),
-                    tokenSettings.name,
-                    tokenSettings.symbol
+
+                // Deploy and initialize the `GovernanceWrappedERC20` minimal proxy.
+                token = governanceWrappedERC20Base.deployMinimalProxy(
+                    abi.encodeCall(
+                        GovernanceWrappedERC20.initialize,
+                        (
+                            IERC20Upgradeable(tokenSettings.addr),
+                            tokenSettings.name,
+                            tokenSettings.symbol
+                        )
+                    )
                 );
             }
         } else {
-            // Clone a `GovernanceERC20`.
-            token = governanceERC20Base.clone();
-            GovernanceERC20(token).initialize(
-                IDAO(_dao),
-                tokenSettings.name,
-                tokenSettings.symbol,
-                mintSettings
+            // Deploy and initialize the `GovernanceERC20` minimal proxy.
+            token = governanceERC20Base.deployMinimalProxy(
+                abi.encodeCall(
+                    GovernanceERC20.initialize,
+                    (IDAO(_dao), tokenSettings.name, tokenSettings.symbol, mintSettings)
+                )
             );
         }
 
         helpers[0] = token;
 
-        // Prepare and deploy plugin proxy.
-        plugin = createERC1967Proxy(
-            address(tokenVotingBase),
+        // Deploy and initialize the plugin UUPS proxy.
+        plugin = IMPLEMENTATION.deployUUPSProxy(
             abi.encodeCall(
                 TokenVoting.initialize,
                 (IDAO(_dao), votingSettings, IVotesUpgradeable(token))
@@ -162,7 +163,7 @@ contract TokenVotingSetup is PluginSetup {
             where: plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+            permissionId: TokenVoting(IMPLEMENTATION).UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         });
 
         permissions[1] = PermissionLib.MultiTargetPermission({
@@ -170,7 +171,7 @@ contract TokenVotingSetup is PluginSetup {
             where: plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            permissionId: TokenVoting(IMPLEMENTATION).UPGRADE_PLUGIN_PERMISSION_ID()
         });
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -199,6 +200,19 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
+    /// @dev Nothing needs to happen for the update.
+    function prepareUpdate(
+        address _dao,
+        uint16 _currentBuild,
+        SetupPayload calldata _payload
+    )
+        external
+        pure
+        override
+        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
+    {}
+
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         SetupPayload calldata _payload
@@ -225,7 +239,7 @@ contract TokenVotingSetup is PluginSetup {
             where: _payload.plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+            permissionId: TokenVoting(IMPLEMENTATION).UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         });
 
         permissions[1] = PermissionLib.MultiTargetPermission({
@@ -233,7 +247,7 @@ contract TokenVotingSetup is PluginSetup {
             where: _payload.plugin,
             who: _dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            permissionId: TokenVoting(IMPLEMENTATION).UPGRADE_PLUGIN_PERMISSION_ID()
         });
 
         permissions[2] = PermissionLib.MultiTargetPermission({
@@ -256,11 +270,6 @@ contract TokenVotingSetup is PluginSetup {
                 permissionId: GovernanceERC20(token).MINT_PERMISSION_ID()
             });
         }
-    }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view virtual override returns (address) {
-        return address(tokenVotingBase);
     }
 
     /// @notice Retrieves the interface identifiers supported by the token contract.

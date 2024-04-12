@@ -16,6 +16,7 @@ import {
   DAO,
   Admin__factory,
   AdminSetup__factory,
+  PluginUUPSUpgradeableV1Mock__factory,
   PluginUUPSUpgradeableSetupV2Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
   DAORegistry__factory,
@@ -57,6 +58,7 @@ import {
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
   getInterfaceId,
 } from '@aragon/osx-commons-sdk';
+import {PluginUUPSUpgradeableV2Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -220,7 +222,13 @@ describe('DAOFactory: ', function () {
     // PluginSetupV1
     const PluginUUPSUpgradeableSetupV1Mock =
       new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
-    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
+
+    const implV1 = await new PluginUUPSUpgradeableV1Mock__factory(
+      signers[0]
+    ).deploy();
+    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy(
+      implV1.address
+    );
 
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       'plugin-uupsupgradeable-setup-v1-mock',
@@ -545,7 +553,13 @@ describe('DAOFactory: ', function () {
       // create 2nd version of PluginUUPSUpgradeableSetupV1.
       const PluginUUPSUpgradeableSetupV2Mock =
         new PluginUUPSUpgradeableSetupV2Mock__factory(signers[0]);
-      pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
+
+      const implV2 = await new PluginUUPSUpgradeableV2Mock__factory(
+        signers[0]
+      ).deploy();
+      pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy(
+        implV2.address
+      );
       {
         await pluginRepoMock.createVersion(
           1,

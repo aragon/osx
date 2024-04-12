@@ -1,7 +1,7 @@
 import {ADMIN_INTERFACE_ID} from '../../../../../subgraph/src/utils/constants';
 import {
-  CloneFactory,
-  CloneFactory__factory,
+  ProxyFactory,
+  ProxyFactory__factory,
   Admin__factory,
   IERC165Upgradeable__factory,
   IMembership__factory,
@@ -34,7 +34,7 @@ import {ethers} from 'hardhat';
 describe('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
-  let adminCloneFactory: CloneFactory;
+  let adminCloneFactory: ProxyFactory;
   let dao: any;
   let ownerAddress: string;
   let dummyActions: any;
@@ -58,7 +58,7 @@ describe('Admin', function () {
     dao = await deployNewDAO(signers[0]);
 
     const admin = await new Admin__factory(signers[0]).deploy();
-    adminCloneFactory = await new CloneFactory__factory(signers[0]).deploy(
+    adminCloneFactory = await new ProxyFactory__factory(signers[0]).deploy(
       admin.address
     );
   });
@@ -74,7 +74,7 @@ describe('Admin', function () {
       nonce,
     });
 
-    await adminCloneFactory.deployClone();
+    await adminCloneFactory.deployMinimalProxy([]);
     plugin = AdminFactory.attach(anticipatedPluginAddress);
 
     await dao.grant(
