@@ -2,7 +2,7 @@ import {
   Dao,
   Permission,
   StandardCallback,
-  TransactionActions,
+  ActionBatch,
 } from '../../generated/schema';
 import {
   MetadataSet,
@@ -30,10 +30,10 @@ import {
 } from '../utils/tokens/erc1155';
 import {handleNativeDeposit} from '../utils/tokens/eth';
 import {
-  generateTransactionActionsDeterministicId,
-  generateTransactionActionsEntityId,
+  generateDeterministicActionBatchId,
+  generateActionBatchEntityId,
 } from './ids';
-import {handleAction, updateProposalWithFailureMap} from './utils';
+import {handleAction} from './utils';
 import {
   generateDaoEntityId,
   generatePermissionEntityId,
@@ -85,7 +85,7 @@ export function handleCallbackReceived(event: CallbackReceived): void {
 }
 
 export function handleExecuted(event: Executed): void {
-  const transactionActionsEntityId = generateTransactionActionsEntityId(
+  const actionBatchEntityId = generateActionBatchEntityId(
     event.params.actor /* caller */,
     event.address /* daoAddress */,
     event.params.callId,
@@ -93,29 +93,29 @@ export function handleExecuted(event: Executed): void {
     event.transactionLogIndex
   );
 
-  const deterministicId = generateTransactionActionsDeterministicId(
+  const deterministicId = generateDeterministicActionBatchId(
     event.params.actor /* caller */,
     event.address /* daoAddress */,
     event.params.callId
   );
 
-  const transactionActions = new TransactionActions(transactionActionsEntityId);
-  transactionActions.dao = generateDaoEntityId(event.address);
-  transactionActions.deterministicId = deterministicId;
-  transactionActions.createdAt = event.block.timestamp;
-  transactionActions.creator = event.params.actor;
-  transactionActions.executionTxHash = event.transaction.hash;
+  const actionBatch = new ActionBatch(actionBatchEntityId);
+  actionBatch.dao = generateDaoEntityId(event.address);
+  actionBatch.deterministicId = deterministicId;
+  actionBatch.createdAt = event.block.timestamp;
+  actionBatch.creator = event.params.actor;
+  actionBatch.executionTxHash = event.transaction.hash;
   // Since DAO v1.0.0 doesn't emit allowFailureMap by mistake, we got no choice now.
   // In such case, `allowFailureMap` shouldn't be fully trusted.
-  transactionActions.allowFailureMap = BigInt.zero();
-  transactionActions.executed = true;
-  transactionActions.failureMap = event.params.failureMap;
-  transactionActions.save();
+  actionBatch.allowFailureMap = BigInt.zero();
+  actionBatch.executed = true;
+  actionBatch.failureMap = event.params.failureMap;
+  actionBatch.save();
 
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
-    handleAction(actions[index], transactionActionsEntityId, index, event);
+    handleAction(actions[index], actionBatchEntityId, index, event);
   }
 }
 

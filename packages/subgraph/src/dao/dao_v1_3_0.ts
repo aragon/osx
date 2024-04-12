@@ -1,17 +1,17 @@
-import {TransactionActions} from '../../generated/schema';
+import {ActionBatch} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_3_0/DAO';
 import {
-  generateTransactionActionsDeterministicId,
-  generateTransactionActionsEntityId,
+  generateDeterministicActionBatchId,
+  generateActionBatchEntityId,
 } from './ids';
 import {handleAction} from './utils';
 import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 
 export function handleExecuted(event: Executed): void {
-  let transactionActionsEntityId = generateTransactionActionsEntityId(
+  let actionBatchEntityId = generateActionBatchEntityId(
     event.params.actor,
     event.address,
     event.params.callId,
@@ -19,30 +19,30 @@ export function handleExecuted(event: Executed): void {
     event.transactionLogIndex
   );
 
-  let deterministicId = generateTransactionActionsDeterministicId(
+  let deterministicId = generateDeterministicActionBatchId(
     event.params.actor,
     event.address,
     event.params.callId
   );
 
-  let transactionActions = new TransactionActions(transactionActionsEntityId);
+  let actionBatch = new ActionBatch(actionBatchEntityId);
 
-  transactionActions.dao = generateDaoEntityId(event.address);
-  transactionActions.deterministicId = deterministicId;
-  transactionActions.createdAt = event.block.timestamp;
-  transactionActions.creator = event.params.actor;
-  transactionActions.executionTxHash = event.transaction.hash;
-  transactionActions.allowFailureMap = event.params.allowFailureMap;
-  transactionActions.executed = true;
-  transactionActions.failureMap = event.params.failureMap;
-  transactionActions.save();
+  actionBatch.dao = generateDaoEntityId(event.address);
+  actionBatch.deterministicId = deterministicId;
+  actionBatch.createdAt = event.block.timestamp;
+  actionBatch.creator = event.params.actor;
+  actionBatch.executionTxHash = event.transaction.hash;
+  actionBatch.allowFailureMap = event.params.allowFailureMap;
+  actionBatch.executed = true;
+  actionBatch.failureMap = event.params.failureMap;
+  actionBatch.save();
 
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
     handleAction<ExecutedActionsStruct, Executed>(
       actions[index],
-      transactionActionsEntityId,
+      actionBatchEntityId,
       index,
       event
     );
