@@ -38,7 +38,7 @@ async function registerAndTransferDomain(
     );
   }
 
-  // It could be the case that domain is already owned by dao management which could happen
+  // It could be the case that domain is already owned by the management DAO which could happen
   // if the script succeeded and is re-run again. So avoid transfer which would fail otherwise.
   if (owner === deployer.address) {
     await transferSubnodeChain(
