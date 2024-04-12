@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
-  // grant the deployer execute permissions during deployment. This will be revoked in 40_finalize-management-dao/40_revoke-permissions
+  // grant the deployer execute permissions.
   await managePermissions(managementDaoContract, [
     {
       operation: Operation.Grant,

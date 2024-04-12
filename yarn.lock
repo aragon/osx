@@ -17,7 +17,7 @@
   dependencies:
     tslib "^2.6.2"
 
-"@aragon/osx-commons-contracts@^1.4.0-alpha.3":
+"@aragon/osx-commons-contracts@1.4.0-alpha.3":
   version "1.4.0-alpha.3"
   resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.3.tgz#a199720e225ea1da07303d8609948bb4a926508b"
   integrity sha512-9ygB2QhroeMetRQJUNvvVKAdOxN3Yhxx+yqz1F5Euf4U3VlPtU9Ick9hlDrwTPuWd5ITufmWEiDAo5zDy1A99A==

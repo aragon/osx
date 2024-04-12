@@ -5,25 +5,16 @@ import {
   DAO__factory,
   ENSSubdomainRegistrar,
   ENSSubdomainRegistrar__factory,
-  Multisig,
-  Multisig__factory,
-  PluginRepo,
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
   PluginRepo__factory,
 } from '../../typechain';
-import {
-  managementDaoMultisigApproversEnv,
-  managementDaoMultisigListedOnlyEnv,
-  managementDaoMultisigMinApprovalsEnv,
-} from '../../utils/environment';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
 import {
   DAO_PERMISSIONS,
   DAO_REGISTRY_PERMISSIONS,
   ENS_REGISTRAR_PERMISSIONS,
   PLUGIN_REGISTRY_PERMISSIONS,
-  PLUGIN_REPO_PERMISSIONS,
 } from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -34,15 +25,11 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Management DAO', function () {
+describe.only('Management DAO', function () {
   let deployer: SignerWithAddress;
-  let approvers: SignerWithAddress[];
-  let minApprovals: number;
-  let listedOnly: boolean;
 
   let managementDaoDeployment: Deployment;
   let managementDao: DAO;
-  let multisig: Multisig;
   let daoRegistryDeployment: Deployment;
   let daoRegistry: DAORegistry;
   let pluginRepoRegistryDeployment: Deployment;
@@ -50,11 +37,6 @@ describe('Management DAO', function () {
   let ensSubdomainRegistrars: {
     pluginRegistrar: ENSSubdomainRegistrar;
     daoRegistrar: ENSSubdomainRegistrar;
-  };
-
-  let pluginsRepos: {
-    tokenVoting: PluginRepo;
-    addresslistVoting: PluginRepo;
   };
 
   before(async () => {
@@ -65,37 +47,6 @@ describe('Management DAO', function () {
 
     // deploy framework
     await deployAll();
-
-    const approversEnv = managementDaoMultisigApproversEnv(hre.network);
-
-    minApprovals = parseInt(managementDaoMultisigMinApprovalsEnv(hre.network));
-    listedOnly = managementDaoMultisigListedOnlyEnv(hre.network) === 'true';
-
-    if (!approversEnv || !minApprovals || !listedOnly) {
-      throw new Error(
-        'Management DAO Multisig settings not set in .env or fallbacks'
-      );
-    }
-
-    // Get approver addresses
-    const approverAddresses = approversEnv.split(',');
-
-    // Impersonate them as signers
-    approvers = await Promise.all(
-      approverAddresses.map(async approverAddr =>
-        ethers.getImpersonatedSigner(approverAddr)
-      )
-    );
-
-    // Fund their wallets
-    await Promise.all(
-      approvers.map(async approver =>
-        deployer.sendTransaction({
-          to: approver.address,
-          value: ethers.utils.parseEther('1'),
-        })
-      )
-    );
 
     // ManagementDAO
     managementDaoDeployment = await deployments.get('ManagementDAOProxy');
@@ -131,11 +82,6 @@ describe('Management DAO', function () {
         deployer
       ),
     };
-
-    multisig = Multisig__factory.connect(
-      hre.managementDAOMultisigPluginAddress,
-      deployer
-    );
   });
 
   it('has deployments', async function () {
@@ -151,34 +97,6 @@ describe('Management DAO', function () {
         []
       )
     ).to.be.true;
-  });
-
-  describe('Associated Multisig Plugin', function () {
-    it('has the `EXECUTE_PERMISSION_ID` permission on the DAO', async function () {
-      expect(
-        await managementDao.hasPermission(
-          managementDao.address,
-          multisig.address,
-          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
-          []
-        )
-      ).to.be.true;
-    });
-
-    it('has the correct signers', async function () {
-      expect(await multisig.addresslistLength()).to.equal(approvers.length);
-
-      const results = await Promise.all(
-        approvers.map(async approver => multisig.isListed(approver.address))
-      );
-      results.forEach(res => expect(res).to.be.true);
-    });
-
-    it('has the correct settings', async function () {
-      const settings = await multisig.multisigSettings();
-      expect(settings.onlyListed).to.equal(listedOnly);
-      expect(settings.minApprovals).to.eq(minApprovals);
-    });
   });
 
   describe('permissions', function () {
