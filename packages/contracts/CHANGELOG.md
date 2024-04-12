@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
 - Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.
-- Renamed `managingDAO` during deployment to `managmentDAO`.
+- Renamed `managingDAO` during deployment to `managementDAO`.
 - Aligned contract names during deployment with the names given in `@aragon/osx-commons-configs`.
 
 ### Removed
