@@ -39,9 +39,9 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     NOTE that `NETWORK` must be replaced to the network name you’re trying to deploy to.
     Example would be:
 
-    ```jsx
-    SEPOLIA_DAO_ENS_DOMAIN = testdao.eth;
-    SEPOLIA_PLUGIN_ENS_DOMAIN = testplugin.eth;
+    ```
+    SEPOLIA_DAO_ENS_DOMAIN="testdao.eth"
+    SEPOLIA_PLUGIN_ENS_DOMAIN="testplugin.eth"
     ```
 
     Make sure domains end up with domain suffix, such as .eth or .com or any other suffix that ENS supports).
