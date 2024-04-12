@@ -1,4 +1,5 @@
 import {DAO__factory, DAORegistry__factory} from '../../../typechain';
+import {ENSRegistry__factory} from '../../../typechain/factories/ENSRegistry__factory';
 import {
   daoDomainEnv,
   managementDaoSubdomainEnv,
@@ -7,7 +8,6 @@ import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
 import MANAGEMENT_DAO_METADATA from '../../management-dao-metadata.json';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ENSRegistry__factory} from '../../../typechain/factories/ENSRegistry__factory';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;

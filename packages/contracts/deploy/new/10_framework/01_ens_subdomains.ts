@@ -1,4 +1,5 @@
 import {ENSRegistry__factory} from '../../../typechain';
+import {ENSRegistry} from '../../../typechain/ENSRegistry';
 import {daoDomainEnv, pluginDomainEnv} from '../../../utils/environment';
 import {
   getContractAddress,
@@ -7,10 +8,9 @@ import {
   registerSubnodeRecord,
   transferSubnodeChain,
 } from '../../helpers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ENSRegistry} from '../../../typechain/ENSRegistry';
 
 async function registerAndTransferDomain(
   ensRegistryContract: ENSRegistry,
