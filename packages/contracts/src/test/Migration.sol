@@ -40,21 +40,6 @@ import {PluginRepoRegistry as PluginRepoRegistry_v1_3_0} from "@aragon/osx-v1.3.
 import {ENSSubdomainRegistrar as ENSSubdomainRegistrar_v1_0_0} from "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol";
 import {ENSSubdomainRegistrar as ENSSubdomainRegistrar_v1_3_0} from "@aragon/osx-v1.3.0/framework/utils/ens/ENSSubdomainRegistrar.sol";
 
-import {TokenVoting as TokenVoting_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/majority-voting/token/TokenVoting.sol";
-import {TokenVoting as TokenVoting_v1_3_0} from "@aragon/osx-v1.3.0/plugins/governance/majority-voting/token/TokenVoting.sol";
-
-import {AddresslistVoting as AddresslistVoting_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol";
-import {AddresslistVoting as AddresslistVoting_v1_3_0} from "@aragon/osx-v1.3.0/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol";
-
-import {Multisig as Multisig_v1_0_0} from "@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol";
-import {Multisig as Multisig_v1_3_0} from "@aragon/osx-v1.3.0/plugins/governance/multisig/Multisig.sol";
-
-import {GovernanceERC20 as GovernanceERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceERC20.sol";
-import {GovernanceERC20 as GovernanceERC20_v1_3_0} from "@aragon/osx-v1.3.0/token/ERC20/governance/GovernanceERC20.sol";
-
-import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_0_0} from "@aragon/osx-v1.0.1/token/ERC20/governance/GovernanceWrappedERC20.sol";
-import {GovernanceWrappedERC20 as GovernanceWrappedERC20_v1_3_0} from "@aragon/osx-v1.3.0/token/ERC20/governance/GovernanceWrappedERC20.sol";
-
 // Integration Testing
 import {ProxyFactory} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyFactory.sol";
 

@@ -22,11 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
 - Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.
-- Renamed `managingDAO` during deployment to `managmentDAO`.
+- Renamed `managingDAO` during deployment to `managementDAO`.
 - Aligned contract names during deployment with the names given in `@aragon/osx-commons-configs`.
 
 ### Removed
 
+- Deleted `AddresslistVoting`, `AddresslistVotingSetup` and related metadata.
+- Moved `TokenVoting`, `TokenVotingSetup` and related metadata to the [aragon/token-voting-plugin](https://github.com/aragon/token-voting-plugin) repo.
+- Moved `Multisig`, `MultisigSetup` and related metadata to the [aragon/multisig-plugin](https://github.com/aragon/multisig-plugin) repo.
+- Moved `Admin`, `AdminSetup` and related metadata to the [aragon/admin-plugin](https://github.com/aragon/admin-plugin) repo.
 - Moved
 
   - interfaces `IDAO`, `IPermissionCondition`, `IPlugin`, `IMembership`, `IProposal`, `IPluginSetup`, `IProtocolVersion`,

@@ -1,8 +1,8 @@
 import {
   DAO,
   ActionExecute__factory,
+  ERC20Mock__factory,
   ERC721Mock__factory,
-  GovernanceERC20__factory,
   ERC1155Mock__factory,
   DAO__factory,
 } from '../../typechain';
@@ -92,7 +92,7 @@ export function getERC20TransferAction(
   to: string,
   amount: number | BigNumber
 ) {
-  const iface = new ethers.utils.Interface(GovernanceERC20__factory.abi);
+  const iface = new ethers.utils.Interface(ERC20Mock__factory.abi);
 
   const encodedData = iface.encodeFunctionData('transfer', [to, amount]);
   return {

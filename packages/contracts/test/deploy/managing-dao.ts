@@ -55,8 +55,6 @@ describe('Management DAO', function () {
   let pluginsRepos: {
     tokenVoting: PluginRepo;
     addresslistVoting: PluginRepo;
-    admin: PluginRepo;
-    multisig: PluginRepo;
   };
 
   before(async () => {
@@ -130,25 +128,6 @@ describe('Management DAO', function () {
       ),
       pluginRegistrar: ENSSubdomainRegistrar__factory.connect(
         (await deployments.get('PluginENSSubdomainRegistrarProxy')).address,
-        deployer
-      ),
-    };
-
-    pluginsRepos = {
-      tokenVoting: PluginRepo__factory.connect(
-        hre.aragonPluginRepos.TokenVotingRepoProxy,
-        deployer
-      ),
-      addresslistVoting: PluginRepo__factory.connect(
-        hre.aragonPluginRepos.AddresslistVotingRepoProxy,
-        deployer
-      ),
-      admin: PluginRepo__factory.connect(
-        hre.aragonPluginRepos.AdminRepoProxy,
-        deployer
-      ),
-      multisig: PluginRepo__factory.connect(
-        hre.aragonPluginRepos.MultisigRepoProxy,
         deployer
       ),
     };
@@ -255,100 +234,6 @@ describe('Management DAO', function () {
           []
         )
       ).to.be.true;
-    });
-
-    context('Multisig Repo', async function () {
-      it('has permission to upgrade the TokenVoting PluginRepo', async function () {
-        expect(
-          await pluginsRepos.tokenVoting.isGranted(
-            pluginsRepos.tokenVoting.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-
-      it('has permission to maintain the repo', async function () {
-        expect(
-          await pluginsRepos.tokenVoting.isGranted(
-            pluginsRepos.tokenVoting.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-    });
-
-    context('AddresslistVoting Repo', async function () {
-      it('has permission to upgrade the repo', async function () {
-        expect(
-          await pluginsRepos.addresslistVoting.isGranted(
-            pluginsRepos.addresslistVoting.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-      it('has permission to maintain the repo', async function () {
-        expect(
-          await pluginsRepos.addresslistVoting.isGranted(
-            pluginsRepos.addresslistVoting.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-    });
-
-    context('Admin Repo', async function () {
-      it('has permission to upgrade the repo', async function () {
-        expect(
-          await pluginsRepos.admin.isGranted(
-            pluginsRepos.admin.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-      it('has permission to maintain the repo', async function () {
-        expect(
-          await pluginsRepos.admin.isGranted(
-            pluginsRepos.admin.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-    });
-
-    context('Multisig Repo', async function () {
-      it('has permission to upgrade the repo', async function () {
-        expect(
-          await pluginsRepos.multisig.isGranted(
-            pluginsRepos.multisig.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
-
-      it('has permission to maintain the repo', async function () {
-        expect(
-          await pluginsRepos.multisig.isGranted(
-            pluginsRepos.multisig.address,
-            managementDao.address,
-            PLUGIN_REPO_PERMISSIONS.MAINTAINER_PERMISSION_ID,
-            []
-          )
-        ).to.be.true;
-      });
     });
   });
 });

@@ -66,7 +66,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Install multisig build 2
-  const multisigRepoAddress = hre.aragonPluginRepos.MultisigRepoProxy;
+  const multisigRepoAddress = hre.aragonPluginRepos.MultisigRepoProxy; // TODO
   const versionTag = {
     release: 1,
     build: 2,
