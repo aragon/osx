@@ -25,7 +25,7 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe.only('Management DAO', function () {
+describe('Management DAO', function () {
   let deployer: SignerWithAddress;
 
   let managementDaoDeployment: Deployment;
