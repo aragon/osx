@@ -2,6 +2,7 @@ import {
   IERC165__factory,
   IPluginSetup__factory,
   IProtocolVersion__factory,
+  PluginCloneableV1Mock__factory,
   PluginCloneableSetupV1Mock,
   PluginCloneableSetupV1Mock__factory,
 } from '../../../typechain';
@@ -15,9 +16,12 @@ describe('PluginSetup', function () {
 
   before(async () => {
     const signers = await ethers.getSigners();
-    setupMock = await new PluginCloneableSetupV1Mock__factory(
+    const pluginImplementation = await new PluginCloneableV1Mock__factory(
       signers[0]
     ).deploy();
+    setupMock = await new PluginCloneableSetupV1Mock__factory(
+      signers[0]
+    ).deploy(pluginImplementation.address);
   });
 
   describe('ERC-165', async () => {
