@@ -1,3 +1,32 @@
+import {ERC165 as ERC165Contract} from '../../generated/PluginSetupProcessor/ERC165';
+import {
+  TokenVotingPlugin,
+  AddresslistVotingPlugin,
+  AdminPlugin,
+  MultisigPlugin,
+} from '../../generated/schema';
+import {
+  TokenVoting,
+  AddresslistVoting,
+  Admin,
+  Multisig,
+} from '../../generated/templates';
+import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
+import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
+import {
+  VOTING_MODES,
+  ADMIN_INTERFACE_ID,
+  TOKEN_VOTING_INTERFACE_ID,
+  ADDRESSLIST_VOTING_INTERFACE_ID,
+  MULTISIG_INTERFACE_ID,
+} from '../utils/constants';
+import {supportsInterface} from '../utils/erc165';
+import {
+  fetchOrCreateERC20Entity,
+  fetchOrCreateWrappedERC20Entity,
+  supportsERC20Wrapped,
+} from '../utils/tokens/erc20';
+import {generatePluginEntityId} from '@aragon/osx-commons-subgraph';
 import {
   Address,
   Bytes,
@@ -5,37 +34,8 @@ import {
   ethereum,
   crypto,
   ByteArray,
-  BigInt
+  BigInt,
 } from '@graphprotocol/graph-ts';
-
-import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
-import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
-import {ERC165 as ERC165Contract} from '../../generated/PluginSetupProcessor/ERC165';
-import {
-  TokenVoting,
-  AddresslistVoting,
-  Admin,
-  Multisig
-} from '../../generated/templates';
-import {
-  TokenVotingPlugin,
-  AddresslistVotingPlugin,
-  AdminPlugin,
-  MultisigPlugin
-} from '../../generated/schema';
-import {
-  TOKEN_VOTING_INTERFACE,
-  ADDRESSLIST_VOTING_INTERFACE,
-  ADMIN_INTERFACE,
-  VOTING_MODES,
-  MULTISIG_INTERFACE
-} from '../utils/constants';
-import {supportsInterface} from '../utils/erc165';
-import {
-  fetchERC20,
-  fetchWrappedERC20,
-  supportsERC20Wrapped
-} from '../utils/tokens/erc20';
 
 export const PERMISSION_OPERATIONS = new Map<number, string>()
   .set(0, 'Grant')
@@ -67,14 +67,14 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
     if (!token.reverted) {
       let tokenAddress = token.value;
       if (supportsERC20Wrapped(tokenAddress)) {
-        let contract = fetchWrappedERC20(tokenAddress);
+        let contract = fetchOrCreateWrappedERC20Entity(tokenAddress);
         if (!contract) {
           return;
         }
 
         packageEntity.token = contract.id;
       } else {
-        let contract = fetchERC20(tokenAddress);
+        let contract = fetchOrCreateERC20Entity(tokenAddress);
         if (!contract) {
           return;
         }
@@ -93,9 +93,10 @@ function createTokenVotingPlugin(plugin: Address, daoId: string): void {
 }
 
 function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
+  let pluginEntityId = generatePluginEntityId(plugin);
+  let packageEntity = AddresslistVotingPlugin.load(pluginEntityId);
   if (!packageEntity) {
-    packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    packageEntity = new AddresslistVotingPlugin(pluginEntityId);
     packageEntity.pluginAddress = plugin;
     packageEntity.dao = daoId;
     packageEntity.proposalCount = BigInt.zero();
@@ -173,16 +174,16 @@ export function addPlugin(daoId: string, plugin: Address): void {
 
   let tokenVotingInterfaceSupported = supportsInterface(
     contract,
-    TOKEN_VOTING_INTERFACE
+    TOKEN_VOTING_INTERFACE_ID
   );
   let addresslistInterfaceSupported = supportsInterface(
     contract,
-    ADDRESSLIST_VOTING_INTERFACE
+    ADDRESSLIST_VOTING_INTERFACE_ID
   );
-  let adminInterfaceSupported = supportsInterface(contract, ADMIN_INTERFACE);
+  let adminInterfaceSupported = supportsInterface(contract, ADMIN_INTERFACE_ID);
   let multisigInterfaceSupported = supportsInterface(
     contract,
-    MULTISIG_INTERFACE
+    MULTISIG_INTERFACE_ID
   );
 
   if (tokenVotingInterfaceSupported) {

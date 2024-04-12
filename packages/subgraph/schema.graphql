@@ -1,203 +1,458 @@
 # Types
 
-# Token
+#############################
+########## Tokens ###########
+#############################
 
+"""
+Interface representing a generic token. Each entity implementing this interface can be queried as Token.
+"""
 interface Token {
-  id: ID! # use address as id
+  " The address of the Token Smart Contract. "
+  id: ID!
+
+  " The name of the token, mirrored from the smart contract. "
   name: String
+
+  " The symbol of the token, mirrored from the smart contract. "
   symbol: String
 }
 
+"""
+An [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20), of type Token.
+"""
 type ERC20Contract implements Token @entity(immutable: true) {
-  id: ID! # use address as id
+  " The address of the [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20). "
+  id: ID!
+
+  " The name of the token, mirrored from the smart contract. "
   name: String
+
+  " The symbol of the token, mirrored from the smart contract. "
   symbol: String
+
+  " The number of decimals of the token, mirrored from the smart contract. "
   decimals: Int!
 }
 
-type ERC20WrapperContract implements Token @entity(inmutable: true) {
-  id: ID! # use address as id
+"""
+Wrapped [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20). Used for token voting.
+"""
+type ERC20WrapperContract implements Token @entity(immutable: true) {
+  " The address of the [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20). "
+  id: ID!
+
+  " The name of the wrapped token, mirrored from the smart contract. "
   name: String
+
+  " The symbol of the wrapped token, mirrored from the smart contract. "
   symbol: String
+
+  " The number of decimals of the wrapped token, mirrored from the smart contract. "
   decimals: Int!
+
+  " The underlying [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20) this wrapper represents. "
   underlyingToken: ERC20Contract!
 }
 
+"""
+[ERC721 Token Standard](https://eips.ethereum.org/EIPS/eip-721), Non-Fungible Token (NFT), of type Token.
+"""
 type ERC721Contract implements Token @entity(immutable: true) {
-  id: ID! # use address as id
+  " The address of the [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721). "
+  id: ID!
+
+  " The name of the token, mirrored from the smart contract. "
   name: String
+
+  " The symbol of the token, mirrored from the smart contract. "
   symbol: String
 }
 
+"""
+[ERC1155 Multi-Token Standard](https://eips.ethereum.org/EIPS/eip-1155), fungible, non-fungible, and semi-fungible tokens all in one contract,
+type of Token.
+"""
 type ERC1155Contract implements Token @entity(immutable: true) {
-  id: ID! # use address as id
+  " The address of the [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
+  id: ID!
+
+  " The name of the [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   name: String
+
+  " The symbol of the [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   symbol: String
 }
 
-# Token Balances
+###########################
+##### Token Balances ######
+###########################
+
+"""
+Balance of the DAO for any kind of token. Each entity implementing this interface can be queried as TokenBalance.
+"""
 interface TokenBalance {
-  id: ID! # dao address + token address
+  " The concatenation of DAO Smart contract address and Token Smart Contract address. Joined by '_'. "
+  id: ID!
+
+  " The DAO that holds the Tokens"
   dao: Dao!
+
+  " The block timestamp of the last update (transfer) for this token balance. "
   lastUpdated: BigInt!
 }
 
+"""
+The ERC20 Token balances for the DAO.
+"""
 type ERC20Balance implements TokenBalance @entity {
+  " The concatenation of DAO Smart contract address and Token Smart contract address. Joined by '_'. "
   id: ID!
+
+  " The [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20) instance. "
   token: ERC20Contract!
+
+  " The DAO that holds the ERC20 token. "
   dao: Dao!
+
+  " The amount of ERC20 tokens held by the DAO. "
   balance: BigInt!
+
+  " The block timestamp of the last update (transfer) for this token balance. "
   lastUpdated: BigInt!
 }
 
+"""
+The Native token balances of the DAO, representing the amount of the blockchain's native currency
+(e.g., Ether on Ethereum, MATIC on Polygon) held by the DAO.
+"""
 type NativeBalance implements TokenBalance @entity {
+  " The concatenation of DAO Smart contract address and Token Smart contract address. Joined by '_'. "
   id: ID!
+
+  " The DAO that holds the native tokens"
   dao: Dao!
+
+  " The amount of native tokens held by the DAO. "
   balance: BigInt!
+
+  " The block timestamp of the last update (transfer) for this native token balance. "
   lastUpdated: BigInt!
 }
 
+"""
+The NFT balances of the DAO. Including all Token IDs held by the DAO per [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721).
+"""
 type ERC721Balance implements TokenBalance @entity {
+  " The concatenation of DAO Smart Contract address and [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721) address. Joined by '_'. "
   id: ID!
+
+  " The [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721) instance. "
   token: ERC721Contract!
+
+  " The DAO that holds tokens from a [ERC721 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-721). "
   dao: Dao!
+
+  " The NFTs from one ERC721 Contract held by the DAO. "
   tokenIds: [BigInt!]!
+
+  " The block timestamp of the last update (transfer) for this token balance. "
   lastUpdated: BigInt!
 }
 
+"""
+The ERC1155 Token balances of the DAO. Including all Token IDs and it's amounts held by the DAO per [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155).
+"""
 type ERC1155Balance implements TokenBalance @entity {
+  " The concatenation of DAO Smart Contract address and [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155) address. Joined by '_'. "
   id: ID!
+
+  " The [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155) instance. "
   token: ERC1155Contract!
+
+  " The DAO that holds tokens from a [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   dao: Dao!
+
+  " Balance for each token ID from an [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   balances: [ERC1155TokenIdBalance!]! @derivedFrom(field: "balance")
+
+  " The URI of the [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155). "
   metadataUri: String!
+
+  " The block timestamp of the last update (transfer) for this token balance. "
   lastUpdated: BigInt!
 }
 
+"""
+The DAO token balance for each token within an [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155)
+"""
 type ERC1155TokenIdBalance @entity {
+  " The concatenation of DAO Smart Contract address, [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155) and token ID. Joined by '_'. "
   id: ID!
+
+  " One to Many relationship linking with ERC1155Balance entity. "
   balance: ERC1155Balance!
+
+  " The ID for each different token in an [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155) held by the DAO. "
   tokenId: BigInt!
+
+  " The number of tokens held by the DAO per [ERC1155 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-1155) and token ID. "
   amount: BigInt!
+
+  " The block timestamp of the last update (transfer) for this token balance. "
   lastUpdated: BigInt!
 }
 
-# Token Transfers
+###########################
+##### Token Transfers #####
+###########################
 
+"""
+Classifies the types of transfers from the DAO's point of view.
+"""
 enum TransferType {
-  ExternalTransfer # when from/to are both NOT equal to dao.
+  """
+  When a DAO facilitates a transfer and neither the source nor the destination addresses match the DAO's. The DAO must
+  have token approval to execute the transfer via proposal, acting as an intermediary in the process.
+  """
+  ExternalTransfer
+
+  " A withdrawal form the DAO treasury. Executed by the DAO via proposal calling `transfer`. "
   Withdraw
+
+  """
+  A deposit to the DAO treasury. Using either the DAO `deposit` function or executed by the DAO via proposal calling `transferFrom` as an action to transfer to itself.
+  The DAO must have token approval.
+  """
   Deposit
 }
 
+"""
+Interface representing a generic token transfer associated with the DAO. Each entity implementing this interface can be queried as TokenTransfer (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
+"""
 interface TokenTransfer {
+  " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
   id: ID!
+
+  " The DAO that manages the transfer. "
   dao: Dao!
+
+  " The Ethereum address from which the tokens are being transferred. "
   from: Bytes!
+
+  " The Ethereum address receiving the transfer. "
   to: Bytes!
+
+  " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
+
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
+
+  " The hash of the transfer to track the transaction. "
   txHash: Bytes!
+
+  " The timestamp of the block including transfer. "
   createdAt: BigInt!
 }
 
+"""
+Transfers of ERC20 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
+"""
 type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
+  " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
   id: ID!
+
+  " The DAO that manages the transfer. "
   dao: Dao!
-  token: ERC20Contract!
+
+  " The ERC20 Smart Contract Token entity involved in the transfer. "
+  token: Token!
+
+  " The amount of ERC20 token transferred. "
   amount: BigInt!
+
+  " The Ethereum address from which the ERC20 tokens are being transferred. "
   from: Bytes!
+
+  " The Ethereum address receiving the ERC20 tokens. "
   to: Bytes!
+
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
+
+  " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
+
+  " The hash of the ERC20 token transfer to track the transaction. "
   txHash: Bytes!
+
+  " The timestamp of the block including the ERC20 token transfer. "
   createdAt: BigInt!
 }
 
+"""
+Transfers of ERC721 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
+"""
 type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
+  " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
   id: ID!
+
+  " The DAO that manages the transfer. "
   dao: Dao!
+
+  " The ERC721 Smart Contract Token entity involved in the transfer. "
   token: ERC721Contract!
+
+  " The ID of the transferred token. "
   tokenId: BigInt!
+
+  " The Ethereum address from which the ERC721 token is being transferred. "
   from: Bytes!
+
+  " The Ethereum address receiving the ERC721 token. "
   to: Bytes!
+
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
+
+  " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
+
+  " The hash of the ERC721 token transfer to track the transaction. "
   txHash: Bytes!
+
+  " The timestamp of the block including the ERC721 token transfer . "
   createdAt: BigInt!
 }
 
+"""
+Transfers of ERC1155 token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
+"""
 type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
+  " The concatenation of the transfer transaction hash, the log index and the action index. Joined by '_'. "
   id: ID!
+
+  " The DAO that manages the transfer. "
   dao: Dao!
+
+  " The ERC1155 Smart Contract Token entity involved in the transfer. "
   token: ERC1155Contract!
+
+  " The ID of the transferred token. "
   tokenId: BigInt!
+
+  " The amount of transferred tokens. "
   amount: BigInt!
+
+  " The Ethereum address performing the token transfer. "
   operator: Bytes!
+
+  " The Ethereum address from which the tokens are being transferred. "
   from: Bytes!
+
+  " The Ethereum address receiving the tokens. "
   to: Bytes!
+
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
+
+  " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
+
+  " The hash of the ERC1155 token transfer to track the transaction. "
   txHash: Bytes!
+
+  " The timestamp of the block including the ERC1155 token transfer. "
   createdAt: BigInt!
 }
 
+"""
+Transfers of Native token associated with the DAO, including transfers sent to, received by, or intermediated by the DAO (refer to `Enum` `TransferType` for a better understanding of transfers associated with the DAO meaning).
+"""
 type NativeTransfer implements TokenTransfer @entity(immutable: true) {
+  " The concatenation of the transfer transaction hash, the log index and the action index (set to 0). Joined by '_'. "
   id: ID!
+
+  " The DAO that manages the transfer. "
   dao: Dao!
+
+  " The amount of transferred native tokens . "
   amount: BigInt!
+
+  " The Ethereum address from which the native tokens are being transferred. "
   from: Bytes!
+
+  " The Ethereum address receiving the native tokens. "
   to: Bytes!
+
+  " The reference describing the deposit reason. "
   reference: String!
+
+  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
   proposal: IProposal
+
+  " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
+
+  " The hash of the native token transfer to track the transaction. "
   txHash: Bytes!
+
+  " The timestamp of the native token transfer block. "
   createdAt: BigInt!
 }
 
-# ACL
+#############################
+######## Executions #########
+#############################
 
-type ContractPermissionId @entity(immutable: true) {
-  id: ID! # where + permissionId
-  dao: Dao!
-  where: Bytes!
-  permissionId: Bytes!
-}
-
-# Cannot be immutable because a permission can be revoked and granted in the same TX.
-# This results in an error in the subgraph if the entity is immutable.
-type Permission @entity {
-  "no need to store granted as we can delete permission when revoked"
-  id: ID! # where + permissionId + who
-  dao: Dao!
-  where: Bytes!
-  contractPermissionId: ContractPermissionId!
-  who: Bytes!
-  actor: Bytes!
-  condition: Bytes
-}
-
-# Executions
-
+"""
+Actions are represented by solidity struct and executed by the DAO's `execute` function, resulting in an external call.
+"""
 type Action @entity {
+  " Concatenation of the proposalID and the index of the action. Joined by '_'. "
   id: ID!
+
+  " The address to call. "
   to: Bytes!
+
+  " The native token value to be sent with the call. "
   value: BigInt!
+
+  " The bytes-encoded function selector and calldata for the call. "
   data: Bytes!
+
+  " The DAO that will `execute` the function. "
   dao: Dao!
+
+  " The proposal of the DAO containing the action to be executed. "
   proposal: IProposal!
+
+  " The result obtained from the executed action in `bytes`. "
   execResult: Bytes
 }
 
+"""
+The supported callback functions for ERC standards registered with [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
+"""
 type StandardCallback @entity {
+  " Concatenation of the DAO address and the interfaceID. Joined by '_'. "
   id: ID!
+
+  " The DAO associated with the supported callback functions. "
   dao: Dao!
+
+  " The interface identifier, as specified in [ERC-165](https://eips.ethereum.org/EIPS/eip-165) (XOR of all function selectors in the interface). "
   interfaceId: Bytes!
+
+  " The selector of the registered callback function. "
   callbackSelector: Bytes!
+
+  " The magic number registered for the function signature. "
   magicNumber: Bytes!
 }
 
-# Dao
+# DAO
 
 type Dao @entity {
   id: ID! # use address as id
@@ -210,7 +465,6 @@ type Dao @entity {
   actions: [Action!]! @derivedFrom(field: "dao")
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
-  contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   proposals: [IProposal!]! @derivedFrom(field: "dao")
   trustedForwarder: Bytes
@@ -218,6 +472,25 @@ type Dao @entity {
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
   plugins: [PluginInstallation!]! @derivedFrom(field: "dao")
+}
+
+# ACL
+
+# Cannot be immutable because a permission can be revoked and granted in the same TX.
+# This results in an error in the subgraph if the entity is immutable.
+# No need to store granted as we can delete permission when revoked
+type Permission @entity {
+  id: ID! # emitting contract Address (DAO or PluginRepo) + permissionId + where + who
+  where: Bytes!
+  permissionId: Bytes!
+  who: Bytes!
+  actor: Bytes!
+  condition: Bytes
+
+  # The following attributes is used to create
+  # one-to-many between DAO or PluginRepo to Permission
+  dao: Dao
+  pluginRepo: PluginRepo
 }
 
 # Plugins
@@ -230,6 +503,8 @@ type PluginRepo @entity(immutable: true) {
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
   # Holds all installed and uninstalled installations.
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
+
+  permissions: [Permission!]! @derivedFrom(field: "pluginRepo")
 }
 
 type PluginSetup @entity(immutable: true) {
@@ -307,6 +582,7 @@ type PluginInstallation @entity {
 enum PluginPreparationType {
   Installation
   Update
+  Uninstallation
 }
 
 enum PluginPreparationState {
@@ -407,7 +683,7 @@ type TokenVotingMember @entity {
   plugin: TokenVotingPlugin!
 
   # delegates
-  delegatee: TokenVotingMember!
+  delegatee: TokenVotingMember
   votingPower: BigInt
   # we assume token owners and/or delegatees are members
   delegators: [TokenVotingMember!]! @derivedFrom(field: "delegatee")
@@ -462,7 +738,8 @@ type TokenVotingProposal implements IProposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   creationBlockNumber: BigInt!
-  potentiallyExecutable: Boolean!
+  approvalReached: Boolean!
+  isSignaling: Boolean!
   earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
@@ -537,7 +814,8 @@ type AddresslistVotingProposal implements IProposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   creationBlockNumber: BigInt!
-  potentiallyExecutable: Boolean!
+  approvalReached: Boolean!
+  isSignaling: Boolean!
   earlyExecutable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
@@ -641,7 +919,8 @@ type MultisigProposal implements IProposal @entity {
   snapshotBlock: BigInt!
   minApprovals: Int!
   approvals: Int
-  potentiallyExecutable: Boolean!
+  approvalReached: Boolean!
+  isSignaling: Boolean!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
