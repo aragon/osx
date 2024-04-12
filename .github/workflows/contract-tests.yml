@@ -1,9 +1,16 @@
 name: Contracts Tests
 on:
   push:
+    branches:
+      - main
     paths:
       - 'packages/contracts/**'
       - '.github/workflows/contract-*.yml'
+  pull_request:
+    paths:
+      - 'packages/contracts/**'
+      - '.github/workflows/contract-*.yml'
+  workflow_dispatch:
 
 env:
   working-directory: packages/contracts

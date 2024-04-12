@@ -35,40 +35,6 @@ export const QueryDao = gql`
   }
 `;
 
-export const QueryDaos = gql`
-  query Daos(
-    $limit: Int!
-    $skip: Int!
-    $direction: OrderDirection!
-    $sortBy: Dao_orderBy!
-  ) {
-    daos(
-      first: $limit
-      skip: $skip
-      orderDirection: $direction
-      orderBy: $sortBy
-    ) {
-      id
-      subdomain
-      metadata
-      plugins {
-        appliedPreparation {
-          pluginAddress
-        }
-        appliedPluginRepo {
-          subdomain
-        }
-        appliedVersion {
-          build
-          release {
-            release
-          }
-        }
-      }
-    }
-  }
-`;
-
 /* MARKDOWN
 The return
 

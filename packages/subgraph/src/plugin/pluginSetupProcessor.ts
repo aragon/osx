@@ -11,7 +11,7 @@ import {
   PluginPermission,
   PluginPreparation,
 } from '../../generated/schema';
-import {addPlugin, PERMISSION_OPERATIONS} from './utils';
+import {PERMISSION_OPERATIONS} from './utils';
 import {
   generateDaoEntityId,
   generatePluginEntityId,
@@ -99,8 +99,6 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   pluginEntity.state = 'InstallationPrepared';
   pluginEntity.dao = daoEntityId;
   pluginEntity.save();
-
-  addPlugin(daoEntityId, event.params.plugin);
 }
 
 export function handleInstallationApplied(event: InstallationApplied): void {
@@ -257,8 +255,6 @@ export function handleUpdateApplied(event: UpdateApplied): void {
   pluginEntity.appliedSetupId = event.params.appliedSetupId;
   pluginEntity.state = 'Installed';
   pluginEntity.save();
-
-  addPlugin(daoEntityId, pluginAddress);
 }
 
 export function handleUninstallationPrepared(
