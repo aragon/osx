@@ -3,12 +3,7 @@ import {
   daoDomainEnv,
   managementDaoSubdomainEnv,
 } from '../../../utils/environment';
-import {
-  getContractAddress,
-  getENSAddress,
-  isENSDomainRegistered,
-  uploadToIPFS,
-} from '../../helpers';
+import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
 import MANAGEMENT_DAO_METADATA from '../../management-dao-metadata.json';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
