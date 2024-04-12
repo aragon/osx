@@ -1,9 +1,9 @@
 version: '3'
 services:
   hardhat-node:
-    build: 
+    build:
       context: .
-      dockerfile: hardhat.Dockerfile 
+      dockerfile: hardhat.Dockerfile
     container_name: ${PROJECT_NAME:-local-subgraph}-hardhat-node
     ports:
       - 8545:${HARDHAT_PORT:-8545}
@@ -15,7 +15,7 @@ services:
   ipfs:
     image: ipfs/kubo:${IPFS_VERSION:-v0.27.0}
     container_name: ${PROJECT_NAME:-local-subgraph}-ipfs
-    command: ["daemon", "--migrate=true"]
+    command: ['daemon', '--migrate=true']
     ports:
       - 5001:${IPFS_PORT:-5001}
     volumes:
@@ -63,14 +63,14 @@ services:
       postgres_db: ${POSTGRES_DB:-graph-node}
       ipfs: ${IPFS_HOST:-ipfs}:${IPFS_PORT:-5001}
       ethereum: localhost:http://${HARDHAT_HOST:-hardhat}:${HARDHAT_PORT:-8545}
-      GRAPH_LOG: "info"
+      GRAPH_LOG: 'info'
     volumes:
       - ${GRAPH_NODE_VOLUME_DATA:-./data/graph-node}:/data
     networks:
       internal:
         aliases:
           - ${GRAPH_NODE_HOST:-graph-node}
-    
+
 networks:
   internal:
     name: ${PROJECT_NAME:-local-subgraph}
