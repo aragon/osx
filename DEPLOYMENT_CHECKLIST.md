@@ -8,9 +8,9 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed.
   - In order to run the tests on localhost, add the following in the packages/contracts/.env
-    ```js
-    HARDHAT_DAO_ENS_DOMAIN = testdao.eth;
-    HARDHAT_PLUGIN_ENS_DOMAIN = testpluginrepo.eth;
+    ```
+    HARDHAT_DAO_ENS_DOMAIN="testdao.eth"
+    HARDHAT_PLUGIN_ENS_DOMAIN="testpluginrepo.eth"
     ```
 - [ ] Verify that the deployers wallet has enough funds.
 - [ ] Go to `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
@@ -29,7 +29,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Management DAO is the dao that will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its values as you wish. This is deployed to the IPFS and its cid is stored in the managing dao so users can get information about what this managing dao does.
 - [ ] Ensure to add `ETH_KEY` in the `.env` which is your private key that will be used to deploy all the contracts. Example:
   ```jsx
-  ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` suffix
+  ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` prefix
   ```
 - [ ] Our contracts use ENS, so it’s important that you safely add the following ENS names in the packages/contracts/.env file. <br>
 
