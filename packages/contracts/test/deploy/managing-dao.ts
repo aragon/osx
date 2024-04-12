@@ -43,7 +43,7 @@ describe('Managing DAO', function () {
     contractAddress: string[],
     newImplementationAddress: string
   ) {
-    // create proposal to upgrade to new implementation
+    // execute upgrade actions for the specified contract.
     const data = DAO__factory.createInterface().encodeFunctionData(
       'upgradeTo',
       [newImplementationAddress]
@@ -131,7 +131,7 @@ describe('Managing DAO', function () {
 
     expect(managingDaoV2Deployment.address).not.equal(implementationAddress);
 
-    // create proposal to upgrade to new implementation
+    // upgrade the managing dao contract.
     await executeUpgradeActions(
       [managingDao.address],
       managingDaoV2Deployment.address
@@ -170,7 +170,7 @@ describe('Managing DAO', function () {
       implementationAddress
     );
 
-    // create proposal to upgrade to new implementation
+    // upgrade the daoRegistry contract.
     await executeUpgradeActions(
       [daoRegistry.address],
       daoRegistry_v1_0_0_Deployment.address
@@ -213,7 +213,7 @@ describe('Managing DAO', function () {
       implementationAddress
     );
 
-    // create proposal to upgrade to new implementation
+    // upgrade the pluginRepoRegistry contract.
     await executeUpgradeActions(
       [pluginRepoRegistry.address],
       pluginRepoRegistry_v1_0_0_Deployment.address
@@ -260,7 +260,7 @@ describe('Managing DAO', function () {
       );
     }
 
-    // create proposal to upgrade to new implementation
+    // upgrade the ensSubdomainRegistrar contract.
     await executeUpgradeActions(
       ensSubdomainRegistrars.map(ensSR => ensSR.address),
       ensSubdomainRegistrar_v1_0_0_Deployment.address
