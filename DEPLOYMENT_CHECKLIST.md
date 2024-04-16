@@ -16,18 +16,18 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Verify that the deployers wallet has sufficient funds to complete a protocol deployment.
 - [ ] Go to `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
-  If your chain doesn’t support contract verification:
+  If contract verification is not available for your chain:
 
-  - Ensure that the `deploy` key for ht new network looks exactly like: <br>
+  - Ensure that the `deploy` key for the new network looks exactly like: <br>
     `"deploy": ["./deploy/new"]`
 
   If your chain does support contract verification:
 
   - Define the `deploy` key like: <br>
     `"deploy": ["./deploy/new", "./deploy/verification"]`.
-  - You will also need to define the `ETHERSCAN_KEY` for contract verification on the `.env` file, depending on the chain. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
+  - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
 
-- [ ] The Management DAO will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its human readable values as you wish. This is deployed to the IPFS and the CID will be stored in the managing DAO, so users may get information about it.
+- [ ] The Management DAO will govern the protocol/framework and its rules. Go to `packages/contracts/deploy/management-dao-metadata.json` and update its human readable values as you wish. This is deployed to the IPFS and the CID will be stored in the managing DAO, so users may get information about it.
 - [ ] Update `.env` to add the deployment wallet's private key under `ETH_KEY`. Example:
   ```jsx
   ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` prefix
@@ -37,7 +37,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
   - `NETWORK_DAO_ENS_DOMAIN`
   - `NETWORK_PLUGIN_ENS_DOMAIN`
 
-    NOTE that `NETWORK` must be replaced according to the network name you’re trying to deploy to. Example:
+    NOTE that the `NETWORK` suffix must be replaced according to the network name you’re deploying to. Example:
 
     ```
     SEPOLIA_DAO_ENS_DOMAIN="testdao.eth"
