@@ -13,25 +13,22 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     HARDHAT_PLUGIN_ENS_DOMAIN=testpluginrepo.eth
     MANAGINGDAO_SUBDOMAIN=mgmt-test
     ```
-- [ ] Verify that the deployers wallet has sufficient funds to complete a protocol deployment.
-- [ ] Go to `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
+- [ ] Edit `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
   If contract verification is not available for your chain:
 
   - Ensure that the `deploy` key for the new network looks exactly like: <br>
     `"deploy": ["./deploy/new"]`
 
-  If your chain does support contract verification:
+  If contract verification is available:
 
   - Define the `deploy` key like: <br>
     `"deploy": ["./deploy/new", "./deploy/verification"]`.
   - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
 
-- [ ] The Management DAO will govern the protocol/framework and its rules. Go to `packages/contracts/deploy/management-dao-metadata.json` and update its human readable values as you wish. This is deployed to the IPFS and the CID will be stored in the managing DAO, so users may get information about it.
-- [ ] Update `.env` to add the deployment wallet's private key under `ETH_KEY`. Example:
-  ```jsx
-  ETH_KEY="your-private-key-here"          # without the 0x prefix
-  ```
+- [ ] Define the Management DAO human readable details
+  - Edit `packages/contracts/deploy/management-dao-metadata.json` and update the details as you wish.
+  - The details are pinned on IPFS and the CID will be stored on the Managing DAO contract.
 - [ ] Define the settings of the ENS domain used by OSx.
   - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
 
@@ -50,16 +47,21 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     - A new, unofficial ENS registry will be deployed, along with a resolver
     - No ownership is needed, the Managing DAO will own them
 
-- [ ] Finally, edit `packages/contracts/.env` and add `MANAGINGDAO_SUBDOMAIN`.
+- [ ] Edit `packages/contracts/.env` and add `MANAGINGDAO_SUBDOMAIN`.
   - Define a name for the subdomain, without any suffix.
   - Example: to get `management.testdao.eth` you would define:
 ```env
 MANAGINGDAO_SUBDOMAIN="management"
 ```
+- [ ] Define the the deployment wallet's private key on the `.env` file
+  ```env
+  ETH_KEY="your-private-key-here"          # without the 0x prefix
+  ```
+- [ ] Verify that the deployment wallet has sufficient funds to complete a protocol deployment.
 
 ## Deployment
 
-When all the settings are correctly defined:
+When the settings above are correctly set:
 
 ```sh
 cd packages/contracts               # if needed
