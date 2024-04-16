@@ -3,8 +3,18 @@ import path from 'path';
 import fs from 'fs';
 import util from 'util';
 import {OSX_VERSION_ALIASES} from './osx-versions-aliases';
+import * as dotenv from 'dotenv';
 
 const execPromise = util.promisify(exec);
+
+dotenv.config();
+
+const outDir = './build';
+
+const artifactsDir =
+  process.env.CONTRACTS_TARGET == 'zksync'
+    ? `${outDir}/artifacts-zk`
+    : '${outDir}/artifacts';
 
 async function generateTypechain(src: string, dest: string): Promise<void> {
   const {stdout} = await execPromise(
@@ -24,7 +34,7 @@ async function generateTypechain(src: string, dest: string): Promise<void> {
 
 for (let i = 0; i < OSX_VERSION_ALIASES.length; i++) {
   generateTypechain(
-    `./artifacts/${OSX_VERSION_ALIASES[i]}`,
+    `${artifactsDir}/${OSX_VERSION_ALIASES[i]}`,
     `./typechain/${OSX_VERSION_ALIASES[i]}`
   );
 }

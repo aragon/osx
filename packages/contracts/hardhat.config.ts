@@ -6,9 +6,11 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-verify';
+import '@matterlabs/hardhat-zksync-deploy';
+import '@matterlabs/hardhat-zksync-solc';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-import '@openzeppelin/hardhat-upgrades';
+// import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
@@ -55,6 +57,11 @@ console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
+  zksolc: {
+    version: '1.3.13',
+    compilerSource: 'binary',
+    settings: {},
+  },
   solidity: {
     version: '0.8.17',
     settings: {
@@ -79,6 +86,15 @@ const config: HardhatUserConfig = {
       deploy: ENABLE_DEPLOY_TEST
         ? ['./deploy']
         : ['./deploy/new', './deploy/verification'],
+    },
+    zkTestnet: {
+      url: 'http://localhost:3050',
+      ethNetwork: 'http://localhost:8545',
+      zksync: true,
+      deployPaths: ['./deploy/new'],
+      accounts: [
+        '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110',
+      ],
     },
     ...networks,
   },
@@ -143,8 +159,8 @@ const config: HardhatUserConfig = {
   paths: {
     sources: './src',
     tests: './test',
-    cache: './cache',
-    artifacts: './artifacts',
+    cache: './build/cache',
+    artifacts: './build/artifacts',
     deploy: './deploy',
   },
   docgen: {

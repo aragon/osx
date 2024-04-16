@@ -3,11 +3,20 @@ import path from 'path';
 import fs from 'fs';
 import util from 'util';
 import {OSX_VERSION_ALIASES} from './osx-versions-aliases';
+import * as dotenv from 'dotenv';
 
 const execPromise = util.promisify(exec);
 
+const outDir = './build';
+
+dotenv.config();
+
+const artifactsDir =
+  process.env.CONTRACTS_TARGET == 'zksync'
+    ? `${outDir}/artifacts-zk`
+    : `${outDir}/artifacts`;
+
 async function generateTypechain(): Promise<void> {
-  const artifactsDir = './artifacts';
   const excludedDirs = new Set([path.join(artifactsDir, 'build-info')]);
 
   for (let i = 0; i < OSX_VERSION_ALIASES.length; i++) {
