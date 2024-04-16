@@ -11,7 +11,8 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     ```env
     HARDHAT_DAO_ENS_DOMAIN="testdao.eth"
     HARDHAT_PLUGIN_ENS_DOMAIN="testpluginrepo.eth"
-    MANAGINGDAO_SUBDOMAIN="mgmt-test"
+    
+    MANAGINGDAO_SUBDOMAIN="management"
     ```
 - [ ] Edit `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
@@ -33,8 +34,8 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
   - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
 
     ```env
-    SEPOLIA_DAO_ENS_DOMAIN="testdao.eth"
-    SEPOLIA_PLUGIN_ENS_DOMAIN="testplugin.eth"
+    SEPOLIA_DAO_ENS_DOMAIN="my-dao.eth"
+    SEPOLIA_PLUGIN_ENS_DOMAIN="my-dao.eth"
     ```
 
   - Ensure that domains end with a suffix like `.eth`
@@ -47,11 +48,10 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     - A new, unofficial ENS registry will be deployed, along with a resolver
     - No ownership is needed, the Managing DAO will own them
 
-- [ ] Edit `packages/contracts/.env` and add `MANAGINGDAO_SUBDOMAIN`.
-  - Define a name for the subdomain, without any suffix.
-  - Example: to get `management.testdao.eth` you would define:
+- [ ] If desired, update `MANAGINGDAO_SUBDOMAIN` on `packages/contracts/.env`.
+  - In case you want the Managing DAO to use a different subdomain than the default one (`management`):
 ```env
-MANAGINGDAO_SUBDOMAIN="management"
+MANAGINGDAO_SUBDOMAIN="root"         # would be root.my-dao.eth
 ```
 - [ ] Define the the deployment wallet's private key on the `.env` file
   ```env
