@@ -462,48 +462,103 @@ type StandardCallback @entity {
   magicNumber: Bytes!
 }
 
-# DAO
+#############################
+########### DAO #############
+#############################
 
+"""
+The Aragon DAOs deployed using the DAOFactory `createDAO` function and registered in the DAORegistry.
+"""
 type Dao @entity {
-  id: ID! # use address as id
+  " The address of the deployed DAO contract (your DAO). "
+  id: ID!
+
+  " ENS DAO subdomain, if added while creating the DAO. "
   subdomain: String
+
+  " The address of the creator. Who calls (msg.sender) `createDao` in `DAOFactory.sol`. "
   creator: Bytes!
+
+  " The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824), if added while creating the DAO. "
   daoURI: String
+
+  " Additional information related to the created DAO, if added while creating the DAO. "
   metadata: String
+
+  " Timestamp for the block where the DAO was created. "
   createdAt: BigInt!
+
+  " Tokens held by the DAO. "
   token: ERC20Contract
+
+  " Actions executed by the DAO `execute` function (refer to `Objects/Action` in this documentation site for more information). "
   actions: [Action!]! @derivedFrom(field: "dao")
+
+  " Token transfers associated with the DAO (refer to `Interfaces/TokenTransfer` in this documentation site for more information). "
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
+
+  " DAO balances for all kind of tokens (refer to `Interfaces/TokenBalance` in this documentation site for more information). "
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
+
+  " #TODO "
   permissions: [Permission!]! @derivedFrom(field: "dao")
+
+  " #TODO "
   proposals: [IProposal!]! @derivedFrom(field: "dao")
+
+  " The address of the trusted forwarder required for meta transactions, if added while creating the DAO. "
   trustedForwarder: Bytes
+
+  " Deprecated field. "
   signatureValidator: Bytes
+
+  " Registered callback functions supported by the DAO (refer to `Objects/StandardCallback` in this documentation site for more information). "
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
+  " #TODO "
   plugins: [PluginInstallation!]! @derivedFrom(field: "dao")
 }
 
-# ACL
+#ACL
 
 # Cannot be immutable because a permission can be revoked and granted in the same TX.
 # This results in an error in the subgraph if the entity is immutable.
 # No need to store granted as we can delete permission when revoked
+
+"""
+Aragon permission system, permissions between contracts and wallets allow a DAO to manage and govern its actions.
+A permission specifies an address `who` being allowed to call certain functions on a contract address `where`.
+"""
 type Permission @entity {
+  " Concatenation of the emitting contract Address (DAO or PluginRepo), the `permissionId`, `where` and `who`. Joined by '_'. "
   id: ID! # emitting contract Address (DAO or PluginRepo) + permissionId + where + who
+  " The address of the target contract to grant `who` permission to. "
   where: Bytes!
+
+  ""
   permissionId: Bytes!
+
+  " The address (EOA or contract) to which the permission has already been granted. "
   who: Bytes!
+
   actor: Bytes!
+
+  " The address of the contract containing the conditions which authorize a call by another address. This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface. "
   condition: Bytes
 
   # The following attributes is used to create
   # one-to-many between DAO or PluginRepo to Permission
+
+  " The DAO related to these permissions. "
   dao: Dao
+
+  "  "
   pluginRepo: PluginRepo
 }
 
-# Plugins
+#############################
+######### Plugins ###########
+#############################
 
 type PluginRepo @entity(immutable: true) {
   id: ID! # address
