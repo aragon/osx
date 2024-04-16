@@ -7,11 +7,11 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Run `yarn` in the repository root to install the dependencies.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed.
-  - In order to run the tests on localhost, add the following in the packages/contracts/.env
+  - To run the tests, edit `packages/contracts/.env` to contain:
     ```
     HARDHAT_DAO_ENS_DOMAIN=testdao.eth
     HARDHAT_PLUGIN_ENS_DOMAIN=testpluginrepo.eth
-    MANAGINGDAO_SUBDOMAIN=test
+    MANAGINGDAO_SUBDOMAIN=mgmt-test
     ```
 - [ ] Verify that the deployers wallet has enough funds.
 - [ ] Go to `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
