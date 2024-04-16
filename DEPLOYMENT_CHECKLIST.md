@@ -38,21 +38,21 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     SEPOLIA_PLUGIN_ENS_DOMAIN="my-dao.eth"
     ```
 
-  - Ensure that domains end with a suffix like `.eth`
-  - If the target chain has an official ENS registry:
+    - Ensure that domains end with a suffix like `.eth`
+  - If the target chain does not have an official ENS registry:
+    - A new, unofficial ENS registry will be deployed, along with a resolver
+    - No ownership is needed, the Managing DAO will own them
+  - If the target chain does have an official ENS registry:
     - Ensure that the wallet under `ETH_KEY` owns the domain
     - If you created the domains via the ENS app, they will be owned by an ENS wrapper which would cause the script to fail
       - [Open the ENS app](https://app.ens.domains/) and click `unwrap` for each of these domains.
       - [Example](https://app.ens.domains/morpheusplugin3.eth?tab=more)
-  - If the target chain does not have an official ENS registry:
-    - A new, unofficial ENS registry will be deployed, along with a resolver
-    - No ownership is needed, the Managing DAO will own them
 
 - [ ] If desired, update `MANAGINGDAO_SUBDOMAIN` on `packages/contracts/.env`.
   - In case you want the Managing DAO to use a different subdomain than the default one (`management`):
-```env
-MANAGINGDAO_SUBDOMAIN="root"         # would be root.my-dao.eth
-```
+  ```env
+  MANAGINGDAO_SUBDOMAIN="root"         # would be root.my-dao.eth
+  ```
 - [ ] Define the the deployment wallet's private key on the `.env` file
   ```env
   ETH_KEY="your-private-key-here"          # without the 0x prefix
