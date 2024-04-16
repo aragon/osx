@@ -8,10 +8,10 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed.
   - To run the tests, edit `packages/contracts/.env` to contain:
-    ```
-    HARDHAT_DAO_ENS_DOMAIN=testdao.eth
-    HARDHAT_PLUGIN_ENS_DOMAIN=testpluginrepo.eth
-    MANAGINGDAO_SUBDOMAIN=mgmt-test
+    ```env
+    HARDHAT_DAO_ENS_DOMAIN="testdao.eth"
+    HARDHAT_PLUGIN_ENS_DOMAIN="testpluginrepo.eth"
+    MANAGINGDAO_SUBDOMAIN="mgmt-test"
     ```
 - [ ] Edit `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
@@ -32,7 +32,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Define the settings of the ENS domain used by OSx.
   - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
 
-    ```
+    ```env
     SEPOLIA_DAO_ENS_DOMAIN="testdao.eth"
     SEPOLIA_PLUGIN_ENS_DOMAIN="testplugin.eth"
     ```
