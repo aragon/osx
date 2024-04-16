@@ -13,19 +13,19 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     HARDHAT_PLUGIN_ENS_DOMAIN=testpluginrepo.eth
     MANAGINGDAO_SUBDOMAIN=mgmt-test
     ```
-- [ ] Verify that the deployers wallet has enough funds.
+- [ ] Verify that the deployers wallet has sufficient funds to complete a protocol deployment.
 - [ ] Go to `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
   If your chain doesn’t support contract verification:
 
-  - Make sure that whatever custom network you add into this file, its `deploy` key looks exactly: <br>
+  - Ensure that the `deploy` key for ht new network looks exactly like: <br>
     `"deploy": ["./deploy/new"]`
 
-  If your chain supports contract verification:
+  If your chain does support contract verification:
 
-  - set `deploy` key such as: <br>
+  - Define the `deploy` key like: <br>
     `"deploy": ["./deploy/new", "./deploy/verification"]` .
-    Not only that, you will need to provide the API_KEY or rpc url for contract verification, depending on the chain. Follow the guide https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify in such case.
+    You will also need to define the `ETHERSCAN_KEY` for contract verification on the `.env` file, depending on the chain. Follow the guide https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify in such case.
 
 - [ ] Management DAO is the dao that will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its values as you wish. This is deployed to the IPFS and its cid is stored in the managing dao so users can get information about what this managing dao does.
 - [ ] Ensure to add `ETH_KEY` in the `.env` which is your private key that will be used to deploy all the contracts. Example:
