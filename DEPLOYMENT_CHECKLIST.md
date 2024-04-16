@@ -32,43 +32,41 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
   ```jsx
   ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` prefix
   ```
-- [ ] OSx use of ENS to assign memorable names for DAO's and plugins. Add the following ENS names in the `packages/contracts/.env` file. <br>
-
-  - `NETWORK_DAO_ENS_DOMAIN`
-  - `NETWORK_PLUGIN_ENS_DOMAIN`
-
-    NOTE that the `NETWORK` suffix must be replaced according to the network name you’re deploying to. Example:
+- [ ] Define the settings of the ENS domain used by OSx.
+  - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
 
     ```
     SEPOLIA_DAO_ENS_DOMAIN="testdao.eth"
     SEPOLIA_PLUGIN_ENS_DOMAIN="testplugin.eth"
     ```
 
-    Ensure that domains end with a suffix like `.eth`
+  - Ensure that domains end with a suffix like `.eth`
+  - If the target chain has an official ENS registry:
+    - Ensure that the wallet under `ETH_KEY` owns the domain
+    - If you created the domains via the ENS app, they will be owned by an ENS wrapper which would cause the script to fail
+      - Ensure to go [open the ENS app](https://app.ens.domains/) and click `unwrap` for each of these domains.
+      - [Example](https://app.ens.domains/morpheusplugin3.eth?tab=more)
+  - If the target chain does not have an official ENS registry:
+    - A new, unofficial ENS registry and a Resolver will be deployed
+    - No ownership is needed, the Managing DAO will own them
 
-  - If the chain you’re deploying to already has official ENS registry, then follow the below rules. <br>
-    - **IMPORTANT 1: The ENS domain(ex: testdao.eth and testplugin.eth**) must be owned by the deployer address, otherwise the script will fail miserably, so make sure that whatever domains you add, deployer owns those before running the deploy script. <br>
-    - **IMPORTANT 2:** Note that if you created the domains through ENS App website, that means they will be owned by a ENS wrapper which would also cause our script to fail, so make sure to go to ens app and click `unwrap` for each of these domains. `unwrap` can be found here - [https://app.ens.domains/morpheusplugin.eth?tab=more](https://app.ens.domains/morpheusplugin3.eth?tab=more)
-  - If the chain you’re deploying to doesn’t have the ENS registry, then: <br>
-    - The script will deploy ENS Registry and Resolver contracts. In this scenario, the domains don’t need to be owned by deployer and the domain and also .eth domain itself both get transferred to the managing dao. I.e., if you set a domain such as “test.eth”, the managing dao will become the owner of both “test.eth” and “.eth”.
-      Every dao and plugin-repos(not plugins, but plugin-repos) that will be deployed by developers and users through your framework will automatically get ENS record such as:
-      daos will get: `dao_name.testdao.eth => daoAddress`
-      plugin-repos will get: `plugin_repo_name.testplugin.eth => pluginRepoAddress`
-      So basically, users’ domains are registered under your main domains.
-
-- [ ] The last thing is to add `MANAGINGDAO_SUBDOMAIN` in the packages/contracts/.env file as well. This will be the ENS name that your managing dao will get. Make sure to NOT add any suffix. <br>
-      Ex: your managing dao would get: `management.testdao.eth` ens name.
-
+- [ ] Finally, edit `packages/contracts/.env` and add `MANAGINGDAO_SUBDOMAIN`.
+  - Define a name for the subdomain, without any suffix.
+  - Example: to get `management.testdao.eth` you would define:
 ```jsx
 MANAGINGDAO_SUBDOMAIN = management;
 ```
 
 ---
 
-Once all details are correctly set:
+When all the settings are correctly defined:
 
-run `yarn deploy --network NETWORK` in `packages/contracts` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `yarn deploy --network mainnet`).
+```sh
+cd packages/contracts               # if needed
+yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, etc
+```
 
-- NOTE that after the script is run and finished, deployer will be the only one, having `EXECUTE_PERMISSION` on your managing dao. This allows you to deploy/install plugin separately, but note that the same deployer's private key must be used for the plugin deployment/installation. After the plugin is installed, it's important to revoke `EXECUTE_PERMISSION` on the deployer.
+
+- NOTE that after the script is run and finished, deployer will be the only one, having `ROOT_PERMISSION` on your managing dao. This allows you to deploy/install plugin separately, but note that the same deployer's private key must be used for the plugin deployment/installation. After the plugin is installed, it's important to revoke `EXECUTE_PERMISSION` on the deployer.
 - In case the script fails in the middle, try to rerun it again, in which case, it won’t start deploying contracts from scratch, but re-use already deployed contracts.
 - If everything worked smoothly, all the deployed contracts' addresses can be found in the `packages/contracts/deployed_contracts.json`.
