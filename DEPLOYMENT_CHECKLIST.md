@@ -24,28 +24,27 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
   If your chain does support contract verification:
 
   - Define the `deploy` key like: <br>
-    `"deploy": ["./deploy/new", "./deploy/verification"]` .
-    You will also need to define the `ETHERSCAN_KEY` for contract verification on the `.env` file, depending on the chain. Follow the guide https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify in such case.
+    `"deploy": ["./deploy/new", "./deploy/verification"]`.
+  - You will also need to define the `ETHERSCAN_KEY` for contract verification on the `.env` file, depending on the chain. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
 
-- [ ] Management DAO is the dao that will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its values as you wish. This is deployed to the IPFS and its cid is stored in the managing dao so users can get information about what this managing dao does.
-- [ ] Ensure to add `ETH_KEY` in the `.env` which is your private key that will be used to deploy all the contracts. Example:
+- [ ] The Management DAO will govern the protocol/framework and its rules. So go to `packages/contracts/deploy/management-dao-metadata.json` and update its human readable values as you wish. This is deployed to the IPFS and the CID will be stored in the managing DAO, so users may get information about it.
+- [ ] Update `.env` to add the deployment wallet's private key under `ETH_KEY`. Example:
   ```jsx
   ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` prefix
   ```
-- [ ] Our contracts use ENS, so it’s important that you safely add the following ENS names in the packages/contracts/.env file. <br>
+- [ ] OSx use of ENS to assign memorable names for DAO's and plugins. Add the following ENS names in the `packages/contracts/.env` file. <br>
 
   - `NETWORK_DAO_ENS_DOMAIN`
   - `NETWORK_PLUGIN_ENS_DOMAIN`
 
-    NOTE that `NETWORK` must be replaced to the network name you’re trying to deploy to.
-    Example would be:
+    NOTE that `NETWORK` must be replaced according to the network name you’re trying to deploy to. Example:
 
     ```
     SEPOLIA_DAO_ENS_DOMAIN="testdao.eth"
     SEPOLIA_PLUGIN_ENS_DOMAIN="testplugin.eth"
     ```
 
-    Make sure domains end up with domain suffix, such as .eth or .com or any other suffix that ENS supports).
+    Ensure that domains end with a suffix like `.eth`
 
   - If the chain you’re deploying to already has official ENS registry, then follow the below rules. <br>
     - **IMPORTANT 1: The ENS domain(ex: testdao.eth and testplugin.eth**) must be owned by the deployer address, otherwise the script will fail miserably, so make sure that whatever domains you add, deployer owns those before running the deploy script. <br>
