@@ -2,7 +2,7 @@
 
 This checklist is seen as a guide to deploy the contracts to a new chain.
 
-## Pre-Deployment
+## Pre deployment
 
 - [ ] Run `yarn` in the repository root to install the dependencies.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
@@ -57,7 +57,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 MANAGINGDAO_SUBDOMAIN = management;
 ```
 
----
+## Deployment
 
 When all the settings are correctly defined:
 
@@ -66,7 +66,11 @@ cd packages/contracts               # if needed
 yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, etc
 ```
 
+## Post deployment
 
-- NOTE that after the script is run and finished, deployer will be the only one, having `ROOT_PERMISSION` on your managing dao. This allows you to deploy/install plugin separately, but note that the same deployer's private key must be used for the plugin deployment/installation. After the plugin is installed, it's important to revoke `EXECUTE_PERMISSION` on the deployer.
-- In case the script fails in the middle, try to rerun it again, in which case, it won’t start deploying contracts from scratch, but re-use already deployed contracts.
-- If everything worked smoothly, all the deployed contracts' addresses can be found in the `packages/contracts/deployed_contracts.json`.
+- After the script has exited, the deployment wallet will be the only one with `ROOT_PERMISSION` on your Managing DAO.
+  - This allows the deployent wallet to manually install plugins to it.
+  - After the required plugins are installed, `ROOT_PERMISSION` has to be revoked on the deployment wallet.
+- Should the script encounter any issues, the deployment should be re-run again.
+  - The script would detect and re-use any already deployed contracts.
+- After the process completes, check out the `packages/contracts/deployed_contracts.json` file to see the deployed contract addresses.
