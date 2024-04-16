@@ -30,7 +30,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] The Management DAO will govern the protocol/framework and its rules. Go to `packages/contracts/deploy/management-dao-metadata.json` and update its human readable values as you wish. This is deployed to the IPFS and the CID will be stored in the managing DAO, so users may get information about it.
 - [ ] Update `.env` to add the deployment wallet's private key under `ETH_KEY`. Example:
   ```jsx
-  ETH_KEY = YOUR_PRIVATE_KEY; // without `0x` prefix
+  ETH_KEY="your-private-key-here"          # without the 0x prefix
   ```
 - [ ] Define the settings of the ENS domain used by OSx.
   - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
@@ -44,17 +44,17 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
   - If the target chain has an official ENS registry:
     - Ensure that the wallet under `ETH_KEY` owns the domain
     - If you created the domains via the ENS app, they will be owned by an ENS wrapper which would cause the script to fail
-      - Ensure to go [open the ENS app](https://app.ens.domains/) and click `unwrap` for each of these domains.
+      - [Open the ENS app](https://app.ens.domains/) and click `unwrap` for each of these domains.
       - [Example](https://app.ens.domains/morpheusplugin3.eth?tab=more)
   - If the target chain does not have an official ENS registry:
-    - A new, unofficial ENS registry and a Resolver will be deployed
+    - A new, unofficial ENS registry will be deployed, along with a resolver
     - No ownership is needed, the Managing DAO will own them
 
 - [ ] Finally, edit `packages/contracts/.env` and add `MANAGINGDAO_SUBDOMAIN`.
   - Define a name for the subdomain, without any suffix.
   - Example: to get `management.testdao.eth` you would define:
-```jsx
-MANAGINGDAO_SUBDOMAIN = management;
+```env
+MANAGINGDAO_SUBDOMAIN="management"
 ```
 
 ## Deployment
