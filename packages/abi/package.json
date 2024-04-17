@@ -1,0 +1,15 @@
+{
+  "name": "abi",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "generate:abi": "./scripts/generate-abi.sh"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@wagmi/cli": "^2.1.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
