@@ -17,6 +17,7 @@ import {
 import {generateMemberEntityId, generateVoterEntityId} from '../../utils/ids';
 import {
   generateActionEntityId,
+  generateEntityIdFromAddress,
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
@@ -102,6 +103,7 @@ export function _handleProposalCreated(
 export function handleApproved(event: Approved): void {
   let memberAddress = event.params.approver;
   let pluginAddress = event.address;
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
   let memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
   let pluginProposalId = event.params.proposalId;
   let proposalEntityId = generateProposalEntityId(
@@ -117,8 +119,9 @@ export function handleApproved(event: Approved): void {
     MultisigProposalApprover.load(approverProposalId);
   if (!approverProposalEntity) {
     approverProposalEntity = new MultisigProposalApprover(approverProposalId);
-    approverProposalEntity.approver = memberEntityId;
     approverProposalEntity.proposal = proposalEntityId;
+    approverProposalEntity.plugin = pluginEntityId;
+    approverProposalEntity.address = generateEntityIdFromAddress(memberAddress);
   }
   approverProposalEntity.createdAt = event.block.timestamp;
   approverProposalEntity.save();

@@ -229,8 +229,8 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   assert.fieldEquals(
     'MultisigProposalApprover',
     voterEntityId,
-    'approver',
-    memberEntityId
+    'address',
+    ADDRESS_ONE
   );
   assert.fieldEquals(
     'MultisigProposalApprover',
@@ -243,6 +243,13 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     voterEntityId,
     'createdAt',
     event.block.timestamp.toString()
+  );
+
+  assert.fieldEquals(
+    'MultisigProposalApprover',
+    voterEntityId,
+    'plugin',
+    Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
 
   // check proposal

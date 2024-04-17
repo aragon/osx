@@ -888,16 +888,24 @@ type MultisigPlugin implements IPlugin @entity {
 }
 
 type MultisigApprover @entity {
+  """
+  Current Approver of the multisig
+  """
   id: ID! # plugin_address + member_address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
   plugin: MultisigPlugin!
 }
 
 type MultisigProposalApprover @entity(immutable: true) {
-  "ApproverProposal for Many-to-Many"
+  """
+  An approver for a specific multisig proposal
+  Will typically also be the address of a MultisigApprover
+  But will also store historical approvers if the address
+  was later deleted.
+  """
   id: ID! # approver + proposal
-  approver: MultisigApprover!
+  address: String! # address as string to facilitate filtering by address on the UI
+  plugin: MultisigPlugin!
   proposal: MultisigProposal!
   createdAt: BigInt!
 }
