@@ -1,5 +1,6 @@
 import {ENSRegistry, ENSRegistry__factory} from '../../../typechain';
 import {
+  ENS_ADDRESSES,
   getContractAddress,
   getENSAddress,
   getPublicResolverAddress,
@@ -20,16 +21,6 @@ async function registerAndTransferDomain(
   ethers: any
 ) {
   let owner = await ensRegistryContract.owner(node);
-
-  // node hasn't been registered yet
-  if (owner === ethers.constants.AddressZero) {
-    owner = await registerSubnodeRecord(
-      domain,
-      deployer,
-      await getENSAddress(hre),
-      await getPublicResolverAddress(hre)
-    );
-  }
 
   if (owner !== managingDAOAddress && owner !== deployer.address) {
     throw new Error(
