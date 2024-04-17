@@ -61,3 +61,6 @@ export async function extractFactoryDepsByHardhatDeploy(
   }
   return factoryDeps;
 }
+
+// exports dummy function for hardhat-deploy. Otherwise we would have to move this file
+export default function () {}

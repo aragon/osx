@@ -37,7 +37,10 @@ for (const network of Object.keys(networks)) {
 
 task('build-contracts').setAction(async (args, hre) => {
   await hre.run('compile');
-  if (hre.network.name === 'zkTestnet') {
+  if (
+    hre.network.name === 'zkTestnet' ||
+    hre.network.name === 'zkLocalTestnet'
+  ) {
     let allArtifacts = await hre.artifacts.getAllFullyQualifiedNames();
     for (let i = 0; i < allArtifacts.length; i++) {
       let artifact = await hre.artifacts.readArtifact(allArtifacts[i]);
@@ -126,14 +129,22 @@ const config: HardhatUserConfig = {
         ? ['./deploy']
         : ['./deploy/new', './deploy/verification'],
     },
-    zkTestnet: {
+    zkLocalTestnet: {
       url: 'http://localhost:3050',
       ethNetwork: 'http://localhost:8545',
       zksync: true,
       deployPaths: ['./deploy/new'],
       accounts: [
+        // This is the rich account that already has lots of funds on the chain of port 8545
         '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110',
       ],
+    },
+    zkTestnet: {
+      url: 'https://sepolia.era.zksync.dev',
+      ethNetwork: 'sepolia',
+      zksync: true,
+      deployPaths: ['./deploy/new'],
+      accounts: accounts,
     },
     ...networks,
   },
