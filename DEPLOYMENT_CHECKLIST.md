@@ -8,10 +8,11 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed.
   - To run the tests, edit `packages/contracts/.env` to contain:
+
     ```env
     HARDHAT_DAO_ENS_DOMAIN="testdao.eth"
     HARDHAT_PLUGIN_ENS_DOMAIN="testpluginrepo.eth"
-    
+
     MANAGINGDAO_SUBDOMAIN="management"
     ```
 - [ ] Edit `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
@@ -28,6 +29,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
   - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
 
 - [ ] Define the settings of the ENS domain used by OSx.
+
   - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
 
     ```env
@@ -36,6 +38,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     ```
 
     - Ensure that domains end with a suffix like `.eth`
+
   - If the target chain does not have an official ENS registry:
     - A new, unofficial ENS registry will be deployed, along with a resolver
     - No ownership is needed, the Managing DAO will own them
@@ -73,3 +76,19 @@ yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, et
 - Should the script encounter any issues, the deployment should be re-run again.
   - The script would detect and re-use any already deployed contracts.
 - After the process completes, check out the `packages/contracts/deployed_contracts.json` file to see the deployed contract addresses.
+
+## Other
+
+### Rerunning the deployment script
+
+If you need to restart the redeployment process and want HardHat to not reuse the existing contracts:
+
+```sh
+rm -R deployments/<network-name>   # replace with the actual name
+```
+
+### Running the deployment script on a testnet
+
+If you want to simulate an L3 deployment within a testnet (sepolia) which has official ENS support, you may want to force the deployment of a new ENS Registry.
+
+Edit the `packages/contracts/deploy/helpers.ts` file and comment out the relevant line from `ENS_ADDRESSES` and `ENS_PUBLIC_RESOLVERS`.
