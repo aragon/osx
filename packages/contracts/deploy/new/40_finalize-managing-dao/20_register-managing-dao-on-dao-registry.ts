@@ -1,15 +1,8 @@
 import {
-  DAO__factory,
   DAORegistry__factory,
   ENSRegistry__factory,
 } from '../../../typechain';
-import {
-  getContractAddress,
-  getENSAddress,
-  isENSDomainRegistered,
-  uploadToIPFS,
-} from '../../helpers';
-import MANAGING_DAO_METADATA from '../../management-dao-metadata.json';
+import {getContractAddress, getENSAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -70,32 +63,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(
       `Registered the (managingDAO: ${managingDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
     );
-  }
-
-  // Set Metadata for the Managing DAO
-  const managingDaoContract = DAO__factory.connect(
-    managingDAOAddress,
-    deployer
-  );
-  const metadataCIDPath = await uploadToIPFS(
-    JSON.stringify(MANAGING_DAO_METADATA),
-    network.name
-  );
-
-  const hasMetadataPermission = await managingDaoContract.hasPermission(
-    managingDaoContract.address,
-    deployer.address,
-    ethers.utils.id('SET_METADATA_PERMISSION'),
-    '0x'
-  );
-
-  if (hasMetadataPermission) {
-    const setMetadataTX = await managingDaoContract.setMetadata(
-      ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`)
-      )
-    );
-    await setMetadataTX.wait();
   }
 };
 export default func;

@@ -27,9 +27,6 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
     `"deploy": ["./deploy/new", "./deploy/verification"]`.
   - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
 
-- [ ] Define the Management DAO human readable details
-  - Edit `packages/contracts/deploy/management-dao-metadata.json` and update the details as you wish.
-  - The details are pinned on IPFS and the CID will be stored on the Managing DAO contract.
 - [ ] Define the settings of the ENS domain used by OSx.
   - Define the following ENS names in the `packages/contracts/.env` file, by replacing `SEPOLIA` with the name of the network name you’re deploying to:
 
