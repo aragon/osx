@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-verify';
 import '@matterlabs/hardhat-zksync-deploy';
@@ -15,6 +15,11 @@ import 'solidity-coverage';
 import 'solidity-docgen';
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
+import {
+  extractFactoryDepsByHardhatDeploy,
+  extractFactoryDepsByZkSync,
+} from './deploy/compare-factory-depths';
+import {Console} from 'console';
 
 dotenv.config();
 
@@ -29,6 +34,40 @@ const networks = JSON.parse(
 for (const network of Object.keys(networks)) {
   networks[network].accounts = accounts;
 }
+
+task('build-contracts').setAction(async (args, hre) => {
+  await hre.run('compile');
+  if (hre.network.name === 'zkTestnet') {
+    let allArtifacts = await hre.artifacts.getAllFullyQualifiedNames();
+    for (let i = 0; i < allArtifacts.length; i++) {
+      let artifact = await hre.artifacts.readArtifact(allArtifacts[i]);
+
+      let factoryDepthsByZkSync = await extractFactoryDepsByZkSync(
+        hre,
+        artifact
+      );
+      let factoryDepthsByHardhatDeploy =
+        await extractFactoryDepsByHardhatDeploy(hre, artifact);
+      if (factoryDepthsByZkSync.length != factoryDepthsByHardhatDeploy.length) {
+        if (artifact.contractName != 'TokenFactory') {
+          throw new Error("ZkSync Deployment won't work withhardhat-deploy");
+        }
+      }
+    }
+
+    // Copying is useful due as no need to
+    // change imports in deploy scripts.
+    fs.cpSync('./build/artifacts-zk', './artifacts', {recursive: true});
+    fs.cpSync('./build/cache-zk', './cache', {recursive: true});
+
+    return;
+  }
+
+  fs.cpSync('./build/artifacts', './artifacts', {recursive: true});
+  fs.cpSync('./build/cache', './cache', {recursive: true});
+});
+
+// if you wanna compile with non-zk
 
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
