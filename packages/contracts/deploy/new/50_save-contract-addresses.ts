@@ -43,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await fs.writeFile(
     'deployed_contracts.json',
-    JSON.stringify(deployedContractAddresses)
+    JSON.stringify(deployedContractAddresses, null, 2)
   );
 };
 export default func;
