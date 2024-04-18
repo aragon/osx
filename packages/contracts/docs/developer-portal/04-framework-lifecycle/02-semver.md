@@ -90,7 +90,7 @@ The reordering / removal of fields in structs being stored in dynamic arrays or 
   - initialization gets convoluted
     - the double initialization problem must be avoided
 
-See the [OpenZeppelin article on multiple inheritance](https://docs.openzeppelin.com/contracts/4.x/upgradeable#multiple-inheritance).
+See the [OpenZepplin article on multiple inheritance](https://docs.openzeppelin.com/contracts/4.x/upgradeable#multiple-inheritance).
 
 ### Function
 

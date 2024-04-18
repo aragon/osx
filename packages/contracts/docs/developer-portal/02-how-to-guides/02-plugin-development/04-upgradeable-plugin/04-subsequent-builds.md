@@ -60,10 +60,10 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 }
 ```
 
-Builds that you publish don't necessarily need to introduce new storage varaibles of your contracts and don't necessarily need to change the storage. To read more about Upgradeability, check out [OpenZeppelin's UUPSUpgradeability implementation here](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable).
+Builds that you publish don't necessarily need to introduce new storage varaibles of your contracts and don't necessarily need to change the storage. To read more about Upgradeability, check out [OpenZepplin's UUPSUpgradeability implementation here](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable).
 
 :::note
-Note that because these contracts are Upgradeable, keeping storage gaps `uint256 [50] __gap;` in dependencies is a must in order to avoid storage corruption. To learn more about storage gaps, review OpenZeppelin's documentation [here](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#storage-gaps).
+Note that because these contracts are Upgradeable, keeping storage gaps `uint256 [50] __gap;` in dependencies is a must in order to avoid storage corruption. To learn more about storage gaps, review OpenZepplin's documentation [here](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#storage-gaps).
 :::
 
 ### 3. Alternatively, a build implementation modifying bytecode
