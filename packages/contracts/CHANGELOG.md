@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed the solidity compiler pragma from `0.8.17` to `^0.8.8` for all files.
 - Improved type safety by using `abi.encodeCall` instead of `abi.encodeWithSelector` and the more explicit bracket syntax for permissions.
-- Bumped OpenZeppelin dependencies to `4.9.5`.
+- Bumped OpenZepplin dependencies to `4.9.6`.
 - Refactored the fallback in the `isGranted` function in `PermissionManager` to make conditions mutually exclusive: Specific conditions answering `false` do not fall back to generic caller conditions (`_who: ANY_ADDR`) or generic target conditions (`_where: ANY_ADDR`).
 - Renamed the `signatureValidator` variable in `DAO` to `__removed0`.
 - Use the DAOs permission manager functionality to validate signatures.
@@ -171,7 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the `Multisig` plugin and setup contract.
 - Added a `VotingMode` enumeration to specify if the vote should be conducted in `Standard`, `EarlyExecution`, or `VoteReplacement` mode.
 - Added the `Admin` plugin and setup contract.
-- Added NFT compatibility by using OpenZeppelin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
+- Added NFT compatibility by using OpenZepplin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
 - Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
   to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
 - Added `resolver` check in initialize function and `setDefaultResolver` of `ENSSubdomainRegistrar.sol`.
@@ -218,7 +218,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
-- Added `DaoAuthorizableClonable` using OpenZeppelin initialization.
+- Added `DaoAuthorizableClonable` using OpenZepplin initialization.
 - Added mocks and tests for the `Plugin` and `PluginSetup` classes.
 - Added `PluginSetupProcessor` to be the main class processing `PluginSetup` contracts and applying permissions in the installing DAO.
 - Added `DaoAuthorizableUpgradeable` and a free `_auth` function to provide an `auth` modifier to the different plugin types and prevent code duplication.
@@ -228,7 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added helper function `test/test-utils/ens.ts` deploying the `ENSSubdomainRegistrar` and `ENS`-related contracts.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
 - Added Abstract `PluginSetup` for the devs to inherit from for their concrete plugin manager implementation.
-- Added the `solidity-docgen` hardhat plugin by OpenZeppelin to automatically generate documentation via `yarn docgen`.
+- Added the `solidity-docgen` hardhat plugin by OpenZepplin to automatically generate documentation via `yarn docgen`.
 - Added deployment script for `ENSSubdomainRegistrar`.
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginRepo` interface for plugin PluginRepo contract.
