@@ -107,8 +107,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     toHex(releaseMetadataURI),
     toHex(buildMetadataURI)
   );
-  const eventLog = await findEventTopicLog(
-    tx,
+  const eventLog = findEventTopicLog(
+    await tx.wait(),
     PluginRepoRegistry__factory.createInterface(),
     'PluginRepoRegistered'
   );

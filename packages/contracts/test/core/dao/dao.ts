@@ -570,7 +570,7 @@ describe('DAO', function () {
       num = flipBit(0, num);
 
       const tx = await dao.execute(ZERO_BYTES32, [data.failAction], num);
-      const event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
+      const event = findEvent<ExecutedEvent>(await tx.wait(), EVENTS.Executed);
 
       // Check that failAction's revertMessage was correctly stored in the dao's execResults
       expect(event.args.execResults[0]).to.includes(data.failActionMessage);
@@ -579,7 +579,7 @@ describe('DAO', function () {
 
     it('returns the correct result if action succeeds', async () => {
       const tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
-      const event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
+      const event = findEvent<ExecutedEvent>(await tx.wait(), EVENTS.Executed);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
 
@@ -605,7 +605,7 @@ describe('DAO', function () {
 
       // If the below call not fails, means allowFailureMap is correct.
       let tx = await dao.execute(ZERO_BYTES32, actions, allowFailureMap);
-      let event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
+      let event = findEvent<ExecutedEvent>(await tx.wait(), EVENTS.Executed);
 
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
@@ -641,7 +641,10 @@ describe('DAO', function () {
       let tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
       let rc = await tx.wait();
 
-      const event = await findEvent<ExecutedEvent>(tx, IDAO_EVENTS.EXECUTED);
+      const event = findEvent<ExecutedEvent>(
+        await tx.wait(),
+        IDAO_EVENTS.EXECUTED
+      );
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
       expect(event.args.actions.length).to.equal(1);

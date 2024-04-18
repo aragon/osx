@@ -76,15 +76,15 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   helpers: any;
   permissions: any;
 }> {
-  const daoRegisteredEvent = await findEventTopicLog<DAORegisteredEvent>(
-    tx,
+  const daoRegisteredEvent = findEventTopicLog<DAORegisteredEvent>(
+    await tx.wait(),
     DAORegistry__factory.createInterface(),
     EVENTS.DAORegistered
   );
 
   const installationPreparedEvent =
-    await findEventTopicLog<InstallationPreparedEvent>(
-      tx,
+    findEventTopicLog<InstallationPreparedEvent>(
+      await tx.wait(),
       PluginSetupProcessor__factory.createInterface(),
       EVENTS.InstallationPrepared
     );
@@ -220,8 +220,8 @@ describe('DAOFactory: ', function () {
       '0x00',
       '0x00'
     );
-    const event = await findEventTopicLog<PluginRepoRegisteredEvent>(
-      tx,
+    const event = findEventTopicLog<PluginRepoRegisteredEvent>(
+      await tx.wait(),
       PluginRepoRegistry__factory.createInterface(),
       EVENTS.PluginRepoRegistered
     );

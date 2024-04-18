@@ -92,12 +92,10 @@ describe('DAO Upgrade', function () {
         expect(implementationAfterUpgrade).to.not.equal(daoV100Implementation);
 
         // Check the emitted implementation.
-        const emittedImplementation = (
-          await findEventTopicLog<UpgradedEvent>(
-            upgradeTx,
-            daoV130Implementation.interface,
-            'Upgraded'
-          )
+        const emittedImplementation = findEventTopicLog<UpgradedEvent>(
+          await upgradeTx.wait(),
+          daoV130Implementation.interface,
+          'Upgraded'
         ).args.implementation;
         expect(emittedImplementation).to.equal(daoV130Implementation.address);
 
