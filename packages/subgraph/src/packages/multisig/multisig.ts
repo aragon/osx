@@ -119,6 +119,7 @@ export function handleApproved(event: Approved): void {
     MultisigProposalApprover.load(approverProposalId);
   if (!approverProposalEntity) {
     approverProposalEntity = new MultisigProposalApprover(approverProposalId);
+    approverProposalEntity.approver = memberEntityId;
     approverProposalEntity.proposal = proposalEntityId;
     approverProposalEntity.plugin = pluginEntityId;
     approverProposalEntity.address = generateEntityIdFromAddress(memberAddress);

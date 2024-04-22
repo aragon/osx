@@ -893,6 +893,7 @@ type MultisigApprover @entity {
   """
   id: ID! # plugin_address + member_address
   address: String # address as string to facilitate filtering by address on the UI
+  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
   plugin: MultisigPlugin!
 }
 
@@ -907,6 +908,7 @@ type MultisigProposalApprover @entity(immutable: true) {
   address: String! # address as string to facilitate filtering by address on the UI
   plugin: MultisigPlugin!
   proposal: MultisigProposal!
+  approver: MultisigApprover!
   createdAt: BigInt!
 }
 
@@ -934,4 +936,5 @@ type MultisigProposal implements IProposal @entity {
   executionBlockNumber: BigInt
   executionTxHash: Bytes
   approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
+  
 }
