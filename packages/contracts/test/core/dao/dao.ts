@@ -35,7 +35,6 @@ import {
 } from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {
-  getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
@@ -46,6 +45,7 @@ import {
   flipBit,
   getInterfaceId,
   DAO_PERMISSIONS,
+  getProtocolVersion,
 } from '@aragon/osx-commons-sdk';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -348,10 +348,12 @@ describe('DAO', function () {
       expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
-        legacyContractFactory.attach(fromImplementation)
+        ethers.provider.connection.url,
+        legacyContractFactory.attach(fromImplementation).address
       );
       const toProtocolVersion = await getProtocolVersion(
-        currentContractFactory.attach(toImplementation)
+        ethers.provider.connection.url,
+        currentContractFactory.attach(toImplementation).address
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
@@ -377,10 +379,12 @@ describe('DAO', function () {
       expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
-        legacyContractFactory.attach(fromImplementation)
+        ethers.provider.connection.url,
+        legacyContractFactory.attach(fromImplementation).address
       );
       const toProtocolVersion = await getProtocolVersion(
-        currentContractFactory.attach(toImplementation)
+        ethers.provider.connection.url,
+        currentContractFactory.attach(toImplementation).address
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);

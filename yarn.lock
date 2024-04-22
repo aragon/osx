@@ -25,12 +25,13 @@
     "@openzeppelin/contracts" "4.9.6"
     "@openzeppelin/contracts-upgradeable" "4.9.6"
 
-"@aragon/osx-commons-sdk@0.0.1-alpha.8":
-  version "0.0.1-alpha.8"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.0.1-alpha.8.tgz#c75d9f9c8f6f90e76ff00d07081f5a5231fc66d3"
-  integrity sha512-zWr/Fr3Sz0fxfDOKT8FLrQVDQhAyyo7LwWg/wXlasjw1XjoJwfasCjs2gssG6KJz7XzNUVHPjKJmWfvfbTuOAw==
+"@aragon/osx-commons-sdk@0.0.1-alpha.9":
+  version "0.0.1-alpha.9"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.0.1-alpha.9.tgz#bd2fe77a847a35b675443db60269fa44af73c5d3"
+  integrity sha512-FJKMLTlFRJ11cL03tEzOCm2Zn4IL+bJkXBQiIWzrCc3U2KdbYfmYLKN9l7103AJhc6slb6jJgGARE0VZvnYgbg==
   dependencies:
     "@aragon/osx-commons-configs" "^0.4.0"
+    "@ethersproject/address" "^5.7.0"
     "@ethersproject/bignumber" "^5.7.0"
     "@ethersproject/contracts" "^5.7.0"
     "@ethersproject/hash" "^5.7.0"

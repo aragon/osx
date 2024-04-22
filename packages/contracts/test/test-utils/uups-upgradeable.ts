@@ -1,6 +1,5 @@
 import {DAO, PluginRepo} from '../../typechain';
 import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
-import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from './protocol-version';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
@@ -161,21 +160,4 @@ export async function deployAndUpgradeFromToCheck(
     ['address']
   );
   return {proxy, fromImplementation, toImplementation};
-}
-
-export async function getProtocolVersion(
-  contract: Contract
-): Promise<[number, number, number]> {
-  let protocolVersion: [number, number, number];
-  try {
-    contract.interface.getFunction('protocolVersion');
-    protocolVersion = await contract.protocolVersion();
-  } catch (error) {
-    if (error.code === errors.INVALID_ARGUMENT) {
-      protocolVersion = IMPLICIT_INITIAL_PROTOCOL_VERSION;
-    } else {
-      throw error;
-    }
-  }
-  return protocolVersion;
 }

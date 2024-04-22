@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@aragon/osx-commons-configs": "^0.4.0",
-    "@aragon/osx-commons-sdk": "0.0.1-alpha.8",
+    "@aragon/osx-commons-sdk": "0.0.1-alpha.9",
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
     "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
     "@aragon/osx-v1.3.0": "npm:@aragon/osx@1.3.0",

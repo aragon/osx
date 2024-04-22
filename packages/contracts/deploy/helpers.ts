@@ -1,18 +1,10 @@
-import {VersionTag} from '../test/test-utils/psp/types';
-import {
-  ENSRegistry__factory,
-  PluginRepoFactory__factory,
-  PluginRepoRegistry__factory,
-  PluginRepo__factory,
-} from '../typechain';
-import {VersionCreatedEvent} from '../typechain/PluginRepo';
-import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
-import {isLocal, pluginDomainEnv} from '../utils/environment';
+import {ENSRegistry__factory} from '../typechain';
+import {isLocal} from '../utils/environment';
 import {
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
 } from '@aragon/osx-commons-configs';
-import {findEvent, findEventTopicLog, Operation} from '@aragon/osx-commons-sdk';
+import {Operation} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {Contract} from 'ethers';
 import {ethers} from 'hardhat';
