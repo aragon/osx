@@ -162,20 +162,3 @@ export async function deployAndUpgradeFromToCheck(
   );
   return {proxy, fromImplementation, toImplementation};
 }
-
-export async function getProtocolVersion(
-  contract: Contract
-): Promise<[number, number, number]> {
-  let protocolVersion: [number, number, number];
-  try {
-    contract.interface.getFunction('protocolVersion');
-    protocolVersion = await contract.protocolVersion();
-  } catch (error) {
-    if (error.code === errors.INVALID_ARGUMENT) {
-      protocolVersion = IMPLICIT_INITIAL_PROTOCOL_VERSION;
-    } else {
-      throw error;
-    }
-  }
-  return protocolVersion;
-}

@@ -10,9 +10,11 @@ import {
 import {UpgradedEvent} from '../../typechain/DAO';
 import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '../test-utils/protocol-version';
 import {deployWithProxy} from '../test-utils/proxy';
-import {findEventTopicLog} from '@aragon/osx-commons-sdk';
+import {
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+  findEventTopicLog,
+} from '@aragon/osx-commons-sdk';
 import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

@@ -29,13 +29,9 @@ import {
   TOKEN_INTERFACE_IDS,
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {
-  osxContractsVersion,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {
-  getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
@@ -46,11 +42,13 @@ import {
   flipBit,
   getInterfaceId,
   DAO_PERMISSIONS,
+  getProtocolVersion,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '@aragon/osx-commons-sdk';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chai, {expect} from 'chai';
-import {ContractFactory} from 'ethers';
+import {Contract, ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
 
 chai.use(smock.matchers);

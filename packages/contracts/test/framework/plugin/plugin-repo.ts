@@ -20,11 +20,14 @@ import {
   deployNewPluginRepo,
 } from '../../test-utils/repo';
 import {
-  getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {PLUGIN_REPO_PERMISSIONS, getInterfaceId} from '@aragon/osx-commons-sdk';
+import {
+  PLUGIN_REPO_PERMISSIONS,
+  getInterfaceId,
+  getProtocolVersion,
+} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
