@@ -9,7 +9,7 @@ import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/perm
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 /// @title InterfaceBasedRegistry
-/// @author Aragon Association - 2022-2023
+/// @author Aragon X - 2022-2023
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts.
 /// @custom:security-contact sirt@aragon.org
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {

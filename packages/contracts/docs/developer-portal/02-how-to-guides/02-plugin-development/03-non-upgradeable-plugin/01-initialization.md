@@ -74,7 +74,7 @@ contract SimpleAdmin is PluginCloneable {
 }
 ```
 
-We must protect it from being called multiple times by using [OpenZepplin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable) and call the internal function `__PluginCloneable_init(IDAO _dao)` available through the `PluginCloneable` base contract to store the `IDAO _dao` reference in the right place.
+We must protect it from being called multiple times by using [OpenZeppelin's `initializer` modifier made available through `Initalizable`](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable) and call the internal function `__PluginCloneable_init(IDAO _dao)` available through the `PluginCloneable` base contract to store the `IDAO _dao` reference in the right place.
 
 :::caution
 If you forget calling `__PluginCloneable_init(_dao)` inside your `initialize` function, your plugin won't be associated with a DAO and cannot use the DAO's `PermissionManager`.

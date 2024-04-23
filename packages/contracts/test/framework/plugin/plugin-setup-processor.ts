@@ -251,8 +251,8 @@ describe('PluginSetupProcessor', function () {
     );
 
     const PluginRepoRegisteredEvent1 =
-      await findEventTopicLog<PluginRepoRegisteredEvent>(
-        tx,
+      findEventTopicLog<PluginRepoRegisteredEvent>(
+        await tx.wait(),
         PluginRepoRegistry__factory.createInterface(),
         EVENTS.PluginRepoRegistered
       );
@@ -275,8 +275,8 @@ describe('PluginSetupProcessor', function () {
     );
 
     const PluginRepoRegisteredEvent2 =
-      await findEventTopicLog<PluginRepoRegisteredEvent>(
-        tx,
+      findEventTopicLog<PluginRepoRegisteredEvent>(
+        await tx.wait(),
         PluginRepoRegistry__factory.createInterface(),
         EVENTS.PluginRepoRegistered
       );

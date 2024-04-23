@@ -132,7 +132,7 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-Then, we will use [OpenZepplin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) to clone our Plugin contract and initialize it with the `admin` address. The first line, `using Clones for address;`, allows us to call OpenZepplin `Clones` library to clone contracts deployed at an address.
+Then, we will use [OpenZeppelin's `Clones` library](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones) to clone our Plugin contract and initialize it with the `admin` address. The first line, `using Clones for address;`, allows us to call OpenZeppelin `Clones` library to clone contracts deployed at an address.
 
 The second line introduces a custom error being thrown if the admin address specified is the zero address.
 

@@ -15,11 +15,13 @@ import {setupResolver} from '../../../test-utils/ens';
 import {osxContractsVersion} from '../../../test-utils/protocol-version';
 import {deployWithProxy} from '../../../test-utils/proxy';
 import {
-  getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
-import {ENS_REGISTRAR_PERMISSIONS} from '@aragon/osx-commons-sdk';
+import {
+  ENS_REGISTRAR_PERMISSIONS,
+  getProtocolVersion,
+} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';

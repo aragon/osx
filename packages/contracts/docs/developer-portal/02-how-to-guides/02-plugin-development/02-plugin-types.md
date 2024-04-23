@@ -43,7 +43,7 @@ Upgradeability and the deployment method of a plugin contract go hand in hand. T
 
 Some key things to keep in mind:
 
-- With upgradeable smart contracts, you can modify their code while keep using or even extending the storage (see the guide [Writing Upgradeable Contracts](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable) by OpenZepplin).
+- With upgradeable smart contracts, you can modify their code while keep using or even extending the storage (see the guide [Writing Upgradeable Contracts](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable) by OpenZeppelin).
 - To enable upgradeable smart contracts (as well as cheap contract clones), the proxy pattern is used.
 - Depending on your upgradeability requirements and the deployment method you choose, you can also greatly reduce the gas costs to distribute your plugin. However, the upgradeability and deployment method can introduce caveats during [the plugin setup](../../01-how-it-works/02-framework/02-plugin-management/02-plugin-setup/index.md), especially when updating from an older version to a new one.
 
