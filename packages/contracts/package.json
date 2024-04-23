@@ -41,14 +41,14 @@
   },
   "homepage": "https://github.com/aragon/osx#readme",
   "dependencies": {
-    "@aragon/osx-commons-contracts": "1.4.0-alpha.4",
+    "@aragon/osx-commons-contracts": "1.4.0-alpha.5",
     "@ensdomains/ens-contracts": "0.0.11",
     "@openzeppelin/contracts": "4.9.6",
     "@openzeppelin/contracts-upgradeable": "4.9.6"
   },
   "devDependencies": {
     "@aragon/osx-commons-configs": "^0.4.0",
-    "@aragon/osx-commons-sdk": "0.0.1-alpha.10",
+    "@aragon/osx-commons-sdk": "0.0.1-alpha.11",
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
     "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
     "@aragon/osx-v1.3.0": "npm:@aragon/osx@1.3.0",

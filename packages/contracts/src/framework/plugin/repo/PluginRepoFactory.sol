@@ -12,7 +12,7 @@ import {PluginRepoRegistry} from "./PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 
 /// @title PluginRepoFactory
-/// @author Aragon Association - 2022-2023
+/// @author Aragon X - 2022-2023
 /// @notice This contract creates `PluginRepo` proxies and registers them on a `PluginRepoRegistry` contract.
 /// @custom:security-contact sirt@aragon.org
 contract PluginRepoFactory is ERC165, ProtocolVersion {

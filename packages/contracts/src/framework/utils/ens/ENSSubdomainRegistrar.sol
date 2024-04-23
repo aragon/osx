@@ -12,7 +12,7 @@ import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/perm
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 /// @title ENSSubdomainRegistrar
-/// @author Aragon Association - 2022-2023
+/// @author Aragon X - 2022-2023
 /// @notice This contract registers ENS subdomains under a parent domain specified in the initialization process and maintains ownership of the subdomain since only the resolver address is set. This contract must either be the domain node owner or an approved operator of the node owner. The default resolver being used is the one specified in the parent domain.
 /// @custom:security-contact sirt@aragon.org
 contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, ProtocolVersion {

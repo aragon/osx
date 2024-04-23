@@ -7,7 +7,7 @@ import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPlug
 import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
 
 /// @title PlaceholderSetup
-/// @author Aragon Association - 2023
+/// @author Aragon X - 2023
 /// @notice A placeholder setup contract for outdated plugin builds. When moving plugin repos to new chains or layers, where only the latest release and build should be available, this placeholder can be used to populate previous builds.
 /// @custom:security-contact sirt@aragon.org
 contract PlaceholderSetup is PluginSetup {

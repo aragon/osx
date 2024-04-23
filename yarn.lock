@@ -17,26 +17,26 @@
   dependencies:
     tslib "^2.6.2"
 
-"@aragon/osx-commons-contracts@1.4.0-alpha.4":
-  version "1.4.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.4.tgz#87bb8cbbd401683add9b3dc4cbee3eb0c20f7785"
-  integrity sha512-RBkynt/XA1U8dapinFDycCvbTnXXRPNKGUklBdHys/MDOe57hEDjbXyFSKM562KC0s4hocTFx6U9sGNKp+90hw==
+"@aragon/osx-commons-contracts@1.4.0-alpha.5":
+  version "1.4.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-contracts/-/osx-commons-contracts-1.4.0-alpha.5.tgz#37a28085677c21216628ba0a05f5fe09489eb71c"
+  integrity sha512-F2JWWxmUNmiJsaXcTDyd6F2GUIgnc313vvWTp/cSmSVkccT2pfMleWqxIi4LIodX3ueFUYfE02rLj8Gjp1jljA==
   dependencies:
     "@openzeppelin/contracts" "4.9.6"
     "@openzeppelin/contracts-upgradeable" "4.9.6"
 
-"@aragon/osx-commons-sdk@0.0.1-alpha.10":
-  version "0.0.1-alpha.10"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.0.1-alpha.10.tgz#d22b5bb58b81591b1d0ba2f798aa141bd657ab5c"
-  integrity sha512-KNx3MBaczjeYzDSMei1laSkKBf6OgxJhXtNLAqBQxfcuWkTFOeXSiUkRSmMKygjPYy8EWZE1Y+Dg8ss21BikVw==
+"@aragon/osx-commons-sdk@0.0.1-alpha.11":
+  version "0.0.1-alpha.11"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.0.1-alpha.11.tgz#1e3e39aac3351b6649921a5e373a5146b86b2c92"
+  integrity sha512-/FgTLnS73QY0JxZYQlHwpd2ZuMPkPKdIlci9T4jgH9E4Eyyxh6GX7fJK+HekCcf6oMS5tTZ/Cb3sVyyzoO95iw==
   dependencies:
     "@aragon/osx-commons-configs" "^0.4.0"
-    "@ethersproject/address" "^5.7.0"
-    "@ethersproject/bignumber" "^5.7.0"
-    "@ethersproject/contracts" "^5.7.0"
-    "@ethersproject/hash" "^5.7.0"
-    "@ethersproject/logger" "^5.7.0"
-    "@ethersproject/providers" "^5.7.0"
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@ethersproject/contracts" "5.7.0"
+    "@ethersproject/hash" "5.7.0"
+    "@ethersproject/logger" "5.7.0"
+    "@ethersproject/providers" "5.7.2"
     ipfs-http-client "^51.0.0"
 
 "@aragon/osx-commons-subgraph@^0.0.4":
@@ -1194,7 +1194,7 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/transactions" "^5.6.0"
 
-"@ethersproject/contracts@5.7.0", "@ethersproject/contracts@^5.7.0":
+"@ethersproject/contracts@5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/contracts/-/contracts-5.7.0.tgz#c305e775abd07e48aa590e1a877ed5c316f8bd1e"
   integrity sha512-5GJbzEU3X+d33CdfPhcyS+z8MzsTrBGk/sc+G+59+tPa9yFkl6HQ9D6L0QMgNTA9q8dT0XKxxkyp883XsQvbbg==
@@ -1561,7 +1561,7 @@
     bech32 "1.1.4"
     ws "7.4.6"
 
-"@ethersproject/providers@5.7.2", "@ethersproject/providers@^5.7.0":
+"@ethersproject/providers@5.7.2":
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/@ethersproject/providers/-/providers-5.7.2.tgz#f8b1a4f275d7ce58cf0a2eec222269a08beb18cb"
   integrity sha512-g34EWZ1WWAVgr4aptGlVBF8mhl3VWjv+8hoAnzStu8Ah22VHBsuGzP17eb6xDVRzw895G4W7vvx60lFFur/1Rg==

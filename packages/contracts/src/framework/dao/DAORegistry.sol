@@ -10,7 +10,7 @@ import {InterfaceBasedRegistry} from "../utils/InterfaceBasedRegistry.sol";
 import {isSubdomainValid} from "../utils/RegistryUtils.sol";
 
 /// @title Register your unique DAO subdomain
-/// @author Aragon Association - 2022-2023
+/// @author Aragon X - 2022-2023
 /// @notice This contract provides the possibility to register a DAO.
 /// @custom:security-contact sirt@aragon.org
 contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {

@@ -18,7 +18,7 @@ import {hashHelpers, PluginSetupRef} from "../plugin/setup/PluginSetupProcessorH
 import {DAORegistry} from "./DAORegistry.sol";
 
 /// @title DAOFactory
-/// @author Aragon Association - 2022-2023
+/// @author Aragon X - 2022-2023
 /// @notice This contract is used to create a DAO.
 /// @custom:security-contact sirt@aragon.org
 contract DAOFactory is ERC165, ProtocolVersion {
