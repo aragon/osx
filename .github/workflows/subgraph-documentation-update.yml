@@ -46,7 +46,7 @@ jobs:
       - name: Copy the docs/developer-portal folder to the developer-portal
         run: cp -R packages/subgraph/docs/developer-portal $GITHUB_WORKSPACE/developer-portal/docs/subgraph
       - name: Copy the generated schema-introspection.json to the developer-portal
-        run: cp -R packages/subgraph/docs/schema-introspection.json $GITHUB_WORKSPACE/developer-portal/static/subgraph
+        run: cp -R packages/subgraph/docs/schema-introspection-partial.json $GITHUB_WORKSPACE/developer-portal/static/subgraph
       - name: Get short commit hash
         id: hash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT

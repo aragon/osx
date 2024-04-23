@@ -22,7 +22,7 @@ graphql-codegen
 cd docs || exit
 
 # Run prettier on schema-introspection.json
-prettier schema-introspection.json --write
+prettier schema-introspection-partial.json --write
 
 # Remove the temporary file
 cd ..
