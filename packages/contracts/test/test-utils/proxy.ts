@@ -7,7 +7,7 @@ type DeployOptions = {
 };
 
 // Used to deploy the implementation with the ERC1967 Proxy behind it.
-// It is designed this way, because it might be desirable to avoid the OpenZepplin upgrades package.
+// It is designed this way, because it might be desirable to avoid the OpenZeppelin upgrades package.
 // In the future, this function might get replaced.
 // NOTE: To avoid lots of changes in the whole test codebase, `deployWithProxy`
 // won't automatically call `initialize` and it's the caller's responsibility to do so.

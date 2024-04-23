@@ -22,7 +22,7 @@ Let's take a look at what this means for you.
 
 ### Upgradeability & Deployment
 
-Upgradeability and the deployment method of a plugin contract go hand in hand. The motivation behind upgrading smart contracts is nicely summarized by OpenZepplin:
+Upgradeability and the deployment method of a plugin contract go hand in hand. The motivation behind upgrading smart contracts is nicely summarized by OpenZeppelin:
 
 > Smart contracts in Ethereum are immutable by default. Once you create them there is no way to alter them, effectively acting as an unbreakable contract among participants.
 >
@@ -39,7 +39,7 @@ Upgradeability and the deployment method of a plugin contract go hand in hand. T
 > 3. Update all contracts that interacted with the old contract to use the address of the new one
 > 4. Reach out to all your users and convince them to start using the new deployment (and handle both contracts being used simultaneously, as users are slow to migrate
 >
-> _source: [OpenZepplin: What's in an upgrade](https://docs.openzeppelin.com/learn/upgrading-smart-contracts#whats-in-an-upgrade)_
+> _source: [OpenZeppelin: What's in an upgrade](https://docs.openzeppelin.com/learn/upgrading-smart-contracts#whats-in-an-upgrade)_
 
 Some key things to keep in mind:
 
