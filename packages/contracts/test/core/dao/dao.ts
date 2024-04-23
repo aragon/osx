@@ -48,7 +48,7 @@ import {
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chai, {expect} from 'chai';
-import {Contract, ContractFactory} from 'ethers';
+import {ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
 
 chai.use(smock.matchers);
