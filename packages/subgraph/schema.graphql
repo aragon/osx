@@ -500,7 +500,7 @@ type Dao @entity {
   " DAO balances for all kind of tokens (refer to `Interfaces/TokenBalance` in this documentation site for more information). "
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
 
-  " #TODO "
+  " The permissions given to a DAO to govern its actions. "
   permissions: [Permission!]! @derivedFrom(field: "dao")
 
   " #TODO "
@@ -526,21 +526,22 @@ type Dao @entity {
 # No need to store granted as we can delete permission when revoked
 
 """
-Aragon permission system, permissions between contracts and wallets allow a DAO to manage and govern its actions.
-A permission specifies an address `who` being allowed to call certain functions on a contract address `where`.
+Aragon permission system, permissions between contracts and wallets allow our DAOs to manage and govern its actions.
+A permission is the hash of a struct which specifies an address `who` being allowed to call certain functions on a contract address `where`.
 """
 type Permission @entity {
   " Concatenation of the emitting contract Address (DAO or PluginRepo), the `permissionId`, `where` and `who`. Joined by '_'. "
-  id: ID! # emitting contract Address (DAO or PluginRepo) + permissionId + where + who
+  id: ID! # emitting contract Address (DAO or PluginRepo) + permissionId + where + who #TODO
   " The address of the target contract to grant `who` permission to. "
   where: Bytes!
 
-  ""
+  " Bytes32, the Keccak256 hash function of the ID for the permission. Normally the Keccak256 of the permission name (string). "
   permissionId: Bytes!
 
   " The address (EOA or contract) to which the permission has already been granted. "
   who: Bytes!
 
+  " The address of the context in which the permission has been granted. "
   actor: Bytes!
 
   " The address of the contract containing the conditions which authorize a call by another address. This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface. "
@@ -549,10 +550,10 @@ type Permission @entity {
   # The following attributes is used to create
   # one-to-many between DAO or PluginRepo to Permission
 
-  " The DAO related to these permissions. "
+  " The DAO that grants the permission (DAO uses `PermissionManager.sol` `grant` function). "
   dao: Dao
 
-  "  "
+  " The PluginRepo that grants the permission (PluginRepo uses `PermissionManager.sol` `grant` function). "
   pluginRepo: PluginRepo
 }
 
@@ -560,96 +561,214 @@ type Permission @entity {
 ######### Plugins ###########
 #############################
 
+"""
+PluginRepo are contracts themselves, handling the versioning of its associated unique plugin. They are deployed using the [PluginRepoFactory](https://devs.aragon.org/docs/osx/how-it-works/framework/plugin-management/plugin-repo/plugin-repo-creation/).
+"""
 type PluginRepo @entity(immutable: true) {
+  " The address of the PluginRepo contract. "
   id: ID! # address
+  " Each PluginRepo has to have a valid ENS subdomain associated, added while creating and registering it. "
   subdomain: String!
+
+  " The different incompatible versions for the associated plugin.  "
   releases: [PluginRelease!]! @derivedFrom(field: "pluginRepo")
-  # Holds all preparations. Also applied ones.
+
+  " Holds all preparations. Also applied ones. " #TODO
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
-  # Holds all installed and uninstalled installations.
+
+  # Holds all installed and uninstalled installations. #TODO
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
 
+  " The permissions given to a PluginRepo to govern its actions (e.g. MAINTAINER_PERMISSION_ID to create a new plugin version). "
   permissions: [Permission!]! @derivedFrom(field: "pluginRepo")
 }
 
+"""
+The contracts that will deploy your plugin using different factory patterns (new/minimal proxy pattern/UUPS pattern).
+Pointing to a specific version of the plugin (the address for one specific implementation contract).
+"""
 type PluginSetup @entity(immutable: true) {
-  id: ID! # contract address
+  " The PluginSetup contract address. "
+  id: ID!
+
+  " The version of the plugin internally referenced in the PluginSetup. "
   versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
 }
 
+"""
+A record of the different incompatible versions for a plugin.
+"""
 type PluginRelease @entity {
-  id: ID! # pluginRepo + release
+  " Concatenation of PluginRepo contract address and the release number (uint8) of the associated plugin. Joined by '_'. "
+  id: ID!
+
+  " The PluginRepo which contains this specific version (release) of the plugin. "
   pluginRepo: PluginRepo!
+
+  " The release marks incompatible versions of a plugin. "
   release: Int!
-  metadata: String! # release metadata
+
+  " URI pointing to a JSON file containing the plugin name, description, as well as optional data. "
+  metadata: String!
+
+  " Record for different compatible versions for the plugin. "
   builds: [PluginVersion!]! @derivedFrom(field: "release")
 }
 
+"""
+Information for the versions of a plugin.
+"""
 type PluginVersion @entity(immutable: true) {
-  id: ID! # pluginRepo + release + build
+  " Concatenation of PluginRepo contract address and the release (uint8) and build (uint16) as numbers. Joined by '_'. "
+  id: ID!
+
+  " The PluginRepo which holds all versions of a plugin. "
   pluginRepo: PluginRepo!
+
+  " The PluginSetup contract pointing to the plugin implementation contract. "
   pluginSetup: PluginSetup
 
+  " Record for the different incompatible versions of the plugin. "
   release: PluginRelease!
+
+  " Uint16 referencing the number of different compatible versions of a plugin. "
   build: Int!
 
-  metadata: String! # build metadata
-  # Holds all preparations. Also applied ones.
+  " URI pointing to a JSON file containing the UI data, setup data, and change description for this specific version. "
+  metadata: String!
+
+  #TODO Holds all preparations. Also applied ones.
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginVersion")
-  # Holds all installed and uninstalled installations.
+  #TODO Holds all installed and uninstalled installations.
   installations: [PluginInstallation!] @derivedFrom(field: "appliedVersion")
 }
 
+"""
+The permissions prepared to be granted/revoked by the `PluginSetupProcessor.sol` to the plugin installed to your DAO (or to be installed/uninstalled).
+Notice these are in the preparation process, they could still not be applied.
+"""
 type PluginPermission @entity(immutable: true) {
-  id: ID! # PluginPreparation + operation + where + who + permissionId
+  " The concatenation of the `PluginPreparation` entity ID, and the permission parameters: operation type (as number), `where`, `who` and the permissionId. Joined by '_'. "
+  id: ID!
+
+  " The preparation process in the the `PluginSetupProcessor.sol` for that permission. "
   pluginPreparation: PluginPreparation!
+
+  " The type of operation done in this permission (granted/granted with condition/revoked). "
   operation: PermissionOperation!
+
+  " The address of the target contract to grant `who` permission to. "
   where: Bytes!
+
+  " The address (EOA or contract) to which the permission has already been granted. "
   who: Bytes!
+
+  " The address of the contract containing the conditions which authorize a call by another address. This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface. "
   condition: Bytes
+
+  " Bytes32, the Keccak256 hash function of the ID for the permission. Normally the Keccak256 of the permission name (string). "
   permissionId: Bytes!
 }
 
+"""
+Wether the permission will be granted, granted with a condition or revoked in your DAO or plugin. (refer to `Objects/Permission` in this documentation site for more information about Aragon Permission system)
+"""
 enum PermissionOperation {
+  " A `Grant` permission operation, sets to ALLOW_FLAG the `permissionHashed` mapping in your DAO or plugin. "
   Grant
+
+  " A `Revoke` permission operation, sets to UNSET_FLAG the `permissionHashed` mapping in your DAO or plugin. "
   Revoke
+
+  " A `GrantWithCondition` permission operation, sets the `permissionHashed` mapping in your DAO or plugin to the contract address with the condition for this specific permission. "
   GrantWithCondition
 }
 
+"""
+The previous step to installing/uninstalling a plugin to your DAO.
+"""
 type PluginPreparation @entity(immutable: true) {
-  id: ID! # psp setupId + installationId
+  " Concatenation of DAO address, plugin address and the preparedSetupId. Joined by '_'. "
+  id: ID!
+
+  #TODO
   installation: PluginInstallation!
+
+  " The caller of the preparation function (install/uninstall/update) in the `PluginSetupProcessor.sol`. "
   creator: Bytes!
+
+  " The DAO where the plugin will be installed/uninstalled/updated. "
   dao: Dao!
-  preparedSetupId: Bytes! # the psp setupId
+
+  " The hash of the [preparedSetupId](https://devs.aragon.org/docs/osx/reference-guide/framework/plugin/setup/PluginSetupProcessorHelpers#internal-function-_getpreparedsetupid). "
+  preparedSetupId: Bytes!
+
+  " The `PluginRepo` contract for the plugin being prepared. "
   pluginRepo: PluginRepo!
+
+  " The version of the plugin being prepared. "
   pluginVersion: PluginVersion!
+
+  " The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata JSON file. "
   data: Bytes
+
+  " The deployed plugin smart contract by the `PluginSetup.sol`. "
   pluginAddress: Bytes!
+
+  " The address array of helpers (contracts or EOAs) associated with this plugin version after the installation or update. "
   helpers: [Bytes!]!
+
+  " The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO. "
   permissions: [PluginPermission!]! @derivedFrom(field: "pluginPreparation")
+
+  " Type of preparation. Wether the plugin is going to be installed/uninstalled/updated from the DAO. "
   type: PluginPreparationType!
 }
 
 # Don't implement IPlugin. Otherwise it would show up under plugins in the DAO entity
+"""
+"""
 type PluginInstallation @entity {
-  id: ID! # psp installationId
+  id: ID! # daoAdd + plugAdd
+  " DAO where the plugin has been installed. "
   dao: Dao!
-  plugin: IPlugin # The plugin address as id provided by the applied preparation
+
+  " The plugin address as id provided by the applied preparation. "
+  plugin: IPlugin
+
+  " The preparation installed. "
   appliedPreparation: PluginPreparation
-  appliedSetupId: Bytes # The setupId of the application see PSP documentation for more info
+
+  " An identifier for applied installations ([appliedSetupId](https://devs.aragon.org/docs/osx/reference-guide/framework/plugin/setup/PluginSetupProcessorHelpers#internal-function-_getappliedsetupid)). "
+  appliedSetupId: Bytes
+
+  "  " #TODO
   appliedVersion: PluginVersion # Stored to track installations in the different plugin versions
+  "  " #TODO
   appliedPluginRepo: PluginRepo # Stored to track installation in the different plugin repos
+  " All the preparations that a DAO has had for a certain plugin (could have been prepared to update many times). "
   preparations: [PluginPreparation!]! @derivedFrom(field: "installation")
+
+  " Current state of the plugin from the DAO point of view. (refer to `Enums/PluginPreparationState` in this documentation site for more information) "
   state: PluginPreparationState!
 }
 
+"""
+Indicator for if a plugin is being prepared to be installed/updated/uninstalled to a DAO.
+"""
 enum PluginPreparationType {
+  " Installing a plugin to a DAO by giving the DAO the necessary permissions. "
   Installation
+
+  " For UUPS upgradeable plugins. When an already installed plugin is being prepared to be updated no a newer version. (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822) "
   Update
+
+  "  "
   Uninstallation
 }
 
+"""
+"""
 enum PluginPreparationState {
   InstallationPrepared
   Installed
