@@ -28,8 +28,8 @@ jobs:
           node-version: 18
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      - name: Generate introspection query result
-        run: yarn generate:introspection
+      - name: Generate partial introspection query result for documentation
+        run: yarn generate:introspection:partial
         working-directory: packages/subgraph/
       - name: Generate Query Examples docs
         run: yarn docs:examples
