@@ -14,13 +14,11 @@ import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
+  getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
-import {
-  PLUGIN_REGISTRY_PERMISSIONS,
-  getProtocolVersion,
-} from '@aragon/osx-commons-sdk';
+import {PLUGIN_REGISTRY_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
@@ -308,12 +306,10 @@ describe('PluginRepoRegistry', function () {
       expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
-        ethers.provider.connection.url,
-        legacyContractFactory.attach(fromImplementation).address
+        legacyContractFactory.attach(fromImplementation)
       );
       const toProtocolVersion = await getProtocolVersion(
-        ethers.provider.connection.url,
-        currentContractFactory.attach(toImplementation).address
+        currentContractFactory.attach(toImplementation)
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
@@ -340,12 +336,10 @@ describe('PluginRepoRegistry', function () {
       expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
-        ethers.provider.connection.url,
-        legacyContractFactory.attach(fromImplementation).address
+        legacyContractFactory.attach(fromImplementation)
       );
       const toProtocolVersion = await getProtocolVersion(
-        ethers.provider.connection.url,
-        currentContractFactory.attach(toImplementation).address
+        currentContractFactory.attach(toImplementation)
       );
 
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
