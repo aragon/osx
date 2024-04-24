@@ -34,7 +34,7 @@ graph create $SUBGRAPH_NAME-$NETWORK_NAME --node http://localhost:8020
 # deploy subgraph
 LOCAL=true ./scripts/deploy-subgraph.sh
 # make introspection json
-FILENAME="docs/schema-introspection.json"
+FILENAME="tests/utils/schema-introspection.json"
 GRAPH_URL="http://localhost:8000/subgraphs/name/$SUBGRAPH_NAME-$NETWORK_NAME"
 echo "Fetching introspection query from $GRAPH_URL"
 node ./scripts/fetch-introspection-query.js $GRAPH_URL $FILENAME
