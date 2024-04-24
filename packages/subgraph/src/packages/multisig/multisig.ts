@@ -3,7 +3,7 @@ import {
   MultisigPlugin,
   MultisigProposal,
   MultisigApprover,
-  MultisigProposalApprover,
+  MultisigProposalApproval,
 } from '../../../generated/schema';
 import {
   ProposalCreated,
@@ -61,7 +61,7 @@ export function _handleProposalCreated(
 
   if (!proposal.reverted) {
     proposalEntity.executed = proposal.value.value0;
-    proposalEntity.approvals = proposal.value.value1;
+    proposalEntity.approvalCount = proposal.value.value1;
 
     // ProposalParameters
     let parameters = proposal.value.value2;
@@ -104,26 +104,22 @@ export function handleApproved(event: Approved): void {
   let memberAddress = event.params.approver;
   let pluginAddress = event.address;
   let pluginEntityId = generatePluginEntityId(pluginAddress);
-  let memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
+  let approverEntityId = generateMemberEntityId(pluginAddress, memberAddress);
   let pluginProposalId = event.params.proposalId;
   let proposalEntityId = generateProposalEntityId(
     event.address,
     pluginProposalId
   );
   let approverProposalId = generateVoterEntityId(
-    memberEntityId,
+    approverEntityId,
     proposalEntityId
   );
 
-  let approverProposalEntity =
-    MultisigProposalApprover.load(approverProposalId);
-  if (!approverProposalEntity) {
-    approverProposalEntity = new MultisigProposalApprover(approverProposalId);
-    approverProposalEntity.approver = memberEntityId;
-    approverProposalEntity.proposal = proposalEntityId;
-    approverProposalEntity.plugin = pluginEntityId;
-    approverProposalEntity.address = generateEntityIdFromAddress(memberAddress);
-  }
+  // No need for checking if approval exists
+  // a proposal cannot be approved twice by the same approver
+  let approverProposalEntity = new MultisigProposalApproval(approverProposalId);
+  approverProposalEntity.approver = approverEntityId;
+  approverProposalEntity.proposal = proposalEntityId;
   approverProposalEntity.createdAt = event.block.timestamp;
   approverProposalEntity.save();
 
@@ -135,7 +131,7 @@ export function handleApproved(event: Approved): void {
 
     if (!proposal.reverted) {
       let approvals = proposal.value.value1;
-      proposalEntity.approvals = approvals;
+      proposalEntity.approvalCount = approvals;
 
       // calculate if proposal is executable
       let minApprovalsStruct = proposal.value.value2;
@@ -175,15 +171,17 @@ export function handleMembersAdded(event: MembersAdded): void {
   for (let index = 0; index < members.length; index++) {
     const memberAddress = members[index];
     const pluginEntityId = generatePluginEntityId(event.address);
-    const memberEntityId = [pluginEntityId, memberAddress.toHexString()].join(
-      '_'
+    const approverEntityId = generateMemberEntityId(
+      event.address,
+      memberAddress
     );
 
-    let approverEntity = MultisigApprover.load(memberEntityId);
+    let approverEntity = MultisigApprover.load(approverEntityId);
     if (!approverEntity) {
-      approverEntity = new MultisigApprover(memberEntityId);
-      approverEntity.address = memberAddress.toHexString();
+      approverEntity = new MultisigApprover(approverEntityId);
+      approverEntity.address = memberAddress;
       approverEntity.plugin = pluginEntityId;
+      approverEntity.isActive = true;
       approverEntity.save();
     }
   }
@@ -194,13 +192,15 @@ export function handleMembersRemoved(event: MembersRemoved): void {
   for (let index = 0; index < members.length; index++) {
     const memberAddress = members[index];
     const pluginEntityId = generatePluginEntityId(event.address);
-    const memberEntityId = [pluginEntityId, memberAddress.toHexString()].join(
-      '_'
+    const approverEntityId = generateMemberEntityId(
+      event.address,
+      memberAddress
     );
 
-    const approverEntity = MultisigApprover.load(memberEntityId);
+    const approverEntity = MultisigApprover.load(approverEntityId);
     if (approverEntity) {
-      store.remove('MultisigApprover', memberEntityId);
+      approverEntity.isActive = false;
+      approverEntity.save();
     }
   }
 }

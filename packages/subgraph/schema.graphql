@@ -892,12 +892,13 @@ type MultisigApprover @entity {
   Current Approver of the multisig
   """
   id: ID! # plugin_address + member_address
-  address: String # address as string to facilitate filtering by address on the UI
-  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
+  address: Bytes!
+  approvals: [MultisigProposalApproval!]! @derivedFrom(field: "approver")
   plugin: MultisigPlugin!
+  isActive: Boolean!
 }
 
-type MultisigProposalApprover @entity(immutable: true) {
+type MultisigProposalApproval @entity(immutable: true) {
   """
   An approver for a specific multisig proposal
   Will typically also be the address of a MultisigApprover
@@ -905,10 +906,8 @@ type MultisigProposalApprover @entity(immutable: true) {
   was later deleted.
   """
   id: ID! # approver + proposal
-  address: String! # address as string to facilitate filtering by address on the UI
-  plugin: MultisigPlugin!
-  proposal: MultisigProposal!
   approver: MultisigApprover!
+  proposal: MultisigProposal!
   createdAt: BigInt!
 }
 
@@ -928,13 +927,12 @@ type MultisigProposal implements IProposal @entity {
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
   minApprovals: Int!
-  approvals: Int
+  approvalCount: Int
   approvalReached: Boolean!
   isSignaling: Boolean!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
   executionTxHash: Bytes
-  approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
-  
+  approvals: [MultisigProposalApproval!]! @derivedFrom(field: "proposal")
 }
