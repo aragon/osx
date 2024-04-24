@@ -900,7 +900,7 @@ type MultisigApprover @entity {
 
 type MultisigProposalApproval @entity(immutable: true) {
   """
-  An approver for a specific multisig proposal
+  An approval for a specific multisig proposal
   Will typically also be the address of a MultisigApprover
   But will also store historical approvers if the address
   was later deleted.
