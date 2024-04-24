@@ -1,4 +1,4 @@
-import {MultisigApprover, MultisigProposal} from '../../generated/schema';
+import {MultisigApprover} from '../../generated/schema';
 import {
   handleMembersAdded,
   handleApproved,
@@ -44,7 +44,7 @@ import {
   generateProposalEntityId,
   createDummyAction,
 } from '@aragon/osx-commons-subgraph';
-import {Address, BigInt, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 
 let actions = [createDummyAction(DAO_TOKEN_ADDRESS, '0', '0x00000000')];

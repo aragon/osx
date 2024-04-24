@@ -17,11 +17,10 @@ import {
 import {generateMemberEntityId, generateVoterEntityId} from '../../utils/ids';
 import {
   generateActionEntityId,
-  generateEntityIdFromAddress,
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {dataSource, store} from '@graphprotocol/graph-ts';
+import {dataSource} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -103,7 +102,6 @@ export function _handleProposalCreated(
 export function handleApproved(event: Approved): void {
   let memberAddress = event.params.approver;
   let pluginAddress = event.address;
-  let pluginEntityId = generatePluginEntityId(pluginAddress);
   let approverEntityId = generateMemberEntityId(pluginAddress, memberAddress);
   let pluginProposalId = event.params.proposalId;
   let proposalEntityId = generateProposalEntityId(
@@ -191,7 +189,6 @@ export function handleMembersRemoved(event: MembersRemoved): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const memberAddress = members[index];
-    const pluginEntityId = generatePluginEntityId(event.address);
     const approverEntityId = generateMemberEntityId(
       event.address,
       memberAddress

@@ -595,7 +595,6 @@ test('Run AddresslistVoting (handleMembersAdded) mappings with mock event', () =
     'id',
     memberEntityId
   );
-  const voter = AddresslistVotingVoter.load(memberEntityId);
   assert.fieldEquals(
     'AddresslistVotingVoter',
     memberEntityId,
