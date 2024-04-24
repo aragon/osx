@@ -4,12 +4,14 @@ To install dependencies:
 
 ```bash
 bun install
+# or
+yarn
 ```
 
-To run:
+To generate viem and ethers compatible ABIs first make sure that the contracts compile and then run:
 
 ```bash
-bun run index.ts
+bun run generate:abi
+# or
+yarn generate:abi
 ```
-
-This project was created using `bun init` in bun v1.0.29. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
