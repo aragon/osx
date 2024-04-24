@@ -3,7 +3,7 @@
 # Copy schema.graphql to a temporary file
 cp schema.graphql schema.tmp.graphql
 
-# Add lines at the beginning of the file
+# Add lines at the end of the file
 cat <<EOF  >> schema.tmp.graphql
 " Byte array, represented as a hexadecimal string. Commonly used for Ethereum hashes and addresses. "
 scalar Bytes
@@ -21,7 +21,7 @@ graphql-codegen
 # Navigate to the docs directory
 cd docs || exit
 
-# Run prettier on schema-introspection.json
+# Run prettier on schema-introspection-partial.json
 prettier schema-introspection-partial.json --write
 
 # Remove the temporary file
