@@ -889,7 +889,8 @@ type MultisigPlugin implements IPlugin @entity {
 
 type MultisigApprover @entity {
   """
-  Current Approver of the multisig
+  Current Approver of the multisig. If the approver is removed from the multisig,
+  the entity is not deleted and instead the isActive flag is set to false.
   """
   id: ID! # plugin_address + member_address
   address: Bytes!
@@ -900,10 +901,9 @@ type MultisigApprover @entity {
 
 type MultisigProposalApproval @entity(immutable: true) {
   """
-  An approval for a specific multisig proposal
-  Will typically also be the address of a MultisigApprover
-  But will also store historical approvers if the address
-  was later deleted.
+  An approval of an specific multisig proposal
+  This entity works as a join table between MultisigProposal and MultisigApprover
+  and also stores the timestamp of the approval
   """
   id: ID! # approver + proposal
   approver: MultisigApprover!
