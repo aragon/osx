@@ -633,7 +633,8 @@ contract PluginSetupProcessor is ProtocolVersion {
         pluginState.blockNumber = block.number;
         pluginState.currentAppliedSetupId = bytes32(0);
 
-        // Process the permissions, which requires the `ROOT_PERMISSION_ID` from the uninstalling DAO.
+        // If the list of requested permission changes is not empy, process them.
+        // Note, that this requires the `PluginSetupProcessor` to TEMPORARILY have the `ROOT_PERMISSION_ID` permission.
         if (_params.permissions.length > 0) {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
