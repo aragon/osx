@@ -376,7 +376,9 @@ contract PluginSetupProcessor is ProtocolVersion {
         pluginState.currentAppliedSetupId = appliedSetupId;
         pluginState.blockNumber = block.number;
 
-        // Process the permissions, which requires the `ROOT_PERMISSION_ID` from the installing DAO.
+        // If the list of requested permission changes is not empy, process them.
+        // Note, that this requires the `PluginSetupProcessor` to have the `ROOT_PERMISSION_ID` permission on the
+        // installing DAO. Make sure this permission is only granted TEMPORARILY.
         if (_params.permissions.length > 0) {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
@@ -533,7 +535,9 @@ contract PluginSetupProcessor is ProtocolVersion {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);
         }
 
-        // Process the permissions, which requires the `ROOT_PERMISSION_ID` from the updating DAO.
+        // If the list of requested permission changes is not empy, process them.
+        // Note, that this requires the `PluginSetupProcessor` to have the `ROOT_PERMISSION_ID` permission on the
+        // updating DAO. Make sure this permission is only granted TEMPORARILY.
         if (_params.permissions.length > 0) {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
