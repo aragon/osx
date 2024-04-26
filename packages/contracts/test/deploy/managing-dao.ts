@@ -1,8 +1,8 @@
-import {expect} from 'chai';
-import {readImplementationValuesFromSlot} from '../../utils/storage';
-
-import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {Deployment} from 'hardhat-deploy/dist/types';
+import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
+import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
+import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
 import {
   DAO,
   DAORegistry,
@@ -15,15 +15,12 @@ import {
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
 } from '../../typechain';
-
-import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
-import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
-import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
-import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
-import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
-
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {readImplementationValuesFromSlot} from '../../utils/storage';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {Deployment} from 'hardhat-deploy/dist/types';
 
 async function deployAll() {
   await initializeDeploymentFixture('New');

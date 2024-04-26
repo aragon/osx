@@ -38,7 +38,7 @@ jobs:
           ETH_KEY: ''
           HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
           HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.dao.eth'
-          MANAGINGDAO_SUBDOMAIN: 'aragon-management'
+          MANAGEMENT_DAO_SUBDOMAIN: 'aragon-management'
         run: yarn run test
       - name: Run solidity-docgen
         run: yarn run docgen

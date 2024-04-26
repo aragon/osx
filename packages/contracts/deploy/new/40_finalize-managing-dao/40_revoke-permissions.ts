@@ -1,8 +1,7 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import {getContractAddress, managePermissions, Permission} from '../../helpers';
-import {Operation} from '../../../utils/types';
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
+import {Operation} from '../../../utils/types';
+import {getContractAddress, managePermissions, Permission} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -10,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoSubdomain = process.env.MANAGEMENT_DAO_SUBDOMAIN || '';
 
   if (!daoSubdomain)
     throw new Error('ManagingDAO subdomain has not been set in .env');

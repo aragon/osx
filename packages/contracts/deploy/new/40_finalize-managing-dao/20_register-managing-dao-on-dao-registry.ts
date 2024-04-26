@@ -1,6 +1,4 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
+import {DAO__factory, DAORegistry__factory} from '../../../typechain';
 import {
   getContractAddress,
   getENSAddress,
@@ -8,14 +6,15 @@ import {
   MANAGING_DAO_METADATA,
   uploadToIPFS,
 } from '../../helpers';
-import {DAO__factory, DAORegistry__factory} from '../../../typechain';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoSubdomain = process.env.MANAGEMENT_DAO_SUBDOMAIN || '';
   const daoDomain =
     process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
 
