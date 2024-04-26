@@ -108,6 +108,10 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Test the new deployed subgraph with the frontend team
 - [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
 
+### ABI
+
+- [ ] Run `yarn publish:npm` in `packages/abi` to publish the ABI package to NPM
+
 ## Appendix
 
 - Changing the owner of the chosen ENS domains will also revoke the permissions of the `DAO_ENSSubdomainRegistrar` and `Plugin_ENSSubdomainRegistrar`. Therefore if the ownership gets transfered, restore the approval for these 2 contracts.
