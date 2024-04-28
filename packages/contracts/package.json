@@ -17,11 +17,13 @@
     "typechain": "yarn typechain:osx && yarn typechain:osx-versions",
     "test": "hardhat test",
     "build": "hardhat build-contracts",
+    "verify": "hardhat verify",
+    "postbuild": "yarn typechain",
     "build:npm": "rollup --config rollup.config.ts",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
-    "deploy": "hardhat deploy",
+    "deploy": "hardhat deploy-contracts",
     "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
@@ -89,6 +91,7 @@
     "zksync-ethers": "^5.0"
   },
   "dependencies": {
+    "@matterlabs/hardhat-zksync-verify": "^0.6.0",
     "hardhat-deploy": "0.11.26"
   }
 }

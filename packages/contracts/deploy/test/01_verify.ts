@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {verifyContract} from '../../../utils/etherscan';
+import {verifyContract} from '../../utils/etherscan';
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -9,6 +9,11 @@ function delay(ms: number) {
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying contracts');
+
+  const {deployments} = hre;
+
+  hre.aragonToVerifyContracts.push(await deployments.get('PluginRepoFactory'));
+  //   hre.aragonToVerifyContracts.push(await deployments.get('DAO_Proxy'));
 
   for (let index = 0; index < hre.aragonToVerifyContracts.length; index++) {
     const element = hre.aragonToVerifyContracts[index];
@@ -33,6 +38,5 @@ func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(
     hre.network.name === 'localhost' ||
       hre.network.name === 'hardhat' ||
-      hre.network.name === 'coverage' ||
-      hre.network.name === 'zkLocalTestnet'
+      hre.network.name === 'coverage'
   );

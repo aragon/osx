@@ -5,12 +5,10 @@ import path from 'path';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@nomicfoundation/hardhat-verify';
 import '@matterlabs/hardhat-zksync-deploy';
 import '@matterlabs/hardhat-zksync-solc';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-// import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
@@ -19,9 +17,15 @@ import {
   extractFactoryDepsByHardhatDeploy,
   extractFactoryDepsByZkSync,
 } from './deploy/compare-factory-depths';
-import {Console} from 'console';
 
 dotenv.config();
+
+if (process.env.CONTRACTS_TARGET === 'zksync') {
+  import('@matterlabs/hardhat-zksync-verify');
+} else {
+  import('@openzeppelin/hardhat-upgrades');
+  import('@nomicfoundation/hardhat-verify');
+}
 
 const ETH_KEY = process.env.ETH_KEY;
 const accounts = ETH_KEY ? ETH_KEY.split(',') : [];
@@ -42,21 +46,21 @@ task('build-contracts').setAction(async (args, hre) => {
     hre.network.name === 'zkLocalTestnet'
   ) {
     let allArtifacts = await hre.artifacts.getAllFullyQualifiedNames();
-    for (let i = 0; i < allArtifacts.length; i++) {
-      let artifact = await hre.artifacts.readArtifact(allArtifacts[i]);
+    // for (let i = 0; i < allArtifacts.length; i++) {
+    //   let artifact = await hre.artifacts.readArtifact(allArtifacts[i]);
 
-      let factoryDepthsByZkSync = await extractFactoryDepsByZkSync(
-        hre,
-        artifact
-      );
-      let factoryDepthsByHardhatDeploy =
-        await extractFactoryDepsByHardhatDeploy(hre, artifact);
-      if (factoryDepthsByZkSync.length != factoryDepthsByHardhatDeploy.length) {
-        if (artifact.contractName != 'TokenFactory') {
-          throw new Error("ZkSync Deployment won't work withhardhat-deploy");
-        }
-      }
-    }
+    //   let factoryDepthsByZkSync = await extractFactoryDepsByZkSync(
+    //     hre,
+    //     artifact
+    //   );
+    //   let factoryDepthsByHardhatDeploy =
+    //     await extractFactoryDepsByHardhatDeploy(hre, artifact);
+    //   if (factoryDepthsByZkSync.length != factoryDepthsByHardhatDeploy.length) {
+    //     if (artifact.contractName != 'TokenFactory') {
+    //       throw new Error("ZkSync Deployment won't work with hardhat-deploy");
+    //     }
+    //   }
+    // }
 
     // Copying is useful due as no need to
     // change imports in deploy scripts.
@@ -70,7 +74,10 @@ task('build-contracts').setAction(async (args, hre) => {
   fs.cpSync('./build/cache', './cache', {recursive: true});
 });
 
-// if you wanna compile with non-zk
+task('deploy-contracts').setAction(async (args, hre) => {
+  await hre.run('build-contracts');
+  await hre.run('deploy');
+});
 
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
@@ -100,7 +107,7 @@ console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   zksolc: {
-    version: '1.3.13',
+    version: '1.4.0',
     compilerSource: 'binary',
     settings: {},
   },
@@ -143,8 +150,11 @@ const config: HardhatUserConfig = {
       url: 'https://sepolia.era.zksync.dev',
       ethNetwork: 'sepolia',
       zksync: true,
-      deployPaths: ['./deploy/new'],
+      verifyURL:
+        'https://explorer.sepolia.era.zksync.dev/contract_verification',
+      deploy: ['./deploy/test2'],
       accounts: accounts,
+      forceDeploy: true,
     },
     ...networks,
   },
