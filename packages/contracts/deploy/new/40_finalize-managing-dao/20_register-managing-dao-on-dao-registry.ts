@@ -1,7 +1,4 @@
-import {
-  DAORegistry__factory,
-  ENSRegistry__factory,
-} from '../../../typechain';
+import {DAORegistry__factory, ENSRegistry__factory} from '../../../typechain';
 import {getContractAddress, getENSAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';

@@ -4,9 +4,6 @@ import {getContractAddress, managePermissions, Permission} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-// Revokes necessary permissions from deployer, but leaving ROOT/EXECUTE
-// permissions currently on the deployer. This is useful for a deployer
-// to install the plugin on managing dao at later time.
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers} = hre;
   const [deployer] = await ethers.getSigners();
@@ -36,6 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `Deployer`.
+  // Revoke `EXECUTE_PERMISSION` from `Deployer`.
   const revokePermissions = [
     {
       operation: Operation.Revoke,
@@ -57,9 +55,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     {
       operation: Operation.Revoke,
+      where: {name: 'managingDAO', address: managingDAOAddress},
+      who: {name: 'Deployer', address: deployer.address},
+      permission: 'ROOT_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
       where: {name: 'DAO', address: managingDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
       permission: 'SET_METADATA_PERMISSION',
+    },
+    {
+      operation: Operation.Revoke,
+      where: {name: 'DAO', address: managingDAOAddress},
+      who: {name: 'Deployer', address: deployer.address},
+      permission: 'EXECUTE_PERMISSION',
     },
   ];
   await managePermissions(managingDaoContract, revokePermissions);

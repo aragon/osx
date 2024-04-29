@@ -45,6 +45,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     permission: 'ROOT_PERMISSION',
   });
 
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Revoke,
+    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    who: {name: 'Deployer', address: deployer.address},
+    permission: 'ROOT_PERMISSION',
+  });
+
+  await checkPermission(managingDaoContract, {
+    operation: Operation.Revoke,
+    where: {name: 'ManagingDAO', address: managingDAOAddress},
+    who: {name: 'Deployer', address: deployer.address},
+    permission: 'EXECUTE_PERMISSION',
+  });
+
   console.log('Finalizing Managing DAO verified');
 };
 export default func;
