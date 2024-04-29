@@ -4,6 +4,7 @@ import path from 'path';
 
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
+
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@matterlabs/hardhat-zksync-deploy';
 import '@matterlabs/hardhat-zksync-solc';
