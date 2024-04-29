@@ -9,7 +9,7 @@ import {ENSSubdomainRegistrar} from "../utils/ens/ENSSubdomainRegistrar.sol";
 import {InterfaceBasedRegistry} from "../utils/InterfaceBasedRegistry.sol";
 import {isSubdomainValid} from "../utils/RegistryUtils.sol";
 
-/// @title Register your unique DAO subdomain
+/// @title Register your unique DAO
 /// @author Aragon Association - 2022-2023
 /// @notice This contract provides the possibility to register a DAO.
 /// @custom:security-contact sirt@aragon.org
@@ -17,17 +17,10 @@ contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
-    /// @notice The ENS subdomain registrar registering the DAO subdomains.
-    ENSSubdomainRegistrar public subdomainRegistrar;
-
-    /// @notice Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
-    error InvalidDaoSubdomain(string subdomain);
-
     /// @notice Emitted when a new DAO is registered.
     /// @param dao The address of the DAO contract.
     /// @param creator The address of the creator.
-    /// @param subdomain The DAO subdomain.
-    event DAORegistered(address indexed dao, address indexed creator, string subdomain);
+    event DAORegistered(address indexed dao, address indexed creator);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -37,40 +30,20 @@ contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
 
     /// @notice Initializes the contract.
     /// @param _managingDao the managing DAO address.
-    /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
-    function initialize(
-        IDAO _managingDao,
-        ENSSubdomainRegistrar _subdomainRegistrar
-    ) external initializer {
+    function initialize(IDAO _managingDao) external initializer {
         __InterfaceBasedRegistry_init(_managingDao, type(IDAO).interfaceId);
-        subdomainRegistrar = _subdomainRegistrar;
     }
 
     /// @notice Registers a DAO by its address. If a non-empty subdomain name is provided that is not taken already, the DAO becomes the owner of the ENS name.
     /// @dev A subdomain is unique within the Aragon DAO framework and can get stored here.
     /// @param dao The address of the DAO contract.
     /// @param creator The address of the creator.
-    /// @param subdomain The DAO subdomain.
-    function register(
-        IDAO dao,
-        address creator,
-        string calldata subdomain
-    ) external auth(REGISTER_DAO_PERMISSION_ID) {
+    function register(IDAO dao, address creator) external auth(REGISTER_DAO_PERMISSION_ID) {
         address daoAddr = address(dao);
 
         _register(daoAddr);
 
-        if ((bytes(subdomain).length > 0)) {
-            if (!isSubdomainValid(subdomain)) {
-                revert InvalidDaoSubdomain({subdomain: subdomain});
-            }
-
-            bytes32 labelhash = keccak256(bytes(subdomain));
-
-            subdomainRegistrar.registerSubnode(labelhash, daoAddr);
-        }
-
-        emit DAORegistered(daoAddr, creator, subdomain);
+        emit DAORegistered(daoAddr, creator);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

@@ -39,7 +39,6 @@ contract DAOFactory is ERC165, ProtocolVersion {
     struct DAOSettings {
         address trustedForwarder;
         string daoURI;
-        string subdomain;
         bytes metadata;
     }
 
@@ -78,7 +77,8 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @param _pluginSettings The array containing references to plugins and their settings to be installed after the DAO has been created.
     function createDao(
         DAOSettings calldata _daoSettings,
-        PluginSettings[] calldata _pluginSettings
+        PluginSettings[] calldata _pluginSettings,
+        IDAO.Action[] calldata _actions
     ) external returns (DAO createdDao) {
         // Check if no plugin is provided.
         if (_pluginSettings.length == 0) {
@@ -89,7 +89,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
         createdDao = _createDAO(_daoSettings);
 
         // Register DAO.
-        daoRegistry.register(createdDao, msg.sender, _daoSettings.subdomain);
+        daoRegistry.register(createdDao, msg.sender);
 
         // Get Permission IDs
         bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
@@ -131,6 +131,18 @@ contract DAOFactory is ERC165, ProtocolVersion {
                     hashHelpers(preparedSetupData.helpers)
                 )
             );
+        }
+
+        if (_actions.length > 0) {
+            // grant temporary execute action permission to this DAOFactory
+            bytes32 executeActionPermissionID = createdDao.EXECUTE_PERMISSION_ID();
+            createdDao.grant(address(createdDao), address(this), executeActionPermissionID);
+
+            // Execute actions on the newly created DAO.
+            createdDao.execute(bytes32("callID"), _actions, 0);
+
+            // revoke the execute action permission
+            createdDao.revoke(address(createdDao), address(this), executeActionPermissionID);
         }
 
         // Set the rest of DAO's permissions.
