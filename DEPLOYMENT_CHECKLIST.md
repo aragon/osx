@@ -26,7 +26,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 
   - Define the `deploy` key like: <br>
     `"deploy": ["./deploy/new", "./deploy/verification"]`.
-  - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
+  - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the Hardhat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in this case.
 
 - [ ] Define the settings of the ENS domain used by OSx.
 
