@@ -71,7 +71,7 @@ yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, et
 ## Post deployment
 
 - After the script has exited, the deployment wallet will be the only one with `ROOT_PERMISSION` on your Managing DAO.
-  - This allows the deployent wallet to manually install plugins to it.
+  - This allows the deployent wallet to manually install plugins on the Managing DAO.
   - After the required plugins are installed, `ROOT_PERMISSION` has to be revoked on the deployment wallet.
 - Should the script encounter any issues, the deployment should be re-run.
   - The script will detect and re-use any previously deployed contracts.
