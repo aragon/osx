@@ -46,7 +46,6 @@ export async function deployPluginRepoFactory(
 
 export async function deployPluginRepoRegistry(
   managingDao: any,
-  ensSubdomainRegistrar: any,
   signer: SignerWithAddress
 ): Promise<PluginRepoRegistry> {
   const PluginRepoRegistry = new PluginRepoRegistry__factory(signer);
@@ -55,10 +54,7 @@ export async function deployPluginRepoRegistry(
     PluginRepoRegistry
   );
 
-  await pluginRepoRegistry.initialize(
-    managingDao.address,
-    ensSubdomainRegistrar.address
-  );
+  await pluginRepoRegistry.initialize(managingDao.address);
 
   return pluginRepoRegistry;
 }
