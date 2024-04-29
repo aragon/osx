@@ -81,7 +81,7 @@ yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, et
 
 ### Rerunning the deployment script
 
-If you need to restart the redeployment process and want HardHat to not reuse the existing contracts:
+If you need to restart the redeployment process and want Hardhat to not reuse the existing contracts:
 
 ```sh
 rm -R deployments/<network-name>   # replace with the actual name
