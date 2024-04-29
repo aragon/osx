@@ -1,8 +1,8 @@
-import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
-import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
-import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
-import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
-import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import {expect} from 'chai';
+import {readImplementationValuesFromSlot} from '../../utils/storage';
+
+import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {Deployment} from 'hardhat-deploy/dist/types';
 import {
   DAO,
   DAORegistry,
@@ -15,13 +15,15 @@ import {
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
 } from '../../typechain';
-import {readImplementationValuesFromSlot} from '../../utils/storage';
-import {ZERO_BYTES32} from '../test-utils/dao';
-import {initializeDeploymentFixture} from '../test-utils/fixture';
+
+import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
+import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
+import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {expect} from 'chai';
-import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {Deployment} from 'hardhat-deploy/dist/types';
+import {initializeDeploymentFixture} from '../test-utils/fixture';
 
 async function deployAll() {
   await initializeDeploymentFixture('New');
@@ -32,6 +34,7 @@ describe('Managing DAO', function () {
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
   let managingDao: DAO;
+  let multisig: Multisig;
   let daoRegistryDeployment: Deployment;
   let daoRegistry: DAORegistry;
   let pluginRepoRegistryDeployment: Deployment;
@@ -39,11 +42,11 @@ describe('Managing DAO', function () {
   let ensSubdomainRegistrarDeployments: Deployment[];
   let ensSubdomainRegistrars: ENSSubdomainRegistrar[];
 
-  async function executeUpgradeActions(
+  async function createUpgradeProposal(
     contractAddress: string[],
     newImplementationAddress: string
   ) {
-    // execute upgrade actions for the specified contract.
+    // create proposal to upgrade to new implementation
     const data = DAO__factory.createInterface().encodeFunctionData(
       'upgradeTo',
       [newImplementationAddress]
@@ -51,8 +54,15 @@ describe('Managing DAO', function () {
     const actions = contractAddress.map(contract => {
       return {to: contract, value: 0, data: data};
     });
-
-    await managingDao.execute(ZERO_BYTES32, actions, 0);
+    await multisig.createProposal(
+      '0x', // metadata
+      actions,
+      0, // allowFailureMap
+      true, // approve proposal
+      true, // execute proposal
+      0, // start date: now
+      Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
+    );
   }
 
   before(async () => {
@@ -103,6 +113,11 @@ describe('Managing DAO', function () {
 
     const {deployer} = await getNamedAccounts();
     ownerAddress = deployer;
+
+    multisig = Multisig__factory.connect(
+      hre.managingDAOMultisigPluginAddress,
+      signers[0]
+    );
   });
 
   it('should have deployments', async function () {
@@ -131,8 +146,8 @@ describe('Managing DAO', function () {
 
     expect(managingDaoV2Deployment.address).not.equal(implementationAddress);
 
-    // upgrade the managing dao contract.
-    await executeUpgradeActions(
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
       [managingDao.address],
       managingDaoV2Deployment.address
     );
@@ -170,8 +185,8 @@ describe('Managing DAO', function () {
       implementationAddress
     );
 
-    // upgrade the daoRegistry contract.
-    await executeUpgradeActions(
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
       [daoRegistry.address],
       daoRegistry_v1_0_0_Deployment.address
     );
@@ -213,8 +228,8 @@ describe('Managing DAO', function () {
       implementationAddress
     );
 
-    // upgrade the pluginRepoRegistry contract.
-    await executeUpgradeActions(
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
       [pluginRepoRegistry.address],
       pluginRepoRegistry_v1_0_0_Deployment.address
     );
@@ -260,8 +275,8 @@ describe('Managing DAO', function () {
       );
     }
 
-    // upgrade the ensSubdomainRegistrar contract.
-    await executeUpgradeActions(
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
       ensSubdomainRegistrars.map(ensSR => ensSR.address),
       ensSubdomainRegistrar_v1_0_0_Deployment.address
     );
@@ -275,6 +290,59 @@ describe('Managing DAO', function () {
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
       expect(ensSubdomainRegistrar_v1_0_0_Deployment.address).to.be.equal(
+        implementationAddress
+      );
+    }
+  });
+
+  it('Should be able to upgrade `PluginRepo`s', async function () {
+    // deploy a new implementation.
+    const PluginRepo_v1_0_0_Deployment = await deployments.deploy(
+      'PluginRepo_v1_0_0',
+      {
+        contract: pluginRepoArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
+    );
+
+    // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
+    expect(PluginRepo_v1_0_0_Deployment.implementation).to.be.equal(undefined);
+
+    // check new implementation is deferent from the one on the `DaoRegistry`.
+    // read from slot
+    let implementationValues = await readImplementationValuesFromSlot([
+      hre.aragonPluginRepos['token-voting'],
+      hre.aragonPluginRepos['address-list-voting'],
+      hre.aragonPluginRepos['admin'],
+      hre.aragonPluginRepos['multisig'],
+    ]);
+
+    for (let index = 0; index < implementationValues.length; index++) {
+      const implementationAddress = implementationValues[index];
+      expect(PluginRepo_v1_0_0_Deployment.address).to.not.equal(
+        implementationAddress
+      );
+    }
+
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
+      Object.values(hre.aragonPluginRepos),
+      PluginRepo_v1_0_0_Deployment.address
+    );
+
+    // re-read from slot
+    implementationValues = await readImplementationValuesFromSlot([
+      hre.aragonPluginRepos['token-voting'],
+      hre.aragonPluginRepos['address-list-voting'],
+      hre.aragonPluginRepos['admin'],
+      hre.aragonPluginRepos['multisig'],
+    ]);
+
+    for (let index = 0; index < implementationValues.length; index++) {
+      const implementationAddress = implementationValues[index];
+      expect(PluginRepo_v1_0_0_Deployment.address).to.be.equal(
         implementationAddress
       );
     }
