@@ -1,5 +1,4 @@
 #!/bin/bash
-yarn generate:abi
 ## Semantic versioning regex with alphar, beta ando other tags
 VERSION_REGEX='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(0|[1-9A-Za-z-][0-9A-Za-z-]*)(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
 while true; do

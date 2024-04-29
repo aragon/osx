@@ -5,9 +5,9 @@
   "version": "0.0.1",
   "scripts": {
     "build:contracts": "cd ../contracts && yarn build",
-    "generate:abi": "./scripts/generate-abi.sh",
+    "generate:abi": "yarn build:contracts && yarn clean && ./scripts/generate-abi.sh",
     "clean": "rimraf generated && rimraf index.ts",
-    "publish:npm": "./scripts/publish.sh"
+    "publish:npm": "yarn generate:abi && ./scripts/publish.sh"
   },
   "devDependencies": {
     "@wagmi/cli": "^2.1.4",
