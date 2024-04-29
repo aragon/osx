@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipDeploy, uploadToIPFS} from '../../../helpers';
+import {uploadToIPFS} from '../../../helpers';
 
 import placeholderSetupArtifact from '../../../../artifacts/src/plugins/placeholder-version/PlaceholderSetup.sol/PlaceholderSetup.json';
 import placeholderBuildMetadata from '../../../../src/plugins/placeholder-version/build-metadata.json';
@@ -27,4 +27,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'PlaceholderSetup'];
-func.skip = skipDeploy;

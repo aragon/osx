@@ -2,7 +2,6 @@ import tokenVotingSetupArtifact from '../../../../artifacts/src/plugins/governan
 import governanceERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
 import governanceWrappedERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
-import {skipDeploy} from '../../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -51,4 +50,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'TokenVotingSetup'];
-func.skip = skipDeploy;

@@ -644,9 +644,5 @@ export function getManagingDAOMultisigAddress(
   return address;
 }
 
-export function skipDeploy(hre: HardhatRuntimeEnvironment) {
-  return Promise.resolve(true);
-}
-
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
 export default function () {}

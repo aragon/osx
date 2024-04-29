@@ -2,7 +2,6 @@ import {
   PluginRepoFactory__factory,
   PluginRepo__factory,
 } from '../../../../typechain';
-import {skipDeploy} from '../../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -35,4 +34,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateTokenVotingRepo', 'Verify'];
-func.skip = skipDeploy;

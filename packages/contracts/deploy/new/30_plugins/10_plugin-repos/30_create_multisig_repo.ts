@@ -9,7 +9,6 @@ import {
   populatePluginRepo,
   getContractAddress,
   uploadToIPFS,
-  skipDeploy,
 } from '../../../helpers';
 import {ethers} from 'ethers';
 
@@ -50,4 +49,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateMultisigRepo'];
-func.skip = skipDeploy;

@@ -4,7 +4,6 @@ import {
 } from '../../../../typechain';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {skipDeploy} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding Multisig deployment.\n`);
@@ -35,4 +34,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateMultisigRepo', 'Verify'];
-func.skip = skipDeploy;

@@ -5,7 +5,6 @@ import {
   populatePluginRepo,
   getContractAddress,
   uploadToIPFS,
-  skipDeploy,
 } from '../../../helpers';
 import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
@@ -51,4 +50,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateTokenVotingRepo'];
-func.skip = skipDeploy;

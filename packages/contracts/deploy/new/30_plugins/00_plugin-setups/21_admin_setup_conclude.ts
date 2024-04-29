@@ -1,5 +1,4 @@
 import {AdminSetup__factory} from '../../../../typechain';
-import {skipDeploy} from '../../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {setTimeout} from 'timers/promises';
@@ -35,4 +34,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'AdminSetup', 'Verify'];
-func.skip = skipDeploy;

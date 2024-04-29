@@ -1,5 +1,4 @@
 import adminSetupArtifact from '../../../../artifacts/src/plugins/governance/admin/AdminSetup.sol/AdminSetup.json';
-import {skipDeploy} from '../../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -17,4 +16,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'AdminSetup'];
-func.skip = skipDeploy;
