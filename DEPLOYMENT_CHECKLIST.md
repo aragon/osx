@@ -74,7 +74,7 @@ yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, et
   - This allows the deployent wallet to manually install plugins to it.
   - After the required plugins are installed, `ROOT_PERMISSION` has to be revoked on the deployment wallet.
 - Should the script encounter any issues, the deployment should be re-run again.
-  - The script would detect and re-use any already deployed contracts.
+  - The script will detect and re-use any previously deployed contracts.
 - After the process completes, check out the `packages/contracts/deployed_contracts.json` file to see the deployed contract addresses.
 
 ## Other
