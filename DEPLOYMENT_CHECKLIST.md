@@ -26,7 +26,7 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 
   - Define the `deploy` key like: <br>
     `"deploy": ["./deploy/new", "./deploy/verification"]`.
-  - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the HardHat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in such case.
+  - Define the `ETHERSCAN_KEY` variable for contract verification on the `.env` file. [Follow the Hardhat guide](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-verify) in this case.
 
 - [ ] Define the settings of the ENS domain used by OSx.
 
@@ -71,17 +71,17 @@ yarn deploy --network <NETWORK>     # Replace with mainnet, polygon, sepolia, et
 ## Post deployment
 
 - After the script has exited, the deployment wallet will be the only one with `ROOT_PERMISSION` on your Managing DAO.
-  - This allows the deployent wallet to manually install plugins to it.
+  - This allows the deployent wallet to manually install plugins on the Managing DAO.
   - After the required plugins are installed, `ROOT_PERMISSION` has to be revoked on the deployment wallet.
-- Should the script encounter any issues, the deployment should be re-run again.
-  - The script would detect and re-use any already deployed contracts.
+- Should the script encounter any issues, the deployment should be re-run.
+  - The script will detect and re-use any previously deployed contracts.
 - After the process completes, check out the `packages/contracts/deployed_contracts.json` file to see the deployed contract addresses.
 
 ## Other
 
 ### Rerunning the deployment script
 
-If you need to restart the redeployment process and want HardHat to not reuse the existing contracts:
+If you need to restart the redeployment process and want Hardhat to not reuse the existing contracts:
 
 ```sh
 rm -R deployments/<network-name>   # replace with the actual name
