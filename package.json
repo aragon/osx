@@ -11,6 +11,8 @@
       "packages/*"
     ],
     "nohoist": [
+      "**/@wagmi/cli",
+      "**/@wagmi/cli/**",
       "**/@graphprotocol/graph-ts",
       "**/@graphprotocol/graph-ts/**",
       "**/@graphprotocol/graph-cli",
