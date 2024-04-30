@@ -446,8 +446,8 @@ describe('Multisig', function () {
       await expect(multisig.removeAddresses([signers[0].address]))
         .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(
-          (await multisig.addresslistLength()).sub(1),
-          multisigSettings.minApprovals
+          multisigSettings.minApprovals,
+          (await multisig.addresslistLength()).sub(1)
         );
     });
 
@@ -465,8 +465,8 @@ describe('Multisig', function () {
       await expect(multisig.removeAddresses([signers[2].address]))
         .to.be.revertedWithCustomError(multisig, 'MinApprovalsOutOfBounds')
         .withArgs(
-          (await multisig.addresslistLength()).sub(1),
-          multisigSettings.minApprovals
+          multisigSettings.minApprovals,
+          (await multisig.addresslistLength()).sub(1)
         );
     });
   });

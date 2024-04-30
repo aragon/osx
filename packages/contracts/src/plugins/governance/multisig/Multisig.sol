@@ -188,8 +188,8 @@ contract Multisig is
         // Check if the new address list length would become less than the current minimum number of approvals required.
         if (newAddresslistLength < multisigSettings.minApprovals) {
             revert MinApprovalsOutOfBounds({
-                limit: newAddresslistLength,
-                actual: multisigSettings.minApprovals
+                limit: multisigSettings.minApprovals,
+                actual: newAddresslistLength
             });
         }
 
@@ -323,7 +323,7 @@ contract Multisig is
     /// @return approvals The number of approvals casted.
     /// @return parameters The parameters of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
+    /// @return allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     function getProposal(
         uint256 _proposalId
     )
