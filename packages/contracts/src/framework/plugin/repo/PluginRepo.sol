@@ -107,7 +107,7 @@ contract PluginRepo is
     /// - initializing the permission manager
     /// - granting the `MAINTAINER_PERMISSION_ID` permission to the initial owner.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
-    function initialize(address initialOwner) external reinitializer(2) {
+    function initialize(address initialOwner) external initializer {
         __PermissionManager_init(initialOwner);
 
         _grant(address(this), initialOwner, MAINTAINER_PERMISSION_ID);
@@ -117,16 +117,17 @@ contract PluginRepo is
     /// @notice Initializes the pluginRepo after an upgrade from a previous protocol version.
     /// @param _previousProtocolVersion The semantic protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
     /// @param _initData The initialization data to be passed to via `upgradeToAndCall` (see [ERC-1967](https://docs.openzeppelin.com/contracts/4.x/api/proxy#ERC1967Upgrade)).
+    /// @dev This function is a placeholder until we require reinitialization.
     function initializeFrom(
         uint8[3] calldata _previousProtocolVersion,
         bytes calldata _initData
     ) external reinitializer(2) {
-        _initData; // Silences the unused function parameter warning.
-
-        // Check that the contract is not upgrading from a different major release.
-        if (_previousProtocolVersion[0] != 1) {
-            revert ProtocolVersionUpgradeNotSupported(_previousProtocolVersion);
-        }
+        // Silences the unused function parameter warning.
+        _previousProtocolVersion;
+        _initData;
+        
+        // Revert because this is a placeholder until this contract requires reinitialization.
+        revert();
     }
 
     /// @inheritdoc IPluginRepo

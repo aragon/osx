@@ -515,7 +515,7 @@ describe('PluginRepo', function () {
         ).to.be.revertedWithCustomError(pluginRepo, 'EmptyReleaseMetadata');
       });
 
-      it('successfully updates metadata for the release that already exists and emits the "ReleaseMetadataUpdated" event', async () => {
+      it('updates metadata for the release that already exists and emits the "ReleaseMetadataUpdated" event', async () => {
         await pluginRepo.createVersion(
           1,
           pluginSetupMock.address,
