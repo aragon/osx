@@ -255,4 +255,7 @@ contract PluginRepo is
             _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[46] private __gap;
 }
