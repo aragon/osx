@@ -67,7 +67,6 @@ describe.only('DAORegistry', function () {
       signers[0],
       managingDao,
       daoRegistry.address,
-      signers[0].address,
       topLevelDomain
     );
 

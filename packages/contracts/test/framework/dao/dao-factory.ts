@@ -174,7 +174,6 @@ describe.only('DAOFactory: ', function () {
       signers[0],
       managingDao,
       daoRegistry.address,
-      pluginRepoRegistry.address,
       registrarManagedDomain
     );
 
