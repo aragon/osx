@@ -8,6 +8,7 @@ import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@matterlabs/hardhat-zksync-deploy';
 import '@matterlabs/hardhat-zksync-solc';
+import "@matterlabs/hardhat-zksync-node";
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -23,8 +24,9 @@ dotenv.config();
 
 if (process.env.CONTRACTS_TARGET === 'zksync') {
   import('@matterlabs/hardhat-zksync-verify');
+  import("@matterlabs/hardhat-zksync-upgradable");
 } else {
-  import('@openzeppelin/hardhat-upgrades');
+  // import('@openzeppelin/hardhat-upgrades');
   import('@nomicfoundation/hardhat-verify');
 }
 
@@ -79,6 +81,11 @@ task('deploy-contracts').setAction(async (args, hre) => {
   await hre.run('build-contracts');
   await hre.run('deploy');
 });
+
+// task('test123').setAction(async (args, hre) => {
+//   await hre.zkUpgrades.deployProxy(deployer.zkWallet, contract, [42], { initializer: "initialize" });
+
+// })
 
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
@@ -138,13 +145,13 @@ const config: HardhatUserConfig = {
         : ['./deploy/new', './deploy/verification'],
     },
     zkLocalTestnet: {
-      url: 'http://localhost:3050',
+      url: 'http://localhost:8011',
       ethNetwork: 'http://localhost:8545',
       zksync: true,
       deployPaths: ['./deploy/new'],
       accounts: [
         // This is the rich account that already has lots of funds on the chain of port 8545
-        '0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110',
+        '0x3d3cbc973389cb26f657686445bcc75662b415b656078503592ac8c1abb8810e',
       ],
     },
     zkTestnet: {
