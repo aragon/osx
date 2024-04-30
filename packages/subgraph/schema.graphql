@@ -458,7 +458,7 @@ type StandardCallback @entity {
 
 """
 The Aragon DAOs deployed using the `DAOFactory` SC `createDAO` function and registered in the `DAORegistry` SC. From this entity you are able to query
-any relevant information related to your DAO.
+any relevant information related to any DAO.
 """
 type Dao @entity {
   " The address of the deployed DAO contract registered in the `DAORegistry` SC. "
@@ -467,7 +467,7 @@ type Dao @entity {
   " ENS DAO subdomain, if added while creating the DAO. "
   subdomain: String
 
-  " The address of the creator who called (msg.sender) `createDao` in the `DAOFactory` SC. "
+  " The address of the creator (msg.sender) who called `createDao` in the `DAOFactory` SC. "
   creator: Bytes!
 
   " The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824), if added while creating the DAO. "
@@ -476,7 +476,7 @@ type Dao @entity {
   " Additional information related to the created DAO, if added while creating the DAO. "
   metadata: String
 
-  " Timestamp for the block where the DAO was created. "
+  " Timestamp of the block where the DAO was created. "
   createdAt: BigInt!
 
   " Tokens held by the DAO. "
@@ -485,10 +485,10 @@ type Dao @entity {
   " Actions executed by the DAO `execute` function (refer to `Objects/Action` in this documentation site for more information). "
   actions: [Action!]! @derivedFrom(field: "dao")
 
-  " Token transfers associated with the DAO (refer to `Interfaces/TokenTransfer` in this documentation site for more information). "
+  " Token transfers associated with the DAO using tracked methods (refer to `Interfaces/TokenTransfer` in this documentation site for more information). "
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
 
-  " DAO balances for all kinds of tokens (refer to `Interfaces/TokenBalance` in this documentation site for more information). "
+  " Balance for tokens transferred to the DAO using tracked methods (refer to `Interfaces/TokenBalance` in this documentation site for more information). "
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
 
   " The permissions given to a DAO to govern its actions (refer to `Objects/Permission` in this documentation site for more information). "
@@ -497,7 +497,7 @@ type Dao @entity {
   " The proposals to execute actions that a DAO has had. "
   proposals: [IProposal!]! @derivedFrom(field: "dao")
 
-  " The address of the trusted forwarder required for meta transactions, if added while creating the DAO. "
+  " The address of the trusted forwarder required for meta transactions, if added when creating the DAO. "
   trustedForwarder: Bytes
 
   " Deprecated field. "
@@ -506,7 +506,7 @@ type Dao @entity {
   " Registered callback functions supported by the DAO (refer to `Objects/StandardCallback` in this documentation site for more information). "
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
-  " The plugins that had been installed/uninstalled to the DAO. "
+  " The plugins that have been installed/uninstalled on the DAO. "
   plugins: [PluginInstallation!]! @derivedFrom(field: "dao")
 }
 
@@ -567,13 +567,13 @@ type PluginRepo @entity(immutable: true) {
   " The different incompatible versions for the associated plugin.  "
   releases: [PluginRelease!]! @derivedFrom(field: "pluginRepo")
 
-  " The prepared necessary settings and addresses to install/uninstall to a DAO the plugin associated to a `PluginRepo`. Also applied ones. "
+  " Preparation settings and addresses required to install/uninstall a plugin from this repo on a DAO. These include settings which have previously been applied.  "
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
 
-  # The plugins installed and uninstalled to DAOs associated to each `PluginRepo`.
+  # List of installations and uninstallations for a given `PluginRepo`. 
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
 
-  " The permissions given to a PluginRepo to govern its actions (e.g. MAINTAINER_PERMISSION_ID to create a new plugin version). "
+  " The permissions given to a `PluginRepo` to govern its actions (e.g. `MAINTAINER_PERMISSION_ID` to create a new plugin version). "
   permissions: [Permission!]! @derivedFrom(field: "pluginRepo")
 }
 
