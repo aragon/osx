@@ -31,24 +31,6 @@ contract PluginRepo is
     using AddressUpgradeable for address;
     using ERC165CheckerUpgradeable for address;
 
-    /// @notice The struct describing the tag of a version obtained by a release and build number as `RELEASE.BUILD`.
-    /// @param release The release number.
-    /// @param build The build number
-    /// @dev Releases mark incompatible changes (e.g., the plugin interface, storage layout, or incompatible behavior) whereas builds mark compatible changes (e.g., patches and compatible feature additions).
-    struct Tag {
-        uint8 release;
-        uint16 build;
-    }
-
-    /// @notice The struct describing a plugin version (release and build).
-    /// @param tag The version tag.
-    /// @param pluginSetup The setup contract associated with this version.
-    /// @param buildMetadata The build metadata URI.
-    struct Version {
-        Tag tag;
-        address pluginSetup;
-        bytes buildMetadata;
-    }
 
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant MAINTAINER_PERMISSION_ID = keccak256("MAINTAINER_PERMISSION");
