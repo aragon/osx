@@ -457,23 +457,23 @@ type StandardCallback @entity {
 #############################
 
 """
-The Aragon DAOs deployed using the `DAOFactory` SC `createDAO` function and registered in the `DAORegistry` SC. From this entity you are able to query
+The Aragon DAOs deployed using the `DAOFactory` `createDAO` function and registered in the `DAORegistry`. From this entity you are able to query
 any relevant information related to any DAO.
 """
 type Dao @entity {
-  " The address of the deployed DAO contract registered in the `DAORegistry` SC. "
+  " The address of the deployed DAO contract registered in the `DAORegistry`. "
   id: ID!
 
-  " ENS DAO subdomain, if added while creating the DAO. "
+  " ENS DAO subdomain. Optional to add when creating the DAO. "
   subdomain: String
 
-  " The address of the creator (msg.sender) who called `createDao` in the `DAOFactory` SC. "
+  " The address of the creator (msg.sender) who called `createDao` in the `DAOFactory`. "
   creator: Bytes!
 
-  " The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824), if added while creating the DAO. "
+  " The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824). Optional to add when creating the DAO. "
   daoURI: String
 
-  " Additional information related to the created DAO, if added while creating the DAO. "
+  " Additional information related to the created DAO. Optional to add when creating the DAO. "
   metadata: String
 
   " Timestamp of the block where the DAO was created. "
@@ -494,7 +494,7 @@ type Dao @entity {
   " The permissions given to a DAO to govern its actions (refer to `Objects/Permission` in this documentation site for more information). "
   permissions: [Permission!]! @derivedFrom(field: "dao")
 
-  " The proposals to execute actions that a DAO has had. "
+  " A list of proposals for actions to be executed by the DAO, including both open and executed proposals. "
   proposals: [IProposal!]! @derivedFrom(field: "dao")
 
   " The address of the trusted forwarder required for meta transactions, if added when creating the DAO. "
@@ -506,11 +506,13 @@ type Dao @entity {
   " Registered callback functions supported by the DAO (refer to `Objects/StandardCallback` in this documentation site for more information). "
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
 
-  " The plugins that have been installed/uninstalled on the DAO. "
+  " The plugins that have been installed/uninstalled on the DAO. It includes the preparations as well. "
   plugins: [PluginInstallation!]! @derivedFrom(field: "dao")
 }
 
-#ACL
+#############################
+####### Permission ##########
+#############################
 
 # Cannot be immutable because a permission can be revoked and granted in the same TX.
 # This results in an error in the subgraph if the entity is immutable.
@@ -518,8 +520,7 @@ type Dao @entity {
 
 """
 [Aragon permission system](https://devs.aragon.org/docs/osx/how-it-works/core/permissions/), permissions between contracts and wallets allow
-our DAOs (and `PluginRepo`s) to manage and govern its actions. A permission is the hash of a struct which specifies an address `who` being
-allowed to call certain functions on a contract address `where`.
+our DAOs (and `PluginRepo`s) to manage and govern its actions. A permission is the hash of the string "PERMISSION", `who`, `where` and `permissionId`.
 """
 type Permission @entity {
   " Concatenation of the emitting contract Address (DAO or PluginRepo), the `permissionId`, `where` and `who`. Joined by '_'. "
@@ -534,7 +535,7 @@ type Permission @entity {
   " The address (EOA or contract) to which the permission has been granted. "
   who: Bytes!
 
-  " The address of the context in which the permission has been granted. "
+  " The address of the context (the msg.sender calling `grant`/`revoke` functions in the `DAO` or `PluginRepo`) in which the permission has been granted. "
   actor: Bytes!
 
   " The address of the contract containing the conditions which authorize a call by another address. This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface. "
@@ -543,10 +544,10 @@ type Permission @entity {
   # The following attributes are used to create
   # one-to-many between DAO or PluginRepo to Permission
 
-  " The DAO that grants the permission (DAO uses `PermissionManager` SC `grant` function). "
+  " The DAO that grants the permission (DAO uses `PermissionManager` `grant` function). "
   dao: Dao
 
-  " The PluginRepo that grants the permission (PluginRepo uses `PermissionManager` SC `grant` function). "
+  " The PluginRepo that grants the permission (PluginRepo uses `PermissionManager` `grant` function). "
   pluginRepo: PluginRepo
 }
 
@@ -570,7 +571,7 @@ type PluginRepo @entity(immutable: true) {
   " Preparation settings and addresses required to install/uninstall a plugin from this repo on a DAO. These include settings which have previously been applied.  "
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
 
-  # List of installations and uninstallations for a given `PluginRepo`. 
+  # List of installations and uninstallations for a given `PluginRepo`.
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
 
   " The permissions given to a `PluginRepo` to govern its actions (e.g. `MAINTAINER_PERMISSION_ID` to create a new plugin version). "
@@ -578,8 +579,7 @@ type PluginRepo @entity(immutable: true) {
 }
 
 """
-The contracts that will deploy your plugin using different factory patterns (new/minimal proxy pattern/UUPS pattern).
-Pointing to a specific version of the plugin (the address for one specific implementation contract).
+The contracts to prepare plugins to be installed/updated/uninstalled to/from your DAO. Pointing to a specific version of the plugin.
 """
 type PluginSetup @entity(immutable: true) {
   " The PluginSetup contract address. "
@@ -590,13 +590,14 @@ type PluginSetup @entity(immutable: true) {
 }
 
 """
-Registration of the different incompatible versions of a plugin.
+A release is a new [version of a plugin](https://devs.aragon.org/docs/osx/how-to-guides/plugin-development/publication/versioning) which introduces
+incompatible changes with its previous versions.
 """
 type PluginRelease @entity {
   " Concatenation of PluginRepo contract address and the release number (uint8) of the associated plugin. Joined by '_'. "
   id: ID!
 
-  " The `PluginRepo` SC which contains this specific version (release) of the plugin. "
+  " The `PluginRepo` which contains this specific version (release) of the plugin. "
   pluginRepo: PluginRepo!
 
   " The release, marking incompatible versions of a plugin. "
@@ -610,7 +611,7 @@ type PluginRelease @entity {
 }
 
 """
-All the versions of a plugin, managed by the [`PluginRepo` SC](https://devs.aragon.org/docs/osx/how-it-works/framework/plugin-management/plugin-repo/).
+All the versions of a plugin, managed by the [`PluginRepo`](https://devs.aragon.org/docs/osx/how-it-works/framework/plugin-management/plugin-repo/).
 """
 type PluginVersion @entity(immutable: true) {
   " Concatenation of PluginRepo contract address and the release (uint8) and build (uint16) as numbers. Joined by '_'. "
@@ -639,14 +640,14 @@ type PluginVersion @entity(immutable: true) {
 }
 
 """
-The plugin permissions prepared to be granted/revoked to/from a DAO by the `PluginSetupProcessor` SC.
+The plugin permissions prepared to be granted/revoked to/from a DAO by the `PluginSetupProcessor`.
 Notice these are in the preparation process, they could be not applied.
 """
 type PluginPermission @entity(immutable: true) {
   " The concatenation of the `PluginPreparation` entity ID, and the permission parameters: operation type (as number), `where`, `who` and the permissionId. Joined by '_'. "
   id: ID!
 
-  " The preparation process handled by the `PluginSetupProcessor` SC for that permission. "
+  " The preparation process handled by the `PluginSetupProcessor` for that permission. "
   pluginPreparation: PluginPreparation!
 
   " The type of operation done in this permission (refer to `Enums/PermissionOperation` in this documentation site for more information). "
@@ -680,7 +681,7 @@ enum PermissionOperation {
 }
 
 """
-The previous step to installing/uninstalling a plugin to/from your DAO. All `PluginSetup` SCs must implement the prepare functions containing
+The previous step to installing/uninstalling a plugin to/from your DAO. `PluginSetup` must implement the prepare functions containing
 necessary permissions and settings to install/uninstall a plugin.
 """
 type PluginPreparation @entity(immutable: true) {
@@ -690,7 +691,7 @@ type PluginPreparation @entity(immutable: true) {
   " The application of this preparation step. "
   installation: PluginInstallation!
 
-  " The caller of the preparation function (install/uninstall/update) in the `PluginSetupProcessor` SC. "
+  " The caller of the preparation function (install/uninstall/update) in the `PluginSetupProcessor`. "
   creator: Bytes!
 
   " The DAO where the plugin will be installed/uninstalled/updated. "
@@ -708,7 +709,7 @@ type PluginPreparation @entity(immutable: true) {
   " The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata JSON file. "
   data: Bytes
 
-  " The deployed plugin SC by the `PluginSetup` SC. "
+  " The deployed plugin by the `PluginSetup`. "
   pluginAddress: Bytes!
 
   " The address array of helpers (contracts or EOAs) associated with this plugin version. "
@@ -769,7 +770,7 @@ enum PluginPreparationType {
 }
 
 """
-Flag to know in which state a plugin is in relation of a DAO. Each of these processes are handled by the [`PluginSetupProcessor` SC](https://devs.aragon.org/docs/osx/how-it-works/framework/plugin-management/plugin-setup/#how-are-plugins-installed-in-daos)
+Flag to know in which state a plugin is in relation of a DAO. Each of these processes are handled by the [`PluginSetupProcessor`](https://devs.aragon.org/docs/osx/how-it-works/framework/plugin-management/plugin-setup/#how-are-plugins-installed-in-daos)
 """
 enum PluginPreparationState {
   " A installation process has started. The plugin contract is deployed and ready to be installed, the parameters are already set too. "
