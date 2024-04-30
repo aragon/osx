@@ -67,7 +67,6 @@ export async function deployENSSubdomainRegistrar(
     managingDao.address,
     ensRegistry.address,
     registry,
-
     node
   );
 
