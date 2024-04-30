@@ -18,6 +18,10 @@ contract PluginRepoRegistry is InterfaceBasedRegistry, ProtocolVersion {
     bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
         keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
 
+    /// @notice The ENS subdomain registrar registering the PluginRepo subdomains.
+    /// ! removed keeping it for storage layout compatibility
+    ENSSubdomainRegistrar public subdomainRegistrar;
+
     /// @notice Emitted if a new plugin repository is registered.
     /// @param pluginRepo The address of the plugin repository.
     event PluginRepoRegistered(address pluginRepo);
