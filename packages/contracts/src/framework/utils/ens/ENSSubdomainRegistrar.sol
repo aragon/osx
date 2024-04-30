@@ -102,7 +102,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
             if (
                 !PluginRepo(_targetAddress).isGranted(
                     _targetAddress,
-                    msg.sender,
+                    _msgSender(),
                     PluginRepo(_targetAddress).MAINTAINER_PERMISSION_ID(),
                     bytes("")
                 )
@@ -114,9 +114,9 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
 
     function registerSubnode(
         bytes32 _label
-    ) external isAllowed(registry.entries(msg.sender), false, address(0)) {
+    ) external isAllowed(registry.entries(_msgSender()), false, address(0)) {
         // is a registered dao
-        _registerSubnode(_label, msg.sender);
+        _registerSubnode(_label, _msgSender());
     }
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
@@ -126,7 +126,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
     function registerSubnode(
         bytes32 _label,
         address _targetAddress
-    ) external isAllowed(registry.entries(msg.sender), true, _targetAddress) {
+    ) external isAllowed(registry.entries(_targetAddress), true, _targetAddress) {
         // is registered plugin and the caller has maintainer permission
         _registerSubnode(_label, _targetAddress);
     }
@@ -148,7 +148,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
 
     function unregisterSubnode(
         bytes32 _label
-    ) external isAllowed(registry.entries(msg.sender), false, address(0)) {
+    ) external isAllowed(registry.entries(_msgSender()), false, address(0)) {
         // is a registered dao
         _unregisterSubnode(_label);
     }
@@ -156,7 +156,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
     function unregisterSubnode(
         bytes32 _label,
         address _targetAddress
-    ) external isAllowed(registry.entries(msg.sender), true, _targetAddress) {
+    ) external isAllowed(registry.entries(_targetAddress), true, _targetAddress) {
         // is registered plugin and the caller has maintainer permission
         _unregisterSubnode(_label);
     }
