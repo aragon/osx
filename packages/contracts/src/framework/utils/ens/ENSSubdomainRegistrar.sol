@@ -11,8 +11,7 @@ import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versionin
 import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
-import {DAORegistry} from "../../dao/DAORegistry.sol";
-import {PluginRepoRegistry} from "../../plugin/repo/PluginRepoRegistry.sol";
+import {InterfaceBasedRegistry} from "../../utils/InterfaceBasedRegistry.sol";
 import {PluginRepo} from "../../plugin/repo/PluginRepo.sol";
 
 /// @title ENSSubdomainRegistrar
@@ -37,8 +36,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
     /// @notice The address of the ENS resolver resolving the names to an address.
     address public resolver;
 
-    DAORegistry public daoRegistry;
-    PluginRepoRegistry public pluginRepoRegistry;
+    InterfaceBasedRegistry public registry;
 
     /// @notice Thrown if the subnode is already registered.
     /// @param subnode The subnode namehash.
@@ -69,16 +67,14 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
     function initialize(
         IDAO _managingDao,
         ENS _ens,
-        DAORegistry _daoRegistry,
-        PluginRepoRegistry _pluginRepoRegistry,
+        InterfaceBasedRegistry _registry,
         bytes32 _node
     ) external initializer {
         __DaoAuthorizableUpgradeable_init(_managingDao);
 
         ens = _ens;
         node = _node;
-        daoRegistry = _daoRegistry;
-        pluginRepoRegistry = _pluginRepoRegistry;
+        registry = _registry;
 
         address nodeResolver = ens.resolver(_node);
 
@@ -118,7 +114,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
 
     function registerSubnode(
         bytes32 _label
-    ) external isAllowed(daoRegistry.entries(msg.sender), false, address(0)) {
+    ) external isAllowed(registry.entries(msg.sender), false, address(0)) {
         // is a registered dao
         _registerSubnode(_label, msg.sender);
     }
@@ -130,7 +126,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
     function registerSubnode(
         bytes32 _label,
         address _targetAddress
-    ) external isAllowed(daoRegistry.entries(msg.sender), true, _targetAddress) {
+    ) external isAllowed(registry.entries(msg.sender), true, _targetAddress) {
         // is registered plugin and the caller has maintainer permission
         _registerSubnode(_label, _targetAddress);
     }
@@ -152,7 +148,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
 
     function unregisterSubnode(
         bytes32 _label
-    ) external isAllowed(daoRegistry.entries(msg.sender), false, address(0)) {
+    ) external isAllowed(registry.entries(msg.sender), false, address(0)) {
         // is a registered dao
         _unregisterSubnode(_label);
     }
@@ -160,7 +156,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable, P
     function unregisterSubnode(
         bytes32 _label,
         address _targetAddress
-    ) external isAllowed(daoRegistry.entries(msg.sender), true, _targetAddress) {
+    ) external isAllowed(registry.entries(msg.sender), true, _targetAddress) {
         // is registered plugin and the caller has maintainer permission
         _unregisterSubnode(_label);
     }
