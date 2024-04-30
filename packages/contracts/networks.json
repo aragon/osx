@@ -74,5 +74,5 @@
     "isTestnet": true,
     "chainId": 43,
     "deploy": ["./deploy/new", "./deploy/verification"]
-  },
+  }
 }
