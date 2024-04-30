@@ -19,7 +19,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry, ProtocolVersion {
         keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
 
     /// @notice The ENS subdomain registrar registering the PluginRepo subdomains.
-    /// ! removed keeping it for storage layout compatibility
+    /// ! removed, but keeping it for storage layout compatibility
     ENSSubdomainRegistrar public subdomainRegistrar;
 
     /// @notice Emitted if a new plugin repository is registered.

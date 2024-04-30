@@ -18,7 +18,7 @@ contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
     /// @notice The ENS subdomain registrar registering the DAO subdomains.
-    /// ! removed keeping it for storage layout compatibility
+    /// ! removed, but keeping it for storage layout compatibility
     ENSSubdomainRegistrar public subdomainRegistrar;
 
     /// @notice Emitted when a new DAO is registered.
