@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Switch the parameter order in the `MinApprovalsOutOfBounds` error in the `Multisig` plugin.
-- Fixed natSpec comment in `getProposal` function in `Multisig` plugin.
+- Fixed NatSpec comment in `getProposal` function in the `Multisig` plugin.
 
 ## v1.3.0
 
