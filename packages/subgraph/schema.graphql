@@ -571,7 +571,7 @@ type PluginRepo @entity(immutable: true) {
   " Preparation settings and addresses required to install/uninstall a plugin from this repo on a DAO. These include settings which have previously been applied.  "
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginRepo")
 
-  # List of installations and uninstallations for a given `PluginRepo`.
+  " List of installations and uninstallations for a given `PluginRepo`. It also includes the preparations. "
   installations: [PluginInstallation!] @derivedFrom(field: "appliedPluginRepo")
 
   " The permissions given to a `PluginRepo` to govern its actions (e.g. `MAINTAINER_PERMISSION_ID` to create a new plugin version). "
@@ -635,7 +635,7 @@ type PluginVersion @entity(immutable: true) {
   " All the preparations to install/uninstall/update this plugin version to any DAOs. Including applied ones. "
   preparations: [PluginPreparation!]! @derivedFrom(field: "pluginVersion")
 
-  " All the applied installed/uninstalled installations for this plugin version. "
+  " All the applied installed/uninstalled installations for this plugin version. It also includes the preparations. "
   installations: [PluginInstallation!] @derivedFrom(field: "appliedVersion")
 }
 
@@ -802,7 +802,7 @@ interface IPlugin {
   " Same as ID but in bytes format. Included for UI purposes. "
   pluginAddress: Bytes!
 
-  " All the installation processes this plugin has been involved. "
+  " All the installation processes this plugin has been involved. It also includes the preparations. "
   installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
 
   # TODO: Uncomment as soon as the plugins have their own subgraph
