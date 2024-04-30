@@ -688,7 +688,7 @@ type PluginPreparation @entity(immutable: true) {
   " Concatenation of DAO address, plugin address and the preparedSetupId. Joined by '_'. "
   id: ID!
 
-  " The application of this preparation step. "
+  " To let `PluginInstallation` entity know that a plugin has been prepared to install/update/uninstall. "
   installation: PluginInstallation!
 
   " The caller of the preparation function (install/uninstall/update) in the `PluginSetupProcessor`. "
