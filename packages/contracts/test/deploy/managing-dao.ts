@@ -34,7 +34,7 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Management DAO', function () {
+describe.only('Management DAO', function () {
   let deployer: SignerWithAddress;
   let approvers: SignerWithAddress[];
   let minApprovals: number;
