@@ -117,6 +117,30 @@ const config: HardhatUserConfig = {
           browserURL: 'https://goerli.basescan.org',
         },
       },
+      {
+        network: 'darwinia',
+        chainId: 46,
+        urls: {
+          apiURL: 'https://darwinia.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://darwinia.subscan.io',
+        },
+      },
+      {
+        network: 'crab',
+        chainId: 44,
+        urls: {
+          apiURL: 'https://crab.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://crab.subscan.io',
+        },
+      },
+      {
+        network: 'pangolin',
+        chainId: 43,
+        urls: {
+          apiURL: 'https://pangolin.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://pangolin.subscan.io',
+        },
+      },
     ],
   },
   namedAccounts: {
