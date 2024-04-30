@@ -23,10 +23,13 @@ import {
   IProtocolVersion__factory,
   IERC165__factory,
   PluginRepoRegistry__factory,
+  ENSRegistry__factory,
+  PublicResolver__factory,
 } from '../../../typechain';
 import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
@@ -299,7 +302,7 @@ describe.only('DAOFactory: ', function () {
     const value = 0;
     const data = (ensSubdomainRegistrar.interface as any).encodeFunctionData(
       'registerSubnode(bytes32)',
-      [ethers.utils.formatBytes32String(daoDummySubdomain)]
+      [ensLabelHash(daoDummySubdomain)]
     );
     return {to, value, data};
   }
@@ -310,7 +313,6 @@ describe.only('DAOFactory: ', function () {
     const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
-    console.log('creating action');
     const action = await createAction();
     expect(
       await daoFactory.createDao(
@@ -326,7 +328,24 @@ describe.only('DAOFactory: ', function () {
       .to.emit(daoContract, EVENTS.NewURI)
       .withArgs(daoSettings.daoURI);
 
-    // todo check subdomain were added
+    // check the new subdomain owner is the registrar
+    const fullDomain = `${daoDummySubdomain}.${registrarManagedDomain}`;
+    const ENSRegistry = new ENSRegistry__factory(signers[0]);
+    const ens = ENSRegistry.attach(await ensSubdomainRegistrar.ens());
+
+    expect(await ens.owner(ensDomainHash(fullDomain))).to.equal(
+      ensSubdomainRegistrar.address
+    );
+
+    // check the new subdomain resolver target
+    const PublicResolverFactory = new PublicResolver__factory(signers[0]);
+    const resolver = PublicResolverFactory.attach(
+      await ensSubdomainRegistrar.resolver()
+    );
+
+    expect(
+      await await resolver['addr(bytes32)'](ensDomainHash(fullDomain))
+    ).to.equal(daoContract.address);
   });
 
   it('creates a dao with a plugin and emits correct events', async () => {
