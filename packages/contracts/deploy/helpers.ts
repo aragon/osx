@@ -275,7 +275,7 @@ export async function createVersion(
       build: buildNumber,
     });
     console.log(
-      `Version Already Deployed, skipping the 'createVersion' call on pluginRepo`
+      `Version already deployed. Skipping the 'createVersion' call on pluginRepo`
     );
     return;
   } catch (err) {}
