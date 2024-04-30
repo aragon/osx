@@ -24,6 +24,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
+  // VERIFYING DAO REGISTRY
+  const DAORegistryAddress = await getContractAddress('DAORegistryProxy', hre);
+  const DAORegistry = DAORegistry__factory.connect(
+    DAORegistryAddress,
+    deployer
+  );
+
+  await checkSetManagementDao(DAORegistry, managementDAOAddress);
+  // ! not nedded as the registry no longer has the subdomain registrar
+  // // scope to reuse same const again
+  // {
+  //   const SubdomainRegistrarAddress = await DAORegistry.subdomainRegistrar();
+  //   if (SubdomainRegistrarAddress !== DAOENSSubdomainRegistrarAddress) {
+  //     throw new Error(
+  //       `${DAORegistry} has wrong SubdomainRegistrarAddress set. Expected ${DAOENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
+  //     );
+  //   }
+  // }
+
   // VERIFYING DAO ENS SUBDOMAIN REGISTRAR
   const DAOENSSubdomainRegistrarAddress = await getContractAddress(
     'DAOENSSubdomainRegistrarProxy',
@@ -33,6 +52,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     DAOENSSubdomainRegistrarAddress,
     deployer
   );
+
   await checkSetManagementDao(DAOENSSubdomainRegistrar, managementDAOAddress);
   // scope to reuse same const again
   {
@@ -56,6 +76,42 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       );
     }
   }
+
+  // check is the correct registry
+  {
+    const SubdomainRegistry = await DAOENSSubdomainRegistrar.registry();
+    console.log('SubdomainRegistry', SubdomainRegistry);
+    console.log('DAORegistryAddress', DAORegistryAddress);
+
+    if (SubdomainRegistry !== DAORegistryAddress) {
+      throw new Error(
+        `${DAOENSSubdomainRegistrar} has wrong Registry set. Expected ${DAORegistryAddress} to be ${SubdomainRegistry}`
+      );
+    }
+  }
+
+  // VERIFYING PLUGIN REPO REGISTRY
+  const PluginRepoRegistryAddress = await getContractAddress(
+    'PluginRepoRegistryProxy',
+    hre
+  );
+  const PluginRepoRegistry = PluginRepoRegistry__factory.connect(
+    PluginRepoRegistryAddress,
+    deployer
+  );
+  await checkSetManagementDao(PluginRepoRegistry, managementDAOAddress);
+
+  // ! not needed as the registry no longer has the subdomain registrar
+  // scope to reuse same const again
+  // {
+  //   const SubdomainRegistrarAddress =
+  //     await PluginRepoRegistry.subdomainRegistrar();
+  //   if (SubdomainRegistrarAddress !== PluginENSSubdomainRegistrarAddress) {
+  //     throw new Error(
+  //       `${PluginRepoRegistry} has wrong SubdomainRegistrarAddress set. Expected ${PluginENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
+  //     );
+  //   }
+  // }
 
   // VERIFYING PLUGIN ENS SUBDOMAIN REGISTRAR
   const PluginENSSubdomainRegistrarAddress = await getContractAddress(
@@ -93,40 +149,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  // VERIFYING DAO REGISTRY
-  const DAORegistryAddress = await getContractAddress('DAORegistryProxy', hre);
-  const DAORegistry = DAORegistry__factory.connect(
-    DAORegistryAddress,
-    deployer
-  );
-  await checkSetManagementDao(DAORegistry, managementDAOAddress);
-  // scope to reuse same const again
+  // check is the correct registry
   {
-    const SubdomainRegistrarAddress = await DAORegistry.subdomainRegistrar();
-    if (SubdomainRegistrarAddress !== DAOENSSubdomainRegistrarAddress) {
+    const SubdomainRegistry = await PluginENSSubdomainRegistrar.registry();
+    console.log('SubdomainRegistry', SubdomainRegistry);
+    console.log('PluginRepoRegistryAddress', PluginRepoRegistryAddress);
+    if (SubdomainRegistry !== PluginRepoRegistryAddress) {
       throw new Error(
-        `${DAORegistry} has wrong SubdomainRegistrarAddress set. Expected ${DAOENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
-      );
-    }
-  }
-
-  // VERIFYING PLUGIN REPO REGISTRY
-  const PluginRepoRegistryAddress = await getContractAddress(
-    'PluginRepoRegistryProxy',
-    hre
-  );
-  const PluginRepoRegistry = PluginRepoRegistry__factory.connect(
-    PluginRepoRegistryAddress,
-    deployer
-  );
-  await checkSetManagementDao(PluginRepoRegistry, managementDAOAddress);
-  // scope to reuse same const again
-  {
-    const SubdomainRegistrarAddress =
-      await PluginRepoRegistry.subdomainRegistrar();
-    if (SubdomainRegistrarAddress !== PluginENSSubdomainRegistrarAddress) {
-      throw new Error(
-        `${PluginRepoRegistry} has wrong SubdomainRegistrarAddress set. Expected ${PluginENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
+        `${PluginENSSubdomainRegistrar} has wrong Registry set. Expected ${PluginRepoRegistryAddress} to be ${SubdomainRegistry}`
       );
     }
   }

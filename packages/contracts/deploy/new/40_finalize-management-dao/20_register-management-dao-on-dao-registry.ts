@@ -1,4 +1,5 @@
 import {DAO__factory, DAORegistry__factory} from '../../../typechain';
+import {ensLabelHash} from '../../../utils/ens';
 import {
   daoDomainEnv,
   managementDaoSubdomainEnv,
@@ -10,6 +11,7 @@ import {
   MANAGEMENT_DAO_METADATA,
   uploadToIPFS,
 } from '../../helpers';
+import {ENSSubdomainRegistrar__factory} from '@aragon/osx-ethers-v1.2.0';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -55,8 +57,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Register `managementDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
     managementDAOAddress,
-    deployer.address,
-    daoSubdomain
+    deployer.address
   );
   await registerTx.wait();
   console.log(

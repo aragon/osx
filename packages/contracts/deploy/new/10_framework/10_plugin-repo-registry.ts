@@ -1,4 +1,4 @@
-import daoRegistryArtifact from '../../../artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json';
+import pluginRepoRegistryArtifact from '../../../artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 import {getContractAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -14,14 +14,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  // Get DAO's `ENSSubdomainRegistrar` contract.
-  const ensSubdomainRegistrarAddress = await getContractAddress(
-    'DAOENSSubdomainRegistrarProxy',
-    hre
-  );
+  // Get DAO's `ENSSubdomainRegistrar` address.
+  // ! no longer needed
+  // const ensSubdomainRegistrarAddress = await getContractAddress(
+  //   'PluginENSSubdomainRegistrarProxy',
+  //   hre
+  // );
 
-  await deploy('DAORegistryProxy', {
-    contract: daoRegistryArtifact,
+  await deploy('PluginRepoRegistryProxy', {
+    contract: pluginRepoRegistryArtifact,
     from: deployer.address,
     args: [],
     log: true,
@@ -32,11 +33,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managementDAOAddress, ensSubdomainRegistrarAddress],
+          args: [managementDAOAddress],
         },
       },
     },
   });
 };
 export default func;
-func.tags = ['New', 'DAORegistry'];
+// func.runAtTheEnd = true;
+func.tags = ['New', 'PluginRepoRegistry'];

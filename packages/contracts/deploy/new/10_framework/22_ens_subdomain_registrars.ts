@@ -6,6 +6,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log('Registrar');
+
   const {deployments, ethers, network} = hre;
   const {deploy} = deployments;
 
@@ -26,6 +28,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoNode = ethers.utils.namehash(daoDomain);
   const pluginNode = ethers.utils.namehash(pluginDomain);
 
+  // Get DAO's `DAORegistry` address.
+  const daoRegistry = await getContractAddress('DAORegistryProxy', hre);
+
   await deploy('DAOENSSubdomainRegistrarProxy', {
     contract: ensSubdomainRegistrarArtifact,
     from: deployer.address,
@@ -38,7 +43,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managementDAOAddress, ensRegistryAddress, daoNode],
+          args: [
+            managementDAOAddress,
+            ensRegistryAddress,
+            daoRegistry,
+            daoNode,
+          ],
         },
       },
     },
@@ -47,6 +57,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get DAO's `DAOENSSubdomainRegistrarProxy` contract.
   const daoSubdomainRegistrarAddress = await getContractAddress(
     'DAOENSSubdomainRegistrarProxy',
+    hre
+  );
+
+  // Get DAO's `PluginRepoRegistry` address.
+  const pluginRepoRegistry = await getContractAddress(
+    'PluginRepoRegistryProxy',
     hre
   );
 
@@ -62,7 +78,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managementDAOAddress, ensRegistryAddress, pluginNode],
+          args: [
+            managementDAOAddress,
+            ensRegistryAddress,
+            pluginRepoRegistry,
+            pluginNode,
+          ],
         },
       },
     },
