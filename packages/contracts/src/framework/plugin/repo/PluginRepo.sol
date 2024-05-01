@@ -153,23 +153,7 @@ contract PluginRepo is
 
         uint16 build = ++buildsPerRelease[_release];
 
-        Tag memory tag = Tag(_release, build);
-        bytes32 _tagHash = tagHash(tag);
-
-        versions[_tagHash] = Version(tag, _pluginSetup, _buildMetadata);
-
-        latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
-
-        emit VersionCreated({
-            release: _release,
-            build: build,
-            pluginSetup: _pluginSetup,
-            buildMetadata: _buildMetadata
-        });
-
-        if (_releaseMetadata.length > 0) {
-            emit ReleaseMetadataUpdated(_release, _releaseMetadata);
-        }
+        updateVersionMappings(_release, build, _pluginSetup, _buildMetadata, _releaseMetadata);
     }
 
     /// @inheritdoc IPluginRepo
@@ -197,24 +181,9 @@ contract PluginRepo is
         }
 
         latestRelease = _release;
-
         buildsPerRelease[_release] = _build;
 
-        Tag memory tag = Tag(_release, _build);
-        bytes32 _tagHash = tagHash(tag);
-
-        versions[_tagHash] = Version(tag, _pluginSetup, _buildMetadata);
-
-        latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
-
-        emit VersionCreated({
-            release: _release,
-            build: _build,
-            pluginSetup: _pluginSetup,
-            buildMetadata: _buildMetadata
-        });
-
-        emit ReleaseMetadataUpdated(_release, _releaseMetadata);
+        updateVersionMappings(_release, _build, _pluginSetup, _buildMetadata, _releaseMetadata);
     }
 
     /// @inheritdoc IPluginRepo
@@ -267,6 +236,38 @@ contract PluginRepo is
     /// @inheritdoc IPluginRepo
     function buildCount(uint8 _release) external view returns (uint256) {
         return buildsPerRelease[_release];
+    }
+
+    /// @notice Internal method for updating the version mappings.
+    /// @param _release The release number.
+    /// @param _build The build number.
+    /// @param _pluginSetup The address of the plugin setup contract.
+    /// @param _buildMetadata The build metadata URI.
+    /// @param _releaseMetadata The release metadata URI.
+    function updateVersionMappings(
+        uint8 _release,
+        uint16 _build,
+        address _pluginSetup,
+        bytes calldata _buildMetadata,
+        bytes calldata _releaseMetadata
+    ) internal {
+        Tag memory tag = Tag(_release, _build);
+        bytes32 _tagHash = tagHash(tag);
+
+        versions[_tagHash] = Version(tag, _pluginSetup, _buildMetadata);
+
+        latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
+
+        emit VersionCreated({
+            release: _release,
+            build: _build,
+            pluginSetup: _pluginSetup,
+            buildMetadata: _buildMetadata
+        });
+
+        if (_releaseMetadata.length > 0) {
+            emit ReleaseMetadataUpdated({release: _release, releaseMetadata: _releaseMetadata});
+        }
     }
 
     /// @notice The hash of the version tag obtained from the packed, bytes-encoded release and build number.
