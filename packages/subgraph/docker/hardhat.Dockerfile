@@ -1,16 +1,9 @@
-FROM node:18
+FROM node:20-alpine3.19
 
-RUN mkdir /osx
-ADD . /osx
-WORKDIR /osx
+COPY ./hardhat /hardhat
+WORKDIR /hardhat
 RUN yarn install
-
-WORKDIR /osx/packages/contracts-versions
-RUN yarn build
-
-WORKDIR /osx/packages/contracts
-RUN yarn build
 
 EXPOSE 8545
 
-CMD [ "yarn", "dev" ]
+CMD [ "yarn", "hardhat", "node", "--hostname", "0.0.0.0"]
