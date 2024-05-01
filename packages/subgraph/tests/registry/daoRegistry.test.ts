@@ -43,6 +43,12 @@ describe('DAORegistry', () => {
       'createdAt',
       newDaoEvent.block.timestamp.toString()
     );
+    assert.fieldEquals(
+      'Dao',
+      daoEntityId,
+      'txHash',
+      newDaoEvent.transaction.hash.toHexString()
+    );
   });
 
   test("Don't store subdomain for blocklisted DAO", () => {
@@ -71,6 +77,12 @@ describe('DAORegistry', () => {
       denylistedEntityId,
       'createdAt',
       newDaoEvent.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'Dao',
+      denylistedEntityId,
+      'txHash',
+      newDaoEvent.transaction.hash.toHexString()
     );
 
     const daoEntity = Dao.load(denylistedEntityId);
