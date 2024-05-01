@@ -31,25 +31,6 @@ contract PluginRepo is
     using AddressUpgradeable for address;
     using ERC165CheckerUpgradeable for address;
 
-    /// @notice The struct describing the tag of a version obtained by a release and build number as `RELEASE.BUILD`.
-    /// @param release The release number.
-    /// @param build The build number
-    /// @dev Releases mark incompatible changes (e.g., the plugin interface, storage layout, or incompatible behavior) whereas builds mark compatible changes (e.g., patches and compatible feature additions).
-    struct Tag {
-        uint8 release;
-        uint16 build;
-    }
-
-    /// @notice The struct describing a plugin version (release and build).
-    /// @param tag The version tag.
-    /// @param pluginSetup The setup contract associated with this version.
-    /// @param buildMetadata The build metadata URI.
-    struct Version {
-        Tag tag;
-        address pluginSetup;
-        bytes buildMetadata;
-    }
-
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant MAINTAINER_PERMISSION_ID = keccak256("MAINTAINER_PERMISSION");
 
@@ -97,6 +78,8 @@ contract PluginRepo is
     error ReleaseDoesNotExist();
     /// @notice Thrown if an upgrade is not supported from a specific protocol version .
     error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
+    /// @notice Thrown if the plugin repo is already initialized.
+    error PluginRepoAlreadyInitialized();
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -190,6 +173,51 @@ contract PluginRepo is
     }
 
     /// @inheritdoc IPluginRepo
+    function createInitialVersion(
+        uint8 _release,
+        uint16 _build,
+        address _pluginSetup,
+        bytes calldata _buildMetadata,
+        bytes calldata _releaseMetadata
+    ) external auth(MAINTAINER_PERMISSION_ID) {
+        if (!_pluginSetup.supportsInterface(type(IPluginSetup).interfaceId)) {
+            revert InvalidPluginSetupInterface();
+        }
+        // This method can only be called if no prior versions exist
+        if (latestRelease != 0) {
+            revert PluginRepoAlreadyInitialized();
+        }
+        // Release should not be 0
+        if (_release == 0) {
+            revert ReleaseZeroNotAllowed();
+        }
+        // Check that the release metadata is not empty
+        if (_releaseMetadata.length == 0) {
+            revert EmptyReleaseMetadata();
+        }
+
+        latestRelease = _release;
+
+        buildsPerRelease[_release] = _build;
+
+        Tag memory tag = Tag(_release, _build);
+        bytes32 _tagHash = tagHash(tag);
+
+        versions[_tagHash] = Version(tag, _pluginSetup, _buildMetadata);
+
+        latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
+
+        emit VersionCreated({
+            release: _release,
+            build: _build,
+            pluginSetup: _pluginSetup,
+            buildMetadata: _buildMetadata
+        });
+
+        emit ReleaseMetadataUpdated(_release, _releaseMetadata);
+    }
+
+    /// @inheritdoc IPluginRepo
     function updateReleaseMetadata(
         uint8 _release,
         bytes calldata _releaseMetadata
@@ -209,31 +237,23 @@ contract PluginRepo is
         emit ReleaseMetadataUpdated(_release, _releaseMetadata);
     }
 
-    /// @notice Returns the latest version for a given release number.
-    /// @param _release The release number.
-    /// @return The latest version of this release.
-    function getLatestVersion(uint8 _release) public view returns (Version memory) {
+    /// @inheritdoc IPluginRepo
+    function getLatestVersion(uint8 _release) external view returns (Version memory) {
         uint16 latestBuild = uint16(buildsPerRelease[_release]);
         return getVersion(tagHash(Tag(_release, latestBuild)));
     }
 
-    /// @notice Returns the latest version for a given plugin setup.
-    /// @param _pluginSetup The plugin setup address
-    /// @return The latest version associated with the plugin Setup.
-    function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
+    /// @inheritdoc IPluginRepo
+    function getLatestVersion(address _pluginSetup) external view returns (Version memory) {
         return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
 
-    /// @notice Returns the version associated with a tag.
-    /// @param _tag The version tag.
-    /// @return The version associated with the tag.
-    function getVersion(Tag calldata _tag) public view returns (Version memory) {
+    /// @inheritdoc IPluginRepo
+    function getVersion(Tag calldata _tag) external view returns (Version memory) {
         return getVersion(tagHash(_tag));
     }
 
-    /// @notice Returns the version for a tag hash.
-    /// @param _tagHash The tag hash.
-    /// @return The version associated with a tag hash.
+    /// @inheritdoc IPluginRepo
     function getVersion(bytes32 _tagHash) public view returns (Version memory) {
         Version storage version = versions[_tagHash];
 
@@ -244,10 +264,8 @@ contract PluginRepo is
         return version;
     }
 
-    /// @notice Gets the total number of builds for a given release number.
-    /// @param _release The release number.
-    /// @return The number of builds of this release.
-    function buildCount(uint8 _release) public view returns (uint256) {
+    /// @inheritdoc IPluginRepo
+    function buildCount(uint8 _release) external view returns (uint256) {
         return buildsPerRelease[_release];
     }
 
