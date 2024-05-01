@@ -21,6 +21,7 @@ export function handleDAORegistered(event: DAORegistered): void {
 
   entity.creator = event.params.creator;
   entity.createdAt = event.block.timestamp;
+  entity.txHash = event.transaction.hash;
 
   // subscribe to templates
   DaoTemplateV1_0_0.create(daoAddress);
