@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
-## 1.4.1
+### Added
 
-## 1.5.0
+- Add `txHash` field to the Dao entity.
+
+## 1.4.1
 
 ### Changed
 
