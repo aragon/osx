@@ -11,6 +11,7 @@ import {
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
+import {OZ_INITIALIZED_SLOT_POSITION} from '../../../utils/storage';
 import {ZERO_BYTES32} from '../../test-utils/dao';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {tagHash} from '../../test-utils/psp/hash-helpers';
@@ -150,6 +151,23 @@ describe('PluginRepo', function () {
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
         expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
         expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
+      });
+    });
+    describe('InitializeFrom', () => {
+      it('increments `_initialized` to `1`', async () => {
+        // Expect the contract to be initialized  with `_initialized = 1`.
+        expect(
+          ethers.BigNumber.from(
+            await ethers.provider.getStorageAt(
+              pluginRepo.address,
+              OZ_INITIALIZED_SLOT_POSITION
+            )
+          ).toNumber()
+        ).to.equal(1);
+
+        // Call `initializeFrom` with version 1.3.0. and revert
+        await expect(pluginRepo.initializeFrom([1, 3, 0], emptyBytes)).to.be
+          .reverted;
       });
     });
 
