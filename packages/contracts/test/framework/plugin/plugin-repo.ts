@@ -170,6 +170,146 @@ describe('PluginRepo', function () {
           .reverted;
       });
     });
+    describe('CreateInitialVersion', () => {
+      const INITIAL_RELEASE = 2;
+      const INITIAL_BUILD = 4;
+      it('reverts if the caller does not have permission', async () => {
+        await expect(
+          pluginRepo
+            .connect(signers[2])
+            .createInitialVersion(
+              INITIAL_RELEASE,
+              INITIAL_BUILD,
+              pluginSetupMock.address,
+              BUILD_METADATA,
+              RELEASE_METADATA
+            )
+        )
+          .to.be.revertedWithCustomError(pluginRepo, 'Unauthorized')
+          .withArgs(
+            pluginRepo.address,
+            signers[2].address,
+            MAINTAINER_PERMISSION_ID
+          );
+      });
+      it('Should revert if the plugin setup does not support the `IPluginSetup` interface', async () => {
+        expect(
+          pluginRepo.createInitialVersion(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            ownerAddress,
+            BUILD_METADATA,
+            RELEASE_METADATA
+          )
+        ).to.be.revertedWithCustomError(
+          pluginRepo,
+          'InvalidPluginSetupInterface'
+        );
+      });
+      it('Should revert if a version was already created', async () => {
+        await pluginRepo.createVersion(
+          1,
+          pluginSetupMock.address,
+          BUILD_METADATA,
+          RELEASE_METADATA
+        );
+        await expect(
+          pluginRepo.createInitialVersion(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA,
+            RELEASE_METADATA
+          )
+        ).to.be.revertedWithCustomError(
+          pluginRepo,
+          'PluginRepoAlreadyInitialized'
+        );
+      });
+      it('Should revert if the release number is 0', async () => {
+        await expect(
+          pluginRepo.createInitialVersion(
+            0,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA,
+            RELEASE_METADATA
+          )
+        ).to.be.revertedWithCustomError(pluginRepo, 'ReleaseZeroNotAllowed');
+      });
+      it('should revert if the release metadata is empty', async () => {
+        await expect(
+          pluginRepo.createInitialVersion(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA,
+            '0x'
+          )
+        ).to.be.revertedWithCustomError(pluginRepo, 'EmptyReleaseMetadata');
+      });
+      it('Should create the initial version and emit the correct events', async () => {
+        await expect(
+          pluginRepo.createInitialVersion(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA,
+            RELEASE_METADATA
+          )
+        )
+          .to.emit(pluginRepo, 'VersionCreated')
+          .withArgs(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA
+          )
+          .to.emit(pluginRepo, 'ReleaseMetadataUpdated')
+          .withArgs(INITIAL_RELEASE, RELEASE_METADATA);
+
+        expect(await pluginRepo.latestRelease()).to.equal(INITIAL_RELEASE);
+        expect(await pluginRepo.buildCount(INITIAL_RELEASE)).to.equal(
+          INITIAL_BUILD
+        );
+      });
+      it('Should create the initial version and then continue creating versions with createVersion', async () => {
+        await expect(
+          pluginRepo.createInitialVersion(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA,
+            RELEASE_METADATA
+          )
+        )
+          .to.emit(pluginRepo, 'VersionCreated')
+          .withArgs(
+            INITIAL_RELEASE,
+            INITIAL_BUILD,
+            pluginSetupMock.address,
+            BUILD_METADATA
+          )
+          .to.emit(pluginRepo, 'ReleaseMetadataUpdated')
+          .withArgs(INITIAL_RELEASE, RELEASE_METADATA);
+
+        expect(await pluginRepo.latestRelease()).to.equal(INITIAL_RELEASE);
+        expect(await pluginRepo.buildCount(INITIAL_RELEASE)).to.equal(
+          INITIAL_BUILD
+        );
+
+        await pluginRepo.createVersion(
+          INITIAL_RELEASE,
+          pluginSetupMock.address,
+          BUILD_METADATA,
+          RELEASE_METADATA
+        );
+        expect(await pluginRepo.latestRelease()).to.equal(INITIAL_RELEASE);
+        expect(await pluginRepo.buildCount(INITIAL_RELEASE)).to.equal(
+          INITIAL_BUILD + 1
+        );
+      });
+    });
 
     describe('ERC-165', async () => {
       it('does not support the empty interface', async () => {
@@ -184,7 +324,7 @@ describe('PluginRepo', function () {
 
       it('supports the `IPluginRepo` interface', async () => {
         const iface = IPluginRepo__factory.createInterface();
-        expect(getInterfaceId(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
+        expect(getInterfaceId(iface)).to.equal('0x0d19035f'); // the interfaceID from IPluginRepo v1.0.0
         expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
