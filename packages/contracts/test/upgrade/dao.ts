@@ -10,13 +10,12 @@ import {
 import {DAO, DAO__factory, ProtocolVersion__factory} from '../../typechain';
 
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {UpgradedEvent} from '../../typechain/DAO';
-import {ARTIFACT_SOURCES} from '../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../test-utils/wrapper';
 
 let signers: SignerWithAddress[];
 let DAO_old: DAO_V1_0_0__factory;
@@ -50,8 +49,6 @@ describe('DAO Upgrade', function () {
   context(`Re-entrancy`, function () {
     context(`v1.0.0 to v1.3.0`, function () {
       beforeEach(async function () {
-        // TODO:GIORGI test commented
-        // daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
         daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
           withProxy: true,
         });
@@ -266,8 +263,6 @@ describe('DAO Upgrade', function () {
   context(`Protocol Version`, function () {
     beforeEach(async function () {
       // prepare v1.0.0
-      // TODO:GIORGI test commented
-      // daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
       daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
         withProxy: true,
       });
@@ -288,8 +283,6 @@ describe('DAO Upgrade', function () {
 
     it('fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards', async () => {
       // deploy the different versions
-      // TODO:GIORGI test commented
-      // const daoCurrentProxy = await deployWithProxy<DAO>(DAO_Current);
       const daoCurrentProxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
         withProxy: true,
       });

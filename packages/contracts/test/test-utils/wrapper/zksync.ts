@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import {BigNumberish, Contract} from 'ethers';
-import {NetworkDeployment} from './Wrapper';
+import {NetworkDeployment, deploySettings} from '.';
 import {Provider} from 'zksync-ethers';
 import {utils, Wallet} from 'zksync-ethers';
 
@@ -40,14 +40,46 @@ export class ZkSync implements NetworkDeployment {
     return this.provider.getTransactionCount(sender);
   }
 
-  async deployProxy(artifactName: string, args: any[], options: any): Promise<Contract> {
-    const signers = await hre.ethers.getSigners()
+  // currently, type is not used and always deploys with UUPS
+  async deployProxy(
+    deployer: number,
+    artifactName: string,
+    type: string,
+    args: any[],
+    initializer: string | null
+  ): Promise<Contract> {
+    const wallets = await hre.zksyncEthers.getWallets();
     const artifact = await hre.deployer.loadArtifact(artifactName);
-    return hre.zkUpgrades.deployProxy(signers[0] as unknown as Wallet, artifact, args)
+    return hre.zkUpgrades.deployProxy(
+      wallets[deployer],
+      artifact,
+      args,
+      {
+        kind: 'uups',
+        unsafeAllow: ['constructor'],
+        constructorArgs: [],
+      },
+      true
+    );
   }
 
-  async upgradeProxy(proxyAddress: string, newArtifactName: string, options: any): Promise<Contract> {
+  async upgradeProxy(
+    upgrader: number,
+    proxyAddress: string,
+    newArtifactName: string
+  ): Promise<Contract> {
+    const wallets = await hre.zksyncEthers.getWallets();
     const newArtifact = await hre.deployer.loadArtifact(newArtifactName);
-    return hre.zkUpgrades.upgradeProxy(await hre.deployer.getWallet(), proxyAddress, newArtifact);
+    return hre.zkUpgrades.upgradeProxy(
+      wallets[upgrader],
+      proxyAddress,
+      newArtifact,
+      {
+        unsafeAllow: ['constructor'],
+        constructorArgs: [],
+        kind: 'uups',
+      },
+      true
+    );
   }
 }

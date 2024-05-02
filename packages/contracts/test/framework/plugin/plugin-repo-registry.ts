@@ -16,14 +16,13 @@ import {deployNewDAO} from '../../test-utils/dao';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {ensDomainHash} from '../../../utils/ens';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   getProtocolVersion,
   ozUpgradeCheckManagedContract,
 } from '../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {ARTIFACT_SOURCES} from '../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -65,12 +64,6 @@ describe('PluginRepoRegistry', function () {
     );
 
     // deploy and initialize PluginRepoRegistry
-    // TODO:GIORGI test commented
-    // const PluginRepoRegistry = new PluginRepoRegistry__factory(signers[0]);
-    // pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
-    //   PluginRepoRegistry
-    // );
-
     pluginRepoRegistry = await hre.wrapper.deploy(
       ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
       {withProxy: true}
@@ -265,8 +258,7 @@ describe('PluginRepoRegistry', function () {
     }).timeout(120000);
   });
 
-  // TODO:GIORGI extra check
-  describe.skip('Upgrades', () => {
+  describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
 
@@ -281,19 +273,20 @@ describe('PluginRepoRegistry', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           managingDAO,
           {
             dao: managingDAO.address,
             ensSubdomainRegistrar: ensSubdomainRegistrar.address,
           },
           'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY_V1_0_0,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
         );
 
+      // TODO:GIORGI what the f is this ?
       expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
 
       const fromProtocolVersion = await getProtocolVersion(

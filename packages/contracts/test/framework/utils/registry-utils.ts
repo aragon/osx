@@ -12,10 +12,6 @@ describe('RegistryUtils', () => {
   });
 
   beforeEach(async () => {
-    // TODO:GIORGI test commented
-    // const RegistryUtilsFactory = new RegistryUtils__factory(signers[0]);
-    // registryUtilsContract = await RegistryUtilsFactory.deploy();
-
     registryUtilsContract = await hre.wrapper.deploy('RegistryUtils');
   });
 

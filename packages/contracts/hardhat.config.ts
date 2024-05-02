@@ -14,18 +14,18 @@ import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
+// If you're running on zksync, import the below
+import '@matterlabs/hardhat-zksync-upgradable';
+import '@matterlabs/hardhat-zksync-ethers';
+import '@matterlabs/hardhat-zksync-verify';
+
+// If you're running on hardhat, import the following
+// import '@nomicfoundation/hardhat-verify'
+// import '@openzeppelin/hardhat-upgrades'
+
 import {AragonPluginRepos, TestingFork} from './utils/types';
 
 dotenv.config();
-
-if (process.env.CONTRACTS_TARGET === 'zksync') {
-  import('@matterlabs/hardhat-zksync-verify');
-  import('@matterlabs/hardhat-zksync-upgradable');
-} else {
-  // console.log("oooooo")
-  import('@openzeppelin/hardhat-upgrades');
-  import('@nomicfoundation/hardhat-verify');
-}
 
 const ETH_KEY = process.env.ETH_KEY;
 const accounts = ETH_KEY ? ETH_KEY.split(',') : [];
@@ -64,11 +64,11 @@ task('deploy-contracts').setAction(async (args, hre) => {
 });
 
 task('test-contracts').setAction(async (args, hre) => {
-  const imp = await import('./test/test-utils/wrapper/Wrapper');
+  const imp = await import('./test/test-utils/wrapper');
 
   const wrapper = imp.Wrapper.create(hre.network.name, hre.ethers.provider);
   hre.wrapper = wrapper;
-  
+
   await hre.run('test');
 });
 

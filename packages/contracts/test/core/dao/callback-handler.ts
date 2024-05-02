@@ -26,12 +26,6 @@ describe('CallbackHandler', function () {
     signers = await ethers.getSigners();
     owner = await signers[0].getAddress();
 
-    // TODO:GIORGI test commented
-    // const CallbackHandlerHelper = new CallbackHandlerMockHelper__factory(
-    //   signers[0]
-    // );
-    // callbackHandlerMockHelper = await CallbackHandlerHelper.deploy();
-
     callbackHandlerMockHelper = await hre.wrapper.deploy(
       'CallbackHandlerMockHelper'
     );

@@ -1416,6 +1416,13 @@
     sinon-chai "^3.7.0"
     ts-morph "^21.0.1"
 
+"@matterlabs/hardhat-zksync-ethers@0.0.1-beta.2":
+  version "0.0.1-beta.2"
+  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-ethers/-/hardhat-zksync-ethers-0.0.1-beta.2.tgz#72c58559e6b5550777dd290f9bfa4f117ac67697"
+  integrity sha512-j5G2uQu/6feEGdFeQ6upbIoUGTRxBJRvFGySbVlC8UxYIdNFMVUUI3Vb2TYlH2EvlJN89Uue908fvGruTrEIHA==
+  dependencies:
+    chalk "5.3.0"
+
 "@matterlabs/hardhat-zksync-node@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-node/-/hardhat-zksync-node-0.1.0.tgz#de9b6b277727457ee981208030f33d06537db5d7"
@@ -3887,6 +3894,11 @@ chalk@4.1.2, chalk@^4.0.0, chalk@^4.0.2, chalk@^4.1.0, chalk@^4.1.2:
   dependencies:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
+
+chalk@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-5.3.0.tgz#67c20a7ebef70e7f3970a01f90fa210cb6860385"
+  integrity sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==
 
 chalk@^2.0.0, chalk@^2.1.0, chalk@^2.3.2, chalk@^2.4.2:
   version "2.4.2"

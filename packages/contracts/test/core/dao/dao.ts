@@ -6,11 +6,8 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO,
   TestERC20,
-  TestERC20__factory,
   TestERC721,
-  TestERC721__factory,
   TestERC1155,
-  TestERC1155__factory,
   ERC1271Mock__factory,
   GasConsumer__factory,
   DAO__factory,
@@ -21,7 +18,6 @@ import {
   IERC1271__factory,
   IEIP4824__factory,
   IProtocolVersion__factory,
-  ProxyFactory__factory,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
 
@@ -49,11 +45,7 @@ import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {
-  ARTIFACT_SOURCES,
-  Wrapper,
-  deploySettings,
-} from '../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 
 chai.use(smock.matchers);
 
@@ -112,11 +104,6 @@ describe('DAO', function () {
   });
 
   beforeEach(async function () {
-    // TODO:GIORGI test commented
-    // const proxyFactory = await new ProxyFactory__factory(deployer).deploy(
-    //   implementation.address
-    // );
-
     dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
     await dao.initialize(
       dummyMetadata1,
@@ -126,7 +113,6 @@ describe('DAO', function () {
     );
 
     // Grant permissions
-
     await dao.grant(
       dao.address,
       ownerAddress,
@@ -333,8 +319,7 @@ describe('DAO', function () {
     });
   });
 
-  // TODO:GIORGI extra check
-  describe.only('Upgrades', async () => {
+  describe('Upgrades', async () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
 
@@ -342,13 +327,13 @@ describe('DAO', function () {
       currentContractFactory = new DAO__factory(signers[0]);
     });
 
-    it.only('from v1.0.0', async () => {
+    it('from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagingContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           {
             metadata: dummyMetadata1,
             initialOwner: signers[0].address,
@@ -356,8 +341,8 @@ describe('DAO', function () {
             daoURI: daoExampleURI,
           },
           'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.DAO_V1_0_0,
+          ARTIFACT_SOURCES.DAO,
           UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -641,10 +626,6 @@ describe('DAO', function () {
 
     // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
     it.skip('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
-      // TODO:GIORGI test commented
-      // const GasConsumer = new GasConsumer__factory(signers[0]);
-      // let gasConsumer = await GasConsumer.deploy();
-
       const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
@@ -681,10 +662,6 @@ describe('DAO', function () {
 
     // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
     it.skip('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
-      // TODO:GIORGI test commented
-      // const GasConsumer = new GasConsumer__factory(signers[0]);
-      // let gasConsumer = await GasConsumer.deploy();
-
       const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
@@ -757,10 +734,6 @@ describe('DAO', function () {
         let erc20Token: TestERC20;
 
         beforeEach(async () => {
-          // TODO:GIORGI test commented
-          // const TestERC20 = new TestERC20__factory(signers[0]);
-          // erc20Token = await TestERC20.deploy('name', 'symbol', 0);
-
           erc20Token = await hre.wrapper.deploy('TestERC20', {
             args: ['name', 'symbol', 0],
           });
@@ -802,10 +775,6 @@ describe('DAO', function () {
         let erc721Token: TestERC721;
 
         beforeEach(async () => {
-          // TODO:GIORGI test commented
-          // const TestERC721 = new TestERC721__factory(signers[0]);
-          // erc721Token = await TestERC721.deploy('name', 'symbol');
-
           erc721Token = await hre.wrapper.deploy('TestERC721', {
             args: ['name', 'symbol'],
           });
@@ -850,10 +819,6 @@ describe('DAO', function () {
         let erc1155Token: TestERC1155;
 
         beforeEach(async () => {
-          // TODO:GIORGI test commented
-          // const TestERC1155 = new TestERC1155__factory(signers[0]);
-          // erc1155Token = await TestERC1155.deploy('URI');
-
           erc1155Token = await hre.wrapper.deploy('TestERC1155', {
             args: ['URI'],
           });
@@ -916,13 +881,6 @@ describe('DAO', function () {
     let erc1155Token: TestERC1155;
 
     beforeEach(async () => {
-      // TODO:GIORGI test commented
-      // const TestERC1155 = new TestERC1155__factory(signers[0]);
-      // erc1155Token = await TestERC1155.deploy('URI');
-
-      // const TestERC721 = new TestERC721__factory(signers[0]);
-      // erc721Token = await TestERC721.deploy('name', 'symbol');
-
       erc1155Token = await hre.wrapper.deploy('TestERC1155', {args: ['URI']});
       erc721Token = await hre.wrapper.deploy('TestERC721', {
         args: ['name', 'symbol'],
@@ -1047,10 +1005,6 @@ describe('DAO', function () {
     let token: TestERC20;
 
     beforeEach(async () => {
-      // TODO:GIORGI test commented
-      // const TestERC20 = new TestERC20__factory(signers[0]);
-      // token = await TestERC20.deploy('name', 'symbol', 0);
-
       token = await hre.wrapper.deploy('TestERC20', {
         args: ['name', 'symbol', 0],
       });

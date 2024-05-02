@@ -61,17 +61,10 @@ describe('GovernanceWrappedERC20', function () {
 
   beforeEach(async function () {
     defaultExistingERC20InitData = [existingErc20Name, existingErc20Symbol, 0];
-    // TODO:GIORGI test commented
-    // erc20 = await TestERC20.deploy(...defaultExistingERC20InitData);
-
     erc20 = await hre.wrapper.deploy('TestERC20', {
       args: defaultExistingERC20InitData,
     });
 
-    // TODO:GIORGI test commented
-    // const promises = defaultBalances.map(balance =>
-    //   erc20.setBalance(balance.account, balance.amount)
-    // );
     for (let i = 0; i < defaultBalances.length; i++) {
       await erc20.setBalance(
         defaultBalances[i].account,
@@ -84,11 +77,6 @@ describe('GovernanceWrappedERC20', function () {
       governanceWrappedERC20Name,
       governanceWrappedERC20Symbol,
     ];
-
-    // TODO:GIORGI test commented
-    // governanceToken = await GovernanceWrappedERC20.deploy(
-    //   ...defaultGovernanceWrappedERC20InitData
-    // );
 
     governanceToken = await hre.wrapper.deploy('GovernanceWrappedERC20', {
       args: defaultGovernanceWrappedERC20InitData,
@@ -103,11 +91,6 @@ describe('GovernanceWrappedERC20', function () {
     });
 
     it('sets the wrapped token name and symbol', async () => {
-      // TODO:GIORGI test commented
-      // governanceToken = await GovernanceWrappedERC20.deploy(
-      //   ...defaultGovernanceWrappedERC20InitData
-      // );
-
       governanceToken = await hre.wrapper.deploy('GovernanceWrappedERC20', {
         args: defaultGovernanceWrappedERC20InitData,
       });
@@ -369,13 +352,6 @@ describe('GovernanceWrappedERC20', function () {
     let token: GovernanceWrappedERC20;
 
     beforeEach(async () => {
-      // TODO:GIORGI test commented
-      // token = await GovernanceWrappedERC20.deploy(
-      //   erc20.address,
-      //   'name',
-      //   'symbol'
-      // );
-
       token = await hre.wrapper.deploy('GovernanceWrappedERC20', {
         args: [erc20.address, 'name', 'symbol'],
       });

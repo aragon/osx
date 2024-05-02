@@ -61,8 +61,7 @@ describe('GovernanceERC20', function () {
       governanceERC20Symbol,
       mintSettings,
     ];
-    // TODO:GIORGI test commented
-    // token = await GovernanceERC20.deploy(...defaultInitData);
+
     token = await hre.wrapper.deploy('GovernanceERC20', {
       args: defaultInitData,
     });
@@ -81,9 +80,6 @@ describe('GovernanceERC20', function () {
     });
 
     it('sets the managing DAO ', async () => {
-      // TODO:GIORGI test commented
-      // token = await GovernanceERC20.deploy(...defaultInitData);
-
       token = await hre.wrapper.deploy('GovernanceERC20', {
         args: defaultInitData,
       });
@@ -249,11 +245,6 @@ describe('GovernanceERC20', function () {
 
   describe('afterTokenTransfer', async () => {
     beforeEach(async () => {
-      // TODO:GIORGI test commented
-      // token = await GovernanceERC20.deploy(dao.address, 'name', 'symbol', {
-      //   receivers: [],
-      //   amounts: [],
-      // });
       token = await hre.wrapper.deploy('GovernanceERC20', {
         args: [dao.address, 'name', 'symbol', {receivers: [], amounts: []}],
       });

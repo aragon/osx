@@ -8,11 +8,6 @@ describe('Ratio', function () {
   let ratio: RatioTest;
 
   before(async () => {
-    const signers = await ethers.getSigners();
-    // TODO:GIORGI test commented
-    // const RatioTest = new RatioTest__factory(signers[0]);
-    // ratio = await RatioTest.deploy();
-
     ratio = await hre.wrapper.deploy('RatioTest');
   });
 

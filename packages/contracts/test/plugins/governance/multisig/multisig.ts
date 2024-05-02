@@ -47,7 +47,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
-import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -106,9 +106,6 @@ describe.skip('Multisig', function () {
       onlyListed: true,
     };
 
-    // TODO:GIORGI test commented
-    // const MultisigFactory = new Multisig__factory(signers[0]);
-    // multisig = await deployWithProxy(MultisigFactory);
     multisig = await hre.wrapper.deploy(ARTIFACT_SOURCES.MULTISIG, {
       withProxy: true,
     });
@@ -200,8 +197,7 @@ describe.skip('Multisig', function () {
     });
   });
 
-  // TODO:GIORGI extra check
-  describe.skip('Upgrades', () => {
+  describe('Upgrades', () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
 
@@ -214,8 +210,8 @@ describe.skip('Multisig', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           dao,
           {
             dao: dao.address,
@@ -227,8 +223,8 @@ describe.skip('Multisig', function () {
             multisigSettings: multisigSettings,
           },
           'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.MULTISIG_V1_0_0,
+          ARTIFACT_SOURCES.MULTISIG,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change

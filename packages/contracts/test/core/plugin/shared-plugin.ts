@@ -2,15 +2,8 @@ import {expect} from 'chai';
 import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {
-  TestSharedPlugin,
-  TestIdGatingCondition,
-  DAO,
-  TestIdGatingCondition__factory,
-  TestSharedPlugin__factory,
-} from '../../../typechain';
+import {TestSharedPlugin, TestIdGatingCondition, DAO} from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {deployWithProxy} from '../../test-utils/proxy';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
   'ID_GATED_ACTION_PERMISSION'
@@ -35,9 +28,6 @@ describe('SharedPlugin', function () {
     dao2 = await deployNewDAO(signers[0]);
 
     // Deploy the `TestSharedPlugin`
-    // TODO:GIORGI test commented
-    // const TestSharedPlugin = new TestSharedPlugin__factory(signers[0]);
-    // testPlugin = await deployWithProxy(TestSharedPlugin);
     testPlugin = await hre.wrapper.deploy('TestSharedPlugin', {
       withProxy: true,
     });
@@ -73,10 +63,6 @@ describe('SharedPlugin', function () {
       const allowedId = 0;
 
       // Deploy `TestIdGatingCondition` and set the allowed ID in the constructor
-      // TODO:GIORGI test commented
-      // const Condition = new TestIdGatingCondition__factory(signers[0]);
-      // condition = await Condition.deploy(allowedId);
-
       condition = await hre.wrapper.deploy('TestIdGatingCondition', {
         args: [allowedId],
       });
@@ -104,10 +90,6 @@ describe('SharedPlugin', function () {
       const nonExistingId = 1;
 
       // Deploy the condition and set the allowed ID
-      // TODO:GIORGI test commented
-      // const Condition = new TestIdGatingCondition__factory(signers[0]);
-      // condition = await Condition.deploy(allowedId);
-
       condition = await hre.wrapper.deploy('TestIdGatingCondition', {
         args: [allowedId],
       });
@@ -144,10 +126,6 @@ describe('SharedPlugin', function () {
       // deploy condition and set allowed ID
       const allowedId = 1;
       const existingButNotAllowedId = 0;
-
-      // TODO:GIORGI test commented
-      // const Condition = new TestIdGatingCondition__factory(signers[0]);
-      // condition = await Condition.deploy(allowedId);
 
       condition = await hre.wrapper.deploy('TestIdGatingCondition', {
         args: [allowedId],
@@ -189,10 +167,6 @@ describe('SharedPlugin', function () {
       // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      // TODO:GIORGI test commented
-      // const Condition = new TestIdGatingCondition__factory(signers[0]);
-      // condition = await Condition.deploy(allowedId);
-
       condition = await hre.wrapper.deploy('TestIdGatingCondition', {
         args: [allowedId],
       });
@@ -210,10 +184,6 @@ describe('SharedPlugin', function () {
     it('reverts if the permission is set in the wrong DAO', async () => {
       // Deploy condition and set allowed ID
       const allowedId = 0;
-
-      // TODO:GIORGI test commented
-      // const Condition = new TestIdGatingCondition__factory(signers[0]);
-      // condition = await Condition.deploy(allowedId);
 
       condition = await hre.wrapper.deploy('TestIdGatingCondition', {
         args: [allowedId],
@@ -240,10 +210,6 @@ describe('SharedPlugin', function () {
     it('reverts if the object belongs to the wrong DAO', async () => {
       // Deploy condition and set allowed ID
       const allowedId = 0;
-
-      // TODO:GIORGI test commented
-      // const Condition = new TestIdGatingCondition__factory(signers[0]);
-      // condition = await Condition.deploy(allowedId);
 
       condition = await hre.wrapper.deploy('TestIdGatingCondition', {
         args: [allowedId],

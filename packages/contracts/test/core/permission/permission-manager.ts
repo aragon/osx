@@ -5,9 +5,6 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   PermissionManagerTest,
   PermissionConditionMock,
-  PermissionManagerTest__factory,
-  PermissionConditionMock__factory,
-  TestPlugin__factory,
 } from '../../../typechain';
 import {DeployTestPermissionCondition} from '../../test-utils/conditions';
 import {OZ_ERRORS} from '../../test-utils/error';
@@ -60,10 +57,6 @@ describe('Core: PermissionManager', function () {
   });
 
   beforeEach(async () => {
-    // TODO:GIORGI test commented
-    // const PM = new PermissionManagerTest__factory(signers[0]);
-    // pm = await PM.deploy();
-
     pm = await hre.wrapper.deploy('PermissionManagerTest');
 
     await pm.init(ownerSigner.address);
@@ -77,10 +70,6 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should emit Granted', async () => {
-      // TODO:GIORGI test commented
-      // const PM = new PermissionManagerTest__factory(ownerSigner);
-      // pm = await PM.deploy();
-
       pm = await hre.wrapper.deploy('PermissionManagerTest');
 
       await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
@@ -177,11 +166,6 @@ describe('Core: PermissionManager', function () {
 
   describe('grantWithCondition', () => {
     before(async () => {
-      // TODO:GIORGI test commented
-      // conditionMock = await new PermissionConditionMock__factory(
-      //   signers[0]
-      // ).deploy();
-
       conditionMock = await hre.wrapper.deploy('PermissionConditionMock');
     });
 
@@ -199,11 +183,6 @@ describe('Core: PermissionManager', function () {
     });
 
     it('reverts if the condition contract does not support `IPermissionConditon`', async () => {
-      // TODO:GIORGI test commented
-      // const nonConditionContract1 = await new TestPlugin__factory(
-      // signers[0]
-      // ).deploy();
-
       const nonConditionContract = await hre.wrapper.deploy('TestPlugin');
 
       await expect(
@@ -288,11 +267,6 @@ describe('Core: PermissionManager', function () {
         ADMIN_PERMISSION_ID,
         conditionMock.address
       );
-
-      // TODO:GIORGI test commented
-      // const newConditionMock = await new PermissionConditionMock__factory(
-      //   signers[0]
-      // ).deploy();
 
       const newConditionMock = await hre.wrapper.deploy(
         'PermissionConditionMock'
@@ -505,11 +479,6 @@ describe('Core: PermissionManager', function () {
 
     it('should grant with condition', async () => {
       const signers = await ethers.getSigners();
-
-      // TODO:GIORGI test commented
-      // const conditionMock2 = await new PermissionConditionMock__factory(
-      //   signers[0]
-      // ).deploy();
 
       const conditionMock2 = await hre.wrapper.deploy(
         'PermissionConditionMock'

@@ -3,7 +3,7 @@ import hre from 'hardhat';
 import {BigNumberish, Contract, providers} from 'ethers';
 import {utils} from 'ethers';
 
-import {NetworkDeployment} from './Wrapper';
+import {NetworkDeployment} from '.';
 
 export class HardhatClass implements NetworkDeployment {
   provider: providers.BaseProvider;
@@ -35,30 +35,51 @@ export class HardhatClass implements NetworkDeployment {
     return this.provider.getTransactionCount(sender);
   }
 
-  async deployProxy(artifactName: string, args: any[], options: any): Promise<Contract> {
+  async deployProxy(
+    deployer: number,
+    artifactName: string,
+    type: string,
+    args: any[],
+    initializer: string
+  ): Promise<Contract> {
     const {ethers} = hre;
-    const signers = await ethers.getSigners();
+    const signer = (await ethers.getSigners())[deployer];
+
     const artifact = await hre.artifacts.readArtifact(artifactName);
     let contract = new ethers.ContractFactory(
       artifact.abi,
       artifact.bytecode,
-      signers[0]
+      signer
     );
 
-    return hre.upgrades.deployProxy(contract, args)
+    // Currently, it doesn't use type and always deployes with uups
+    return hre.upgrades.deployProxy(contract, args, {
+      kind: 'uups',
+      initializer: initializer,
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    });
   }
 
-  async upgradeProxy(proxyAddress: string, newArtifactName: string, options: any): Promise<Contract> {
+  async upgradeProxy(
+    upgrader: number,
+    proxyAddress: string,
+    newArtifactName: string
+  ): Promise<Contract> {
     const {ethers} = hre;
-    const signers = await ethers.getSigners();
+    const signer = (await ethers.getSigners())[upgrader];
+
     const artifact = await hre.artifacts.readArtifact(newArtifactName);
+
     let contract = new ethers.ContractFactory(
       artifact.abi,
       artifact.bytecode,
-      signers[0]
+      signer
     );
 
-    return hre.upgrades.upgradeProxy(proxyAddress, contract)
+    return hre.upgrades.upgradeProxy(proxyAddress, contract, {
+      unsafeAllow: ['constructor'],
+      constructorArgs: [],
+    });
   }
-
 }

@@ -41,15 +41,8 @@ describe('CounterPluginSetup(Example)', function () {
     address1 = await signers[1].getAddress();
     address2 = await signers[2].getAddress();
 
-    // TODO:GIORGI test commented
-    // const DAOMock = new DAOMock__factory(signers[0]);
-    // daoMock = await DAOMock.deploy(ownerAddress);
-
     daoMock = await hre.wrapper.deploy('DAOMock', {args: [ownerAddress]});
 
-    // TODO:GIORGI test commented
-    // const CounterV1Setup = new CounterV1PluginSetup__factory(signers[0]);
-    // counterV1Setup = await CounterV1Setup.deploy();
     counterV1Setup = await hre.wrapper.deploy('CounterV1PluginSetup');
 
     const counterV1 = CounterV1__factory.connect(
@@ -60,13 +53,8 @@ describe('CounterPluginSetup(Example)', function () {
 
     implementationAddress = await counterV1Setup.implementation();
 
-    // TODO:GIORGI test commented
-    // const MultiplyHelper = new MultiplyHelper__factory(signers[0]);
-    // multiplyHelper = await MultiplyHelper.deploy();
     multiplyHelper = await hre.wrapper.deploy('MultiplyHelper');
-    // TODO:GIORGI test commented
-    // const CounterV2Setup = new CounterV2PluginSetup__factory(signers[0]);
-    // counterV2Setup = await CounterV2Setup.deploy(multiplyHelper.address);
+
     counterV2Setup = await hre.wrapper.deploy('CounterV2PluginSetup', {
       args: [multiplyHelper.address],
     });

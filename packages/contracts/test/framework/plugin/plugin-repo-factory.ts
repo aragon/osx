@@ -73,15 +73,6 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // deploy PluginRepoFactory
-    // TODO:GIORGI test commented
-    // const PluginRepoFactory = new PluginRepoFactory__factory(
-    //   signers[0]
-    // ) as PluginRepoFactory__factory;
-
-    // pluginRepoFactory = await PluginRepoFactory.deploy(
-    //   pluginRepoRegistry.address
-    // );
-
     pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {
       args: [pluginRepoRegistry.address],
     });
