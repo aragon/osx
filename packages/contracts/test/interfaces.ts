@@ -19,7 +19,6 @@ import {IPermissionCondition__factory as IPermissionCondition_V1_0_0__factory} f
 import {IPlugin__factory as IPlugin_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/plugin/IPlugin.sol';
 import {IMembership__factory as IMembership_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/plugin/membership/IMembership.sol';
 import {IProposal__factory as IProposal_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/core/plugin/proposal/IProposal.sol';
-import {IPluginRepo__factory as IPluginRepo_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/IPluginRepo.sol';
 import {IPluginSetup__factory as IPluginSetup_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/framework/plugin/setup/IPluginSetup.sol';
 import {IMajorityVoting__factory as IMajorityVoting_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/majority-voting/IMajorityVoting.sol';
 import {IMultisig__factory as IMultisig_V1_0_0__factory} from '../typechain/@aragon/osx-v1.0.1/plugins/governance/multisig/IMultisig.sol';
@@ -85,16 +84,6 @@ describe('Interfaces', function () {
         const current = getInterfaceId(IProposal__factory.createInterface());
         const initial = getInterfaceId(
           IProposal_V1_0_0__factory.createInterface()
-        );
-        expect(current).to.equal(initial);
-      });
-    });
-
-    describe('IPluginRepo', function () {
-      it('has still the same interface ID', async () => {
-        const current = getInterfaceId(IPluginRepo__factory.createInterface());
-        const initial = getInterfaceId(
-          IPluginRepo_V1_0_0__factory.createInterface()
         );
         expect(current).to.equal(initial);
       });
