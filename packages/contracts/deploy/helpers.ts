@@ -7,12 +7,14 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {ensLabelHash} from '../utils/ens';
 import {isLocal, pluginDomainEnv} from '../utils/environment';
 import {
   getNetworkNameByAlias,
   getLatestNetworkDeployment,
 } from '@aragon/osx-commons-configs';
 import {findEvent, findEventTopicLog, Operation} from '@aragon/osx-commons-sdk';
+import {ENSSubdomainRegistrar__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {Contract} from 'ethers';
 import {ethers} from 'hardhat';
@@ -158,6 +160,25 @@ export async function detemineDeployerNextAddress(
   return futureAddress;
 }
 
+export async function registerPluginRepoSubdomain(
+  hre: HardhatRuntimeEnvironment,
+  repoAddress: string,
+  subdomain: string,
+  ensRegistrar: any
+): Promise<void> {
+  const [deployer] = await ethers.getSigners();
+
+  const ensRegistrarContract = ENSSubdomainRegistrar__factory.connect(
+    ensRegistrar,
+    deployer
+  );
+
+  await ensRegistrarContract.registerSubnode(
+    ensLabelHash(subdomain),
+    repoAddress
+  );
+}
+
 export async function createPluginRepo(
   hre: HardhatRuntimeEnvironment,
   pluginName: string,
@@ -191,10 +212,7 @@ export async function createPluginRepo(
 
   const {deployer} = await hre.getNamedAccounts();
 
-  const tx = await pluginRepoFactoryContract.createPluginRepo(
-    subdomain,
-    deployer
-  );
+  const tx = await pluginRepoFactoryContract.createPluginRepo(deployer);
   console.log(
     `Creating & registering repo for ${pluginName} with tx ${tx.hash}`
   );
@@ -208,6 +226,14 @@ export async function createPluginRepo(
   const repoAddress = event.args.pluginRepo;
 
   hre.aragonPluginRepos[pluginName] = repoAddress;
+
+  // register subdomain
+  await registerPluginRepoSubdomain(
+    hre,
+    repoAddress,
+    subdomain,
+    await getContractAddress('PluginENSSubdomainRegistrarProxy', hre)
+  );
 
   console.log(
     `Created & registered repo for ${pluginName} at address: ${repoAddress}` //, with contentURI ${ethers.utils.toUtf8String(releaseMetadata)}`

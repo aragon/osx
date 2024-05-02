@@ -55,8 +55,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Register `managementDAO` on `DAORegistry`.
   const registerTx = await daoRegistryContract.register(
     managementDAOAddress,
-    deployer.address,
-    daoSubdomain
+    deployer.address
   );
   await registerTx.wait();
   console.log(

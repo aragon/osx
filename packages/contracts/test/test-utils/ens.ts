@@ -13,10 +13,12 @@ import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {deployWithProxy} from '../test-utils/proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
+import {Address} from 'hardhat-deploy/types';
 
 export async function deployENSSubdomainRegistrar(
   owner: SignerWithAddress,
   managingDao: DAO,
+  registry: Address,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
   const ENSRegistryFactory = new ENSRegistry__factory(owner);
@@ -64,6 +66,7 @@ export async function deployENSSubdomainRegistrar(
   await ensSubdomainRegistrar.initialize(
     managingDao.address,
     ensRegistry.address,
+    registry,
     node
   );
 

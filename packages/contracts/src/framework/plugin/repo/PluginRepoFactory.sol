@@ -40,31 +40,25 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
     }
 
     /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
-    /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The plugin maintainer address.
-    function createPluginRepo(
-        string calldata _subdomain,
-        address _initialOwner
-    ) external returns (PluginRepo) {
-        return _createPluginRepo(_subdomain, _initialOwner);
+    function createPluginRepo(address _initialOwner) external returns (PluginRepo) {
+        return _createPluginRepo(_initialOwner);
     }
 
     /// @notice Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.1`.
-    /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _maintainer The maintainer of the plugin repo. This address has permission to update metadata, upgrade the repo logic, and manage the repo permissions.
     /// @param _releaseMetadata The release metadata URI.
     /// @param _buildMetadata The build metadata URI.
     /// @dev After the creation of the `PluginRepo` and release of the first version by the factory, ownership is transferred to the `_maintainer` address.
     function createPluginRepoWithFirstVersion(
-        string calldata _subdomain,
         address _pluginSetup,
         address _maintainer,
         bytes memory _releaseMetadata,
         bytes memory _buildMetadata
     ) external returns (PluginRepo pluginRepo) {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
-        pluginRepo = _createPluginRepo(_subdomain, address(this));
+        pluginRepo = _createPluginRepo(address(this));
 
         pluginRepo.createVersion(1, _pluginSetup, _buildMetadata, _releaseMetadata);
 
@@ -124,12 +118,8 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
 
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
     /// @dev Passing an empty `_subdomain` will cause the transaction to revert.
-    /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The initial owner address.
-    function _createPluginRepo(
-        string calldata _subdomain,
-        address _initialOwner
-    ) internal returns (PluginRepo pluginRepo) {
+    function _createPluginRepo(address _initialOwner) internal returns (PluginRepo pluginRepo) {
         pluginRepo = PluginRepo(
             createERC1967Proxy(
                 pluginRepoBase,
@@ -137,6 +127,6 @@ contract PluginRepoFactory is ERC165, ProtocolVersion {
             )
         );
 
-        pluginRepoRegistry.registerPluginRepo(_subdomain, address(pluginRepo));
+        pluginRepoRegistry.registerPluginRepo(address(pluginRepo));
     }
 }

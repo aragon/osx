@@ -23,10 +23,13 @@ import {
   IProtocolVersion__factory,
   IERC165__factory,
   PluginRepoRegistry__factory,
+  ENSRegistry__factory,
+  PublicResolver__factory,
 } from '../../../typechain';
 import {DAORegisteredEvent} from '../../../typechain/DAORegistry';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
@@ -57,6 +60,7 @@ import {
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
   getInterfaceId,
 } from '@aragon/osx-commons-sdk';
+import {ENSSubdomainRegistrar} from '@aragon/osx-ethers-v1.2.0';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
@@ -86,7 +90,6 @@ const AddressZero = ethers.constants.AddressZero;
 async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   dao: any;
   creator: any;
-  subdomain: any;
   plugin: any;
   helpers: any;
   permissions: any;
@@ -107,7 +110,6 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   return {
     dao: daoRegisteredEvent.args.dao,
     creator: daoRegisteredEvent.args.creator,
-    subdomain: daoRegisteredEvent.args.subdomain,
     plugin: installationPreparedEvent.args.plugin,
     helpers: installationPreparedEvent.args.preparedSetupData.helpers,
     permissions: installationPreparedEvent.args.preparedSetupData.permissions,
@@ -123,7 +125,7 @@ async function getAnticipatedAddress(from: string) {
   return anticipatedAddress;
 }
 
-describe('DAOFactory: ', function () {
+describe.only('DAOFactory: ', function () {
   let daoFactory: DAOFactory;
   let managingDao: any;
 
@@ -142,6 +144,8 @@ describe('DAOFactory: ', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
 
+  let ensSubdomainRegistrar: ENSSubdomainRegistrar;
+
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
@@ -151,26 +155,26 @@ describe('DAOFactory: ', function () {
     // Managing DAO
     managingDao = await deployNewDAO(signers[0]);
 
-    // ENS subdomain Registry
-    const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
-      signers[0],
-      managingDao,
-      registrarManagedDomain
-    );
-
     // DAO Registry
     const DAORegistry = new DAORegistry__factory(signers[0]);
     daoRegistry = await deployWithProxy(DAORegistry);
     await daoRegistry.initialize(
-      managingDao.address,
-      ensSubdomainRegistrar.address
+      managingDao.address
+      // ensSubdomainRegistrar.address
     );
 
     // Plugin Repo Registry
     pluginRepoRegistry = await deployPluginRepoRegistry(
       managingDao,
-      ensSubdomainRegistrar,
       signers[0]
+    );
+
+    // ENS subdomain Registry
+    ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
+      signers[0],
+      managingDao,
+      daoRegistry.address,
+      registrarManagedDomain
     );
 
     // Plugin Setup Processor
@@ -223,7 +227,7 @@ describe('DAOFactory: ', function () {
     pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-      'plugin-uupsupgradeable-setup-v1-mock',
+      // 'plugin-uupsupgradeable-setup-v1-mock',
       pluginSetupV1Mock.address,
       ownerAddress,
       '0x00',
@@ -288,9 +292,19 @@ describe('DAOFactory: ', function () {
 
   it('reverts if no plugin is provided', async () => {
     await expect(
-      daoFactory.createDao(daoSettings, [])
+      daoFactory.createDao(daoSettings, [], [])
     ).to.be.revertedWithCustomError(daoFactory, 'NoPluginProvided');
   });
+
+  async function createAction() {
+    const to = ensSubdomainRegistrar.address;
+    const value = 0;
+    const data = (ensSubdomainRegistrar.interface as any).encodeFunctionData(
+      'registerSubnode(bytes32)',
+      [ensLabelHash(daoDummySubdomain)]
+    );
+    return {to, value, data};
+  }
 
   it('creates a dao and initializes with correct args', async () => {
     const dao = await getAnticipatedAddress(daoFactory.address);
@@ -298,13 +312,39 @@ describe('DAOFactory: ', function () {
     const factory = new DAO__factory(signers[0]);
     const daoContract = factory.attach(dao);
 
-    expect(await daoFactory.createDao(daoSettings, [pluginInstallationData]))
+    const action = await createAction();
+    expect(
+      await daoFactory.createDao(
+        daoSettings,
+        [pluginInstallationData],
+        [action]
+      )
+    )
       .to.emit(daoContract, EVENTS.MetadataSet)
       .withArgs(daoSettings.metadata)
       .to.emit(daoContract, EVENTS.TrustedForwarderSet)
       .withArgs(daoSettings.trustedForwarder)
       .to.emit(daoContract, EVENTS.NewURI)
       .withArgs(daoSettings.daoURI);
+
+    // check the new subdomain owner is the registrar
+    const fullDomain = `${daoDummySubdomain}.${registrarManagedDomain}`;
+    const ENSRegistry = new ENSRegistry__factory(signers[0]);
+    const ens = ENSRegistry.attach(await ensSubdomainRegistrar.ens());
+
+    expect(await ens.owner(ensDomainHash(fullDomain))).to.equal(
+      ensSubdomainRegistrar.address
+    );
+
+    // check the new subdomain resolver target
+    const PublicResolverFactory = new PublicResolver__factory(signers[0]);
+    const resolver = PublicResolverFactory.attach(
+      await ensSubdomainRegistrar.resolver()
+    );
+
+    expect(
+      await await resolver['addr(bytes32)'](ensDomainHash(fullDomain))
+    ).to.equal(daoContract.address);
   });
 
   it('creates a dao with a plugin and emits correct events', async () => {
@@ -321,9 +361,11 @@ describe('DAOFactory: ', function () {
       pluginInstallationData.data
     );
 
-    const tx = await daoFactory.createDao(daoSettings, [
-      pluginInstallationData,
-    ]);
+    const tx = await daoFactory.createDao(
+      daoSettings,
+      [pluginInstallationData],
+      []
+    );
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const pluginRepoPointer: PluginRepoPointer = [
@@ -337,7 +379,7 @@ describe('DAOFactory: ', function () {
 
     await expect(tx)
       .to.emit(daoRegistry, EVENTS.DAORegistered)
-      .withArgs(dao, ownerAddress, daoSettings.subdomain)
+      .withArgs(dao, ownerAddress)
       .to.emit(psp, EVENTS.InstallationPrepared)
       .withArgs(
         daoFactory.address,
@@ -359,9 +401,11 @@ describe('DAOFactory: ', function () {
   });
 
   it('creates a dao with a plugin and sets plugin permissions on dao correctly', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [
-      pluginInstallationData,
-    ]);
+    const tx = await daoFactory.createDao(
+      daoSettings,
+      [pluginInstallationData],
+      []
+    );
     const {dao, permissions} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = new DAO__factory(signers[0]);
@@ -381,9 +425,11 @@ describe('DAOFactory: ', function () {
   });
 
   it('creates a dao and sets its own permissions correctly on itself', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [
-      pluginInstallationData,
-    ]);
+    const tx = await daoFactory.createDao(
+      daoSettings,
+      [pluginInstallationData],
+      []
+    );
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = new DAO__factory(signers[0]);
@@ -433,9 +479,11 @@ describe('DAOFactory: ', function () {
   });
 
   it('revokes all temporarly granted permissions', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [
-      pluginInstallationData,
-    ]);
+    const tx = await daoFactory.createDao(
+      daoSettings,
+      [pluginInstallationData],
+      []
+    );
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = new DAO__factory(signers[0]);
@@ -518,7 +566,7 @@ describe('DAOFactory: ', function () {
     };
 
     const plugins = [plugin1, plugin2];
-    const tx = await daoFactory.createDao(daoSettings, plugins);
+    const tx = await daoFactory.createDao(daoSettings, plugins, []);
 
     // Count how often the event was emitted by inspecting the logs
     const receipt = await tx.wait();
@@ -561,7 +609,6 @@ describe('DAOFactory: ', function () {
       adminPluginSetup = await AdminPluginSetupFactory.deploy();
 
       let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-        'admin',
         adminPluginSetup.address,
         ownerAddress,
         '0x11',
@@ -593,7 +640,11 @@ describe('DAOFactory: ', function () {
         adminPluginRepoPointer,
         data
       );
-      tx = await daoFactory.createDao(daoSettings, [adminPluginInstallation]);
+      tx = await daoFactory.createDao(
+        daoSettings,
+        [adminPluginInstallation],
+        []
+      );
       {
         const installationPreparedEvent =
           await findEventTopicLog<InstallationPreparedEvent>(
