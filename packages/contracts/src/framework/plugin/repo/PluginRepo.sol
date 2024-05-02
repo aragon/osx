@@ -125,7 +125,7 @@ contract PluginRepo is
         // Silences the unused function parameter warning.
         _previousProtocolVersion;
         _initData;
-        
+
         // Revert because this is a placeholder until this contract requires reinitialization.
         revert();
     }
