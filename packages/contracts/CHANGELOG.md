@@ -42,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed the `setSignatureValidator` function and `signatureValidator` variable in `DAO`. In places, where the function must remain to not alter the `IDAO` interface ID, it will revert and explanatory notes are put in place.
 - Removed `active_contracts.json` file and replaced it with `@aragon/osx-commons-configs` package.
 
+### Fixed
+
+- Switch the parameter order in the `MinApprovalsOutOfBounds` error in the `Multisig` plugin.
+- Fixed NatSpec comment in `getProposal` function in the `Multisig` plugin.
+
 ## v1.3.0
 
 ### Added
