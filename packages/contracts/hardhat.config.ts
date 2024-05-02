@@ -15,10 +15,6 @@ import 'solidity-coverage';
 import 'solidity-docgen';
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
-import {
-  extractFactoryDepsByHardhatDeploy,
-  extractFactoryDepsByZkSync,
-} from './deploy/compare-factory-depths';
 
 dotenv.config();
 
@@ -44,29 +40,13 @@ for (const network of Object.keys(networks)) {
 
 task('build-contracts').setAction(async (args, hre) => {
   await hre.run('compile');
+
   if (
     hre.network.name === 'zkTestnet' ||
     hre.network.name === 'zkLocalTestnet'
   ) {
-    let allArtifacts = await hre.artifacts.getAllFullyQualifiedNames();
-    // for (let i = 0; i < allArtifacts.length; i++) {
-    //   let artifact = await hre.artifacts.readArtifact(allArtifacts[i]);
-
-    //   let factoryDepthsByZkSync = await extractFactoryDepsByZkSync(
-    //     hre,
-    //     artifact
-    //   );
-    //   let factoryDepthsByHardhatDeploy =
-    //     await extractFactoryDepsByHardhatDeploy(hre, artifact);
-    //   if (factoryDepthsByZkSync.length != factoryDepthsByHardhatDeploy.length) {
-    //     if (artifact.contractName != 'TokenFactory') {
-    //       throw new Error("ZkSync Deployment won't work with hardhat-deploy");
-    //     }
-    //   }
-    // }
-
-    // Copying is useful due as no need to
-    // change imports in deploy scripts.
+    // Copying is useful because we won't have to
+    // change imports in there for artifacts.
     fs.cpSync('./build/artifacts-zk', './artifacts', {recursive: true});
     fs.cpSync('./build/cache-zk', './cache', {recursive: true});
 
@@ -82,10 +62,14 @@ task('deploy-contracts').setAction(async (args, hre) => {
   await hre.run('deploy');
 });
 
-// task('test123').setAction(async (args, hre) => {
-//   await hre.zkUpgrades.deployProxy(deployer.zkWallet, contract, [42], { initializer: "initialize" });
+task('test-contracts').setAction(async (args, hre) => {
+  const imp = await import('./test/test-utils/wrapper/Wrapper')
 
-// })
+  const wrapper = imp.Wrapper.create(hre.network.name, hre.ethers.provider)
+  hre.wrapper = wrapper;
+
+  await hre.run('test')
+})
 
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
@@ -150,8 +134,17 @@ const config: HardhatUserConfig = {
       zksync: true,
       deployPaths: ['./deploy/new'],
       accounts: [
-        // This is the rich account that already has lots of funds on the chain of port 8545
+        // Rich accounts that already have lots of funds on the chain of port 8545
         '0x3d3cbc973389cb26f657686445bcc75662b415b656078503592ac8c1abb8810e',
+        '0x509ca2e9e6acf0ba086477910950125e698d4ea70fa6f63e000c5a22bda9361c',
+        '0x71781d3a358e7a65150e894264ccc594993fbc0ea12d69508a340bc1d4f5bfbc',
+        '0x379d31d4a7031ead87397f332aab69ef5cd843ba3898249ca1046633c0c7eefe',
+        '0x105de4e75fe465d075e1daae5647a02e3aad54b8d23cf1f70ba382b9f9bee839',
+        '0x7becc4a46e0c3b512d380ca73a4c868f790d1055a7698f38fb3ca2b2ac97efbb',
+        '0xe0415469c10f3b1142ce0262497fe5c7a0795f0cbfd466a6bfa31968d0f70841',
+        '0x4d91647d0a8429ac4433c83254fb9625332693c848e578062fe96362f32bfe91',
+        '0x41c9f9518aa07b50cb1c0cc160d45547f57638dd824a8d85b5eb3bf99ed2bdeb',
+        '0xb0680d66303a0163a19294f1ef8c95cd69a9d7902a4aca99c05f3e134e68a11a'
       ],
     },
     zkTestnet: {

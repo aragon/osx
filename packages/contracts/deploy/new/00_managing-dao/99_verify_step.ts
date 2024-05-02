@@ -46,5 +46,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Managing DAO deployment verified');
 };
 export default func;
-func.tags = ['New', 'SetDAOPermissions'];
-// TODO:GIORGI removed ManagingDao tag
+func.tags = ['New', 'ManagingDao', 'SetDAOPermissions'];

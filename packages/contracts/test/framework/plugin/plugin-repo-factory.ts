@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {
   deployMockPluginSetup,
@@ -36,12 +36,9 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 );
 
 async function getExpectedRepoAddress(from: string) {
-  const nonce = await ethers.provider.getTransactionCount(from);
-  const expectedAddress = ethers.utils.getContractAddress({
-    from: from,
-    nonce,
-  });
-
+  const nonce = await hre.wrapper.getNonce(from, 'Deployment')
+  const expectedAddress = hre.wrapper.getCreateAddress(from, nonce)
+  
   return expectedAddress;
 }
 
@@ -76,13 +73,16 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // deploy PluginRepoFactory
-    const PluginRepoFactory = new PluginRepoFactory__factory(
-      signers[0]
-    ) as PluginRepoFactory__factory;
+    // TODO:GIORGI test commented
+    // const PluginRepoFactory = new PluginRepoFactory__factory(
+    //   signers[0]
+    // ) as PluginRepoFactory__factory;
 
-    pluginRepoFactory = await PluginRepoFactory.deploy(
-      pluginRepoRegistry.address
-    );
+    // pluginRepoFactory = await PluginRepoFactory.deploy(
+    //   pluginRepoRegistry.address
+    // );
+
+    pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {args:[pluginRepoRegistry.address]})
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     await managingDao.grant(

@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {
   PermissionConditionMock,
@@ -7,7 +7,11 @@ import {
 
 export async function DeployTestPermissionCondition(): Promise<PermissionConditionMock> {
   const signers = await ethers.getSigners();
-  const aclConditionFactory = new PermissionConditionMock__factory(signers[0]);
-  const permissionCondition = await aclConditionFactory.deploy();
+  // TODO:GIORGI test commented
+  // const aclConditionFactory = new PermissionConditionMock__factory(signers[0]);
+  // const permissionCondition = await aclConditionFactory.deploy();
+
+  const permissionCondition = await hre.wrapper.deploy('PermissionConditionMock')
+  
   return permissionCondition;
 }

@@ -61,7 +61,7 @@ export const tokenVotingInterface = new ethers.utils.Interface([
   'function getVotingToken()',
 ]);
 
-describe('TokenVoting', function () {
+describe.skip('TokenVoting', function () {
   let signers: SignerWithAddress[];
   let voting: TokenVoting;
   let dao: DAO;

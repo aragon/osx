@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {RatioTest, RatioTest__factory} from '../../../typechain';
 import {pctToRatio, RATIO_BASE} from '../../test-utils/voting';
@@ -9,8 +9,12 @@ describe('Ratio', function () {
 
   before(async () => {
     const signers = await ethers.getSigners();
-    const RatioTest = new RatioTest__factory(signers[0]);
-    ratio = await RatioTest.deploy();
+    // TODO:GIORGI test commented
+    // const RatioTest = new RatioTest__factory(signers[0]);
+    // ratio = await RatioTest.deploy();
+
+    ratio = await hre.wrapper.deploy('RatioTest')
+    
   });
 
   describe('RATIO_BASE', async () => {

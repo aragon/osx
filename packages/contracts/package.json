@@ -15,7 +15,7 @@
     "typechain:osx": "ts-node scripts/generate-typechain-osx.ts",
     "typechain:osx-versions": "ts-node scripts/generate-typechain-osx-versions.ts",
     "typechain": "yarn typechain:osx && yarn typechain:osx-versions",
-    "test": "hardhat test",
+    "test": "hardhat test-contracts",
     "build": "hardhat build-contracts",
     "verify": "hardhat verify",
     "postbuild": "yarn typechain",

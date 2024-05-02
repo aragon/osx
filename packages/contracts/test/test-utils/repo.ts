@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {
   PluginRepoRegistry,
@@ -12,21 +12,27 @@ import {
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import { ARTIFACT_SOURCES } from './wrapper/Wrapper';
 
 export async function deployMockPluginSetup(
   signer: SignerWithAddress
 ): Promise<PluginUUPSUpgradeableSetupV1Mock> {
-  const PluginSetupMock = new PluginUUPSUpgradeableSetupV1Mock__factory(signer);
-  const pluginSetupMockContract = await PluginSetupMock.deploy();
+  // TODO:GIORGI test commented
+  // const PluginSetupMock = new PluginUUPSUpgradeableSetupV1Mock__factory(signer);
+  // const pluginSetupMockContract = await PluginSetupMock.deploy();
 
-  return pluginSetupMockContract;
+  return await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV1Mock')
 }
 
 export async function deployNewPluginRepo(
   maintainer: SignerWithAddress
 ): Promise<PluginRepo> {
-  const PluginRepo = new PluginRepo__factory(maintainer);
-  const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
+  // TODO:GIORGI test commented
+  // const PluginRepo = new PluginRepo__factory(maintainer);
+  // const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
+  // TODO:GIORGI previously, maintainer was deploying it. maybe deploy function needs to receive that as well ?
+  const newPluginRepo = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO, {withProxy: true})
+
   await newPluginRepo.initialize(maintainer.address);
 
   return newPluginRepo;
@@ -37,11 +43,14 @@ export async function deployPluginRepoFactory(
   pluginRepoRegistry: PluginRepoRegistry
 ): Promise<PluginRepoFactory> {
   // PluginRepoFactory
-  const PluginRepoFactory = new PluginRepoFactory__factory(signers[0]);
+  // TODO:GIORGI test commented
+  // const PluginRepoFactory = new PluginRepoFactory__factory(signers[0]);
 
-  const pluginRepoFactory = await PluginRepoFactory.deploy(
-    pluginRepoRegistry.address
-  );
+  // const pluginRepoFactory = await PluginRepoFactory.deploy(
+  //   pluginRepoRegistry.address
+  // );
+
+  const pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {args: [pluginRepoRegistry.address]})
 
   return pluginRepoFactory;
 }
@@ -51,11 +60,14 @@ export async function deployPluginRepoRegistry(
   ensSubdomainRegistrar: any,
   signer: SignerWithAddress
 ): Promise<PluginRepoRegistry> {
-  const PluginRepoRegistry = new PluginRepoRegistry__factory(signer);
+  // TODO:GIORGI test commented
+  // const PluginRepoRegistry = new PluginRepoRegistry__factory(signer);
 
-  let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
-    PluginRepoRegistry
-  );
+  // let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
+  //   PluginRepoRegistry
+  // );
+
+  let pluginRepoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY, {withProxy: true})
 
   await pluginRepoRegistry.initialize(
     managingDao.address,

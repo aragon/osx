@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -30,19 +30,24 @@ describe('TestParameterScopingCondition', function () {
     managingDao = await deployNewDAO(signers[0]);
 
     // Deploy the component
-    const TestPlugin = new TestPlugin__factory(signers[0]);
+    // TODO:GIORGI test commented
+    // const TestPlugin = new TestPlugin__factory(signers[0]);
+    // testPlugin = await deployWithProxy(TestPlugin);
 
-    testPlugin = await deployWithProxy(TestPlugin);
+    testPlugin = await hre.wrapper.deploy('TestPlugin', {withProxy: true})
     await testPlugin.initialize(managingDao.address);
 
     // Deploy the condition
-    const ParameterCondition =
-      new TestParameterScopingPermissionCondition__factory(signers[0]);
 
-    parameterCondition = await ParameterCondition.deploy();
+    // TODO:GIORGI test commented
+    // const ParameterCondition =
+    //   new TestParameterScopingPermissionCondition__factory(signers[0]);
+    // parameterCondition = await ParameterCondition.deploy();
+
+    parameterCondition = await hre.wrapper.deploy('TestParameterScopingPermissionCondition')
 
     // Give signers[0] the `DO_SOMETHING_PERMISSION_ID` on the TestPlugin
-    managingDao.grantWithCondition(
+    await managingDao.grantWithCondition(
       testPlugin.address,
       ownerAddress,
       DO_SOMETHING_PERMISSION_ID,

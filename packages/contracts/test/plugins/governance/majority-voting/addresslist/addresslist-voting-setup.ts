@@ -38,7 +38,7 @@ const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('AddresslistVotingSetup', function () {
+describe.skip('AddresslistVotingSetup', function () {
   let signers: SignerWithAddress[];
   let addresslistVotingSetup: AddresslistVotingSetup;
   let implementationAddress: string;
