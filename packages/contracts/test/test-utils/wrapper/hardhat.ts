@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 
-import {BigNumberish, providers} from 'ethers';
+import {BigNumberish, Contract, providers} from 'ethers';
 import {utils} from 'ethers';
 
 import {NetworkDeployment} from './Wrapper';
@@ -34,4 +34,31 @@ export class HardhatClass implements NetworkDeployment {
   ): Promise<BigNumberish> {
     return this.provider.getTransactionCount(sender);
   }
+
+  async deployProxy(artifactName: string, args: any[], options: any): Promise<Contract> {
+    const {ethers} = hre;
+    const signers = await ethers.getSigners();
+    const artifact = await hre.artifacts.readArtifact(artifactName);
+    let contract = new ethers.ContractFactory(
+      artifact.abi,
+      artifact.bytecode,
+      signers[0]
+    );
+
+    return hre.upgrades.deployProxy(contract, args)
+  }
+
+  async upgradeProxy(proxyAddress: string, newArtifactName: string, options: any): Promise<Contract> {
+    const {ethers} = hre;
+    const signers = await ethers.getSigners();
+    const artifact = await hre.artifacts.readArtifact(newArtifactName);
+    let contract = new ethers.ContractFactory(
+      artifact.abi,
+      artifact.bytecode,
+      signers[0]
+    );
+
+    return hre.upgrades.upgradeProxy(proxyAddress, contract)
+  }
+
 }

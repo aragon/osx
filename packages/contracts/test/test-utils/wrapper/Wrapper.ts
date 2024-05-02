@@ -1,7 +1,7 @@
 import hre from 'hardhat';
 import {findEvent} from '../../../utils/event';
 import {ProxyCreatedEvent} from '../../../typechain/ProxyFactory';
-import {BigNumberish} from 'ethers';
+import {BigNumberish, Contract} from 'ethers';
 import {providers} from 'ethers';
 
 import {HardhatClass} from './hardhat';
@@ -37,6 +37,8 @@ export interface NetworkDeployment {
     sender: string,
     type?: 'Deployment' | 'Transaction'
   ): Promise<BigNumberish>;
+  deployProxy(artifactName: string, args: any[], options: any): Promise<Contract>;
+  upgradeProxy(proxyAddress: string, newArtifactName: string, options: any): Promise<Contract>;
 }
 
 export class Wrapper {
@@ -88,5 +90,13 @@ export class Wrapper {
     type?: 'Deployment' | 'Transaction'
   ): Promise<BigNumberish> {
     return this.network.getNonce(sender, type ?? 'Deployment');
+  }
+
+  async deployProxy(artifactName: string, args: any[], options: any) {
+    return this.network.deployProxy(artifactName, args, options);
+  }
+
+  async upgradeProxy(proxyAddress: string, newArtifactName: string, options: any) {
+    return this.network.upgradeProxy(proxyAddress, newArtifactName, options);
   }
 }

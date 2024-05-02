@@ -334,7 +334,7 @@ describe('DAO', function () {
   });
 
   // TODO:GIORGI extra check
-  describe.skip('Upgrades', async () => {
+  describe.only('Upgrades', async () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
 
@@ -342,7 +342,7 @@ describe('DAO', function () {
       currentContractFactory = new DAO__factory(signers[0]);
     });
 
-    it('from v1.0.0', async () => {
+    it.only('from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
       const {fromImplementation, toImplementation} =

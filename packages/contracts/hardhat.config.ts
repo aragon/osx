@@ -22,7 +22,8 @@ if (process.env.CONTRACTS_TARGET === 'zksync') {
   import('@matterlabs/hardhat-zksync-verify');
   import('@matterlabs/hardhat-zksync-upgradable');
 } else {
-  // import('@openzeppelin/hardhat-upgrades');
+  // console.log("oooooo")
+  import('@openzeppelin/hardhat-upgrades');
   import('@nomicfoundation/hardhat-verify');
 }
 
@@ -67,7 +68,7 @@ task('test-contracts').setAction(async (args, hre) => {
 
   const wrapper = imp.Wrapper.create(hre.network.name, hre.ethers.provider);
   hre.wrapper = wrapper;
-
+  
   await hre.run('test');
 });
 

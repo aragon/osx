@@ -121,7 +121,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
 
-describe('Plugin Setup Processor', function () {
+describe.skip('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;

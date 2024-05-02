@@ -1,7 +1,7 @@
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {Contract, ContractFactory, errors} from 'ethers';
-import {upgrades} from 'hardhat';
+import hre, {upgrades} from 'hardhat';
 import {DAO} from '../../typechain';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 
@@ -81,6 +81,12 @@ export async function ozUpgradeCheckManagingContract(
   fromImplementation: string;
   toImplementation: string;
 }> {
+  console.log(hre.upgrades, ' ooo19')
+
+  hre.wrapper.deployProxy(
+    deployer, 
+    Object.values(initArgs)
+  )
   // Deploy the proxy
   let proxy = await upgrades.deployProxy(
     from.connect(deployer),
