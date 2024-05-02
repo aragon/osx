@@ -12,7 +12,7 @@ import {
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import { ARTIFACT_SOURCES } from './wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from './wrapper/Wrapper';
 
 export async function deployMockPluginSetup(
   signer: SignerWithAddress
@@ -21,7 +21,7 @@ export async function deployMockPluginSetup(
   // const PluginSetupMock = new PluginUUPSUpgradeableSetupV1Mock__factory(signer);
   // const pluginSetupMockContract = await PluginSetupMock.deploy();
 
-  return await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV1Mock')
+  return await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV1Mock');
 }
 
 export async function deployNewPluginRepo(
@@ -31,7 +31,9 @@ export async function deployNewPluginRepo(
   // const PluginRepo = new PluginRepo__factory(maintainer);
   // const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
   // TODO:GIORGI previously, maintainer was deploying it. maybe deploy function needs to receive that as well ?
-  const newPluginRepo = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO, {withProxy: true})
+  const newPluginRepo = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO, {
+    withProxy: true,
+  });
 
   await newPluginRepo.initialize(maintainer.address);
 
@@ -50,7 +52,9 @@ export async function deployPluginRepoFactory(
   //   pluginRepoRegistry.address
   // );
 
-  const pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {args: [pluginRepoRegistry.address]})
+  const pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {
+    args: [pluginRepoRegistry.address],
+  });
 
   return pluginRepoFactory;
 }
@@ -67,7 +71,10 @@ export async function deployPluginRepoRegistry(
   //   PluginRepoRegistry
   // );
 
-  let pluginRepoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY, {withProxy: true})
+  let pluginRepoRegistry = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+    {withProxy: true}
+  );
 
   await pluginRepoRegistry.initialize(
     managingDao.address,

@@ -17,7 +17,9 @@ export async function deployPluginSetupProcessor(
   // );
   // psp = await PluginSetupProcessor.deploy(pluginRepoRegistry.address);
 
-  psp = await hre.wrapper.deploy('PluginSetupProcessor', {args: [pluginRepoRegistry.address] })
+  psp = await hre.wrapper.deploy('PluginSetupProcessor', {
+    args: [pluginRepoRegistry.address],
+  });
 
   return psp;
 }

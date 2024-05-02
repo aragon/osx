@@ -12,7 +12,7 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {getInterfaceID} from '../../test-utils/interfaces';
-import { ARTIFACT_SOURCES } from '../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper/Wrapper';
 
 const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
 
@@ -44,7 +44,10 @@ describe('InterfaceBasedRegistry', function () {
     //   InterfaceBasedRegistryMock
     // );
 
-    interfaceBasedRegistryMock = await hre.wrapper.deploy('InterfaceBasedRegistryMock', {withProxy: true})
+    interfaceBasedRegistryMock = await hre.wrapper.deploy(
+      'InterfaceBasedRegistryMock',
+      {withProxy: true}
+    );
 
     // Let the interface registry register `DAO` contracts for testing purposes
     await interfaceBasedRegistryMock.initialize(
@@ -77,7 +80,9 @@ describe('InterfaceBasedRegistry', function () {
       // TODO:GIORGI test commented
       // const PluginRepo = new PluginRepo__factory(signers[0]);
       // let contractNotBeingADao = await PluginRepo.deploy();
-      let contractNotBeingADao = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO)
+      let contractNotBeingADao = await hre.wrapper.deploy(
+        ARTIFACT_SOURCES.PLUGIN_REPO
+      );
 
       await expect(
         interfaceBasedRegistryMock.register(contractNotBeingADao.address)

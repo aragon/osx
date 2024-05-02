@@ -11,7 +11,9 @@ export async function DeployTestPermissionCondition(): Promise<PermissionConditi
   // const aclConditionFactory = new PermissionConditionMock__factory(signers[0]);
   // const permissionCondition = await aclConditionFactory.deploy();
 
-  const permissionCondition = await hre.wrapper.deploy('PermissionConditionMock')
-  
+  const permissionCondition = await hre.wrapper.deploy(
+    'PermissionConditionMock'
+  );
+
   return permissionCondition;
 }

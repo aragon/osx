@@ -21,7 +21,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper/Wrapper';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -68,7 +68,9 @@ describe('DAORegistry', function () {
     // TODO:GIORGI test commented
     // const Registry = new DAORegistry__factory(signers[0]);
     // daoRegistry = await deployWithProxy(Registry);
-    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {withProxy: true})
+    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {
+      withProxy: true,
+    });
 
     await daoRegistry.initialize(
       managingDao.address,

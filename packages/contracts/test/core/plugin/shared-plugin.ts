@@ -38,7 +38,9 @@ describe('SharedPlugin', function () {
     // TODO:GIORGI test commented
     // const TestSharedPlugin = new TestSharedPlugin__factory(signers[0]);
     // testPlugin = await deployWithProxy(TestSharedPlugin);
-    testPlugin = await hre.wrapper.deploy('TestSharedPlugin', {withProxy: true})
+    testPlugin = await hre.wrapper.deploy('TestSharedPlugin', {
+      withProxy: true,
+    });
     await testPlugin.initialize(managingDao.address);
 
     expectedUnauthorizedErrorArguments = [
@@ -75,7 +77,9 @@ describe('SharedPlugin', function () {
       // const Condition = new TestIdGatingCondition__factory(signers[0]);
       // condition = await Condition.deploy(allowedId);
 
-      condition = await hre.wrapper.deploy('TestIdGatingCondition', {args: [allowedId]})
+      condition = await hre.wrapper.deploy('TestIdGatingCondition', {
+        args: [allowedId],
+      });
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
       await dao1.grantWithCondition(
@@ -104,7 +108,9 @@ describe('SharedPlugin', function () {
       // const Condition = new TestIdGatingCondition__factory(signers[0]);
       // condition = await Condition.deploy(allowedId);
 
-      condition = await hre.wrapper.deploy('TestIdGatingCondition', {args: [allowedId]})
+      condition = await hre.wrapper.deploy('TestIdGatingCondition', {
+        args: [allowedId],
+      });
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
       await dao1.grantWithCondition(
@@ -143,7 +149,9 @@ describe('SharedPlugin', function () {
       // const Condition = new TestIdGatingCondition__factory(signers[0]);
       // condition = await Condition.deploy(allowedId);
 
-      condition = await hre.wrapper.deploy('TestIdGatingCondition', {args: [allowedId]})
+      condition = await hre.wrapper.deploy('TestIdGatingCondition', {
+        args: [allowedId],
+      });
 
       // Grants signers[0] the permission to do ID gated actions on `testPlugin` via `condition`
       await dao1.grantWithCondition(
@@ -185,7 +193,9 @@ describe('SharedPlugin', function () {
       // const Condition = new TestIdGatingCondition__factory(signers[0]);
       // condition = await Condition.deploy(allowedId);
 
-      condition = await hre.wrapper.deploy('TestIdGatingCondition', {args: [allowedId]})
+      condition = await hre.wrapper.deploy('TestIdGatingCondition', {
+        args: [allowedId],
+      });
 
       // Create ID-gated object associated with `dao1`
       const tx = await testPlugin.createNewObject(dao1.address);
@@ -205,7 +215,9 @@ describe('SharedPlugin', function () {
       // const Condition = new TestIdGatingCondition__factory(signers[0]);
       // condition = await Condition.deploy(allowedId);
 
-      condition = await hre.wrapper.deploy('TestIdGatingCondition', {args: [allowedId]})
+      condition = await hre.wrapper.deploy('TestIdGatingCondition', {
+        args: [allowedId],
+      });
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
       await dao2.grantWithCondition(
@@ -233,7 +245,9 @@ describe('SharedPlugin', function () {
       // const Condition = new TestIdGatingCondition__factory(signers[0]);
       // condition = await Condition.deploy(allowedId);
 
-      condition = await hre.wrapper.deploy('TestIdGatingCondition', {args: [allowedId]})
+      condition = await hre.wrapper.deploy('TestIdGatingCondition', {
+        args: [allowedId],
+      });
 
       // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
       await dao1.grantWithCondition(

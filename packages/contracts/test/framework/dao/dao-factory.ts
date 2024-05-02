@@ -58,7 +58,7 @@ import {
 } from '../../test-utils/psp/wrappers';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper/Wrapper';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -138,9 +138,9 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
 }
 
 async function getAnticipatedAddress(from: string) {
-  const nonce = await hre.wrapper.getNonce(from)
+  const nonce = await hre.wrapper.getNonce(from);
   const anticipatedAddress = hre.wrapper.getCreateAddress(from, nonce);
-  
+
   return anticipatedAddress;
 }
 
@@ -184,7 +184,9 @@ describe('DAOFactory: ', function () {
     // const DAORegistry = new DAORegistry__factory(signers[0]);
     // daoRegistry = await deployWithProxy(DAORegistry);
 
-    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {withProxy: true})
+    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {
+      withProxy: true,
+    });
     await daoRegistry.initialize(
       managingDao.address,
       ensSubdomainRegistrar.address
@@ -211,7 +213,9 @@ describe('DAOFactory: ', function () {
     // const DAOFactory = new DAOFactory__factory(signers[0]);
     // daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
 
-    daoFactory = await hre.wrapper.deploy('DAOFactory', {args: [daoRegistry.address, psp.address]})
+    daoFactory = await hre.wrapper.deploy('DAOFactory', {
+      args: [daoRegistry.address, psp.address],
+    });
     // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
     await managingDao.grant(
       daoRegistry.address,
@@ -247,7 +251,9 @@ describe('DAOFactory: ', function () {
     //   new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
     // pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
-    pluginSetupV1Mock = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV1Mock')
+    pluginSetupV1Mock = await hre.wrapper.deploy(
+      'PluginUUPSUpgradeableSetupV1Mock'
+    );
 
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       'plugin-uupsupgradeable-setup-v1-mock',
@@ -558,7 +564,7 @@ describe('DAOFactory: ', function () {
     expect(installationAppliedEventCount).to.equal(2);
   });
 
-  // TODO:GIORGI the below uses AdminSetup that has .clones inside the contract. 
+  // TODO:GIORGI the below uses AdminSetup that has .clones inside the contract.
   // This doesn't work on zksync https://github.com/zkSync-Community-Hub/zksync-developers/discussions/91
   describe.skip('E2E: Install,Update,Uninstall Plugin through Admin Plugin', async () => {
     let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
@@ -574,7 +580,9 @@ describe('DAOFactory: ', function () {
       //   new PluginUUPSUpgradeableSetupV2Mock__factory(signers[0]);
       // pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
 
-      pluginSetupV2Mock = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV2Mock')
+      pluginSetupV2Mock = await hre.wrapper.deploy(
+        'PluginUUPSUpgradeableSetupV2Mock'
+      );
       {
         await pluginRepoMock.createVersion(
           1,
@@ -590,7 +598,7 @@ describe('DAOFactory: ', function () {
       // const AdminPluginSetupFactory = new AdminSetup__factory(signers[0]);
       // adminPluginSetup = await AdminPluginSetupFactory.deploy();
 
-      adminPluginSetup = await hre.wrapper.deploy('AdminSetup')
+      adminPluginSetup = await hre.wrapper.deploy('AdminSetup');
 
       let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
         'admin',

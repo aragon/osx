@@ -16,7 +16,7 @@ import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {UpgradedEvent} from '../../typechain/DAO';
-import { ARTIFACT_SOURCES } from '../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../test-utils/wrapper/Wrapper';
 
 let signers: SignerWithAddress[];
 let DAO_old: DAO_V1_0_0__factory;
@@ -52,7 +52,9 @@ describe('DAO Upgrade', function () {
       beforeEach(async function () {
         // TODO:GIORGI test commented
         // daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
-        daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {withProxy: true})
+        daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
+          withProxy: true,
+        });
         await daoV100Proxy.initialize(
           DUMMY_METADATA,
           signers[0].address,
@@ -266,7 +268,9 @@ describe('DAO Upgrade', function () {
       // prepare v1.0.0
       // TODO:GIORGI test commented
       // daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
-      daoV100Proxy  = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {withProxy: true})
+      daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
+        withProxy: true,
+      });
       await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -286,7 +290,9 @@ describe('DAO Upgrade', function () {
       // deploy the different versions
       // TODO:GIORGI test commented
       // const daoCurrentProxy = await deployWithProxy<DAO>(DAO_Current);
-      const daoCurrentProxy  = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true})
+      const daoCurrentProxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
       await daoCurrentProxy.initialize(
         DUMMY_METADATA,
         signers[0].address,

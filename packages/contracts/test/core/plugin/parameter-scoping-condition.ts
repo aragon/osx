@@ -34,7 +34,7 @@ describe('TestParameterScopingCondition', function () {
     // const TestPlugin = new TestPlugin__factory(signers[0]);
     // testPlugin = await deployWithProxy(TestPlugin);
 
-    testPlugin = await hre.wrapper.deploy('TestPlugin', {withProxy: true})
+    testPlugin = await hre.wrapper.deploy('TestPlugin', {withProxy: true});
     await testPlugin.initialize(managingDao.address);
 
     // Deploy the condition
@@ -44,7 +44,9 @@ describe('TestParameterScopingCondition', function () {
     //   new TestParameterScopingPermissionCondition__factory(signers[0]);
     // parameterCondition = await ParameterCondition.deploy();
 
-    parameterCondition = await hre.wrapper.deploy('TestParameterScopingPermissionCondition')
+    parameterCondition = await hre.wrapper.deploy(
+      'TestParameterScopingPermissionCondition'
+    );
 
     // Give signers[0] the `DO_SOMETHING_PERMISSION_ID` on the TestPlugin
     await managingDao.grantWithCondition(

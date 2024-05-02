@@ -11,7 +11,7 @@ import {
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import { ARTIFACT_SOURCES, Wrapper } from './wrapper/Wrapper';
+import {ARTIFACT_SOURCES, Wrapper} from './wrapper/Wrapper';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -29,7 +29,7 @@ export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
   // TODO:GIORGI test commented
   // const DAO = new DAO__factory(signer);
   // const dao = await deployWithProxy<DAO>(DAO);
-  const dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true})
+  const dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
 
   await dao.initialize(
     '0x00',
@@ -43,15 +43,16 @@ export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
 
 export async function getActions() {
   const signers = await ethers.getSigners();
-  
+
   // TODO:GIORGI test commented
   // const ActionExecuteFactory = new ActionExecute__factory(signers[0]);
   // let ActionExecute = await ActionExecuteFactory.deploy();
   // const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
-  
-  const ActionExecute = await hre.wrapper.deploy('ActionExecute') as ActionExecute
-  const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
 
+  const ActionExecute = (await hre.wrapper.deploy(
+    'ActionExecute'
+  )) as ActionExecute;
+  const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
 
   const num = 20;
   return {

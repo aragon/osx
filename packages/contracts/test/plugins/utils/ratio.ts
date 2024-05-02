@@ -13,8 +13,7 @@ describe('Ratio', function () {
     // const RatioTest = new RatioTest__factory(signers[0]);
     // ratio = await RatioTest.deploy();
 
-    ratio = await hre.wrapper.deploy('RatioTest')
-    
+    ratio = await hre.wrapper.deploy('RatioTest');
   });
 
   describe('RATIO_BASE', async () => {

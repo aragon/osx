@@ -49,7 +49,11 @@ import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {ARTIFACT_SOURCES, Wrapper, deploySettings} from '../../test-utils/wrapper/Wrapper';
+import {
+  ARTIFACT_SOURCES,
+  Wrapper,
+  deploySettings,
+} from '../../test-utils/wrapper/Wrapper';
 
 chai.use(smock.matchers);
 
@@ -112,8 +116,8 @@ describe('DAO', function () {
     // const proxyFactory = await new ProxyFactory__factory(deployer).deploy(
     //   implementation.address
     // );
-    
-    dao = (await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true}))
+
+    dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
     await dao.initialize(
       dummyMetadata1,
       ownerAddress,
@@ -128,31 +132,31 @@ describe('DAO', function () {
       ownerAddress,
       PERMISSION_IDS.SET_METADATA_PERMISSION_ID
     ),
-    await dao.grant(
-      dao.address,
-      ownerAddress,
-      PERMISSION_IDS.EXECUTE_PERMISSION_ID
-    ),
-    await dao.grant(
-      dao.address,
-      ownerAddress,
-      PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-    ),
-    await dao.grant(
-      dao.address,
-      ownerAddress,
-      PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
-    ),
-    await dao.grant(
-      dao.address,
-      ownerAddress,
-      PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
-    ),
-    await dao.grant(
-      dao.address,
-      ownerAddress,
-      PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
-    );
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      ),
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
+      ),
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
+      ),
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
+      ),
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
+      );
   });
 
   it('does not support the empty interface', async () => {
@@ -170,7 +174,6 @@ describe('DAO', function () {
         )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
-    
 
     it('initializes with the correct trusted forwarder', async () => {
       expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress1);
@@ -642,7 +645,7 @@ describe('DAO', function () {
       // const GasConsumer = new GasConsumer__factory(signers[0]);
       // let gasConsumer = await GasConsumer.deploy();
 
-      const gasConsumer = await hre.wrapper.deploy('GasConsumer')
+      const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
       // Prepare an action array calling `consumeGas` twenty times.
@@ -682,7 +685,7 @@ describe('DAO', function () {
       // const GasConsumer = new GasConsumer__factory(signers[0]);
       // let gasConsumer = await GasConsumer.deploy();
 
-      const gasConsumer = await hre.wrapper.deploy('GasConsumer')
+      const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
       // Prepare an action array calling `consumeGas` one times.
@@ -758,7 +761,9 @@ describe('DAO', function () {
           // const TestERC20 = new TestERC20__factory(signers[0]);
           // erc20Token = await TestERC20.deploy('name', 'symbol', 0);
 
-          erc20Token = await hre.wrapper.deploy('TestERC20', {args: ['name', 'symbol', 0]})
+          erc20Token = await hre.wrapper.deploy('TestERC20', {
+            args: ['name', 'symbol', 0],
+          });
         });
 
         it('reverts if transfers more ERC20 than dao has', async () => {
@@ -801,7 +806,9 @@ describe('DAO', function () {
           // const TestERC721 = new TestERC721__factory(signers[0]);
           // erc721Token = await TestERC721.deploy('name', 'symbol');
 
-          erc721Token = await hre.wrapper.deploy('TestERC721', {args: ['name', 'symbol']})
+          erc721Token = await hre.wrapper.deploy('TestERC721', {
+            args: ['name', 'symbol'],
+          });
         });
 
         it('reverts if transfers more ERC721 than dao has', async () => {
@@ -847,7 +854,9 @@ describe('DAO', function () {
           // const TestERC1155 = new TestERC1155__factory(signers[0]);
           // erc1155Token = await TestERC1155.deploy('URI');
 
-          erc1155Token = await hre.wrapper.deploy('TestERC1155', {args: ['URI']})
+          erc1155Token = await hre.wrapper.deploy('TestERC1155', {
+            args: ['URI'],
+          });
         });
 
         it('reverts if transfers more ERC1155 than dao has', async () => {
@@ -914,8 +923,10 @@ describe('DAO', function () {
       // const TestERC721 = new TestERC721__factory(signers[0]);
       // erc721Token = await TestERC721.deploy('name', 'symbol');
 
-      erc1155Token = await hre.wrapper.deploy('TestERC1155', {args: ['URI']})
-      erc721Token = await hre.wrapper.deploy('TestERC721', {args: ['name', 'symbol']})
+      erc1155Token = await hre.wrapper.deploy('TestERC1155', {args: ['URI']});
+      erc721Token = await hre.wrapper.deploy('TestERC721', {
+        args: ['name', 'symbol'],
+      });
 
       await erc721Token.mint(ownerAddress, 1);
       await erc1155Token.mint(ownerAddress, 1, 2);
@@ -1040,7 +1051,9 @@ describe('DAO', function () {
       // const TestERC20 = new TestERC20__factory(signers[0]);
       // token = await TestERC20.deploy('name', 'symbol', 0);
 
-      token = await hre.wrapper.deploy('TestERC20', {args: ['name', 'symbol', 0]})
+      token = await hre.wrapper.deploy('TestERC20', {
+        args: ['name', 'symbol', 0],
+      });
     });
 
     it('reverts if amount is zero', async () => {

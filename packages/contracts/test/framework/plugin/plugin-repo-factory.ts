@@ -36,9 +36,9 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 );
 
 async function getExpectedRepoAddress(from: string) {
-  const nonce = await hre.wrapper.getNonce(from, 'Deployment')
-  const expectedAddress = hre.wrapper.getCreateAddress(from, nonce)
-  
+  const nonce = await hre.wrapper.getNonce(from, 'Deployment');
+  const expectedAddress = hre.wrapper.getCreateAddress(from, nonce);
+
   return expectedAddress;
 }
 
@@ -82,7 +82,9 @@ describe('PluginRepoFactory: ', function () {
     //   pluginRepoRegistry.address
     // );
 
-    pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {args:[pluginRepoRegistry.address]})
+    pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {
+      args: [pluginRepoRegistry.address],
+    });
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     await managingDao.grant(

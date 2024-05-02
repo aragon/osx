@@ -63,7 +63,9 @@ describe('GovernanceERC20', function () {
     ];
     // TODO:GIORGI test commented
     // token = await GovernanceERC20.deploy(...defaultInitData);
-    token = await hre.wrapper.deploy('GovernanceERC20', {args: defaultInitData})
+    token = await hre.wrapper.deploy('GovernanceERC20', {
+      args: defaultInitData,
+    });
   });
 
   describe('initialize:', async () => {
@@ -82,7 +84,9 @@ describe('GovernanceERC20', function () {
       // TODO:GIORGI test commented
       // token = await GovernanceERC20.deploy(...defaultInitData);
 
-      token = await hre.wrapper.deploy('GovernanceERC20', {args: defaultInitData});
+      token = await hre.wrapper.deploy('GovernanceERC20', {
+        args: defaultInitData,
+      });
 
       expect(await token.dao()).to.eq(dao.address);
     });
@@ -101,9 +105,14 @@ describe('GovernanceERC20', function () {
       //   .to.be.revertedWithCustomError(token, 'MintSettingsArrayLengthMismatch')
       //   .withArgs(receivers.length, amounts.length);
       await expect(
-        hre.wrapper.deploy(
-          'GovernanceERC20', {args: [dao.address, governanceERC20Name, governanceERC20Symbol, {receivers: receivers, amounts: amounts}]}
-        )
+        hre.wrapper.deploy('GovernanceERC20', {
+          args: [
+            dao.address,
+            governanceERC20Name,
+            governanceERC20Symbol,
+            {receivers: receivers, amounts: amounts},
+          ],
+        })
       )
         .to.be.revertedWithCustomError(token, 'MintSettingsArrayLengthMismatch')
         .withArgs(receivers.length, amounts.length);
@@ -245,7 +254,9 @@ describe('GovernanceERC20', function () {
       //   receivers: [],
       //   amounts: [],
       // });
-      token = await hre.wrapper.deploy('GovernanceERC20', {args: [dao.address, 'name', 'symbol', {receivers:[], amounts:[]}]});
+      token = await hre.wrapper.deploy('GovernanceERC20', {
+        args: [dao.address, 'name', 'symbol', {receivers: [], amounts: []}],
+      });
 
       await dao.grant(token.address, signers[0].address, MINT_PERMISSION_ID);
     });

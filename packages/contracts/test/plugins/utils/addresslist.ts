@@ -16,7 +16,7 @@ describe('AddresslistMock', function () {
     // TODO:GIORGI test commented
     // const AddresslistMock = new AddresslistMock__factory(signers[0]);
     // addresslist = await AddresslistMock.deploy();
-    addresslist = await hre.wrapper.deploy('AddresslistMock')
+    addresslist = await hre.wrapper.deploy('AddresslistMock');
   });
 
   context('addresslistLength', function () {

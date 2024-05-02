@@ -16,7 +16,7 @@ describe('RegistryUtils', () => {
     // const RegistryUtilsFactory = new RegistryUtils__factory(signers[0]);
     // registryUtilsContract = await RegistryUtilsFactory.deploy();
 
-    registryUtilsContract = await hre.wrapper.deploy('RegistryUtils')
+    registryUtilsContract = await hre.wrapper.deploy('RegistryUtils');
   });
 
   describe('isSubdomainValid', () => {

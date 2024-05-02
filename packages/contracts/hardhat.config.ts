@@ -8,7 +8,7 @@ import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import '@nomicfoundation/hardhat-chai-matchers';
 import '@matterlabs/hardhat-zksync-deploy';
 import '@matterlabs/hardhat-zksync-solc';
-import "@matterlabs/hardhat-zksync-node";
+import '@matterlabs/hardhat-zksync-node';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -20,7 +20,7 @@ dotenv.config();
 
 if (process.env.CONTRACTS_TARGET === 'zksync') {
   import('@matterlabs/hardhat-zksync-verify');
-  import("@matterlabs/hardhat-zksync-upgradable");
+  import('@matterlabs/hardhat-zksync-upgradable');
 } else {
   // import('@openzeppelin/hardhat-upgrades');
   import('@nomicfoundation/hardhat-verify');
@@ -63,13 +63,13 @@ task('deploy-contracts').setAction(async (args, hre) => {
 });
 
 task('test-contracts').setAction(async (args, hre) => {
-  const imp = await import('./test/test-utils/wrapper/Wrapper')
+  const imp = await import('./test/test-utils/wrapper/Wrapper');
 
-  const wrapper = imp.Wrapper.create(hre.network.name, hre.ethers.provider)
+  const wrapper = imp.Wrapper.create(hre.network.name, hre.ethers.provider);
   hre.wrapper = wrapper;
 
-  await hre.run('test')
-})
+  await hre.run('test');
+});
 
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
@@ -144,7 +144,7 @@ const config: HardhatUserConfig = {
         '0xe0415469c10f3b1142ce0262497fe5c7a0795f0cbfd466a6bfa31968d0f70841',
         '0x4d91647d0a8429ac4433c83254fb9625332693c848e578062fe96362f32bfe91',
         '0x41c9f9518aa07b50cb1c0cc160d45547f57638dd824a8d85b5eb3bf99ed2bdeb',
-        '0xb0680d66303a0163a19294f1ef8c95cd69a9d7902a4aca99c05f3e134e68a11a'
+        '0xb0680d66303a0163a19294f1ef8c95cd69a9d7902a4aca99c05f3e134e68a11a',
       ],
     },
     zkTestnet: {

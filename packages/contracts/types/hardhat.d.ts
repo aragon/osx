@@ -4,7 +4,7 @@ import {
   AragonVerifyEntry,
   TestingFork,
 } from '../utils/types';
-import { Wrapper } from '../test/test-utils/wrapper/Wrapper';
+import {Wrapper} from '../test/test-utils/wrapper/Wrapper';
 
 declare module 'hardhat/types' {
   interface HardhatRuntimeEnvironment {

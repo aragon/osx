@@ -27,7 +27,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper/Wrapper';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
@@ -57,7 +57,10 @@ describe('MerkleDistributor', function () {
     // TODO:GIORGI test commented
     // const MerkleDistributor = new MerkleDistributor__factory(signers[0]);
     // distributor = await deployWithProxy(MerkleDistributor);
-    distributor = await hre.wrapper.deploy(ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR, {withProxy: true});
+    distributor = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR,
+      {withProxy: true}
+    );
   });
 
   describe('plugin interface: ', async () => {

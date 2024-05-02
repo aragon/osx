@@ -67,7 +67,9 @@ describe('CounterPluginSetup(Example)', function () {
     // TODO:GIORGI test commented
     // const CounterV2Setup = new CounterV2PluginSetup__factory(signers[0]);
     // counterV2Setup = await CounterV2Setup.deploy(multiplyHelper.address);
-    counterV2Setup = await hre.wrapper.deploy('CounterV2PluginSetup', {args: [multiplyHelper.address]});
+    counterV2Setup = await hre.wrapper.deploy('CounterV2PluginSetup', {
+      args: [multiplyHelper.address],
+    });
   });
 
   describe('prepareInstallation', async () => {

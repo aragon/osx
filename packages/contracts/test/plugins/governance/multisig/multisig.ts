@@ -47,7 +47,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper/Wrapper';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -109,7 +109,9 @@ describe.skip('Multisig', function () {
     // TODO:GIORGI test commented
     // const MultisigFactory = new Multisig__factory(signers[0]);
     // multisig = await deployWithProxy(MultisigFactory);
-    multisig = await hre.wrapper.deploy(ARTIFACT_SOURCES.MULTISIG, {withProxy: true})
+    multisig = await hre.wrapper.deploy(ARTIFACT_SOURCES.MULTISIG, {
+      withProxy: true,
+    });
 
     await dao.grant(
       dao.address,

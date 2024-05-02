@@ -23,7 +23,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper/Wrapper';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -71,7 +71,10 @@ describe('PluginRepoRegistry', function () {
     //   PluginRepoRegistry
     // );
 
-    pluginRepoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY, {withProxy: true})
+    pluginRepoRegistry = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+      {withProxy: true}
+    );
 
     await pluginRepoRegistry.initialize(
       managingDAO.address,

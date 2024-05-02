@@ -1,23 +1,27 @@
 import hre from 'hardhat';
 import {findEvent} from '../../../utils/event';
 import {ProxyCreatedEvent} from '../../../typechain/ProxyFactory';
-import { BigNumberish } from 'ethers';
-import {providers} from 'ethers'
+import {BigNumberish} from 'ethers';
+import {providers} from 'ethers';
 
-import {HardhatClass} from './hardhat'
-import {ZkSync} from './zksync'
+import {HardhatClass} from './hardhat';
+import {ZkSync} from './zksync';
 
 export const ARTIFACT_SOURCES = {
   DAO: 'src/core/dao/DAO.sol:DAO',
   DAO_V1_0_0: '@aragon/osx-v1.0.1/core/dao/DAO.sol:DAO',
   DAO_REGISTRY: 'src/framework/dao/DAORegistry.sol:DAORegistry',
-  PLUGIN_REPO_REGISTRY: 'src/framework/plugin/repo/PluginRepoRegistry.sol:PluginRepoRegistry',
+  PLUGIN_REPO_REGISTRY:
+    'src/framework/plugin/repo/PluginRepoRegistry.sol:PluginRepoRegistry',
   PLUGIN_REPO: 'src/framework/plugin/repo/PluginRepo.sol:PluginRepo',
-  ENS_SUBDOMAIN_REGISTRAR: 'src/framework/utils/ens/ENSSubdomainRegistrar.sol:ENSSubdomainRegistrar',
+  ENS_SUBDOMAIN_REGISTRAR:
+    'src/framework/utils/ens/ENSSubdomainRegistrar.sol:ENSSubdomainRegistrar',
   MULTISIG: 'src/plugins/governance/multisig/Multisig.sol:Multisig',
-  MERKLE_DISTRIBUTOR: 'src/plugins/token/MerkleDistributor.sol:MerkleDistributor',
+  MERKLE_DISTRIBUTOR:
+    'src/plugins/token/MerkleDistributor.sol:MerkleDistributor',
   MERKLE_MINTER: 'src/plugins/token/MerkleMinter.sol:MerkleMinter',
-}
+};
+
 export type deploySettings = {
   args?: any[];
   withProxy?: boolean;
@@ -27,21 +31,23 @@ export type deploySettings = {
 };
 
 export interface NetworkDeployment {
-  deploy(artifactName: string, args:any[]): any;
+  deploy(artifactName: string, args: any[]): any;
   getCreateAddress(sender: string, nonce: BigNumberish): string;
-  getNonce(sender: string, type?: 'Deployment'| 'Transaction'): Promise<BigNumberish>;
+  getNonce(
+    sender: string,
+    type?: 'Deployment' | 'Transaction'
+  ): Promise<BigNumberish>;
 }
-
 
 export class Wrapper {
   network: NetworkDeployment;
 
-  constructor(_network:NetworkDeployment) {
+  constructor(_network: NetworkDeployment) {
     this.network = _network;
   }
 
   static create(networkName: string, provider: providers.BaseProvider) {
-    if(networkName == 'zkLocalTestnet' || networkName == 'zkSyncLocal') {
+    if (networkName == 'zkLocalTestnet' || networkName == 'zkSyncLocal') {
       // @ts-ignore TODO:GIORGI
       return new Wrapper(new ZkSync(provider));
     }
@@ -50,9 +56,15 @@ export class Wrapper {
   }
 
   async deploy(artifactName: string, settings?: deploySettings) {
-    let {artifact, contract} = await this.network.deploy(artifactName, settings?.args ?? [])
+    let {artifact, contract} = await this.network.deploy(
+      artifactName,
+      settings?.args ?? []
+    );
     if (settings?.withProxy) {
-      const {contract: proxyFactoryContract} = await this.network.deploy('ProxyFactory', [contract.address])
+      const {contract: proxyFactoryContract} = await this.network.deploy(
+        'ProxyFactory',
+        [contract.address]
+      );
       // Currently, always deploys with UUPS
       const tx = await proxyFactoryContract.deployUUPSProxy('0x');
 
@@ -68,10 +80,13 @@ export class Wrapper {
   }
 
   getCreateAddress(sender: string, nonce: BigNumberish): string {
-    return this.network.getCreateAddress(sender, nonce)
+    return this.network.getCreateAddress(sender, nonce);
   }
 
-  async getNonce(sender: string, type?: 'Deployment'| 'Transaction'): Promise<BigNumberish> {
-    return this.network.getNonce(sender, type ?? 'Deployment')
+  async getNonce(
+    sender: string,
+    type?: 'Deployment' | 'Transaction'
+  ): Promise<BigNumberish> {
+    return this.network.getNonce(sender, type ?? 'Deployment');
   }
 }

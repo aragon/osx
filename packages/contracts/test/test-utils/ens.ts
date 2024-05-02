@@ -14,7 +14,7 @@ import {
   ENSSubdomainRegistrar__factory,
   PublicResolver__factory,
 } from '../../typechain';
-import { ARTIFACT_SOURCES } from './wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from './wrapper/Wrapper';
 
 export async function deployENSSubdomainRegistrar(
   owner: SignerWithAddress,
@@ -31,8 +31,10 @@ export async function deployENSSubdomainRegistrar(
   //   owner.address
   // );
 
-  const ensRegistry = await hre.wrapper.deploy('ENSRegistry')
-  const publicResolver = await hre.wrapper.deploy('PublicResolver', {args: [ensRegistry.address, owner.address]})
+  const ensRegistry = await hre.wrapper.deploy('ENSRegistry');
+  const publicResolver = await hre.wrapper.deploy('PublicResolver', {
+    args: [ensRegistry.address, owner.address],
+  });
 
   // Register subdomains in the reverse order
   let domainNamesReversed = domain.split('.');
@@ -63,7 +65,10 @@ export async function deployENSSubdomainRegistrar(
   //   ENSSubdomainRegistrar
   // );
 
-  const ensSubdomainRegistrar = await hre.wrapper.deploy(ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR, {withProxy: true})
+  const ensSubdomainRegistrar = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
+    {withProxy: true}
+  );
 
   await ensRegistry
     .connect(owner)

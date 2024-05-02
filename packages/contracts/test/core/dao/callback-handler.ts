@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import hre,{ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {defaultAbiCoder, hexDataSlice, id} from 'ethers/lib/utils';
 
@@ -32,7 +32,9 @@ describe('CallbackHandler', function () {
     // );
     // callbackHandlerMockHelper = await CallbackHandlerHelper.deploy();
 
-    callbackHandlerMockHelper = await hre.wrapper.deploy('CallbackHandlerMockHelper')
+    callbackHandlerMockHelper = await hre.wrapper.deploy(
+      'CallbackHandlerMockHelper'
+    );
   });
 
   it('reverts for an unknown callback function signature', async () => {

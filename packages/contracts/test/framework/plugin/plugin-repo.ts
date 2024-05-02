@@ -192,7 +192,7 @@ describe('PluginRepo', function () {
         //   signers[0]
         // ).deploy();
 
-        const randomContract = await hre.wrapper.deploy('TestPlugin')
+        const randomContract = await hre.wrapper.deploy('TestPlugin');
         await expect(
           pluginRepo.createVersion(
             1,
@@ -396,8 +396,8 @@ describe('PluginRepo', function () {
         // const placeholder1 = await PlaceholderSetup.deploy();
         // const placeholder2 = await PlaceholderSetup.deploy();
 
-        const placeholder1 = await hre.wrapper.deploy('PlaceholderSetup')
-        const placeholder2 = await hre.wrapper.deploy('PlaceholderSetup')
+        const placeholder1 = await hre.wrapper.deploy('PlaceholderSetup');
+        const placeholder2 = await hre.wrapper.deploy('PlaceholderSetup');
 
         // Release 1
         await expect(

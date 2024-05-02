@@ -29,7 +29,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper/Wrapper';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -72,17 +72,23 @@ describe('MerkleMinter', function () {
     //   amounts: [],
     // });
 
-    token = await hre.wrapper.deploy('GovernanceERC20', {args: [managingDao.address, 'GOV', 'GOV', {receivers:[], amounts: []}]})
+    token = await hre.wrapper.deploy('GovernanceERC20', {
+      args: [managingDao.address, 'GOV', 'GOV', {receivers: [], amounts: []}],
+    });
 
     // TODO:GIORGI test commented
     // const MerkleDistributor = new MerkleDistributor__factory(signers[0]);
     // distributorBase = await MerkleDistributor.deploy();
-    distributorBase = await hre.wrapper.deploy(ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR)
+    distributorBase = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR
+    );
 
     // TODO:GIORGI test commented
     // const MerkleMinter = new MerkleMinter__factory(signers[0]);
     // minter = await deployWithProxy(MerkleMinter);
-    minter = await hre.wrapper.deploy(ARTIFACT_SOURCES.MERKLE_MINTER, {withProxy: true});
+    minter = await hre.wrapper.deploy(ARTIFACT_SOURCES.MERKLE_MINTER, {
+      withProxy: true,
+    });
 
     await minter.initialize(
       managingDao.address,

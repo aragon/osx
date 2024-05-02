@@ -25,7 +25,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
-import { ARTIFACT_SOURCES } from '../../../test-utils/wrapper/Wrapper';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper/Wrapper';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -46,16 +46,17 @@ async function setupENS(
   // await ens.deployed();
 
   const ens = await hre.wrapper.deploy('ENSRegistry');
-  
 
   // Deploy the Resolver
-  // TODO:GIORGI test commented 
+  // TODO:GIORGI test commented
   // const resolver = await PublicResolver.deploy(
   //   ens.address,
   //   ethers.constants.AddressZero
   // );
   // await resolver.deployed();
-  const resolver = await hre.wrapper.deploy('PublicResolver', {args: [ens.address, ethers.constants.AddressZero]});
+  const resolver = await hre.wrapper.deploy('PublicResolver', {
+    args: [ens.address, ethers.constants.AddressZero],
+  });
 
   await setupResolver(ens, resolver, owner);
 
@@ -68,7 +69,10 @@ async function setupENS(
   //   ENSSubdomainRegistrar
   // );
 
-  const registrar = await hre.wrapper.deploy(ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR, {withProxy: true})
+  const registrar = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
+    {withProxy: true}
+  );
 
   return [ens, resolver, dao, registrar];
 }

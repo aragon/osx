@@ -64,7 +64,7 @@ describe('Core: PermissionManager', function () {
     // const PM = new PermissionManagerTest__factory(signers[0]);
     // pm = await PM.deploy();
 
-    pm = await hre.wrapper.deploy('PermissionManagerTest')
+    pm = await hre.wrapper.deploy('PermissionManagerTest');
 
     await pm.init(ownerSigner.address);
   });
@@ -81,7 +81,7 @@ describe('Core: PermissionManager', function () {
       // const PM = new PermissionManagerTest__factory(ownerSigner);
       // pm = await PM.deploy();
 
-      pm = await hre.wrapper.deploy('PermissionManagerTest')
+      pm = await hre.wrapper.deploy('PermissionManagerTest');
 
       await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
     });
@@ -182,7 +182,7 @@ describe('Core: PermissionManager', function () {
       //   signers[0]
       // ).deploy();
 
-      conditionMock = await hre.wrapper.deploy('PermissionConditionMock')
+      conditionMock = await hre.wrapper.deploy('PermissionConditionMock');
     });
 
     it('reverts if the condition address is not a contract', async () => {
@@ -201,10 +201,10 @@ describe('Core: PermissionManager', function () {
     it('reverts if the condition contract does not support `IPermissionConditon`', async () => {
       // TODO:GIORGI test commented
       // const nonConditionContract1 = await new TestPlugin__factory(
-        // signers[0]
+      // signers[0]
       // ).deploy();
-      
-      const nonConditionContract = await hre.wrapper.deploy('TestPlugin')
+
+      const nonConditionContract = await hre.wrapper.deploy('TestPlugin');
 
       await expect(
         pm.grantWithCondition(
@@ -294,8 +294,9 @@ describe('Core: PermissionManager', function () {
       //   signers[0]
       // ).deploy();
 
-      const newConditionMock = await hre.wrapper.deploy('PermissionConditionMock')
-
+      const newConditionMock = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
 
       await expect(
         pm.grantWithCondition(
@@ -510,7 +511,9 @@ describe('Core: PermissionManager', function () {
       //   signers[0]
       // ).deploy();
 
-      const conditionMock2 = await hre.wrapper.deploy('PermissionConditionMock')
+      const conditionMock2 = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
 
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
