@@ -324,7 +324,7 @@ describe('PluginRepo', function () {
 
       it('supports the `IPluginRepo` interface', async () => {
         const iface = IPluginRepo__factory.createInterface();
-        expect(getInterfaceId(iface)).to.equal('0xd4321b40'); // the interfaceID from IPluginRepo v1.0.0
+        expect(getInterfaceId(iface)).to.equal('0x0d19035f');
         expect(await pluginRepo.supportsInterface(getInterfaceId(iface))).to.be
           .true;
       });
