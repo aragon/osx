@@ -48,7 +48,7 @@ extendEnvironment(hre => {
     activeContracts: {},
   };
   hre.aragonToVerifyContracts = [];
-  hre.managementDAOMultisigPluginAddress = ''; // TODO
+  hre.managementDAOMultisigPluginAddress = ''; // TODO This must be removed after the deploy script got refactored (see https://github.com/aragon/osx/pull/582)
   hre.managementDAOActions = [];
   hre.testingFork = testingFork;
 });
