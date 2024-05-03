@@ -1,8 +1,9 @@
+import {generateActionBatchEntityId} from '../src/dao/ids';
 import {
   generatePluginEntityId,
   generateProposalEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 export const ADDRESS_ONE = '0x0000000000000000000000000000000000000001';
@@ -38,29 +39,18 @@ export const TOKEN_SYMBOL = 'symbol';
 export const TOKEN_NAME = 'name';
 
 export const HOUR = '3600';
-
-export const VOTING_MODE: string = ONE; // EarlyExecution
-export const SUPPORT_THRESHOLD = '500000'; // 50*10**4 = 50%
-export const MIN_PARTICIPATION = '500000'; // 50*10**4 = 50%
-export const MIN_DURATION = HOUR;
-
-export const MIN_PROPOSER_VOTING_POWER = ZERO;
-export const START_DATE = '1644851000';
-export const END_DATE = '1644852000';
 export const SNAPSHOT_BLOCK = '100';
 
 // Use 1 for testing as default value is anyways 0
 // and test might succeed even though it shouldn't
 export const ALLOW_FAILURE_MAP = '1';
-
-export const MIN_VOTING_POWER = TWO;
-export const TOTAL_VOTING_POWER = THREE;
 export const CREATED_AT = ONE;
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 export const ONE_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
+
 export const HALF_UINT256_BYTES32 =
   '0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 export const MAX_UINT256_BYTES32 =
@@ -73,6 +63,14 @@ export const PLUGIN_SETUP_ID =
   '0xfb3fd2c4cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
 export const APPLIED_PLUGIN_SETUP_ID =
   '0x00000000cd4e19944dd3f8437e67476240cd9e3efb2294ebd10c59c8f1d6817c';
+
+export const ACTION_BATCH_ID = generateActionBatchEntityId(
+  Address.fromString(CONTRACT_ADDRESS),
+  Address.fromString(DAO_ADDRESS),
+  Bytes.fromHexString(ONE_BYTES32),
+  Bytes.fromHexString(HALF_UINT256_BYTES32),
+  BigInt.fromString('1')
+);
 
 export const PROPOSAL_ENTITY_ID = generateProposalEntityId(
   Address.fromString(CONTRACT_ADDRESS),

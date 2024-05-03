@@ -1,10 +1,4 @@
-import {
-  Action,
-  AddresslistVotingProposal,
-  AdminProposal,
-  MultisigProposal,
-  TokenVotingProposal,
-} from '../../generated/schema';
+import {Action} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct,
@@ -23,51 +17,20 @@ import {handleERC20Action} from '../utils/tokens/erc20';
 import {handleERC721Action} from '../utils/tokens/erc721';
 import {handleERC1155Action} from '../utils/tokens/erc1155';
 import {handleNativeAction} from '../utils/tokens/eth';
+import {generateActionEntityId, generateDeterministicActionId} from './ids';
 import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 import {BigInt} from '@graphprotocol/graph-ts';
-
-// AssemblyScript struggles having multiple return types. Due to this,
-// The below seems most effective way.
-export function updateProposalWithFailureMap(
-  proposalId: string,
-  failureMap: BigInt
-): boolean {
-  let tokenVotingProposal = TokenVotingProposal.load(proposalId);
-  if (tokenVotingProposal) {
-    tokenVotingProposal.failureMap = failureMap;
-    tokenVotingProposal.save();
-    return true;
-  }
-
-  let multisigProposal = MultisigProposal.load(proposalId);
-  if (multisigProposal) {
-    multisigProposal.failureMap = failureMap;
-    multisigProposal.save();
-    return true;
-  }
-
-  let addresslistProposal = AddresslistVotingProposal.load(proposalId);
-  if (addresslistProposal) {
-    addresslistProposal.failureMap = failureMap;
-    addresslistProposal.save();
-    return true;
-  }
-
-  let adminProposal = AdminProposal.load(proposalId);
-  if (adminProposal) {
-    adminProposal.failureMap = failureMap;
-    adminProposal.save();
-    return true;
-  }
-
-  return false;
-}
 
 export function handleAction<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, proposalId: string, index: i32, event: R): void {
-  let actionEntity = getOrCreateActionEntity(action, proposalId, index, event);
+>(action: T, actionBatchId: string, index: i32, event: R): void {
+  let actionEntity = getOrCreateActionEntity(
+    action,
+    actionBatchId,
+    index,
+    event
+  );
   actionEntity.execResult = event.params.execResults[index];
   actionEntity.save();
 
@@ -77,44 +40,58 @@ export function handleAction<
       action.to,
       action.value,
       'Native Token Withdraw',
-      proposalId,
+      actionBatchId,
       index,
       event
     );
     return;
   }
 
-  handleTokenTransfers(action, proposalId, index, event);
+  handleTokenTransfers(action, actionBatchId, index, event);
 }
 
 function getOrCreateActionEntity<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, proposalId: string, index: i32, event: R): Action {
-  const actionId = [proposalId, index.toString()].join('_');
-  let entity = Action.load(actionId);
+>(action: T, actionBatchId: string, index: i32, event: R): Action {
+  const deterministicActionId = generateDeterministicActionId(
+    event.params.actor,
+    event.address,
+    event.params.callId,
+    index
+  );
+  const actionId = generateActionEntityId(
+    event.params.actor,
+    event.address,
+    event.params.callId,
+    index,
+    event.transaction.hash,
+    event.transactionLogIndex
+  );
 
-  // In case the execute on the dao is called by the address
-  // That we don't currently index for the actions in the subgraph,
-  // we fallback and still create an action.
-  // NOTE that it's important to generate action id differently to not allow
-
-  if (!entity) {
-    entity = new Action(actionId);
-    entity.to = action.to;
-    entity.value = action.value;
-    entity.data = action.data;
-    entity.proposal = proposalId;
-    entity.dao = generateDaoEntityId(event.address);
-  }
+  const entity = new Action(actionId);
+  entity.deterministicId = deterministicActionId;
+  entity.to = action.to;
+  entity.value = action.value;
+  entity.data = action.data;
+  entity.actionBatch = actionBatchId;
+  entity.dao = generateDaoEntityId(event.address);
 
   return entity;
 }
 
+/**
+ * Determines if the action is an ERC20, ERC721 or ERC1155 transfer and calls the appropriate handler if so.
+ * Does nothing if the action is not a recognised token transfer.
+ * @param action the action to validate
+ * @param actionBatchId the id container for a single set of executed actions
+ * @param actionIndex the index number of the action inside the executed batch
+ * @param event the Executed event emitting the event
+ */
 function handleTokenTransfers<
   T extends ExecutedActionsStruct,
   R extends Executed
->(action: T, proposalId: string, actionIndex: i32, event: R): void {
+>(action: T, actionBatchId: string, actionIndex: i32, event: R): void {
   const methodSig = getMethodSignature(action.data);
 
   let handledByErc721: bool = false;
@@ -125,7 +102,7 @@ function handleTokenTransfers<
       action.to,
       event.address,
       action.data,
-      proposalId,
+      actionBatchId,
       actionIndex,
       event
     );
@@ -136,7 +113,7 @@ function handleTokenTransfers<
       action.to,
       event.address,
       action.data,
-      proposalId,
+      actionBatchId,
       actionIndex,
       event
     );
@@ -146,7 +123,7 @@ function handleTokenTransfers<
     handleERC20Action(
       action.to,
       event.address,
-      proposalId,
+      actionBatchId,
       action.data,
       actionIndex,
       event

@@ -15,12 +15,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'ManagementDAOProxy',
     hre
   );
-  // Get `DAO` contract.
 
+  // Get `DAO` contract.
   const managementDaoContract = DAO__factory.connect(
     managementDAOAddress,
     (await ethers.getSigners())[0]
   );
+
   // Get `DAORegistryProxy` address.
   const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
   // Get `PluginSetupProcessor` address.
@@ -56,7 +57,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   await checkPermission(managementDaoContract, {
-    operation: Operation.Revoke,
+    operation: Operation.Grant,
     where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
     who: {name: 'Deployer', address: deployer.address},
     permission: 'EXECUTE_PERMISSION',
@@ -65,4 +66,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Finalizing Management DAO verified');
 };
 export default func;
-func.tags = ['New', 'RegisterManagementDAO', 'InstallMultisigOnManagementDAO'];
+func.tags = ['New', 'RegisterManagementDAO'];

@@ -5,26 +5,32 @@ pragma solidity ^0.8.8;
 
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {PluginUpgradeableSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginUpgradeableSetup.sol";
 
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
 
-contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
-    address internal pluginBase;
-
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV1Mock());
-    }
+contract PluginUUPSUpgradeableSetupV1Mock is PluginUpgradeableSetup {
+    constructor(address implementation) PluginUpgradeableSetup(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(2);
         preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
+    }
+
+    /// @inheritdoc IPluginSetup
+    /// @dev The default implementation for the initial build 1 that reverts because no earlier build exists.
+    function prepareUpdate(
+        address _dao,
+        uint16 _fromBuild,
+        SetupPayload calldata _payload
+    ) external virtual returns (bytes memory, PreparedSetupData memory) {
+        (_dao, _fromBuild, _payload);
     }
 
     /// @inheritdoc IPluginSetup
@@ -35,14 +41,11 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         (_dao, _payload);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
-
-    /// @inheritdoc IPluginSetup
-    function implementation() external view virtual override returns (address) {
-        return address(pluginBase);
-    }
 }
 
 contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
+    constructor(address implementation) PluginUUPSUpgradeableSetupV1Mock(implementation) {}
+
     function prepareInstallation(
         address _dao,
         bytes memory
@@ -55,16 +58,14 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock
 }
 
 contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV2Mock());
-    }
+    constructor(address implementation) PluginUUPSUpgradeableSetupV1Mock(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(2);
         preparedSetupData.permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
@@ -91,16 +92,14 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
 }
 
 contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
-    constructor() {
-        pluginBase = address(new PluginUUPSUpgradeableV3Mock());
-    }
+    constructor(address implementation) PluginUUPSUpgradeableSetupV2Mock(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(3);
         preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }
@@ -139,16 +138,14 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
 /// but applies new/modifier permissions on it.
 
 contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
-    constructor(address _pluginUUPSUpgradeableV3) {
-        pluginBase = _pluginUUPSUpgradeableV3;
-    }
+    constructor(address implementation) PluginUUPSUpgradeableSetupV3Mock(implementation) {}
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
     ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
-        plugin = mockPluginProxy(pluginBase, _dao);
+        plugin = mockPluginProxy(implementation(), _dao);
         preparedSetupData.helpers = mockHelpers(3);
         preparedSetupData.permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }

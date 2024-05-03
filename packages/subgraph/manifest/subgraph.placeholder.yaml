@@ -70,12 +70,6 @@ dataSources:
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC165
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
-        - name: TokenVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
-        - name: AddresslistVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
-        - name: GovernanceWrappedERC20
-          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
@@ -94,6 +88,10 @@ dataSources:
 # templates
 templates:
   # DAO
+  # subscribing to both dao templates needs care to avoid duplication.
+  # Below, the event signature for `Executed` differs slightly, so we can
+  # safely define two separate handlers and the graph will index based on the
+  # matching event.
   - name: DaoTemplateV1_0_0
     kind: ethereum/contract
     network: {{network}}
@@ -115,16 +113,10 @@ templates:
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC1155/ERC1155.sol/ERC1155.json
         - name: ERC165
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
-        - name: TokenVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
-        - name: AddresslistVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
           file: $ARAGON_OSX_MODULE/../subgraph/abis/DAO_v1_0_0.json
         - name: CallbackHandler
           file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
-        - name: GovernanceWrappedERC20
-          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
@@ -169,175 +161,11 @@ templates:
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC1155/ERC1155.sol/ERC1155.json
         - name: ERC165
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
-        - name: TokenVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
-        - name: AddresslistVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: CallbackHandler
           file: $ARAGON_OSX_MODULE/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json
-        - name: GovernanceWrappedERC20
-          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: Executed(indexed address,bytes32,(address,uint256,bytes)[],uint256,uint256,bytes[])
           handler: handleExecuted
-  # TokenVoting (package)
-  - name: TokenVoting
-    kind: ethereum/contract
-    network: {{network}}
-    source:
-      abi: TokenVoting
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/packages/token/token-voting.ts
-      entities:
-        - Dao
-      abis:
-        - name: ERC20
-          file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
-        - name: GovernanceWrappedERC20
-          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
-        - name: TokenVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
-      eventHandlers:
-        - event: MembershipContractAnnounced(indexed address)
-          handler: handleMembershipContractAnnounced
-        - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
-          handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256)
-          handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
-          handler: handleProposalCreated
-        - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
-          handler: handleVotingSettingsUpdated
-  - name: GovernanceERC20
-    kind: ethereum/contract
-    network: {{network}}
-    source:
-      abi: GovernanceERC20
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/packages/token/governance-erc20.ts
-      entities:
-        - Dao
-      abis:
-        - name: GovernanceERC20
-          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
-        - event: DelegateChanged(indexed address,indexed address,indexed address)
-          handler: handleDelegateChanged
-        - event: DelegateVotesChanged(indexed address,uint256,uint256)
-          handler: handleDelegateVotesChanged
-
-  # AddresslistVoting (package)
-  - name: AddresslistVoting
-    kind: ethereum/contract
-    network: {{network}}
-    source:
-      abi: AddresslistVoting
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/packages/addresslist/addresslist-voting.ts
-      entities:
-        - Dao
-      abis:
-        - name: AddresslistVoting
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
-      eventHandlers:
-        - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
-          handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256)
-          handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
-          handler: handleProposalCreated
-        - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
-          handler: handleVotingSettingsUpdated
-        - event: MembersAdded(address[])
-          handler: handleMembersAdded
-        - event: MembersRemoved(address[])
-          handler: handleMembersRemoved
-  # Multisig (package)
-  - name: Multisig
-    kind: ethereum/contract
-    network: {{network}}
-    source:
-      abi: Multisig
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/packages/multisig/multisig.ts
-      entities:
-        - Dao
-      abis:
-        - name: Multisig
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/multisig/Multisig.sol/Multisig.json
-      eventHandlers:
-        - event: MembersAdded(address[])
-          handler: handleMembersAdded
-        - event: MembersRemoved(address[])
-          handler: handleMembersRemoved
-        - event: Approved(indexed uint256,indexed address)
-          handler: handleApproved
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
-          handler: handleProposalCreated
-        - event: ProposalExecuted(indexed uint256)
-          handler: handleProposalExecuted
-        - event: MultisigSettingsUpdated(bool,indexed uint16)
-          handler: handleMultisigSettingsUpdated
-    # admin (package)
-  - name: Admin
-    kind: ethereum/contract
-    network: {{network}}
-    source:
-      abi: Admin
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/packages/admin/admin.ts
-      entities:
-        - Dao
-      abis:
-        - name: DAO
-          file: $ARAGON_OSX_MODULE/artifacts/src/core/dao/DAO.sol/DAO.json
-        - name: Admin
-          file: $ARAGON_OSX_MODULE/artifacts/src/plugins/governance/admin/Admin.sol/Admin.json
-      eventHandlers:
-        - event: MembershipContractAnnounced(indexed address)
-          handler: handleMembershipContractAnnounced
-        - event: ProposalExecuted(indexed uint256)
-          handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
-          handler: handleProposalCreated
-    # Permission manager contract. Used by admin to track members
-  - name: AdminMembers
-    kind: ethereum/contract
-    network: {{network}}
-    source:
-      abi: PermissionManager
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/packages/admin/adminMembers.ts
-      entities:
-        - Adminstrator
-      abis:
-        - name: PermissionManager
-          file: $ARAGON_OSX_MODULE/artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json
-      eventHandlers:
-        - event: Granted(indexed bytes32,indexed address,address,indexed address,address)
-          handler: handleGranted
-        - event: Revoked(indexed bytes32,indexed address,address,indexed address)
-          handler: handleRevoked
   # PluginRepo
   - name: PluginRepoTemplate
     kind: ethereum/contract

@@ -36,26 +36,6 @@ type ERC20Contract implements Token @entity(immutable: true) {
 }
 
 """
-Wrapped [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20). Used for token voting.
-"""
-type ERC20WrapperContract implements Token @entity(immutable: true) {
-  " The address of the [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20). "
-  id: ID!
-
-  " The name of the wrapped token, mirrored from the smart contract. "
-  name: String
-
-  " The symbol of the wrapped token, mirrored from the smart contract. "
-  symbol: String
-
-  " The number of decimals of the wrapped token, mirrored from the smart contract. "
-  decimals: Int!
-
-  " The underlying [ERC20 Token Smart Contract](https://eips.ethereum.org/EIPS/eip-20) this wrapper represents. "
-  underlyingToken: ERC20Contract!
-}
-
-"""
 [ERC721 Token Standard](https://eips.ethereum.org/EIPS/eip-721), Non-Fungible Token (NFT), of type Token.
 """
 type ERC721Contract implements Token @entity(immutable: true) {
@@ -246,8 +226,8 @@ interface TokenTransfer {
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated Execution container on the DAO, if applicable. If deposited using the DAO `deposit` function then will be empty. "
+  actionBatch: ActionBatch
 
   " The hash of the transfer to track the transaction. "
   txHash: Bytes!
@@ -278,8 +258,8 @@ type ERC20Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC20 tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -313,8 +293,8 @@ type ERC721Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the ERC721 token. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -354,8 +334,8 @@ type ERC1155Transfer implements TokenTransfer @entity(immutable: true) {
   " The Ethereum address receiving the tokens. "
   to: Bytes!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -389,8 +369,8 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
   " The reference describing the deposit reason. "
   reference: String!
 
-  " The associated DAO proposal, if applicable. Using the DAO `deposit` function there's no need for proposal. "
-  proposal: IProposal
+  " The associated DAO transaction, if applicable. If deposited Using the DAO `deposit` function then will be empty "
+  actionBatch: ActionBatch
 
   " The type of transfer (External, Withdraw, Deposit) from the DAO's POV. "
   type: TransferType!
@@ -407,11 +387,37 @@ type NativeTransfer implements TokenTransfer @entity(immutable: true) {
 #############################
 
 """
-Actions are represented by solidity struct and executed by the DAO's `execute` function, resulting in an external call.
+A container for actions executed in batches by the DAO's `execute` function.
 """
-type Action @entity {
-  " Concatenation of the proposalID and the index of the action. Joined by '_'. "
+type ActionBatch @entity(immutable: true) {
+  " generateActionBatchEntityId: Concatenation caller, daoAddress, callId, transactionHash and txLogIndex. Joined by '_'. "
   id: ID!
+
+  " generateDeterministicActionBatchId: Concatenation caller, daoAddress, callId. Joined by '_'. "
+  deterministicId: String!
+  dao: Dao!
+  creator: Bytes!
+  metadata: String
+  actions: [Action!]! @derivedFrom(field: "actionBatch")
+  allowFailureMap: BigInt!
+  failureMap: BigInt
+  executed: Boolean!
+  createdAt: BigInt!
+  executionTxHash: Bytes
+}
+
+type Action @entity(immutable: true) {
+  " generateActionEntityId: Concatenation caller, daoAddress, callId, actionIdx, transactionHash and txLogIndex. Joined by '_'. "
+  id: ID!
+
+  " generateDeterministicActionId: Concatenation caller, daoAddress, callId, actionIdx. Joined by '_'. "
+  deterministicId: String!
+
+  " container for the actions executed in batches by the DAO's `execute` function. "
+  actionBatch: ActionBatch!
+
+  " The DAO that executed the action. "
+  dao: Dao!
 
   " The address to call. "
   to: Bytes!
@@ -421,12 +427,6 @@ type Action @entity {
 
   " The bytes-encoded function selector and calldata for the call. "
   data: Bytes!
-
-  " The DAO that will `execute` the function. "
-  dao: Dao!
-
-  " The proposal of the DAO containing the action to be executed. "
-  proposal: IProposal!
 
   " The result obtained from the executed action in `bytes`. "
   execResult: Bytes
@@ -467,7 +467,7 @@ type Dao @entity {
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")
   balances: [TokenBalance!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  proposals: [IProposal!]! @derivedFrom(field: "dao")
+  actionBatch: [ActionBatch!]! @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!]! @derivedFrom(field: "dao")
@@ -598,342 +598,5 @@ interface IPlugin {
   id: ID! # plugin address
   dao: Dao!
   pluginAddress: Bytes!
-
   installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
-
-  # TODO: Uncomment as soon as the plugins have their own subgraph
-  # appliedPreparation: PluginPreparation
-  # appliedSetupId: Bytes # The setupId of the application see PSP documentation for more info
-  # preparations: [PluginPreparation!]! @derivedFrom(field: "plugin")
-  # state: PluginPreparationState!
-}
-
-### Entities below should move to there respective subgraph once plugin is seperated from the Aragon OSx
-# Proposal
-
-interface IProposal {
-  id: ID! # package + proposalId
-  dao: Dao!
-  creator: Bytes!
-  metadata: String
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  executed: Boolean!
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  executionTxHash: Bytes
-}
-
-type TransactionActionsProposal implements IProposal @entity {
-  id: ID!
-  dao: Dao!
-  creator: Bytes!
-  metadata: String
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  executed: Boolean!
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  executionTxHash: Bytes
-}
-
-# Voting
-
-enum VoteOption {
-  None
-  Abstain
-  Yes
-  No
-}
-
-enum VotingMode {
-  Standard
-  EarlyExecution
-  VoteReplacement
-}
-
-# TokenVoting
-
-type TokenVotingPlugin implements IPlugin @entity {
-  "TODO: attributes should be appended to Plugins once plugin is separated from Aragon OSx"
-  id: ID!
-  dao: Dao!
-  pluginAddress: Bytes!
-
-  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
-
-  proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
-  votingMode: VotingMode
-  supportThreshold: BigInt
-  minParticipation: BigInt
-  minDuration: BigInt
-  minProposerVotingPower: BigInt
-  proposalCount: BigInt!
-  token: Token
-  members: [TokenVotingMember!]! @derivedFrom(field: "plugin")
-}
-
-type TokenVotingMember @entity {
-  id: ID! # user address + TokenVotingPlugin pluginId.
-  address: Bytes!
-  balance: BigInt!
-  plugin: TokenVotingPlugin!
-
-  # delegates
-  delegatee: TokenVotingMember
-  votingPower: BigInt
-  # we assume token owners and/or delegatees are members
-  delegators: [TokenVotingMember!]! @derivedFrom(field: "delegatee")
-}
-
-type TokenVotingVoter @entity {
-  id: ID! # address
-  address: String! # address as string to facilitate filtering by address on the UI
-  proposals: [TokenVotingVote!]! @derivedFrom(field: "voter")
-  plugin: TokenVotingPlugin!
-  lastUpdated: BigInt
-}
-
-type TokenVotingVote @entity {
-  "VoterProposal for Many-to-Many"
-  id: ID! # voter + proposal
-  voter: TokenVotingVoter!
-  proposal: TokenVotingProposal!
-  voteOption: VoteOption!
-  votingPower: BigInt!
-  createdAt: BigInt!
-  voteReplaced: Boolean!
-  updatedAt: BigInt!
-}
-
-type TokenVotingProposal implements IProposal @entity {
-  id: ID! # package + proposalId
-  dao: Dao!
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  plugin: TokenVotingPlugin!
-  pluginProposalId: BigInt!
-  creator: Bytes!
-  metadata: String
-
-  votingMode: VotingMode!
-  supportThreshold: BigInt!
-  minVotingPower: BigInt!
-  snapshotBlock: BigInt!
-
-  yes: BigInt
-  no: BigInt
-  abstain: BigInt
-  castedVotingPower: BigInt
-  totalVotingPower: BigInt!
-
-  voters: [TokenVotingVote!]! @derivedFrom(field: "proposal")
-  open: Boolean!
-  executed: Boolean!
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  creationBlockNumber: BigInt!
-  approvalReached: Boolean!
-  isSignaling: Boolean!
-  earlyExecutable: Boolean
-  executionDate: BigInt
-  executionBlockNumber: BigInt
-  executionTxHash: Bytes
-}
-
-# AddresslistVoting
-
-type AddresslistVotingPlugin implements IPlugin @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
-  id: ID!
-  dao: Dao!
-  pluginAddress: Bytes!
-
-  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
-
-  proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
-  votingMode: VotingMode
-  supportThreshold: BigInt
-  minParticipation: BigInt
-  minDuration: BigInt
-  minProposerVotingPower: BigInt
-  proposalCount: BigInt
-  members: [AddresslistVotingVoter!]! @derivedFrom(field: "plugin")
-}
-
-type AddresslistVotingVoter @entity {
-  id: ID! # address
-  address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AddresslistVotingVote!]! @derivedFrom(field: "voter")
-  plugin: AddresslistVotingPlugin!
-}
-
-type AddresslistVotingVote @entity {
-  "VoterProposal for Many-to-Many"
-  id: ID! # voter + proposal
-  voter: AddresslistVotingVoter!
-  proposal: AddresslistVotingProposal!
-  voteOption: VoteOption!
-  votingPower: BigInt!
-  createdAt: BigInt!
-  voteReplaced: Boolean!
-  updatedAt: BigInt!
-}
-
-type AddresslistVotingProposal implements IProposal @entity {
-  id: ID! # package + proposalId
-  dao: Dao!
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  plugin: AddresslistVotingPlugin!
-  pluginProposalId: BigInt!
-  creator: Bytes!
-  metadata: String
-
-  votingMode: VotingMode!
-  supportThreshold: BigInt!
-  minVotingPower: BigInt!
-  snapshotBlock: BigInt!
-
-  abstain: BigInt
-  yes: BigInt
-  no: BigInt
-  castedVotingPower: BigInt
-  totalVotingPower: BigInt!
-
-  voters: [AddresslistVotingVote!]! @derivedFrom(field: "proposal")
-  open: Boolean!
-  executed: Boolean!
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  creationBlockNumber: BigInt!
-  approvalReached: Boolean!
-  isSignaling: Boolean!
-  earlyExecutable: Boolean
-  executionDate: BigInt
-  executionBlockNumber: BigInt
-  executionTxHash: Bytes
-}
-
-# Admin (plugin)
-
-type AdminPlugin implements IPlugin @entity {
-  "TODO: attributes should be appended to Plugin once plugin is separated from Aragon OSx"
-  id: ID!
-  dao: Dao!
-  pluginAddress: Bytes!
-
-  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
-
-  proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
-  administrators: [AdministratorAdminPlugin!]! @derivedFrom(field: "plugin")
-}
-
-type Administrator @entity(immutable: true) {
-  id: ID! # address
-  address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AdminProposal!]! @derivedFrom(field: "administrator")
-  plugins: [AdministratorAdminPlugin!]! @derivedFrom(field: "administrator")
-}
-
-type AdministratorAdminPlugin @entity {
-  "for Many-to-Many"
-  id: ID! # Administrator + plugin
-  administrator: Administrator!
-  plugin: AdminPlugin!
-}
-
-type AdminProposal implements IProposal @entity {
-  id: ID! # plugin + proposalId
-  dao: Dao!
-  creator: Bytes! # Administrator address
-  metadata: String
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  executed: Boolean!
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  plugin: AdminPlugin!
-  pluginProposalId: BigInt!
-  administrator: Administrator!
-  executionTxHash: Bytes
-}
-
-# Multisig
-
-type MultisigPlugin implements IPlugin @entity {
-  "TODO: attributes should be appended to Plugin once plugin is seperated from Aragon OSx"
-  id: ID!
-  dao: Dao!
-  pluginAddress: Bytes!
-
-  installations: [PluginInstallation!]! @derivedFrom(field: "plugin")
-
-  proposalCount: BigInt
-  proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
-  members: [MultisigApprover!]! @derivedFrom(field: "plugin")
-
-  # multisig settings
-  minApprovals: Int
-  onlyListed: Boolean
-}
-
-type MultisigApprover @entity {
-  """
-  Current Approver of the multisig. If the approver is removed from the multisig,
-  the entity is not deleted and instead the isActive flag is set to false.
-  """
-  id: ID! # plugin_address + member_address
-  address: Bytes!
-  approvals: [MultisigProposalApproval!]! @derivedFrom(field: "approver")
-  plugin: MultisigPlugin!
-  isActive: Boolean!
-}
-
-type MultisigProposalApproval @entity(immutable: true) {
-  """
-  An approval of an specific multisig proposal
-  This entity works as a join table between MultisigProposal and MultisigApprover
-  and also stores the timestamp of the approval
-  """
-  id: ID! # approver + proposal
-  approver: MultisigApprover!
-  proposal: MultisigProposal!
-  createdAt: BigInt!
-}
-
-type MultisigProposal implements IProposal @entity {
-  id: ID! # plugin + proposalId
-  dao: Dao!
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  allowFailureMap: BigInt!
-  failureMap: BigInt
-  plugin: MultisigPlugin!
-  pluginProposalId: BigInt!
-  creator: Bytes!
-  metadata: String
-  createdAt: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
-  creationBlockNumber: BigInt!
-  snapshotBlock: BigInt!
-  minApprovals: Int!
-  approvalCount: Int
-  approvalReached: Boolean!
-  isSignaling: Boolean!
-  executed: Boolean!
-  executionDate: BigInt
-  executionBlockNumber: BigInt
-  executionTxHash: Bytes
-  approvals: [MultisigProposalApproval!]! @derivedFrom(field: "proposal")
 }

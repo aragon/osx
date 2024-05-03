@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Aragon DAO Framework",
   "repository": "https://github.com/aragon/osx",
-  "author": "Aragon Association",
+  "author": "Aragon X",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "workspaces": {

@@ -1,48 +1,48 @@
-import {TransactionActionsProposal} from '../../generated/schema';
+import {ActionBatch} from '../../generated/schema';
 import {
   Executed,
   ExecutedActionsStruct,
 } from '../../generated/templates/DaoTemplateV1_3_0/DAO';
-import {handleAction} from './utils';
 import {
-  generateDaoEntityId,
-  generateProposalEntityId,
-  generateTransactionActionsProposalEntityId,
-} from '@aragon/osx-commons-subgraph';
-import {BigInt} from '@graphprotocol/graph-ts';
+  generateDeterministicActionBatchId,
+  generateActionBatchEntityId,
+} from './ids';
+import {handleAction} from './utils';
+import {generateDaoEntityId} from '@aragon/osx-commons-subgraph';
 
 export function handleExecuted(event: Executed): void {
-  let proposalEntityId = generateProposalEntityId(
+  let actionBatchEntityId = generateActionBatchEntityId(
     event.params.actor,
-    BigInt.fromByteArray(event.params.callId)
+    event.address,
+    event.params.callId,
+    event.transaction.hash,
+    event.transactionLogIndex
   );
 
-  let transactionActionsProposalEntityId =
-    generateTransactionActionsProposalEntityId(
-      proposalEntityId,
-      event.transaction.hash,
-      event.transactionLogIndex
-    );
-  let proposal = new TransactionActionsProposal(
-    transactionActionsProposalEntityId
+  let deterministicId = generateDeterministicActionBatchId(
+    event.params.actor,
+    event.address,
+    event.params.callId
   );
-  proposal.dao = generateDaoEntityId(event.address);
-  proposal.createdAt = event.block.timestamp;
-  proposal.endDate = event.block.timestamp;
-  proposal.startDate = event.block.timestamp;
-  proposal.creator = event.params.actor;
-  proposal.executionTxHash = event.transaction.hash;
-  proposal.allowFailureMap = event.params.allowFailureMap;
-  proposal.executed = true;
-  proposal.failureMap = event.params.failureMap;
-  proposal.save();
+
+  let actionBatch = new ActionBatch(actionBatchEntityId);
+
+  actionBatch.dao = generateDaoEntityId(event.address);
+  actionBatch.deterministicId = deterministicId;
+  actionBatch.createdAt = event.block.timestamp;
+  actionBatch.creator = event.params.actor;
+  actionBatch.executionTxHash = event.transaction.hash;
+  actionBatch.allowFailureMap = event.params.allowFailureMap;
+  actionBatch.executed = true;
+  actionBatch.failureMap = event.params.failureMap;
+  actionBatch.save();
 
   let actions = event.params.actions;
 
   for (let index = 0; index < actions.length; index++) {
     handleAction<ExecutedActionsStruct, Executed>(
       actions[index],
-      transactionActionsProposalEntityId,
+      actionBatchEntityId,
       index,
       event
     );

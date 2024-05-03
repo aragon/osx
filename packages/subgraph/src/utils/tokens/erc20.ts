@@ -2,12 +2,8 @@ import {
   ERC20Balance,
   ERC20Contract,
   ERC20Transfer,
-  ERC20WrapperContract,
 } from '../../../generated/schema';
 import {ERC20} from '../../../generated/templates/DaoTemplateV1_0_0/ERC20';
-import {GovernanceWrappedERC20} from '../../../generated/templates/TokenVoting/GovernanceWrappedERC20';
-import {GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID} from '../../utils/constants';
-import {supportsInterface} from '../erc165';
 import {generateTokenEntityId} from '../ids';
 import {ERC20_transfer, ERC20_transferFrom} from './common';
 import {
@@ -16,61 +12,6 @@ import {
   generateTransferEntityId,
 } from '@aragon/osx-commons-subgraph';
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-
-export function supportsERC20Wrapped(token: Address): bool {
-  // Double check that it's ERC20Wrapped by calling supportsInterface checks.
-  let erc20Wrapped = GovernanceWrappedERC20.bind(token);
-  let introspection_wrapped_erc20 = supportsInterface(
-    erc20Wrapped,
-    GOVERNANCE_WRAPPED_ERC20_INTERFACE_ID
-  ); // GovernanceWrappedERC20
-  if (!introspection_wrapped_erc20) {
-    return false;
-  }
-  let introspection_ffffffff = supportsInterface(
-    erc20Wrapped,
-    'ffffffff',
-    false
-  );
-  return introspection_ffffffff;
-}
-
-export function fetchOrCreateWrappedERC20Entity(
-  address: Address
-): ERC20WrapperContract | null {
-  const tokenEntityId = generateTokenEntityId(address);
-  let wrappedErc20 = GovernanceWrappedERC20.bind(address);
-  // try load entry
-  let contract = ERC20WrapperContract.load(tokenEntityId);
-  if (contract != null) {
-    return contract;
-  }
-
-  contract = new ERC20WrapperContract(tokenEntityId);
-
-  let try_name = wrappedErc20.try_name();
-  let try_symbol = wrappedErc20.try_symbol();
-  let totalSupply = wrappedErc20.try_totalSupply();
-  let try_decimals = wrappedErc20.try_decimals();
-  // extra checks
-  let balanceOf = wrappedErc20.try_balanceOf(address);
-  let underlying = wrappedErc20.try_underlying();
-  if (totalSupply.reverted || balanceOf.reverted || underlying.reverted) {
-    return null;
-  }
-  // get and save the underliying contract
-  let underlyingContract = fetchOrCreateERC20Entity(underlying.value);
-  if (!underlyingContract) {
-    return null;
-  }
-  // set params and save
-  contract.name = try_name.reverted ? '' : try_name.value;
-  contract.symbol = try_symbol.reverted ? '' : try_symbol.value;
-  contract.decimals = try_decimals.reverted ? 18 : try_decimals.value;
-  contract.underlyingToken = underlyingContract.id;
-  contract.save();
-  return contract;
-}
 
 export function fetchOrCreateERC20Entity(
   address: Address
@@ -106,34 +47,15 @@ export function fetchOrCreateERC20Entity(
 }
 
 /**
- * @dev Identifies the type of ERC20 token (wrapped or regular), fetches or creates the corresponding entity, and returns its entity ID.
- *
- * 1. Checks whether the token supports wrapped ERC20.
- * 2. Fetches the existing entity if it exists.
- * 3. Creates a new entity if it doesn't exist.
- *
- * @param token The address of the token to be identified.
- * @return entityId The entity ID of the ERC20 token if it's either wrapped or regular, null otherwise.
+ * @param token The address of the token
+ * @return entityId The entity ID of the ERC20 token if it exists, null otherwise.
  */
-export function identifyAndFetchOrCreateERC20TokenEntity(
-  token: Address
-): string | null {
-  let tokenAddress: string;
-  if (supportsERC20Wrapped(token)) {
-    let contract = fetchOrCreateWrappedERC20Entity(token);
-    if (!contract) {
-      return null;
-    }
-    tokenAddress = contract.id;
-  } else {
-    let contract = fetchOrCreateERC20Entity(token);
-    if (!contract) {
-      return null;
-    }
-    tokenAddress = contract.id;
+export function fetchOrCreateERC20TokenEntity(token: Address): string | null {
+  let contract = fetchOrCreateERC20Entity(token);
+  if (!contract) {
+    return null;
   }
-
-  return tokenAddress;
+  return contract.id;
 }
 
 export function updateERC20Balance(
@@ -170,12 +92,12 @@ export function updateERC20Balance(
 export function handleERC20Action(
   token: Address,
   dao: Address,
-  proposalId: string,
+  actionBatchId: string,
   data: Bytes,
   actionIndex: number,
   event: ethereum.Event
 ): void {
-  let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+  let tokenAddress = fetchOrCreateERC20TokenEntity(token);
   if (!tokenAddress) {
     return;
   }
@@ -234,7 +156,7 @@ export function handleERC20Action(
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
   transfer.token = tokenAddress as string;
-  transfer.proposal = proposalId;
+  transfer.actionBatch = actionBatchId;
 
   // If from/to both aren't equal to dao, it means
   // dao must have been approved for the `tokenId`
@@ -268,7 +190,7 @@ export function handleERC20Deposit(
   amount: BigInt,
   event: ethereum.Event
 ): void {
-  let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+  let tokenAddress = fetchOrCreateERC20TokenEntity(token);
   if (!tokenAddress) {
     return;
   }

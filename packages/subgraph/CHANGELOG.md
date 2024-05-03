@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 2.0.0 (Split)
+
+- Renamed `Proposal` to `ActionBatch` and made it immutable
+- Added `deterministicId` as field to `ActionBatch` and `Action`. The `deterministicId` is a reference shared by the ActionId in plugins packages that can be known at the time of proposal execution.
+- The `deterministicId` and `Id` fields now include the `daoAddress` inside `executeActions`
+- Renamed `proposal` to `actionBatch` in `Action`, `ERC20Transfer`, `ERC721Transfer`, `ERC1155Transfer`, `NativeTransfer` and `DAO`
+- Removed `startDate` and `endDate` from `ActionBatch` as they relate to proposals
+- Removed `TokenVoting` `Multisig` `Admin` and `AddressList` from the schema
+- Deleted the corresponding handlers any references to the above plugins
+- Removed the concept of wrapped ERC20 as these are only relevant in the context of the token voting plugin
+- The function `identifyAndFetchOrCreateERC20Entity` is now renamed to `fetchOrCreateERC20Entity` inside the `token/utils` file
+
+## 1.4.1
+
 ### Added
 
 - Add `txHash` field to the Dao entity.
-
-## 1.4.1
 
 ### Changed
 

@@ -10,7 +10,7 @@ import {PermissionCondition} from "@aragon/osx-commons-contracts/src/permission/
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
 
 /// @title PermissionManager
-/// @author Aragon Association - 2021-2023
+/// @author Aragon X - 2021-2023
 /// @notice The abstract permission manager used in a DAO, its associated plugins, and other framework-related components.
 /// @custom:security-contact sirt@aragon.org
 abstract contract PermissionManager is Initializable {

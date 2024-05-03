@@ -3,7 +3,7 @@
 pragma solidity ^0.8.8;
 
 /// @title IPluginRepo
-/// @author Aragon Association - 2022-2023
+/// @author Aragon X - 2022-2023
 /// @notice The interface required for a plugin repository.
 /// @custom:security-contact sirt@aragon.org
 interface IPluginRepo {

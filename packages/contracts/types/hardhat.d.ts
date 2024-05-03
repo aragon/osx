@@ -1,12 +1,6 @@
 import {BigNumberish, BytesLike} from 'ethers';
 
-export type AragonPluginRepos = {
-  AddresslistVotingRepoProxy: string;
-  TokenVotingRepoProxy: string;
-  AdminRepoProxy: string;
-  MultisigRepoProxy: string;
-  [index: string]: string;
-};
+
 
 export type AragonVerifyEntry = {
   contract?: string;
@@ -28,7 +22,6 @@ export type TestingFork = {
 
 declare module 'hardhat/types/runtime' {
   interface HardhatRuntimeEnvironment {
-    aragonPluginRepos: AragonPluginRepos;
     aragonToVerifyContracts: AragonVerifyEntry[];
     managementDAOMultisigPluginAddress: string;
     placeholderBuildCIDPath: string;

@@ -29,24 +29,21 @@ import {
   TOKEN_INTERFACE_IDS,
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {
-  osxContractsVersion,
-  IMPLICIT_INITIAL_PROTOCOL_VERSION,
-} from '../../test-utils/protocol-version';
+import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {
-  getProtocolVersion,
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
 import {ANY_ADDR} from '../permission/permission-manager';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {
-  IDAO_EVENTS,
   findEvent,
   flipBit,
   getInterfaceId,
   DAO_PERMISSIONS,
+  getProtocolVersion,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
 } from '@aragon/osx-commons-sdk';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -570,7 +567,7 @@ describe('DAO', function () {
       num = flipBit(0, num);
 
       const tx = await dao.execute(ZERO_BYTES32, [data.failAction], num);
-      const event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
+      const event = findEvent<ExecutedEvent>(await tx.wait(), EVENTS.Executed);
 
       // Check that failAction's revertMessage was correctly stored in the dao's execResults
       expect(event.args.execResults[0]).to.includes(data.failActionMessage);
@@ -579,7 +576,7 @@ describe('DAO', function () {
 
     it('returns the correct result if action succeeds', async () => {
       const tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
-      const event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
+      const event = findEvent<ExecutedEvent>(await tx.wait(), EVENTS.Executed);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
 
@@ -605,7 +602,7 @@ describe('DAO', function () {
 
       // If the below call not fails, means allowFailureMap is correct.
       let tx = await dao.execute(ZERO_BYTES32, actions, allowFailureMap);
-      let event = await findEvent<ExecutedEvent>(tx, EVENTS.Executed);
+      let event = findEvent<ExecutedEvent>(await tx.wait(), EVENTS.Executed);
 
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
@@ -638,10 +635,10 @@ describe('DAO', function () {
     });
 
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
-      let rc = await tx.wait();
+      const tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
+      const rc = await tx.wait();
 
-      const event = await findEvent<ExecutedEvent>(tx, IDAO_EVENTS.EXECUTED);
+      const event = findEvent<ExecutedEvent>(rc, 'Executed');
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(ZERO_BYTES32);
       expect(event.args.actions.length).to.equal(1);
@@ -1399,7 +1396,7 @@ describe('DAO', function () {
     it('should emit DaoURIUpdated', async () => {
       const newURI = 'https://new.example.com';
       await expect(dao.setDaoURI(newURI))
-        .to.emit(dao, IDAO_EVENTS.NEW_URI)
+        .to.emit(dao, 'NewURI')
         .withArgs(newURI);
     });
 

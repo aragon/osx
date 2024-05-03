@@ -30,8 +30,8 @@ export async function prepareInstallation(
     createPrepareInstallationParams(pluginRepoPointer, data)
   );
 
-  const event = await findEvent<InstallationPreparedEvent>(
-    tx,
+  const event = findEvent<InstallationPreparedEvent>(
+    await tx.wait(),
     'InstallationPrepared'
   );
 
@@ -56,8 +56,8 @@ export async function applyInstallation(
     )
   );
 
-  const event = await findEvent<InstallationAppliedEvent>(
-    tx,
+  const event = findEvent<InstallationAppliedEvent>(
+    await tx.wait(),
     'InstallationApplied'
   );
 
@@ -86,7 +86,10 @@ export async function prepareUpdate(
     )
   );
 
-  const event = await findEvent<UpdatePreparedEvent>(tx, 'UpdatePrepared');
+  const event = findEvent<UpdatePreparedEvent>(
+    await tx.wait(),
+    'UpdatePrepared'
+  );
 
   return event.args;
 }
@@ -111,7 +114,7 @@ export async function applyUpdate(
     )
   );
 
-  const event = await findEvent<UpdateAppliedEvent>(tx, 'UpdateApplied');
+  const event = findEvent<UpdateAppliedEvent>(await tx.wait(), 'UpdateApplied');
 
   return event.args;
 }
@@ -129,8 +132,8 @@ export async function prepareUninstallation(
     createPrepareUninstallationParams(plugin, pluginRepoPointer, helpers, data)
   );
 
-  const event = await findEvent<UninstallationPreparedEvent>(
-    tx,
+  const event = findEvent<UninstallationPreparedEvent>(
+    await tx.wait(),
     'UninstallationPrepared'
   );
 
@@ -149,8 +152,8 @@ export async function applyUninstallation(
     createApplyUninstallationParams(plugin, pluginRepoPointer, permissions)
   );
 
-  const event = await findEvent<UninstallationAppliedEvent>(
-    tx,
+  const event = findEvent<UninstallationAppliedEvent>(
+    await tx.wait(),
     'UninstallationApplied'
   );
 

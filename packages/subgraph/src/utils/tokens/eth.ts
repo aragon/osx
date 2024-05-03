@@ -73,7 +73,7 @@ export function handleNativeAction(
   to: Address,
   amount: BigInt,
   reference: string,
-  proposalId: string,
+  actionBatchId: string,
   actionIndex: number,
   event: ethereum.Event
 ): void {
@@ -93,7 +93,7 @@ export function handleNativeAction(
   transfer.reference = reference;
   transfer.txHash = event.transaction.hash;
   transfer.createdAt = event.block.timestamp;
-  transfer.proposal = proposalId;
+  transfer.actionBatch = actionBatchId;
   transfer.type = 'Withdraw';
   transfer.save();
 

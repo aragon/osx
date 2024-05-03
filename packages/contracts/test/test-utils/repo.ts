@@ -9,13 +9,19 @@ import {
   PluginRepoFactory__factory,
 } from '../../typechain';
 import {deployWithProxy} from '../test-utils/proxy';
+import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 export async function deployMockPluginSetup(
   signer: SignerWithAddress
 ): Promise<PluginUUPSUpgradeableSetupV1Mock> {
-  const PluginSetupMock = new PluginUUPSUpgradeableSetupV1Mock__factory(signer);
-  const pluginSetupMockContract = await PluginSetupMock.deploy();
+  const implV1 = await new PluginUUPSUpgradeableV1Mock__factory(
+    signer
+  ).deploy();
+  const pluginSetupMockContract =
+    await new PluginUUPSUpgradeableSetupV1Mock__factory(signer).deploy(
+      implV1.address
+    );
 
   return pluginSetupMockContract;
 }

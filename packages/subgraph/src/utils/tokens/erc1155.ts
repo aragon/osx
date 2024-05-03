@@ -198,7 +198,7 @@ export function handleERC1155Action(
   token: Address,
   dao: Address,
   data: Bytes,
-  proposalId: string,
+  actionBatchId: string,
   actionIndex: number,
   event: ethereum.Event
 ): bool {
@@ -228,7 +228,7 @@ export function handleERC1155Action(
       tuple,
       dao,
       token,
-      proposalId,
+      actionBatchId,
       event,
       actionIndex
     );
@@ -237,7 +237,7 @@ export function handleERC1155Action(
       tuple,
       dao,
       token,
-      proposalId,
+      actionBatchId,
       event,
       actionIndex
     );
@@ -262,7 +262,7 @@ function handleERC1155SingleTransfer(
   tuple: ethereum.Tuple,
   dao: Address,
   token: Address,
-  proposalId: string,
+  actionBatchId: string,
   event: ethereum.Event,
   actionIndex: number
 ): void {
@@ -286,7 +286,7 @@ function handleERC1155SingleTransfer(
     token,
     tokenId,
     amount,
-    proposalId,
+    actionBatchId,
     event.transaction.hash,
     event.block.timestamp
   );
@@ -338,7 +338,7 @@ function createErc1155Transfer(
   token: Address,
   tokenId: BigInt,
   amount: BigInt,
-  proposalId: string | null,
+  actionBatchId: string | null,
   txHash: Bytes,
   timestamp: BigInt
 ): void {
@@ -353,7 +353,7 @@ function createErc1155Transfer(
   transfer.token = tokenEntityId;
   transfer.amount = amount;
   transfer.tokenId = tokenId;
-  transfer.proposal = proposalId;
+  transfer.actionBatch = actionBatchId;
   transfer.txHash = txHash;
   transfer.createdAt = timestamp;
   // check the transfer type

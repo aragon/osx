@@ -9,7 +9,7 @@ import {
   CallbackReceived,
   NewURI,
 } from '../../generated/templates/DaoTemplateV1_0_0/DAO';
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt, log} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 
 // events
@@ -439,11 +439,18 @@ export function encodeWithFunctionSelector(
   // when the emitted event contains at least 1 dynamic type.
   let index = isDynamic == true ? 66 : 2;
 
-  let calldata = ethereum
-    .encode(ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tuple)))!
-    .toHexString()
-    .substring(index);
+  let encoded = ethereum.encode(
+    ethereum.Value.fromTuple(changetype<ethereum.Tuple>(tuple))
+  );
 
+  // warning to satisfy eslint but not introduce a breaking change
+  if (!encoded)
+    log.warning(
+      'encodeWithFunctionSelector::Could not encode ethereum tuple',
+      []
+    );
+
+  let calldata = (encoded as Bytes).toHexString().substring(index);
   let functionData = funcSelector.concat(calldata);
 
   return Bytes.fromHexString(functionData);
