@@ -22,7 +22,7 @@ Copy `.env.example` into a file called `.env` or create a new one with these 3 k
 # keys used for running tests
 HARDHAT_DAO_ENS_DOMAIN=dao.eth
 HARDHAT_PLUGIN_ENS_DOMAIN=plugin.eth
-MANAGINGDAO_SUBDOMAIN=management
+MANAGEMENT_DAO_SUBDOMAIN=management
 ```
 
 Run these commands on the project's root folder in your terminal:
@@ -117,8 +117,8 @@ After successful contract compilation, TypeChain typings will be automatically g
 Here is a generic example of usage in a test:
 
 ```ts
-import {MyContract} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract}';
 import {MyContract____factory} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract__factory}';
+import {MyContract} from '@aragon/osx-ethers-v1.2.0/{path_to_MyContract}';
 
 describe('MyContract Test', function () {
   let myContract: MyContract;
@@ -141,13 +141,13 @@ Please replace 'MyContract' with the actual name of your contract, and follow th
 Example of usage in a test:
 
 ```ts
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO as DAO_V1_3_0,
   DAO__factory as DAO_V1_3_0_factory,
 } from '@aragon/osx-ethers-v1.3.0/contracts/core/dao/DAO.sol';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
 
 describe('Legacy Test Example', function () {
   let signers: SignerWithAddress[];
