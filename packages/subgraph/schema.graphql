@@ -461,6 +461,7 @@ type Dao @entity {
   daoURI: String
   metadata: String
   createdAt: BigInt!
+  txHash: Bytes!
   token: ERC20Contract
   actions: [Action!]! @derivedFrom(field: "dao")
   transfers: [TokenTransfer!]! @derivedFrom(field: "dao")

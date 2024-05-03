@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
-## Split
+## 2.0.0 (Split)
 
 - Renamed `Proposal` to `ActionBatch` and made it immutable
 - Added `deterministicId` as field to `ActionBatch` and `Action`. The `deterministicId` is a reference shared by the ActionId in plugins packages that can be known at the time of proposal execution.
@@ -21,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.4.1
 
-## 1.5.0
+### Added
+
+- Add `txHash` field to the Dao entity.
 
 ### Changed
 

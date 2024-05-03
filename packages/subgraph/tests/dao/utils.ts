@@ -420,6 +420,8 @@ export function createDaoEntityState(
   daoEntity.creator = Address.fromString(creator);
   daoEntity.createdAt = BigInt.zero();
   daoEntity.token = Address.fromString(token).toHexString();
+  // random tx hash for testing purposes only
+  daoEntity.txHash = Bytes.fromHexString('0x01');
   daoEntity.save();
 
   return daoEntity;

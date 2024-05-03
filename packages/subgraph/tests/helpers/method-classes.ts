@@ -386,6 +386,8 @@ class DaoMethods extends Dao {
     this.token = Address.fromString(DAO_TOKEN_ADDRESS).toHexString();
     this.trustedForwarder = Address.fromHexString(ADDRESS_TWO);
     this.signatureValidator = Address.fromHexString(ADDRESS_THREE);
+    // random tx hash for testing purposes only
+    this.txHash = Bytes.fromHexString('0x01');
     return this;
   }
 
