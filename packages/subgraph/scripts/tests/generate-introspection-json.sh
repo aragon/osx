@@ -37,7 +37,7 @@ LOCAL=true ./scripts/deploy-subgraph.sh
 FILENAME="tests/utils/schema-introspection.json"
 GRAPH_URL="http://localhost:8000/subgraphs/name/$SUBGRAPH_NAME-$NETWORK_NAME"
 echo "Fetching introspection query from $GRAPH_URL"
-node ./scripts/fetch-introspection-query.js $GRAPH_URL $FILENAME
+node ./scripts/tests/fetch-introspection-query.js $GRAPH_URL $FILENAME
 prettier $FILENAME --write
 # down docker
 docker compose -f docker/docker-compose.yml down
