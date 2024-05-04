@@ -41,21 +41,23 @@ for (const network of Object.keys(networks)) {
 
 task('build-contracts').setAction(async (args, hre) => {
   await hre.run('compile');
-
   if (
     hre.network.name === 'zkTestnet' ||
     hre.network.name === 'zkLocalTestnet'
   ) {
     // Copying is useful because we won't have to
     // change imports in there for artifacts.
-    fs.cpSync('./build/artifacts-zk', './artifacts', {recursive: true});
-    fs.cpSync('./build/cache-zk', './cache', {recursive: true});
+    fs.cpSync('./build/artifacts-zk', './artifacts', {
+      recursive: true,
+      force: true,
+    });
+    fs.cpSync('./build/cache-zk', './cache', {recursive: true, force: true});
 
     return;
   }
 
-  fs.cpSync('./build/artifacts', './artifacts', {recursive: true});
-  fs.cpSync('./build/cache', './cache', {recursive: true});
+  fs.cpSync('./build/artifacts', './artifacts', {recursive: true, force: true});
+  fs.cpSync('./build/cache', './cache', {recursive: true, force: true});
 });
 
 task('deploy-contracts').setAction(async (args, hre) => {
@@ -64,6 +66,7 @@ task('deploy-contracts').setAction(async (args, hre) => {
 });
 
 task('test-contracts').setAction(async (args, hre) => {
+  await hre.run('build-contracts');
   const imp = await import('./test/test-utils/wrapper');
 
   const wrapper = imp.Wrapper.create(hre.network.name, hre.ethers.provider);
