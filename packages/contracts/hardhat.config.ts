@@ -130,8 +130,8 @@ const config: HardhatUserConfig = {
         : ['./deploy/new', './deploy/verification'],
     },
     zkLocalTestnet: {
-      url: 'http://localhost:8011',
-      ethNetwork: 'http://localhost:8545',
+      url: 'http://127.0.0.1:8011',
+      ethNetwork: 'http://127.0.0.1:8545',
       zksync: true,
       deployPaths: ['./deploy/new'],
       accounts: [

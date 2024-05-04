@@ -7,6 +7,7 @@ import {providers} from 'ethers';
 import {HardhatClass} from './hardhat';
 import {ZkSync} from './zksync';
 
+// TODO: generate paths programatically.
 export const ARTIFACT_SOURCES = {
   DAO: 'src/core/dao/DAO.sol:DAO',
   DAO_V1_0_0: '@aragon/osx-v1.0.1/core/dao/DAO.sol:DAO',

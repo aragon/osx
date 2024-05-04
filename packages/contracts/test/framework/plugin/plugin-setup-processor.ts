@@ -121,7 +121,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 const {UPGRADE_PLUGIN_PERMISSION_ID} = UPGRADE_PERMISSIONS;
 
-describe.skip('Plugin Setup Processor', function () {
+describe.only('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -293,7 +293,7 @@ describe.skip('Plugin Setup Processor', function () {
   // They end up in the same pluginRepo with
   // the same release - 1, but different builds - 1,2,3.
   describe('PluginUUPSUpgradeableSetupMock', function () {
-    it('points to the V1 implementation', async () => {
+    it.only('points to the V1 implementation', async () => {
       await checkImplementation(setupUV1, PluginUV1, 1);
     });
 

@@ -1,14 +1,14 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import hre, {ethers} from 'hardhat';
 import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+// import { solidity } from "ethereum-waffle";
 
 import {
   DAO,
   TestERC20,
   TestERC721,
   TestERC1155,
-  ERC1271Mock__factory,
   GasConsumer__factory,
   DAO__factory,
   IDAO__factory,
@@ -38,7 +38,6 @@ import {
 
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../test-utils/error';
-import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
@@ -47,7 +46,7 @@ import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 
-chai.use(smock.matchers);
+// chai.use()
 
 const errorSignature = '0x08c379a0'; // first 4 bytes of Error(string)
 
@@ -96,7 +95,6 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
-  let DAO: DAO__factory;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -216,9 +214,11 @@ describe('DAO', function () {
     });
   });
 
-  describe.skip('initializeFrom', async () => {
+  describe('initializeFrom', async () => {
     it('reverts if trying to upgrade from a different major release', async () => {
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
 
       await expect(uninitializedDao.initializeFrom([0, 1, 0], EMPTY_DATA))
         .to.be.revertedWithCustomError(
@@ -230,7 +230,9 @@ describe('DAO', function () {
 
     it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
       // Create an unitialized DAO.
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
 
       // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
       expect(
@@ -275,7 +277,9 @@ describe('DAO', function () {
 
     it('does not initialize `_reentrancyStatus` for versions >= 1.3.0', async () => {
       // Create an unitialized DAO.
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
 
       // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
       expect(
@@ -1209,25 +1213,18 @@ describe('DAO', function () {
         .withArgs(validatorAddress);
     });
 
-    // TODO:GIORGI test commented smock doesn't work in zksync
-    it.skip('should call the signature validator', async () => {
-      const ERC1271MockFactory = await smock.mock('ERC1271Mock');
-      const erc1271Mock = await ERC1271MockFactory.deploy();
+    it('should call the signature validator', async () => {
+      const magicValue = '0x41424344';
+
+      const erc1271Mock = await hre.wrapper.deploy('ERC1271Mock');
+
+      await erc1271Mock.setMagicValue('0x41424344');
 
       await dao.setSignatureValidator(erc1271Mock.address);
-      await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00');
-      expect(erc1271Mock.isValidSignature).has.been.callCount(1);
-    });
 
-    // TODO:GIORGI test commented smock doesn't work in zksync
-    it.skip('should return the validators response', async () => {
-      const ERC1271MockFactory = new ERC1271Mock__factory(signers[0]);
-      const erc1271Mock = await ERC1271MockFactory.deploy();
-
-      await dao.setSignatureValidator(erc1271Mock.address);
       expect(
         await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
-      ).to.be.eq('0x41424344');
+      ).to.be.eq(magicValue);
     });
 
     describe('ERC4824 - daoURI', async () => {
