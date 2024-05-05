@@ -99,6 +99,9 @@ const config: HardhatUserConfig = {
       baseGoerli: process.env.BASESCAN_KEY || '',
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumGoerli: process.env.ARBISCAN_KEY || '',
+      pangolin: '',
+      crab: '',
+      darwinia: '',
     },
     customChains: [
       {
