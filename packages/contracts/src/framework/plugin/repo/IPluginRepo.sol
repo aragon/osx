@@ -36,7 +36,7 @@ interface IPluginRepo {
         bytes buildMetadata
     );
 
-    /// @notice Thrown when a release's metadata was updated.
+    /// @notice Emitted when a release's metadata was updated.
     /// @param release The release number.
     /// @param releaseMetadata The release metadata URI.
     event ReleaseMetadataUpdated(uint8 release, bytes releaseMetadata);
