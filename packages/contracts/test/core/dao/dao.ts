@@ -45,6 +45,7 @@ import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
+import '../../test-utils/matcher';
 
 // chai.use()
 
@@ -629,7 +630,7 @@ describe('DAO', function () {
     });
 
     // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
-    it.skip('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
+    it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
       const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
@@ -665,7 +666,7 @@ describe('DAO', function () {
     });
 
     // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
-    it.skip('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
+    it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
       const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
@@ -684,11 +685,12 @@ describe('DAO', function () {
         [gasConsumingAction],
         allowFailureMap
       );
+      console.log('expectedGas', expectedGas.toString());
 
       // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(10000),
+          gasLimit: expectedGas.div(5),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
