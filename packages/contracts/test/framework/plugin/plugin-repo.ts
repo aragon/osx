@@ -154,17 +154,7 @@ describe('PluginRepo', function () {
       });
     });
     describe('InitializeFrom', () => {
-      it('increments `_initialized` to `1`', async () => {
-        // Expect the contract to be initialized  with `_initialized = 1`.
-        expect(
-          ethers.BigNumber.from(
-            await ethers.provider.getStorageAt(
-              pluginRepo.address,
-              OZ_INITIALIZED_SLOT_POSITION
-            )
-          ).toNumber()
-        ).to.equal(1);
-
+      it('Should revert because the function is a placeholder', async () => {
         // Call `initializeFrom` with version 1.3.0. and revert
         await expect(pluginRepo.initializeFrom([1, 3, 0], emptyBytes)).to.be
           .reverted;

@@ -95,8 +95,6 @@ contract PluginRepo is
 
     /// @notice Thrown if release does not exist.
     error ReleaseDoesNotExist();
-    /// @notice Thrown if an upgrade is not supported from a specific protocol version .
-    error ProtocolVersionUpgradeNotSupported(uint8[3] protocolVersion);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
