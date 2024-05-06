@@ -24,7 +24,7 @@ interface IPluginRepo {
         bytes calldata _releaseMetadata
     ) external;
 
-    /// @notice Thrown if the same plugin setup exists in previous releases.
+    /// @notice Emitted if the same plugin setup exists in previous releases.
     /// @param release The release number.
     /// @param build The build number.
     /// @param pluginSetup The address of the plugin setup contract.
