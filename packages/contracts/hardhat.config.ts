@@ -146,6 +146,9 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  sourcify: {
+    enabled: true,
+  },
   namedAccounts: {
     deployer: 0,
   },
