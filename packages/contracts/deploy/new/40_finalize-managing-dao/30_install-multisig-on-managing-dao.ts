@@ -1,20 +1,18 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import buildMetadataJson from '../../../src/plugins/governance/multisig/build-metadata.json';
-import {findEvent} from '../../../utils/event';
-
-import {checkPermission, getContractAddress} from '../../helpers';
-import {Operation} from '../../../utils/types';
-import {hashHelpers} from '../../../utils/psp';
 import {
   DAO__factory,
   MultisigSetup__factory,
   Multisig__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {InstallationPreparedEvent} from '../../../typechain/PluginSetupProcessor';
+import {findEvent} from '../../../utils/event';
 import {getNamedTypesFromMetadata} from '../../../utils/metadata';
+import {hashHelpers} from '../../../utils/psp';
+import {Operation} from '../../../utils/types';
+import {checkPermission, getContractAddress} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
@@ -22,25 +20,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (network.name !== 'localhost' && network.name !== 'hardhat') {
     if (
-      !('MANAGINGDAO_MULTISIG_LISTEDONLY' in process.env) ||
-      !('MANAGINGDAO_MULTISIG_MINAPPROVALS' in process.env) ||
-      !('MANAGINGDAO_MULTISIG_APPROVERS' in process.env)
+      !('MANAGEMENT_DAO_MULTISIG_LISTEDONLY' in process.env) ||
+      !('MANAGEMENT_DAO_MULTISIG_MINAPPROVALS' in process.env) ||
+      !('MANAGEMENT_DAO_MULTISIG_APPROVERS' in process.env)
     ) {
       throw new Error('Managing DAO Multisig settings not set in .env');
     }
   }
 
-  const approvers = process.env.MANAGINGDAO_MULTISIG_APPROVERS?.split(',') || [
-    deployer.address,
-  ];
+  const approvers = process.env.MANAGEMENT_DAO_MULTISIG_APPROVERS?.split(
+    ','
+  ) || [deployer.address];
   const minApprovals = parseInt(
-    process.env.MANAGINGDAO_MULTISIG_MINAPPROVALS || '1'
+    process.env.MANAGEMENT_DAO_MULTISIG_MINAPPROVALS || '1'
   );
-  // In case `MANAGINGDAO_MULTISIG_LISTEDONLY` not present in .env
+  // In case `MANAGEMENT_DAO_MULTISIG_LISTEDONLY` not present in .env
   // which applies only hardhat/localhost, use `true` setting for extra safety for tests.
   const listedOnly =
-    'MANAGINGDAO_MULTISIG_LISTEDONLY' in process.env
-      ? process.env.MANAGINGDAO_MULTISIG_LISTEDONLY === 'true'
+    'MANAGEMENT_DAO_MULTISIG_LISTEDONLY' in process.env
+      ? process.env.MANAGEMENT_DAO_MULTISIG_LISTEDONLY === 'true'
       : true;
 
   // Get `managingDAO` address.

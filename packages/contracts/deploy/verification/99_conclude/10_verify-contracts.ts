@@ -1,7 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import {verifyContract} from '../../../utils/etherscan';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));

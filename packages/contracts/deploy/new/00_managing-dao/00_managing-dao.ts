@@ -1,7 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {ArtifactData, DeployFunction} from 'hardhat-deploy/types';
-
 import daoArtifactJson from '../../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import {ArtifactData, DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+
 /** NOTE:
  * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */

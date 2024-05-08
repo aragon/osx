@@ -1,8 +1,4 @@
-import {expect} from 'chai';
-import hre, {ethers} from 'hardhat';
-import {ContractFactory} from 'ethers';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-// import { solidity } from "ethereum-waffle";
+import hre from 'hardhat';
 
 import {
   DAO,
@@ -20,14 +16,9 @@ import {
   IProtocolVersion__factory,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
-
-import {
-  getProtocolVersion,
-  ozUpgradeCheckManagingContract,
-} from '../../test-utils/uups-upgradeable';
+import {ExecutedEvent} from '../../../typechain/DAO';
 import {findEvent, DAO_EVENTS} from '../../../utils/event';
 import {flipBit} from '../../test-utils/bitmap';
-
 import {
   getActions,
   getERC1155TransferAction,
@@ -38,28 +29,29 @@ import {
 
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../test-utils/error';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {
+  getProtocolVersion,
+  ozUpgradeCheckManagingContract,
+} from '../../test-utils/uups-upgradeable';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {expect} from 'chai';
+import {ContractFactory} from 'ethers';
+import {ethers} from 'hardhat';
 import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import '../../test-utils/matcher';
 
-// chai.use()
-
 const errorSignature = '0x08c379a0'; // first 4 bytes of Error(string)
-
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
 const MAX_ACTIONS = 256;
-
 const OZ_INITIALIZED_SLOT_POSITION = 0;
 const REENTRANCY_STATUS_SLOT_POSITION = 304;
-
 const EMPTY_DATA = '0x';
 
 const EVENTS = {

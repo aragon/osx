@@ -1,8 +1,7 @@
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import {getContractAddress, managePermissions, Permission} from '../../helpers';
-import {Operation} from '../../../utils/types';
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
+import {Operation} from '../../../utils/types';
+import {getContractAddress, managePermissions, Permission} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -10,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoSubdomain = process.env.MANAGEMENT_DAO_SUBDOMAIN || '';
 
   if (!daoSubdomain)
     throw new Error('ManagingDAO subdomain has not been set in .env');
@@ -34,6 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Revoke `ROOT_PERMISSION` from `PluginSetupProcessor`.
   // Revoke `APPLY_INSTALLATION_PERMISSION` from `Deployer`.
   // Revoke `ROOT_PERMISSION` from `Deployer`.
+  // Revoke `EXECUTE_PERMISSION` from `Deployer`.
   const revokePermissions = [
     {
       operation: Operation.Revoke,
@@ -73,46 +73,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
   ];
   await managePermissions(managingDaoContract, revokePermissions);
-
-  // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer` on the permission manager of each PluginRepo.
-  for (const repoName in hre.aragonPluginRepos) {
-    const repoAddress = hre.aragonPluginRepos[repoName];
-    const revokePluginRepoPermissions: Permission[] = [];
-    revokePluginRepoPermissions.push({
-      operation: Operation.Revoke,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'ROOT_PERMISSION',
-    });
-
-    revokePluginRepoPermissions.push({
-      operation: Operation.Revoke,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'MAINTAINER_PERMISSION',
-    });
-
-    revokePluginRepoPermissions.push({
-      operation: Operation.Revoke,
-      where: {
-        name: repoName + ' PluginRepo',
-        address: repoAddress,
-      },
-      who: {name: 'Deployer', address: deployer.address},
-      permission: 'UPGRADE_REPO_PERMISSION',
-    });
-
-    await managePermissions(
-      PluginRepo__factory.connect(repoAddress, deployer),
-      revokePluginRepoPermissions
-    );
-  }
 
   console.log(
     `\nManagingDao is no longer owned by the (Deployer: ${deployer.address}),` +
