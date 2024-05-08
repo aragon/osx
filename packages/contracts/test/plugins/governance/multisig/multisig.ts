@@ -73,7 +73,7 @@ export async function approveWithSigners(
 }
 
 async function advanceTime(time: number) {
-  if(hre.network.name == 'zkLocalTestnet') {
+  if(hre.network.config.zksync) {
     time = time / 1000;
   }
   await ethers.provider.send('evm_increaseTime', [time]);
@@ -81,14 +81,14 @@ async function advanceTime(time: number) {
 }
 
 function expectedBlockNumber(blockNumber: number) {
-  if(hre.network.name == 'zkLocalTestnet') {
+  if(hre.network.config.zksync) {
     return blockNumber- 2;
   }
   return blockNumber - 1;
 }
 
 function expectedTime(time: number) {
-  if(hre.network.name == 'zkLocalTestnet') {
+  if(hre.network.config.zksync) {
     return time + 1;
   }
   return time;

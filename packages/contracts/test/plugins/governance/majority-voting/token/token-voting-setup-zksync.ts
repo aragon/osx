@@ -4,13 +4,11 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   ERC20,
-  ERC20__factory,
   GovernanceERC20,
   GovernanceERC20__factory,
   GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
   TokenVotingSetup,
-  TokenVotingSetup__factory,
   TokenVoting__factory,
 } from '../../../../../typechain';
 import {deployNewDAO} from '../../../../test-utils/dao';
@@ -50,10 +48,11 @@ const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
   'UPDATE_VOTING_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
+const TOKEN_UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_GOVERNANCE_ERC20_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe('TokenVotingSetup', function () {
+describe('TokenVotingSetupZkSync', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
   let governanceERC20Base: GovernanceERC20;
@@ -84,13 +83,14 @@ describe('TokenVotingSetup', function () {
     };
     defaultMintSettings = {receivers: [], amounts: []};
 
-    governanceERC20Base = await hre.wrapper.deploy('GovernanceERC20', {args: [AddressZero, emptyName, emptySymbol, defaultMintSettings]})
-    governanceWrappedERC20Base = await hre.wrapper.deploy('GovernanceWrappedERC20', {args: [AddressZero, emptyName, emptySymbol]})
-    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetup', {args: [governanceERC20Base.address, governanceWrappedERC20Base.address]})
+    governanceERC20Base = await hre.wrapper.deploy('GovernanceERC20Upgradeable', {args: [AddressZero, emptyName, emptySymbol, defaultMintSettings]})
+    governanceWrappedERC20Base = await hre.wrapper.deploy('GovernanceWrappedERC20Upgradeable', {args: [AddressZero, emptyName, emptySymbol]})
+    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetupZkSync', {args: [governanceERC20Base.address, governanceWrappedERC20Base.address]})
     implementationAddress = await tokenVotingSetup.implementation();
 
     erc20Token = await hre.wrapper.deploy('ERC20', {args: [tokenName, tokenSymbol]})
-    
+
+
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
       Object.values(defaultVotingSettings),
       Object.values(defaultTokenSettings),
@@ -216,7 +216,7 @@ describe('TokenVotingSetup', function () {
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
       expect(helpers).to.be.deep.equal([anticipatedWrappedTokenAddress]);
-      expect(permissions.length).to.be.equal(3);
+      expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
           Operation.Grant,
@@ -238,6 +238,13 @@ describe('TokenVotingSetup', function () {
           plugin,
           AddressZero,
           EXECUTE_PERMISSION_ID,
+        ],
+        [
+        Operation.Grant,
+        anticipatedWrappedTokenAddress,
+        targetDao.address,
+        AddressZero,
+        TOKEN_UPGRADE_PERMISSION_ID,
         ],
       ]);
     });
@@ -322,6 +329,7 @@ describe('TokenVotingSetup', function () {
           AddressZero,
           EXECUTE_PERMISSION_ID,
         ],
+        
       ]);
     });
 
@@ -341,7 +349,7 @@ describe('TokenVotingSetup', function () {
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
       expect(helpers).to.be.deep.equal([anticipatedTokenAddress]);
-      expect(permissions.length).to.be.equal(4);
+      expect(permissions.length).to.be.equal(5);
       expect(permissions).to.deep.equal([
         [
           Operation.Grant,
@@ -371,6 +379,13 @@ describe('TokenVotingSetup', function () {
           AddressZero,
           MINT_PERMISSION_ID,
         ],
+        [
+            Operation.Grant,
+            anticipatedTokenAddress,
+            targetDao.address,
+            AddressZero,
+            TOKEN_UPGRADE_PERMISSION_ID,
+            ],
       ]);
     });
 

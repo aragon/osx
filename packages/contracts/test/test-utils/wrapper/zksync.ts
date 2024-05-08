@@ -1,10 +1,9 @@
 import hre from 'hardhat';
-import {BigNumberish, Contract} from 'ethers';
-import {NetworkDeployment, deploySettings} from '.';
+import {BigNumber, BigNumberish, Contract} from 'ethers';
+import {NetworkDeployment} from '.';
 import {Provider} from 'zksync-ethers';
-import {utils, Wallet} from 'zksync-ethers';
+import {utils} from 'zksync-ethers';
 import { getTime } from '../voting';
-import { Deployer } from '@matterlabs/hardhat-zksync-deploy';
 
 export class ZkSync implements NetworkDeployment {
   provider: Provider;
@@ -36,7 +35,8 @@ export class ZkSync implements NetworkDeployment {
       ];
       let signers = await ethers.getSigners();
       let contract = new ethers.Contract(NONCE_HOLDER_ADDRESS, abi, signers[0]);
-      return contract.getDeploymentNonce(sender);
+      const nonce = await contract.getDeploymentNonce(sender);
+      return BigNumber.from(nonce).toNumber()
     }
 
     return this.provider.getTransactionCount(sender);
@@ -83,12 +83,5 @@ export class ZkSync implements NetworkDeployment {
       },
       true
     );
-  }
-
-  async nextBlockTimestamp(timestamp?: number): Promise<number> {
-    if(timestamp) {
-      return timestamp + 1;
-    }
-    return (await getTime()) + 1;
   }
 }

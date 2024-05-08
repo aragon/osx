@@ -941,7 +941,7 @@ describe('TokenVoting', function () {
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
-      const expectedBlockNumber = hre.network.name == 'zkLocalTestnet' ? block.number - 2 : block.number - 1;
+      const expectedBlockNumber = hre.network.config.zksync ? block.number - 2 : block.number - 1;
       expect(proposal.parameters.snapshotBlock).to.equal(expectedBlockNumber);
       expect(
         proposal.parameters.startDate.add(votingSettings.minDuration)
@@ -1014,7 +1014,7 @@ describe('TokenVoting', function () {
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
-      const expectedBlockNumber = hre.network.name == 'zkLocalTestnet' ? block.number - 2 : block.number - 1;
+      const expectedBlockNumber = hre.network.config.zksync ? block.number - 2 : block.number - 1;
       expect(proposal.parameters.snapshotBlock).to.equal(expectedBlockNumber);
 
       expect(

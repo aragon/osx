@@ -15,13 +15,13 @@ import 'solidity-coverage';
 import 'solidity-docgen';
 
 // If you're running on zksync, import the below
-// import '@matterlabs/hardhat-zksync-upgradable';
-// import '@matterlabs/hardhat-zksync-ethers';
-// import '@matterlabs/hardhat-zksync-verify';
+import '@matterlabs/hardhat-zksync-upgradable';
+import '@matterlabs/hardhat-zksync-ethers';
+import '@matterlabs/hardhat-zksync-verify';
 
 // If you're running on hardhat, import the following
-import '@nomicfoundation/hardhat-verify'
-import '@openzeppelin/hardhat-upgrades'
+// import '@nomicfoundation/hardhat-verify'
+// import '@openzeppelin/hardhat-upgrades'
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
 import { Wallet } from 'zksync-ethers';

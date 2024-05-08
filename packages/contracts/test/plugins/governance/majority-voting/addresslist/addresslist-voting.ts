@@ -54,6 +54,7 @@ import {
 } from '../../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../../../test-utils/wrapper';
+import { skipTestIfNetworkIsZkSync } from '../../../../test-utils/skip-functions';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
@@ -62,7 +63,7 @@ export const addresslistVotingInterface = new ethers.utils.Interface([
 ]);
 
 function expectedBlockNumber(blockNumber: number) {
-  if(hre.network.name == 'zkLocalTestnet') {
+  if(hre.network.config.zksync) {
     return blockNumber- 2;
   }
   return blockNumber - 1;
@@ -316,7 +317,7 @@ describe('AddresslistVoting', function () {
     });
 
     // TODO:GIORGI skip for zksync
-    it.skip('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
+    it('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
       votingSettings.minProposerVotingPower = 1;
 
       await voting.initialize(

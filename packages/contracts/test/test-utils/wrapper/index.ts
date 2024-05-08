@@ -73,8 +73,6 @@ export interface NetworkDeployment {
     proxyAddress: string,
     newArtifactName: string
   ): Promise<Contract>;
-  nextBlockTimestamp(timestamp?: number): Promise<number>;
-
 }
 
 export class Wrapper {
@@ -113,6 +111,7 @@ export class Wrapper {
         'ProxyFactory',
         [contract.address]
       );
+
       // Currently, always deploys with UUPS
       const tx = await proxyFactoryContract.deployUUPSProxy('0x');
 
@@ -164,10 +163,6 @@ export class Wrapper {
     options?: DeploySettings
   ) {
     return this.network.upgradeProxy(upgrader, proxyAddress, newArtifactName);
-  }
-
-  async nextBlockTimestamp(timestamp?: number) {
-    return this.network.nextBlockTimestamp(timestamp);
   }
 
 }

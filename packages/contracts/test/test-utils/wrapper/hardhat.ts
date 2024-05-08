@@ -83,11 +83,5 @@ export class HardhatClass implements NetworkDeployment {
       constructorArgs: [],
     });
   }
-
-  async nextBlockTimestamp(timestamp?: number): Promise<number> {
-    if(timestamp) {
-      return timestamp + 12;
-    }
-    return (await getTime()) + 12;
-  }
+  
 }
