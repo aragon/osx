@@ -3,7 +3,15 @@
 pragma solidity 0.8.17;
 
 contract ERC1271Mock {
-    function isValidSignature(bytes32, bytes memory) public pure returns (bytes4) {
-        return 0x41424344;
+    event Called(uint);
+
+    bytes4 private magicValue;
+
+    function setMagicValue(bytes4 _magicValue) public {
+        magicValue = _magicValue;
+    }
+
+    function isValidSignature(bytes32, bytes memory) public view returns (bytes4) {
+        return magicValue;
     }
 }

@@ -32,5 +32,6 @@ func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(
     hre.network.name === 'localhost' ||
       hre.network.name === 'hardhat' ||
-      hre.network.name === 'coverage'
+      hre.network.name === 'coverage' ||
+      hre.network.name === 'zkLocalTestnet'
   );

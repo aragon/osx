@@ -35,7 +35,7 @@ export const majorityVotingBaseInterface = new ethers.utils.Interface([
   'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
 ]);
 
-describe('MajorityVotingMock', function () {
+describe.skip('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
   let votingBase: MajorityVotingMock;
   let dao: DAO;

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -61,12 +61,16 @@ describe('GovernanceWrappedERC20', function () {
 
   beforeEach(async function () {
     defaultExistingERC20InitData = [existingErc20Name, existingErc20Symbol, 0];
-    erc20 = await TestERC20.deploy(...defaultExistingERC20InitData);
+    erc20 = await hre.wrapper.deploy('TestERC20', {
+      args: defaultExistingERC20InitData,
+    });
 
-    const promises = defaultBalances.map(balance =>
-      erc20.setBalance(balance.account, balance.amount)
-    );
-    await Promise.all(promises);
+    for (let i = 0; i < defaultBalances.length; i++) {
+      await erc20.setBalance(
+        defaultBalances[i].account,
+        defaultBalances[i].amount
+      );
+    }
 
     defaultGovernanceWrappedERC20InitData = [
       erc20.address,
@@ -74,9 +78,9 @@ describe('GovernanceWrappedERC20', function () {
       governanceWrappedERC20Symbol,
     ];
 
-    governanceToken = await GovernanceWrappedERC20.deploy(
-      ...defaultGovernanceWrappedERC20InitData
-    );
+    governanceToken = await hre.wrapper.deploy('GovernanceWrappedERC20', {
+      args: defaultGovernanceWrappedERC20InitData,
+    });
   });
 
   describe('initialize:', async () => {
@@ -87,9 +91,9 @@ describe('GovernanceWrappedERC20', function () {
     });
 
     it('sets the wrapped token name and symbol', async () => {
-      governanceToken = await GovernanceWrappedERC20.deploy(
-        ...defaultGovernanceWrappedERC20InitData
-      );
+      governanceToken = await hre.wrapper.deploy('GovernanceWrappedERC20', {
+        args: defaultGovernanceWrappedERC20InitData,
+      });
 
       expect(await governanceToken.name()).to.eq(governanceWrappedERC20Name);
       expect(await governanceToken.symbol()).to.eq(
@@ -248,11 +252,12 @@ describe('GovernanceWrappedERC20', function () {
   describe('delegate', async () => {
     beforeEach(async function () {
       // approve and deposit for all token holders
-      let promises = defaultBalances.map(balance =>
-        erc20.approve(balance.account, balance.amount)
-      );
-
-      await Promise.all(promises);
+      for (let i = 0; i < defaultBalances.length; i++) {
+        await erc20.approve(
+          defaultBalances[i].account,
+          defaultBalances[i].amount
+        );
+      }
     });
 
     it('delegates voting power to another account', async () => {
@@ -347,11 +352,9 @@ describe('GovernanceWrappedERC20', function () {
     let token: GovernanceWrappedERC20;
 
     beforeEach(async () => {
-      token = await GovernanceWrappedERC20.deploy(
-        erc20.address,
-        'name',
-        'symbol'
-      );
+      token = await hre.wrapper.deploy('GovernanceWrappedERC20', {
+        args: [erc20.address, 'name', 'symbol'],
+      });
 
       await erc20.setBalance(signers[0].address, 200);
       await erc20.setBalance(signers[1].address, 200);

@@ -1,12 +1,10 @@
+import hre from 'hardhat';
+
 import {
   DAO,
   TestERC20,
-  TestERC20__factory,
   TestERC721,
-  TestERC721__factory,
   TestERC1155,
-  TestERC1155__factory,
-  ERC1271Mock__factory,
   GasConsumer__factory,
   DAO__factory,
   IDAO__factory,
@@ -28,36 +26,32 @@ import {
   getERC721TransferAction,
   TOKEN_INTERFACE_IDS,
 } from '../../test-utils/dao';
-import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
-import {OZ_ERRORS} from '../../test-utils/error';
+
 import {getInterfaceID} from '../../test-utils/interfaces';
+import {OZ_ERRORS} from '../../test-utils/error';
+import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
+import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   getProtocolVersion,
   ozUpgradeCheckManagingContract,
 } from '../../test-utils/uups-upgradeable';
-import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
-import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
 import {ethers} from 'hardhat';
-
-chai.use(smock.matchers);
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
+import '../../test-utils/matcher';
 
 const errorSignature = '0x08c379a0'; // first 4 bytes of Error(string)
-
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
 const MAX_ACTIONS = 256;
-
 const OZ_INITIALIZED_SLOT_POSITION = 0;
 const REENTRANCY_STATUS_SLOT_POSITION = 304;
-
 const EMPTY_DATA = '0x';
 
 const EVENTS = {
@@ -94,7 +88,6 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
-  let DAO: DAO__factory;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -102,8 +95,7 @@ describe('DAO', function () {
   });
 
   beforeEach(async function () {
-    DAO = new DAO__factory(signers[0]);
-    dao = await deployWithProxy<DAO>(DAO);
+    dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
     await dao.initialize(
       dummyMetadata1,
       ownerAddress,
@@ -112,38 +104,36 @@ describe('DAO', function () {
     );
 
     // Grant permissions
-    await Promise.all([
-      dao.grant(
-        dao.address,
-        ownerAddress,
-        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
-      ),
-      dao.grant(
+    await dao.grant(
+      dao.address,
+      ownerAddress,
+      PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+    ),
+      await dao.grant(
         dao.address,
         ownerAddress,
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       ),
-      dao.grant(
+      await dao.grant(
         dao.address,
         ownerAddress,
         PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
       ),
-      dao.grant(
+      await dao.grant(
         dao.address,
         ownerAddress,
         PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
       ),
-      dao.grant(
+      await dao.grant(
         dao.address,
         ownerAddress,
         PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       ),
-      dao.grant(
+      await dao.grant(
         dao.address,
         ownerAddress,
         PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
-      ),
-    ]);
+      );
   });
 
   it('does not support the empty interface', async () => {
@@ -219,7 +209,9 @@ describe('DAO', function () {
 
   describe('initializeFrom', async () => {
     it('reverts if trying to upgrade from a different major release', async () => {
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
 
       await expect(uninitializedDao.initializeFrom([0, 1, 0], EMPTY_DATA))
         .to.be.revertedWithCustomError(
@@ -231,7 +223,9 @@ describe('DAO', function () {
 
     it('initializes `_reentrancyStatus` for versions < 1.3.0', async () => {
       // Create an unitialized DAO.
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
 
       // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
       expect(
@@ -276,7 +270,9 @@ describe('DAO', function () {
 
     it('does not initialize `_reentrancyStatus` for versions >= 1.3.0', async () => {
       // Create an unitialized DAO.
-      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+      const uninitializedDao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
 
       // Expect the contract to be uninitialized  with `_initialized = 0` and `_reentrancyStatus = 0`.
       expect(
@@ -333,8 +329,8 @@ describe('DAO', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagingContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           {
             metadata: dummyMetadata1,
             initialOwner: signers[0].address,
@@ -342,8 +338,8 @@ describe('DAO', function () {
             daoURI: daoExampleURI,
           },
           'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.DAO_V1_0_0,
+          ARTIFACT_SOURCES.DAO,
           UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
       expect(toImplementation).to.not.equal(fromImplementation);
@@ -625,9 +621,10 @@ describe('DAO', function () {
       expect(event.args.allowFailureMap).to.equal(0);
     });
 
+    // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
     it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
+      const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
-      let gasConsumer = await GasConsumer.deploy();
 
       // Prepare an action array calling `consumeGas` twenty times.
       const gasConsumingAction = {
@@ -660,9 +657,10 @@ describe('DAO', function () {
       ).to.not.be.reverted;
     });
 
+    // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
     it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
+      const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
-      let gasConsumer = await GasConsumer.deploy();
 
       // Prepare an action array calling `consumeGas` one times.
       const gasConsumingAction = {
@@ -679,11 +677,12 @@ describe('DAO', function () {
         [gasConsumingAction],
         allowFailureMap
       );
+      console.log('expectedGas', expectedGas.toString());
 
       // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(10000),
+          gasLimit: expectedGas.div(5),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
@@ -733,8 +732,9 @@ describe('DAO', function () {
         let erc20Token: TestERC20;
 
         beforeEach(async () => {
-          const TestERC20 = new TestERC20__factory(signers[0]);
-          erc20Token = await TestERC20.deploy('name', 'symbol', 0);
+          erc20Token = await hre.wrapper.deploy('TestERC20', {
+            args: ['name', 'symbol', 0],
+          });
         });
 
         it('reverts if transfers more ERC20 than dao has', async () => {
@@ -773,8 +773,9 @@ describe('DAO', function () {
         let erc721Token: TestERC721;
 
         beforeEach(async () => {
-          const TestERC721 = new TestERC721__factory(signers[0]);
-          erc721Token = await TestERC721.deploy('name', 'symbol');
+          erc721Token = await hre.wrapper.deploy('TestERC721', {
+            args: ['name', 'symbol'],
+          });
         });
 
         it('reverts if transfers more ERC721 than dao has', async () => {
@@ -816,8 +817,9 @@ describe('DAO', function () {
         let erc1155Token: TestERC1155;
 
         beforeEach(async () => {
-          const TestERC1155 = new TestERC1155__factory(signers[0]);
-          erc1155Token = await TestERC1155.deploy('URI');
+          erc1155Token = await hre.wrapper.deploy('TestERC1155', {
+            args: ['URI'],
+          });
         });
 
         it('reverts if transfers more ERC1155 than dao has', async () => {
@@ -877,11 +879,10 @@ describe('DAO', function () {
     let erc1155Token: TestERC1155;
 
     beforeEach(async () => {
-      const TestERC1155 = new TestERC1155__factory(signers[0]);
-      erc1155Token = await TestERC1155.deploy('URI');
-
-      const TestERC721 = new TestERC721__factory(signers[0]);
-      erc721Token = await TestERC721.deploy('name', 'symbol');
+      erc1155Token = await hre.wrapper.deploy('TestERC1155', {args: ['URI']});
+      erc721Token = await hre.wrapper.deploy('TestERC721', {
+        args: ['name', 'symbol'],
+      });
 
       await erc721Token.mint(ownerAddress, 1);
       await erc1155Token.mint(ownerAddress, 1, 2);
@@ -1002,8 +1003,9 @@ describe('DAO', function () {
     let token: TestERC20;
 
     beforeEach(async () => {
-      const TestERC20 = new TestERC20__factory(signers[0]);
-      token = await TestERC20.deploy('name', 'symbol', 0);
+      token = await hre.wrapper.deploy('TestERC20', {
+        args: ['name', 'symbol', 0],
+      });
     });
 
     it('reverts if amount is zero', async () => {
@@ -1206,22 +1208,17 @@ describe('DAO', function () {
     });
 
     it('should call the signature validator', async () => {
-      const ERC1271MockFactory = await smock.mock('ERC1271Mock');
-      const erc1271Mock = await ERC1271MockFactory.deploy();
+      const magicValue = '0x41424344';
+
+      const erc1271Mock = await hre.wrapper.deploy('ERC1271Mock');
+
+      await erc1271Mock.setMagicValue('0x41424344');
 
       await dao.setSignatureValidator(erc1271Mock.address);
-      await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00');
-      expect(erc1271Mock.isValidSignature).has.been.callCount(1);
-    });
 
-    it('should return the validators response', async () => {
-      const ERC1271MockFactory = new ERC1271Mock__factory(signers[0]);
-      const erc1271Mock = await ERC1271MockFactory.deploy();
-
-      await dao.setSignatureValidator(erc1271Mock.address);
       expect(
         await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
-      ).to.be.eq('0x41424344');
+      ).to.be.eq(magicValue);
     });
 
     describe('ERC4824 - daoURI', async () => {

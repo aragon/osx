@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -62,7 +62,9 @@ describe('GovernanceERC20', function () {
       mintSettings,
     ];
 
-    token = await GovernanceERC20.deploy(...defaultInitData);
+    token = await hre.wrapper.deploy('GovernanceERC20', {
+      args: defaultInitData,
+    });
   });
 
   describe('initialize:', async () => {
@@ -78,20 +80,35 @@ describe('GovernanceERC20', function () {
     });
 
     it('sets the managing DAO ', async () => {
-      token = await GovernanceERC20.deploy(...defaultInitData);
+      token = await hre.wrapper.deploy('GovernanceERC20', {
+        args: defaultInitData,
+      });
+
       expect(await token.dao()).to.eq(dao.address);
     });
 
     it('reverts if the `receivers` and `amounts` array lengths in the mint settings mismatch', async () => {
       const receivers = [signers[0].address];
       const amounts = [123, 456];
+      // await expect(
+      //   GovernanceERC20.deploy(
+      //     dao.address,
+      //     governanceERC20Name,
+      //     governanceERC20Symbol,
+      //     {receivers: receivers, amounts: amounts}
+      //   )
+      // )
+      //   .to.be.revertedWithCustomError(token, 'MintSettingsArrayLengthMismatch')
+      //   .withArgs(receivers.length, amounts.length);
       await expect(
-        GovernanceERC20.deploy(
-          dao.address,
-          governanceERC20Name,
-          governanceERC20Symbol,
-          {receivers: receivers, amounts: amounts}
-        )
+        hre.wrapper.deploy('GovernanceERC20', {
+          args: [
+            dao.address,
+            governanceERC20Name,
+            governanceERC20Symbol,
+            {receivers: receivers, amounts: amounts},
+          ],
+        })
       )
         .to.be.revertedWithCustomError(token, 'MintSettingsArrayLengthMismatch')
         .withArgs(receivers.length, amounts.length);
@@ -228,9 +245,8 @@ describe('GovernanceERC20', function () {
 
   describe('afterTokenTransfer', async () => {
     beforeEach(async () => {
-      token = await GovernanceERC20.deploy(dao.address, 'name', 'symbol', {
-        receivers: [],
-        amounts: [],
+      token = await hre.wrapper.deploy('GovernanceERC20', {
+        args: [dao.address, 'name', 'symbol', {receivers: [], amounts: []}],
       });
 
       await dao.grant(token.address, signers[0].address, MINT_PERMISSION_ID);

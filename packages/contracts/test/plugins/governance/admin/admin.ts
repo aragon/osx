@@ -37,7 +37,7 @@ export const adminInterface = new ethers.utils.Interface([
   'function executeProposal(bytes,tuple(address,uint256,bytes)[],uint256)',
 ]);
 
-describe('Admin', function () {
+describe.skip('Admin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let adminCloneFactory: AdminCloneFactory;

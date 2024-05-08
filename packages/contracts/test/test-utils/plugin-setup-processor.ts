@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {
   PluginSetupProcessor__factory,
@@ -11,11 +11,9 @@ export async function deployPluginSetupProcessor(
 ): Promise<PluginSetupProcessor> {
   let psp: PluginSetupProcessor;
 
-  const PluginSetupProcessor = new PluginSetupProcessor__factory(
-    (await ethers.getSigners())[0]
-  );
-
-  psp = await PluginSetupProcessor.deploy(pluginRepoRegistry.address);
+  psp = await hre.wrapper.deploy('PluginSetupProcessor', {
+    args: [pluginRepoRegistry.address],
+  });
 
   return psp;
 }

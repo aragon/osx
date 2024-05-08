@@ -1,7 +1,7 @@
 // Copied and modified from: https://github.com/Uniswap/merkle-distributor/blob/master/test/MerkleDistributor.spec.ts
 
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {BigNumber, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -17,7 +17,6 @@ import {
 } from '../../../../typechain';
 import {MerkleDistributor__factory as MerkleDistributor_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/plugins/token/MerkleDistributor.sol';
 
-import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
@@ -27,6 +26,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
@@ -48,11 +48,12 @@ describe('MerkleDistributor', function () {
     // create a DAO
     dao = await deployNewDAO(signers[0]);
 
-    const TestERC20 = new TestERC20__factory(signers[0]);
-    token = await TestERC20.deploy('FOO', 'FOO', 0); // mint 0 FOO tokens
+    token = await hre.wrapper.deploy('TestERC20', {args: ['FOO', 'FOO', 0]});
 
-    const MerkleDistributor = new MerkleDistributor__factory(signers[0]);
-    distributor = await deployWithProxy(MerkleDistributor);
+    distributor = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR,
+      {withProxy: true}
+    );
   });
 
   describe('plugin interface: ', async () => {
@@ -92,8 +93,8 @@ describe('MerkleDistributor', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           dao,
           {
             dao: dao.address,
@@ -101,10 +102,12 @@ describe('MerkleDistributor', function () {
             merkleRoot: ZERO_BYTES32,
           },
           'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR,
+          ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR_V1_0_0,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
+
+      // TODO:GIORGI what the
       expect(toImplementation).to.equal(fromImplementation); // The build did not change
 
       const fromProtocolVersion = await getProtocolVersion(

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {
   DAO,
@@ -21,7 +21,6 @@ import {Operation} from '../../../../utils/types';
 import metadata from '../../../../src/plugins/governance/multisig/build-metadata.json';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {MultisigSettings, multisigInterface} from './multisig';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {findEvent} from '../../../../utils/event';
 import {
   InstallationPreparedEvent,
@@ -29,6 +28,7 @@ import {
 } from '../../../../typechain/PluginSetupProcessor';
 import {hashHelpers} from '../../../../utils/psp';
 import {getNamedTypesFromMetadata} from '../../../../utils/metadata';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -69,8 +69,7 @@ describe('MultisigSetup', function () {
       [[signers[0].address], Object.values(defaultMultisigSettings)]
     );
 
-    const MultisigSetup = new MultisigSetup__factory(signers[0]);
-    multisigSetup = await MultisigSetup.deploy();
+    multisigSetup = await hre.wrapper.deploy('MultisigSetup');
 
     MultisigFactory = new Multisig__factory(signers[0]);
 
@@ -120,13 +119,11 @@ describe('MultisigSetup', function () {
         [noMembers, defaultMultisigSettings]
       );
 
-      const nonce = await ethers.provider.getTransactionCount(
-        multisigSetup.address
+      const nonce = await hre.wrapper.getNonce(multisigSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        multisigSetup.address,
+        nonce
       );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: multisigSetup.address,
-        nonce,
-      });
 
       const multisig = MultisigFactory.attach(anticipatedPluginAddress);
 
@@ -154,13 +151,12 @@ describe('MultisigSetup', function () {
         [members, multisigSettings]
       );
 
-      const nonce = await ethers.provider.getTransactionCount(
-        multisigSetup.address
+      const nonce = await hre.wrapper.getNonce(multisigSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        multisigSetup.address,
+        nonce
       );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: multisigSetup.address,
-        nonce,
-      });
+
       const multisig = MultisigFactory.attach(anticipatedPluginAddress);
 
       await expect(
@@ -187,13 +183,12 @@ describe('MultisigSetup', function () {
         [members, multisigSettings]
       );
 
-      const nonce = await ethers.provider.getTransactionCount(
-        multisigSetup.address
+      const nonce = await hre.wrapper.getNonce(multisigSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        multisigSetup.address,
+        nonce
       );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: multisigSetup.address,
-        nonce,
-      });
+
       const multisig = MultisigFactory.attach(anticipatedPluginAddress);
 
       await expect(
@@ -207,13 +202,11 @@ describe('MultisigSetup', function () {
     });
 
     it('returns the plugin, helpers, and permissions', async () => {
-      const nonce = await ethers.provider.getTransactionCount(
-        multisigSetup.address
+      const nonce = await hre.wrapper.getNonce(multisigSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        multisigSetup.address,
+        nonce
       );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: multisigSetup.address,
-        nonce,
-      });
 
       const {
         plugin,
@@ -254,13 +247,11 @@ describe('MultisigSetup', function () {
     it('sets up the plugin', async () => {
       const daoAddress = targetDao.address;
 
-      const nonce = await ethers.provider.getTransactionCount(
-        multisigSetup.address
+      const nonce = await hre.wrapper.getNonce(multisigSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        multisigSetup.address,
+        nonce
       );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: multisigSetup.address,
-        nonce,
-      });
 
       await multisigSetup.prepareInstallation(daoAddress, minimum_data);
 
@@ -353,16 +344,17 @@ describe('MultisigSetup', function () {
       managingDAO = await deployNewDAO(owner);
 
       // Create the PluginRepo
-      const pluginRepoFactory = new PluginRepo__factory(owner);
-      pluginRepo = await deployWithProxy<PluginRepo>(pluginRepoFactory);
+      pluginRepo = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO, {
+        withProxy: true,
+      });
       await pluginRepo.initialize(owner.address);
 
       // Create the PluginRepoRegistry
-      const pluginRepoRegistryFactory = new InterfaceBasedRegistryMock__factory(
-        owner
+      pluginRepoRegistry = await hre.wrapper.deploy(
+        'InterfaceBasedRegistryMock'
       );
-      pluginRepoRegistry = await pluginRepoRegistryFactory.deploy();
-      pluginRepoRegistry.initialize(
+
+      await pluginRepoRegistry.initialize(
         managingDAO.address,
         getInterfaceID(IPluginRepo__factory.createInterface())
       );
@@ -378,13 +370,13 @@ describe('MultisigSetup', function () {
       await pluginRepoRegistry.register(pluginRepo.address);
 
       // Create the PluginSetupProcessor
-      const pspFactory = new PluginSetupProcessor__factory(owner);
-      psp = await pspFactory.deploy(pluginRepoRegistry.address);
+      psp = await hre.wrapper.deploy('PluginSetupProcessor', {
+        args: [pluginRepoRegistry.address],
+      });
 
       // Prepare all MultisigSetup' - We can reuse the same for now
-      const multisigSetupFactory = new MultisigSetup__factory(owner);
-      setup1 = await multisigSetupFactory.deploy();
-      setup2 = await multisigSetupFactory.deploy();
+      setup1 = await hre.wrapper.deploy('MultisigSetup');
+      setup2 = await hre.wrapper.deploy('MultisigSetup');
 
       // Create the versions in the plugin repo
       await expect(pluginRepo.createVersion(1, setup1.address, '0x00', '0x00'))

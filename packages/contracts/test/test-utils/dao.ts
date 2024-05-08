@@ -1,15 +1,15 @@
 import {BigNumber} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {
   DAO,
   ActionExecute__factory,
   TestERC721__factory,
   GovernanceERC20__factory,
   TestERC1155__factory,
-  DAO__factory,
+  ActionExecute,
 } from '../../typechain';
-import {deployWithProxy} from './proxy';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {ARTIFACT_SOURCES, Wrapper} from './wrapper';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -24,8 +24,7 @@ export const TOKEN_INTERFACE_IDS = {
 };
 
 export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
-  const DAO = new DAO__factory(signer);
-  const dao = await deployWithProxy<DAO>(DAO);
+  const dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
 
   await dao.initialize(
     '0x00',
@@ -38,9 +37,9 @@ export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
 }
 
 export async function getActions() {
-  const signers = await ethers.getSigners();
-  const ActionExecuteFactory = new ActionExecute__factory(signers[0]);
-  let ActionExecute = await ActionExecuteFactory.deploy();
+  const ActionExecute = (await hre.wrapper.deploy(
+    'ActionExecute'
+  )) as ActionExecute;
   const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
 
   const num = 20;

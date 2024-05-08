@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -10,12 +10,12 @@ import {
 import {DAO, DAO__factory, ProtocolVersion__factory} from '../../typechain';
 
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {deployWithProxy} from '../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {findEventTopicLog} from '../../utils/event';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {UpgradedEvent} from '../../typechain/DAO';
+import {ARTIFACT_SOURCES} from '../test-utils/wrapper';
 
 let signers: SignerWithAddress[];
 let DAO_old: DAO_V1_0_0__factory;
@@ -43,13 +43,15 @@ describe('DAO Upgrade', function () {
     DAO_Current = new DAO__factory(signers[0]);
 
     // Deploy the v1.3.0 implementation
-    daoCurrentImplementaion = await DAO_Current.deploy();
+    daoCurrentImplementaion = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO);
   });
 
   context(`Re-entrancy`, function () {
     context(`v1.0.0 to v1.3.0`, function () {
       beforeEach(async function () {
-        daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
+        daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
+          withProxy: true,
+        });
         await daoV100Proxy.initialize(
           DUMMY_METADATA,
           signers[0].address,
@@ -261,7 +263,9 @@ describe('DAO Upgrade', function () {
   context(`Protocol Version`, function () {
     beforeEach(async function () {
       // prepare v1.0.0
-      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(DAO_old);
+      daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
+        withProxy: true,
+      });
       await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -279,7 +283,9 @@ describe('DAO Upgrade', function () {
 
     it('fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards', async () => {
       // deploy the different versions
-      const daoCurrentProxy = await deployWithProxy<DAO>(DAO_Current);
+      const daoCurrentProxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {
+        withProxy: true,
+      });
       await daoCurrentProxy.initialize(
         DUMMY_METADATA,
         signers[0].address,

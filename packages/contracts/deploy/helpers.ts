@@ -51,7 +51,11 @@ export async function uploadToIPFS(
     },
   });
 
-  if (networkName === 'hardhat' || networkName === 'localhost') {
+  if (
+    networkName === 'hardhat' ||
+    networkName === 'localhost' ||
+    networkName === 'zkLocalTestnet'
+  ) {
     // return a dummy path
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }

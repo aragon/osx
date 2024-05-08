@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {artifacts, ethers} from 'hardhat';
 import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -8,13 +8,10 @@ import {
   DAO,
   PublicResolver,
   ENSRegistry,
-  ENSRegistry__factory,
-  PublicResolver__factory,
   ENSSubdomainRegistrar__factory,
 } from '../../../../typechain';
 import {ENSSubdomainRegistrar__factory as ENSSubdomainRegistrar_V1_0_0__factory} from '../../../../typechain/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol';
 
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {OZ_ERRORS} from '../../../test-utils/error';
@@ -25,6 +22,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -34,28 +32,23 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 async function setupENS(
   owner: SignerWithAddress
 ): Promise<[ENSRegistry, PublicResolver, DAO, ENSSubdomainRegistrar]> {
-  const ENSRegistry = new ENSRegistry__factory(owner);
-  const PublicResolver = new PublicResolver__factory(owner);
-  const ENSSubdomainRegistrar = new ENSSubdomainRegistrar__factory(owner);
-
   // Deploy the ENSRegistry
-  const ens = await ENSRegistry.deploy();
-  await ens.deployed();
+  const ens = await hre.wrapper.deploy('ENSRegistry');
 
   // Deploy the Resolver
-  const resolver = await PublicResolver.deploy(
-    ens.address,
-    ethers.constants.AddressZero
-  );
-  await resolver.deployed();
+  const resolver = await hre.wrapper.deploy('PublicResolver', {
+    args: [ens.address, ethers.constants.AddressZero],
+  });
+
   await setupResolver(ens, resolver, owner);
 
   // Deploy the managing DAO
   const dao = await deployNewDAO(owner);
 
   // Deploy the registrar
-  const registrar = await deployWithProxy<ENSSubdomainRegistrar>(
-    ENSSubdomainRegistrar
+  const registrar = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
+    {withProxy: true}
   );
 
   return [ens, resolver, dao, registrar];
@@ -236,7 +229,7 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('reverts if the approval of the registrar is removed', async () => {
       // Initialize the registrar with the 'test' domain
-      registrar.initialize(
+      await registrar.initialize(
         managingDao.address,
         ens.address,
         ensDomainHash('test')
@@ -304,8 +297,8 @@ describe('ENSSubdomainRegistrar', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           managingDao,
           {
             managingDao: managingDao.address,
@@ -313,10 +306,12 @@ describe('ENSSubdomainRegistrar', function () {
             parentDomain: ensDomainHash('test'),
           },
           'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR_V1_0_0,
+          ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID
         );
+
+      // TODO:GIORGI what th
       expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
 
       const fromProtocolVersion = await getProtocolVersion(

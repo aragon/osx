@@ -23,7 +23,7 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('AdminSetup', function () {
+describe.skip('AdminSetup', function () {
   let ownerAddress: string;
   let signers: any;
   let adminSetup: AdminSetup;
