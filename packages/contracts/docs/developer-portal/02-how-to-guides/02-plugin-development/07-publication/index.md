@@ -18,6 +18,10 @@ To publish a plugin, we will use Aragon's `PluginRepoFactory` contract - in char
 
 You can find all of the addresses of `PluginRepoFactory` contracts by network [here](https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json).
 
-To create more versions of your plugin in the future, you'll call on the [`createVersion` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L128) from the `PluginRepo` instance of your plugin. When you publish your plugin, you'll be able to find the address of your plugin's `PluginRepo` instance within the transaction data.
+To create more versions of your plugin in the future, you'll call on the [`createVersion` function](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L133) from the `PluginRepo` instance of your plugin. When you publish your plugin, you'll be able to find the address of your plugin's `PluginRepo` instance within the transaction data.
+
+### 3. Publishing subsequent builds
+
+When publishing subsequent builds, you want to use the `createVersion` function in the `PluginRepo` contract ([check out the function's source code here](https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L133)).
 
 To deploy your plugin, follow the steps in the [`osx-plugin-template-hardhat` README.md](https://github.com/aragon/osx-plugin-template-hardhat/blob/main/README.md#deployment).
