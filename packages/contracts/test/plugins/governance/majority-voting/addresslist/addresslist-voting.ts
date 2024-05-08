@@ -317,8 +317,9 @@ describe('AddresslistVoting', function () {
       ).not.to.be.reverted;
     });
 
-    skipTestIfNetworkIsZkSync('f', async () => {
-      it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
+    skipTestIfNetworkIsZkSync(
+      'reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected',
+      async () => {
         votingSettings.minProposerVotingPower = 1;
 
         await voting.initialize(
@@ -400,8 +401,8 @@ describe('AddresslistVoting', function () {
         );
 
         await ethers.provider.send('evm_setAutomine', [true]);
-      });
-    });
+      }
+    );
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
       votingSettings.minProposerVotingPower = 123;

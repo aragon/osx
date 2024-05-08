@@ -209,8 +209,9 @@ describe('Multisig', function () {
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
     });
 
-    skipTestIfNetworkIsZkSync('f', async () => {
-      it('should revert if members list is longer than uint16 max', async done => {
+    skipTestIfNetworkIsZkSync(
+      'should revert if members list is longer than uint16 max',
+      async () => {
         const megaMember = signers[1];
         const members: string[] = new Array(65537).fill(megaMember.address);
         await expect(
@@ -218,8 +219,8 @@ describe('Multisig', function () {
         )
           .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
           .withArgs(65535, members.length);
-      });
-    });
+      }
+    );
   });
 
   describe('Upgrades', () => {
@@ -566,8 +567,9 @@ describe('Multisig', function () {
         );
     });
 
-    skipTestIfNetworkIsZkSync('f', async () => {
-      it('reverts if the multisig settings have been changed in the same block', async () => {
+    skipTestIfNetworkIsZkSync(
+      'reverts if the multisig settings have been changed in the same block',
+      async () => {
         await multisig.initialize(
           dao.address,
           [signers[0].address], // signers[0] is listed
@@ -615,8 +617,8 @@ describe('Multisig', function () {
           .withArgs(signers[0].address);
 
         await ethers.provider.send('evm_setAutomine', [true]);
-      });
-    });
+      }
+    );
 
     context('`onlyListed` is set to `false`:', async () => {
       beforeEach(async () => {
@@ -702,8 +704,9 @@ describe('Multisig', function () {
         ).not.to.be.reverted;
       });
 
-      skipTestIfNetworkIsZkSync('f', async () => {
-        it('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
+      skipTestIfNetworkIsZkSync(
+        'reverts if `_msgSender` is not listed in the current block although he was listed in the last block',
+        async () => {
           await ethers.provider.send('evm_setAutomine', [false]);
           const expectedSnapshotBlockNumber = (
             await ethers.provider.getBlock('latest')
@@ -780,8 +783,8 @@ describe('Multisig', function () {
           );
 
           await ethers.provider.send('evm_setAutomine', [true]);
-        });
-      });
+        }
+      );
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
         const startDate = await timestampIn(1000);

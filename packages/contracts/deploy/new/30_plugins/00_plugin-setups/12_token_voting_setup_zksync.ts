@@ -4,6 +4,7 @@ import governanceWrappedERC20UpgradeableArtifact from '../../../../artifacts/src
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import { skipIfNotZkSync } from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -49,12 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['New', 'TokenVotingSetup'];
-// Skip if network is not zksync
-func.skip = (hre: HardhatRuntimeEnvironment) =>
-    Promise.resolve(
-        hre.network.name !== 'zkTestnet' &&
-        hre.network.name !== 'zkLocalTestnet' &&
-        hre.network.name !== 'zkMainnet'
-    );
+func.tags = ['New', 'TokenVotingSetupZkSync'];
+func.skip = async hre => await skipIfNotZkSync(hre, 'TokenVotingSetupZkSync');
+
   

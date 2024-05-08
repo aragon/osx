@@ -106,7 +106,7 @@ console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   zksolc: {
-    version: '1.4.0',
+    version: '1.4.1',
     compilerSource: 'binary',
     settings: {},
   },
@@ -152,8 +152,8 @@ const config: HardhatUserConfig = {
         '0x4d91647d0a8429ac4433c83254fb9625332693c848e578062fe96362f32bfe91',
         '0x41c9f9518aa07b50cb1c0cc160d45547f57638dd824a8d85b5eb3bf99ed2bdeb',
         '0xb0680d66303a0163a19294f1ef8c95cd69a9d7902a4aca99c05f3e134e68a11a',
-        // The below accounts are random additions to ensure that ethers.getSigners()
-        // still return 20 addresses instead of 10
+        // The below accounts are random additions to ensure that 
+        // ethers.getSigners() still return 20 addresses instead of 10.
         '0xec4822aa037f555ba18304bfcb6e30f3c981e730f57e7bad174312868952af90',
         '0x00058bfe32cbfe46e81a7c60178fae13078068b5a3a8e1441d47f7cb96665286',
         '0x4e0e42d531f61e25f12d64504ec5f021ead984c406fb5df97d27d813d11222a3',

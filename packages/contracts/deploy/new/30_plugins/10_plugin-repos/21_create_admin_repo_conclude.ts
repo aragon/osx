@@ -4,6 +4,7 @@ import {
 } from '../../../../typechain';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipIfZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding TokenVotingSetup deployment.\n`);
@@ -34,10 +35,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateAdminRepo', 'Verify'];
-// skip if network is zksync
-func.skip = (hre: HardhatRuntimeEnvironment) =>
-  Promise.resolve(
-      hre.network.name === 'zkTestnet' ||
-      hre.network.name === 'zkLocalTestnet' ||
-      hre.network.name === 'zkMainnet'
-  );
+func.skip = async hre => await skipIfZkSync(hre, 'CreateAdminRepoConclude');
