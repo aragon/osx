@@ -176,6 +176,16 @@ const config: HardhatUserConfig = {
       accounts: accounts,
       forceDeploy: true,
     },
+    zkMainnet: {
+      url: 'https://mainnet.era.zksync.io',
+      ethNetwork: 'mainnet',
+      zksync: true,
+      verifyURL:
+        'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
+      deploy: ['./deploy/new', './deploy/verification'],
+      accounts: accounts,
+      forceDeploy: true,
+    },
     ...networks,
   },
   gasReporter: {

@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployments, network} = hre;
 
-  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetup');
+  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetupZkSync');
   const tokenVotingSetup = TokenVotingSetup__factory.connect(
     TokenVotingSetupDeployment.address,
     deployer
@@ -22,16 +22,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   hre.aragonToVerifyContracts.push(
-    await hre.deployments.get('GovernanceERC20')
+    await hre.deployments.get('GovernanceERC20Upgradeable')
   );
 
   hre.aragonToVerifyContracts.push(
-    await hre.deployments.get('GovernanceWrappedERC20')
+    await hre.deployments.get('GovernanceWrappedERC20Upgradeable')
   );
 
   hre.aragonToVerifyContracts.push({
     contract:
-      'src/plugins/governance/majority-voting/token/TokenVotingSetup.sol:TokenVotingSetup',
+      'src/zksync/TokenVotingSetupZkSync.sol:TokenVotingSetupZkSync',      
     ...TokenVotingSetupDeployment,
   });
   hre.aragonToVerifyContracts.push({
@@ -44,10 +44,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'TokenVotingSetup', 'Verify'];
-// Skip if network is zksync
+// Skip if network is not zksync
 func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(
-      hre.network.name === 'zkTestnet' ||
-      hre.network.name === 'zkLocalTestnet' ||
-      hre.network.name === 'zkMainnet'
+      hre.network.name !== 'zkTestnet' &&
+      hre.network.name !== 'zkLocalTestnet' &&
+      hre.network.name !== 'zkMainnet'
   );

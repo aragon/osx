@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const tokenVotingSetupContract = await getContractAddress(
-    'TokenVotingSetup',
+    hre.network.config.zksync ? 'TokenVotingSetupZkSync' : 'TokenVotingSetup',
     hre
   );
 

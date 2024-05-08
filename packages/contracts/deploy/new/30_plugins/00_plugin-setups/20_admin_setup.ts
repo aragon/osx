@@ -16,3 +16,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'AdminSetup'];
+func.skip = (hre: HardhatRuntimeEnvironment) =>
+  Promise.resolve(
+      hre.network.name === 'zkTestnet' ||
+      hre.network.name === 'zkLocalTestnet' ||
+      hre.network.name === 'zkMainnet'
+  );

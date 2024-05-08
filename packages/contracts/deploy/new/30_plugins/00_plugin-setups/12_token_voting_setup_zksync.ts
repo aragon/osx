@@ -1,6 +1,6 @@
-import tokenVotingSetupArtifact from '../../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
-import governanceERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
-import governanceWrappedERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
+import tokenVotingSetupArtifact from '../../../../artifacts/src/zksync/TokenVotingSetupZkSync.sol/TokenVotingSetupZkSync.json';
+import governanceERC20UpgradeableArtifact from '../../../../artifacts/src/zksync/GovernanceERC20Upgradeable.sol/GovernanceERC20Upgradeable.json';
+import governanceWrappedERC20UpgradeableArtifact from '../../../../artifacts/src/zksync/GovernanceWrappedERC20Upgradeable.sol/GovernanceWrappedERC20Upgradeable.json';
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -20,17 +20,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   };
 
   // Deploy the bases for the TokenVotingSetup
-  const governanceERC20DeployResult = await deploy('GovernanceERC20', {
-    contract: governanceERC20Artifact,
+  const governanceERC20DeployResult = await deploy('GovernanceERC20Upgradeable', {
+    contract: governanceERC20UpgradeableArtifact,
     from: deployer.address,
     args: [zeroDaoAddress, emptyName, emptySymbol, emptyMintSettings],
     log: true,
   });
 
   const governanceWrappedERC20DeployResult = await deploy(
-    'GovernanceWrappedERC20',
+    'GovernanceWrappedERC20Upgradeable',
     {
-      contract: governanceWrappedERC20Artifact,
+      contract: governanceWrappedERC20UpgradeableArtifact,
       from: deployer.address,
       args: [zeroTokenAddress, emptyName, emptySymbol],
       log: true,
@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Deploy the TokenVotingSetup and provide the bases in the constructor
-  await deploy('TokenVotingSetup', {
+  await deploy('TokenVotingSetupZkSync', {
     contract: tokenVotingSetupArtifact,
     from: deployer.address,
     args: [
@@ -50,10 +50,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'TokenVotingSetup'];
-// Skip if network is zksync
+// Skip if network is not zksync
 func.skip = (hre: HardhatRuntimeEnvironment) =>
-  Promise.resolve(
-      hre.network.name === 'zkTestnet' ||
-      hre.network.name === 'zkLocalTestnet' ||
-      hre.network.name === 'zkMainnet'
-  );
+    Promise.resolve(
+        hre.network.name !== 'zkTestnet' &&
+        hre.network.name !== 'zkLocalTestnet' &&
+        hre.network.name !== 'zkMainnet'
+    );
+  

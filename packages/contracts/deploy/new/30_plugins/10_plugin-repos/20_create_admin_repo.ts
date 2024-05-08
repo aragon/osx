@@ -47,3 +47,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateAdminRepo'];
+// skip if network is zksync
+func.skip = (hre: HardhatRuntimeEnvironment) =>
+  Promise.resolve(
+      hre.network.name === 'zkTestnet' ||
+      hre.network.name === 'zkLocalTestnet' ||
+      hre.network.name === 'zkMainnet'
+  );

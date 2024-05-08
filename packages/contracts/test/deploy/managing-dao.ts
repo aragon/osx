@@ -29,7 +29,7 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe.skip('Managing DAO', function () {
+describe('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
@@ -51,9 +51,10 @@ describe.skip('Managing DAO', function () {
       'upgradeTo',
       [newImplementationAddress]
     );
-    const actions = contractAddress.map(contract => {
+    const actions = contractAddress.filter(address => address != '').map(contract => {
       return {to: contract, value: 0, data: data};
     });
+
     await multisig.createProposal(
       '0x', // metadata
       actions,
@@ -307,17 +308,25 @@ describe.skip('Managing DAO', function () {
       }
     );
 
+    // For some networks, not every repo is deployed, in which case
+    // hre.aragonPluginRepos contains empty string for that repo and
+    // causing the below code to fail.
+    const deployedRepoAddresses = [];
+
+    for (const [key, value] of Object.entries(hre.aragonPluginRepos)) {
+      if(value == '') continue;
+      deployedRepoAddresses.push(value);
+    }
+
     // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
     expect(PluginRepo_v1_0_0_Deployment.implementation).to.be.equal(undefined);
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
-    let implementationValues = await readImplementationValuesFromSlot([
-      hre.aragonPluginRepos['token-voting'],
-      hre.aragonPluginRepos['address-list-voting'],
-      hre.aragonPluginRepos['admin'],
-      hre.aragonPluginRepos['multisig'],
-    ]);
+
+    const repos = hre.aragonPluginRepos.filter
+
+    let implementationValues = await readImplementationValuesFromSlot(deployedRepoAddresses);
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
@@ -333,12 +342,7 @@ describe.skip('Managing DAO', function () {
     );
 
     // re-read from slot
-    implementationValues = await readImplementationValuesFromSlot([
-      hre.aragonPluginRepos['token-voting'],
-      hre.aragonPluginRepos['address-list-voting'],
-      hre.aragonPluginRepos['admin'],
-      hre.aragonPluginRepos['multisig'],
-    ]);
+    implementationValues = await readImplementationValuesFromSlot(deployedRepoAddresses);
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
