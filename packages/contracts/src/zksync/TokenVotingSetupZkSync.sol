@@ -91,7 +91,7 @@ contract TokenVotingSetupZkSync is PluginSetup {
             );
 
         address token = tokenSettings.addr;
-        
+
         bool setUpgradePermission = false;
 
         // Prepare helpers.
@@ -122,7 +122,7 @@ contract TokenVotingSetupZkSync is PluginSetup {
                 // GovernanceWrappedERC20 in order to make the token
                 // include governance functionality.
                 token = createERC1967Proxy(
-                    governanceWrappedERC20Base, 
+                    governanceWrappedERC20Base,
                     abi.encodeWithSelector(
                         GovernanceWrappedERC20.initialize.selector,
                         IERC20Upgradeable(tokenSettings.addr),
@@ -134,7 +134,7 @@ contract TokenVotingSetupZkSync is PluginSetup {
             }
         } else {
             token = createERC1967Proxy(
-                governanceERC20Base, 
+                governanceERC20Base,
                 abi.encodeWithSelector(
                     GovernanceERC20.initialize.selector,
                     IDAO(_dao),
@@ -154,15 +154,18 @@ contract TokenVotingSetupZkSync is PluginSetup {
             abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, token)
         );
 
-        uint256 permissionCount = tokenSettings.addr != address(0) ? 3 : 4;
+        PermissionLib.MultiTargetPermission[] memory permissions;
 
-        if(setUpgradePermission) {
-            permissionCount = permissionCount + 1;
+        // avoid stack too deep.
+        {
+            uint256 permissionCount = tokenSettings.addr != address(0) ? 3 : 4;
+
+            if (setUpgradePermission) {
+                permissionCount = permissionCount + 1;
+            }
+
+            permissions = new PermissionLib.MultiTargetPermission[](permissionCount);
         }
-        
-        // Prepare permissions
-        PermissionLib.MultiTargetPermission[]
-            memory permissions = new PermissionLib.MultiTargetPermission[](permissionCount);
 
         uint256 upgradePermissionIndex = 3;
 
@@ -207,8 +210,9 @@ contract TokenVotingSetupZkSync is PluginSetup {
             upgradePermissionIndex = 4;
         }
 
-        if(setUpgradePermission) {
-            bytes32 tokenUpgradePermission = GovernanceERC20Upgradeable(token).UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID();
+        if (setUpgradePermission) {
+            bytes32 tokenUpgradePermission = GovernanceERC20Upgradeable(token)
+                .UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID();
             permissions[upgradePermissionIndex] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Grant,
                 token,

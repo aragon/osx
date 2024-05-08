@@ -48,7 +48,7 @@ export async function advanceTimeTo(timestamp: number) {
 }
 
 export async function advanceIntoVoteTime(startDate: number, endDate: number) {
-  await setTimeForNextBlock(startDate)
+  await setTimeForNextBlock(startDate);
   await ethers.provider.send('evm_mine', []);
 
   expect(await getTime()).to.be.greaterThanOrEqual(startDate);

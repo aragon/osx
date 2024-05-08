@@ -84,6 +84,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'ENSSubdomains'];
-// TODO:GIORGI when running the script 2nd time, this needs to be commented
-// or code needs to move from geo browser to this.
-// func.skip = (hre: HardhatRuntimeEnvironment) => Promise.resolve(true);

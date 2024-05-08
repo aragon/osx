@@ -46,6 +46,7 @@ import {
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
+import {skipTestIfNetworkIsZkSync} from '../../../test-utils/skip-functions';
 
 export const multisigInterface = new ethers.utils.Interface([
   'function initialize(address,address[],tuple(bool,uint16))',
@@ -73,7 +74,7 @@ export async function approveWithSigners(
 }
 
 async function advanceTime(time: number) {
-  if(hre.network.config.zksync) {
+  if (hre.network.config.zksync) {
     time = time / 1000;
   }
   await ethers.provider.send('evm_increaseTime', [time]);
@@ -81,14 +82,14 @@ async function advanceTime(time: number) {
 }
 
 function expectedBlockNumber(blockNumber: number) {
-  if(hre.network.config.zksync) {
-    return blockNumber- 2;
+  if (hre.network.config.zksync) {
+    return blockNumber - 2;
   }
   return blockNumber - 1;
 }
 
 function expectedTime(time: number) {
-  if(hre.network.config.zksync) {
+  if (hre.network.config.zksync) {
     return time + 1;
   }
   return time;
@@ -208,13 +209,16 @@ describe('Multisig', function () {
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
     });
 
-    // TODO:GIORGI only skip this on zksync
-    it.skip('should revert if members list is longer than uint16 max', async (done) => {
-      const megaMember = signers[1];
-      const members: string[] = new Array(65537).fill(megaMember.address);
-      await expect(multisig.initialize(dao.address, members, multisigSettings))
-        .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
-        .withArgs(65535, members.length);
+    skipTestIfNetworkIsZkSync('f', async () => {
+      it('should revert if members list is longer than uint16 max', async done => {
+        const megaMember = signers[1];
+        const members: string[] = new Array(65537).fill(megaMember.address);
+        await expect(
+          multisig.initialize(dao.address, members, multisigSettings)
+        )
+          .to.revertedWithCustomError(multisig, 'AddresslistLengthOutOfBounds')
+          .withArgs(65535, members.length);
+      });
     });
   });
 
@@ -562,55 +566,56 @@ describe('Multisig', function () {
         );
     });
 
-    // TODO:GIORGI only skip this on zksync
-    it.skip('reverts if the multisig settings have been changed in the same block', async () => {
-      await multisig.initialize(
-        dao.address,
-        [signers[0].address], // signers[0] is listed
-        multisigSettings
-      );
-      await dao.grant(
-        multisig.address,
-        dao.address,
-        await multisig.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
-      );
+    skipTestIfNetworkIsZkSync('f', async () => {
+      it('reverts if the multisig settings have been changed in the same block', async () => {
+        await multisig.initialize(
+          dao.address,
+          [signers[0].address], // signers[0] is listed
+          multisigSettings
+        );
+        await dao.grant(
+          multisig.address,
+          dao.address,
+          await multisig.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
+        );
 
-      await ethers.provider.send('evm_setAutomine', [false]);
+        await ethers.provider.send('evm_setAutomine', [false]);
 
-      const endDate = await timestampIn(5000);
+        const endDate = await timestampIn(5000);
 
-      await multisig.connect(signers[0]).createProposal(
-        dummyMetadata,
-        [
-          {
-            to: multisig.address,
-            value: 0,
-            data: multisig.interface.encodeFunctionData(
-              'updateMultisigSettings',
-              [
-                {
-                  onlyListed: false,
-                  minApprovals: 1,
-                },
-              ]
-            ),
-          },
-        ],
-        0,
-        true,
-        true,
-        0,
-        endDate
-      );
-      await expect(
-        multisig
-          .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, true, true, 0, endDate)
-      )
-        .to.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
-        .withArgs(signers[0].address);
+        await multisig.connect(signers[0]).createProposal(
+          dummyMetadata,
+          [
+            {
+              to: multisig.address,
+              value: 0,
+              data: multisig.interface.encodeFunctionData(
+                'updateMultisigSettings',
+                [
+                  {
+                    onlyListed: false,
+                    minApprovals: 1,
+                  },
+                ]
+              ),
+            },
+          ],
+          0,
+          true,
+          true,
+          0,
+          endDate
+        );
+        await expect(
+          multisig
+            .connect(signers[0])
+            .createProposal(dummyMetadata, [], 0, true, true, 0, endDate)
+        )
+          .to.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
+          .withArgs(signers[0].address);
 
-      await ethers.provider.send('evm_setAutomine', [true]);
+        await ethers.provider.send('evm_setAutomine', [true]);
+      });
     });
 
     context('`onlyListed` is set to `false`:', async () => {
@@ -697,21 +702,40 @@ describe('Multisig', function () {
         ).not.to.be.reverted;
       });
 
-      // TODO:GIORGI only skip this on zksync
-      it.skip('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
-        await ethers.provider.send('evm_setAutomine', [false]);
-        const expectedSnapshotBlockNumber = (
-          await ethers.provider.getBlock('latest')
-        ).number;
+      skipTestIfNetworkIsZkSync('f', async () => {
+        it('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
+          await ethers.provider.send('evm_setAutomine', [false]);
+          const expectedSnapshotBlockNumber = (
+            await ethers.provider.getBlock('latest')
+          ).number;
 
-        // Transaction 1 & 2: Add signers[1] and remove signers[0]
-        const tx1 = await multisig.addAddresses([signers[1].address]);
-        const tx2 = await multisig.removeAddresses([signers[0].address]);
+          // Transaction 1 & 2: Add signers[1] and remove signers[0]
+          const tx1 = await multisig.addAddresses([signers[1].address]);
+          const tx2 = await multisig.removeAddresses([signers[0].address]);
 
-        // Transaction 3: Expect the proposal creation to fail for signers[0] because he was removed as a member in transaction 2.
-        await expect(
-          multisig
-            .connect(signers[0])
+          // Transaction 3: Expect the proposal creation to fail for signers[0] because he was removed as a member in transaction 2.
+          await expect(
+            multisig
+              .connect(signers[0])
+              .createProposal(
+                dummyMetadata,
+                [],
+                0,
+                false,
+                false,
+                0,
+                await timestampIn(1000)
+              )
+          )
+            .to.be.revertedWithCustomError(
+              multisig,
+              'ProposalCreationForbidden'
+            )
+            .withArgs(signers[0].address);
+
+          // Transaction 4: Create the proposal as signers[1]
+          const tx4 = await multisig
+            .connect(signers[1])
             .createProposal(
               dummyMetadata,
               [],
@@ -720,58 +744,43 @@ describe('Multisig', function () {
               false,
               0,
               await timestampIn(1000)
-            )
-        )
-          .to.be.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
-          .withArgs(signers[0].address);
+            );
 
-        // Transaction 4: Create the proposal as signers[1]
-        const tx4 = await multisig
-          .connect(signers[1])
-          .createProposal(
-            dummyMetadata,
-            [],
-            0,
-            false,
-            false,
-            0,
-            await timestampIn(1000)
+          // Check the listed members before the block is mined
+          expect(await multisig.isListed(signers[0].address)).to.equal(true);
+          expect(await multisig.isListed(signers[1].address)).to.equal(false);
+
+          // Mine the block
+          await ethers.provider.send('evm_mine', []);
+          const minedBlockNumber = (await ethers.provider.getBlock('latest'))
+            .number;
+
+          // Expect all transaction receipts to be in the same block after the snapshot block.
+          expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
+          expect((await tx2.wait()).blockNumber).to.equal(minedBlockNumber);
+          expect((await tx4.wait()).blockNumber).to.equal(minedBlockNumber);
+          expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
+
+          // Expect the listed member to have changed
+          expect(await multisig.isListed(signers[0].address)).to.equal(false);
+          expect(await multisig.isListed(signers[1].address)).to.equal(true);
+
+          // Check the `ProposalCreatedEvent` for the creator and proposalId
+          const event = await findEvent<ProposalCreatedEvent>(
+            tx4,
+            'ProposalCreated'
+          );
+          expect(event.args.proposalId).to.equal(id);
+          expect(event.args.creator).to.equal(signers[1].address);
+
+          // Check that the snapshot block stored in the proposal struct
+          const proposal = await multisig.getProposal(id);
+          expect(proposal.parameters.snapshotBlock).to.equal(
+            expectedSnapshotBlockNumber
           );
 
-        // Check the listed members before the block is mined
-        expect(await multisig.isListed(signers[0].address)).to.equal(true);
-        expect(await multisig.isListed(signers[1].address)).to.equal(false);
-
-        // Mine the block
-        await ethers.provider.send('evm_mine', []);
-        const minedBlockNumber = (await ethers.provider.getBlock('latest'))
-          .number;
-
-        // Expect all transaction receipts to be in the same block after the snapshot block.
-        expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
-        expect((await tx2.wait()).blockNumber).to.equal(minedBlockNumber);
-        expect((await tx4.wait()).blockNumber).to.equal(minedBlockNumber);
-        expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
-
-        // Expect the listed member to have changed
-        expect(await multisig.isListed(signers[0].address)).to.equal(false);
-        expect(await multisig.isListed(signers[1].address)).to.equal(true);
-
-        // Check the `ProposalCreatedEvent` for the creator and proposalId
-        const event = await findEvent<ProposalCreatedEvent>(
-          tx4,
-          'ProposalCreated'
-        );
-        expect(event.args.proposalId).to.equal(id);
-        expect(event.args.creator).to.equal(signers[1].address);
-
-        // Check that the snapshot block stored in the proposal struct
-        const proposal = await multisig.getProposal(id);
-        expect(proposal.parameters.snapshotBlock).to.equal(
-          expectedSnapshotBlockNumber
-        );
-
-        await ethers.provider.send('evm_setAutomine', [true]);
+          await ethers.provider.send('evm_setAutomine', [true]);
+        });
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
@@ -807,11 +816,13 @@ describe('Multisig', function () {
           );
 
         const block = await ethers.provider.getBlock('latest');
-        
+
         const proposal = await multisig.getProposal(id);
         expect(proposal.executed).to.equal(false);
-        
-        expect(proposal.parameters.snapshotBlock).to.equal(expectedBlockNumber(block.number));
+
+        expect(proposal.parameters.snapshotBlock).to.equal(
+          expectedBlockNumber(block.number)
+        );
 
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
@@ -822,8 +833,8 @@ describe('Multisig', function () {
         expect(proposal.approvals).to.equal(0);
         expect(proposal.actions.length).to.equal(0);
 
-        await ethers.provider.send('evm_mine', [])
-        
+        await ethers.provider.send('evm_mine', []);
+
         expect(await multisig.canApprove(id, signers[0].address)).to.be.true;
         expect(await multisig.canApprove(id, signers[1].address)).to.be.false;
       });
@@ -836,7 +847,7 @@ describe('Multisig', function () {
 
         await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
 
-        const expectedStartDate = expectedTime(startDate)
+        const expectedStartDate = expectedTime(startDate);
         await expect(
           multisig.createProposal(
             dummyMetadata,
@@ -866,7 +877,9 @@ describe('Multisig', function () {
         const proposal = await multisig.getProposal(id);
         expect(proposal.executed).to.equal(false);
         expect(proposal.allowFailureMap).to.equal(allowFailureMap);
-        expect(proposal.parameters.snapshotBlock).to.equal(expectedBlockNumber(block.number));
+        expect(proposal.parameters.snapshotBlock).to.equal(
+          expectedBlockNumber(block.number)
+        );
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
@@ -902,13 +915,12 @@ describe('Multisig', function () {
       });
     });
 
-    
     it('should revert if startDate is < than now', async () => {
       const blockTimestamp = (await getTime()) + 20;
       await setTimeForNextBlock(blockTimestamp);
 
-      const expectedTimestamp = expectedTime(blockTimestamp)
-      
+      const expectedTimestamp = expectedTime(blockTimestamp);
+
       await expect(
         multisig.createProposal(
           dummyMetadata,
@@ -921,7 +933,7 @@ describe('Multisig', function () {
         )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
-        .withArgs(expectedTimestamp, 5)
+        .withArgs(expectedTimestamp, 5);
     });
 
     it('should revert if endDate is < than startDate', async () => {
@@ -934,7 +946,7 @@ describe('Multisig', function () {
       let nextTimeStamp = nextBlockTime + 500;
       await setTimeForNextBlock(nextTimeStamp);
 
-      const expectedTimestamp = expectedTime(nextTimeStamp)
+      const expectedTimestamp = expectedTime(nextTimeStamp);
       await expect(
         multisig.createProposal(
           dummyMetadata,

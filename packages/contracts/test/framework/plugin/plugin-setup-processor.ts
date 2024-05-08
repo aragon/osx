@@ -23,7 +23,7 @@ import {
   PluginUUPSUpgradeableV1Mock__factory,
   PluginUUPSUpgradeableV2Mock__factory,
   PluginUUPSUpgradeableV3Mock__factory,
-  PluginUUPSUpgradeableSetupV1Mock__factory
+  PluginUUPSUpgradeableSetupV1Mock__factory,
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 

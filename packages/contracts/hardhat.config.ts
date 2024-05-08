@@ -24,7 +24,6 @@ import '@matterlabs/hardhat-zksync-verify';
 // import '@openzeppelin/hardhat-upgrades'
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
-import { Wallet } from 'zksync-ethers';
 
 dotenv.config();
 
@@ -69,12 +68,12 @@ task('deploy-contracts').setAction(async (args, hre) => {
 task('test-contracts').setAction(async (args, hre) => {
   await hre.run('build-contracts');
   const imp = await import('./test/test-utils/wrapper');
-  
-  const wrapper = await imp.Wrapper.create(hre.network.name, hre.ethers.provider);
+
+  const wrapper = await imp.Wrapper.create(
+    hre.network.name,
+    hre.ethers.provider
+  );
   hre.wrapper = wrapper;
-
-  // console.log( (await hre.ethers.getSigners()).map(item => item.address, ' kkkk'))
-
 
   await hre.run('test');
 });

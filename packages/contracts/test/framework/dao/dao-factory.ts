@@ -54,6 +54,7 @@ import {
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
+import {skipTestIfNetworkIsZkSync} from '../../test-utils/skip-functions';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -547,209 +548,216 @@ describe('DAOFactory: ', function () {
     expect(installationAppliedEventCount).to.equal(2);
   });
 
-  // TODO:GIORGI the below uses AdminSetup that has .clones inside the contract.
+  // the below uses AdminSetup that has .clones inside the contract.
   // This doesn't work on zksync https://github.com/zkSync-Community-Hub/zksync-developers/discussions/91
-  describe.skip('E2E: Install,Update,Uninstall Plugin through Admin Plugin', async () => {
-    let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
-    let adminPluginSetup: AdminSetup;
-    let adminPluginRepoAddress: string;
-    let adminPlugin: Admin;
-    let dao: DAO;
+  skipTestIfNetworkIsZkSync(
+    'E2E: Install,Update,Uninstall Plugin through Admin Plugin',
+    async () => {
+      describe('E2E: Install,Update,Uninstall Plugin through Admin Plugin', async () => {
+        let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
+        let adminPluginSetup: AdminSetup;
+        let adminPluginRepoAddress: string;
+        let adminPlugin: Admin;
+        let dao: DAO;
 
-    beforeEach(async () => {
-      // create 2nd version of PluginUUPSUpgradeableSetupV1.
-      pluginSetupV2Mock = await hre.wrapper.deploy(
-        'PluginUUPSUpgradeableSetupV2Mock'
-      );
-      {
-        await pluginRepoMock.createVersion(
-          1,
-          pluginSetupV2Mock.address,
-          '0x11',
-          '0x11'
-        );
-      }
+        beforeEach(async () => {
+          // create 2nd version of PluginUUPSUpgradeableSetupV1.
+          pluginSetupV2Mock = await hre.wrapper.deploy(
+            'PluginUUPSUpgradeableSetupV2Mock'
+          );
+          {
+            await pluginRepoMock.createVersion(
+              1,
+              pluginSetupV2Mock.address,
+              '0x11',
+              '0x11'
+            );
+          }
 
-      // Create admin plugin repo so we can install it with dao
-      // This will help us execute installation/update calldatas through dao's execute.
+          // Create admin plugin repo so we can install it with dao
+          // This will help us execute installation/update calldatas through dao's execute.
 
-      adminPluginSetup = await hre.wrapper.deploy('AdminSetup');
+          adminPluginSetup = await hre.wrapper.deploy('AdminSetup');
 
-      let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-        'admin',
-        adminPluginSetup.address,
-        ownerAddress,
-        '0x11',
-        '0x11'
-      );
-      const pluginRepoRegisteredEvent =
-        await findEventTopicLog<PluginRepoRegisteredEvent>(
-          tx,
-          PluginRepoRegistry__factory.createInterface(),
-          EVENTS.PluginRepoRegistered
-        );
-      adminPluginRepoAddress = pluginRepoRegisteredEvent.args.pluginRepo;
+          let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
+            'admin',
+            adminPluginSetup.address,
+            ownerAddress,
+            '0x11',
+            '0x11'
+          );
+          const pluginRepoRegisteredEvent =
+            await findEventTopicLog<PluginRepoRegisteredEvent>(
+              tx,
+              PluginRepoRegistry__factory.createInterface(),
+              EVENTS.PluginRepoRegistered
+            );
+          adminPluginRepoAddress = pluginRepoRegisteredEvent.args.pluginRepo;
 
-      // create dao with admin plugin.
-      const adminPluginRepoPointer: PluginRepoPointer = [
-        adminPluginRepoAddress,
-        1,
-        1,
-      ];
+          // create dao with admin plugin.
+          const adminPluginRepoPointer: PluginRepoPointer = [
+            adminPluginRepoAddress,
+            1,
+            1,
+          ];
 
-      let data = ethers.utils.defaultAbiCoder.encode(
-        adminMetadata.pluginSetup.prepareInstallation.inputs.map(
-          arg => `${arg.type} ${arg.name}`
-        ),
-        [ownerAddress]
-      );
-
-      let adminPluginInstallation = createPrepareInstallationParams(
-        adminPluginRepoPointer,
-        data
-      );
-      tx = await daoFactory.createDao(daoSettings, [adminPluginInstallation]);
-      {
-        const installationPreparedEvent =
-          await findEventTopicLog<InstallationPreparedEvent>(
-            tx,
-            PluginSetupProcessor__factory.createInterface(),
-            EVENTS.InstallationPrepared
+          let data = ethers.utils.defaultAbiCoder.encode(
+            adminMetadata.pluginSetup.prepareInstallation.inputs.map(
+              arg => `${arg.type} ${arg.name}`
+            ),
+            [ownerAddress]
           );
 
-        const adminFactory = new Admin__factory(signers[0]);
-        adminPlugin = adminFactory.attach(
-          installationPreparedEvent.args.plugin
-        );
+          let adminPluginInstallation = createPrepareInstallationParams(
+            adminPluginRepoPointer,
+            data
+          );
+          tx = await daoFactory.createDao(daoSettings, [
+            adminPluginInstallation,
+          ]);
+          {
+            const installationPreparedEvent =
+              await findEventTopicLog<InstallationPreparedEvent>(
+                tx,
+                PluginSetupProcessor__factory.createInterface(),
+                EVENTS.InstallationPrepared
+              );
 
-        const daoFactory = new DAO__factory(signers[0]);
-        dao = daoFactory.attach(installationPreparedEvent.args.dao);
-      }
-    });
+            const adminFactory = new Admin__factory(signers[0]);
+            adminPlugin = adminFactory.attach(
+              installationPreparedEvent.args.plugin
+            );
 
-    it('installs,updates and uninstalls plugin through dao', async () => {
-      // Prepare Installation
-      let {
-        plugin,
-        preparedSetupData: {permissions, helpers},
-      } = await prepareInstallation(
-        psp,
-        dao.address,
-        [pluginSetupMockRepoAddress, 1, 1],
-        EMPTY_DATA
-      );
+            const daoFactory = new DAO__factory(signers[0]);
+            dao = daoFactory.attach(installationPreparedEvent.args.dao);
+          }
+        });
 
-      const daoInterface = DAO__factory.createInterface();
-      const pspInterface = PluginSetupProcessor__factory.createInterface();
-
-      // Prepare actions for apply Installation.
-      let applyInstallationActions = [
-        {
-          to: dao.address,
-          value: 0,
-          data: daoInterface.encodeFunctionData('grant', [
-            dao.address,
-            psp.address,
-            ethers.utils.id('ROOT_PERMISSION'),
-          ]),
-        },
-        {
-          to: psp.address,
-          value: 0,
-          data: pspInterface.encodeFunctionData('applyInstallation', [
-            dao.address,
-            createApplyInstallationParams(
-              plugin,
-              [pluginSetupMockRepoAddress, 1, 1],
-              permissions,
-              helpers
-            ),
-          ]),
-        },
-      ];
-
-      await expect(
-        adminPlugin.executeProposal('0x', applyInstallationActions, 0)
-      ).to.emit(psp, EVENTS.InstallationApplied);
-
-      // Prepare Update
-      const {
-        initData,
-        preparedSetupData: {
-          permissions: updatePermissions,
-          helpers: updateHelpers,
-        },
-      } = await prepareUpdate(
-        psp,
-        dao.address,
-        plugin,
-        [1, 1],
-        [1, 2],
-        pluginSetupMockRepoAddress,
-        helpers,
-        EMPTY_DATA
-      );
-
-      // Prepare actions for applyUpdate to succeed.
-      let applyUpdateActions = [
-        {
-          to: dao.address,
-          value: 0,
-          data: daoInterface.encodeFunctionData('grant', [
+        it('installs,updates and uninstalls plugin through dao', async () => {
+          // Prepare Installation
+          let {
             plugin,
-            psp.address,
-            ethers.utils.id('UPGRADE_PLUGIN_PERMISSION'),
-          ]),
-        },
-        {
-          to: psp.address,
-          value: 0,
-          data: pspInterface.encodeFunctionData('applyUpdate', [
+            preparedSetupData: {permissions, helpers},
+          } = await prepareInstallation(
+            psp,
             dao.address,
-            createApplyUpdateParams(
-              plugin,
-              [pluginSetupMockRepoAddress, 1, 2],
-              initData,
-              updatePermissions,
-              updateHelpers
-            ),
-          ]),
-        },
-      ];
+            [pluginSetupMockRepoAddress, 1, 1],
+            EMPTY_DATA
+          );
 
-      await expect(
-        adminPlugin.executeProposal('0x', applyUpdateActions, 0)
-      ).to.emit(psp, EVENTS.UpdateApplied);
+          const daoInterface = DAO__factory.createInterface();
+          const pspInterface = PluginSetupProcessor__factory.createInterface();
 
-      // Uninstall the plugin
-      let {permissions: uninstallPermissions} = await prepareUninstallation(
-        psp,
-        dao.address,
-        plugin,
-        [pluginSetupMockRepoAddress, 1, 2],
-        updateHelpers,
-        EMPTY_DATA
-      );
+          // Prepare actions for apply Installation.
+          let applyInstallationActions = [
+            {
+              to: dao.address,
+              value: 0,
+              data: daoInterface.encodeFunctionData('grant', [
+                dao.address,
+                psp.address,
+                ethers.utils.id('ROOT_PERMISSION'),
+              ]),
+            },
+            {
+              to: psp.address,
+              value: 0,
+              data: pspInterface.encodeFunctionData('applyInstallation', [
+                dao.address,
+                createApplyInstallationParams(
+                  plugin,
+                  [pluginSetupMockRepoAddress, 1, 1],
+                  permissions,
+                  helpers
+                ),
+              ]),
+            },
+          ];
 
-      // Prepare actions for apply Uninstallation.
-      let applyUninstallationActions = [
-        {
-          to: psp.address,
-          value: 0,
-          data: pspInterface.encodeFunctionData('applyUninstallation', [
+          await expect(
+            adminPlugin.executeProposal('0x', applyInstallationActions, 0)
+          ).to.emit(psp, EVENTS.InstallationApplied);
+
+          // Prepare Update
+          const {
+            initData,
+            preparedSetupData: {
+              permissions: updatePermissions,
+              helpers: updateHelpers,
+            },
+          } = await prepareUpdate(
+            psp,
             dao.address,
-            createApplyUninstallationParams(
-              plugin,
-              [pluginSetupMockRepoAddress, 1, 2],
-              uninstallPermissions
-            ),
-          ]),
-        },
-      ];
+            plugin,
+            [1, 1],
+            [1, 2],
+            pluginSetupMockRepoAddress,
+            helpers,
+            EMPTY_DATA
+          );
 
-      await expect(
-        adminPlugin.executeProposal('0x', applyUninstallationActions, 0)
-      ).to.emit(psp, EVENTS.UninstallationApplied);
-    });
-  });
+          // Prepare actions for applyUpdate to succeed.
+          let applyUpdateActions = [
+            {
+              to: dao.address,
+              value: 0,
+              data: daoInterface.encodeFunctionData('grant', [
+                plugin,
+                psp.address,
+                ethers.utils.id('UPGRADE_PLUGIN_PERMISSION'),
+              ]),
+            },
+            {
+              to: psp.address,
+              value: 0,
+              data: pspInterface.encodeFunctionData('applyUpdate', [
+                dao.address,
+                createApplyUpdateParams(
+                  plugin,
+                  [pluginSetupMockRepoAddress, 1, 2],
+                  initData,
+                  updatePermissions,
+                  updateHelpers
+                ),
+              ]),
+            },
+          ];
+
+          await expect(
+            adminPlugin.executeProposal('0x', applyUpdateActions, 0)
+          ).to.emit(psp, EVENTS.UpdateApplied);
+
+          // Uninstall the plugin
+          let {permissions: uninstallPermissions} = await prepareUninstallation(
+            psp,
+            dao.address,
+            plugin,
+            [pluginSetupMockRepoAddress, 1, 2],
+            updateHelpers,
+            EMPTY_DATA
+          );
+
+          // Prepare actions for apply Uninstallation.
+          let applyUninstallationActions = [
+            {
+              to: psp.address,
+              value: 0,
+              data: pspInterface.encodeFunctionData('applyUninstallation', [
+                dao.address,
+                createApplyUninstallationParams(
+                  plugin,
+                  [pluginSetupMockRepoAddress, 1, 2],
+                  uninstallPermissions
+                ),
+              ]),
+            },
+          ];
+
+          await expect(
+            adminPlugin.executeProposal('0x', applyUninstallationActions, 0)
+          ).to.emit(psp, EVENTS.UninstallationApplied);
+        });
+      });
+    }
+  );
 });

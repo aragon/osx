@@ -55,6 +55,7 @@ import {
 import {majorityVotingBaseInterface} from '../majority-voting';
 import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../../../test-utils/wrapper';
+import {skipTestIfNetworkIsZkSync} from '../../../../test-utils/skip-functions';
 
 export const tokenVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address)',
@@ -103,12 +104,21 @@ describe('TokenVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    governanceErc20Mock = await hre.wrapper.deploy('GovernanceERC20Mock', {args: [dao.address, 'GOV', 'GOV', {
-      receivers: [],
-      amounts: [],
-    }]})
-  
-    voting = await hre.wrapper.deploy(ARTIFACT_SOURCES.TOKEN_VOTING, {withProxy: true})
+    governanceErc20Mock = await hre.wrapper.deploy('GovernanceERC20Mock', {
+      args: [
+        dao.address,
+        'GOV',
+        'GOV',
+        {
+          receivers: [],
+          amounts: [],
+        },
+      ],
+    });
+
+    voting = await hre.wrapper.deploy(ARTIFACT_SOURCES.TOKEN_VOTING, {
+      withProxy: true,
+    });
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -123,10 +133,10 @@ describe('TokenVoting', function () {
   async function setBalances(
     balances: {receiver: string; amount: number | BigNumber}[]
   ) {
-    const receivers = balances.map(item => item.receiver)
-    const amounts = balances.map(item => item.amount)
+    const receivers = balances.map(item => item.receiver);
+    const amounts = balances.map(item => item.amount);
 
-    await governanceErc20Mock.setBalances(receivers, amounts)
+    await governanceErc20Mock.setBalances(receivers, amounts);
   }
 
   async function setTotalSupply(totalSupply: number) {
@@ -403,29 +413,48 @@ describe('TokenVoting', function () {
         ).not.to.be.reverted;
       });
 
-      // TODO:GIORGI
-      it.skip('reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block', async () => {
-        await setBalances([
-          {
-            receiver: signers[0].address,
-            amount: votingSettings.minProposerVotingPower,
-          },
-        ]);
+      skipTestIfNetworkIsZkSync('f', async () => {
+        it('reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block', async () => {
+          await setBalances([
+            {
+              receiver: signers[0].address,
+              amount: votingSettings.minProposerVotingPower,
+            },
+          ]);
 
-        await ethers.provider.send('evm_setAutomine', [false]);
-        const expectedSnapshotBlockNumber = (
-          await ethers.provider.getBlock('latest')
-        ).number;
+          await ethers.provider.send('evm_setAutomine', [false]);
+          const expectedSnapshotBlockNumber = (
+            await ethers.provider.getBlock('latest')
+          ).number;
 
-        // Transaction 1: Transfer the tokens from signers[0] to signers[1]
-        const tx1 = await governanceErc20Mock
-          .connect(signers[0])
-          .transfer(signers[1].address, votingSettings.minProposerVotingPower);
-
-        // Transaction 2: Expect the proposal creation to fail for signers[0] because he transferred the tokens in transaction 1
-        await expect(
-          voting
+          // Transaction 1: Transfer the tokens from signers[0] to signers[1]
+          const tx1 = await governanceErc20Mock
             .connect(signers[0])
+            .transfer(
+              signers[1].address,
+              votingSettings.minProposerVotingPower
+            );
+
+          // Transaction 2: Expect the proposal creation to fail for signers[0] because he transferred the tokens in transaction 1
+          await expect(
+            voting
+              .connect(signers[0])
+              .createProposal(
+                dummyMetadata,
+                [],
+                0,
+                startDate,
+                endDate,
+                VoteOption.None,
+                false
+              )
+          )
+            .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+            .withArgs(signers[0].address);
+
+          // Transaction 3: Create the proposal as signers[1]
+          const tx3 = await voting
+            .connect(signers[1])
             .createProposal(
               dummyMetadata,
               [],
@@ -434,65 +463,50 @@ describe('TokenVoting', function () {
               endDate,
               VoteOption.None,
               false
-            )
-        )
-          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
-          .withArgs(signers[0].address);
+            );
 
-        // Transaction 3: Create the proposal as signers[1]
-        const tx3 = await voting
-          .connect(signers[1])
-          .createProposal(
-            dummyMetadata,
-            [],
-            0,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
+          // Check the balances before the block is mined
+          expect(
+            await governanceErc20Mock.balanceOf(signers[0].address)
+          ).to.equal(votingSettings.minProposerVotingPower);
+          expect(
+            await governanceErc20Mock.balanceOf(signers[1].address)
+          ).to.equal(0);
+
+          // Mine the block
+          await ethers.provider.send('evm_mine', []);
+          const minedBlockNumber = (await ethers.provider.getBlock('latest'))
+            .number;
+
+          // Expect all transaction receipts to be in the same block after the snapshot block.
+          expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
+          expect((await tx3.wait()).blockNumber).to.equal(minedBlockNumber);
+          expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
+
+          // Expect the balances to have changed
+          expect(
+            await governanceErc20Mock.balanceOf(signers[0].address)
+          ).to.equal(0);
+          expect(
+            await governanceErc20Mock.balanceOf(signers[1].address)
+          ).to.equal(votingSettings.minProposerVotingPower);
+
+          // Check the `ProposalCreatedEvent` for the creator and proposalId
+          const event = await findEvent<ProposalCreatedEvent>(
+            tx3,
+            'ProposalCreated'
+          );
+          expect(event.args.proposalId).to.equal(id);
+          expect(event.args.creator).to.equal(signers[1].address);
+
+          // Check that the snapshot block stored in the proposal struct
+          const proposal = await voting.getProposal(id);
+          expect(proposal.parameters.snapshotBlock).to.equal(
+            expectedSnapshotBlockNumber
           );
 
-        // Check the balances before the block is mined
-        expect(
-          await governanceErc20Mock.balanceOf(signers[0].address)
-        ).to.equal(votingSettings.minProposerVotingPower);
-        expect(
-          await governanceErc20Mock.balanceOf(signers[1].address)
-        ).to.equal(0);
-
-        // Mine the block
-        await ethers.provider.send('evm_mine', []);
-        const minedBlockNumber = (await ethers.provider.getBlock('latest'))
-          .number;
-
-        // Expect all transaction receipts to be in the same block after the snapshot block.
-        expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
-        expect((await tx3.wait()).blockNumber).to.equal(minedBlockNumber);
-        expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
-
-        // Expect the balances to have changed
-        expect(
-          await governanceErc20Mock.balanceOf(signers[0].address)
-        ).to.equal(0);
-        expect(
-          await governanceErc20Mock.balanceOf(signers[1].address)
-        ).to.equal(votingSettings.minProposerVotingPower);
-
-        // Check the `ProposalCreatedEvent` for the creator and proposalId
-        const event = await findEvent<ProposalCreatedEvent>(
-          tx3,
-          'ProposalCreated'
-        );
-        expect(event.args.proposalId).to.equal(id);
-        expect(event.args.creator).to.equal(signers[1].address);
-
-        // Check that the snapshot block stored in the proposal struct
-        const proposal = await voting.getProposal(id);
-        expect(proposal.parameters.snapshotBlock).to.equal(
-          expectedSnapshotBlockNumber
-        );
-
-        await ethers.provider.send('evm_setAutomine', [true]);
+          await ethers.provider.send('evm_setAutomine', [true]);
+        });
       });
 
       it('creates a proposal if `_msgSender` owns enough tokens  in the current block', async () => {
@@ -679,11 +693,17 @@ describe('TokenVoting', function () {
     });
 
     it('reverts if the total token supply is 0', async () => {
-      governanceErc20Mock = await hre.wrapper.deploy('GovernanceERC20Mock', {args: [dao.address, 'GOV', 'GOV', {
-        receivers: [],
-        amounts: [],
-      }]})
-      
+      governanceErc20Mock = await hre.wrapper.deploy('GovernanceERC20Mock', {
+        args: [
+          dao.address,
+          'GOV',
+          'GOV',
+          {
+            receivers: [],
+            amounts: [],
+          },
+        ],
+      });
 
       await voting.initialize(
         dao.address,
@@ -941,7 +961,9 @@ describe('TokenVoting', function () {
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
-      const expectedBlockNumber = hre.network.config.zksync ? block.number - 2 : block.number - 1;
+      const expectedBlockNumber = hre.network.config.zksync
+        ? block.number - 2
+        : block.number - 1;
       expect(proposal.parameters.snapshotBlock).to.equal(expectedBlockNumber);
       expect(
         proposal.parameters.startDate.add(votingSettings.minDuration)
@@ -1014,7 +1036,9 @@ describe('TokenVoting', function () {
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
-      const expectedBlockNumber = hre.network.config.zksync ? block.number - 2 : block.number - 1;
+      const expectedBlockNumber = hre.network.config.zksync
+        ? block.number - 2
+        : block.number - 1;
       expect(proposal.parameters.snapshotBlock).to.equal(expectedBlockNumber);
 
       expect(

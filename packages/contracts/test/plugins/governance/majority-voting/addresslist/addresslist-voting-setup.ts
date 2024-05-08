@@ -57,7 +57,7 @@ describe('AddresslistVotingSetup', function () {
     };
     defaultMembers = [signers[0].address];
 
-    addresslistVotingSetup = await hre.wrapper.deploy('AddresslistVotingSetup')
+    addresslistVotingSetup = await hre.wrapper.deploy('AddresslistVotingSetup');
 
     implementationAddress = await addresslistVotingSetup.implementation();
 
@@ -110,8 +110,11 @@ describe('AddresslistVotingSetup', function () {
     });
 
     it('correctly returns plugin, helpers and permissions', async () => {
-      const nonce = await hre.wrapper.getNonce(addresslistVotingSetup.address)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(addresslistVotingSetup.address, nonce)
+      const nonce = await hre.wrapper.getNonce(addresslistVotingSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        addresslistVotingSetup.address,
+        nonce
+      );
 
       const {
         plugin,
@@ -157,8 +160,11 @@ describe('AddresslistVotingSetup', function () {
     });
 
     it('correctly sets up the plugin', async () => {
-      const nonce = await hre.wrapper.getNonce(addresslistVotingSetup.address)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(addresslistVotingSetup.address, nonce)
+      const nonce = await hre.wrapper.getNonce(addresslistVotingSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        addresslistVotingSetup.address,
+        nonce
+      );
 
       await addresslistVotingSetup.prepareInstallation(
         targetDao.address,

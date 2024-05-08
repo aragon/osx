@@ -48,7 +48,9 @@ const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
   'UPDATE_VOTING_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
-const TOKEN_UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_GOVERNANCE_ERC20_PERMISSION');
+const TOKEN_UPGRADE_PERMISSION_ID = ethers.utils.id(
+  'UPGRADE_GOVERNANCE_ERC20_PERMISSION'
+);
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
@@ -83,13 +85,22 @@ describe('TokenVotingSetupZkSync', function () {
     };
     defaultMintSettings = {receivers: [], amounts: []};
 
-    governanceERC20Base = await hre.wrapper.deploy('GovernanceERC20Upgradeable', {args: [AddressZero, emptyName, emptySymbol, defaultMintSettings]})
-    governanceWrappedERC20Base = await hre.wrapper.deploy('GovernanceWrappedERC20Upgradeable', {args: [AddressZero, emptyName, emptySymbol]})
-    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetupZkSync', {args: [governanceERC20Base.address, governanceWrappedERC20Base.address]})
+    governanceERC20Base = await hre.wrapper.deploy(
+      'GovernanceERC20Upgradeable',
+      {args: [AddressZero, emptyName, emptySymbol, defaultMintSettings]}
+    );
+    governanceWrappedERC20Base = await hre.wrapper.deploy(
+      'GovernanceWrappedERC20Upgradeable',
+      {args: [AddressZero, emptyName, emptySymbol]}
+    );
+    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetupZkSync', {
+      args: [governanceERC20Base.address, governanceWrappedERC20Base.address],
+    });
     implementationAddress = await tokenVotingSetup.implementation();
 
-    erc20Token = await hre.wrapper.deploy('ERC20', {args: [tokenName, tokenSymbol]})
-
+    erc20Token = await hre.wrapper.deploy('ERC20', {
+      args: [tokenName, tokenSymbol],
+    });
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
       Object.values(defaultVotingSettings),
@@ -147,8 +158,11 @@ describe('TokenVotingSetupZkSync', function () {
         {receivers: receivers, amounts: amounts},
       ]);
 
-      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce) 
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce
+      );
 
       const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
 
@@ -195,9 +209,15 @@ describe('TokenVotingSetupZkSync', function () {
     });
 
     it('correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied', async () => {
-      let nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
-      const anticipatedWrappedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce + 1) 
+      let nonce = await hre.wrapper.getNonce(tokenVotingSetup.address);
+      const anticipatedWrappedTokenAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce
+      );
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce + 1
+      );
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
@@ -240,18 +260,21 @@ describe('TokenVotingSetupZkSync', function () {
           EXECUTE_PERMISSION_ID,
         ],
         [
-        Operation.Grant,
-        anticipatedWrappedTokenAddress,
-        targetDao.address,
-        AddressZero,
-        TOKEN_UPGRADE_PERMISSION_ID,
+          Operation.Grant,
+          anticipatedWrappedTokenAddress,
+          targetDao.address,
+          AddressZero,
+          TOKEN_UPGRADE_PERMISSION_ID,
         ],
       ]);
     });
 
     it('correctly sets up `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied', async () => {
-      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
-      const anticipatedWrappedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce) 
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address);
+      const anticipatedWrappedTokenAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce
+      );
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
@@ -280,15 +303,21 @@ describe('TokenVotingSetupZkSync', function () {
     });
 
     it('correctly returns plugin, helpers and permissions, when a governance token address is supplied', async () => {
-      const governanceERC20 = await hre.wrapper.deploy('GovernanceERC20', {args: [targetDao.address,
-        'name',
-        'symbol',
-        {receivers: [], amounts: []}]}) 
-      
-      
-      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
-      
+      const governanceERC20 = await hre.wrapper.deploy('GovernanceERC20', {
+        args: [
+          targetDao.address,
+          'name',
+          'symbol',
+          {receivers: [], amounts: []},
+        ],
+      });
+
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address);
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce
+      );
+
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
         [governanceERC20.address, '', ''],
@@ -329,15 +358,20 @@ describe('TokenVotingSetupZkSync', function () {
           AddressZero,
           EXECUTE_PERMISSION_ID,
         ],
-        
       ]);
     });
 
     it('correctly returns plugin, helpers and permissions, when a token address is not supplied', async () => {
-      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
-      const anticipatedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce + 1) 
-      
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address);
+      const anticipatedTokenAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce
+      );
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce + 1
+      );
+
       const {
         plugin,
         preparedSetupData: {helpers, permissions},
@@ -380,12 +414,12 @@ describe('TokenVotingSetupZkSync', function () {
           MINT_PERMISSION_ID,
         ],
         [
-            Operation.Grant,
-            anticipatedTokenAddress,
-            targetDao.address,
-            AddressZero,
-            TOKEN_UPGRADE_PERMISSION_ID,
-            ],
+          Operation.Grant,
+          anticipatedTokenAddress,
+          targetDao.address,
+          AddressZero,
+          TOKEN_UPGRADE_PERMISSION_ID,
+        ],
       ]);
     });
 
@@ -398,9 +432,15 @@ describe('TokenVotingSetupZkSync', function () {
         [merkleMintToAddressArray, merkleMintToAmountArray],
       ]);
 
-      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
-      const anticipatedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
-      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce + 1) 
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address);
+      const anticipatedTokenAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce
+      );
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(
+        tokenVotingSetup.address,
+        nonce + 1
+      );
 
       await tokenVotingSetup.prepareInstallation(daoAddress, data);
 
@@ -471,16 +511,20 @@ describe('TokenVotingSetupZkSync', function () {
 
     it('correctly returns permissions, when the required number of helpers is supplied', async () => {
       const plugin = ethers.Wallet.createRandom().address;
-      
-      const governanceERC20 = await hre.wrapper.deploy('GovernanceERC20', {args: [targetDao.address,
-        tokenName,
-        tokenSymbol,
-        {receivers: [], amounts: []}]})
 
-      const governanceWrappedERC20 = await hre.wrapper.deploy('GovernanceWrappedERC20', {args: [governanceERC20.address,
-        tokenName,
-        tokenSymbol]})
+      const governanceERC20 = await hre.wrapper.deploy('GovernanceERC20', {
+        args: [
+          targetDao.address,
+          tokenName,
+          tokenSymbol,
+          {receivers: [], amounts: []},
+        ],
+      });
 
+      const governanceWrappedERC20 = await hre.wrapper.deploy(
+        'GovernanceWrappedERC20',
+        {args: [governanceERC20.address, tokenName, tokenSymbol]}
+      );
 
       // When the helpers contain governanceWrappedERC20 token
       const permissions1 =

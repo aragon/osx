@@ -4,7 +4,7 @@ import {BigNumberish, Contract, providers} from 'ethers';
 import {utils} from 'ethers';
 
 import {NetworkDeployment} from '.';
-import { getTime } from '../voting';
+import {getTime} from '../voting';
 
 export class HardhatClass implements NetworkDeployment {
   provider: providers.BaseProvider;
@@ -83,5 +83,4 @@ export class HardhatClass implements NetworkDeployment {
       constructorArgs: [],
     });
   }
-  
 }

@@ -19,15 +19,17 @@ export const verifyContract = async (
     'utf8'
   );
   const networksJSON = JSON.parse(networks.toString());
-  // TODO:Giorgi we can add this check if we're sure verification works
-  // we would need networksJson to include zksync
-  // if (!Object.keys(networksJSON).includes(currentNetwork)) {
-  //   throw Error(
-  //     `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${Object.keys(
-  //       networksJSON
-  //     ).join(',')}`
-  //   );
-  // }
+
+  if (
+    !Object.keys(networksJSON).includes(currentNetwork) &&
+    !HRE.network.config.zksync
+  ) {
+    throw Error(
+      `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${Object.keys(
+        networksJSON
+      ).join(',')}`
+    );
+  }
 
   try {
     const msDelay = 500; // minimum dely between tasks

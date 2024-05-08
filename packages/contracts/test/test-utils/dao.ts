@@ -25,7 +25,7 @@ export const TOKEN_INTERFACE_IDS = {
 
 export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
   const dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
-  
+
   await dao.initialize(
     '0x00',
     signer.address,

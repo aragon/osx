@@ -1,4 +1,4 @@
-import hre, { ethers } from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {findEvent} from '../../../utils/event';
 import {ProxyCreatedEvent} from '../../../typechain/ProxyFactory';
 import {BigNumberish, Contract, Wallet} from 'ethers';
@@ -84,16 +84,16 @@ export class Wrapper {
 
   static async create(networkName: string, provider: providers.BaseProvider) {
     if (networkName == 'zkLocalTestnet' || networkName == 'zkSyncLocal') {
-      const signers = await ethers.getSigners()
-      const allSigners = signers.map(signer => signer.address)
+      const signers = await ethers.getSigners();
+      const allSigners = signers.map(signer => signer.address);
 
-      for(let i = 10; i < 20; i++) {
+      for (let i = 10; i < 20; i++) {
         await signers[0].sendTransaction({
           to: allSigners[i],
-          value: ethers.utils.parseEther("0.5"),
-        })
+          value: ethers.utils.parseEther('0.5'),
+        });
       }
-      
+
       // @ts-ignore TODO:GIORGI
       return new Wrapper(new ZkSync(provider));
     }
@@ -116,7 +116,7 @@ export class Wrapper {
       const tx = await proxyFactoryContract.deployUUPSProxy('0x');
 
       const event = await findEvent<ProxyCreatedEvent>(tx, 'ProxyCreated');
-      
+
       contract = new hre.ethers.Contract(
         event.args.proxy,
         artifact.abi,
@@ -164,5 +164,4 @@ export class Wrapper {
   ) {
     return this.network.upgradeProxy(upgrader, proxyAddress, newArtifactName);
   }
-
 }

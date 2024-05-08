@@ -23,7 +23,7 @@ import {
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {daoExampleURI} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
-import { ARTIFACT_SOURCES } from '../../../test-utils/wrapper';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 
 export const majorityVotingBaseInterface = new ethers.utils.Interface([
   'function minDuration()',
@@ -66,7 +66,9 @@ describe('MajorityVotingMock', function () {
 
     const MajorityVotingBase = new MajorityVotingMock__factory(signers[0]);
 
-    votingBase = await hre.wrapper.deploy('MajorityVotingMock', {withProxy: true})
+    votingBase = await hre.wrapper.deploy('MajorityVotingMock', {
+      withProxy: true,
+    });
     await dao.grant(
       votingBase.address,
       ownerAddress,
