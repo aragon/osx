@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {expect} from 'chai';
 import {BigNumber, Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -48,7 +48,9 @@ export async function advanceTimeTo(timestamp: number) {
 }
 
 export async function advanceIntoVoteTime(startDate: number, endDate: number) {
-  await advanceTimeTo(startDate);
+  await setTimeForNextBlock(startDate)
+  await ethers.provider.send('evm_mine', []);
+
   expect(await getTime()).to.be.greaterThanOrEqual(startDate);
   expect(await getTime()).to.be.lessThan(endDate);
 }

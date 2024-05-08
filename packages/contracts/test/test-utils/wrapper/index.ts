@@ -1,7 +1,7 @@
-import hre from 'hardhat';
+import hre, { ethers } from 'hardhat';
 import {findEvent} from '../../../utils/event';
 import {ProxyCreatedEvent} from '../../../typechain/ProxyFactory';
-import {BigNumberish, Contract} from 'ethers';
+import {BigNumberish, Contract, Wallet} from 'ethers';
 import {providers} from 'ethers';
 
 import {HardhatClass} from './hardhat';
@@ -60,7 +60,7 @@ export interface NetworkDeployment {
   getNonce(
     sender: string,
     type?: 'Deployment' | 'Transaction'
-  ): Promise<BigNumberish>;
+  ): Promise<number>;
   deployProxy(
     deployer: number,
     artifactName: string,
@@ -73,6 +73,8 @@ export interface NetworkDeployment {
     proxyAddress: string,
     newArtifactName: string
   ): Promise<Contract>;
+  nextBlockTimestamp(timestamp?: number): Promise<number>;
+
 }
 
 export class Wrapper {
@@ -82,8 +84,18 @@ export class Wrapper {
     this.network = _network;
   }
 
-  static create(networkName: string, provider: providers.BaseProvider) {
+  static async create(networkName: string, provider: providers.BaseProvider) {
     if (networkName == 'zkLocalTestnet' || networkName == 'zkSyncLocal') {
+      const signers = await ethers.getSigners()
+      const allSigners = signers.map(signer => signer.address)
+
+      for(let i = 10; i < 20; i++) {
+        await signers[0].sendTransaction({
+          to: allSigners[i],
+          value: ethers.utils.parseEther("0.5"),
+        })
+      }
+      
       // @ts-ignore TODO:GIORGI
       return new Wrapper(new ZkSync(provider));
     }
@@ -105,6 +117,7 @@ export class Wrapper {
       const tx = await proxyFactoryContract.deployUUPSProxy('0x');
 
       const event = await findEvent<ProxyCreatedEvent>(tx, 'ProxyCreated');
+      
       contract = new hre.ethers.Contract(
         event.args.proxy,
         artifact.abi,
@@ -122,7 +135,7 @@ export class Wrapper {
   async getNonce(
     sender: string,
     type?: 'Deployment' | 'Transaction'
-  ): Promise<BigNumberish> {
+  ): Promise<number> {
     return this.network.getNonce(sender, type ?? 'Deployment');
   }
 
@@ -152,4 +165,9 @@ export class Wrapper {
   ) {
     return this.network.upgradeProxy(upgrader, proxyAddress, newArtifactName);
   }
+
+  async nextBlockTimestamp(timestamp?: number) {
+    return this.network.nextBlockTimestamp(timestamp);
+  }
+
 }

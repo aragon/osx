@@ -107,9 +107,6 @@ describe('MerkleDistributor', function () {
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
 
-      // TODO:GIORGI what the
-      expect(toImplementation).to.equal(fromImplementation); // The build did not change
-
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
       );

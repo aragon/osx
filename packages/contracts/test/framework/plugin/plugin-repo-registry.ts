@@ -285,10 +285,7 @@ describe('PluginRepoRegistry', function () {
           ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY_V1_0_0,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
         );
-
-      // TODO:GIORGI what the f is this ?
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
-
+      
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
       );

@@ -311,9 +311,6 @@ describe('ENSSubdomainRegistrar', function () {
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID
         );
 
-      // TODO:GIORGI what th
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
-
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)
       );

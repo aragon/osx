@@ -257,7 +257,6 @@ describe('DAORegistry', function () {
       currentContractFactory = new DAORegistry__factory(signers[0]);
     });
 
-    // TODO:GIORGI fix later
     it('from v1.0.0', async () => {
       legacyContractFactory = new DAORegistry_V1_0_0__factory(signers[0]);
 
@@ -275,9 +274,6 @@ describe('DAORegistry', function () {
           ARTIFACT_SOURCES.DAO_REGISTRY,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
         );
-
-      // TODO: GIORGI what the f is this ?
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)

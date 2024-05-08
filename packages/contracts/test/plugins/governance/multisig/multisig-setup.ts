@@ -4,16 +4,12 @@ import hre, {ethers} from 'hardhat';
 import {
   DAO,
   InterfaceBasedRegistryMock,
-  InterfaceBasedRegistryMock__factory,
   IPluginRepo__factory,
   Multisig,
   MultisigSetup,
-  MultisigSetup__factory,
   Multisig__factory,
   PluginRepo,
-  PluginRepo__factory,
   PluginSetupProcessor,
-  PluginSetupProcessor__factory,
 } from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
@@ -328,7 +324,6 @@ describe('MultisigSetup', function () {
     });
   });
 
-  // TODO: Improve checks by using smock with the proxy (We don't know how yet)
   describe('Updates', async () => {
     let psp: PluginSetupProcessor;
     let setup1: MultisigSetup;

@@ -88,7 +88,6 @@ export function supportRevertedWith(Assertion: Chai.AssertionStatic) {
 
         const returnData = getReturnDataFromError(error);
         const decodedReturnData = decodeReturnData(returnData);
-
         if (decodedReturnData.kind === 'Empty') {
           assert(
             false,

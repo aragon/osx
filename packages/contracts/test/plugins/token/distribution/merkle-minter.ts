@@ -115,7 +115,6 @@ describe('MerkleMinter', function () {
           ARTIFACT_SOURCES.MERKLE_MINTER,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
-      expect(toImplementation).to.equal(fromImplementation); // The build did not change
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)

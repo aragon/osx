@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -53,7 +53,7 @@ const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe.skip('TokenVotingSetup', function () {
+describe('TokenVotingSetup', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
   let governanceERC20Base: GovernanceERC20;
@@ -84,33 +84,16 @@ describe.skip('TokenVotingSetup', function () {
     };
     defaultMintSettings = {receivers: [], amounts: []};
 
-    const GovernanceERC20Factory = new GovernanceERC20__factory(signers[0]);
-    governanceERC20Base = await GovernanceERC20Factory.deploy(
-      AddressZero,
-      emptyName,
-      emptySymbol,
-      defaultMintSettings
-    );
+    governanceERC20Base = await hre.wrapper.deploy('GovernanceERC20', {args: [AddressZero, emptyName, emptySymbol, defaultMintSettings]})
 
-    const GovernanceWrappedERC20Factory = new GovernanceWrappedERC20__factory(
-      signers[0]
-    );
-    governanceWrappedERC20Base = await GovernanceWrappedERC20Factory.deploy(
-      AddressZero,
-      emptyName,
-      emptySymbol
-    );
+   
+    governanceWrappedERC20Base = await hre.wrapper.deploy('GovernanceWrappedERC20', {args: [AddressZero, emptyName, emptySymbol]})
 
-    const TokenVotingSetup = new TokenVotingSetup__factory(signers[0]);
-    tokenVotingSetup = await TokenVotingSetup.deploy(
-      governanceERC20Base.address,
-      governanceWrappedERC20Base.address
-    );
+    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetup', {args: [governanceERC20Base.address, governanceWrappedERC20Base.address]})
 
     implementationAddress = await tokenVotingSetup.implementation();
 
-    const ERC20Token = new ERC20__factory(signers[0]);
-    erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
+    erc20Token = await hre.wrapper.deploy('ERC20', {args: [tokenName, tokenSymbol]})
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
       Object.values(defaultVotingSettings),
@@ -168,13 +151,8 @@ describe.skip('TokenVotingSetup', function () {
         {receivers: receivers, amounts: amounts},
       ]);
 
-      const nonce = await ethers.provider.getTransactionCount(
-        tokenVotingSetup.address
-      );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce,
-      });
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce) 
 
       const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
 
@@ -221,17 +199,9 @@ describe.skip('TokenVotingSetup', function () {
     });
 
     it('correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied', async () => {
-      const nonce = await ethers.provider.getTransactionCount(
-        tokenVotingSetup.address
-      );
-      const anticipatedWrappedTokenAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce,
-      });
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce + 1,
-      });
+      let nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
+      const anticipatedWrappedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce + 1) 
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
@@ -277,13 +247,8 @@ describe.skip('TokenVotingSetup', function () {
     });
 
     it('correctly sets up `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied', async () => {
-      const nonce = await ethers.provider.getTransactionCount(
-        tokenVotingSetup.address
-      );
-      const anticipatedWrappedTokenAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce,
-      });
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
+      const anticipatedWrappedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce) 
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
@@ -312,23 +277,15 @@ describe.skip('TokenVotingSetup', function () {
     });
 
     it('correctly returns plugin, helpers and permissions, when a governance token address is supplied', async () => {
-      const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
-      const governanceERC20 = await GovernanceERC20.deploy(
-        targetDao.address,
+      const governanceERC20 = await hre.wrapper.deploy('GovernanceERC20', {args: [targetDao.address,
         'name',
         'symbol',
-        {receivers: [], amounts: []}
-      );
-
-      const nonce = await ethers.provider.getTransactionCount(
-        tokenVotingSetup.address
-      );
-
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce,
-      });
-
+        {receivers: [], amounts: []}]}) 
+      
+      
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
+      
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
         [governanceERC20.address, '', ''],
@@ -373,19 +330,10 @@ describe.skip('TokenVotingSetup', function () {
     });
 
     it('correctly returns plugin, helpers and permissions, when a token address is not supplied', async () => {
-      const nonce = await ethers.provider.getTransactionCount(
-        tokenVotingSetup.address
-      );
-      const anticipatedTokenAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce,
-      });
-
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce + 1,
-      });
-
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
+      const anticipatedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce + 1) 
+      
       const {
         plugin,
         preparedSetupData: {helpers, permissions},
@@ -439,17 +387,9 @@ describe.skip('TokenVotingSetup', function () {
         [merkleMintToAddressArray, merkleMintToAmountArray],
       ]);
 
-      const nonce = await ethers.provider.getTransactionCount(
-        tokenVotingSetup.address
-      );
-      const anticipatedTokenAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce,
-      });
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: tokenVotingSetup.address,
-        nonce: nonce + 1,
-      });
+      const nonce = await hre.wrapper.getNonce(tokenVotingSetup.address)
+      const anticipatedTokenAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(tokenVotingSetup.address, nonce + 1) 
 
       await tokenVotingSetup.prepareInstallation(daoAddress, data);
 
@@ -520,22 +460,16 @@ describe.skip('TokenVotingSetup', function () {
 
     it('correctly returns permissions, when the required number of helpers is supplied', async () => {
       const plugin = ethers.Wallet.createRandom().address;
-      const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
-      const GovernanceWrappedERC20 = new GovernanceWrappedERC20__factory(
-        signers[0]
-      );
-      const governanceERC20 = await GovernanceERC20.deploy(
-        targetDao.address,
+      
+      const governanceERC20 = await hre.wrapper.deploy('GovernanceERC20', {args: [targetDao.address,
         tokenName,
         tokenSymbol,
-        {receivers: [], amounts: []}
-      );
+        {receivers: [], amounts: []}]})
 
-      const governanceWrappedERC20 = await GovernanceWrappedERC20.deploy(
-        governanceERC20.address,
+      const governanceWrappedERC20 = await hre.wrapper.deploy('GovernanceWrappedERC20', {args: [governanceERC20.address,
         tokenName,
-        tokenSymbol
-      );
+        tokenSymbol]})
+
 
       // When the helpers contain governanceWrappedERC20 token
       const permissions1 =

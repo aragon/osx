@@ -4,6 +4,7 @@ import {BigNumberish, Contract, providers} from 'ethers';
 import {utils} from 'ethers';
 
 import {NetworkDeployment} from '.';
+import { getTime } from '../voting';
 
 export class HardhatClass implements NetworkDeployment {
   provider: providers.BaseProvider;
@@ -31,7 +32,7 @@ export class HardhatClass implements NetworkDeployment {
   async getNonce(
     sender: string,
     type?: 'Deployment' | 'Transaction'
-  ): Promise<BigNumberish> {
+  ): Promise<number> {
     return this.provider.getTransactionCount(sender);
   }
 
@@ -81,5 +82,12 @@ export class HardhatClass implements NetworkDeployment {
       unsafeAllow: ['constructor'],
       constructorArgs: [],
     });
+  }
+
+  async nextBlockTimestamp(timestamp?: number): Promise<number> {
+    if(timestamp) {
+      return timestamp + 12;
+    }
+    return (await getTime()) + 12;
   }
 }

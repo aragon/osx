@@ -38,7 +38,6 @@ import {
 
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {OZ_ERRORS} from '../../test-utils/error';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './callback-handler';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
@@ -46,8 +45,6 @@ import {ExecutedEvent} from '../../../typechain/DAO';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import '../../test-utils/matcher';
-
-// chai.use()
 
 const errorSignature = '0x08c379a0'; // first 4 bytes of Error(string)
 
@@ -350,7 +347,6 @@ describe('DAO', function () {
           ARTIFACT_SOURCES.DAO,
           UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
-      expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)

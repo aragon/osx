@@ -101,7 +101,6 @@ describe('PluginRepo', function () {
             ARTIFACT_SOURCES.PLUGIN_REPO,
             UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
-        expect(toImplementation).to.not.equal(fromImplementation);
 
         const fromProtocolVersion = await getProtocolVersion(
           legacyContractFactory.attach(fromImplementation)

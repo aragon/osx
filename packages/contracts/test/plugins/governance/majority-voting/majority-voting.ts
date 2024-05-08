@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -20,10 +20,10 @@ import {
   ONE_HOUR,
   ONE_YEAR,
 } from '../../../test-utils/voting';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {OZ_ERRORS} from '../../../test-utils/error';
 import {daoExampleURI} from '../../../test-utils/dao';
 import {getInterfaceID} from '../../../test-utils/interfaces';
+import { ARTIFACT_SOURCES } from '../../../test-utils/wrapper';
 
 export const majorityVotingBaseInterface = new ethers.utils.Interface([
   'function minDuration()',
@@ -35,7 +35,7 @@ export const majorityVotingBaseInterface = new ethers.utils.Interface([
   'function createProposal(bytes,tuple(address,uint256,bytes)[],uint256,uint64,uint64,uint8,bool)',
 ]);
 
-describe.skip('MajorityVotingMock', function () {
+describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
   let votingBase: MajorityVotingMock;
   let dao: DAO;
@@ -46,8 +46,7 @@ describe.skip('MajorityVotingMock', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAO = new DAO__factory(signers[0]);
-    dao = await deployWithProxy(DAO);
+    dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
     await dao.initialize(
       '0x',
       ownerAddress,
@@ -67,7 +66,7 @@ describe.skip('MajorityVotingMock', function () {
 
     const MajorityVotingBase = new MajorityVotingMock__factory(signers[0]);
 
-    votingBase = await deployWithProxy(MajorityVotingBase);
+    votingBase = await hre.wrapper.deploy('MajorityVotingMock', {withProxy: true})
     await dao.grant(
       votingBase.address,
       ownerAddress,

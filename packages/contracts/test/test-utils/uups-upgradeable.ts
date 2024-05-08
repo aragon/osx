@@ -23,7 +23,7 @@ export async function ozUpgradeCheckManagedContract(
 }> {
   const deployerSigner = (await hre.ethers.getSigners())[deployer];
   const upgraderSigner = (await hre.ethers.getSigners())[upgrader];
-
+  
   let proxy = await hre.wrapper.deployProxy(deployer, from, {
     args: Object.values(initArgs),
     proxySettings: {

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -38,7 +38,7 @@ const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe.skip('AddresslistVotingSetup', function () {
+describe('AddresslistVotingSetup', function () {
   let signers: SignerWithAddress[];
   let addresslistVotingSetup: AddresslistVotingSetup;
   let implementationAddress: string;
@@ -57,10 +57,7 @@ describe.skip('AddresslistVotingSetup', function () {
     };
     defaultMembers = [signers[0].address];
 
-    const AddresslistVotingSetup = new AddresslistVotingSetup__factory(
-      signers[0]
-    );
-    addresslistVotingSetup = await AddresslistVotingSetup.deploy();
+    addresslistVotingSetup = await hre.wrapper.deploy('AddresslistVotingSetup')
 
     implementationAddress = await addresslistVotingSetup.implementation();
 
@@ -113,13 +110,8 @@ describe.skip('AddresslistVotingSetup', function () {
     });
 
     it('correctly returns plugin, helpers and permissions', async () => {
-      const nonce = await ethers.provider.getTransactionCount(
-        addresslistVotingSetup.address
-      );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: addresslistVotingSetup.address,
-        nonce,
-      });
+      const nonce = await hre.wrapper.getNonce(addresslistVotingSetup.address)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(addresslistVotingSetup.address, nonce)
 
       const {
         plugin,
@@ -165,13 +157,8 @@ describe.skip('AddresslistVotingSetup', function () {
     });
 
     it('correctly sets up the plugin', async () => {
-      const nonce = await ethers.provider.getTransactionCount(
-        addresslistVotingSetup.address
-      );
-      const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: addresslistVotingSetup.address,
-        nonce,
-      });
+      const nonce = await hre.wrapper.getNonce(addresslistVotingSetup.address)
+      const anticipatedPluginAddress = hre.wrapper.getCreateAddress(addresslistVotingSetup.address, nonce)
 
       await addresslistVotingSetup.prepareInstallation(
         targetDao.address,

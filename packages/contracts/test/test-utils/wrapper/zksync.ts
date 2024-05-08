@@ -3,6 +3,8 @@ import {BigNumberish, Contract} from 'ethers';
 import {NetworkDeployment, deploySettings} from '.';
 import {Provider} from 'zksync-ethers';
 import {utils, Wallet} from 'zksync-ethers';
+import { getTime } from '../voting';
+import { Deployer } from '@matterlabs/hardhat-zksync-deploy';
 
 export class ZkSync implements NetworkDeployment {
   provider: Provider;
@@ -13,8 +15,8 @@ export class ZkSync implements NetworkDeployment {
   async deploy(artifactName: string, args: any[] = []) {
     const {deployer} = hre;
     const artifact = await deployer.loadArtifact(artifactName);
-    let contract = await deployer.deploy(artifact, args);
-
+    const contract = await deployer.deploy(artifact, args);
+    
     return {artifact, contract};
   }
 
@@ -25,7 +27,7 @@ export class ZkSync implements NetworkDeployment {
   async getNonce(
     sender: string,
     type: 'Deployment' | 'Transaction' = 'Deployment'
-  ): Promise<BigNumberish> {
+  ): Promise<number> {
     if (type == 'Deployment') {
       const {ethers} = hre;
       const NONCE_HOLDER_ADDRESS = '0x0000000000000000000000000000000000008003';
@@ -81,5 +83,12 @@ export class ZkSync implements NetworkDeployment {
       },
       true
     );
+  }
+
+  async nextBlockTimestamp(timestamp?: number): Promise<number> {
+    if(timestamp) {
+      return timestamp + 1;
+    }
+    return (await getTime()) + 1;
   }
 }
