@@ -413,8 +413,9 @@ describe('TokenVoting', function () {
         ).not.to.be.reverted;
       });
 
-      skipTestIfNetworkIsZkSync('f', async () => {
-        it('reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block', async () => {
+      skipTestIfNetworkIsZkSync(
+        'reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block',
+        async () => {
           await setBalances([
             {
               receiver: signers[0].address,
@@ -506,8 +507,8 @@ describe('TokenVoting', function () {
           );
 
           await ethers.provider.send('evm_setAutomine', [true]);
-        });
-      });
+        }
+      );
 
       it('creates a proposal if `_msgSender` owns enough tokens  in the current block', async () => {
         await setBalances([

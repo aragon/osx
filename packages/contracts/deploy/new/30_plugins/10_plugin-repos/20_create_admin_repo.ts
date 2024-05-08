@@ -5,6 +5,7 @@ import {
   populatePluginRepo,
   getContractAddress,
   uploadToIPFS,
+  skipIfZkSync,
 } from '../../../helpers';
 import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
@@ -47,3 +48,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateAdminRepo'];
+func.skip = async hre => await skipIfZkSync(hre, 'CreateAdminRepo');

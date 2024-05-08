@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect, use} from 'chai';
 import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -24,6 +24,7 @@ import {
 } from '../../../../test-utils/voting';
 import {tokenVotingInterface} from './token-voting';
 import {getNamedTypesFromMetadata} from '../../../../../utils/metadata';
+import {supportRevertedWith} from '../../../../test-utils/matcher';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -135,14 +136,14 @@ describe('TokenVotingSetupZkSync', function () {
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
-      ).to.be.reverted;
+      ).revertedWithoutReason();
 
       await expect(
         tokenVotingSetup.prepareInstallation(
           targetDao.address,
           defaultData.substring(0, defaultData.length - 2)
         )
-      ).to.be.reverted;
+      ).revertedWithoutReason();
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, defaultData)

@@ -1,11 +1,24 @@
 import hre from 'hardhat';
-
-const ZK_SYNC_NETWORKS = ['zkSync', 'zkLocalTestnet', 'zkTestnet'];
+import {ZK_SYNC_NETWORKS} from '../../utils/zkSync';
 
 // ANSI escape codes for colored terminal output
 const YELLOW = '\x1b[33m'; // Yellow color for SKIPPED
 const BLUE = '\x1b[34m'; // Blue color for message
 const RESET = '\x1b[0m'; // Reset to default terminal color
+
+const logSkipped = (testName: string, reason?: string) =>
+  console.log(
+    `${YELLOW}SKIPPING TEST ${
+      reason ? '(' + reason + ')' : ''
+    }${RESET}: ${BLUE}${testName}${RESET}`
+  );
+
+const logSkippedSuite = (testName: string, reason?: string) =>
+  console.log(
+    `${YELLOW}SKIPPING TEST SUITE ${
+      reason ? '(' + reason + ')' : ''
+    }${RESET}: ${BLUE}${testName}${RESET}`
+  );
 
 /**
  * Creates a conditional test function that skips based on the provided condition.
@@ -13,13 +26,12 @@ const RESET = '\x1b[0m'; // Reset to default terminal color
  * @returns A function to define a test, which will skip based on the condition.
  */
 export function skipTestIf(condition: boolean, reason?: string) {
-  return (testName: string, testFunc: (() => any) | (() => Promise<any>)) => {
+  return (
+    testName: string,
+    testFunc: ((args: any) => void) | ((args: any) => Promise<void>)
+  ) => {
     if (condition) {
-      console.log(
-        `${YELLOW}SKIPPED TEST ${
-          reason ? '(' + reason + ')' : ''
-        }${RESET}: ${BLUE}${testName}${RESET}`
-      );
+      logSkipped(testName, reason);
       return it.skip(testName, testFunc);
     } else {
       return it(testName, testFunc);
@@ -33,13 +45,9 @@ export function skipTestIf(condition: boolean, reason?: string) {
  * @returns A function to define a test, which will skip based on the condition.
  */
 export function skipDescribeIf(condition: boolean, reason?: string) {
-  return (testName: string, testFunc: (() => any) | (() => Promise<any>)) => {
+  return (testName: string, testFunc: (() => void) | (() => Promise<void>)) => {
     if (condition) {
-      console.log(
-        `${YELLOW}SKIPPED TEST SUITE ${
-          reason ? '(' + reason + ')' : ''
-        }${RESET}: ${BLUE}${testName} as condition is met${RESET}`
-      );
+      logSkippedSuite(testName, reason);
       return describe.skip(testName, testFunc);
     } else {
       return describe(testName, testFunc);

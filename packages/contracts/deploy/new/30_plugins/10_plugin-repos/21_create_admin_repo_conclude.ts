@@ -4,6 +4,7 @@ import {
 } from '../../../../typechain';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipIfZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding TokenVotingSetup deployment.\n`);
@@ -34,3 +35,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateAdminRepo', 'Verify'];
+func.skip = async hre => await skipIfZkSync(hre, 'CreateAdminRepoConclude');

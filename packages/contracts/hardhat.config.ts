@@ -106,7 +106,7 @@ console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   zksolc: {
-    version: '1.4.0',
+    version: '1.4.1',
     compilerSource: 'binary',
     settings: {},
   },

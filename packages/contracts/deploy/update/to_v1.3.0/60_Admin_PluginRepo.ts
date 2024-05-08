@@ -4,7 +4,7 @@ import {
   PluginRepo__factory,
   PluginRepoFactory__factory,
 } from '../../../typechain';
-import {getContractAddress} from '../../helpers';
+import {getContractAddress, skipIfZkSync} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(
@@ -42,3 +42,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['AdminPluginRepo', 'v1.3.0'];
+func.skip = async hre => await skipIfZkSync(hre, 'UpdateAdminPluginRepo');

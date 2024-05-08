@@ -16,6 +16,7 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {ZK_SYNC_NETWORKS} from '../utils/zkSync';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -647,6 +648,17 @@ export function getManagingDAOMultisigAddress(
     );
   }
   return address;
+}
+
+export async function skipIfZkSync(
+  hre: HardhatRuntimeEnvironment,
+  stage: string
+) {
+  if (ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    console.log(`Skipping deployment stage ${stage} due to zkSync network`);
+    return true;
+  }
+  return false;
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

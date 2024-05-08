@@ -24,7 +24,7 @@ import {TokenVoting} from "../plugins/governance/majority-voting/token/TokenVoti
 
 /// @title TokenVotingSetup
 /// @author Aragon Association - 2022-2023
-/// @notice The setup contract of the `TokenVoting` plugin.
+/// @notice The setup contract of the `TokenVoting` plugin for the ZkSync network.
 contract TokenVotingSetupZkSync is PluginSetup {
     using Address for address;
     using Clones for address;
@@ -92,6 +92,11 @@ contract TokenVotingSetupZkSync is PluginSetup {
 
         address token = tokenSettings.addr;
 
+        // determine if the plugin needs to be granted the upgrade permission
+        // this will be if:
+        // - the token is not passed (new token is deployed)
+        // - the token is passed, but it does not support our token interfaces
+        //   so we need to deploy it behind a proxy and grant upgrade to the DAO
         bool setUpgradePermission = false;
 
         // Prepare helpers.
@@ -158,16 +163,16 @@ contract TokenVotingSetupZkSync is PluginSetup {
 
         // avoid stack too deep.
         {
+            // check for an existing token: we will grant mint on the token to the dao if so
             uint256 permissionCount = tokenSettings.addr != address(0) ? 3 : 4;
 
+            // If the plugin needs to be granted the upgrade permission, increment the permission count.
             if (setUpgradePermission) {
                 permissionCount = permissionCount + 1;
             }
 
             permissions = new PermissionLib.MultiTargetPermission[](permissionCount);
         }
-
-        uint256 upgradePermissionIndex = 3;
 
         // Set plugin permissions to be granted.
         // Grant the list of permissions of the plugin to the DAO.
@@ -206,14 +211,12 @@ contract TokenVotingSetupZkSync is PluginSetup {
                 PermissionLib.NO_CONDITION,
                 tokenMintPermission
             );
-
-            upgradePermissionIndex = 4;
         }
 
         if (setUpgradePermission) {
             bytes32 tokenUpgradePermission = GovernanceERC20Upgradeable(token)
                 .UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID();
-            permissions[upgradePermissionIndex] = PermissionLib.MultiTargetPermission(
+            permissions[permissions.length - 1] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Grant,
                 token,
                 _dao,
