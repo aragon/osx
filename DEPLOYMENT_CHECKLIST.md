@@ -7,14 +7,16 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
 - [ ] Run `yarn` in the repository root to install the dependencies.
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile.
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed.
+
   - To run the tests, edit `packages/contracts/.env` to contain:
 
     ```env
     HARDHAT_DAO_ENS_DOMAIN="testdao.eth"
     HARDHAT_PLUGIN_ENS_DOMAIN="testpluginrepo.eth"
 
-    MANAGINGDAO_SUBDOMAIN="management"
+    MANAGEMENT_DAO_SUBDOMAIN="management"
     ```
+
 - [ ] Edit `packages/contracts/networks.json` and add your custom network to which you want to deploy to.
 
   If contract verification is not available for your chain:
@@ -48,10 +50,10 @@ This checklist is seen as a guide to deploy the contracts to a new chain.
       - [Open the ENS app](https://app.ens.domains/) and click `unwrap` for each of these domains.
       - [Example](https://app.ens.domains/morpheusplugin3.eth?tab=more)
 
-- [ ] If desired, update `MANAGINGDAO_SUBDOMAIN` on `packages/contracts/.env`.
+- [ ] If desired, update `MANAGEMENT_DAO_SUBDOMAIN` on `packages/contracts/.env`.
   - In case you want the Managing DAO to use a different subdomain than the default one (`management`):
   ```env
-  MANAGINGDAO_SUBDOMAIN="root"         # would be root.my-dao.eth
+  MANAGEMENT_DAO_SUBDOMAIN="root"         # would be root.my-dao.eth
   ```
 - [ ] Define the the deployment wallet's private key on the `.env` file
   ```env

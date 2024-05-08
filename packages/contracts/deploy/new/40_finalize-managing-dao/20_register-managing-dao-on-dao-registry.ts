@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Get info from .env
-  const daoSubdomain = process.env.MANAGINGDAO_SUBDOMAIN || '';
+  const daoSubdomain = process.env.MANAGEMENT_DAO_SUBDOMAIN || '';
   const daoDomain =
     process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
 
