@@ -154,7 +154,7 @@ describe('PluginRepo', function () {
       });
     });
     describe('InitializeFrom', () => {
-      it('Should revert because the function is a placeholder', async () => {
+      it('reverts because the function is a placeholder', async () => {
         // Call `initializeFrom` with version 1.3.0. and revert
         await expect(pluginRepo.initializeFrom([1, 3, 0], emptyBytes)).to.be
           .reverted;
