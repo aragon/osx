@@ -4,7 +4,7 @@ import governanceWrappedERC20Artifact from '../../../../artifacts/src/token/ERC2
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import { skipIfZkSync } from '../../../helpers';
+import {skipIfZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;

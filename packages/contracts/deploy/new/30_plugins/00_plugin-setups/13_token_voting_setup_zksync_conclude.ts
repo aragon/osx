@@ -2,7 +2,7 @@ import {TokenVotingSetup__factory} from '../../../../typechain';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {setTimeout} from 'timers/promises';
-import { skipIfNotZkSync } from '../../../helpers';
+import {skipIfNotZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`Concluding token voting setup deployment.\n`);
@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployments, network} = hre;
 
-  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetupZkSync');
+  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetup');
   const tokenVotingSetup = TokenVotingSetup__factory.connect(
     TokenVotingSetupDeployment.address,
     deployer
@@ -31,8 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   hre.aragonToVerifyContracts.push({
-    contract:
-      'src/zksync/TokenVotingSetupZkSync.sol:TokenVotingSetupZkSync',      
+    contract: 'src/zksync/TokenVotingSetupZkSync.sol:TokenVotingSetupZkSync',
     ...TokenVotingSetupDeployment,
   });
   hre.aragonToVerifyContracts.push({
@@ -45,4 +44,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'TokenVotingSetupZkSync', 'Verify'];
-func.skip = async hre => await skipIfNotZkSync(hre, 'TokenVotingSetupZkSync-Verify');
+func.skip = async hre =>
+  await skipIfNotZkSync(hre, 'TokenVotingSetupZkSync-Verify');

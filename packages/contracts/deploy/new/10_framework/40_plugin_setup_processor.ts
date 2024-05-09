@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {getContractAddress} from '../../helpers';
+import {getContractAddress, skipIfZkSync} from '../../helpers';
 
 import pluginSetupProcessorFactoryArtifact from '../../../artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
 
@@ -24,3 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'PluginSetupProcessor'];
+func.skip = async hre => await skipIfZkSync(hre, 'PluginSetupProcessor');

@@ -29,7 +29,7 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Managing DAO', function () {
+describe.only('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
@@ -51,9 +51,11 @@ describe('Managing DAO', function () {
       'upgradeTo',
       [newImplementationAddress]
     );
-    const actions = contractAddress.filter(address => address != '').map(contract => {
-      return {to: contract, value: 0, data: data};
-    });
+    const actions = contractAddress
+      .filter(address => address != '')
+      .map(contract => {
+        return {to: contract, value: 0, data: data};
+      });
 
     await multisig.createProposal(
       '0x', // metadata
@@ -314,7 +316,7 @@ describe('Managing DAO', function () {
     const deployedRepoAddresses = [];
 
     for (const [key, value] of Object.entries(hre.aragonPluginRepos)) {
-      if(value == '') continue;
+      if (value == '') continue;
       deployedRepoAddresses.push(value);
     }
 
@@ -324,9 +326,11 @@ describe('Managing DAO', function () {
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
 
-    const repos = hre.aragonPluginRepos.filter
+    const repos = hre.aragonPluginRepos.filter;
 
-    let implementationValues = await readImplementationValuesFromSlot(deployedRepoAddresses);
+    let implementationValues = await readImplementationValuesFromSlot(
+      deployedRepoAddresses
+    );
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
@@ -342,7 +346,9 @@ describe('Managing DAO', function () {
     );
 
     // re-read from slot
-    implementationValues = await readImplementationValuesFromSlot(deployedRepoAddresses);
+    implementationValues = await readImplementationValuesFromSlot(
+      deployedRepoAddresses
+    );
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];

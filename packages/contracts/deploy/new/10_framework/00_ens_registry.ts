@@ -10,8 +10,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nDeploying framework.`);
 
   const {network} = hre;
-  
-  console.log(`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`, ' kkkkk')
+
+  console.log(`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`, ' kkkkk');
   // Prepare ENS.
   const daoDomain =
     process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';

@@ -129,7 +129,8 @@ contract TokenVotingSetupZkSync is PluginSetup {
                 token = createERC1967Proxy(
                     governanceWrappedERC20Base,
                     abi.encodeWithSelector(
-                        GovernanceWrappedERC20.initialize.selector,
+                        GovernanceWrappedERC20Upgradeable.initialize.selector,
+                        IDAO(_dao),
                         IERC20Upgradeable(tokenSettings.addr),
                         tokenSettings.name,
                         tokenSettings.symbol
@@ -141,7 +142,7 @@ contract TokenVotingSetupZkSync is PluginSetup {
             token = createERC1967Proxy(
                 governanceERC20Base,
                 abi.encodeWithSelector(
-                    GovernanceERC20.initialize.selector,
+                    GovernanceERC20Upgradeable.initialize.selector,
                     IDAO(_dao),
                     tokenSettings.name,
                     tokenSettings.symbol,

@@ -4,7 +4,7 @@ import governanceWrappedERC20UpgradeableArtifact from '../../../../artifacts/src
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import { skipIfNotZkSync } from '../../../helpers';
+import {skipIfNotZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -21,25 +21,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   };
 
   // Deploy the bases for the TokenVotingSetup
-  const governanceERC20DeployResult = await deploy('GovernanceERC20Upgradeable', {
-    contract: governanceERC20UpgradeableArtifact,
-    from: deployer.address,
-    args: [zeroDaoAddress, emptyName, emptySymbol, emptyMintSettings],
-    log: true,
-  });
+  const governanceERC20DeployResult = await deploy(
+    'GovernanceERC20Upgradeable',
+    {
+      contract: governanceERC20UpgradeableArtifact,
+      from: deployer.address,
+      args: [zeroDaoAddress, emptyName, emptySymbol, emptyMintSettings],
+      log: true,
+    }
+  );
 
   const governanceWrappedERC20DeployResult = await deploy(
     'GovernanceWrappedERC20Upgradeable',
     {
       contract: governanceWrappedERC20UpgradeableArtifact,
       from: deployer.address,
-      args: [zeroTokenAddress, emptyName, emptySymbol],
+      args: [zeroTokenAddress, zeroTokenAddress, emptyName, emptySymbol],
       log: true,
     }
   );
 
   // Deploy the TokenVotingSetup and provide the bases in the constructor
-  await deploy('TokenVotingSetupZkSync', {
+  await deploy('TokenVotingSetup', {
     contract: tokenVotingSetupArtifact,
     from: deployer.address,
     args: [
@@ -52,5 +55,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['New', 'TokenVotingSetupZkSync'];
 func.skip = async hre => await skipIfNotZkSync(hre, 'TokenVotingSetupZkSync');
-
-  

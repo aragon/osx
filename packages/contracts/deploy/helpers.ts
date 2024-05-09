@@ -229,7 +229,7 @@ export async function createPluginRepo(
       `Critical: Either the event was not found or none of the plugin repo deployment corresponds to your domain.`
     );
   }
-  
+
   // The owner of the node is already set to someone who is not pluginSubdomainRegistrar.
   if (owner !== ethers.constants.AddressZero) {
     throw new Error(
@@ -671,8 +671,6 @@ export async function skipIfNotZkSync(
   }
   return false;
 }
-
-
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
 export default function () {}
