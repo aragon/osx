@@ -92,7 +92,7 @@ describe('TokenVotingSetupZkSync', function () {
     );
     governanceWrappedERC20Base = await hre.wrapper.deploy(
       'GovernanceWrappedERC20Upgradeable',
-      {args: [AddressZero, emptyName, emptySymbol]}
+      {args: [AddressZero, AddressZero, emptyName, emptySymbol]}
     );
     tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetupZkSync', {
       args: [governanceERC20Base.address, governanceWrappedERC20Base.address],
