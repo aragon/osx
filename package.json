@@ -18,7 +18,9 @@
       "**/matchstick-as",
       "**/matchstick-as/**",
       "**/@aragon/osx-commons-subgraph",
-      "**/@aragon/osx-commons-subgraph/**"
+      "**/@aragon/osx-commons-subgraph/**",
+      "**/@wagmi/cli",
+      "**/@wagmi/cli/**"
     ]
   },
   "scripts": {

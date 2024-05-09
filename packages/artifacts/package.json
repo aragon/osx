@@ -5,6 +5,18 @@
     "publishConfig": {
         "access": "public"
     },
+    "exports": {
+        ".": {
+            "import": "./dist/bundle-esm.js",
+            "require": "./dist/bundle-cjs.js",
+            "types": "./dist/bundle.d.ts"
+        },
+        "./abi": {
+            "import": "./dist/abi/bundle-esm.js",
+            "require": "./dist/abi/bundle-cjs.js",
+            "types": "./dist/abi/bundle.d.ts"
+        }
+    },
     "scripts": {
         "build:contracts": "cd ../contracts && yarn build",
         "build": "yarn build:contracts && yarn build:viem && yarn bundle",
