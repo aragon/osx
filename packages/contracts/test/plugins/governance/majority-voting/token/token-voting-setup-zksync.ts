@@ -136,14 +136,14 @@ describe('TokenVotingSetupZkSync', function () {
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
-      ).revertedWithoutReason();
+      ).to.be.reverted;
 
       await expect(
         tokenVotingSetup.prepareInstallation(
           targetDao.address,
           defaultData.substring(0, defaultData.length - 2)
         )
-      ).revertedWithoutReason();
+      ).to.be.reverted;
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, defaultData)
