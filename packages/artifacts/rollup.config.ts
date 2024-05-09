@@ -4,7 +4,7 @@ import dts from 'rollup-plugin-dts';
 
 export default [
   {
-    input: 'npm/index.ts',
+    input: ['index.ts'],
     plugins: [json(), typescript()],
     output: [
       {
@@ -18,7 +18,7 @@ export default [
     ],
   },
   {
-    input: 'npm/index.ts',
+    input: ['index.ts'],
     plugins: [json(), dts()],
     output: [
       {

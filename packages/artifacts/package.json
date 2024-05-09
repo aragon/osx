@@ -1,0 +1,31 @@
+{
+    "name": "@aragon/osx-artifacts",
+    "version": "1.4.0-rc0",
+    "description": "The Aragon OSx Solidity contracts",
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build:contracts": "cd ../contracts && yarn build",
+        "build": "yarn build:contracts && yarn build:viem && yarn bundle",
+        "bundle": "rollup --config rollup.config.ts",
+        "build:viem": "wagmi generate -c wagmi.config.ts",
+        "publish": "yarn build && yarn publish"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/aragon/osx.git"
+    },
+    "author": "",
+    "license": "AGPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/aragon/osx/issues"
+    },
+    "homepage": "https://github.com/aragon/osx#readme",
+    "devDependencies": {
+        "@wagmi/cli": "^2.1.4",
+        "rollup": "^2.70.1",
+        "rollup-plugin-dts": "^4.2.0",
+        "typescript": "^4.4.4"
+    }
+}
