@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     hardhat({
       artifacts: `../contracts/artifacts/src`,
+      exclude: ['**/test'],
       project: '../contracts',
     }),
   ],
