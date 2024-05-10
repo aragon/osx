@@ -11,12 +11,14 @@ import {IERC20MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/tok
 import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {DaoAuthorizableUpgradeable} from "../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+
 import {IDAO} from "../core/dao/IDAO.sol";
 import {IGovernanceWrappedERC20} from "../token/ERC20/governance/IGovernanceWrappedERC20.sol";
 
-/// @title GovernanceWrappedERC20
+/// @title GovernanceWrappedERC20Upgradeable
 /// @author Aragon Association
 /// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`. The latter is compatible with [OpenZeppelin's `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) interface.
 /// The contract also supports meta transactions. To use an `amount` of underlying tokens for voting, the token owner has to
@@ -24,26 +26,35 @@ import {IGovernanceWrappedERC20} from "../token/ERC20/governance/IGovernanceWrap
 /// 2. call `depositFor` to wrap them, which safely transfers the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens to the contract and mints wrapped [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens.
 /// To get the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens back, the owner of the wrapped tokens can call `withdrawFor`, which  burns the wrapped [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and safely transfers the underlying tokens back to the owner.
 /// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token contract.
-contract GovernanceWrappedERC20 is
+contract GovernanceWrappedERC20Upgradeable is
     IGovernanceWrappedERC20,
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
-    ERC20WrapperUpgradeable
+    ERC20WrapperUpgradeable,
+    UUPSUpgradeable,
+    DaoAuthorizableUpgradeable
 {
+    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
+    bytes32 public constant UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID =
+        keccak256("UPGRADE_GOVERNANCE_ERC20_PERMISSION");
+
     /// @notice Calls the initialize function.
+    /// @param _dao The managing DAO.
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol of the wrapped token.
-    constructor(IERC20Upgradeable _token, string memory _name, string memory _symbol) {
-        initialize(_token, _name, _symbol);
+    constructor(IDAO _dao, IERC20Upgradeable _token, string memory _name, string memory _symbol) {
+        initialize(_dao, _token, _name, _symbol);
     }
 
     /// @notice Initializes the contract.
+    /// @param _dao The managing DAO.
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol of the wrapped token.
     function initialize(
+        IDAO _dao,
         IERC20Upgradeable _token,
         string memory _name,
         string memory _symbol
@@ -51,6 +62,7 @@ contract GovernanceWrappedERC20 is
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
+        __DaoAuthorizableUpgradeable_init(_dao);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -123,4 +135,10 @@ contract GovernanceWrappedERC20 is
     ) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._burn(account, amount);
     }
+
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID) {}
 }
