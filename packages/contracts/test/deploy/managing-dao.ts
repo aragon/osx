@@ -21,6 +21,7 @@ import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framewor
 import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
 import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+import pluginSetupProcessorUpgradeableArtifactData from '../../artifacts/src/zksync/PluginSetupProcessorUpgradeable.sol/PluginSetupProcessorUpgradeable.json';
 
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {initializeDeploymentFixture} from '../test-utils/fixture';

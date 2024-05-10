@@ -2,7 +2,7 @@ import hre from 'hardhat';
 import {BigNumber, BigNumberish, Contract} from 'ethers';
 import {DeployOptions, NetworkDeployment} from '.';
 import {Provider} from 'zksync-ethers';
-import {utils} from 'zksync-ethers';
+import {utils, ContractFactory} from 'zksync-ethers';
 import {getTime} from '../voting';
 
 export class ZkSync implements NetworkDeployment {
@@ -17,6 +17,23 @@ export class ZkSync implements NetworkDeployment {
     const contract = await deployer.deploy(artifact, args);
 
     return {artifact, contract};
+  }
+
+  async encodeFunctionData(
+    artifactName: string,
+    functionName: string,
+    args: any[]
+  ): Promise<string> {
+    const {deployer} = hre;
+    const artifact = await deployer.loadArtifact(artifactName);
+    const contract = new ContractFactory(
+      artifact.abi,
+      artifact.bytecode,
+      await deployer.getWallet()
+    );
+
+    const fragment = contract.interface.getFunction(functionName);
+    return contract.interface.encodeFunctionData(fragment, args);
   }
 
   getCreateAddress(sender: string, nonce: BigNumberish): string {

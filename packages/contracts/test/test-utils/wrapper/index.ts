@@ -47,7 +47,7 @@ export const ARTIFACT_SOURCES = {
 
 export type DeployOptions = {
   initArgs?: any[]; // initialize function arguments in case `withProxy` is set to true.
-  args: any[]; // constructor arguments
+  args?: any[]; // constructor arguments
   withProxy?: boolean;
   proxySettings?: {
     type?: 'uups' | 'transparent' | 'beacon' | undefined;
@@ -62,6 +62,11 @@ export interface NetworkDeployment {
     sender: string,
     type?: 'Deployment' | 'Transaction'
   ): Promise<number>;
+  encodeFunctionData(
+    artifactName: string,
+    functionName: string,
+    args: any[]
+  ): Promise<string>;
   deployProxy(
     deployer: number,
     artifactName: string,
@@ -102,18 +107,31 @@ export class Wrapper {
   }
 
   async deploy(artifactName: string, options?: DeployOptions) {
+    const constructorArgs = options?.args ?? [];
+    const isProxy = options?.withProxy ?? false;
+    const initializer = options?.proxySettings?.initializer ?? undefined;
+
     let {artifact, contract} = await this.network.deploy(
       artifactName,
-      options?.args ?? []
+      constructorArgs
     );
-    if (options?.withProxy) {
+    if (isProxy) {
       const {contract: proxyFactoryContract} = await this.network.deploy(
         'ProxyFactory',
         [contract.address]
       );
 
       // Currently, always deploys with UUPS
-      const tx = await proxyFactoryContract.deployUUPSProxy('0x');
+      let data = '0x';
+      if (initializer) {
+        data = await this.network.encodeFunctionData(
+          artifactName,
+          initializer,
+          options?.initArgs ?? []
+        );
+      }
+
+      const tx = await proxyFactoryContract.deployUUPSProxy(data);
 
       const event = await findEvent<ProxyCreatedEvent>(tx, 'ProxyCreated');
 

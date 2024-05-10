@@ -4,7 +4,6 @@ import {BigNumberish, Contract, providers} from 'ethers';
 import {utils} from 'ethers';
 
 import {DeployOptions, NetworkDeployment} from '.';
-import {getTime} from '../voting';
 
 export class HardhatClass implements NetworkDeployment {
   provider: providers.BaseProvider;
@@ -23,6 +22,24 @@ export class HardhatClass implements NetworkDeployment {
     ).deploy(...args);
 
     return {artifact, contract};
+  }
+
+  async encodeFunctionData(
+    artifactName: string,
+    functionName: string,
+    args: any[]
+  ): Promise<string> {
+    const {ethers} = hre;
+    const signers = await ethers.getSigners();
+    const artifact = await hre.artifacts.readArtifact(artifactName);
+    const contract = new ethers.ContractFactory(
+      artifact.abi,
+      artifact.bytecode,
+      signers[0]
+    );
+
+    const fragment = contract.interface.getFunction(functionName);
+    return contract.interface.encodeFunctionData(fragment, args);
   }
 
   getCreateAddress(sender: string, nonce: BigNumberish): string {

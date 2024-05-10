@@ -36,10 +36,13 @@ let to: SignerWithAddress;
 let other: SignerWithAddress;
 let toDelegate: string;
 
-const runs = ['GovernanceWrappedERC20', 'GovernanceWrappedERC20Upgradeable'];
+const runs = [
+  {artifact: 'GovernanceWrappedERC20', upgradeable: false},
+  {artifact: 'GovernanceWrappedERC20Upgradeable', upgradeable: true},
+];
 
-runs.forEach(artifact => {
-  describe(artifact, function () {
+runs.forEach(options => {
+  describe(options.artifact, function () {
     let signers: SignerWithAddress[];
     let governanceToken: GovernanceWrappedERC20;
     let erc20: TestERC20;
@@ -52,7 +55,7 @@ runs.forEach(artifact => {
     let defaultGovernanceWrappedERC20InitData: any[] = [];
 
     function getArgs(args: any[]) {
-      if (artifact == 'GovernanceWrappedERC20Upgradeable') {
+      if (options.upgradeable) {
         args = [dao.address, ...args];
       }
       return args;
@@ -99,12 +102,12 @@ runs.forEach(artifact => {
         governanceWrappedERC20Symbol,
       ]);
 
-      governanceToken = await hre.wrapper.deploy(artifact, {
+      governanceToken = await hre.wrapper.deploy(options.artifact, {
         args: defaultGovernanceWrappedERC20InitData,
       });
     });
 
-    if (artifact == 'GovernanceWrappedERC20Upgradeable') {
+    if (options.upgradeable) {
       describe('Upgrades', async () => {
         it('successfully upgrades the contract', async () => {
           await ozUpgradeCheckManagedContract(
@@ -116,8 +119,8 @@ runs.forEach(artifact => {
               initArgs: defaultGovernanceWrappedERC20InitData,
               initializer: 'initialize',
             },
-            'GovernanceWrappedERC20Upgradeable',
-            'GovernanceWrappedERC20Upgradeable',
+            options.artifact,
+            options.artifact,
             UPGRADE_PERMISSIONS.UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID
           );
         });
@@ -133,7 +136,7 @@ runs.forEach(artifact => {
       });
 
       it('sets the wrapped token name and symbol', async () => {
-        governanceToken = await hre.wrapper.deploy(artifact, {
+        governanceToken = await hre.wrapper.deploy(options.artifact, {
           args: defaultGovernanceWrappedERC20InitData,
         });
 
@@ -405,7 +408,7 @@ runs.forEach(artifact => {
       let token: GovernanceWrappedERC20;
 
       beforeEach(async () => {
-        token = await hre.wrapper.deploy(artifact, {
+        token = await hre.wrapper.deploy(options.artifact, {
           args: getArgs([erc20.address, 'name', 'symbol']),
         });
 

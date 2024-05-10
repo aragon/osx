@@ -4,6 +4,7 @@ import {
   PluginSetupProcessor__factory,
   PluginRepoRegistry,
   PluginSetupProcessor,
+  DAO,
 } from '../../typechain';
 
 export async function deployPluginSetupProcessor(
@@ -13,6 +14,23 @@ export async function deployPluginSetupProcessor(
 
   psp = await hre.wrapper.deploy('PluginSetupProcessor', {
     args: [pluginRepoRegistry.address],
+  });
+
+  return psp;
+}
+
+export async function deployUpgradeablePluginSetupProcessor(
+  dao: DAO,
+  pluginRepoRegistry: PluginRepoRegistry
+): Promise<PluginSetupProcessor> {
+  let psp: PluginSetupProcessor;
+
+  psp = await hre.wrapper.deploy('PluginSetupProcessorUpgradeable', {
+    withProxy: true,
+    initArgs: [dao.address, pluginRepoRegistry.address],
+    proxySettings: {
+      initializer: 'initialize',
+    },
   });
 
   return psp;
