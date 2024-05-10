@@ -45,12 +45,12 @@ npm install
 # or
 yarn install 
 ```
-### Build
+### Build all
 This will build the contracts, generate viem abis and bundle the artifacts.
 ```bash
-npm run build
+npm run build:all
 # or
-yarn build
+yarn build:all
 ```
 ### Build Contracts
 This will build the contracts.
@@ -62,16 +62,16 @@ yarn build:contracts
 ### Generate viem ABIs
 This will generate the viem ABIs.
 ```bash
-npm run build:viem
+npm run generate:abi
 # or
-yarn build:viem
+yarn generate:abi
 ```
 ### Bundle Artifacts
 This will bundle the artifacts.
 ```bash
-npm run bundle
+npm run build
 # or
-yarn bundle
+yarn build
 ```
 ## Publishing
 Will run a script that will ask for the version and will publish the package.

@@ -7,21 +7,21 @@
     },
     "exports": {
         ".": {
-            "import": "./dist/bundle-esm.js",
-            "require": "./dist/bundle-cjs.js",
-            "types": "./dist/bundle.d.ts"
+            "import": "./dist/artifacts/index.js",
+            "require": "./dist/artifacts/index.js",
+            "types": "./dist/artifacts/index.d.ts"
         },
         "./abi": {
-            "import": "./dist/abi/bundle-esm.js",
-            "require": "./dist/abi/bundle-cjs.js",
-            "types": "./dist/abi/bundle.d.ts"
+            "import": "./dist/artifacts/generated/abis.js",
+            "require": "./dist/artifacts/generated/abis.js",
+            "types": "./dist/artifacts/generated/abis.d.ts"
         }
     },
     "scripts": {
         "build:contracts": "cd ../contracts && yarn build",
-        "build": "yarn build:contracts && yarn build:viem && yarn bundle",
-        "bundle": "rollup --config rollup.config.ts",
-        "build:viem": "wagmi generate -c wagmi.config.ts",
+        "build": "tsc --build tsconfig.json",
+        "build:all": "yarn build:contracts && yarn generate:abi && yarn build",
+        "generate:abi": "wagmi generate -c wagmi.config.ts",
         "publish": "yarn build && yarn publish"
     },
     "repository": {
@@ -35,9 +35,8 @@
     },
     "homepage": "https://github.com/aragon/osx#readme",
     "devDependencies": {
+        "@tsconfig/node18": "^18.2.4",
         "@wagmi/cli": "^2.1.4",
-        "rollup": "^2.70.1",
-        "rollup-plugin-dts": "^4.2.0",
         "typescript": "^4.4.4"
     }
 }
