@@ -37,44 +37,63 @@ console.log(json.DAOFactory.bytecode);
 console.log(daoFactoryAbi); // usable for viem users
 console.log(viem.daoFactoryAbi); // usable for viem users
 ```
+
 ## Building
+
 ### Prerequisites
+
 - Node.js -> 16.x
+
 ```bash
 npm install
 # or
-yarn install 
+yarn install
 ```
+
 ### Build all
+
 This will build the contracts, generate viem abis and bundle the artifacts.
+
 ```bash
 npm run build:all
 # or
 yarn build:all
 ```
+
 ### Build Contracts
+
 This will build the contracts.
+
 ```bash
 npm run build:contracts
 # or
 yarn build:contracts
 ```
+
 ### Generate viem ABIs
+
 This will generate the viem ABIs.
+
 ```bash
 npm run generate:abi
 # or
 yarn generate:abi
 ```
+
 ### Bundle Artifacts
+
 This will bundle the artifacts.
+
 ```bash
 npm run build
 # or
 yarn build
 ```
+
 ## Publishing
+
 Will run a script that will ask for the version and will publish the package.
+
 ```bash
 npm publish
 # or

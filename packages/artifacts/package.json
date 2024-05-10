@@ -1,42 +1,42 @@
 {
-    "name": "@aragon/osx-artifacts",
-    "version": "1.4.0-rc0",
-    "description": "The Aragon OSx Solidity contracts",
-    "publishConfig": {
-        "access": "public"
+  "name": "@aragon/osx-artifacts",
+  "version": "1.4.0-rc0",
+  "description": "The Aragon OSx Solidity contracts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/artifacts/index.js",
+      "require": "./dist/artifacts/index.js",
+      "types": "./dist/artifacts/index.d.ts"
     },
-    "exports": {
-        ".": {
-            "import": "./dist/artifacts/index.js",
-            "require": "./dist/artifacts/index.js",
-            "types": "./dist/artifacts/index.d.ts"
-        },
-        "./abi": {
-            "import": "./dist/artifacts/generated/abis.js",
-            "require": "./dist/artifacts/generated/abis.js",
-            "types": "./dist/artifacts/generated/abis.d.ts"
-        }
-    },
-    "scripts": {
-        "build:contracts": "cd ../contracts && yarn build",
-        "build": "tsc --build tsconfig.json",
-        "build:all": "yarn build:contracts && yarn generate:abi && yarn build",
-        "generate:abi": "wagmi generate -c wagmi.config.ts",
-        "publish": "yarn build && yarn publish"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/aragon/osx.git"
-    },
-    "author": "",
-    "license": "AGPL-3.0-or-later",
-    "bugs": {
-        "url": "https://github.com/aragon/osx/issues"
-    },
-    "homepage": "https://github.com/aragon/osx#readme",
-    "devDependencies": {
-        "@tsconfig/node18": "^18.2.4",
-        "@wagmi/cli": "^2.1.4",
-        "typescript": "^4.4.4"
+    "./abi": {
+      "import": "./dist/artifacts/generated/abis.js",
+      "require": "./dist/artifacts/generated/abis.js",
+      "types": "./dist/artifacts/generated/abis.d.ts"
     }
+  },
+  "scripts": {
+    "build:contracts": "cd ../contracts && yarn build",
+    "build": "tsc --build tsconfig.json",
+    "build:all": "yarn build:contracts && yarn generate:abi && yarn build",
+    "generate:abi": "wagmi generate -c wagmi.config.ts",
+    "publish": "yarn build && yarn publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aragon/osx.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/aragon/osx/issues"
+  },
+  "homepage": "https://github.com/aragon/osx#readme",
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.4",
+    "@wagmi/cli": "^2.1.4",
+    "typescript": "^4.4.4"
+  }
 }
