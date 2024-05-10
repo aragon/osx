@@ -3,7 +3,6 @@
 pragma solidity 0.8.17;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {DAO, IDAO} from "../core/dao/DAO.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
@@ -17,17 +16,12 @@ import {IPluginSetup} from "../framework/plugin/setup/IPluginSetup.sol";
 import {PluginSetup} from "../framework/plugin/setup/PluginSetup.sol";
 import {PluginSetupRef, hashHelpers, hashPermissions, _getPreparedSetupId, _getAppliedSetupId, _getPluginInstallationId, PreparationType} from "../framework/plugin/setup/PluginSetupProcessorHelpers.sol";
 
-import {DaoAuthorizableUpgradeable} from "../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022-2023
 /// @notice This contract processes the preparation and application of plugin setups (installation, update, uninstallation) on behalf of a requesting DAO.
 /// @dev This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
-contract PluginSetupProcessorUpgradeable is UUPSUpgradeable, DaoAuthorizableUpgradeable {
+contract PluginSetupProcessor {
     using ERC165Checker for address;
-
-    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
-    bytes32 public constant UPGRADE_PSP_PERMISSION_ID = keccak256("UPGRADE_PSP_PERMISSION");
 
     /// @notice The ID of the permission required to call the `applyInstallation` function.
     bytes32 public constant APPLY_INSTALLATION_PERMISSION_ID =
@@ -278,15 +272,9 @@ contract PluginSetupProcessorUpgradeable is UUPSUpgradeable, DaoAuthorizableUpgr
         _;
     }
 
-    /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
-    constructor() {
-        _disableInitializers();
-    }
-
-    /// @param _dao The managing dao.
+    /// @notice Constructs the plugin setup processor by setting the associated plugin repo registry.
     /// @param _repoRegistry The plugin repo registry contract.
-    function initialize(IDAO _dao, PluginRepoRegistry _repoRegistry) external initializer {
-        __DaoAuthorizableUpgradeable_init(_dao);
+    constructor(PluginRepoRegistry _repoRegistry) {
         repoRegistry = _repoRegistry;
     }
 
@@ -746,8 +734,4 @@ contract PluginSetupProcessorUpgradeable is UUPSUpgradeable, DaoAuthorizableUpgr
             initData: _initData
         });
     }
-
-    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PSP_PERMISSION_ID) {}
 }

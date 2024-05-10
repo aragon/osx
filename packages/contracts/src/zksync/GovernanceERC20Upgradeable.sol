@@ -9,27 +9,21 @@ import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/E
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import {IDAO} from "../core/dao/IDAO.sol";
 import {DaoAuthorizableUpgradeable} from "../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../core/dao/IDAO.sol";
 import {IERC20MintableUpgradeable} from "../token/ERC20/IERC20MintableUpgradeable.sol";
 
-/// @title GovernanceERC20Upgradeable
+/// @title GovernanceERC20
 /// @author Aragon Association
 /// @notice An [OpenZeppelin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
-contract GovernanceERC20Upgradeable is
+contract GovernanceERC20 is
     IERC20MintableUpgradeable,
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
-    UUPSUpgradeable,
     DaoAuthorizableUpgradeable
 {
-    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
-    bytes32 public constant UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID =
-        keccak256("UPGRADE_GOVERNANCE_ERC20_PERMISSION");
-
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 
@@ -123,10 +117,4 @@ contract GovernanceERC20Upgradeable is
             _delegate(to, to);
         }
     }
-
-    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
-    function _authorizeUpgrade(
-        address
-    ) internal virtual override auth(UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID) {}
 }
