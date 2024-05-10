@@ -280,12 +280,14 @@ describe('PluginRepoRegistry', function () {
           1,
           managingDAO,
           {
-            dao: managingDAO.address,
-            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+            initArgs: {
+              dao: managingDAO.address,
+              ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
-          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
           ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY_V1_0_0,
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
         );
 

@@ -215,11 +215,13 @@ describe('TokenVoting', function () {
           1,
           dao,
           {
-            dao: dao.address,
-            votingSettings: votingSettings,
-            token: governanceErc20Mock.address,
+            initArgs: {
+              dao: dao.address,
+              votingSettings: votingSettings,
+              token: governanceErc20Mock.address,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
           ARTIFACT_SOURCES.TOKEN_VOTING_V1_0_0,
           ARTIFACT_SOURCES.TOKEN_VOTING,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID

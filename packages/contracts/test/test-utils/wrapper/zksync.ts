@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import {BigNumber, BigNumberish, Contract} from 'ethers';
-import {NetworkDeployment} from '.';
+import {DeployOptions, NetworkDeployment} from '.';
 import {Provider} from 'zksync-ethers';
 import {utils} from 'zksync-ethers';
 import {getTime} from '../voting';
@@ -46,20 +46,20 @@ export class ZkSync implements NetworkDeployment {
   async deployProxy(
     deployer: number,
     artifactName: string,
-    type: string,
-    args: any[],
-    initializer: string | null
+    options: DeployOptions
   ): Promise<Contract> {
     const wallets = await hre.zksyncEthers.getWallets();
     const artifact = await hre.deployer.loadArtifact(artifactName);
+
     return hre.zkUpgrades.deployProxy(
       wallets[deployer],
       artifact,
-      args,
+      options.initArgs,
       {
-        kind: 'uups',
+        kind: options.proxySettings?.type,
         unsafeAllow: ['constructor'],
-        constructorArgs: [],
+        constructorArgs: options.args,
+        initializer: options.proxySettings?.initializer,
       },
       true
     );
@@ -68,18 +68,20 @@ export class ZkSync implements NetworkDeployment {
   async upgradeProxy(
     upgrader: number,
     proxyAddress: string,
-    newArtifactName: string
+    newArtifactName: string,
+    options: DeployOptions
   ): Promise<Contract> {
     const wallets = await hre.zksyncEthers.getWallets();
     const newArtifact = await hre.deployer.loadArtifact(newArtifactName);
+
     return hre.zkUpgrades.upgradeProxy(
       wallets[upgrader],
       proxyAddress,
       newArtifact,
       {
         unsafeAllow: ['constructor'],
-        constructorArgs: [],
-        kind: 'uups',
+        constructorArgs: options.args,
+        // TODO: pass initiailizer and initArgs
       },
       true
     );

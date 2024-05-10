@@ -301,11 +301,13 @@ describe('ENSSubdomainRegistrar', function () {
           1,
           managingDao,
           {
-            managingDao: managingDao.address,
-            ens: ens.address,
-            parentDomain: ensDomainHash('test'),
+            initArgs: {
+              managingDao: managingDao.address,
+              ens: ens.address,
+              parentDomain: ensDomainHash('test'),
+            },
+            initializer: 'initialize',
           },
-          'initialize',
           ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR_V1_0_0,
           ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID

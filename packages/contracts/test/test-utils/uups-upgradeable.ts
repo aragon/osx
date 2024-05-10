@@ -1,18 +1,22 @@
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ContractFactory, errors} from 'ethers';
-import hre, {ethers, upgrades, zksyncEthers} from 'hardhat';
+import {errors} from 'ethers';
+import hre from 'hardhat';
 import {DAO} from '../../typechain';
 import {readImplementationValueFromSlot} from '../../utils/storage';
 import {Contract} from 'zksync-ethers';
+
+type options = {
+  args?: Record<string, any>;
+  initArgs?: Record<string, any>;
+  initializer?: string | undefined;
+};
 
 // Deploys and upgrades a contract that is managed by a DAO
 export async function ozUpgradeCheckManagedContract(
   deployer: number,
   upgrader: number,
   managingDao: DAO,
-  initArgs: any,
-  initializerName: string,
+  {args = {}, initArgs = {}, initializer = undefined}: options,
   from: string,
   to: string,
   upgradePermissionId: string
@@ -25,9 +29,10 @@ export async function ozUpgradeCheckManagedContract(
   const upgraderSigner = (await hre.ethers.getSigners())[upgrader];
 
   let proxy = await hre.wrapper.deployProxy(deployer, from, {
-    args: Object.values(initArgs),
+    args: Object.values(args),
+    initArgs: Object.values(initArgs),
     proxySettings: {
-      initializer: initializerName,
+      initializer: initializer,
     },
   });
 
@@ -36,7 +41,11 @@ export async function ozUpgradeCheckManagedContract(
   );
 
   // Check that upgrade permission is required
-  await expect(hre.wrapper.upgradeProxy(upgrader, proxy.address, to))
+  await expect(
+    hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+      args: Object.values(args),
+    })
+  )
     .to.be.revertedWithCustomError(proxy, 'DaoUnauthorized')
     .withArgs(
       managingDao.address,
@@ -51,7 +60,9 @@ export async function ozUpgradeCheckManagedContract(
     .grant(proxy.address, upgraderSigner.address, upgradePermissionId);
 
   // Upgrade the proxy
-  await hre.wrapper.upgradeProxy(upgrader, proxy.address, to);
+  await hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+    args: Object.values(args),
+  });
 
   const toImplementation = await readImplementationValueFromSlot(proxy.address);
 
@@ -62,8 +73,7 @@ export async function ozUpgradeCheckManagedContract(
 export async function ozUpgradeCheckManagingContract(
   deployer: number,
   upgrader: number,
-  initArgs: any,
-  initializerName: string,
+  {args = {}, initArgs = {}, initializer = undefined}: options,
   from: string,
   to: string,
   upgradePermissionId: string
@@ -77,9 +87,10 @@ export async function ozUpgradeCheckManagingContract(
 
   // Deploy the proxy
   let proxy = await hre.wrapper.deployProxy(deployer, from, {
-    args: Object.values(initArgs),
+    args: Object.values(args),
+    initArgs: Object.values(initArgs),
     proxySettings: {
-      initializer: initializerName,
+      initializer: initializer,
     },
   });
 
@@ -88,7 +99,11 @@ export async function ozUpgradeCheckManagingContract(
   );
 
   // Check that upgrade permission is required
-  await expect(hre.wrapper.upgradeProxy(upgrader, proxy.address, to))
+  await expect(
+    hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+      args: Object.values(args),
+    })
+  )
     .to.be.revertedWithCustomError(proxy, 'Unauthorized')
     .withArgs(proxy.address, upgraderSigner.address, upgradePermissionId);
 
@@ -97,7 +112,9 @@ export async function ozUpgradeCheckManagingContract(
     .connect(deployerSigner)
     .grant(proxy.address, upgraderSigner.address, upgradePermissionId);
 
-  await hre.wrapper.upgradeProxy(upgrader, proxy.address, to);
+  await hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+    args: Object.values(args),
+  });
 
   const toImplementation = await readImplementationValueFromSlot(proxy.address);
 

@@ -3,7 +3,7 @@ import hre from 'hardhat';
 import {BigNumberish, Contract, providers} from 'ethers';
 import {utils} from 'ethers';
 
-import {NetworkDeployment} from '.';
+import {DeployOptions, NetworkDeployment} from '.';
 import {getTime} from '../voting';
 
 export class HardhatClass implements NetworkDeployment {
@@ -39,9 +39,7 @@ export class HardhatClass implements NetworkDeployment {
   async deployProxy(
     deployer: number,
     artifactName: string,
-    type: string,
-    args: any[],
-    initializer: string
+    options: DeployOptions
   ): Promise<Contract> {
     const {ethers} = hre;
     const signer = (await ethers.getSigners())[deployer];
@@ -54,18 +52,19 @@ export class HardhatClass implements NetworkDeployment {
     );
 
     // Currently, it doesn't use type and always deployes with uups
-    return hre.upgrades.deployProxy(contract, args, {
-      kind: 'uups',
-      initializer: initializer,
+    return hre.upgrades.deployProxy(contract, options.initArgs, {
+      kind: options.proxySettings?.type,
+      initializer: options.proxySettings?.initializer ?? false,
       unsafeAllow: ['constructor'],
-      constructorArgs: [],
+      constructorArgs: options.args,
     });
   }
 
   async upgradeProxy(
     upgrader: number,
     proxyAddress: string,
-    newArtifactName: string
+    newArtifactName: string,
+    options: DeployOptions
   ): Promise<Contract> {
     const {ethers} = hre;
     const signer = (await ethers.getSigners())[upgrader];
@@ -80,7 +79,7 @@ export class HardhatClass implements NetworkDeployment {
 
     return hre.upgrades.upgradeProxy(proxyAddress, contract, {
       unsafeAllow: ['constructor'],
-      constructorArgs: [],
+      constructorArgs: options.args,
     });
   }
 }

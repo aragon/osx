@@ -272,10 +272,12 @@ describe('DAORegistry', function () {
           1,
           managingDao,
           {
-            dao: managingDao.address,
-            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+            initArgs: {
+              dao: managingDao.address,
+              ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
           ARTIFACT_SOURCES.DAO_REGISTRY_V1_0_0,
           ARTIFACT_SOURCES.DAO_REGISTRY,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID

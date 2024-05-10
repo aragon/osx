@@ -97,13 +97,15 @@ describe('MerkleDistributor', function () {
           1,
           dao,
           {
-            dao: dao.address,
-            token: token.address,
-            merkleRoot: ZERO_BYTES32,
+            initArgs: {
+              dao: dao.address,
+              token: token.address,
+              merkleRoot: ZERO_BYTES32,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
-          ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR,
           ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR_V1_0_0,
+          ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
 

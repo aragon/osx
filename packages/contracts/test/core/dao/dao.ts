@@ -332,12 +332,14 @@ describe('DAO', function () {
           0,
           1,
           {
-            metadata: dummyMetadata1,
-            initialOwner: signers[0].address,
-            trustedForwarder: dummyAddress1,
-            daoURI: daoExampleURI,
+            initArgs: {
+              metadata: dummyMetadata1,
+              initialOwner: signers[0].address,
+              trustedForwarder: dummyAddress1,
+              daoURI: daoExampleURI,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
           ARTIFACT_SOURCES.DAO_V1_0_0,
           ARTIFACT_SOURCES.DAO,
           UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID

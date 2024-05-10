@@ -94,9 +94,11 @@ describe('PluginRepo', function () {
             0,
             1,
             {
-              initialOwner: signers[0].address,
+              initArgs: {
+                initialOwner: signers[0].address,
+              },
+              initializer: 'initialize',
             },
-            'initialize',
             ARTIFACT_SOURCES.PLUGIN_REPO_V1_0_0,
             ARTIFACT_SOURCES.PLUGIN_REPO,
             UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID

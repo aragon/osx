@@ -106,11 +106,13 @@ describe('MerkleMinter', function () {
           1,
           managingDao,
           {
-            dao: managingDao.address,
-            token: token.address,
-            merkleDistributor: distributorBase.address,
+            initArgs: {
+              dao: managingDao.address,
+              token: token.address,
+              merkleDistributor: distributorBase.address,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
           ARTIFACT_SOURCES.MERKLE_MINTER_V1_0_0,
           ARTIFACT_SOURCES.MERKLE_MINTER,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID

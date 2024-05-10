@@ -45,11 +45,12 @@ export const ARTIFACT_SOURCES = {
     '@aragon/osx-v1.0.1/plugins/governance/multisig/Multisig.sol:Multisig',
 };
 
-export type DeploySettings = {
-  args?: any[];
+export type DeployOptions = {
+  initArgs?: any[]; // initialize function arguments in case `withProxy` is set to true.
+  args: any[]; // constructor arguments
   withProxy?: boolean;
   proxySettings?: {
-    type?: 'UUPS' | 'clones';
+    type?: 'uups' | 'transparent' | 'beacon' | undefined;
     initializer?: string;
   };
 };
@@ -64,14 +65,13 @@ export interface NetworkDeployment {
   deployProxy(
     deployer: number,
     artifactName: string,
-    type: string,
-    args: any[],
-    initializer: string | null
+    options: DeployOptions
   ): Promise<Contract>;
   upgradeProxy(
     upgrader: number,
     proxyAddress: string,
-    newArtifactName: string
+    newArtifactName: string,
+    options: DeployOptions
   ): Promise<Contract>;
 }
 
@@ -101,12 +101,12 @@ export class Wrapper {
     return new Wrapper(new HardhatClass(provider));
   }
 
-  async deploy(artifactName: string, settings?: DeploySettings) {
+  async deploy(artifactName: string, options?: DeployOptions) {
     let {artifact, contract} = await this.network.deploy(
       artifactName,
-      settings?.args ?? []
+      options?.args ?? []
     );
-    if (settings?.withProxy) {
+    if (options?.withProxy) {
       const {contract: proxyFactoryContract} = await this.network.deploy(
         'ProxyFactory',
         [contract.address]
@@ -141,27 +141,38 @@ export class Wrapper {
   async deployProxy(
     deployer: number,
     artifactName: string,
-    options?: DeploySettings
+    options?: DeployOptions
   ) {
-    const args = options?.args ?? [];
-    const type = options?.proxySettings?.type ?? 'UUPS';
-    const initializer = options?.proxySettings?.initializer ?? null;
+    const _options: DeployOptions = {
+      args: options?.args ?? [],
+      initArgs: options?.initArgs ?? [],
+      proxySettings: {
+        type: options?.proxySettings?.type ?? 'uups',
+        initializer: options?.proxySettings?.initializer ?? undefined,
+      },
+    };
 
-    return this.network.deployProxy(
-      deployer,
-      artifactName,
-      type,
-      args,
-      initializer
-    );
+    return this.network.deployProxy(deployer, artifactName, _options);
   }
 
   async upgradeProxy(
     upgrader: number,
     proxyAddress: string,
     newArtifactName: string,
-    options?: DeploySettings
+    options?: DeployOptions
   ) {
-    return this.network.upgradeProxy(upgrader, proxyAddress, newArtifactName);
+    const _options: DeployOptions = {
+      args: options?.args ?? [],
+      initArgs: options?.initArgs ?? [],
+      proxySettings: {
+        initializer: options?.proxySettings?.initializer ?? undefined,
+      },
+    };
+    return this.network.upgradeProxy(
+      upgrader,
+      proxyAddress,
+      newArtifactName,
+      _options
+    );
   }
 }

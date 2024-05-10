@@ -240,15 +240,17 @@ describe('Multisig', function () {
           1,
           dao,
           {
-            dao: dao.address,
-            members: [
-              signers[0].address,
-              signers[1].address,
-              signers[2].address,
-            ],
-            multisigSettings: multisigSettings,
+            initArgs: {
+              dao: dao.address,
+              members: [
+                signers[0].address,
+                signers[1].address,
+                signers[2].address,
+              ],
+              multisigSettings: multisigSettings,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
           ARTIFACT_SOURCES.MULTISIG_V1_0_0,
           ARTIFACT_SOURCES.MULTISIG,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
