@@ -10,6 +10,21 @@
 
 ## Usage
 
+### 1.4.0, versions with `-viem` suffix and future versions
+
+From version 1.4.0 onwards, the package exports the artifacts and the ABIs `as const` for viem users. To use them you can import the artifact or ABI you need directly from the package.
+
+```ts
+import {daoFactoryArtifact} from '@aragon/osx-artifacts';
+import {daoFactoryAbi} from '@aragon/osx-artifacts/abi';
+
+// Traditional artifacts
+console.log(daoFactoryArtifact.abi);
+console.log(daoFactoryArtifact.bytecode);
+// ABIs as const oriented to viem users
+console.log(daoFactoryAbi); // usable for viem users
+```
+
 ### 1.3.1 and previous versions
 
 Versions `1.3.1`and previous only export the json artifacts. To use them just import the artifacts and use them as needed.
@@ -19,23 +34,6 @@ import {DAOFactory} from '@aragon/osx-artifacts';
 
 console.log(DAOFactory.abi);
 console.log(DAOFactory.bytecode);
-```
-
-### 1.4.0, versions with `-viem` suffix and future versions
-
-From version 1.4.0 onwards, the package exports the artifacts and the ABIs `as const` for viem users. To use them you can import the artifact or ABI you need directly from the package or use the `viem` or `json` objects to access them.
-
-```ts
-import {DAOFactory, viem, json, daoFactoryAbi} from '@aragon/osx-artifacts';
-
-// Traditional artifacts
-console.log(DAOFactory.abi);
-console.log(DAOFactory.bytecode);
-console.log(json.DAOFactory.abi);
-console.log(json.DAOFactory.bytecode);
-// ABIs as const oriented to viem users
-console.log(daoFactoryAbi); // usable for viem users
-console.log(viem.daoFactoryAbi); // usable for viem users
 ```
 
 ## Building
