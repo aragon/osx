@@ -23,4 +23,21 @@ interface IPluginRepo {
         bytes calldata _buildMetadata,
         bytes calldata _releaseMetadata
     ) external;
+
+    /// @notice Emitted if the same plugin setup exists in previous releases.
+    /// @param release The release number.
+    /// @param build The build number.
+    /// @param pluginSetup The address of the plugin setup contract.
+    /// @param buildMetadata The build metadata URI.
+    event VersionCreated(
+        uint8 release,
+        uint16 build,
+        address indexed pluginSetup,
+        bytes buildMetadata
+    );
+
+    /// @notice Emitted when a release's metadata was updated.
+    /// @param release The release number.
+    /// @param releaseMetadata The release metadata URI.
+    event ReleaseMetadataUpdated(uint8 release, bytes releaseMetadata);
 }

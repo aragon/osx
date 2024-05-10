@@ -96,23 +96,6 @@ contract PluginRepo is
     /// @notice Thrown if release does not exist.
     error ReleaseDoesNotExist();
 
-    /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param release The release number.
-    /// @param build The build number.
-    /// @param pluginSetup The address of the plugin setup contract.
-    /// @param buildMetadata The build metadata URI.
-    event VersionCreated(
-        uint8 release,
-        uint16 build,
-        address indexed pluginSetup,
-        bytes buildMetadata
-    );
-
-    /// @notice Thrown when a release's metadata was updated.
-    /// @param release The release number.
-    /// @param releaseMetadata The release metadata URI.
-    event ReleaseMetadataUpdated(uint8 release, bytes releaseMetadata);
-
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
         _disableInitializers();
@@ -127,6 +110,22 @@ contract PluginRepo is
 
         _grant(address(this), initialOwner, MAINTAINER_PERMISSION_ID);
         _grant(address(this), initialOwner, UPGRADE_REPO_PERMISSION_ID);
+    }
+
+    /// @notice Initializes the pluginRepo after an upgrade from a previous protocol version.
+    /// @param _previousProtocolVersion The semantic protocol version number of the previous DAO implementation contract this upgrade is transitioning from.
+    /// @param _initData The initialization data to be passed to via `upgradeToAndCall` (see [ERC-1967](https://docs.openzeppelin.com/contracts/4.x/api/proxy#ERC1967Upgrade)).
+    /// @dev This function is a placeholder until we require reinitialization.
+    function initializeFrom(
+        uint8[3] calldata _previousProtocolVersion,
+        bytes calldata _initData
+    ) external reinitializer(2) {
+        // Silences the unused function parameter warning.
+        _previousProtocolVersion;
+        _initData;
+
+        // Revert because this is a placeholder until this contract requires reinitialization.
+        revert();
     }
 
     /// @inheritdoc IPluginRepo
@@ -272,4 +271,7 @@ contract PluginRepo is
             _interfaceId == type(IProtocolVersion).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[46] private __gap;
 }

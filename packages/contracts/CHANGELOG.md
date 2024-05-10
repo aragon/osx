@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `VersionComparisonLib` to compare semantic versioning numbers.
 - Inherit `ProtocolVersion` in `Plugin`, `PluginCloneable`, `PluginUUPSUpgradeable`, `PluginSetup`, `PermissionCondition`, `PermissionConditionUpgradeable` `PluginSetupProcessor`, `PluginRepoRegistry`, `DAORegistry`, and `ENSSubdomainRegistrar`.
 - Added the `FunctionDeprecated` error to `DAO`.
+- Added a storage gap to `PluginRepo`.
+- Added `initializeFrom` placeholder function to `PluginRepo`.
 
 ### Changed
 
@@ -24,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use the DAOs permission manager functionality to validate signatures.
 - Renamed `managingDAO` during deployment to `managementDAO`.
 - Aligned contract names during deployment with the names given in `@aragon/osx-commons-configs`.
+- Move events `ReleaseMetadataUpdated`and `VersionCreated` from `PluginRepo` to `IPluginRepo`.
 
 ### Removed
 

@@ -12,6 +12,7 @@ import {
 } from '../../../typechain';
 import {PluginRepo__factory as PluginRepo_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol';
 import {PluginRepo__factory as PluginRepo_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol';
+import {OZ_INITIALIZED_SLOT_POSITION} from '../../../utils/storage';
 import {ZERO_BYTES32} from '../../test-utils/dao';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {tagHash} from '../../test-utils/psp/hash-helpers';
@@ -153,6 +154,13 @@ describe('PluginRepo', function () {
         expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
         expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
         expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
+      });
+    });
+    describe('InitializeFrom', () => {
+      it('reverts because the function is a placeholder', async () => {
+        // Call `initializeFrom` with version 1.3.0. and revert
+        await expect(pluginRepo.initializeFrom([1, 3, 0], emptyBytes)).to.be
+          .reverted;
       });
     });
 
@@ -518,7 +526,7 @@ describe('PluginRepo', function () {
         ).to.be.revertedWithCustomError(pluginRepo, 'EmptyReleaseMetadata');
       });
 
-      it('successfuly updates metadata for the release that already exists', async () => {
+      it('updates metadata for the release that already exists and emits the "ReleaseMetadataUpdated" event', async () => {
         await pluginRepo.createVersion(
           1,
           pluginSetupMock.address,
