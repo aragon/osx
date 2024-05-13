@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
   const [deployer] = await ethers.getSigners();
 
-  if (network.name !== 'localhost' && network.name !== 'hardhat') {
+  if (network.name !== 'localhost' && network.name !== 'hardhat' && network.name !== 'zkLocalTestnet') {
     if (
       !('MANAGEMENT_DAO_MULTISIG_LISTEDONLY' in process.env) ||
       !('MANAGEMENT_DAO_MULTISIG_MINAPPROVALS' in process.env) ||

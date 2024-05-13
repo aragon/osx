@@ -22,14 +22,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await setTimeout(30000);
   }
 
-  hre.aragonToVerifyContracts.push(
-    await hre.deployments.get('GovernanceERC20Upgradeable')
-  );
-
-  hre.aragonToVerifyContracts.push(
-    await hre.deployments.get('GovernanceWrappedERC20Upgradeable')
-  );
-
   hre.aragonToVerifyContracts.push({
     contract: 'src/zksync/TokenVotingSetupZkSync.sol:TokenVotingSetupZkSync',
     ...TokenVotingSetupDeployment,

@@ -13,8 +13,6 @@ import {
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {deployNewDAO} from '../../test-utils/dao';
-import {ozUpgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 
 export type AccountBalance = {account: string; amount: number};
 
@@ -36,13 +34,8 @@ let to: SignerWithAddress;
 let other: SignerWithAddress;
 let toDelegate: string;
 
-const runs = [
-  {artifact: 'GovernanceWrappedERC20', upgradeable: false},
-  {artifact: 'GovernanceWrappedERC20Upgradeable', upgradeable: true},
-];
 
-runs.forEach(options => {
-  describe(options.artifact, function () {
+describe('GovernanceWrappedERC20', function () {
     let signers: SignerWithAddress[];
     let governanceToken: GovernanceWrappedERC20;
     let erc20: TestERC20;
@@ -54,12 +47,6 @@ runs.forEach(options => {
     let defaultExistingERC20InitData: [string, string, number];
     let defaultGovernanceWrappedERC20InitData: any[] = [];
 
-    function getArgs(args: any[]) {
-      if (options.upgradeable) {
-        args = [dao.address, ...args];
-      }
-      return args;
-    }
 
     before(async () => {
       signers = await ethers.getSigners();
@@ -96,36 +83,17 @@ runs.forEach(options => {
         );
       }
 
-      defaultGovernanceWrappedERC20InitData = getArgs([
+      defaultGovernanceWrappedERC20InitData = [
         erc20.address,
         governanceWrappedERC20Name,
         governanceWrappedERC20Symbol,
-      ]);
+      ]
 
-      governanceToken = await hre.wrapper.deploy(options.artifact, {
+      governanceToken = await hre.wrapper.deploy('GovernanceWrappedERC20', {
         args: defaultGovernanceWrappedERC20InitData,
       });
     });
 
-    if (options.upgradeable) {
-      describe('Upgrades', async () => {
-        it('successfully upgrades the contract', async () => {
-          await ozUpgradeCheckManagedContract(
-            0,
-            1,
-            dao,
-            {
-              args: defaultGovernanceWrappedERC20InitData,
-              initArgs: defaultGovernanceWrappedERC20InitData,
-              initializer: 'initialize',
-            },
-            options.artifact,
-            options.artifact,
-            UPGRADE_PERMISSIONS.UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID
-          );
-        });
-      });
-    }
 
     describe('initialize:', async () => {
       it('reverts if trying to re-initialize', async () => {
@@ -136,7 +104,7 @@ runs.forEach(options => {
       });
 
       it('sets the wrapped token name and symbol', async () => {
-        governanceToken = await hre.wrapper.deploy(options.artifact, {
+        governanceToken = await hre.wrapper.deploy('GovernanceWrappedERC20', {
           args: defaultGovernanceWrappedERC20InitData,
         });
 
@@ -408,8 +376,8 @@ runs.forEach(options => {
       let token: GovernanceWrappedERC20;
 
       beforeEach(async () => {
-        token = await hre.wrapper.deploy(options.artifact, {
-          args: getArgs([erc20.address, 'name', 'symbol']),
+        token = await hre.wrapper.deploy('GovernanceWrappedERC20', {
+          args: [erc20.address, 'name', 'symbol']
         });
 
         await erc20.setBalance(signers[0].address, 200);
@@ -995,4 +963,3 @@ runs.forEach(options => {
       });
     });
   });
-});

@@ -15,8 +15,6 @@ import {
 import {deployNewDAO} from '../../test-utils/dao';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
-import {ozUpgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 
 export type MintSettings = {
   receivers: string[];
@@ -34,13 +32,7 @@ let to: SignerWithAddress;
 let other: SignerWithAddress;
 let toDelegate: string;
 
-const runs = [
-  {artifact: 'GovernanceERC20', upgradeable: false},
-  {artifact: 'GovernanceERC20Upgradeable', upgradeable: true},
-];
-
-runs.forEach(options => {
-  describe(options.artifact, function () {
+describe('GovernanceERC20', function () {
     let signers: SignerWithAddress[];
     let dao: DAO;
     let token: GovernanceERC20;
@@ -70,30 +62,10 @@ runs.forEach(options => {
         mintSettings,
       ];
 
-      token = await hre.wrapper.deploy(options.artifact, {
+      token = await hre.wrapper.deploy('GovernanceERC20', {
         args: defaultInitData,
       });
     });
-
-    if (options.upgradeable) {
-      describe('Upgrades', async () => {
-        it('successfully upgrades the contract', async () => {
-          await ozUpgradeCheckManagedContract(
-            0,
-            1,
-            dao,
-            {
-              args: defaultInitData,
-              initArgs: defaultInitData,
-              initializer: 'initialize',
-            },
-            options.artifact,
-            options.artifact,
-            UPGRADE_PERMISSIONS.UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID
-          );
-        });
-      });
-    }
 
     describe('initialize:', async () => {
       it('reverts if trying to re-initialize', async () => {
@@ -108,7 +80,7 @@ runs.forEach(options => {
       });
 
       it('sets the managing DAO ', async () => {
-        token = await hre.wrapper.deploy(options.artifact, {
+        token = await hre.wrapper.deploy('GovernanceERC20', {
           args: defaultInitData,
         });
 
@@ -119,7 +91,7 @@ runs.forEach(options => {
         const receivers = [signers[0].address];
         const amounts = [123, 456];
         await expect(
-          hre.wrapper.deploy(options.artifact, {
+          hre.wrapper.deploy('GovernanceERC20', {
             args: [
               dao.address,
               governanceERC20Name,
@@ -266,7 +238,7 @@ runs.forEach(options => {
 
     describe('afterTokenTransfer', async () => {
       beforeEach(async () => {
-        token = await hre.wrapper.deploy(options.artifact, {
+        token = await hre.wrapper.deploy('GovernanceERC20', {
           args: [dao.address, 'name', 'symbol', {receivers: [], amounts: []}],
         });
 
@@ -830,4 +802,3 @@ runs.forEach(options => {
       });
     });
   });
-});

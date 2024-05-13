@@ -49,17 +49,13 @@ const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
   'UPDATE_VOTING_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
-const TOKEN_UPGRADE_PERMISSION_ID = ethers.utils.id(
-  'UPGRADE_GOVERNANCE_ERC20_PERMISSION'
-);
+
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
 describe('TokenVotingSetupZkSync', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
-  let governanceERC20Base: GovernanceERC20;
-  let governanceWrappedERC20Base: GovernanceWrappedERC20;
   let implementationAddress: string;
   let targetDao: any;
   let erc20Token: ERC20;
@@ -86,17 +82,7 @@ describe('TokenVotingSetupZkSync', function () {
     };
     defaultMintSettings = {receivers: [], amounts: []};
 
-    governanceERC20Base = await hre.wrapper.deploy(
-      'GovernanceERC20Upgradeable',
-      {args: [AddressZero, emptyName, emptySymbol, defaultMintSettings]}
-    );
-    governanceWrappedERC20Base = await hre.wrapper.deploy(
-      'GovernanceWrappedERC20Upgradeable',
-      {args: [AddressZero, AddressZero, emptyName, emptySymbol]}
-    );
-    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetupZkSync', {
-      args: [governanceERC20Base.address, governanceWrappedERC20Base.address],
-    });
+    tokenVotingSetup = await hre.wrapper.deploy('TokenVotingSetupZkSync');
     implementationAddress = await tokenVotingSetup.implementation();
 
     erc20Token = await hre.wrapper.deploy('ERC20', {
@@ -114,14 +100,6 @@ describe('TokenVotingSetupZkSync', function () {
     expect(await tokenVotingSetup.supportsInterface('0xffffffff')).to.be.false;
   });
 
-  it('stores the bases provided through the constructor', async () => {
-    expect(await tokenVotingSetup.governanceERC20Base()).to.be.eq(
-      governanceERC20Base.address
-    );
-    expect(await tokenVotingSetup.governanceWrappedERC20Base()).to.be.eq(
-      governanceWrappedERC20Base.address
-    );
-  });
 
   it('creates token voting base with the correct interface', async () => {
     const factory = new TokenVoting__factory(signers[0]);
@@ -237,7 +215,7 @@ describe('TokenVotingSetupZkSync', function () {
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
       expect(helpers).to.be.deep.equal([anticipatedWrappedTokenAddress]);
-      expect(permissions.length).to.be.equal(4);
+      expect(permissions.length).to.be.equal(3);
       expect(permissions).to.deep.equal([
         [
           Operation.Grant,
@@ -259,14 +237,7 @@ describe('TokenVotingSetupZkSync', function () {
           plugin,
           AddressZero,
           EXECUTE_PERMISSION_ID,
-        ],
-        [
-          Operation.Grant,
-          anticipatedWrappedTokenAddress,
-          targetDao.address,
-          AddressZero,
-          TOKEN_UPGRADE_PERMISSION_ID,
-        ],
+        ]
       ]);
     });
 
@@ -384,7 +355,7 @@ describe('TokenVotingSetupZkSync', function () {
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
       expect(helpers).to.be.deep.equal([anticipatedTokenAddress]);
-      expect(permissions.length).to.be.equal(5);
+      expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
           Operation.Grant,
@@ -413,14 +384,7 @@ describe('TokenVotingSetupZkSync', function () {
           targetDao.address,
           AddressZero,
           MINT_PERMISSION_ID,
-        ],
-        [
-          Operation.Grant,
-          anticipatedTokenAddress,
-          targetDao.address,
-          AddressZero,
-          TOKEN_UPGRADE_PERMISSION_ID,
-        ],
+        ]
       ]);
     });
 

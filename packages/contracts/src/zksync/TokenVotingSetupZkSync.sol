@@ -12,8 +12,6 @@ import {IDAO} from "../core/dao/IDAO.sol";
 import {DAO} from "../core/dao/DAO.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../framework/plugin/setup/PluginSetup.sol";
-import {GovernanceERC20Upgradeable} from "./GovernanceERC20Upgradeable.sol";
-import {GovernanceWrappedERC20Upgradeable} from "./GovernanceWrappedERC20Upgradeable.sol";
 
 import {GovernanceERC20} from "../token/ERC20/governance/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../token/ERC20/governance/GovernanceWrappedERC20.sol";
@@ -32,12 +30,6 @@ contract TokenVotingSetupZkSync is PluginSetup {
 
     /// @notice The address of the `TokenVoting` base contract.
     TokenVoting private immutable tokenVotingBase;
-
-    /// @notice The address of the `GovernanceERC20` base contract.
-    address public immutable governanceERC20Base;
-
-    /// @notice The address of the `GovernanceWrappedERC20` base contract.
-    address public immutable governanceWrappedERC20Base;
 
     /// @notice The token settings struct.
     /// @param addr The token address. If this is `address(0)`, a new `GovernanceERC20` token is deployed. If not, the existing token is wrapped as an `GovernanceWrappedERC20`.
@@ -62,15 +54,8 @@ contract TokenVotingSetupZkSync is PluginSetup {
     error WrongHelpersArrayLength(uint256 length);
 
     /// @notice The contract constructor deploying the plugin implementation contract and receiving the governance token base contracts to clone from.
-    /// @param _governanceERC20Base The base `GovernanceERC20` contract to create clones from.
-    /// @param _governanceWrappedERC20Base The base `GovernanceWrappedERC20` contract to create clones from.
-    constructor(
-        GovernanceERC20Upgradeable _governanceERC20Base,
-        GovernanceWrappedERC20Upgradeable _governanceWrappedERC20Base
-    ) {
+    constructor() {
         tokenVotingBase = new TokenVoting();
-        governanceERC20Base = address(_governanceERC20Base);
-        governanceWrappedERC20Base = address(_governanceWrappedERC20Base);
     }
 
     /// @inheritdoc IPluginSetup
@@ -91,13 +76,6 @@ contract TokenVotingSetupZkSync is PluginSetup {
             );
 
         address token = tokenSettings.addr;
-
-        // determine if the plugin needs to be granted the upgrade permission
-        // this will be if:
-        // - the token is not passed (new token is deployed)
-        // - the token is passed, but it does not support our token interfaces
-        //   so we need to deploy it behind a proxy and grant upgrade to the DAO
-        bool setUpgradePermission = false;
 
         // Prepare helpers.
         address[] memory helpers = new address[](1);
@@ -126,30 +104,19 @@ contract TokenVotingSetupZkSync is PluginSetup {
                 // User already has a token. We need to wrap it in
                 // GovernanceWrappedERC20 in order to make the token
                 // include governance functionality.
-                token = createERC1967Proxy(
-                    governanceWrappedERC20Base,
-                    abi.encodeWithSelector(
-                        GovernanceWrappedERC20Upgradeable.initialize.selector,
-                        IDAO(_dao),
-                        IERC20Upgradeable(tokenSettings.addr),
-                        tokenSettings.name,
-                        tokenSettings.symbol
-                    )
-                );
-                setUpgradePermission = true;
+                token = address(new GovernanceWrappedERC20(
+                    IERC20Upgradeable(tokenSettings.addr),
+                    tokenSettings.name,
+                    tokenSettings.symbol
+                ));
             }
         } else {
-            token = createERC1967Proxy(
-                governanceERC20Base,
-                abi.encodeWithSelector(
-                    GovernanceERC20Upgradeable.initialize.selector,
-                    IDAO(_dao),
-                    tokenSettings.name,
-                    tokenSettings.symbol,
-                    mintSettings
-                )
-            );
-            setUpgradePermission = true;
+            token = address(new GovernanceERC20(
+                IDAO(_dao),
+                tokenSettings.name,
+                tokenSettings.symbol,
+                mintSettings
+            ));
         }
 
         helpers[0] = token;
@@ -160,20 +127,11 @@ contract TokenVotingSetupZkSync is PluginSetup {
             abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, token)
         );
 
-        PermissionLib.MultiTargetPermission[] memory permissions;
-
-        // avoid stack too deep.
-        {
-            // check for an existing token: we will grant mint on the token to the dao if so
-            uint256 permissionCount = tokenSettings.addr != address(0) ? 3 : 4;
-
-            // If the plugin needs to be granted the upgrade permission, increment the permission count.
-            if (setUpgradePermission) {
-                permissionCount = permissionCount + 1;
-            }
-
-            permissions = new PermissionLib.MultiTargetPermission[](permissionCount);
-        }
+        // Prepare permissions
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](
+                tokenSettings.addr != address(0) ? 3 : 4
+            );
 
         // Set plugin permissions to be granted.
         // Grant the list of permissions of the plugin to the DAO.
@@ -211,18 +169,6 @@ contract TokenVotingSetupZkSync is PluginSetup {
                 _dao,
                 PermissionLib.NO_CONDITION,
                 tokenMintPermission
-            );
-        }
-
-        if (setUpgradePermission) {
-            bytes32 tokenUpgradePermission = GovernanceERC20Upgradeable(token)
-                .UPGRADE_GOVERNANCE_ERC20_PERMISSION_ID();
-            permissions[permissions.length - 1] = PermissionLib.MultiTargetPermission(
-                PermissionLib.Operation.Grant,
-                token,
-                _dao,
-                PermissionLib.NO_CONDITION,
-                tokenUpgradePermission
             );
         }
 
