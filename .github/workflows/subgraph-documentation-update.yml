@@ -42,9 +42,9 @@ jobs:
           path: developer-portal
           token: ${{ secrets.ARABOT_PAT }}
       - name: Remove the docs/subgraph folder in the developer-portal
-        run: rm -rf $GITHUB_WORKSPACE/developer-portal/docs/subgraph
+        run: rm -rf $GITHUB_WORKSPACE/developer-portal/versioned_docs/version-1.3.0/osx/subgraph
       - name: Copy the docs/developer-portal folder to the developer-portal
-        run: cp -R packages/subgraph/docs/developer-portal $GITHUB_WORKSPACE/developer-portal/docs/subgraph
+        run: cp -R packages/subgraph/docs/developer-portal $GITHUB_WORKSPACE/developer-portal/versioned_docs/version-1.3.0/osx/subgraph
       - name: Copy the generated schema-introspection.json to the developer-portal
         run: cp -R packages/subgraph/docs/schema-introspection-partial.json $GITHUB_WORKSPACE/developer-portal/static/subgraph
       - name: Get short commit hash
