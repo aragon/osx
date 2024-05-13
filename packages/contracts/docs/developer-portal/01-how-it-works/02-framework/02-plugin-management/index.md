@@ -40,7 +40,7 @@ A detailed explanation of the [build and release versioning](../../../02-how-to-
 
 <div class="center-column">
 
-![](./plugin-version.drawio.svg)
+![](/img/docs/optimized-svg/plugin-version.drawio.svg)
 
 <p class="caption">
   A schematic depiction of a plugin bundle consisting of a version tag, the plugin setup contract pointing to the plugin implementation contract, and a metadata URI.

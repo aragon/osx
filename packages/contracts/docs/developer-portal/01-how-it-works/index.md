@@ -7,7 +7,7 @@ title: How It Works
 The Aragon OSx protocol is a DAO framework structured as follows:
 
 <div class="center-column">
-  <img src="https://res.cloudinary.com/duvrxe0m9/image/upload/v1687512002/aragon-os-framework-overview.drawio_dj7e4p.svg" alt="Aragon architecture diagram" />
+  ![](/img/docs/optimized-svg/aragon-os-framework-overview.drawio.svg)
   <p class="caption">
     Overview of the Aragon OSx protocol with its structural components and their responsibilities: the governance layer constituted by the framework DAO, the code layer including the framework and core contracts, which depends on external libraries and services
   </p>

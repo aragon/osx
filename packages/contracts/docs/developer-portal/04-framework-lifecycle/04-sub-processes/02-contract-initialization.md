@@ -58,7 +58,7 @@ Accordingly, `v1.2.0` is the 5th version and our `reinitializer()` number is `5`
 
 First, change the `reinitializer(5)` and make sure that there is a test for it.
 
-Then do all the initialzation changes and write a note, in which version they have been introduced (for easier traceability).
+Then do all the initialization changes and write a note, in which version they have been introduced (for easier traceability).
 
 ```solidity
 function initialize(uint256 calldata _a, address calldata _c) external reinitializer(5) {
@@ -89,7 +89,7 @@ function initializeFrom(
   uint8[3] calldata _previousProtocolVersion,
   bytes calldata _initData
 ) external reinitializer(5) {
-  // Ensure that the previous and current protocol MAJOR version numbers match. If not, revert because the upgrade is incompatible since breaking changes occured.
+  // Ensure that the previous and current protocol MAJOR version numbers match. If not, revert because the upgrade is incompatible since breaking changes occurred.
   if (_previousProtocolVersion[0] != protocolVersion()[0]) {
     revert('Incompatible upgrade');
   }

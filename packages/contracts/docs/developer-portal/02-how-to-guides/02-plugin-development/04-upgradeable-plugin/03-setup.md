@@ -47,7 +47,7 @@ The `prepareInstallation()` function takes in two parameters:
 1. the `DAO` it should prepare the installation for, and
 2. the `_data` parameter containing all the information needed for this function to work properly, encoded as a `bytes memory`. In this case, we get the number we want to store.
 
-Hence, the first thing we should do when working on the `prepareInsallation()` function is decode the information from the `_data` parameter.
+Hence, the first thing we should do when working on the `prepareInstallation()` function is decode the information from the `_data` parameter.
 Similarly, the `prepareUninstallation()` function takes in a `payload`.
 
 ```solidity
@@ -131,7 +131,7 @@ Firstly, we'll make sure our preferred network is well setup within our `hardhat
 ```js
 import '@nomicfoundation/hardhat-toolbox';
 
-// To find your Alchemy key, go to https://dashboard.alchemy.com/. Infure or any other provider would work here as well.
+// To find your Alchemy key, go to https://dashboard.alchemy.com/. Infura or any other provider would work here as well.
 const goerliAlchemyKey = 'add-your-own-alchemy-key';
 // To find a private key, go to your wallet of choice and export a private key. Remember this must be kept secret at all times.
 const privateKeyGoerli = 'add-your-account-private-key';

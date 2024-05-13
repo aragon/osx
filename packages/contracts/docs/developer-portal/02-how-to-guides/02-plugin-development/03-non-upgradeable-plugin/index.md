@@ -14,7 +14,7 @@ Some observations:
 
 Before moving on with the Guide, make sure you've read our documentation on [Choosing the Best Type for Your Plugin](../02-plugin-types.md) to make sure you're selecting the right type of contract for your Plugin.
 
-## Building a Non-Upgradeble Plugin
+## Building a Non-Upgradable Plugin
 
 We will build a plugin which returns "Hello world!" and the amount of times the function has been called.
 
@@ -43,7 +43,7 @@ sudo apt-get install -y nodejs
 
 [Here's a tutorial](https://hardhat.org/tutorial/setting-up-the-environment) on installing this if you haven't done so already.
 
-2. Next up, we want to create a Hardhat project in our terminal. This is the Solidity framework we'll use to get our project up and runing.
+2. Next up, we want to create a Hardhat project in our terminal. This is the Solidity framework we'll use to get our project up and running.
 
 ```bash
 npm init
@@ -275,7 +275,7 @@ You can publish the plugin into Aragon's protocol through a few different ways:
 
 Go to the [`PluginFactory`](https://goerli.etherscan.io/address/0x301868712b77744A3C0E5511609238399f0A2d4d#writeContract) contract on Etherscan and deploy the first version of your plugin.
 
-![Register your Plugin through Etherscan](https://res.cloudinary.com/dacofvu8m/image/upload/v1682466427/Screen_Shot_2023-04-25_at_19.46.58_nlo9p1.png)
+![Register your Plugin through Etherscan](/img/docs/create_plugin_etherscan.png)
 
 #### b) Publishing script
 

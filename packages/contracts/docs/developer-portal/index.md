@@ -1,6 +1,6 @@
 ---
 title: Aragon OSx
-sidebar_label: Introduction to Aragon OSx
+sidebar_label: Introduction
 sidebar_position: 0
 ---
 

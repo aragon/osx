@@ -24,7 +24,7 @@ Whenever a DAO installs a plugin, an instance of that plugin's base template is 
 Each instance of a plugin is installed to a DAO through the granting of permissions.
 
 :::info
-Lern more about the different [plugin types](../../../02-how-to-guides/02-plugin-development/02-plugin-types.md) in our How-to guide.
+Learn more about the different [plugin types](../../../02-how-to-guides/02-plugin-development/02-plugin-types.md) in our How-to guide.
 :::
 
 This raises questions on how the DAO manages plugins and who actually owns plugins.
@@ -39,10 +39,10 @@ A DAO manages plugins and interactions between them. In more detail, its permiss
 
 <div class="center-column">
 
-![Schematic depiction of the interaction between the DAO, the PermissionManager, and a Plugin contract.](../dao-plugin.drawio.svg)
+![Schematic depiction of the interaction between the DAO, the PermissionManager, and a Plugin contract.](/img/docs/optimized-svg/dao-plugin.drawio.svg)
 
 <p class="caption">
-  An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The <code>DAO</code> contract in blue containing the <code>PermissionManager</code> in red, respectively, as well as two <code>Plugin</code> contracts in green.
+  An exemplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The <code>DAO</code> contract in blue containing the <code>PermissionManager</code> in red, respectively, as well as two <code>Plugin</code> contracts in green.
   Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if a DeFi-related plugin is allowed to invest in a certain, external contract.
 </p>
 

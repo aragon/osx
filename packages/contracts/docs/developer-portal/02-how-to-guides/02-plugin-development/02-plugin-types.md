@@ -49,11 +49,11 @@ Some key things to keep in mind:
 
 The following table compares the different deployment methods with their benefits and drawbacks:
 
-|               | `new` Instantiation                           | Minimal Proxy (Clones)                            | Transparent Proxy                                | UUPS Proxy                                    |
-| ------------- | --------------------------------------------- | ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
-| upgradability | <span class="table-cell-negative">no</span>   | <span class="table-cell-negative">no</span>       | <span class="table-cell-positive">yes</span>     | <span class="table-cell-positive">yes</span>  |
-| gas costs     | <span class="table-cell-negative">high</span> | <span class="table-cell-positive">very low</span> | <span class="table-cell-neutral">moderate</span> | <span class="table-cell-positive">low</span>  |
-| difficulty    | <span class="table-cell-positive">low</span>  | <span class="table-cell-positive">low</span>      | <span class="table-cell-negative">high</span>    | <span class="table-cell-negative">high</span> |
+|                | `new` Instantiation                           | Minimal Proxy (Clones)                            | Transparent Proxy                                | UUPS Proxy                                    |
+| -------------- | --------------------------------------------- | ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| upgradeability | <span class="table-cell-negative">no</span>   | <span class="table-cell-negative">no</span>       | <span class="table-cell-positive">yes</span>     | <span class="table-cell-positive">yes</span>  |
+| gas costs      | <span class="table-cell-negative">high</span> | <span class="table-cell-positive">very low</span> | <span class="table-cell-neutral">moderate</span> | <span class="table-cell-positive">low</span>  |
+| difficulty     | <span class="table-cell-positive">low</span>  | <span class="table-cell-positive">low</span>      | <span class="table-cell-negative">high</span>    | <span class="table-cell-negative">high</span> |
 
 Accordingly, we recommend to use [minimal proxies (ERC-1167)](https://eips.ethereum.org/EIPS/eip-1167) for non-upgradeable and [UUPS proxies (1822)](https://eips.ethereum.org/EIPS/eip-1822) for upgradeable plugin.
 To help you with developing and deploying your plugin within the Aragon infrastructure, we provide the following implementation that you can inherit from:

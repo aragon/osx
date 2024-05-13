@@ -4,7 +4,7 @@ title: Plugin Repositories
 
 ## What are Plugin Repositories?
 
-Each plugin has its own Plugin Repository, unique ENS name, and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference using verstion tags constituted by a **release** and **build** number.
+Each plugin has its own Plugin Repository, unique ENS name, and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference using version tags constituted by a **release** and **build** number.
 
 Different versions might contain:
 
@@ -16,10 +16,10 @@ Different versions might contain:
 
 <div class="center-column">
 
-![Schematic depiction of the versioning taking place in the PluginRepoRegistry.](./plugin-repo-overview.drawio.svg)
+![Schematic depiction of the versioning taking place in the PluginRepoRegistry.](/img/docs/optimized-svg/plugin-repo-overview.drawio.svg)
 
 <p class="caption">
-  Overview of the plugin versioning and registry in the Aragon OSx protocol. The `PluginRepoRegistry` contract, which is a curated list of ENS named `PluginRepo` contracts, is shown on the left. Each `PluginRepo` contract maintains a list of versions of the `PluginSetup` contract (internally referencing the `Plugin` implementation contract) and the associated UI building blocks as a URI, examplarily shown on the right.
+  Overview of the plugin versioning and registry in the Aragon OSx protocol. The `PluginRepoRegistry` contract, which is a curated list of ENS named `PluginRepo` contracts, is shown on the left. Each `PluginRepo` contract maintains a list of versions of the `PluginSetup` contract (internally referencing the `Plugin` implementation contract) and the associated UI building blocks as a URI, exemplarily shown on the right.
 </p>
 
 </div>

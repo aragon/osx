@@ -6,7 +6,7 @@ title: Plugin Setup Contract
 
 The Plugin Setup contract is the contract defining the instructions for installing, uninstalling, or upgrading plugins into DAOs. This contract prepares the permission granting or revoking that needs to happen in order for plugins to be able to perform actions on behalf of the DAO.
 
-You need it for the plugin to be installed intto the DAO.
+You need it for the plugin to be installed into the DAO.
 
 ### 1. Finish the Plugin contract
 
@@ -116,7 +116,7 @@ The `prepareInstallation()` function should take in two parameters:
 1. the `DAO` it prepares the installation for, and
 2. the `_data` parameter containing all the information needed for this function to work properly, in this case, the address we want to set as admin of our DAO.
 
-Hence, the first thing we should do when working on the `prepareInsallation()` function is decode the information from the `_data` parameter. We also want to check that the address is not accidentally set to `address(0)`, which would freeze the DAO forever.
+Hence, the first thing we should do when working on the `prepareInstallation()` function is decode the information from the `_data` parameter. We also want to check that the address is not accidentally set to `address(0)`, which would freeze the DAO forever.
 
 ```solidity
 import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';

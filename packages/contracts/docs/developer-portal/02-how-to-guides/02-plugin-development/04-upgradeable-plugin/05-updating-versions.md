@@ -146,7 +146,7 @@ contract SimpleStorageBuild2Setup is PluginSetup {
 }
 ```
 
-The key thing to review in this new Plugin Setup contract is its `prepareUpdate()` function. The function only contains a condition checking from which build number the update is transitioning to build `2`. Here, it is the build number `1` as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of intializing the storage that was added in this build.
+The key thing to review in this new Plugin Setup contract is its `prepareUpdate()` function. The function only contains a condition checking from which build number the update is transitioning to build `2`. Here, it is the build number `1` as this is the only update path we support. Inside, we decode the `address _account` input argument provided with `bytes _date` and pass it to the `initializeFromBuild1` function taking care of initializing the storage that was added in this build.
 
 ### 3. Future builds
 
@@ -226,7 +226,7 @@ contract SimpleStorageBuild3 is PluginUUPSUpgradeable {
 
 </details>
 
-With each new build implementation, we will need to udate the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function to support any new features that need to be set up.
+With each new build implementation, we will need to update the Plugin Setup contract to be able to update to that new version. We do this through updating the `prepareUpdate()` function to support any new features that need to be set up.
 
 <details>
 <summary>Third plugin setup example, modifying <code>prepareUpdate</code> function</summary>
@@ -353,8 +353,8 @@ contract SimpleStorageBuild3Setup is PluginSetup {
 
 In this case, the `prepareUpdate()` function only contains a condition checking from which build number the update is transitioning to build 2. Here, we can update from build 0 or build 1 and different operations must happen for each case to transition to `SimpleAdminBuild3`.
 
-In the first case, `initializeFromBuild1` is called taking care of intializing `address _account` that was added in build 1 and emitting the events added in build 2.
+In the first case, `initializeFromBuild1` is called taking care of initializing `address _account` that was added in build 1 and emitting the events added in build 2.
 
-In the second case, `initializeFromBuild2` is called taking care of intializing the build. Here, only the two events will be emitted.
+In the second case, `initializeFromBuild2` is called taking care of initializing the build. Here, only the two events will be emitted.
 
 Lastly, the `prepareUpdate()` function takes care of modifying the permissions by revoking the `STORE_PERMISSION_ID` and granting the more specific `STORE_NUMBER_PERMISSION_ID` and `STORE_ACCOUNT)PERMISSION_ID` permissions, that are also granted if build 2 is freshly installed. This must happen for both update paths so this code is outside the `if` statements.

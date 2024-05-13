@@ -1,5 +1,6 @@
 ---
-title: How-to Guides
+title: Tutorials
+sidebar_label: Tutorials
 ---
 
 ## Welcome to our How To Guides on Using the Aragon OSx Protocol!
@@ -30,14 +31,14 @@ Technically speaking, Aragon DAOs are:
 
 All other functionality is enabled through plugins. This allows DAOs to be extremely flexible and modular as they mature, through installing and uninstalling these plugins as needs arise.
 
-![Aragon DAO](https://res.cloudinary.com/dacofvu8m/image/upload/v1683224604/Screen_Shot_2023-05-04_at_14.21.52_uuogzr.png)
+![Aragon DAO](/img/docs/Aragon_DAO_Diagram.png)
 
 On the technical level, plugins are composed of two key contracts:
 
 - ⚡️ The Plugin implementation contract: containing all of the logic and functionality for your DAO, and
 - 👩🏻‍🏫 The Plugin Setup contract: containing the installation, uninstallation and upgrade instructions for your plugin.
 
-![Aragon OSx Plugins](https://res.cloudinary.com/dacofvu8m/image/upload/v1683225098/Screen_Shot_2023-05-04_at_14.31.25_r0qqut.png)
+![Aragon OSx Plugins](/img/docs/what_is_a_plugin.png)
 
 Through plugins, we provide a secure, flexible way for on-chain organizations to iterate as they grow.
 

@@ -21,7 +21,7 @@ Make sure you have at least one build already deployed and published into the Ar
 
 In this second build implementation we want to update the functionality of our plugin - in this case, we want to update the storage of our plugin with new values. Specifically, we will add a second storage variable `address public account;`. Additional to the `initializeFromBuild2` function, we also want to add a second setter function `storeAccount` that uses the same permission as `storeNumber`.
 
-As you can see, we're still inheritting from the `PluginUUPSUpgradeable` contract and simply overriding some implementation from the previous build. The idea is that when someone upgrades the plugin and calls on these functions, they'll use this new upgraded implementation, rather than the older one.
+As you can see, we're still inheriting from the `PluginUUPSUpgradeable` contract and simply overriding some implementation from the previous build. The idea is that when someone upgrades the plugin and calls on these functions, they'll use this new upgraded implementation, rather than the older one.
 
 ```solidity
 import {PluginUUPSUpgradeable, IDAO} '@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol';
@@ -60,7 +60,7 @@ contract SimpleStorageBuild2 is PluginUUPSUpgradeable {
 }
 ```
 
-Builds that you publish don't necessarily need to introduce new storage varaibles of your contracts and don't necessarily need to change the storage. To read more about Upgradeability, check out [OpenZeppelin's UUPSUpgradeability implementation here](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable).
+Builds that you publish don't necessarily need to introduce new storage variables of your contracts and don't necessarily need to change the storage. To read more about Upgradeability, check out [OpenZeppelin's UUPSUpgradeability implementation here](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable).
 
 :::note
 Note that because these contracts are Upgradeable, keeping storage gaps `uint256 [50] __gap;` in dependencies is a must in order to avoid storage corruption. To learn more about storage gaps, review OpenZeppelin's documentation [here](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#storage-gaps).

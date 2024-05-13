@@ -42,7 +42,7 @@ Setting this permission is key because it ensures only signers who have been gra
 
 Now that we have created the permission, we will use it to protect the implementation. We want to make sure only the authorized callers holding the `ADMIN_EXECUTE_PERMISSION`, can use the function.
 
-Because we have initialized the [`PluginClonable` base contract](https://github.com/aragon/osx-commons/blob/develop/contracts/src/plugin/PluginCloneable.sol), we can now use its features, i.e., the [`auth` modifier](https://github.com/aragon/osx-commons/blob/1cf46ff15dbda8481f9ee37558e7ea8b257d51f2/contracts/src/permission/auth/DaoAuthorizable.sol#L30-L35) provided through the `DaoAuthorizable` base class. The `auth('ADMIN_EXECUTE_PERMISSION')` returns an error if the address calling on the function has not been granted that permission, effectively protecting from malicious use cases.
+Because we have initialized the [`PluginCloneable` base contract](https://github.com/aragon/osx-commons/blob/develop/contracts/src/plugin/PluginCloneable.sol), we can now use its features, i.e., the [`auth` modifier](https://github.com/aragon/osx-commons/blob/1cf46ff15dbda8481f9ee37558e7ea8b257d51f2/contracts/src/permission/auth/DaoAuthorizable.sol#L30-L35) provided through the `DaoAuthorizable` base class. The `auth('ADMIN_EXECUTE_PERMISSION')` returns an error if the address calling on the function has not been granted that permission, effectively protecting from malicious use cases.
 
 Later, we will also use the [`dao()` getter function from the base contract](https://github.com/aragon/osx-commons/blob/1cf46ff15dbda8481f9ee37558e7ea8b257d51f2/contracts/src/permission/auth/DaoAuthorizable.sol#L24-L28), which returns the associated DAO for that plugin.
 

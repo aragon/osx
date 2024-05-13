@@ -1,5 +1,6 @@
 ---
 title: How to build a DAO Plugin
+sidebar_title: Developing a Plugin
 ---
 
 ## Plugin Development Quickstart Guide
@@ -185,7 +186,7 @@ Lastly, we can call the [`createPluginRepoWithFirstVersion` function from Aragon
 
 We can do this directly by calling the function on Etherscan ([make sure to get the right scan and contract address based on your network](https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json)) or through locally calling on the method from your project using Ethers.
 
-![Etherscan](https://res.cloudinary.com/dacofvu8m/image/upload/v1682466427/Screen_Shot_2023-04-25_at_19.46.58_nlo9p1.png)
+![Etherscan](/img/docs/create_plugin_etherscan.png)
 
 If you want to review how to publish your plugin in more depth, review our [How to Publish a Plugin in Aragon OSx guide here](./07-publication//index.md)
 

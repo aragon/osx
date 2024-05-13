@@ -67,7 +67,7 @@ Each `"prepare..."` object contains:
 | description | `string`   | The description of what this particular setup step is doing and what it requires the input for.                                                                                                                                                |
 | inputs      | `object[]` | A description of the inputs required for this setup step following the [Solidity JSON ABI](https://docs.ethers.org/v5/api/utils/abi/formats/#abi-formats--solidity) format enriched with an additional `"description"` field for each element. |
 
-By following the Solidity JSON ABI format for the inputs, we followed an establishd standard, have support for complex types (tuples, arrays, nested versions of the prior) and allow for future extensibility (such as the human readable description texts that we have added).
+By following the Solidity JSON ABI format for the inputs, we followed an establish standard, have support for complex types (tuples, arrays, nested versions of the prior) and allow for future extensibility (such as the human readable description texts that we have added).
 
 #### Example
 
@@ -103,7 +103,7 @@ By following the Solidity JSON ABI format for the inputs, we followed an establi
           "internalType": "struct Multisig.MultisigSettings",
           "name": "multisigSettings",
           "type": "tuple",
-          "description": "The inital multisig settings."
+          "description": "The initial multisig settings."
         }
       ],
       "prepareUpdate": {
