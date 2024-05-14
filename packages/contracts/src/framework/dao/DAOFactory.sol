@@ -99,10 +99,10 @@ contract DAOFactory is ERC165, ProtocolVersion {
             .APPLY_INSTALLATION_PERMISSION_ID();
 
         // Grant the temporary permissions.
-        // Grant Temporarly `ROOT_PERMISSION` to `pluginSetupProcessor`.
+        // Grant Temporarily `ROOT_PERMISSION` to `pluginSetupProcessor`.
         createdDao.grant(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
 
-        // Grant Temporarly `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
+        // Grant Temporarily `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
         createdDao.grant(
             address(pluginSetupProcessor),
             address(this),
@@ -138,8 +138,8 @@ contract DAOFactory is ERC165, ProtocolVersion {
         // Set the rest of DAO's permissions.
         _setDAOPermissions(createdDao);
 
-        // Revoke the temporarly granted permissions.
-        // Revoke Temporarly `ROOT_PERMISSION` from `pluginSetupProcessor`.
+        // Revoke the temporarily granted permissions.
+        // Revoke Temporarily `ROOT_PERMISSION` from `pluginSetupProcessor`.
         createdDao.revoke(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
 
         // Revoke `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` from this `DAOFactory` .
@@ -149,12 +149,12 @@ contract DAOFactory is ERC165, ProtocolVersion {
             applyInstallationPermissionID
         );
 
-        // Revoke Temporarly `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implicitly granted to this `DaoFactory`
+        // Revoke Temporarily `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implicitly granted to this `DaoFactory`
         // at the create dao step `address(this)` being the initial owner of the new created DAO.
         createdDao.revoke(address(createdDao), address(this), rootPermissionID);
     }
 
-    /// @notice Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the intial owner.
+    /// @notice Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the initial owner.
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // Create a DAO proxy and initialize it with the DAOFactory (`address(this)`) as the initial owner.

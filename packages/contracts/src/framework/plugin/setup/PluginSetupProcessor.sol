@@ -376,7 +376,7 @@ contract PluginSetupProcessor is ProtocolVersion {
         pluginState.currentAppliedSetupId = appliedSetupId;
         pluginState.blockNumber = block.number;
 
-        // If the list of requested permission changes is not empy, process them.
+        // If the list of requested permission changes is not empty, process them.
         // Note, that this requires the `PluginSetupProcessor` to have the `ROOT_PERMISSION_ID` permission on the
         // installing DAO. Make sure this permission is only granted TEMPORARILY.
         if (_params.permissions.length > 0) {
@@ -396,7 +396,7 @@ contract PluginSetupProcessor is ProtocolVersion {
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
     /// @return preparedSetupData The data struct containing the array of helper contracts and permissions that the setup has prepared.
-    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for.
+    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happened) on which the update is prepared for.
     function prepareUpdate(
         address _dao,
         PrepareUpdateParams calldata _params
@@ -535,7 +535,7 @@ contract PluginSetupProcessor is ProtocolVersion {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);
         }
 
-        // If the list of requested permission changes is not empy, process them.
+        // If the list of requested permission changes is not empty, process them.
         // Note, that this requires the `PluginSetupProcessor` to have the `ROOT_PERMISSION_ID` permission on the
         // updating DAO. Make sure this permission is only granted TEMPORARILY.
         if (_params.permissions.length > 0) {
@@ -554,7 +554,7 @@ contract PluginSetupProcessor is ProtocolVersion {
     /// @param _dao The address of the uninstalling DAO.
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
-    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
+    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happened) on which the uninstallation was prepared for.
     function prepareUninstallation(
         address _dao,
         PrepareUninstallationParams calldata _params
@@ -614,7 +614,7 @@ contract PluginSetupProcessor is ProtocolVersion {
     /// @param _dao The address of the DAO.
     /// @param _dao The address of the uninstalling DAO.
     /// @param _params The struct containing the parameters for the `applyUninstallation` function.
-    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
+    /// @dev The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happened) on which the uninstallation was prepared for.
     function applyUninstallation(
         address _dao,
         ApplyUninstallationParams calldata _params
@@ -637,7 +637,7 @@ contract PluginSetupProcessor is ProtocolVersion {
         pluginState.blockNumber = block.number;
         pluginState.currentAppliedSetupId = bytes32(0);
 
-        // If the list of requested permission changes is not empy, process them.
+        // If the list of requested permission changes is not empty, process them.
         // Note, that this requires the `PluginSetupProcessor` to have the `ROOT_PERMISSION_ID` permission on the
         // uninstalling DAO. Make sure this permission is only granted TEMPORARILY.
         if (_params.permissions.length > 0) {

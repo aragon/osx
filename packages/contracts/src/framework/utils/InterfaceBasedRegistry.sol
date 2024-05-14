@@ -38,7 +38,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     error ContractERC165SupportInvalid(address registrant);
 
     /// @notice Initializes the component.
-    /// @dev This is required for the UUPS upgradability pattern.
+    /// @dev This is required for the UUPS upgradeability pattern.
     /// @param _managingDao The interface of the DAO managing the components permissions.
     /// @param _targetInterfaceId The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface id of the contracts to be registered.
     function __InterfaceBasedRegistry_init(
