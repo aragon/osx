@@ -200,7 +200,7 @@ describe('Core: PermissionManager', function () {
           nonConditionContract.address
         )
       )
-        .to.be.revertedWithCustomError(pm, 'ConditionInterfacNotSupported')
+        .to.be.revertedWithCustomError(pm, 'ConditionInterfaceNotSupported')
         .withArgs(nonConditionContract.address);
     });
 
