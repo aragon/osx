@@ -37,7 +37,7 @@ describe('CallbackHandler', function () {
     )
       .to.be.revertedWithCustomError(
         callbackHandlerMockHelper,
-        'UnkownCallback'
+        'UnknownCallback'
       )
       .withArgs(callbackSelector, UNREGISTERED_INTERFACE_RETURN);
   });

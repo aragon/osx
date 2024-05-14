@@ -311,7 +311,7 @@ describe('DAO Upgrade', function () {
       );
 
       await expect(daoV100.protocolVersion())
-        .to.be.revertedWithCustomError(daoV100Proxy, 'UnkownCallback')
+        .to.be.revertedWithCustomError(daoV100Proxy, 'UnknownCallback')
         .withArgs(protocolVersionSelector, '0x00000000');
 
       // for DAO v1.3.0 onward

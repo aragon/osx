@@ -1137,7 +1137,7 @@ describe('DAO', function () {
           data: id,
         })
       )
-        .to.be.revertedWithCustomError(dao, 'UnkownCallback')
+        .to.be.revertedWithCustomError(dao, 'UnknownCallback')
         .withArgs(id, UNREGISTERED_INTERFACE_RETURN);
 
       await dao.registerStandardCallback(id, id, id);
