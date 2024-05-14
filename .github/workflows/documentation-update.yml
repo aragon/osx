@@ -43,8 +43,11 @@ jobs:
           ref: staging
           path: developer-portal
           token: ${{ secrets.ARABOT_PAT }}
-      - name: Remove the docs/osx/03-reference-guide folder in the developer-portal
-        run: rm -rf $GITHUB_WORKSPACE/developer-portal/docs/osx/03-reference-guide
+      - name: Remove the docs/osx/03-reference-guide folder in the developer-portal, excluding index.md
+        run: |
+          cd $GITHUB_WORKSPACE/developer-portal/docs/osx/03-reference-guide
+          shopt -s extglob
+          rm -rf !(index.md)
       - name: Copy the docs/developer-portal/03-reference-guide folder to the developer-portal
         run: cp -R packages/contracts/docs/developer-portal/03-reference-guide $GITHUB_WORKSPACE/developer-portal/docs/osx/03-reference-guide
       - name: Get short commit hash
