@@ -1,12 +1,12 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {newMockEvent} from 'matchstick-as';
-
 import {
   ProposalCreated,
-  ProposalExecuted
+  ProposalExecuted,
 } from '../../generated/templates/Admin/Admin';
 import {Granted, Revoked} from '../../generated/templates/Admin/DAO';
 import {ADDRESS_ZERO} from '../constants';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {newMockEvent} from 'matchstick-as';
+
 // events
 
 export function createNewProposalCreatedEvent(

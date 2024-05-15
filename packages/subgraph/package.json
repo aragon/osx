@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-subgraph",
-  "version": "1.3.0",
+  "version": "1.4.1",
   "description": "The Aragon OSx Subgraph",
   "homepage": "https://github.com/aragon/osx",
   "license": "AGPL-3.0-or-later",
@@ -19,9 +19,7 @@
     "buildAndStart:dev": "docker-compose -f docker/docker-compose.yml up -d --build hardhat && sleep 30 && yarn create:local && yarn deploy:local",
     "test:fast": "graph test",
     "test": "graph test -r",
-    "coverage": "graph test -c",
-    "formatting:check": "prettier '**/*.{json,ts,js}' -c",
-    "formatting:write": "prettier '**/*.{json,ts,js}' --write"
+    "coverage": "graph test -c"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.52.0",
@@ -29,9 +27,12 @@
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
     "eslint": "^8.12.0",
-    "matchstick-as": "^0.5.1",
+    "matchstick-as": "^0.5.2",
     "mustache": "^4.2.0",
     "ts-morph": "^17.0.1",
     "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@aragon/osx-commons-subgraph": "^0.0.4"
   }
 }

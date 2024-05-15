@@ -1,5 +1,10 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  MultisigPlugin,
+  MultisigProposal,
+  MultisigApprover,
+  MultisigProposalApprover,
+} from '../../../generated/schema';
 import {
   ProposalCreated,
   ProposalExecuted,
@@ -7,16 +12,15 @@ import {
   MembersRemoved,
   Multisig,
   Approved,
-  MultisigSettingsUpdated
+  MultisigSettingsUpdated,
 } from '../../../generated/templates/Multisig/Multisig';
+import {generateMemberEntityId, generateVoterEntityId} from '../../utils/ids';
 import {
-  Action,
-  MultisigPlugin,
-  MultisigProposal,
-  MultisigApprover,
-  MultisigProposalApprover
-} from '../../../generated/schema';
-import {getProposalId} from '../../utils/proposals';
+  generateActionEntityId,
+  generatePluginEntityId,
+  generateProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -32,11 +36,16 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
+  let pluginAddress = event.address;
+  let proposalEntityId = generateProposalEntityId(
+    pluginAddress,
+    pluginProposalId
+  );
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
 
-  let proposalEntity = new MultisigProposal(proposalId);
+  let proposalEntity = new MultisigProposal(proposalEntityId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = event.address.toHexString();
+  proposalEntity.plugin = pluginEntityId;
   proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
@@ -46,48 +55,41 @@ export function _handleProposalCreated(
   proposalEntity.endDate = event.params.endDate;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
-  let contract = Multisig.bind(event.address);
-  let vote = contract.try_getProposal(pluginProposalId);
+  let contract = Multisig.bind(pluginAddress);
+  let proposal = contract.try_getProposal(pluginProposalId);
 
-  if (!vote.reverted) {
-    proposalEntity.executed = vote.value.value0;
-    proposalEntity.approvals = vote.value.value1;
+  if (!proposal.reverted) {
+    proposalEntity.executed = proposal.value.value0;
+    proposalEntity.approvals = proposal.value.value1;
 
     // ProposalParameters
-    let parameters = vote.value.value2;
+    let parameters = proposal.value.value2;
     proposalEntity.minApprovals = parameters.minApprovals;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
-
-    // if minApproval is 1, the proposal is always executable
-    if (parameters.minApprovals == 1) {
-      proposalEntity.potentiallyExecutable = true;
-    } else {
-      proposalEntity.potentiallyExecutable = false;
-    }
+    proposalEntity.approvalReached = false;
 
     // Actions
-    let actions = vote.value.value3;
+    let actions = proposal.value.value3;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId = getProposalId(event.address, pluginProposalId)
-        .concat('_')
-        .concat(index.toString());
+      let actionId = generateActionEntityId(proposalEntityId, index);
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
       actionEntity.value = action.value;
       actionEntity.data = action.data;
       actionEntity.dao = daoId;
-      actionEntity.proposal = proposalId;
+      actionEntity.proposal = proposalEntityId;
       actionEntity.save();
     }
+    proposalEntity.isSignaling = actions.length == 0;
   }
 
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = MultisigPlugin.load(event.address.toHexString());
+  let packageEntity = MultisigPlugin.load(pluginEntityId);
   if (packageEntity) {
     let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
@@ -98,28 +100,33 @@ export function _handleProposalCreated(
 }
 
 export function handleApproved(event: Approved): void {
-  const member = event.params.approver.toHexString();
-  const pluginId = event.address.toHexString();
-  const memberId = pluginId.concat('_').concat(member);
+  let memberAddress = event.params.approver;
+  let pluginAddress = event.address;
+  let memberEntityId = generateMemberEntityId(pluginAddress, memberAddress);
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
-  let approverProposalId = member.concat('_').concat(proposalId);
-
-  let approverProposalEntity = MultisigProposalApprover.load(
-    approverProposalId
+  let proposalEntityId = generateProposalEntityId(
+    event.address,
+    pluginProposalId
   );
+  let approverProposalId = generateVoterEntityId(
+    memberEntityId,
+    proposalEntityId
+  );
+
+  let approverProposalEntity =
+    MultisigProposalApprover.load(approverProposalId);
   if (!approverProposalEntity) {
     approverProposalEntity = new MultisigProposalApprover(approverProposalId);
-    approverProposalEntity.approver = memberId;
-    approverProposalEntity.proposal = proposalId;
+    approverProposalEntity.approver = memberEntityId;
+    approverProposalEntity.proposal = proposalEntityId;
   }
   approverProposalEntity.createdAt = event.block.timestamp;
   approverProposalEntity.save();
 
   // update count
-  let proposalEntity = MultisigProposal.load(proposalId);
+  let proposalEntity = MultisigProposal.load(proposalEntityId);
   if (proposalEntity) {
-    let contract = Multisig.bind(event.address);
+    let contract = Multisig.bind(pluginAddress);
     let proposal = contract.try_getProposal(pluginProposalId);
 
     if (!proposal.reverted) {
@@ -131,9 +138,9 @@ export function handleApproved(event: Approved): void {
 
       if (
         approvals >= minApprovalsStruct.minApprovals &&
-        !proposalEntity.potentiallyExecutable
+        !proposalEntity.approvalReached
       ) {
-        proposalEntity.potentiallyExecutable = true;
+        proposalEntity.approvalReached = true;
       }
 
       proposalEntity.save();
@@ -143,11 +150,14 @@ export function handleApproved(event: Approved): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
+  let proposalEntityId = generateProposalEntityId(
+    event.address,
+    pluginProposalId
+  );
 
-  let proposalEntity = MultisigProposal.load(proposalId);
+  let proposalEntity = MultisigProposal.load(proposalEntityId);
   if (proposalEntity) {
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = false;
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
@@ -159,15 +169,17 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleMembersAdded(event: MembersAdded): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index].toHexString();
-    const pluginId = event.address.toHexString();
-    const memberId = pluginId + '_' + member;
+    const memberAddress = members[index];
+    const pluginEntityId = generatePluginEntityId(event.address);
+    const memberEntityId = [pluginEntityId, memberAddress.toHexString()].join(
+      '_'
+    );
 
-    let approverEntity = MultisigApprover.load(memberId);
+    let approverEntity = MultisigApprover.load(memberEntityId);
     if (!approverEntity) {
-      approverEntity = new MultisigApprover(memberId);
-      approverEntity.address = member;
-      approverEntity.plugin = pluginId;
+      approverEntity = new MultisigApprover(memberEntityId);
+      approverEntity.address = memberAddress.toHexString();
+      approverEntity.plugin = pluginEntityId;
       approverEntity.save();
     }
   }
@@ -176,13 +188,15 @@ export function handleMembersAdded(event: MembersAdded): void {
 export function handleMembersRemoved(event: MembersRemoved): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index].toHexString();
-    const pluginId = event.address.toHexString();
-    const memberId = pluginId + '_' + member;
+    const memberAddress = members[index];
+    const pluginEntityId = generatePluginEntityId(event.address);
+    const memberEntityId = [pluginEntityId, memberAddress.toHexString()].join(
+      '_'
+    );
 
-    const approverEntity = MultisigApprover.load(memberId);
+    const approverEntity = MultisigApprover.load(memberEntityId);
     if (approverEntity) {
-      store.remove('MultisigApprover', memberId);
+      store.remove('MultisigApprover', memberEntityId);
     }
   }
 }
@@ -190,7 +204,9 @@ export function handleMembersRemoved(event: MembersRemoved): void {
 export function handleMultisigSettingsUpdated(
   event: MultisigSettingsUpdated
 ): void {
-  let packageEntity = MultisigPlugin.load(event.address.toHexString());
+  let packageEntity = MultisigPlugin.load(
+    generatePluginEntityId(event.address)
+  );
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;
     packageEntity.minApprovals = event.params.minApprovals;

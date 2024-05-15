@@ -1,31 +1,28 @@
-import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-
+import {
+  Action,
+  TokenVotingPlugin,
+  TokenVotingProposal,
+  TokenVotingVoter,
+  TokenVotingVote,
+} from '../../../generated/schema';
+import {GovernanceERC20} from '../../../generated/templates';
 import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
   MembershipContractAnnounced,
-  TokenVoting
+  TokenVoting,
 } from '../../../generated/templates/TokenVoting/TokenVoting';
-
-import {GovernanceERC20} from '../../../generated/templates';
-
-import {
-  Action,
-  TokenVotingPlugin,
-  TokenVotingProposal,
-  TokenVotingVoter,
-  TokenVotingVote
-} from '../../../generated/schema';
-
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
+import {generateMemberEntityId, generateVoteEntityId} from '../../utils/ids';
+import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20';
 import {
-  fetchERC20,
-  fetchWrappedERC20,
-  supportsERC20Wrapped
-} from '../../utils/tokens/erc20';
-import {getProposalId} from '../../utils/proposals';
+  generateActionEntityId,
+  generatePluginEntityId,
+  generateProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -41,21 +38,25 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginAddress = event.address;
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(pluginAddress, pluginProposalId);
+  let proposalEntityId = generateProposalEntityId(
+    pluginAddress,
+    pluginProposalId
+  );
 
-  let proposalEntity = new TokenVotingProposal(proposalId);
+  let proposalEntity = new TokenVotingProposal(proposalEntityId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = pluginAddress.toHexString();
+  proposalEntity.plugin = pluginEntityId;
   proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
-  proposalEntity.potentiallyExecutable = false;
+  proposalEntity.approvalReached = false;
 
-  let contract = TokenVoting.bind(event.address);
+  let contract = TokenVoting.bind(pluginAddress);
   let proposal = contract.try_getProposal(pluginProposalId);
 
   if (!proposal.reverted) {
@@ -85,18 +86,17 @@ export function _handleProposalCreated(
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
-      let actionId = getProposalId(event.address, pluginProposalId)
-        .concat('_')
-        .concat(index.toString());
+      let actionId = generateActionEntityId(proposalEntityId, index);
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
       actionEntity.value = action.value;
       actionEntity.data = action.data;
       actionEntity.dao = daoId;
-      actionEntity.proposal = proposalId;
+      actionEntity.proposal = proposalEntityId;
       actionEntity.save();
     }
+    proposalEntity.isSignaling = actions.length == 0;
 
     // totalVotingPower
     proposalEntity.totalVotingPower = contract.try_totalVotingPower(
@@ -107,7 +107,7 @@ export function _handleProposalCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
+  let packageEntity = TokenVotingPlugin.load(pluginEntityId);
   if (packageEntity) {
     let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
@@ -118,26 +118,30 @@ export function _handleProposalCreated(
 }
 
 export function handleVoteCast(event: VoteCast): void {
-  let pluginId = event.address.toHexString();
-  let voter = event.params.voter.toHexString();
-  let voterId = pluginId.concat('_').concat(voter);
+  let pluginAddress = event.address;
+  let voterAddress = event.params.voter;
+  let voterEntityId = generateMemberEntityId(pluginAddress, voterAddress);
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
-  let voterVoteId = voter.concat('_').concat(proposalId);
+  let proposalEntityId = generateProposalEntityId(
+    pluginAddress,
+    pluginProposalId
+  );
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
+  let voterVoteEntityId = generateVoteEntityId(voterAddress, proposalEntityId);
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
   if (voteOption === 'None') {
     return;
   }
 
-  let voterProposalVoteEntity = TokenVotingVote.load(voterVoteId);
+  let voterProposalVoteEntity = TokenVotingVote.load(voterVoteEntityId);
   if (voterProposalVoteEntity) {
     voterProposalVoteEntity.voteReplaced = true;
     voterProposalVoteEntity.updatedAt = event.block.timestamp;
   } else {
-    voterProposalVoteEntity = new TokenVotingVote(voterVoteId);
-    voterProposalVoteEntity.voter = voterId;
-    voterProposalVoteEntity.proposal = proposalId;
+    voterProposalVoteEntity = new TokenVotingVote(voterVoteEntityId);
+    voterProposalVoteEntity.voter = voterEntityId;
+    voterProposalVoteEntity.proposal = proposalEntityId;
     voterProposalVoteEntity.createdAt = event.block.timestamp;
     voterProposalVoteEntity.voteReplaced = false;
     voterProposalVoteEntity.updatedAt = BigInt.zero();
@@ -147,11 +151,11 @@ export function handleVoteCast(event: VoteCast): void {
   voterProposalVoteEntity.save();
 
   // voter
-  let voterEntity = TokenVotingVoter.load(voterId);
+  let voterEntity = TokenVotingVoter.load(voterEntityId);
   if (!voterEntity) {
-    voterEntity = new TokenVotingVoter(voterId);
-    voterEntity.address = voter;
-    voterEntity.plugin = pluginId;
+    voterEntity = new TokenVotingVoter(voterEntityId);
+    voterEntity.address = voterEntityId;
+    voterEntity.plugin = pluginEntityId;
     voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
   } else {
@@ -160,9 +164,9 @@ export function handleVoteCast(event: VoteCast): void {
   }
 
   // update count
-  let proposalEntity = TokenVotingProposal.load(proposalId);
+  let proposalEntity = TokenVotingProposal.load(proposalEntityId);
   if (proposalEntity) {
-    let contract = TokenVoting.bind(event.address);
+    let contract = TokenVoting.bind(pluginAddress);
     let proposal = contract.try_getProposal(pluginProposalId);
 
     if (!proposal.reverted) {
@@ -206,7 +210,7 @@ export function handleVoteCast(event: VoteCast): void {
         let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
         // Used when proposal has ended.
-        proposalEntity.potentiallyExecutable =
+        proposalEntity.approvalReached =
           supportThresholdReached && minParticipationReached;
 
         // Used when proposal has not ended.
@@ -222,12 +226,15 @@ export function handleVoteCast(event: VoteCast): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
+  let proposalEntityId = generateProposalEntityId(
+    event.address,
+    pluginProposalId
+  );
 
-  let proposalEntity = TokenVotingProposal.load(proposalId);
+  let proposalEntity = TokenVotingProposal.load(proposalEntityId);
   if (proposalEntity) {
     proposalEntity.executed = true;
-    proposalEntity.potentiallyExecutable = false;
+    proposalEntity.approvalReached = false;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.executionTxHash = event.transaction.hash;
@@ -238,7 +245,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVotingSettingsUpdated(
   event: VotingSettingsUpdated
 ): void {
-  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
+  let packageEntity = TokenVotingPlugin.load(
+    generatePluginEntityId(event.address)
+  );
   if (packageEntity) {
     packageEntity.votingMode = VOTING_MODES.get(event.params.votingMode);
     packageEntity.supportThreshold = event.params.supportThreshold;
@@ -253,32 +262,21 @@ export function handleMembershipContractAnnounced(
   event: MembershipContractAnnounced
 ): void {
   let token = event.params.definingContract;
-  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
+  let pluginEntityId = generatePluginEntityId(event.address);
+  let packageEntity = TokenVotingPlugin.load(pluginEntityId);
 
   if (packageEntity) {
-    let contractAddress: string;
-
-    if (supportsERC20Wrapped(token)) {
-      let contract = fetchWrappedERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
-    } else {
-      let contract = fetchERC20(token);
-      if (!contract) {
-        return;
-      }
-      contractAddress = contract.id;
+    let tokenAddress = identifyAndFetchOrCreateERC20TokenEntity(token);
+    if (!tokenAddress) {
+      return;
     }
-    packageEntity.token = contractAddress;
-
+    packageEntity.token = tokenAddress as string;
     packageEntity.save();
 
     // Both GovernanceWrappedERC20/GovernanceERC20 use the `Transfer` event, so
     // It's safe to create the same type of template for them.
     let context = new DataSourceContext();
-    context.setString('pluginId', event.address.toHexString());
+    context.setString('pluginId', pluginEntityId);
     GovernanceERC20.createWithContext(event.params.definingContract, context);
   }
 }

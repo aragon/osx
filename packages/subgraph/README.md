@@ -70,7 +70,8 @@ You have the option to deploy your subgraph locally, this is how you can do it.
 
 Make sure u set the env variable `<NETWORK_NAME>` to 'localhost' and `<SUBGRAPH_NAME>` to 'aragon/aragon-core'.
 
-To update the local manifest after the contracts have been compiled, 
+To update the local manifest after the contracts have been compiled,
+
 ```console
 yarn updateLocalManifest
 ```
@@ -81,11 +82,13 @@ To start:
 yarn start:dev
 ```
 
-When there's changes in the contract's package, run 
+When there are changes in the contract's package, run
+
 ```console
 yarn buildAndStart:dev
-``` 
-to force build the hardhat docker image containing the contracts. 
+```
+
+to force build the hardhat docker image containing the contracts.
 
 Ideally in the future, the docker image should be part of the contract's CI/CD flow. Each time a new version of contracts is released, a new docker image should also be released, and the version number should be changed on the docker-compose in the subgraph directory.
 
@@ -111,3 +114,15 @@ yarn stop:dev
 | subgraph:patch | Applies a patch version bump for the changelog and package.json |
 | subgraph:minor | Applies a minor version bump for the changelog and package.json |
 | subgraph:major | Applies a major version bump for the changelog and package.json |
+
+## Contributing
+
+If you like what we're doing and would love to support, please review our `CONTRIBUTING_GUIDE.md` [here](https://github.com/aragon/osx/blob/develop/CONTRIBUTION_GUIDE.md). We'd love to build with you.
+
+## Security
+
+If you believe you've found a security issue, we encourage you to notify us. We welcome working with you to resolve the issue promptly.
+
+Security Contact Email: sirt@aragon.org
+
+Please do not use the issue tracker for security issues.

@@ -1,17 +1,23 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {
   ERC721Balance,
   ERC721Contract,
-  ERC721Transfer
+  ERC721Transfer,
 } from '../../../generated/schema';
 import {ERC721} from '../../../generated/templates/DaoTemplateV1_0_0/ERC721';
+import {getMethodSignature} from '../bytes';
 import {supportsInterface} from '../erc165';
-import {DECODE_OFFSET, getTransferId, TransferType} from './common';
+import {generateTokenEntityId} from '../ids';
+import {DECODE_OFFSET, TransferType} from './common';
 import {
   ERC721_safeTransferFromNoData,
   ERC721_safeTransferFromWithData,
-  ERC721_transferFrom
+  ERC721_transferFrom,
 } from './common';
+import {
+  generateDaoEntityId,
+  generateTransferEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 
 function supportsERC721(token: Address): bool {
   // Double check that it's ERC721 by calling supportsInterface checks.
@@ -103,26 +109,26 @@ export function handleERC721Received(
   let from = tuple[1].toAddress();
   let tokenId = tuple[2].toBigInt();
 
-  let daoId = dao.toHexString();
+  let daoEntityId = generateDaoEntityId(dao);
 
   updateERC721Balance(
-    daoId,
-    token.toHexString(),
+    daoEntityId,
+    generateTokenEntityId(token),
     tokenId,
     event.block.timestamp,
     TransferType.Deposit
   );
 
-  let transferId = getTransferId(
+  let transferEntityId = generateTransferEntityId(
     event.transaction.hash,
     event.transactionLogIndex,
     0
   );
 
-  let transfer = new ERC721Transfer(transferId);
+  let transfer = new ERC721Transfer(transferEntityId);
   transfer.from = from;
   transfer.to = dao;
-  transfer.dao = daoId;
+  transfer.dao = daoEntityId;
   transfer.token = contract.id;
   transfer.tokenId = tokenId;
   transfer.txHash = event.transaction.hash;
@@ -138,97 +144,106 @@ export function handleERC721Action(
   proposalId: string,
   actionIndex: number,
   event: ethereum.Event
-): void {
+): bool {
   let contract = fetchERC721(token);
-  if (!contract) {
-    return;
-  }
+  if (!contract) return false;
 
-  let functionSelector = data.toHexString().substring(0, 10);
-  let calldata = data.toHexString().slice(10);
+  let functionSelector = getMethodSignature(data);
+  let decodeABI = determineERC721DecodeABI(functionSelector);
 
-  let decodeABI = '';
+  if (!decodeABI) return false;
 
-  if (
-    functionSelector == ERC721_transferFrom ||
-    functionSelector == ERC721_safeTransferFromNoData
-  ) {
-    decodeABI = '(address,address,uint256)';
-  }
+  let calldata = getCalldata(functionSelector, data);
+  let decoded = ethereum.decode(
+    decodeABI as string,
+    Bytes.fromHexString(calldata)
+  );
+  if (!decoded) return false;
 
-  if (functionSelector == ERC721_safeTransferFromWithData) {
-    decodeABI = '(address,address,uint256,bytes)';
-    calldata = DECODE_OFFSET + calldata;
-  }
-
-  let decoded = ethereum.decode(decodeABI, Bytes.fromHexString(calldata));
-
-  if (!decoded) {
-    return;
-  }
-
-  let tuple = decoded.toTuple();
-
-  let from = tuple[0].toAddress();
-  let to = tuple[1].toAddress();
-  let tokenId = tuple[2].toBigInt();
-
-  let daoId = dao.toHexString();
-
-  let transferId = getTransferId(
-    event.transaction.hash,
-    event.transactionLogIndex,
+  let transfer = createERC721Transfer(
+    decoded.toTuple(),
+    contract,
+    dao,
+    event,
+    proposalId,
     actionIndex
   );
 
-  let transfer = new ERC721Transfer(transferId);
-  transfer.from = from;
-  transfer.to = to;
-  transfer.dao = daoId;
-  transfer.token = contract.id;
-  transfer.tokenId = tokenId;
-  transfer.proposal = proposalId;
-  transfer.txHash = event.transaction.hash;
-  transfer.createdAt = event.block.timestamp;
-
-  if (from == dao && to == dao) {
+  if (transfer.from == dao && transfer.to == dao) {
     transfer.type = 'Withdraw';
-    transfer.save();
-    return;
-  }
-
-  // If from/to both aren't equal to dao, it means
-  // dao must have been approved for the `tokenId`
-  // and played the role of transfering between 2 parties.
-  if (from != dao && to != dao) {
+  } else if (transfer.from != dao && transfer.to != dao) {
+    // If from/to both aren't equal to dao, it means
+    // dao must have been approved for the `tokenId`
+    // and played the role of transfering between 2 parties.
     transfer.type = 'ExternalTransfer';
-    transfer.save();
-    return;
-  }
-
-  if (from != dao && to == dao) {
+  } else if (transfer.from != dao && transfer.to == dao) {
     // 1. some party `y` approved `x` tokenId to the dao.
     // 2. dao calls transferFrom as an action to transfer it from `y` to itself.
     transfer.type = 'Deposit';
-
     updateERC721Balance(
-      daoId,
-      token.toHexString(),
-      tokenId,
+      transfer.dao,
+      transfer.token,
+      transfer.tokenId,
       event.block.timestamp,
       TransferType.Deposit
     );
   } else {
     transfer.type = 'Withdraw';
-
     updateERC721Balance(
-      daoId,
-      token.toHexString(),
-      tokenId,
+      transfer.dao,
+      transfer.token,
+      transfer.tokenId,
       event.block.timestamp,
       TransferType.Withdraw
     );
   }
 
   transfer.save();
+  return true;
+}
+
+function determineERC721DecodeABI(functionSelector: string): string | null {
+  if (
+    functionSelector == ERC721_transferFrom ||
+    functionSelector == ERC721_safeTransferFromNoData
+  ) {
+    return '(address,address,uint256)';
+  } else if (functionSelector == ERC721_safeTransferFromWithData) {
+    return '(address,address,uint256,bytes)';
+  }
+  return null;
+}
+
+function getCalldata(functionSelector: string, data: Bytes): string {
+  if (functionSelector == ERC721_safeTransferFromWithData) {
+    return DECODE_OFFSET + data.toHexString().slice(10);
+  }
+  return data.toHexString().slice(10);
+}
+
+function createERC721Transfer(
+  tuple: ethereum.Tuple,
+  contract: ERC721Contract,
+  dao: Address,
+  event: ethereum.Event,
+  proposalId: string,
+  actionIndex: number
+): ERC721Transfer {
+  let transferEntityId = generateTransferEntityId(
+    event.transaction.hash,
+    event.transactionLogIndex,
+    actionIndex as i32
+  );
+  let daoEntityId = generateDaoEntityId(dao);
+  let transfer = new ERC721Transfer(transferEntityId);
+  transfer.from = tuple[0].toAddress();
+  transfer.to = tuple[1].toAddress();
+  transfer.dao = daoEntityId;
+  transfer.token = contract.id;
+  transfer.tokenId = tuple[2].toBigInt();
+  transfer.proposal = proposalId;
+  transfer.txHash = event.transaction.hash;
+  transfer.createdAt = event.block.timestamp;
+
+  return transfer;
 }

@@ -1,18 +1,22 @@
-import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
-
-import {
-  MembershipContractAnnounced,
-  ProposalCreated,
-  ProposalExecuted
-} from '../../../generated/templates/Admin/Admin';
 import {
   Action,
   AdministratorAdminPlugin,
   AdminProposal,
-  Administrator
+  Administrator,
 } from '../../../generated/schema';
 import {AdminMembers} from '../../../generated/templates';
-import {getProposalId} from '../../utils/proposals';
+import {
+  MembershipContractAnnounced,
+  ProposalCreated,
+  ProposalExecuted,
+} from '../../../generated/templates/Admin/Admin';
+import {generateAdministratorAdminPluginEntityId} from '../../utils/ids';
+import {
+  generateActionEntityId,
+  generatePluginEntityId,
+  generateProposalEntityId,
+} from '@aragon/osx-commons-subgraph';
+import {dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -28,13 +32,17 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
-  let pluginId = event.address.toHexString();
+  let pluginAddress = event.address;
+  let pluginEntityId = generatePluginEntityId(pluginAddress);
+  let proposalEntityId = generateProposalEntityId(
+    pluginAddress,
+    pluginProposalId
+  );
   let administratorAddress = event.params.creator;
 
-  let proposalEntity = new AdminProposal(proposalId);
+  let proposalEntity = new AdminProposal(proposalEntityId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = pluginId;
+  proposalEntity.plugin = pluginEntityId;
   proposalEntity.pluginProposalId = pluginProposalId;
   proposalEntity.creator = administratorAddress;
   proposalEntity.metadata = metadata;
@@ -44,17 +52,15 @@ export function _handleProposalCreated(
   proposalEntity.endDate = event.params.endDate;
   proposalEntity.administrator = administratorAddress.toHexString();
   proposalEntity.allowFailureMap = event.params.allowFailureMap;
-
-  // Administrator
-  let administratorId = administratorAddress
-    .toHexString()
-    .concat('_')
-    .concat(pluginId);
-  let adminMemberEntity = AdministratorAdminPlugin.load(administratorId);
+  let administratorEntityId = generateAdministratorAdminPluginEntityId(
+    administratorAddress,
+    pluginAddress
+  );
+  let adminMemberEntity = AdministratorAdminPlugin.load(administratorEntityId);
   if (!adminMemberEntity) {
-    adminMemberEntity = new AdministratorAdminPlugin(administratorId);
+    adminMemberEntity = new AdministratorAdminPlugin(administratorEntityId);
     adminMemberEntity.administrator = administratorAddress.toHexString();
-    adminMemberEntity.plugin = pluginId;
+    adminMemberEntity.plugin = pluginEntityId;
     adminMemberEntity.save();
   }
   let administratorEntity = Administrator.load(
@@ -71,16 +77,13 @@ export function _handleProposalCreated(
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
 
-    let actionId = getProposalId(event.address, pluginProposalId)
-      .concat('_')
-      .concat(index.toString());
-
-    let actionEntity = new Action(actionId);
+    let actionEntityId = generateActionEntityId(proposalEntityId, index);
+    let actionEntity = new Action(actionEntityId);
     actionEntity.to = action.to;
     actionEntity.value = action.value;
     actionEntity.data = action.data;
     actionEntity.dao = daoId;
-    actionEntity.proposal = proposalId;
+    actionEntity.proposal = proposalEntityId;
     actionEntity.save();
   }
 
@@ -89,9 +92,12 @@ export function _handleProposalCreated(
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let pluginProposalId = event.params.proposalId;
-  let proposalId = getProposalId(event.address, pluginProposalId);
+  let proposalEntityId = generateProposalEntityId(
+    event.address,
+    pluginProposalId
+  );
 
-  let proposalEntity = AdminProposal.load(proposalId);
+  let proposalEntity = AdminProposal.load(proposalEntityId);
   if (proposalEntity) {
     proposalEntity.executed = true;
     proposalEntity.executionTxHash = event.transaction.hash;

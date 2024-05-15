@@ -7,11 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
-### Added
+## 1.4.1
+
+## 1.5.0
 
 ### Changed
 
+- Fixed bug with negative number balances and missing delegation history for existing ERC20 tokens using `TokenVoting`
+- Fixed bugs regarding inconsistent memberIds in various parts of the codebase. This primarily affects delegation.
+
+### Changed
+
+- Removed `createERC1155TokenCalls`, `createTokenCalls`, `createWrappedTokenCalls` and `createDummyActions` and use the equivalent functions `createERC20TokenCalls`, `createERC1155TokenCalls` and `createDummyAction` from `@aragon/sdk-commons-subgraph`
+- Used `createDummyAction` from `@aragon/sdk-commons-subgraph`
+
+## 1.4.0
+
+### Added
+
+- Added `isSignaling` attribute to `TokenVotingProposal`, `AddresslistVotingProposal`, and `MultisigProposal` that is set to true for proposals having an empty action array.
+
+### Changed
+
+- Renamed `potentiallyExecutable` attribute to `approvalReached` and stopped setting it to `true` during multisig proposal creation if `minApprovals = 1` when zero approvals were given yet.
+
+## 1.3.1
+
+### Added
+
+- Add support for `Granted` & `Revoked` event in `PluginRepo`
+- Add one-to-many relationship from `Dao` & `PluginRepo` to `Permission`
+
+### Changed
+
+- Renamed `fetchERC20` & `fetchWrappedERC20` to `fetchOrCreateERC20Entity` & `fetchOrCreateWrappedERC20Entity` respectively.
+- Changed type of `token` attribute of `ERC20Transfer` from `ERC20Contract` to `Token`.
+- Refactored `Permission` entity & added `pluginRepo` attribute.
+- Fixed wrong token voting member deletion, when balance & voting power was zero, but it was still delegating to another address.
+
 ### Removed
+
+- Removed `SignatureValidatorSet` event.
+- Removed `ContractPermissionId` entity.
 
 ## [1.3.0]
 
@@ -69,7 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `IPluginInstallation` to `IPlugin`.
 - Changed `release: Int!` to `release: PluginRelease!` in `PluginVersion`
 - Changed `versions` to `releases` in `PluginRepo`.
-- Changes `Permission` entity to be muteable.
+- Changes `Permission` entity to be mutable.
 
 ### Removed
 

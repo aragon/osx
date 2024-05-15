@@ -1,14 +1,11 @@
-import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
-import {createMockedFunction, newMockEvent} from 'matchstick-as';
 import {MultisigPlugin, MultisigProposal} from '../../generated/schema';
-
 import {
   ProposalCreated,
   Approved,
   ProposalExecuted,
   MembersAdded,
   MembersRemoved,
-  MultisigSettingsUpdated
+  MultisigSettingsUpdated,
 } from '../../generated/templates/Multisig/Multisig';
 import {
   ADDRESS_ONE,
@@ -24,8 +21,10 @@ import {
   ALLOW_FAILURE_MAP,
   ZERO,
   THREE,
-  PLUGIN_ENTITY_ID
+  PLUGIN_ENTITY_ID,
 } from '../constants';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 // events
 
@@ -247,7 +246,7 @@ export function createGetProposalCall(
     'getProposal(uint256):(bool,uint16,(uint16,uint64,uint64,uint64),(address,uint256,bytes)[],uint256)'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId)),
     ])
     .returns([
       ethereum.Value.fromBoolean(executed),
@@ -259,7 +258,7 @@ export function createGetProposalCall(
 
       ethereum.Value.fromTupleArray(actions),
 
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap)),
     ]);
 }
 
@@ -309,7 +308,8 @@ export function createMultisigProposalEntityState(
   multisigProposal.creator = Address.fromString(creator);
   multisigProposal.startDate = BigInt.fromString(startDate);
   multisigProposal.endDate = BigInt.fromString(endDate);
-  multisigProposal.potentiallyExecutable = executable;
+  multisigProposal.approvalReached = executable;
+  multisigProposal.isSignaling = false;
   multisigProposal.executed = executed;
   multisigProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   multisigProposal.minApprovals = BigInt.fromString(minApprovals).toI32();

@@ -1,8 +1,5 @@
-import {expect} from 'chai';
-import {readImplementationValuesFromSlot} from '../../utils/storage';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {Deployment} from 'hardhat-deploy/dist/types';
 import {
   DAO,
   DAORegistry,
@@ -21,16 +18,18 @@ import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framewor
 import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
 import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
-import pluginSetupProcessorUpgradeableArtifactData from '../../artifacts/src/zksync/PluginSetupProcessorUpgradeable.sol/PluginSetupProcessorUpgradeable.json';
 
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {readImplementationValuesFromSlot} from '../../utils/storage';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
+import {expect} from 'chai';
+import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {Deployment} from 'hardhat-deploy/dist/types';
 
 async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe('Managing DAO', function () {
+describe.only('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
@@ -326,9 +325,6 @@ describe('Managing DAO', function () {
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
-
-    const repos = hre.aragonPluginRepos.filter;
-
     let implementationValues = await readImplementationValuesFromSlot(
       deployedRepoAddresses
     );

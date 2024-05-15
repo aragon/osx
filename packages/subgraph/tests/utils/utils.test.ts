@@ -1,6 +1,3 @@
-import {BigInt} from '@graphprotocol/graph-ts';
-
-import {assert, describe, test} from 'matchstick-as/assembly/index';
 import {bigIntToBytes32} from '../../src/utils/bytes';
 import {
   ZERO,
@@ -10,11 +7,13 @@ import {
   ZERO_BYTES32,
   ONE_BYTES32,
   HALF_UINT256_BYTES32,
-  MAX_UINT256_BYTES32
+  MAX_UINT256_BYTES32,
 } from '../constants';
+import {BigInt} from '@graphprotocol/graph-ts';
+import {assert, describe, test} from 'matchstick-as/assembly/index';
 
-describe('Test bytes', function() {
-  test('`bigIntToBytes32` with a range of `bigInt`s', function() {
+describe('Test bytes', function () {
+  test('`bigIntToBytes32` with a range of `bigInt`s', function () {
     const MAX_UINT256 = BigInt.fromString(MAX_UINT256_NUMBER_STRING);
 
     assert.stringEquals(bigIntToBytes32(BigInt.fromString(ZERO)), ZERO_BYTES32);
