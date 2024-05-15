@@ -16,12 +16,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
-  // add a timeout for polygon because the call to `implementation()` can fail for newly deployed contracts in the first few seconds
-  if (network.name === 'polygon') {
-    console.log(`Waiting 30secs for ${network.name} to finish up...`);
-    await setTimeout(30000);
-  }
-
   hre.aragonToVerifyContracts.push({
     contract: 'src/zksync/TokenVotingSetupZkSync.sol:TokenVotingSetupZkSync',
     ...TokenVotingSetupDeployment,
