@@ -5,7 +5,7 @@ pragma solidity ^0.8.8;
 /// @title CallbackHandler
 /// @author Aragon X - 2022-2023
 /// @notice This contract handles callbacks by registering a magic number together with the callback function's selector. It provides the `_handleCallback` function that inheriting contracts have to call inside their `fallback()` function  (`_handleCallback(msg.callbackSelector, msg.data)`).  This allows to adaptively register ERC standards (e.g., [ERC-721](https://eips.ethereum.org/EIPS/eip-721), [ERC-1115](https://eips.ethereum.org/EIPS/eip-1155), or future versions of [ERC-165](https://eips.ethereum.org/EIPS/eip-165)) and returning the required magic numbers for the associated callback functions for the inheriting contract so that it doesn't need to be upgraded.
-/// @dev This callback handling functionality is intented to be used by executor contracts (i.e., `DAO.sol`).
+/// @dev This callback handling functionality is intended to be used by executor contracts (i.e., `DAO.sol`).
 /// @custom:security-contact sirt@aragon.org
 abstract contract CallbackHandler {
     /// @notice A mapping between callback function selectors and magic return numbers.
@@ -17,7 +17,7 @@ abstract contract CallbackHandler {
     /// @notice Thrown if the callback function is not registered.
     /// @param callbackSelector The selector of the callback function.
     /// @param magicNumber The magic number to be registered for the callback function selector.
-    error UnkownCallback(bytes4 callbackSelector, bytes4 magicNumber);
+    error UnknownCallback(bytes4 callbackSelector, bytes4 magicNumber);
 
     /// @notice Emitted when `_handleCallback` is called.
     /// @param sender Who called the callback.
@@ -36,7 +36,7 @@ abstract contract CallbackHandler {
     ) internal virtual returns (bytes4) {
         bytes4 magicNumber = callbackMagicNumbers[_callbackSelector];
         if (magicNumber == UNREGISTERED_CALLBACK) {
-            revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
+            revert UnknownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
         }
 
         emit CallbackReceived({sender: msg.sender, sig: _callbackSelector, data: _data});

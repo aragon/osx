@@ -58,7 +58,7 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Thrown if a condition contract does not support the `IPermissionCondition` interface.
     /// @param condition The address that is not a contract.
-    error ConditionInterfacNotSupported(IPermissionCondition condition);
+    error ConditionInterfaceNotSupported(IPermissionCondition condition);
 
     /// @notice Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
     error PermissionsForAnyAddressDisallowed();
@@ -385,7 +385,7 @@ abstract contract PermissionManager is Initializable {
                 type(IPermissionCondition).interfaceId
             )
         ) {
-            revert ConditionInterfacNotSupported(_condition);
+            revert ConditionInterfaceNotSupported(_condition);
         }
 
         if (_where == ANY_ADDR && _who == ANY_ADDR) {

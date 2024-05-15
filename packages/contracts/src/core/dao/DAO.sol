@@ -67,10 +67,10 @@ contract DAO is
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
-    /// @notice The first out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was not entered.
+    /// @notice The first out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set indicating that a function was not entered.
     uint256 private constant _NOT_ENTERED = 1;
 
-    /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set inidicating that a function was entered.
+    /// @notice The second out of two values to which the `_reentrancyStatus` state variable (used by the `nonReentrant` modifier) can be set indicating that a function was entered.
     uint256 private constant _ENTERED = 2;
 
     /// @notice Removed variable that is left here to maintain the storage layout.
@@ -100,7 +100,7 @@ contract DAO is
     /// @param index The index of the action in the action array that failed.
     error ActionFailed(uint256 index);
 
-    /// @notice Thrown if an action has insufficent gas left.
+    /// @notice Thrown if an action has insufficient gas left.
     error InsufficientGas();
 
     /// @notice Thrown if the deposit amount is zero.
