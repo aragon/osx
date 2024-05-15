@@ -29,7 +29,7 @@ async function deployAll() {
   await initializeDeploymentFixture('New');
 }
 
-describe.only('Managing DAO', function () {
+describe('Managing DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let managingDaoDeployment: Deployment;
