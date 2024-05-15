@@ -141,7 +141,8 @@ const config: HardhatUserConfig = {
       zksync: true,
       deployPaths: ['./deploy/new'],
       accounts: [
-        // Rich accounts that already have lots of funds on the chain of port 8545
+        // Rich accounts with pre-funded balances for the chain on port 8545.
+        // These accounts are used for testing purposes and have sufficient funds.
         '0x3d3cbc973389cb26f657686445bcc75662b415b656078503592ac8c1abb8810e',
         '0x509ca2e9e6acf0ba086477910950125e698d4ea70fa6f63e000c5a22bda9361c',
         '0x71781d3a358e7a65150e894264ccc594993fbc0ea12d69508a340bc1d4f5bfbc',
