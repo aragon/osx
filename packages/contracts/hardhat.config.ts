@@ -45,8 +45,8 @@ task('build-contracts').setAction(async (args, hre) => {
     hre.network.name === 'zkTestnet' ||
     hre.network.name === 'zkLocalTestnet'
   ) {
-    // Copying is useful because we won't have to
-    // change imports in there for artifacts.
+    // Copy zkSync specific build artifacts and cache to the default directories.
+    // This ensures that we don't need to change import paths for artifacts in the project.
     fs.cpSync('./build/artifacts-zk', './artifacts', {
       recursive: true,
       force: true,
