@@ -1,6 +1,6 @@
 # ZkSync
 
-ZkSync uses a zkEVM and so has different considerations.
+ZkSync uses a zkEVM and so has different requirements.
 
 1. Ensure contracts are compiled with the zkSolc compiler
 
