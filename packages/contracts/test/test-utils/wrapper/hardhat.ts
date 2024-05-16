@@ -62,7 +62,7 @@ export class HardhatClass implements NetworkDeployment {
     const signer = (await ethers.getSigners())[deployer];
 
     const artifact = await hre.artifacts.readArtifact(artifactName);
-    let contract = new ethers.ContractFactory(
+    const contract = new ethers.ContractFactory(
       artifact.abi,
       artifact.bytecode,
       signer
