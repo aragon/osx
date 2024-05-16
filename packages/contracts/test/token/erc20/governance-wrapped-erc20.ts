@@ -8,11 +8,9 @@ import {
   GovernanceWrappedERC20,
   GovernanceWrappedERC20__factory,
   IERC165Upgradeable__factory,
-  DAO,
 } from '../../../typechain';
 import {OZ_ERRORS} from '../../test-utils/error';
 import {getInterfaceID} from '../../test-utils/interfaces';
-import {deployNewDAO} from '../../test-utils/dao';
 
 export type AccountBalance = {account: string; amount: number};
 
@@ -38,13 +36,12 @@ describe('GovernanceWrappedERC20', function () {
   let signers: SignerWithAddress[];
   let governanceToken: GovernanceWrappedERC20;
   let erc20: TestERC20;
-  let dao: DAO;
   let TestERC20: TestERC20__factory;
   let GovernanceWrappedERC20: GovernanceWrappedERC20__factory;
   let defaultBalances: AccountBalance[];
 
   let defaultExistingERC20InitData: [string, string, number];
-  let defaultGovernanceWrappedERC20InitData: any[] = [];
+  let defaultGovernanceWrappedERC20InitData: [string, string, string];
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -67,8 +64,6 @@ describe('GovernanceWrappedERC20', function () {
     erc20 = await hre.wrapper.deploy('TestERC20', {
       args: defaultExistingERC20InitData,
     });
-
-    dao = await deployNewDAO(signers[0]);
 
     for (let i = 0; i < defaultBalances.length; i++) {
       await erc20.setBalance(
