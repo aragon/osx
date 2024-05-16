@@ -26,4 +26,4 @@ See the framework lifecycle in `packages/contracts/docs/framework-lifecycle` to 
 - [ ] I have updated the `DEPLOYMENT_CHECKLIST` file in the root folder.
 - [ ] I have updated the `UPDATE_CHECKLIST` file in the root folder.
 - [ ] I have updated the Subgraph and added a QA URL to the description of this PR.
-- [ ] I have created a follow-up task to update our Developer Portal with the changes made in this PR.
+- [ ] I have created a follow-up task to update the Developer Portal with the changes made in this PR.
