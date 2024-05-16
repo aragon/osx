@@ -1,0 +1,34 @@
+name: 'formatting & linting'
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+
+jobs:
+  checks:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Check out the repo'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Install Node.js'
+        uses: 'actions/setup-node@v3'
+        with:
+          cache: 'yarn'
+          node-version: 18
+
+      - name: 'Install the dependencies'
+        run: 'yarn install --frozen-lockfile'
+
+      - name: 'Check code formatting'
+        run: 'yarn prettier:check'
+
+      - name: 'Lint contracts solidity'
+        run: 'yarn lint:contracts:sol'
+
+      - name: 'Lint contracts ts and js'
+        run: 'yarn lint:contracts:ts'
+
+      - name: 'Lint subgraph ts and js'
+        run: 'yarn lint:subgraph:ts'
