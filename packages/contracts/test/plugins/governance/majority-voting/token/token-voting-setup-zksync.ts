@@ -100,7 +100,6 @@ describe('TokenVotingSetupZkSync', function () {
     expect(await tokenVotingSetup.supportsInterface('0xffffffff')).to.be.false;
   });
 
-
   it('creates token voting base with the correct interface', async () => {
     const factory = new TokenVoting__factory(signers[0]);
     const tokenVoting = factory.attach(implementationAddress);
@@ -237,7 +236,7 @@ describe('TokenVotingSetupZkSync', function () {
           plugin,
           AddressZero,
           EXECUTE_PERMISSION_ID,
-        ]
+        ],
       ]);
     });
 
@@ -384,7 +383,7 @@ describe('TokenVotingSetupZkSync', function () {
           targetDao.address,
           AddressZero,
           MINT_PERMISSION_ID,
-        ]
+        ],
       ]);
     });
 

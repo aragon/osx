@@ -88,9 +88,9 @@ export class Wrapper {
   }
 
   // Creates an according wrapper class depending on the network.
-  // Note that on zksync network, node only has 10 rich addresses whereas 
+  // Note that on zksync network, node only has 10 rich addresses whereas
   // on hardhat, it's 20. Tests are heavily using the numbers in the Signers
-  // object from 10 to 20. So We make 10 custom addresses rich-funded to 
+  // object from 10 to 20. So We make 10 custom addresses rich-funded to
   // allow tests use the same approach on zksync as on hardhat.
   static async create(networkName: string, provider: providers.BaseProvider) {
     if (networkName == 'zkLocalTestnet' || networkName == 'zkSyncLocal') {

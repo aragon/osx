@@ -1,4 +1,8 @@
-import {DAORegistry__factory, DAO__factory, ENSRegistry__factory} from '../../../typechain';
+import {
+  DAORegistry__factory,
+  DAO__factory,
+  ENSRegistry__factory,
+} from '../../../typechain';
 import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
