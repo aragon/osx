@@ -17,7 +17,6 @@ import {getBalanceOf} from '../dao/utils';
 import {ExtendedTokenVotingMember} from '../helpers/extended-schema';
 import {
   createNewDelegateChangedEvent,
-  createNewERC20TransferEvent,
   createNewERC20TransferEventWithAddress,
   createTokenVotingMember,
   getDelegatee,
@@ -27,7 +26,7 @@ import {
   generateEntityIdFromAddress,
   generatePluginEntityId,
 } from '@aragon/osx-commons-subgraph';
-import {Address, BigInt, DataSourceContext, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt, DataSourceContext} from '@graphprotocol/graph-ts';
 import {
   assert,
   afterEach,
@@ -610,8 +609,6 @@ describe('Governance ERC20', () => {
     test("It should initialize with the user's existing voting power and delegation, if she has any", () => {
       // constants
       const STARTING_BALANCE = '10';
-      const TRANSFER = '3';
-      const REMAINING = '7';
 
       // mocked calls
       getBalanceOf(
@@ -637,16 +634,6 @@ describe('Governance ERC20', () => {
       const memberEntityIdFromSecondPlugin = generateMemberEntityId(
         pluginAddressSecond,
         Address.fromString(fromAddressHexString)
-      );
-
-      const memberEntityIdTo = generateMemberEntityId(
-        pluginAddressSecond,
-        Address.fromString(toAddressHexString)
-      );
-
-      const memberEntityIdToSecondPlugin = generateMemberEntityId(
-        pluginAddressSecond,
-        Address.fromString(toAddressHexString)
       );
 
       // delegate to self

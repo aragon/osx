@@ -156,7 +156,12 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     SNAPSHOT_BLOCK
   );
   assert.fieldEquals('MultisigProposal', proposalEntityId, 'minApprovals', ONE);
-  assert.fieldEquals('MultisigProposal', proposalEntityId, 'approvals', ONE);
+  assert.fieldEquals(
+    'MultisigProposal',
+    proposalEntityId,
+    'approvalCount',
+    ONE
+  );
   assert.fieldEquals('MultisigProposal', proposalEntityId, 'executed', 'false');
   assert.fieldEquals(
     'MultisigProposal',
@@ -221,32 +226,32 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   const voterEntityId = generateVoterEntityId(memberEntityId, proposal.id);
   // check proposalVoter
   assert.fieldEquals(
-    'MultisigProposalApprover',
+    'MultisigProposalApproval',
     voterEntityId,
     'id',
     voterEntityId
   );
   assert.fieldEquals(
-    'MultisigProposalApprover',
+    'MultisigProposalApproval',
+    voterEntityId,
+    'createdAt',
+    event.block.timestamp.toString()
+  );
+  assert.fieldEquals(
+    'MultisigProposalApproval',
     voterEntityId,
     'approver',
     memberEntityId
   );
   assert.fieldEquals(
-    'MultisigProposalApprover',
+    'MultisigProposalApproval',
     voterEntityId,
     'proposal',
     proposal.id
   );
-  assert.fieldEquals(
-    'MultisigProposalApprover',
-    voterEntityId,
-    'createdAt',
-    event.block.timestamp.toString()
-  );
 
   // check proposal
-  assert.fieldEquals('MultisigProposal', proposal.id, 'approvals', ONE);
+  assert.fieldEquals('MultisigProposal', proposal.id, 'approvalCount', ONE);
   assert.fieldEquals(
     'MultisigProposal',
     proposal.id,
@@ -284,7 +289,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   handleApproved(event2);
 
   // Check
-  assert.fieldEquals('MultisigProposal', proposal.id, 'approvals', TWO);
+  assert.fieldEquals('MultisigProposal', proposal.id, 'approvalCount', TWO);
   assert.fieldEquals(
     'MultisigProposal',
     proposal.id,
@@ -358,10 +363,10 @@ test('Run Multisig (handleMembersAdded) mappings with mock event', () => {
   handleMembersAdded(event);
 
   // checks
-  let memberId =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    userArray[0].toHexString();
+  let memberId = generateMemberEntityId(
+    Address.fromString(CONTRACT_ADDRESS),
+    userArray[0]
+  );
 
   assert.fieldEquals('MultisigApprover', memberId, 'id', memberId);
   assert.fieldEquals(
@@ -376,6 +381,7 @@ test('Run Multisig (handleMembersAdded) mappings with mock event', () => {
     'plugin',
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
+  assert.fieldEquals('MultisigApprover', memberId, 'isActive', 'true');
 
   clearStore();
 });
@@ -386,25 +392,23 @@ test('Run Multisig (handleMembersRemoved) mappings with mock event', () => {
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO),
   ];
-
+  let pluginAddress = Address.fromString(CONTRACT_ADDRESS);
+  // create approvers
   for (let index = 0; index < memberAddresses.length; index++) {
-    const user = memberAddresses[index].toHexString();
-    const pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
-    let memberId = pluginId + '_' + user;
-    let userEntity = new MultisigApprover(memberId);
-    userEntity.plugin = Address.fromString(CONTRACT_ADDRESS).toHexString();
-    userEntity.save();
+    let memberId = generateMemberEntityId(
+      pluginAddress,
+      memberAddresses[index]
+    );
+    let approverEntity = new MultisigApprover(memberId);
+    approverEntity.plugin = pluginAddress.toHexString();
+    approverEntity.address = memberAddresses[index];
+    approverEntity.isActive = true;
+    approverEntity.save();
   }
 
   // checks
-  let memberId1 =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    memberAddresses[0].toHexString();
-  let memberId2 =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    memberAddresses[1].toHexString();
+  let memberId1 = generateMemberEntityId(pluginAddress, memberAddresses[0]);
+  let memberId2 = generateMemberEntityId(pluginAddress, memberAddresses[1]);
 
   assert.fieldEquals('MultisigApprover', memberId1, 'id', memberId1);
   assert.fieldEquals('MultisigApprover', memberId2, 'id', memberId2);
@@ -420,8 +424,9 @@ test('Run Multisig (handleMembersRemoved) mappings with mock event', () => {
 
   // checks
   assert.fieldEquals('MultisigApprover', memberId1, 'id', memberId1);
-  assert.notInStore('MultisigApprover', memberId2);
-
+  assert.fieldEquals('MultisigApprover', memberId1, 'isActive', 'true');
+  assert.fieldEquals('MultisigApprover', memberId2, 'id', memberId2);
+  assert.fieldEquals('MultisigApprover', memberId2, 'isActive', 'false');
   clearStore();
 });
 

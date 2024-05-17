@@ -888,14 +888,23 @@ type MultisigPlugin implements IPlugin @entity {
 }
 
 type MultisigApprover @entity {
+  """
+  Current Approver of the multisig. If the approver is removed from the multisig,
+  the entity is not deleted and instead the isActive flag is set to false.
+  """
   id: ID! # plugin_address + member_address
-  address: String # address as string to facilitate filtering by address on the UI
-  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
+  address: Bytes!
+  approvals: [MultisigProposalApproval!]! @derivedFrom(field: "approver")
   plugin: MultisigPlugin!
+  isActive: Boolean!
 }
 
-type MultisigProposalApprover @entity(immutable: true) {
-  "ApproverProposal for Many-to-Many"
+type MultisigProposalApproval @entity(immutable: true) {
+  """
+  An approval of an specific multisig proposal
+  This entity works as a join table between MultisigProposal and MultisigApprover
+  and also stores the timestamp of the approval
+  """
   id: ID! # approver + proposal
   approver: MultisigApprover!
   proposal: MultisigProposal!
@@ -918,12 +927,12 @@ type MultisigProposal implements IProposal @entity {
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
   minApprovals: Int!
-  approvals: Int
+  approvalCount: Int
   approvalReached: Boolean!
   isSignaling: Boolean!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
   executionTxHash: Bytes
-  approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
+  approvals: [MultisigProposalApproval!]! @derivedFrom(field: "proposal")
 }
