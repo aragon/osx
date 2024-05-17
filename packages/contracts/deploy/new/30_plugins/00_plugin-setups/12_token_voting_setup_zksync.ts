@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   // Deploy the TokenVotingSetup and provide the bases in the constructor
-  await deploy('TokenVotingSetup', {
+  await deploy('TokenVotingSetupZkSync', {
     contract: tokenVotingSetupArtifact,
     from: deployer.address,
     args: [],

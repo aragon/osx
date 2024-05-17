@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get `Management DAO` address.
   const managementDAOAddress = await getContractAddress('DAO', hre);
 
-  await deploy('PluginSetupProcessor', {
+  await deploy('PluginSetupProcessorUpgradeable', {
     contract: pluginSetupProcessorUpgradeableFactoryArtifact,
     from: deployer.address,
     args: [],

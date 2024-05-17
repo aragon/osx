@@ -5,6 +5,7 @@ import {
   populatePluginRepo,
   getContractAddress,
   uploadToIPFS,
+  getTokenVotingSetupAddress,
 } from '../../../helpers';
 import {ethers} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
@@ -28,10 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  const tokenVotingSetupContract = await getContractAddress(
-    'TokenVotingSetup',
-    hre
-  );
+  const tokenVotingSetupContract = await getTokenVotingSetupAddress(hre);
 
   await createPluginRepo(hre, 'token-voting');
   await populatePluginRepo(hre, 'token-voting', [

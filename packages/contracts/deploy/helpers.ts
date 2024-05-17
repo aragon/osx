@@ -650,6 +650,34 @@ export function getManagingDAOMultisigAddress(
   return address;
 }
 
+export async function getPSPAddress(hre: HardhatRuntimeEnvironment) {
+  let name = 'PluginSetupProcessor'
+  if(ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    name = 'PluginSetupProcessorUpgradeable'
+  }
+
+  const address = await getContractAddress(
+    name,
+    hre
+  );
+
+  return address;
+}
+
+export async function getTokenVotingSetupAddress(hre: HardhatRuntimeEnvironment) {
+  let name = 'TokenVotingSetup'
+  if(ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    name = 'TokenVotingSetupZkSync'
+  }
+
+  const address = await getContractAddress(
+    name,
+    hre
+  );
+
+  return address;
+}
+
 export async function skipIfZkSync(
   hre: HardhatRuntimeEnvironment,
   stage: string

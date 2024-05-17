@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployments} = hre;
   hre.aragonToVerifyContracts.push(
-    await deployments.get('PluginSetupProcessor')
+    await deployments.get('PluginSetupProcessorUpgradeable')
   );
 };
 

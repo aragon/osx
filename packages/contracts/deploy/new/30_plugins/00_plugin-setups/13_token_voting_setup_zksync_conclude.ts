@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployments, network} = hre;
 
-  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetup');
+  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetupZkSync');
   const tokenVotingSetup = TokenVotingSetup__factory.connect(
     TokenVotingSetupDeployment.address,
     deployer

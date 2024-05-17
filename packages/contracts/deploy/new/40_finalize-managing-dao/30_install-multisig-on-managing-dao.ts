@@ -10,7 +10,7 @@ import {findEvent} from '../../../utils/event';
 import {getNamedTypesFromMetadata} from '../../../utils/metadata';
 import {hashHelpers} from '../../../utils/psp';
 import {Operation} from '../../../utils/types';
-import {checkPermission, getContractAddress} from '../../helpers';
+import {checkPermission, getContractAddress, getPSPAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -55,7 +55,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Get `PluginSetupProcessor` address.
-  const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
+  const pspAddress = await getPSPAddress(hre)
 
   // Get `PluginSetupProcessor` contract.
   const pspContract = PluginSetupProcessor__factory.connect(

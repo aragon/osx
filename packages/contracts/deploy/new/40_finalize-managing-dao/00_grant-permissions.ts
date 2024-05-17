@@ -1,6 +1,6 @@
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
 import {Operation} from '../../../utils/types';
-import {getContractAddress, managePermissions, Permission} from '../../helpers';
+import {getContractAddress, getPSPAddress, managePermissions, Permission} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
   // Get `PluginSetupProcessor` address.
-  const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
+  const pspAddress = await getPSPAddress(hre);
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
