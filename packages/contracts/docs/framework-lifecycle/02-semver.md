@@ -86,7 +86,7 @@ The reordering / removal of fields in structs being stored in dynamic arrays or 
 
 - not easily possible if the base class introduces storage and therefore needs a storage gap itself, which is likely the case
   - new contract needs to inherit from the previous implementation
-  - methods affected must be virtual to be overriden
+  - methods affected must be virtual to be overridden
   - initialization gets convoluted
     - the double initialization problem must be avoided
 
