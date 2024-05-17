@@ -1,0 +1,23 @@
+{
+  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
+  "network": "zksync-era-sepolia",
+  "dataSources": {
+    "DAORegistry": {
+      "name": "DAORegistry",
+      "address": "0x06C3A96e6798beEEF53E65AB2bFA8c5de7388C41",
+      "startBlock": 1988369
+    },
+    "PluginRepoRegistry": {
+      "name": "PluginRepoRegistry",
+      "address": "0xf106de6639845fB618A118E5Be4087dFDFC44bd1",
+      "startBlock": 1988373
+    },
+    "PluginSetupProcessors": [
+      {
+        "name": "PluginSetupProcessor",
+        "address": "0x5f03D7308b30c62cB2163AB44dB130CAeB1E4CaF",
+        "startBlock": 1988377
+      }
+    ]
+  }
+}
