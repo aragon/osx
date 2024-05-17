@@ -58,7 +58,7 @@ Conduct all necessary actions to prepare the installation of a plugin.
 
 ## Implement `prepareUninstallation`
 
-Conduct all necessary actions to prepare the uninstallation of a plugin and to decomission it.
+Conduct all necessary actions to prepare the uninstallation of a plugin and to decommission it.
 
 - decode `_payload._data` if required
 
@@ -76,7 +76,7 @@ Conduct all necessary actions to prepare the uninstallation of a plugin and to d
 
   over from the `_currentBuild` to the new build by
 
-  - deploying / decomissioning helpers return the addresses of the prevailing ones via the `preparedSetupData.helpers` array of addresses.
+  - deploying / decommissioning helpers return the addresses of the prevailing ones via the `preparedSetupData.helpers` array of addresses.
   - requesting to grant new / revoke existing permissions and returning them via the `preparedSetupData.permissions` array of permission structs.
 
 ## Update Metadata

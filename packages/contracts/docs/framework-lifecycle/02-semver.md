@@ -38,7 +38,7 @@ We now classify [smart contract changes](01-systems.md#smart-contracts) accordin
 ### Storage
 
 - Addition
-  Be aware that public constatns/immutables affect the `interfaceId`.
+  Be aware that public constants/immutables affect the `interfaceId`.
   Implementation
 
   - **IF** contract is **NOT** upgradeable
@@ -86,7 +86,7 @@ The reordering / removal of fields in structs being stored in dynamic arrays or 
 
 - not easily possible if the base class introduces storage and therefore needs a storage gap itself, which is likely the case
   - new contract needs to inherit from the previous implementation
-  - methods affected must be virtual to be overriden
+  - methods affected must be virtual to be overridden
   - initialization gets convoluted
     - the double initialization problem must be avoided
 
@@ -108,7 +108,7 @@ See the [OpenZeppelin article on multiple inheritance](https://docs.openzeppelin
 - Change
 
   - Body
-    A change to a function body can change the behaviour of the function requiring dependent contracts or software systems to change
+    A change to a function body can change the behavior of the function requiring dependent contracts or software systems to change
 
     - **IF** used by SDK
 
@@ -117,17 +117,17 @@ See the [OpenZeppelin article on multiple inheritance](https://docs.openzeppelin
     - **IF** used by App
       - [ ] adapt App
 
-    Behavioural changes that can be **major** / breaking
+    Behavioral changes that can be **major** / breaking
 
     - additional checks that result in external contracts reverting
     - making different internal or external calls
     - different execution or storing logic
 
-    Behavioural changes that can be **minor**
+    Behavioral changes that can be **minor**
 
     - storing new values
 
-    Non-behavioural changes that classify as **patch**
+    Non-behavioral changes that classify as **patch**
 
     - gas optimizations
 
@@ -212,7 +212,7 @@ Inheriting contracts or depending software systems must adapt.
 
 Logic using the constants / immutable variables must be adapted
 
-Be aware that public constatns/immutables change the `interfaceId`.
+Be aware that public constants/immutables change the `interfaceId`.
 
 ### Compiler Version
 
