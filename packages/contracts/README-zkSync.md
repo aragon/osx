@@ -8,7 +8,7 @@ ZkSync uses a zkEVM and so has different requirements.
 
 ```bash
 # Build your contracts with zkSolc
-yarn build --network zkSyncLocal
+yarn build --network zkLocalTestnet
 
 # build with solc to ensure artifacts are present
 yarn build
