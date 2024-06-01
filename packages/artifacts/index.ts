@@ -1,0 +1,14 @@
+export {default as callbackHandlerArtifact} from '../contracts/artifacts/src/core/utils/CallbackHandler.sol/CallbackHandler.json';
+export {default as daoArtifact} from '../contracts/artifacts/src/core/dao/DAO.sol/DAO.json';
+export {default as daoFactoryArtifact} from '../contracts/artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
+export {default as daoRegistryArtifact} from '../contracts/artifacts/src/framework/dao/DAORegistry.sol/DAORegistry.json';
+export {default as ensSubdomainRegistrarArtifact} from '../contracts/artifacts/src/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+export {default as ieip4824Artifact} from '../contracts/artifacts/src/core/dao/IEIP4824.sol/IEIP4824.json';
+export {default as iPluginRepoArtifact} from '../contracts/artifacts/src/framework/plugin/repo/IPluginRepo.sol/IPluginRepo.json';
+export {default as interfaceBasedRegistryArtifact} from '../contracts/artifacts/src/framework/utils/InterfaceBasedRegistry.sol/InterfaceBasedRegistry.json';
+export {default as permissionManagerArtifact} from '../contracts/artifacts/src/core/permission/PermissionManager.sol/PermissionManager.json';
+export {default as placeholderSetupArtifact} from '../contracts/artifacts/src/framework/plugin/repo/placeholder/PlaceholderSetup.sol/PlaceholderSetup.json';
+export {default as pluginRepoArtifact} from '../contracts/artifacts/src/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
+export {default as pluginRepoFactoryArtifact} from '../contracts/artifacts/src/framework/plugin/repo/PluginRepoFactory.sol/PluginRepoFactory.json';
+export {default as pluginRepoRegistryArtifact} from '../contracts/artifacts/src/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+export {default as pluginSetupProcessorArtifact} from '../contracts/artifacts/src/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
