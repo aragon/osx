@@ -76,9 +76,7 @@ const config: HardhatUserConfig = {
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
       gasPrice: 80000000000,
-      deploy: ENABLE_DEPLOY_TEST
-        ? ['./deploy']
-        : ['./deploy/new', './deploy/verification'],
+      deploy: ['./deploy/new', './deploy/verification'],
     },
     ...networks,
   },

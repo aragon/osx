@@ -15,6 +15,7 @@ import {PluginRepo} from "../repo/PluginRepo.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {PluginSetupRef, hashHelpers, hashPermissions, _getPreparedSetupId, _getAppliedSetupId, _getPluginInstallationId, PreparationType} from "./PluginSetupProcessorHelpers.sol";
+import "hardhat/console.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022-2023
@@ -350,6 +351,7 @@ contract PluginSetupProcessor {
         address _dao,
         ApplyInstallationParams calldata _params
     ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
+       
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
         PluginState storage pluginState = states[pluginInstallationId];
@@ -364,8 +366,11 @@ contract PluginSetupProcessor {
 
         // Check if this plugin is already installed.
         if (pluginState.currentAppliedSetupId != bytes32(0)) {
+            console.log("fuck me1");
             revert PluginAlreadyInstalled();
         }
+
+         
 
         validatePreparedSetupId(pluginInstallationId, preparedSetupId);
 
@@ -653,6 +658,7 @@ contract PluginSetupProcessor {
     ) public view {
         PluginState storage pluginState = states[pluginInstallationId];
         if (pluginState.blockNumber >= pluginState.preparedSetupIdToBlockNumber[preparedSetupId]) {
+            console.log("fuck me2");
             revert SetupNotApplicable({preparedSetupId: preparedSetupId});
         }
     }
@@ -701,6 +707,7 @@ contract PluginSetupProcessor {
             msg.sender != _dao &&
             !DAO(payable(_dao)).hasPermission(address(this), msg.sender, _permissionId, bytes(""))
         ) {
+            console.log("fuck me3");
             revert SetupApplicationUnauthorized({
                 dao: _dao,
                 caller: msg.sender,

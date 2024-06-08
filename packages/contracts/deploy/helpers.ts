@@ -216,7 +216,7 @@ export async function createPluginRepo(
   );
 
   const {deployer} = await hre.getNamedAccounts();
-
+  console.log(deployer, ' omg')
   const tx = await pluginRepoFactoryContract.createPluginRepo(
     pluginName,
     deployer

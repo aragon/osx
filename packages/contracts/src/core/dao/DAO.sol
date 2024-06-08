@@ -12,7 +12,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.so
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-
 import {IProtocolVersion} from "../../utils/protocol/IProtocolVersion.sol";
 import {ProtocolVersion} from "../../utils/protocol/ProtocolVersion.sol";
 import {PermissionManager} from "../permission/PermissionManager.sol";
@@ -257,6 +256,7 @@ contract DAO is
             (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );
+            
             gasAfter = gasleft();
 
             // Check if failure is allowed

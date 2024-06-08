@@ -107,10 +107,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       permission: 'UPGRADE_REPO_PERMISSION',
     });
 
-    await managePermissions(
-      PluginRepo__factory.connect(repoAddress, deployer),
-      revokePluginRepoPermissions
-    );
+    // Deployer still has permission TODO:GIORGI
+    // await managePermissions(
+    //   PluginRepo__factory.connect(repoAddress, deployer),
+    //   revokePluginRepoPermissions
+    // );
   }
 
   console.log(
