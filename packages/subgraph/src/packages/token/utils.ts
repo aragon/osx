@@ -15,11 +15,14 @@ export function getDelegation(
   tokenAddress: Address
 ): string | null {
   let contract = GovernanceERC20Contract.bind(tokenAddress);
-  let delegate = contract.delegates(user);
+  let delegate = contract.try_delegates(user);
 
-  return delegate === Address.fromString(ADDRESS_ZERO)
-    ? null
-    : delegate.toHexString();
+  if (!delegate.reverted) {
+    return delegate.value === Address.fromString(ADDRESS_ZERO)
+      ? null
+      : delegate.value.toHexString();
+  }
+  return null;
 }
 
 export function getDelegateeId(
@@ -36,10 +39,16 @@ export function getDelegateeId(
     : null;
 }
 
-export function getVotingPower(user: Address, tokenAddress: Address): BigInt {
+export function getVotingPower(
+  user: Address,
+  tokenAddress: Address
+): BigInt | null {
   let contract = GovernanceERC20Contract.bind(tokenAddress);
-  let votingPower = contract.getVotes(user);
-  return votingPower;
+  let votingPower = contract.try_getVotes(user);
+  if (!votingPower.reverted) {
+    return votingPower.value;
+  }
+  return null;
 }
 
 /**
