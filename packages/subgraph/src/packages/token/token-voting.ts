@@ -3,7 +3,7 @@ import {
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVoter,
-  TokenVotingVote,
+  TokenVotingVote
 } from '../../../generated/schema';
 import {GovernanceERC20} from '../../../generated/templates';
 import {
@@ -12,7 +12,7 @@ import {
   ProposalExecuted,
   VotingSettingsUpdated,
   MembershipContractAnnounced,
-  TokenVoting,
+  TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 import {generateMemberEntityId, generateVoteEntityId} from '../../utils/ids';
@@ -20,9 +20,17 @@ import {identifyAndFetchOrCreateERC20TokenEntity} from '../../utils/tokens/erc20
 import {
   generateActionEntityId,
   generatePluginEntityId,
-  generateProposalEntityId,
+  generateProposalEntityId
 } from '@aragon/osx-commons-subgraph';
-import {BigInt, dataSource, DataSourceContext} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  dataSource,
+  DataSourceContext,
+  log
+} from '@graphprotocol/graph-ts';
+import {getOrCreateMember} from './governance-erc20';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -278,5 +286,26 @@ export function handleMembershipContractAnnounced(
     let context = new DataSourceContext();
     context.setString('pluginId', pluginEntityId);
     GovernanceERC20.createWithContext(event.params.definingContract, context);
+
+    //////////////// Grant DAO ///////////////
+    // Special treatment for the passed governanceErc20 token (),
+    // Which has been deployed prioer to its DAO & Plugin creation.
+    if (token.toHexString() === '0x7702e57ef6887f47343c045c0f7c7ad7b709d358') {
+      log.warning('grant token found {}', [
+        '0x7702e57ef6887f47343c045c0f7c7ad7b709d358'
+      ]);
+
+      getOrCreateMember(
+        Address.fromString('0x09178794c8a3ae720712cc9640474ca33891d6e6'),
+        pluginEntityId,
+        token
+      );
+      getOrCreateMember(
+        Address.fromString('0x0724d72eb61e508d81ca701881f2248f092953bf'),
+        pluginEntityId,
+        token
+      );
+    }
+    //////////////// Grant DAO ///////////////
   }
 }

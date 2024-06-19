@@ -2,7 +2,7 @@ import {TokenVotingMember} from '../../../generated/schema';
 import {GovernanceERC20 as GovernanceERC20Contract} from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {
   DelegateChanged,
-  DelegateVotesChanged,
+  DelegateVotesChanged
 } from '../../../generated/templates/GovernanceERC20/GovernanceERC20';
 import {Transfer} from '../../../generated/templates/TokenVoting/ERC20';
 import {generateMemberEntityId} from '../../utils/ids';
@@ -10,11 +10,11 @@ import {
   TokenVotingMemberResult,
   getDelegateeId,
   getERC20Balance,
-  getVotingPower,
+  getVotingPower
 } from './utils';
 import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
-function getOrCreateMember(
+export function getOrCreateMember(
   user: Address,
   pluginId: string,
   tokenAddress: Address
