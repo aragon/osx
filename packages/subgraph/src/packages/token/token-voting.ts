@@ -288,23 +288,28 @@ export function handleMembershipContractAnnounced(
     GovernanceERC20.createWithContext(event.params.definingContract, context);
 
     //////////////// Grant DAO ///////////////
-    // Special treatment for the passed governanceErc20 token (),
+    // Special treatment for the passed governanceErc20 token (0x7702e57ef6887f47343c045c0f7c7ad7b709d358),
     // Which has been deployed prioer to its DAO & Plugin creation.
-    if (token.toHexString() === '0x7702e57ef6887f47343c045c0f7c7ad7b709d358') {
+    const isTargetToken =
+      token == Address.fromString('0x7702e57ef6887f47343c045c0f7c7ad7b709d358');
+    if (isTargetToken) {
       log.warning('grant token found {}', [
         '0x7702e57ef6887f47343c045c0f7c7ad7b709d358'
       ]);
 
-      getOrCreateMember(
+      const userOne = getOrCreateMember(
         Address.fromString('0x09178794c8a3ae720712cc9640474ca33891d6e6'),
         pluginEntityId,
         token
       );
-      getOrCreateMember(
+      userOne.entity.save();
+
+      const userTwo = getOrCreateMember(
         Address.fromString('0x0724d72eb61e508d81ca701881f2248f092953bf'),
         pluginEntityId,
         token
       );
+      userTwo.entity.save();
     }
     //////////////// Grant DAO ///////////////
   }
