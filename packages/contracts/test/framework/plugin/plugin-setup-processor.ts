@@ -24,6 +24,9 @@ import {
   PluginUUPSUpgradeableV2Mock__factory,
   PluginUUPSUpgradeableV3Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock__factory,
+  PluginSetupProcessorUpgradeable,
+  PluginSetupProcessor__factory,
+  PluginSetupProcessorUpgradeable__factory
 } from '../../../typechain';
 import {PluginRepoRegisteredEvent} from '../../../typechain/PluginRepoRegistry';
 
@@ -81,6 +84,7 @@ import {
 } from '../../test-utils/psp/atomic-helpers';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {ozUpgradeCheckManagedContract} from '../../test-utils/uups-upgradeable';
+import { readImplementationValueFromSlot } from '../../../utils/storage';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -218,7 +222,7 @@ runs.forEach(options => {
       } else {
         psp = await deployPluginSetupProcessor(pluginRepoRegistry);
       }
-
+      
       // Create and register a plugin on the PluginRepoRegistry
       let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
         `plugin-uups-upgradeable-mock`,
@@ -272,24 +276,53 @@ runs.forEach(options => {
     });
 
     if (options.upgradeable) {
+      // PSP stops upgradability after `hardcodedTimestamp`.
+      let hardcodedTimestamp = 1719048022;
       describe('Upgrades', async () => {
-        it('successfully upgrades the contract', async () => {
-          await ozUpgradeCheckManagedContract(
-            0,
-            1,
-            managingDao,
-            {
-              initArgs: {
-                dao: managingDao.address,
-                pluginRepoRegistry: pluginRepoRegistry.address,
-              },
-              initializer: 'initialize',
-            },
-            options.artifact,
-            options.artifact,
-            UPGRADE_PERMISSIONS.UPGRADE_PSP_PERMISSION_ID
-          );
+        beforeEach(async () => {
+          await managingDao
+          .connect(signers[0])
+          .grant(psp.address, signers[0].address, UPGRADE_PERMISSIONS.UPGRADE_PSP_PERMISSION_ID);
+        })
+        it('upgrades the contract', async () => {
+          const newPSP = await hre.wrapper.deploy('PluginSetupProcessorUpgradeable')
+
+          // @ts-ignore
+          await psp.upgradeTo(newPSP.address)
+
+          const toImplementation = await readImplementationValueFromSlot(psp.address);
+          expect(toImplementation).to.equal(newPSP.address)
         });
+        
+        it("upgrades the contract even if current block number is very close to the specified timestamp", async () => {
+          const newPSP = await hre.wrapper.deploy('PluginSetupProcessorUpgradeable')
+
+          const snapshotId = await ethers.provider.send("evm_snapshot", []);
+          
+          await ethers.provider.send('evm_setNextBlockTimestamp', [hardcodedTimestamp - 40000])
+          await ethers.provider.send('evm_mine', [])
+          
+          // @ts-ignore
+          await psp.upgradeTo(newPSP.address)
+
+          await ethers.provider.send('evm_revert', [snapshotId])
+        })
+        it("doesn't allow upgrade if block number exceeds the specified number", async () => {
+          const newPSP = await hre.wrapper.deploy('PluginSetupProcessorUpgradeable')
+
+          const snapshotId = await ethers.provider.send("evm_snapshot", []);
+          
+          await ethers.provider.send('evm_setNextBlockTimestamp', [hardcodedTimestamp])
+          await ethers.provider.send('evm_mine', [])
+          
+          // @ts-ignore
+          await expect(psp.upgradeTo(newPSP.address)).to.be.revertedWithCustomError(
+            psp,
+            'PSPNonupgradeable'
+          );
+          
+          await ethers.provider.send('evm_revert', [snapshotId])
+        })
       });
     }
 

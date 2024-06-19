@@ -68,7 +68,7 @@ task('deploy-contracts').setAction(async (args, hre) => {
 task('test-contracts').setAction(async (args, hre) => {
   await hre.run('build-contracts');
   const imp = await import('./test/test-utils/wrapper');
-
+  
   const wrapper = await imp.Wrapper.create(
     hre.network.name,
     hre.ethers.provider
@@ -139,7 +139,9 @@ const config: HardhatUserConfig = {
       url: 'http://127.0.0.1:8011',
       ethNetwork: 'http://127.0.0.1:8545',
       zksync: true,
-      deployPaths: ['./deploy/new'],
+      deploy: ['./deploy/new'],
+      gas: 15000000,
+      blockGasLimit: 30000000,
       accounts: [
         // Rich accounts with pre-funded balances for the chain on port 8545.
         // These accounts are used for testing purposes and have sufficient funds.

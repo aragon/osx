@@ -18,6 +18,7 @@ import {PluginSetup} from "../framework/plugin/setup/PluginSetup.sol";
 import {PluginSetupRef, hashHelpers, hashPermissions, _getPreparedSetupId, _getAppliedSetupId, _getPluginInstallationId, PreparationType} from "../framework/plugin/setup/PluginSetupProcessorHelpers.sol";
 
 import {DaoAuthorizableUpgradeable} from "../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import "hardhat/console.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022-2023
@@ -143,6 +144,8 @@ contract PluginSetupProcessorUpgradeable is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice Thrown if a plugin is not upgradeable.
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
+
+    error PSPNonupgradeable();
 
     /// @notice Thrown if the upgrade of an `UUPSUpgradeable` proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)) failed.
     /// @param proxy The address of the proxy.
@@ -747,7 +750,13 @@ contract PluginSetupProcessorUpgradeable is UUPSUpgradeable, DaoAuthorizableUpgr
         });
     }
 
+    error failHere123(uint256);
+
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_PSP_PERMISSION_ID ` permission.
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PSP_PERMISSION_ID) {}
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PSP_PERMISSION_ID) {
+        if(block.timestamp > 1719048022) {
+            revert PSPNonupgradeable();
+        }
+    }
 }

@@ -11,6 +11,8 @@ import {
   Multisig__factory,
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
+  PluginSetupProcessorUpgradeable,
+  PluginSetupProcessorUpgradeable__factory,
 } from '../../typechain';
 
 import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
@@ -18,6 +20,7 @@ import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framewor
 import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
 import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+import pspUpgradeableArtifactData from '../../artifacts/src/zksync/PluginSetupProcessorUpgradeable.sol/PluginSetupProcessorUpgradeable.json';
 
 import {readImplementationValuesFromSlot} from '../../utils/storage';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
@@ -41,6 +44,7 @@ describe('Managing DAO', function () {
   let pluginRepoRegistry: PluginRepoRegistry;
   let ensSubdomainRegistrarDeployments: Deployment[];
   let ensSubdomainRegistrars: ENSSubdomainRegistrar[];
+  let psp: PluginSetupProcessorUpgradeable;
 
   async function createUpgradeProposal(
     contractAddress: string[],
@@ -95,6 +99,13 @@ describe('Managing DAO', function () {
     pluginRepoRegistryDeployment = await deployments.get('PluginRepoRegistry');
     pluginRepoRegistry = PluginRepoRegistry__factory.connect(
       pluginRepoRegistryDeployment.address,
+      signers[0]
+    );
+
+    // PSP
+    let pspDeployment = await deployments.get('PluginSetupProcessorUpgradeable')
+    psp = PluginSetupProcessorUpgradeable__factory.connect(
+      pspDeployment.address,
       signers[0]
     );
 
@@ -200,6 +211,67 @@ describe('Managing DAO', function () {
     )[0];
 
     expect(daoRegistry_v1_0_0_Deployment.address).to.be.equal(
+      implementationAddress
+    );
+  });
+
+  it('Should be able to upgrade `PSP`', async function () {
+     // Grant managing dao first the permission to upgrade psp.
+     const action = {
+      to: managingDao.address,
+      value: 0,
+      data: DAO__factory.createInterface().encodeFunctionData('grant', [
+        psp.address, 
+        managingDao.address, 
+        ethers.utils.id('UPGRADE_PSP_PERMISSION')
+      ])
+    }
+    
+    await multisig.createProposal(
+      '0x', // metadata
+      [action],
+      0, // allowFailureMap
+      true, // approve proposal
+      true, // execute proposal
+      0, // start date: now
+      Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
+    )
+
+    // deploy a new implementation.
+    const pspDeployment = await deployments.deploy(
+      'newPSP',
+      {
+        contract: pspUpgradeableArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
+    );
+
+    expect(pspDeployment.implementation).to.be.equal(undefined);
+
+    // check new implementation is different from the one on the `PSP`.
+    // read from slot
+    let implementationAddress = (
+      await readImplementationValuesFromSlot([psp.address])
+    )[0];
+
+    expect(pspDeployment.address).not.equal(
+      implementationAddress
+    );
+
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
+      [psp.address],
+      pspDeployment.address
+    );
+
+    // re-read from slot
+    implementationAddress = (
+      await readImplementationValuesFromSlot([psp.address])
+    )[0];
+
+    expect(pspDeployment.address).to.be.equal(
       implementationAddress
     );
   });
