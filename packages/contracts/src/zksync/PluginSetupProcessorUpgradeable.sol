@@ -18,7 +18,6 @@ import {PluginSetup} from "../framework/plugin/setup/PluginSetup.sol";
 import {PluginSetupRef, hashHelpers, hashPermissions, _getPreparedSetupId, _getAppliedSetupId, _getPluginInstallationId, PreparationType} from "../framework/plugin/setup/PluginSetupProcessorHelpers.sol";
 
 import {DaoAuthorizableUpgradeable} from "../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import "hardhat/console.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022-2023
