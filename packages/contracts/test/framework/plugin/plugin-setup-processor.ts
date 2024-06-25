@@ -277,7 +277,7 @@ runs.forEach(options => {
 
     if (options.upgradeable) {
       // PSP stops upgradability after `hardcodedTimestamp`.
-      let hardcodedTimestamp = 1719048022;
+      let hardcodedTimestamp = 1733007600;
       describe('Upgrades', async () => {
         beforeEach(async () => {
           await managingDao

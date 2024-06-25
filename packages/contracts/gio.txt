@@ -1,0 +1,1484 @@
+yarn run v1.22.22
+$ hardhat test-contracts --network zkLocalTestnet
+Is deploy test is enabled:  false
+Nothing to compile
+Overwriting revertedWith matcher
+[33mSKIPPING TEST (ZkSync network)[0m: [34mE2E: Install,Update,Uninstall Plugin through Admin Plugin[0m
+[33mSKIPPING TEST SUITE (ZkSync network)[0m: [34msubdomain validation[0m
+[33mSKIPPING TEST SUITE (ZkSync network)[0m: [34msubdomain validation[0m
+[33mSKIPPING TEST SUITE (ZkSync network)[0m: [34mAdmin[0m
+[33mSKIPPING TEST SUITE (ZkSync network)[0m: [34mAdminSetup[0m
+[33mSKIPPING TEST (ZkSync network)[0m: [34mreverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected[0m
+[33mSKIPPING TEST (ZkSync network)[0m: [34mreverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block[0m
+[33mSKIPPING TEST SUITE (ZkSync network)[0m: [34mTokenVotingSetup[0m
+[33mSKIPPING TEST (ZkSync network)[0m: [34mshould revert if members list is longer than uint16 max[0m
+[33mSKIPPING TEST (ZkSync network)[0m: [34mreverts if the multisig settings have been changed in the same block[0m
+[33mSKIPPING TEST (ZkSync network)[0m: [34mreverts if `_msgSender` is not listed in the current block although he was listed in the last block[0m
+
+
+  CallbackHandler
+    ✔ reverts for an unknown callback function signature (52ms)
+    ✔ returns the correct magic number from the `_handleCallback` (38ms)
+    ✔ correctly emits the received callback event (78ms)
+
+  DAO
+    ✔ does not support the empty interface
+    initialize
+      ✔ reverts if trying to re-initialize
+      ✔ initializes with the correct trusted forwarder
+      ✔ initializes with the correct token interfaces
+      ✔ sets OZs `_initialized` at storage slot [0] to 2
+      ✔ sets the `_reentrancyStatus` at storage slot [304] to `_NOT_ENTERED = 1`
+    initializeFrom
+      ✔ reverts if trying to upgrade from a different major release (278ms)
+      ✔ initializes `_reentrancyStatus` for versions < 1.3.0 (285ms)
+      ✔ does not initialize `_reentrancyStatus` for versions >= 1.3.0 (277ms)
+    Upgrades
+      ✔ from v1.0.0 (1156ms)
+    ERC-165
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165` interface
+      ✔ supports the `IDAO` interface
+      ✔ supports the `IProtocolVersion` interface
+      ✔ supports the `IERC1271` interface
+      ✔ supports the `IEIP4824` interface
+      ✔ supports the `IERC721Receiver` interface
+      ✔ supports the `IERC1155Receiver` interface
+    Protocol version
+      ✔ returns the current protocol version
+    setTrustedForwarder:
+      ✔ reverts if the sender lacks the required permissionId (53ms)
+      ✔ sets a new trusted forwarder
+      ✔ emits an event containing the address
+    setMetadata:
+      ✔ reverts if the sender lacks the required permissionId (55ms)
+      ✔ sets new metadata via an event
+    execute:
+      ✔ reverts if the sender lacks the required permissionId (55ms)
+      ✔ reverts if array of actions is too big (554ms)
+      ✔ reverts if action is failable and allowFailureMap doesn't include it
+      ✔ reverts on re-entrant actions (56ms)
+      ✔ succeeds if action is failable but allowFailureMap allows it
+      ✔ returns the correct result if action succeeds
+      ✔ succeeds and correctly constructs failureMap results  (69ms)
+      ✔ emits an event afterwards
+      1) reverts if failure is allowed but not enough gas is provided (many actions)
+expectedGas 2655386
+      2) reverts if failure is allowed but not enough gas is provided (one action)
+      Transfering tokens
+        ETH Transfer
+          ✔ reverts if transfers more eth than dao has
+          ✔ transfers native token(eth) to recipient (65ms)
+        ERC20 Transfer
+          ✔ reverts if transfers more ERC20 than dao has
+          ✔ transfers native token(eth) to recipient (78ms)
+        ERC721 Transfer
+          ✔ reverts if transfers more ERC721 than dao has
+          ✔ transfers native ERC721(eth) to recipient (82ms)
+        ERC1155 Transfer
+          ✔ reverts if transfers more ERC1155 than dao has
+          ✔ transfers ERC1155 tokens to recipient (133ms)
+    Deposit through direct transfer:
+      ✔ reverts if erc721 callback is not registered (61ms)
+      ✔ successfully transfers erc721 into the dao and emits the correct callback received event (43ms)
+      ✔ reverts if erc1155 callbacks are not registered (119ms)
+      ✔ successfully transfers erc1155 into the dao (83ms)
+    Deposit through deposit function:
+      ✔ reverts if amount is zero
+      ✔ reverts if passed amount does not match native amount value
+      ✔ reverts if ERC20 and native tokens are deposited at the same time (61ms)
+      ✔ reverts when tries to deposit ERC20 token while sender does not have token amount
+      ✔ reverts when tries to deposit ERC20 token while sender does not have approved token transfer (60ms)
+      ✔ deposits native tokens into the DAO
+      ✔ deposits ERC20 into the DAO (112ms)
+    registerStandardCallback:
+      ✔ reverts if `REGISTER_STANDARD_CALLBACK_PERMISSION` is not granted (53ms)
+      ✔ correctly emits selector and interface id
+      ✔ correctly sets callback selector and interface and can call later (60ms)
+    receive:
+      ✔ receives native tokens 
+    hasPermission
+      ✔ returns `false` if the permission is not set
+      ✔ returns `true` if permission is set
+    ERC1271
+      ✔ should register the interfaceId
+      ✔ should return 0 if no validator is set
+      ✔ should allow only `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` to set validator
+      ✔ should set validator and emits event (43ms)
+      ✔ should call the signature validator (126ms)
+      ERC4824 - daoURI
+        ✔ should set a new URI
+        ✔ should emit DaoURIUpdated
+        ✔ should revert if the sender lacks the permission to update the URI (54ms)
+        ✔ should return the DAO URI
+
+  Core: PermissionManager
+    init
+      ✔ should allow init call only once
+      ✔ should emit Granted (109ms)
+      ✔ should add ROOT_PERMISSION
+    grant
+      ✔ should add permission (40ms)
+      ✔ reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR
+      ✔ reverts if permissionId is restricted and `_who == ANY_ADDR` or `_where == ANY_ADDR` (167ms)
+      ✔ reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR` (54ms)
+      ✔ should emit Granted
+      ✔ should not emit granted event if already granted (77ms)
+      ✔ should not allow grant
+      ✔ should not allow for non ROOT (60ms)
+    grantWithCondition
+      ✔ reverts if the condition address is not a contract
+      ✔ reverts if the condition contract does not support `IPermissionConditon` (197ms)
+      ✔ should add permission (39ms)
+      ✔ should emit Granted (50ms)
+      ✔ should emit Granted when condition is present and `who == ANY_ADDR` or `where == ANY_ADDR` (77ms)
+      ✔ should not emit Granted with already granted with the same condition or ALLOW_FLAG (88ms)
+      ✔ reverts if tries to grant the same permission, but with different condition (125ms)
+      ✔ should set PermissionCondition (40ms)
+      ✔ should not allow grant
+      ✔ reverts if the caller does not have `ROOT_PERMISSION_ID` (66ms)
+    revoke
+      ✔ should revoke (74ms)
+      ✔ should emit Revoked (72ms)
+      ✔ should revert if not granted (63ms)
+      ✔ should not emit revoked if already revoked (114ms)
+      ✔ should not allow
+      ✔ should not allow for non ROOT (60ms)
+    bulk on multiple target
+      ✔ should bulk grant ADMIN_PERMISSION on different targets (84ms)
+      ✔ should bulk revoke (119ms)
+      ✔ should grant with condition (130ms)
+      ✔ throws Unauthorized error when caller does not have ROOT_PERMISSION_ID permission
+    bulk on single target
+      ✔ should bulk grant ADMIN_PERMISSION (46ms)
+      ✔ should bulk revoke (162ms)
+      ✔ reverts for `Operation.GrantWithCondition` 
+      ✔ should handle bulk mixed (85ms)
+      ✔ should emit correct events on bulk (84ms)
+      ✔ should not allow
+      ✔ should not allow for non ROOT (65ms)
+    isGranted
+      ✔ should return true if the permission is granted to the user (40ms)
+      ✔ should return false if the permissions is not granted to the user
+      ✔ should return true for permissions granted to any address on a specific target contract using the `ANY_ADDR` flag (137ms)
+      ✔ should be callable by anyone
+    _hasPermission
+      ✔ should call IPermissionCondition.isGranted (86ms)
+    helpers
+      ✔ should hash PERMISSIONS
+
+  TestParameterScopingCondition
+    condition conditions:
+      ✔ adds if the first parameter is larger than the second
+      ✔ reverts if the condition is called by the wrong function
+      ✔ reverts if the first parameter is equal to the second
+      ✔ reverts if the first parameter is smaller than the second
+
+  SharedPlugin
+    ✔ increments IDs
+    idGatedAction:
+      ✔ executes if the ID is allowed (123ms)
+      ✔ reverts if the ID does not exist (116ms)
+      ✔ reverts if the ID is not allowed (168ms)
+      ✔ reverts if the permission is missing (76ms)
+      ✔ reverts if the permission is set in the wrong DAO (106ms)
+      ✔ reverts if the object belongs to the wrong DAO (109ms)
+
+  Managing DAO
+
+Deploying ManagingDao.
+ManagingDAO will be owned by the (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A) temporarily, while the entire framework is getting deployed. At the final step when Multisig is available, it will be installed on managingDAO and all roles for the Deployer will be revoked.
+Granting 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A temp execute permissions
+Setting 1 permissions. Skipped 0
+Set permissions with 0x935380176cb54575bbd25cc592c8722cf9f232838992d6008fdc87c57439b02d. Waiting for confirmation...
+Granted the EXECUTE_PERMISSION of (DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x935380176cb54575bbd25cc592c8722cf9f232838992d6008fdc87c57439b02d)
+Concluding ManagingDao deployment.
+
+
+Setting ManagingDao permissions.
+Setting 6 permissions. Skipped 0
+Set permissions with 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731. Waiting for confirmation...
+Granted the ROOT_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731)
+Granted the UPGRADE_DAO_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731)
+Granted the SET_SIGNATURE_VALIDATOR_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731)
+Granted the SET_TRUSTED_FORWARDER_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731)
+Granted the SET_METADATA_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731)
+Granted the REGISTER_STANDARD_CALLBACK_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xd7bd706b02b9189a07e13de66f1f499d6a1f202c57ecc9fa1b37e80265a51731)
+
+Verifying managing DAO deployment.
+Managing DAO deployment verified
+
+Deploying framework.
+Registering subdomain morpheusdao5.gio.eth
+Registered subdomain morpheusdao5.gio.eth
+Registering subdomain morpheusplugin5.gio.eth
+Registered subdomain morpheusplugin5.gio.eth
+ENS Setup complete!
+Changing owner of  from (currentOwner) 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A to 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4 (newOwner)
+Changing owner of eth from (currentOwner) 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A to 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4 (newOwner)
+Changing owner of gio.eth from (currentOwner) 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A to 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4 (newOwner)
+Changing owner of morpheusdao5.gio.eth from (currentOwner) 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A to 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4 (newOwner)
+Changing owner of morpheusplugin5.gio.eth from (currentOwner) 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A to 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4 (newOwner)
+Updating controllers of ENS domains with tx 0xa4b8f7c59f2db069533ea622f70920b16419f184214e21dfccd7dd458a9437ea
+Concluding ENS deployment.
+
+Concluding DAO Registry deployment.
+
+Concluding Plugin Repo Registry deployment.
+
+Concluding Plugin Repo Registry deployment.
+
+Skipping deployment stage: PluginSetupProcessor due to zkSync network
+Skipping deployment stage: PluginSetupProcessor due to zkSync network
+Concluding Plugin Setup Processor deployment.
+
+Concluding DAOFactory deployment.
+
+
+Verifying framework deployment.
+Framework deployment verified
+
+Setting framework permission.
+Setting 4 permissions. Skipped 0
+Set permissions with 0x66c029e41252a4bc7520b934703b257e04f80dd87d54a85c1c0b1fa6d05b3c6c. Waiting for confirmation...
+Granted the REGISTER_ENS_SUBDOMAIN_PERMISSION of (DAO_ENSSubdomainRegistrar: 0xF3F5a04dF804D7a1D5966bF21337c0F891E49D5e) for (DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e), see (tx: 0x66c029e41252a4bc7520b934703b257e04f80dd87d54a85c1c0b1fa6d05b3c6c)
+Granted the REGISTER_ENS_SUBDOMAIN_PERMISSION of (Plugin_ENSSubdomainRegistrar: 0x47d538f72f2603Fed83A889ACA3bF608508F8421) for (PluginRepoRegistry: 0xcaB6222719FF3B55e6105889A0Ad4d2910841280), see (tx: 0x66c029e41252a4bc7520b934703b257e04f80dd87d54a85c1c0b1fa6d05b3c6c)
+Granted the UPGRADE_REGISTRAR_PERMISSION of (DAO_ENSSubdomainRegistrar: 0xF3F5a04dF804D7a1D5966bF21337c0F891E49D5e) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x66c029e41252a4bc7520b934703b257e04f80dd87d54a85c1c0b1fa6d05b3c6c)
+Granted the UPGRADE_REGISTRAR_PERMISSION of (Plugin_ENSSubdomainRegistrar: 0x47d538f72f2603Fed83A889ACA3bF608508F8421) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x66c029e41252a4bc7520b934703b257e04f80dd87d54a85c1c0b1fa6d05b3c6c)
+Setting 2 permissions. Skipped 0
+Set permissions with 0x380ace18b4d16750994dabd73877d8c7a8647c1005afd2cce32dfd6b60a3bc59. Waiting for confirmation...
+Granted the REGISTER_DAO_PERMISSION of (DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e) for (DAOFactory: 0x6e1881d4e3726481b371A41C9f1b6f0f5d60C7b6), see (tx: 0x380ace18b4d16750994dabd73877d8c7a8647c1005afd2cce32dfd6b60a3bc59)
+Granted the UPGRADE_REGISTRY_PERMISSION of (DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x380ace18b4d16750994dabd73877d8c7a8647c1005afd2cce32dfd6b60a3bc59)
+Setting 2 permissions. Skipped 0
+Set permissions with 0xb7ac72013a3374ceb946f2311d33b33a7f5fa5fd006621a8ecf788e6ec6d385f. Waiting for confirmation...
+Granted the REGISTER_PLUGIN_REPO_PERMISSION of (PluginRepoRegistry: 0xcaB6222719FF3B55e6105889A0Ad4d2910841280) for (PluginRepoFactory: 0xb240F7f6cafF4e0B0Dd0A649ECE8Bb5737b0DCA5), see (tx: 0xb7ac72013a3374ceb946f2311d33b33a7f5fa5fd006621a8ecf788e6ec6d385f)
+Granted the UPGRADE_REGISTRY_PERMISSION of (PluginRepoRegistry: 0xcaB6222719FF3B55e6105889A0Ad4d2910841280) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xb7ac72013a3374ceb946f2311d33b33a7f5fa5fd006621a8ecf788e6ec6d385f)
+
+Verifying permissions
+Permissions verified
+
+Deploying plugins.
+Concluding addresslist voting setup deployment.
+
+Skipping deployment stage: TokenVotingSetup due to zkSync network
+Skipping deployment stage: TokenVotingSetup-Verify due to zkSync network
+Concluding token voting setup deployment.
+
+Skipping deployment stage: AdminSetup due to zkSync network
+Skipping deployment stage: AdminSetupConclude due to zkSync network
+Concluding multisig setup deployment.
+
+Concluding PlaceholdeSetup deployment.
+
+
+Creating address-list-voting repo.
+Creating & registering repo for address-list-voting with tx 0x3635ac96af271e309c3fbfbdd23f05c6a92ff7d3bb0902ff41d9b5fdd9ec9f6f
+Created & registered repo for address-list-voting at address: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA
+Creating build for release 1 with tx 0xa413376b0b0645e92918ef9101920b8f00902ebbcf4bc106f3e8dd56dc40b3a0
+Created build 1 for release 1 with setup address: 0x21FeCBEa26354d2DbfA3E55011f93681E9dF5969, with build metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ and release metadata {}
+Creating build for release 1 with tx 0xe5644ae12268404d57a4c7833504a4e389885c4a6fc2fefca9575b5bffbf3462
+Created build 2 for release 1 with setup address: 0xA740dC2319289C01EAFCa1472CD70794fc3766bb, with build metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ and release metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ
+Concluding AddresslistVotingSetup deployment.
+
+
+Creating token-voting repo.
+Creating & registering repo for token-voting with tx 0x08ecab2451acdde3c949f46ed5c9a89aa426219641b07598b444ee9b2b653d92
+Created & registered repo for token-voting at address: 0xa2e45801Ca063100843e915F17dd0A797ecD7736
+Creating build for release 1 with tx 0xd930c8698c0ce0cf7fb6e10376e4a29f8983d2d30d172be6d2a8cf88c7616880
+Created build 1 for release 1 with setup address: 0x21FeCBEa26354d2DbfA3E55011f93681E9dF5969, with build metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ and release metadata {}
+Creating build for release 1 with tx 0xe97e0054a3b5817c2643c297f7ad9b1ff13ebde391ff1de66ec3b750dab620a5
+Created build 2 for release 1 with setup address: 0x9A0E7D6FBC140B9639f4085367815F3Bb5884890, with build metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ and release metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ
+Concluding TokenVotingSetup deployment.
+
+Skipping deployment stage: CreateAdminRepo due to zkSync network
+Skipping deployment stage: CreateAdminRepoConclude due to zkSync network
+
+Creating multisig repo.
+Creating & registering repo for multisig with tx 0x9c4b7522736091425c8c81d8cabd447a4038109cc3f24207a05cc9ff998a4a7d
+Created & registered repo for multisig at address: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741
+Creating build for release 1 with tx 0x7af10406ff06042282add2559a719391b3b710005d67dbfa5a60136ca11d8447
+Created build 1 for release 1 with setup address: 0x21FeCBEa26354d2DbfA3E55011f93681E9dF5969, with build metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ and release metadata {}
+Creating build for release 1 with tx 0x8f850f681f14ed838d81ba5e0a60ee9b6de653de32b2e1648e49559bafedf05a
+Created build 2 for release 1 with setup address: 0x7fecF31679fE1b57fdC46Ff61D68A1f279064aED, with build metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ and release metadata ipfs://QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ
+Concluding Multisig deployment.
+
+
+Finalizing ManagingDao.
+Setting 4 permissions. Skipped 0
+Set permissions with 0xd184c5cc713c0a1e796a070c9bb9c8b49a5d578a33d48a8970a2bbcaa0acf72b. Waiting for confirmation...
+Granted the REGISTER_DAO_PERMISSION of (DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0xd184c5cc713c0a1e796a070c9bb9c8b49a5d578a33d48a8970a2bbcaa0acf72b)
+Granted the ROOT_PERMISSION of (DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (PluginSetupProcessor: 0x7b281938e4014049D8949657be94AbdF71669664), see (tx: 0xd184c5cc713c0a1e796a070c9bb9c8b49a5d578a33d48a8970a2bbcaa0acf72b)
+Granted the APPLY_INSTALLATION_PERMISSION of (PluginSetupProcessor: 0x7b281938e4014049D8949657be94AbdF71669664) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0xd184c5cc713c0a1e796a070c9bb9c8b49a5d578a33d48a8970a2bbcaa0acf72b)
+Granted the SET_METADATA_PERMISSION of (DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0xd184c5cc713c0a1e796a070c9bb9c8b49a5d578a33d48a8970a2bbcaa0acf72b)
+Setting 3 permissions. Skipped 0
+Set permissions with 0xc4aea422d304379d5ce66b0f0e0570ed8d9300308c60b6556c3e034ffd108c5f. Waiting for confirmation...
+Granted the ROOT_PERMISSION of (address-list-voting PluginRepo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xc4aea422d304379d5ce66b0f0e0570ed8d9300308c60b6556c3e034ffd108c5f)
+Granted the MAINTAINER_PERMISSION of (address-list-voting PluginRepo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xc4aea422d304379d5ce66b0f0e0570ed8d9300308c60b6556c3e034ffd108c5f)
+Granted the UPGRADE_REPO_PERMISSION of (address-list-voting PluginRepo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0xc4aea422d304379d5ce66b0f0e0570ed8d9300308c60b6556c3e034ffd108c5f)
+Setting 3 permissions. Skipped 0
+Set permissions with 0x5650bdc1094320b942ba7db2b9ed763b5a90e55cf8a65615e5cbe3bb5702fcf5. Waiting for confirmation...
+Granted the ROOT_PERMISSION of (token-voting PluginRepo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x5650bdc1094320b942ba7db2b9ed763b5a90e55cf8a65615e5cbe3bb5702fcf5)
+Granted the MAINTAINER_PERMISSION of (token-voting PluginRepo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x5650bdc1094320b942ba7db2b9ed763b5a90e55cf8a65615e5cbe3bb5702fcf5)
+Granted the UPGRADE_REPO_PERMISSION of (token-voting PluginRepo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x5650bdc1094320b942ba7db2b9ed763b5a90e55cf8a65615e5cbe3bb5702fcf5)
+Setting 3 permissions. Skipped 0
+Set permissions with 0x9f392e7aabd2792d27256372060d615c98272a57d1bcdf68eefbf2065b917bb0. Waiting for confirmation...
+Granted the ROOT_PERMISSION of (multisig PluginRepo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x9f392e7aabd2792d27256372060d615c98272a57d1bcdf68eefbf2065b917bb0)
+Granted the MAINTAINER_PERMISSION of (multisig PluginRepo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x9f392e7aabd2792d27256372060d615c98272a57d1bcdf68eefbf2065b917bb0)
+Granted the UPGRADE_REPO_PERMISSION of (multisig PluginRepo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741) for (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x9f392e7aabd2792d27256372060d615c98272a57d1bcdf68eefbf2065b917bb0)
+Registered the (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) on (DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e), see (tx: 0xf721ab84c343bed45f1eea6ab46d3bf838fdcde097c8ba4e74c9716a0fba4ba6)
+Prepared (Multisig: 0x8Ef941e509694EeCa5C3e6C80BA3Bd0300586590 version (release: 1 / build: 2) to be applied on (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x5a520e60eaee6b91411a3dfe0b69814de98e64271a43df382f8c4246053cfab1)
+Applied (Multisig: 0x8Ef941e509694EeCa5C3e6C80BA3Bd0300586590) on (ManagingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4), see (tx: 0x94ab2b99e908b8f2a2bf0e9938bf00ebc3c038b44946c45f6d0c9aa80dc253d0)
+Setting 3 permissions. Skipped 0
+Set permissions with 0xf2b432d0d2f0f8cb38bab82ed2584559357575a1c6b1de9ff9d560872fc47926. Waiting for confirmation...
+Revoked the ROOT_PERMISSION of (address-list-voting PluginRepo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0xf2b432d0d2f0f8cb38bab82ed2584559357575a1c6b1de9ff9d560872fc47926)
+Revoked the MAINTAINER_PERMISSION of (address-list-voting PluginRepo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0xf2b432d0d2f0f8cb38bab82ed2584559357575a1c6b1de9ff9d560872fc47926)
+Revoked the UPGRADE_REPO_PERMISSION of (address-list-voting PluginRepo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0xf2b432d0d2f0f8cb38bab82ed2584559357575a1c6b1de9ff9d560872fc47926)
+Setting 3 permissions. Skipped 0
+Set permissions with 0x73ebf1338f997177438f3ca98c5cec55760a148f8827cd19ae5490f6faab49cd. Waiting for confirmation...
+Revoked the ROOT_PERMISSION of (token-voting PluginRepo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x73ebf1338f997177438f3ca98c5cec55760a148f8827cd19ae5490f6faab49cd)
+Revoked the MAINTAINER_PERMISSION of (token-voting PluginRepo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x73ebf1338f997177438f3ca98c5cec55760a148f8827cd19ae5490f6faab49cd)
+Revoked the UPGRADE_REPO_PERMISSION of (token-voting PluginRepo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x73ebf1338f997177438f3ca98c5cec55760a148f8827cd19ae5490f6faab49cd)
+Setting 3 permissions. Skipped 0
+Set permissions with 0x32bfebeeb8e9c22c2ad988d143e7f752f51903f216151237b9f5b2dbd8ad9918. Waiting for confirmation...
+Revoked the ROOT_PERMISSION of (multisig PluginRepo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x32bfebeeb8e9c22c2ad988d143e7f752f51903f216151237b9f5b2dbd8ad9918)
+Revoked the MAINTAINER_PERMISSION of (multisig PluginRepo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x32bfebeeb8e9c22c2ad988d143e7f752f51903f216151237b9f5b2dbd8ad9918)
+Revoked the UPGRADE_REPO_PERMISSION of (multisig PluginRepo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x32bfebeeb8e9c22c2ad988d143e7f752f51903f216151237b9f5b2dbd8ad9918)
+
+PluginRepos are no longer owned by the (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A),
+Setting 6 permissions. Skipped 0
+Set permissions with 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06. Waiting for confirmation...
+Revoked the REGISTER_DAO_PERMISSION of (DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06)
+Revoked the ROOT_PERMISSION of (DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (PluginSetupProcessor: 0x7b281938e4014049D8949657be94AbdF71669664), see (tx: 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06)
+Revoked the APPLY_INSTALLATION_PERMISSION of (PluginSetupProcessor: 0x7b281938e4014049D8949657be94AbdF71669664) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06)
+Revoked the ROOT_PERMISSION of (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06)
+Revoked the SET_METADATA_PERMISSION of (DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06)
+Revoked the EXECUTE_PERMISSION of (DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) for (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), see (tx: 0x54cef9b45935140d30c8c0932055cd9ffc1975cc61bd7dae93403abe9f818c06)
+
+ManagingDao is no longer owned by the (Deployer: 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A), and all future actions of the (managingDAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4) will be handled by the newly installed (Multisig plugin).
+
+Verifying managing DAO deployment.
+Finalizing Managing DAO verified
+
+Printing deployed contracts.
+Managing DAO Implementation: 0x8914c9e720F7cFd2998fB44c6d1C510122B0bA6a
+Managing DAO: 0x475c686D85D4735aB31bea2B7Ea1CD3e45c8B5C4
+ENSRegistry: 0xe067b68347778F6bE4546bA6015EE2929F7fdb61
+PublicResolver: 0xCF356065C3457d2F8CC01C8aC9a0225a5fA9bec3
+DAO_ENSSubdomainRegistrar_Implementation: 0xEB877e7ef4A2bAf01A4eafF5e762A21168A52Cac
+DAO_ENSSubdomainRegistrar: 0xF3F5a04dF804D7a1D5966bF21337c0F891E49D5e
+Plugin_ENSSubdomainRegistrar_Implementation: 0xB94D73d0fe4A7E136C6DE930e620539C05b42664
+Plugin_ENSSubdomainRegistrar: 0x47d538f72f2603Fed83A889ACA3bF608508F8421
+DAORegistry_Implementation: 0xD5D4F584160e56f6748C6e10c1cB00b50b0E86C4
+DAORegistry: 0x8f2CD1F43E43b815302eD6aFC586B615F000592e
+PluginRepoRegistry_Implementation: 0x530c402f5326BE94Fd07D6282c669af84C66d4f6
+PluginRepoRegistry: 0xcaB6222719FF3B55e6105889A0Ad4d2910841280
+PluginRepoFactory: 0xb240F7f6cafF4e0B0Dd0A649ECE8Bb5737b0DCA5
+PluginSetupProcessorUpgradeable_Implementation: 0x413338A47619fa950596e5337D1824d6FD647A8E
+PluginSetupProcessorUpgradeable: 0x7b281938e4014049D8949657be94AbdF71669664
+DAOFactory: 0x6e1881d4e3726481b371A41C9f1b6f0f5d60C7b6
+AddresslistVotingSetup: 0xA740dC2319289C01EAFCa1472CD70794fc3766bb
+TokenVotingSetupZkSync: 0x9A0E7D6FBC140B9639f4085367815F3Bb5884890
+MultisigSetup: 0x7fecF31679fE1b57fdC46Ff61D68A1f279064aED
+PlaceholderSetup: 0x21FeCBEa26354d2DbfA3E55011f93681E9dF5969
+address-list-voting-repo: 0xa78Db29B93e61267F7165A786EF9343E08d68AEA
+token-voting-repo: 0xa2e45801Ca063100843e915F17dd0A797ecD7736
+admin-repo: 
+multisig-repo: 0x02256bB260980Efe383e476Db04E1A2bF0e6C741
+    ✔ should have deployments
+    ✔ should be able to upgrade `ManagingDAO` itself (159ms)
+    ✔ Should be able to upgrade `DaoRegistry` (248ms)
+    ✔ Should be able to upgrade `PSP` (192ms)
+    ✔ Should be able to upgrade `PluginRepoRegistry` (249ms)
+    ✔ Should be able to upgrade `ENSSubdomainRegistrar` (238ms)
+    ✔ Should be able to upgrade `PluginRepo`s (530ms)
+
+  DAOFactory: 
+    ✔ reverts if no plugin is provided
+    ✔ creates a dao and initializes with correct args (113ms)
+    ✔ creates a dao with a plugin and emits correct events (138ms)
+    ✔ creates a dao with a plugin and sets plugin permissions on dao correctly (117ms)
+    ✔ creates a dao and sets its own permissions correctly on itself (139ms)
+    ✔ revokes all temporarly granted permissions (126ms)
+    ✔ creates a dao with multiple plugins installed (164ms)
+    - E2E: Install,Update,Uninstall Plugin through Admin Plugin
+    ERC-165
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165` interface
+      ✔ supports the `IProtocolVersion` interface
+    Protocol version
+      ✔ returns the current protocol version
+
+  DAORegistry
+    ✔ succeeds even if the dao subdomain is empty
+    ✔ successfully sets subdomainregistrar
+    ✔ Should register a new DAO successfully (45ms)
+    ✔ fails to register if the sender lacks the required role (360ms)
+    ✔ fails to register if DAO already exists (67ms)
+    ✔ fails to register a DAO with the same name twice (355ms)
+    subdomain validation
+      - should validate the passed subdomain correctly (< 32 bytes long subdomain)
+      - should validate the passed subdomain correctly (> 32 bytes long subdomain)
+    Upgrades
+      ✔ from v1.0.0 (360ms)
+
+  PluginRepoFactory: 
+    ERC-165
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165` interface
+      ✔ supports the `IProtocolVersion` interface
+    Protocol version
+      ✔ returns the current protocol version
+    CreatePluginRepo
+      ✔ fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION (71ms)
+      ✔ fail to create new pluginRepo with empty subdomain (40ms)
+      ✔ creates new pluginRepo and sets up correct permissions (88ms)
+    CreatePluginRepoWithFirstVersion
+      ✔ fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION (66ms)
+      ✔ fail to create new pluginRepo with empty subdomain (40ms)
+      ✔ creates new pluginRepo with correct permissions (173ms)
+
+  PluginRepoRegistry
+    ✔ successfully sets subdomainregistrar
+    ✔ Should register a new pluginRepo successfully (48ms)
+    ✔ fail to register if the sender lacks the required role (348ms)
+    ✔ reverts the registration if the plugin repo already exists in the registry (71ms)
+    ✔ reverts the registration if the plugin repo's ENS subdomain is already taken (70ms)
+    subdomain validation
+      - should validate the passed subdomain correctly (< 32 bytes long subdomain)
+      - should validate the passed subdomain correctly (> 32 bytes long subdomain)
+    Upgrades
+      ✔ from v1.0.0 (355ms)
+
+  PluginRepo
+    Initialize
+      ✔ initializes correctly
+      Upgrades
+        ✔ from v1.0.0 (449ms)
+      ERC-165
+        ✔ does not support the empty interface
+        ✔ supports the `IERC165` interface
+        ✔ supports the `IPluginRepo` interface
+        ✔ supports the `IProtocolVersion` interface
+      Protocol version
+        ✔ returns the current protocol version
+      CreateVersion: 
+        ✔ reverts if the caller does not have permission
+        ✔ fails if the plugin setup does not support the `IPluginSetup` interface (150ms)
+        ✔ fails if the release number is 0
+        ✔ fails if the release is incremented by more than 1 (56ms)
+        ✔ fails for the first release, if `releaseMetadata` is empty
+        ✔ fails if the same plugin setup exists in another release (258ms)
+        ✔ successfully creates a version and emits the correct events
+        ✔ correctly increases and emits the build number (72ms)
+        ✔ correctly increases and emits release number (150ms)
+        ✔ succeeds if release already exists and release metadata is empty (68ms)
+        ✔ allows to create placeholder builds for the same release (223ms)
+      updateReleaseMetadata
+        ✔ reverts if caller does not have permission
+        ✔ reverts if release is 0
+        ✔ reverts if release does not exist
+        ✔ reverts if metadata length is 0 (66ms)
+        ✔ successfuly updates metadata for the release that already exists (62ms)
+      Different types of getVersions:
+        getLatestVersion
+          ✔ reverts if release does not exist
+          ✔ correctly returns the Version per release
+          ✔ reverts if plugin setup does not exist
+          ✔ correctly returns the Version per plugin setup
+        getVersion
+          ✔ reverts if `Tag` does not exist
+          ✔ correctly returns the version per `Tag`
+          ✔ correctly returns the version per Tag hash
+
+  PluginSetupProcessor
+    PluginUUPSUpgradeableSetupMock
+      ✔ points to the V1 implementation (59ms)
+      ✔ points to the V2 implementation (59ms)
+      ✔ points to the V3 implementation (66ms)
+    Installation
+      prepareInstallation
+        ✔ reverts if `PluginSetupRepo` does not exist on `PluginRepoRegistry`
+        ✔ reverts if the plugin version does not exist on `PluginRepoRegistry`
+        ✔ reverts if plugin with the same setupId is already prepared. (102ms)
+        ✔ reverts if plugin with the same address is already installed. (127ms)
+        ✔ EDGE-CASE: allows to prepare plugin installation with the same address and setupId if it was installed and then uninstalled (287ms)
+        ✔ successfully calls plugin setup's prepareInstallation with correct arguments (53ms)
+        ✔ successfully prepares a plugin installation with the correct event arguments (57ms)
+      applyInstallation
+        ✔ reverts if caller does not have `APPLY_INSTALLATION_PERMISSION` (58ms)
+        ✔ reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION` (121ms)
+        ✔ reverts if setupId wasn't prepared by `prepareInstallation` first
+        ✔ reverts if the plugin with the same address is already installed (128ms)
+        ✔ successfully applies installation if setupId was prepared first by `prepareInstallation` (100ms)
+        ✔ EDGE-CASE: reverts for all preparation if one of them was already applied for the install (283ms)
+    Uninstallation
+      prepareUninstallation
+        ✔ reverts if plugin is not installed yet (80ms)
+        ✔ reverts if prepare uninstallation params do not match the current `appliedSetupId` (85ms)
+        ✔ reverts if plugin uninstallation with the same setup is already prepared (79ms)
+        ✔ reverts if the plugin was uninstalled and tries to prepare uninstallation for it (124ms)
+        ✔ allows to prepare multiple uninstallation as long as setup is different (159ms)
+        ✔ successfully calls plugin setup's prepareUninstallation with correct arguments (45ms)
+        ✔ successfully prepares a plugin uninstallation with the correct event arguments (44ms)
+      applyUninstallation
+        ✔ reverts if caller does not have `APPLY_UNINSTALLATION_PERMISSION` (60ms)
+        ✔ reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION` (109ms)
+        ✔ reverts if uninstallation is not prepared first
+        ✔ EDGE-CASE: reverts for all uninstall preparations once one of them is applied (276ms)
+        ✔ successfully uninstalls the plugin and emits the correct event (90ms)
+    Update
+      prepareUpdate
+        ✔ reverts if plugin does not support `IPlugin` interface (130ms)
+        ✔ reverts if plugin supports the `IPlugin` interface, but is non-upgradable (145ms)
+        ✔ reverts if release numbers differ or new build is less than or equal to current build (87ms)
+        ✔ reverts if plugin is not installed
+        ✔ reverts if prepare update params do not match the current `appliedSetupId` (90ms)
+        ✔ reverts if same setup is already prepared (88ms)
+        ✔ allows to prepare multiple update as long as setup is different (174ms)
+        ✔ correctly prepares updates when plugin setups are same, but UI different (154ms)
+        ✔ successfully calls plugin setup's prepareUpdate with correct arguments (45ms)
+        ✔ successfully prepares update and emits the correct arguments (54ms)
+    applyUpdate
+      ✔ reverts if caller does not have `APPLY_UPDATE_PERMISSION` permission (61ms)
+      ✔ reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION` (125ms)
+      ✔ reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission (119ms)
+      ✔ reverts if preparation has not happened yet for update
+      ✔ EDGE-CASE: reverts for both preparations once one of them gets applied (251ms)
+      ✔ successfuly updates and emits the correct event arguments (102ms)
+      Whether upgrade functions of proxy get called the right way
+        ✔ correctly applies updates when plugin setups are same, but UI different (191ms)
+        ✔ successfully calls `upgradeToAndCall` on plugin if initData was provided by pluginSetup (106ms)
+    Update scenarios
+      V1 was installed
+        ✔ points to the V1 implementation
+        ✔ initializes the members
+        ✔ sets the V1 helpers
+        ✔ sets the V1 permissions
+        ✔ updates to V2: Contract was actually updated (114ms)
+        ✔ updates to V3 (121ms)
+        and updated to V2
+          ✔ points to the V2 implementation
+          ✔ initializes the members
+          ✔ sets the V2 helpers
+          ✔ sets the V1 to V2 permissions
+          ✔ updates to V3 (121ms)
+          and updated to V3
+            ✔ points to the V3 implementation
+            ✔ initializes the members
+            ✔ sets the V3 helpers
+            ✔ sets the V2 to V3 permissions
+        and updated to V3
+          ✔ points to the V3 implementation
+          ✔ initializes the members
+          ✔ sets the V3 helpers
+          ✔ sets the V1 to V3 permissions
+      V2 was installed
+        ✔ points to the V2 implementation
+        ✔ initializes the members
+        ✔ sets the V2 helpers
+        ✔ sets the V2 permissions
+        ✔ updates to V3 (122ms)
+        and updated to V3
+          ✔ points to the V3 implementation
+          ✔ initializes the members
+          ✔ sets the V3 helpers
+          ✔ sets the V2 to V3 permissions
+      V3 was installed
+        ✔ points to the V3 implementation
+        ✔ initializes the members
+        ✔ sets the V3 helpers
+        ✔ sets the V3 permissions
+        ✔ updates to v5 (110ms)
+
+  PluginSetupProcessorUpgradeable
+    Upgrades
+      ✔ upgrades the contract (153ms)
+      ✔ upgrades the contract even if current block number is very close to the specified timestamp (491ms)
+      ✔ doesn't allow upgrade if block number exceeds the specified number (367ms)
+    PluginUUPSUpgradeableSetupMock
+      ✔ points to the V1 implementation (50ms)
+      ✔ points to the V2 implementation (51ms)
+      ✔ points to the V3 implementation (51ms)
+    Installation
+      prepareInstallation
+        ✔ reverts if `PluginSetupRepo` does not exist on `PluginRepoRegistry`
+        ✔ reverts if the plugin version does not exist on `PluginRepoRegistry`
+        ✔ reverts if plugin with the same setupId is already prepared. (83ms)
+        ✔ reverts if plugin with the same address is already installed. (110ms)
+        ✔ EDGE-CASE: allows to prepare plugin installation with the same address and setupId if it was installed and then uninstalled (239ms)
+        ✔ successfully calls plugin setup's prepareInstallation with correct arguments (45ms)
+        ✔ successfully prepares a plugin installation with the correct event arguments (47ms)
+      applyInstallation
+        ✔ reverts if caller does not have `APPLY_INSTALLATION_PERMISSION` (54ms)
+        ✔ reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION` (104ms)
+        ✔ reverts if setupId wasn't prepared by `prepareInstallation` first
+        ✔ reverts if the plugin with the same address is already installed (103ms)
+        ✔ successfully applies installation if setupId was prepared first by `prepareInstallation` (85ms)
+        ✔ EDGE-CASE: reverts for all preparation if one of them was already applied for the install (252ms)
+    Uninstallation
+      prepareUninstallation
+        ✔ reverts if plugin is not installed yet (79ms)
+        ✔ reverts if prepare uninstallation params do not match the current `appliedSetupId` (75ms)
+        ✔ reverts if plugin uninstallation with the same setup is already prepared (66ms)
+        ✔ reverts if the plugin was uninstalled and tries to prepare uninstallation for it (103ms)
+        ✔ allows to prepare multiple uninstallation as long as setup is different (149ms)
+        ✔ successfully calls plugin setup's prepareUninstallation with correct arguments (40ms)
+        ✔ successfully prepares a plugin uninstallation with the correct event arguments (40ms)
+      applyUninstallation
+        ✔ reverts if caller does not have `APPLY_UNINSTALLATION_PERMISSION` (58ms)
+        ✔ reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION` (99ms)
+        ✔ reverts if uninstallation is not prepared first
+        ✔ EDGE-CASE: reverts for all uninstall preparations once one of them is applied (251ms)
+        ✔ successfully uninstalls the plugin and emits the correct event (76ms)
+    Update
+      prepareUpdate
+        ✔ reverts if plugin does not support `IPlugin` interface (112ms)
+        ✔ reverts if plugin supports the `IPlugin` interface, but is non-upgradable (112ms)
+        ✔ reverts if release numbers differ or new build is less than or equal to current build (71ms)
+        ✔ reverts if plugin is not installed
+        ✔ reverts if prepare update params do not match the current `appliedSetupId` (75ms)
+        ✔ reverts if same setup is already prepared (80ms)
+        ✔ allows to prepare multiple update as long as setup is different (154ms)
+        ✔ correctly prepares updates when plugin setups are same, but UI different (128ms)
+        ✔ successfully calls plugin setup's prepareUpdate with correct arguments (40ms)
+        ✔ successfully prepares update and emits the correct arguments (46ms)
+    applyUpdate
+      ✔ reverts if caller does not have `APPLY_UPDATE_PERMISSION` permission (61ms)
+      ✔ reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION` (115ms)
+      ✔ reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission (108ms)
+      ✔ reverts if preparation has not happened yet for update
+      ✔ EDGE-CASE: reverts for both preparations once one of them gets applied (197ms)
+      ✔ successfuly updates and emits the correct event arguments (91ms)
+      Whether upgrade functions of proxy get called the right way
+        ✔ correctly applies updates when plugin setups are same, but UI different (160ms)
+        ✔ successfully calls `upgradeToAndCall` on plugin if initData was provided by pluginSetup (94ms)
+    Update scenarios
+      V1 was installed
+        ✔ points to the V1 implementation
+        ✔ initializes the members
+        ✔ sets the V1 helpers
+        ✔ sets the V1 permissions
+        ✔ updates to V2: Contract was actually updated (100ms)
+        ✔ updates to V3 (104ms)
+        and updated to V2
+          ✔ points to the V2 implementation
+          ✔ initializes the members
+          ✔ sets the V2 helpers
+          ✔ sets the V1 to V2 permissions
+          ✔ updates to V3 (104ms)
+          and updated to V3
+            ✔ points to the V3 implementation
+            ✔ initializes the members
+            ✔ sets the V3 helpers
+            ✔ sets the V2 to V3 permissions
+        and updated to V3
+          ✔ points to the V3 implementation
+          ✔ initializes the members
+          ✔ sets the V3 helpers
+          ✔ sets the V1 to V3 permissions
+      V2 was installed
+        ✔ points to the V2 implementation
+        ✔ initializes the members
+        ✔ sets the V2 helpers
+        ✔ sets the V2 permissions
+        ✔ updates to V3 (103ms)
+        and updated to V3
+          ✔ points to the V3 implementation
+          ✔ initializes the members
+          ✔ sets the V3 helpers
+          ✔ sets the V2 to V3 permissions
+      V3 was installed
+        ✔ points to the V3 implementation
+        ✔ initializes the members
+        ✔ sets the V3 helpers
+        ✔ sets the V3 permissions
+        ✔ updates to v5 (102ms)
+
+  ENSSubdomainRegistrar
+    Check the initial ENS state
+      ✔ unregistered domains are owned by the zero address on ENS
+      ✔ unregistered domains resolve to the zero address on ENS
+    Registrar is the domain owner but not approved
+      ✔ initializes correctly
+      ✔ reverts if the registrar do not have the ownership of the domain node (132ms)
+      ✔ reverts if the ownership of the domain node is removed from the registrar (155ms)
+      After registrar initialization
+        ✔ reverts if initialized a second time
+        ✔ reverts subnode registration if the calling address lacks permission of the managing DAO
+        ✔ reverts setting the resolver if the calling address lacks permission of the managing DAO
+        After granting permission to the calling address via the managing DAO
+          ✔ registers the subdomain and resolves to the target address (44ms)
+          ✔ reverts subnode registration if the subdomain was already registered before (71ms)
+          ✔ reverts subnode registration if the subdomain was already registered before, also for the same caller (64ms)
+          ✔ revert if invalid resolver is set
+          ✔ sets the resolver correctly
+    Registrar is not the domain owner but it is approved
+      ✔ initializes correctly
+      ✔ reverts if the approval of the registrar is removed (157ms)
+      After registrar initialization
+        ✔ reverts if initialized a second time
+        ✔ reverts subnode registration if the calling address lacks permission of the managing DAO
+        ✔ reverts setting the resolver if the calling address lacks permission of the managing DAO
+        After granting permission to the calling address via the managing DAO
+          ✔ registers the subdomain and resolves to the target address (43ms)
+          ✔ reverts subnode registration if the subdomain was already registered before (65ms)
+          ✔ reverts subnode registration if the subdomain was already registered before, also for the same caller (62ms)
+          ✔ revert if invalid resolver is set
+          ✔ sets the resolver correctly
+    Registrar is not the domain owner and is not approved but has permission
+      ✔ reverts during initialization if node does not have a valid resolver
+      ✔ reverts on attempted subnode registration
+      ✔ reverts on attempted default resolver setting
+    Random signer with no permissions at all
+      ✔ reverts during initialization if node does not have a valid resolver
+      ✔ reverts on attempted subnode registration
+      ✔ reverts on attempted default resolver setting
+    Upgrades
+      ✔ from v1.0.0 (368ms)
+
+  InterfaceBasedRegistry
+    Register
+      ✔ fail if registrant address is not a contract
+      ✔ fail to register if the interface is not supported (150ms)
+      ✔ fail to register if the sender lacks the required permissionId (57ms)
+      ✔ fail to register if the contract is already registered (58ms)
+      ✔ register a contract with known interface (40ms)
+
+  RegistryUtils
+    isSubdomainValid
+      ✔ should validate the passed name correctly (< 32 bytes long name) (298ms)
+      ✔ should validate the passed name correctly (> 32 bytes long name) (310ms)
+
+  Core: TokenFactory
+    createToken
+      - should fail if token addr is no ERC20 contract
+      - should fail if token addr contains balanceOf, but returns different type
+      - should create a GovernanceWrappedERC20 clone
+      - should return MerkleMinter with 0x0
+      - should create a GovernanceERC20 and merkleminter clone
+      - should emit TokenCreated
+      - should mint tokens
+      - should grant proper permissions
+
+  CounterPluginSetup(Example)
+    prepareInstallation
+      ✔ correctly returns permissions/helpers/plugin when helper is passed
+      ✔ correcly returns permissions/helpers/plugin when helper is NOT passed
+    prepareUpdate
+      ✔ correcly returns activeHelpers/initData/permissions
+    prepareUninstallation
+      ✔ correcly returns permissions when helper is NOT passed
+      ✔ correcly returns permissions when helper is passed.
+
+  Admin
+    Admin
+      initialize: 
+        - reverts if trying to re-initialize
+        - emits the `MembershipContractAnnounced` event and returns the admin as a member afterwards
+      plugin interface: 
+        - does not support the empty interface
+        - supports the `IERC165Upgradeable` interface
+        - supports the `IPlugin` interface
+        - supports the `IProposal` interface
+        - supports the `IMembership` interface
+        - supports the `Admin` interface
+      execute proposal: 
+        - fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address
+        - fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address
+        - correctly emits the ProposalCreated event
+        - correctly emits the `ProposalExecuted` event
+        - correctly increments the proposal ID
+        - calls the DAO's execute function correctly with proposalId
+
+  AdminSetup
+    AdminSetup
+      - does not support the empty interface
+      - creates admin address base with the correct interface
+      prepareInstallation
+        - fails if data is empty, or not of minimum length
+        - reverts if encoded address in `_data` is zero
+        - correctly returns plugin, helpers and permissions
+        - correctly sets up the plugin
+      prepareUninstallation
+        - correctly returns permissions
+
+  MajorityVotingMock
+    initialize: 
+      ✔ reverts if trying to re-initialize (56ms)
+    plugin interface: 
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ supports the `IPlugin` interface
+      ✔ supports the `IProposal` interface
+      ✔ supports the `IMajorityVoting` interface
+      ✔ supports the `MajorityVotingBase` interface
+    validateAndSetSettings: 
+      ✔ reverts if the support threshold specified equals 100%
+      ✔ reverts if the support threshold specified exceeds 100%
+      ✔ accepts if the minimum participation specified equals 100%
+      ✔ reverts if the minimum participation specified exceeds 100%
+      ✔ reverts if the minimal duration is shorter than one hour (38ms)
+      ✔ reverts if the minimal duration is longer than one year
+      ✔ should change the voting settings successfully
+      ✔ should change the voting settings successfully
+
+  AddresslistVoting
+    initialize: 
+      ✔ reverts if trying to re-initialize (57ms)
+    Upgrades
+      ✔ from v1.0.0 (997ms)
+    plugin interface: 
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ supports the `IPlugin` interface
+      ✔ supports the `IProposal` interface
+      ✔ supports the `IMembership` interface
+      ✔ supports the `Addresslist` interface
+      ✔ supports the `IMajorityVoting` interface
+      ✔ supports the `MajorityVotingBase` interface
+      ✔ supports the `AddresslistVoting` interface
+    isMember
+      ✔ should return false, if user is not listed
+      ✔ should return true if user is in the latest list
+    Addresslisting members: 
+      ✔ should return false, if user is not listed
+      ✔ should add new users in the address list and emit the `MembersAdded` event (43ms)
+      ✔ should remove users from the address list and emit the `MembersRemoved` event (80ms)
+    Proposal creation
+      ✔ reverts if the user is not allowed to create a proposal (86ms)
+      - reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected
+      ✔ reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected (85ms)
+      ✔ reverts if the start date is set smaller than the current date (56ms)
+      ✔ reverts if the start date is after the latest start date (56ms)
+      ✔ reverts if the end date is before the earliest end date so that min duration cannot be met (76ms)
+      ✔ sets the startDate to now and endDate to startDate + minDuration, if 0 is provided as an input (70ms)
+      ✔ ceils the `minVotingPower` value if it has a remainder (74ms)
+      ✔ does not ceil the `minVotingPower` value if it has no remainder (72ms)
+      ✔ should create a proposal successfully, but not vote (91ms)
+      ✔ should create a proposal and cast a vote immediately (85ms)
+      ✔ reverts creation if the creator tries to vote before the start date (90ms)
+    Proposal + Execute:
+      Standard Mode
+        ✔ reverts on voting None
+        ✔ reverts on vote replacement (144ms)
+        ✔ cannot early execute (177ms)
+        ✔ can execute normally if participation and support are met (207ms)
+        ✔ does not execute early when voting with the `tryEarlyExecution` option (258ms)
+        ✔ reverts if vote is not decided yet
+      Early Execution Mode
+        ✔ does not allow voting, when the vote has not started yet
+        ✔ increases the yes, no, and abstain count and emits correct events (123ms)
+        ✔ reverts on voting None
+        ✔ reverts on vote replacement (137ms)
+        ✔ can execute early if participation is large enough (184ms)
+        ✔ can execute normally if participation and support are met (217ms)
+        ✔ executes the vote immediately when the vote is decided early and the `tryEarlyExecution` option is selected (244ms)
+        ✔ reverts if vote is not decided yet
+      Vote Replacement Mode
+        ✔ reverts on voting None
+        ✔ should allow vote replacement but not double-count votes by the same address (230ms)
+        ✔ cannot early execute (166ms)
+        ✔ can execute normally if participation and support are met (206ms)
+        ✔ does not execute early when voting with the `tryEarlyExecution` option (240ms)
+        ✔ reverts if vote is not decided yet
+    Different configurations:
+      A simple majority vote with >50% support and >=25% participation required
+        ✔ does not execute if support is high enough but participation is too low (50ms)
+        ✔ does not execute `if participation is high enough but support is t`oo low (115ms)
+        ✔ executes after the duration if participation and support are met (100ms)
+        ✔ executes early if participation and support are met and the vote outcome cannot change anymore (295ms)
+      A special majority vote with >50% support and >=75% participation required and early execution enabled
+        ✔ does not execute if support is high enough but participation is too low (52ms)
+        ✔ does not execute if participation is high enough but support is too low (238ms)
+        ✔ executes after the duration if participation and support thresholds are met (233ms)
+        ✔ should not allow the vote to pass if the minimum participation is not reached (177ms)
+        ✔ executes early if the participation exceeds the support threshold (assuming the latter is > 50%) (278ms)
+      An edge case with `supportThreshold = 0` and `minParticipation = 0` in early execution mode activated
+        ✔ does not execute with 0 votes
+        ✔ executes if participation and support are met (51ms)
+      An edge case with `supportThreshold = 99.9999%` and `minParticipation = 100%` in early execution mode
+        ✔ does not execute with 9 votes (264ms)
+        ✔ executes if participation and support are met (284ms)
+
+  AddresslistVotingSetup
+    ✔ does not support the empty interface
+    ✔ creates address list voting base with the correct interface
+    prepareInstallation
+      ✔ fails if data is empty, or not of minimum length (111ms)
+      ✔ correctly returns plugin, helpers and permissions
+      ✔ correctly sets up the plugin (69ms)
+    prepareUninstallation
+      ✔ correctly returns permissions
+
+  TokenVoting
+    initialize: 
+      ✔ reverts if trying to re-initialize (59ms)
+      ✔ emits the `MembershipContractAnnounced` event
+      ✔ reverts if trying to re-initialize (53ms)
+    Upgrades
+      ✔ from v1.0.0 (843ms)
+    plugin interface: 
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ supports the `IPlugin` interface
+      ✔ supports the `IProposal` interface
+      ✔ supports the `IMembership` interface
+      ✔ supports the `IMajorityVoting` interface
+      ✔ supports the `MajorityVotingBase` interface
+      ✔ supports the `TokenVoting` interface
+    isMember: 
+      ✔ returns true if the account currently owns at least one token (85ms)
+      ✔ returns true if the account currently has one at least one token delegated to her/him (115ms)
+    Proposal creation
+      ✔ reverts if the total token supply is 0 (173ms)
+      ✔ reverts if the start date is set smaller than the current date (58ms)
+      ✔ panics if the start date is after the latest start date (56ms)
+      ✔ reverts if the end date is before the earliest end date so that min duration cannot be met (57ms)
+      ✔ sets the startDate to now and endDate to startDate + minDuration, if 0 is provided as an input (69ms)
+      ✔ ceils the `minVotingPower` value if it has a remainder (113ms)
+      ✔ does not ceil the `minVotingPower` value if it has no remainder (106ms)
+      ✔ should create a vote successfully, but not vote (119ms)
+      ✔ should create a vote and cast a vote immediately (118ms)
+      ✔ reverts creation when voting before the start date (93ms)
+      minProposerVotingPower == 0
+        ✔ creates a proposal if `_msgSender` owns no tokens and has not tokens delegated to her/him in the current block (72ms)
+      minProposerVotingPower > 0
+        ✔ reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block (97ms)
+        - reverts if `_msgSender` owns no tokens and has no tokens delegated to her/him in the current block although having them in the last block
+        ✔ creates a proposal if `_msgSender` owns enough tokens  in the current block (107ms)
+        ✔ creates a proposal if `_msgSender` owns enough tokens and has delegated them to someone else in the current block (133ms)
+        ✔ creates a proposal if `_msgSender` owns no tokens but has enough tokens delegated to her/him in the current block (138ms)
+        ✔ reverts if `_msgSender` doesn not own enough tokens herself/himself and has not tokens delegated to her/him in the current block (122ms)
+    Proposal + Execute:
+      Standard Mode
+        ✔ reverts on voting None
+        ✔ reverts on vote replacement (134ms)
+        ✔ cannot early execute (186ms)
+        ✔ can execute normally if participation and support are met (214ms)
+        ✔ does not execute early when voting with the `tryEarlyExecution` option (229ms)
+        ✔ reverts if vote is not decided yet
+      Early Execution
+        ✔ does not allow voting, when the vote has not started yet
+        ✔ should not be able to vote if user has 0 token
+        ✔ increases the yes, no, and abstain count and emits correct events (122ms)
+        ✔ reverts on voting None
+        ✔ reverts on vote replacement (134ms)
+        ✔ can execute early if participation is large enough (205ms)
+        ✔ can execute normally if participation is large enough (271ms)
+        ✔ cannot execute normally if participation is too low (97ms)
+        ✔ executes the vote immediately when the vote is decided early and the tryEarlyExecution options is selected (264ms)
+        ✔ reverts if vote is not decided yet
+      Vote Replacement
+        ✔ reverts on voting None
+        ✔ should allow vote replacement but not double-count votes by the same address (236ms)
+        ✔ cannot early execute (182ms)
+        ✔ can execute normally if participation and support are met (231ms)
+        ✔ does not execute early when voting with the `tryEarlyExecution` option (240ms)
+        ✔ reverts if vote is not decided yet
+    Different configurations:
+      A simple majority vote with >50% support and >=25% participation required
+        ✔ does not execute if support is high enough but participation is too low (51ms)
+        ✔ does not execute if participation is high enough but support is too low (110ms)
+        ✔ executes after the duration if participation and support are met (109ms)
+        ✔ executes early if participation and support are met and the vote outcome cannot change anymore (223ms)
+      An edge case with `supportThreshold = 0%`, `minParticipation = 0%`, in early execution mode
+        ✔ does not execute with 0 votes
+        ✔ executes if participation and support are met (52ms)
+    An edge case with `supportThreshold = 99.9999%` and `minParticipation = 100%` in early execution mode
+      token balances are in the magnitude of 10^18
+        ✔ early support criterium is sharp by 1 vote (124ms)
+        ✔ participation criterium is sharp by 1 vote (114ms)
+      tokens balances are in the magnitude of 10^6
+        ✔ early support criterium is sharp by 1 vote (79ms)
+        ✔ participation is not met with 1 vote missing (79ms)
+    Execution criteria handle token balances for multiple orders of magnitude
+      ✔ magnitudes of 10^0 (182ms)
+      ✔ magnitudes of 10^1 (204ms)
+      ✔ magnitudes of 10^2 (185ms)
+      ✔ magnitudes of 10^3 (185ms)
+      ✔ magnitudes of 10^6 (187ms)
+      ✔ magnitudes of 10^12 (200ms)
+      ✔ magnitudes of 10^18 (184ms)
+      ✔ magnitudes of 10^24 (184ms)
+      ✔ magnitudes of 10^36 (199ms)
+      ✔ magnitudes of 10^48 (189ms)
+
+  TokenVotingSetupZkSync
+    ✔ does not support the empty interface
+    ✔ creates token voting base with the correct interface
+    prepareInstallation
+      ✔ fails if data is empty, or not of minimum length (110ms)
+      ✔ fails if `MintSettings` arrays do not have the same length (38ms)
+      ✔ fails if passed token address is not a contract
+      ✔ fails if passed token address is not ERC20
+      ✔ correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied
+      ✔ correctly sets up `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied (65ms)
+      ✔ correctly returns plugin, helpers and permissions, when a governance token address is supplied (146ms)
+      ✔ correctly returns plugin, helpers and permissions, when a token address is not supplied
+      ✔ correctly sets up the plugin and helpers, when a token address is not passed (85ms)
+    prepareUninstallation
+      ✔ fails when the wrong number of helpers is supplied
+      ✔ correctly returns permissions, when the required number of helpers is supplied (216ms)
+
+  TokenVotingSetup
+    TokenVotingSetup
+      - does not support the empty interface
+      - stores the bases provided through the constructor
+      - creates token voting base with the correct interface
+      prepareInstallation
+        - fails if data is empty, or not of minimum length
+        - fails if `MintSettings` arrays do not have the same length
+        - fails if passed token address is not a contract
+        - fails if passed token address is not ERC20
+        - correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied
+        - correctly sets up `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied
+        - correctly returns plugin, helpers and permissions, when a governance token address is supplied
+        - correctly returns plugin, helpers and permissions, when a token address is not supplied
+        - correctly sets up the plugin and helpers, when a token address is not passed
+      prepareUninstallation
+        - fails when the wrong number of helpers is supplied
+        - correctly returns permissions, when the required number of helpers is supplied
+
+  Multisig
+    initialize:
+      ✔ reverts if trying to re-initialize (59ms)
+      ✔ adds the initial addresses to the address list (42ms)
+      ✔ should set the `minApprovals`
+      ✔ should set `onlyListed`
+      ✔ should emit `MultisigSettingsUpdated` during initialization
+      - should revert if members list is longer than uint16 max
+    Upgrades
+      ✔ from v1.0.0 (870ms)
+    plugin interface: 
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ supports the `IPlugin` interface
+      ✔ supports the `IProposal` interface
+      ✔ supports the `IMembership` interface
+      ✔ supports the `Addresslist` interface
+      ✔ supports the `IMultisig` interface
+      ✔ supports the `Multisig` interface
+    updateMultisigSettings:
+      ✔ should not allow to set minApprovals larger than the address list length
+      ✔ should not allow to set `minApprovals` to 0
+      ✔ should emit `MultisigSettingsUpdated` when `updateMutlsigSettings` gets called
+    isListed:
+      ✔ should return false, if a user is not listed
+    isMember
+      ✔ should return false, if user is not listed
+      ✔ should return true if user is in the latest list
+    addAddresses:
+      ✔ should add new members to the address list and emit the `MembersAdded` event (83ms)
+    removeAddresses:
+      ✔ should remove users from the address list and emit the `MembersRemoved` event (78ms)
+      ✔ reverts if the address list would become empty (56ms)
+      ✔ reverts if the address list would become shorter than the current minimum approval parameter requires (91ms)
+    createProposal:
+      ✔ increments the proposal counter (70ms)
+      ✔ creates unique proposal IDs for each proposal (76ms)
+      ✔ emits the `ProposalCreated` event (69ms)
+      - reverts if the multisig settings have been changed in the same block
+      ✔ should revert if startDate is < than now
+      ✔ should revert if endDate is < than startDate
+      `onlyListed` is set to `false`:
+        ✔ creates a proposal when unlisted accounts are allowed
+      `onlyListed` is set to `true`:
+        ✔ reverts if the user is not on the list and only listed accounts can create proposals (58ms)
+        - reverts if `_msgSender` is not listed in the current block although he was listed in the last block
+        ✔ creates a proposal successfully and does not approve if not specified (44ms)
+        ✔ creates a proposal successfully and approves if specified (45ms)
+        ✔ increases the proposal count (80ms)
+    Approving and executing proposals
+      canApprove:
+        ✔ returns `false` if the proposal is already executed (95ms)
+        ✔ returns `false` if the approver is not listed
+        ✔ returns `false` if the approver has already approved
+        ✔ returns `true` if the approver is listed
+        ✔ returns `false` if the proposal hasn't started yet (41ms)
+        ✔ returns `false` if the proposal has ended (38ms)
+      hasApproved
+        ✔ returns `false` if user hasn't approved yet
+        ✔ returns `true` if user has approved
+      approve:
+        ✔ reverts when approving multiple times (56ms)
+        ✔ reverts if minimal approval is not met yet
+        ✔ approves with the msg.sender address
+        ✔ reverts if the proposal hasn't started yet (93ms)
+        ✔ reverts if the proposal has ended (88ms)
+      canExecute:
+        ✔ returns `false` if the proposal has not reached the minimum approval yet
+        ✔ returns `false` if the proposal is already executed (110ms)
+        ✔ returns `true` if the proposal can be executed (85ms)
+        ✔ returns `false` if the proposal hasn't started yet (134ms)
+        ✔ returns `false` if the proposal has ended (128ms)
+      execute:
+        ✔ reverts if the minimum approval is not met
+        ✔ executes if the minimum approval is met (121ms)
+        ✔ executes if the minimum approval is met and can be called by an unlisted accounts (120ms)
+        ✔ executes if the minimum approval is met when multisig with the `tryExecution` option (178ms)
+        ✔ emits the `ProposalExecuted` and `Executed` events (121ms)
+        ✔ emits the `Approved`, `ProposalExecuted`, and `Executed` events if execute is called inside the `approve` method (100ms)
+        ✔ reverts if the proposal hasn't started yet (194ms)
+        ✔ reverts if the proposal has ended (173ms)
+
+  MultisigSetup
+    ✔ does not support the empty interface
+    ✔ creates multisig base with the correct interface
+    prepareInstallation
+      ✔ fails if data is empty, or not of minimum length (102ms)
+      ✔ reverts if zero members are provided in `_data` (39ms)
+      ✔ reverts if the `minApprovals` value in `_data` is zero (39ms)
+      ✔ reverts if the `minApprovals` value in `_data` is greater than the number members (39ms)
+      ✔ returns the plugin, helpers, and permissions
+      ✔ sets up the plugin (55ms)
+    prepareUpdate
+      ✔ should return nothing (44ms)
+    prepareUninstallation
+      ✔ correctly returns permissions
+    Updates
+      Release 1 Build 1
+        ✔ should install (116ms)
+        ✔ should update to Release 1 Build 2 (149ms)
+      Release 1 Build 2
+        ✔ should install (121ms)
+
+  MerkleDistributor
+    plugin interface: 
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ supports the `IPlugin` interface
+      ✔ supports the `IMerkleDistributor` interface
+    Upgrades
+      ✔ from v1.0.0 (507ms)
+    general
+      #token
+        ✔ returns the token address
+      #merkleRoot
+        ✔ returns the zero merkle root
+      #claim
+        ✔ fails for empty proof
+        ✔ fails for invalid index
+    two account tree
+      ✔ successful claim (65ms)
+      ✔ transfers the token (39ms)
+      ✔ must have enough to transfer (61ms)
+      ✔ sets #isClaimed (42ms)
+      ✔ cannot allow two claims (55ms)
+      ✔ cannot claim more than once: 0 and then 1 (87ms)
+      ✔ cannot claim more than once: 1 and then 0 (82ms)
+      ✔ cannot claim for address other than proof
+      ✔ cannot claim more than proof
+      unclaimedBalance
+        ✔ returns the correct `unclaimedBalance`
+        ✔ returns 0 if proof incorrect
+        ✔ returns 0 if it was already claimed
+    larger tree
+      ✔ claim index 4 (54ms)
+      ✔ claim index 9
+
+  MerkleMinter
+    Upgrades
+      ✔ from v1.0.0 (560ms)
+    plugin interface: 
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ supports the `IPlugin` interface
+      ✔ supports the `IMerkleMinter` interface
+    merkleMint:
+      ✔ mints tokens using the merkle distributor (49ms)
+      ✔ does not mint if the minting permissionId on the minter is missing (55ms)
+      ✔ does not mint if the minting permissionId on the token is missing (64ms)
+
+  AddresslistMock
+    addresslistLength
+      ✔ returns the right length after addresses were added (80ms)
+      ✔ returns the right length after addresses were removed (119ms)
+    addresslistLengthAtBlock
+      ✔ returns the right length after addresses were added (83ms)
+      ✔ returns the right length after addresses were removed (142ms)
+    isListed
+      ✔ returns `true` if the address is listed (40ms)
+      ✔ returns `false` if the address is not listed
+    isListedAtBlock
+      ✔ returns `true` if the address is listed at the specific block (83ms)
+      ✔ returns `false` if the address is not listed at the specific block (69ms)
+    addAddresses
+      ✔ adds new addresses to the address list (53ms)
+      ✔ reverts if an address was listed already (76ms)
+      ✔ reverts if the array of new addresses to be added contains an address multiple times
+    removeAddresses
+      ✔ removes existing addresses from the address list (102ms)
+      ✔ reverts removal if an address is not listed (74ms)
+      ✔ reverts if the array of existing addresses to be removed contains an address multiple times (69ms)
+
+  Ratio
+    RATIO_BASE
+      ✔ is 10^6
+    applyRatioCeiled
+      ✔ reverts for ratios larger than `RATIO_BASE`
+      ✔ reverts for too large values that would cause an overflow
+      ✔ does not ceil for division without remainder
+      ✔ ceils for division with remainder
+
+  GovernanceERC20
+    initialize:
+      ✔ reverts if trying to re-initialize
+      ✔ sets the token name and symbol
+      ✔ sets the managing DAO  (116ms)
+      ✔ reverts if the `receivers` and `amounts` array lengths in the mint settings mismatch (82ms)
+    supportsInterface:
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ it supports all inherited interfaces
+    mint:
+      ✔ reverts if the `MINT_PERMISSION_ID` permission is missing
+      ✔ mints tokens if the caller has the `mintPermission` (75ms)
+    delegate
+      ✔ delegates voting power to another account (53ms)
+      ✔ is checkpointed (124ms)
+    afterTokenTransfer
+      ✔ turns on delegation after mint (51ms)
+      ✔ turns on delegation for the `to` address after transfer (88ms)
+      ✔ turns on delegation for all users in the chain of transfer A => B => C (129ms)
+      ✔ should not turn on delegation on `transfer` if `to` manually turned it off (160ms)
+      ✔ should not turn on delegation on `mint` if `to` manually turned it off (137ms)
+      ✔ should not rewrite delegation setting for `transfer` if user set it on before receiving tokens (114ms)
+      ✔ should not rewrite delegation setting for `mint` if user set it on before receiving tokens (75ms)
+      ✔ should not turn on delegation on `mint` if it was turned on at least once in the past (88ms)
+      ✔ should not turn on delegation on `transfer` if it was turned on at least once in the past (124ms)
+      ✔ updates voting power after transfer for `from` if delegation turned on (80ms)
+      ✔ updates voting power after transfer for `to` if delegation turned on (105ms)
+      exhaustive tests
+        `to` has a zero balance
+          `to` delegated to `other`
+            `to` receives via `mint` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+          `to` has not delegated before
+            `to` receives via `mint` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+        `to` has a non-zero balance
+          `to` delegated to `other`
+            `to` receives via `mint` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+          `to` has not delegated before
+            `to` receives via `mint` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+
+  GovernanceWrappedERC20
+    initialize:
+      ✔ reverts if trying to re-initialize
+      ✔ sets the wrapped token name and symbol (101ms)
+      ✔ should return default decimals if not modified
+      ✔ should return modified decimals (72ms)
+    supportsInterface:
+      ✔ does not support the empty interface
+      ✔ supports the `IERC165Upgradeable` interface
+      ✔ it supports all inherited interfaces
+    depositFor
+      ✔ reverts if the amount is not approved
+      ✔ deposits an amount of tokens (120ms)
+      ✔ updates the available votes (85ms)
+    withdrawTo
+      ✔ withdraws an amount of tokens (87ms)
+      ✔ updates the available votes (46ms)
+    delegate
+      ✔ delegates voting power to another account (50ms)
+      ✔ is checkpointed (111ms)
+    afterTokenTransfer
+      ✔ turns on delegation after mint (64ms)
+      ✔ turns on delegation for the `to` address after transfer (89ms)
+      ✔ turns on delegation for all users in the chain of transfer A => B => C (129ms)
+      ✔ should not turn on delegation on `transfer` if `to` manually turned it off (158ms)
+      ✔ should not turn on delegation on `mint` if `to` manually turned it off (148ms)
+      ✔ should not rewrite delegation setting for `transfer` if user set it on before receiving tokens (116ms)
+      ✔ should not rewrite delegation setting for `mint` if user set it on before receiving tokens (79ms)
+      ✔ should not turn on delegation on `mint` if it was turned on at least once in the past (87ms)
+      ✔ should not turn on delegation on `transfer` if it was turned on at least once in the past (121ms)
+      ✔ updates voting power after transfer for `from` if delegation turned on (85ms)
+      ✔ updates voting power after transfer for `to` if delegation turned on (82ms)
+      exhaustive tests
+        `to` has a zero balance
+          `to` delegated to `other`
+            `to` receives via `depositFor` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+          `to` has not delegated before
+            `to` receives via `depositFor` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+        `to` has a non-zero balance
+          `to` delegated to `other`
+            `to` receives via `depositFor` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+          `to` has not delegated before
+            `to` receives via `depositFor` from `address(0)`
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+            `to` receives via transfer from `from`
+              ✔ `from` has the correct voting power
+              ✔ `from`s delegate has not changed
+              ✔ `from`s delegate has the correct voting power
+              ✔ `to` has the correct voting power
+              ✔ `to`s delegate has not changed
+              ✔ `to`s delegate has the correct voting power
+              `to` transfers to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate has not changed
+                ✔ `to`s delegate has the correct voting power
+              `to` delegates to `other`
+                ✔ `to` has the correct voting power
+                ✔ `to`s delegate is correctly changed
+                ✔ `to`s delegate has the correct voting power
+
+  DAO Upgrade
+    Re-entrancy
+      v1.0.0 to v1.3.0
+        ✔ does not corrupt the DAO storage (52ms)
+        ✔ does not corrupt permissions (87ms)
+        ✔ executes actions after the upgrade (202ms)
+    Protocol Version
+      ✔ fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards (344ms)
+      v1.0.0 to v1.3.0
+        ✔ supports new protocol version interface after upgrade (40ms)
+        ✔ returns the correct protocol version after upgrade
+
+
+  860 passing (8m)
+  53 pending
+  2 failing
+
+  1) DAO
+       execute:
+         reverts if failure is allowed but not enough gas is provided (many actions):
+     AssertionError: Expected transaction to be reverted with custom error 'InsufficientGas', but it didn't revert
+      at processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at Context.<anonymous> (test/core/dao/dao.ts:647:7)
+
+  2) DAO
+       execute:
+         reverts if failure is allowed but not enough gas is provided (one action):
+     AssertionError: Expected transaction to be reverted with custom error 'InsufficientGas', but it reverted with a different custom error
+      at processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at Context.<anonymous> (test/core/dao/dao.ts:684:7)
+
+
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
