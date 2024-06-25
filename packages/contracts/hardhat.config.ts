@@ -43,7 +43,8 @@ task('build-contracts').setAction(async (args, hre) => {
   await hre.run('compile');
   if (
     hre.network.name === 'zkTestnet' ||
-    hre.network.name === 'zkLocalTestnet'
+    hre.network.name === 'zkLocalTestnet' ||
+    hre.network.name === 'zkMainnet'
   ) {
     // Copy zkSync specific build artifacts and cache to the default directories.
     // This ensures that we don't need to change import paths for artifacts in the project.
