@@ -196,6 +196,8 @@ templates:
       abis:
         - name: ERC20
           file: $ARAGON_OSX_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: GovernanceERC20
+          file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json
         - name: GovernanceWrappedERC20
           file: $ARAGON_OSX_MODULE/artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
         - name: TokenVoting
