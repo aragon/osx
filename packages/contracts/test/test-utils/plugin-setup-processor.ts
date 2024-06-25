@@ -1,9 +1,10 @@
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 import {
   PluginSetupProcessor__factory,
   PluginRepoRegistry,
   PluginSetupProcessor,
+  DAO,
 } from '../../typechain';
 
 export async function deployPluginSetupProcessor(
@@ -11,11 +12,26 @@ export async function deployPluginSetupProcessor(
 ): Promise<PluginSetupProcessor> {
   let psp: PluginSetupProcessor;
 
-  const PluginSetupProcessor = new PluginSetupProcessor__factory(
-    (await ethers.getSigners())[0]
-  );
+  psp = await hre.wrapper.deploy('PluginSetupProcessor', {
+    args: [pluginRepoRegistry.address],
+  });
 
-  psp = await PluginSetupProcessor.deploy(pluginRepoRegistry.address);
+  return psp;
+}
+
+export async function deployUpgradeablePluginSetupProcessor(
+  dao: DAO,
+  pluginRepoRegistry: PluginRepoRegistry
+): Promise<PluginSetupProcessor> {
+  let psp: PluginSetupProcessor;
+
+  psp = await hre.wrapper.deploy('PluginSetupProcessorUpgradeable', {
+    withProxy: true,
+    initArgs: [dao.address, pluginRepoRegistry.address],
+    proxySettings: {
+      initializer: 'initialize',
+    },
+  });
 
   return psp;
 }

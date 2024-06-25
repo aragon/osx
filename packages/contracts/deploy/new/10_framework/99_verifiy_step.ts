@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {checkSetManagingDao, getContractAddress} from '../../helpers';
+import {checkSetManagingDao, getContractAddress, getPSPAddress} from '../../helpers';
 import {
   DAOFactory__factory,
   DAORegistry__factory,
@@ -11,6 +11,7 @@ import {
   PluginRepoRegistry__factory,
   PluginSetupProcessor__factory,
 } from '../../../typechain';
+import { ZK_SYNC_NETWORKS } from '../../../utils/zkSync';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying framework deployment.');
@@ -147,13 +148,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         `${PluginRepoFactoryAddress} has wrong PluginRepoRegistry set. Expected ${SetPluginRepoRegistryAddress} to be ${PluginRepoRegistryAddress}`
       );
     }
-  }
+  } 
 
-  // VERIFYING PSP
-  const PluginSetupProcessorAddress = await getContractAddress(
-    'PluginSetupProcessor',
-    hre
-  );
+
+  let PluginSetupProcessorAddress = await getPSPAddress(hre)
+
   const PluginSetupProcessor = PluginSetupProcessor__factory.connect(
     PluginSetupProcessorAddress,
     deployer

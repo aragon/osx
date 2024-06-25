@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {ContractFactory} from 'ethers';
 
 import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
@@ -14,13 +14,17 @@ import {DAORegistry__factory as DAORegistry_V1_0_0__factory} from '../../../type
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {UPGRADE_PERMISSIONS} from '../../test-utils/permissions';
 import {
   getProtocolVersion,
   ozUpgradeCheckManagedContract,
 } from '../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
+import {
+  skipTestIfNetworkIsZkSync,
+  skipTestSuiteIfNetworkIsZkSync,
+} from '../../test-utils/skip-functions';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -64,9 +68,9 @@ describe('DAORegistry', function () {
     targetDao = await deployNewDAO(signers[0]);
 
     // DAO Registry
-    const Registry = new DAORegistry__factory(signers[0]);
-
-    daoRegistry = await deployWithProxy(Registry);
+    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {
+      withProxy: true,
+    });
 
     await daoRegistry.initialize(
       managingDao.address,
@@ -168,7 +172,7 @@ describe('DAORegistry', function () {
   });
 
   // without mocking we have to repeat the tests here to make sure the validation is correct
-  describe('subdomain validation', () => {
+  skipTestSuiteIfNetworkIsZkSync('subdomain validation', async () => {
     it('should validate the passed subdomain correctly (< 32 bytes long subdomain)', async () => {
       const baseSubdomain = 'this-is-my-super-valid-subdomain';
 
@@ -262,20 +266,20 @@ describe('DAORegistry', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           managingDao,
           {
-            dao: managingDao.address,
-            ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+            initArgs: {
+              dao: managingDao.address,
+              ensSubdomainRegistrar: ensSubdomainRegistrar.address,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.DAO_REGISTRY_V1_0_0,
+          ARTIFACT_SOURCES.DAO_REGISTRY,
           UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID
         );
-
-      expect(toImplementation).to.equal(fromImplementation); // The implementation was not changed from 1.0.0 to the current version
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)

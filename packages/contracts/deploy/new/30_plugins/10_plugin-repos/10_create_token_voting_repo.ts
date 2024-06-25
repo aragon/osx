@@ -1,16 +1,15 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import tokenVotingReleaseMetadata from '../../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
-
+import tokenVotingReleaseMetadata from '../../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import {
   createPluginRepo,
   populatePluginRepo,
   getContractAddress,
   uploadToIPFS,
+  getTokenVotingSetupAddress,
 } from '../../../helpers';
 import {ethers} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating token-voting repo.`);
@@ -30,10 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  const tokenVotingSetupContract = await getContractAddress(
-    'TokenVotingSetup',
-    hre
-  );
+  const tokenVotingSetupContract = await getTokenVotingSetupAddress(hre);
 
   await createPluginRepo(hre, 'token-voting');
   await populatePluginRepo(hre, 'token-voting', [

@@ -1,9 +1,8 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import {Operation} from '../../../utils/types';
-import {getContractAddress, managePermissions, Permission} from '../../helpers';
 import {DAO__factory, PluginRepo__factory} from '../../../typechain';
+import {Operation} from '../../../utils/types';
+import {getContractAddress, getPSPAddress, managePermissions, Permission} from '../../helpers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nFinalizing ManagingDao.`);
@@ -15,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
   // Get `PluginSetupProcessor` address.
-  const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
+  const pspAddress = await getPSPAddress(hre);
 
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
@@ -62,6 +61,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Grant `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` to `managingDao` on the permission manager of each PluginRepo.
   for (const repoName in hre.aragonPluginRepos) {
     const repoAddress = hre.aragonPluginRepos[repoName];
+
+    // if repoAddress empty, the deployment must have been marked as skipped.
+    if (repoAddress === '') continue;
+
     const grantPluginRepoPermissions: Permission[] = [];
     grantPluginRepoPermissions.push({
       operation: Operation.Grant,

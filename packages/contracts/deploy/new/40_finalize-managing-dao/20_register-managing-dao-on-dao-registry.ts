@@ -1,13 +1,12 @@
-import {DAO__factory, DAORegistry__factory} from '../../../typechain';
 import {
-  getContractAddress,
-  getENSAddress,
-  isENSDomainRegistered,
-  MANAGING_DAO_METADATA,
-  uploadToIPFS,
-} from '../../helpers';
+  DAORegistry__factory,
+  DAO__factory,
+  ENSRegistry__factory,
+} from '../../../typechain';
+import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import MANAGING_DAO_METADATA from '../../management-dao-metadata.json';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
@@ -21,6 +20,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!daoSubdomain)
     throw new Error('ManagingDAO subdomain has not been set in .env');
 
+  const node = ethers.utils.namehash(`${daoSubdomain}.${daoDomain}`);
+
   // Get `managingDAO` address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
@@ -33,29 +34,38 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    await getENSAddress(hre),
+    deployer
+  );
+  let owner = await ensRegistryContract.owner(node);
+  let daoENSSubdomainRegistrar = await getContractAddress(
+    'DAO_ENSSubdomainRegistrar',
+    hre
+  );
+
   if (
-    await isENSDomainRegistered(
-      `${daoSubdomain}.${daoDomain}`,
-      await getENSAddress(hre),
-      deployer
-    )
+    owner != daoENSSubdomainRegistrar &&
+    owner != ethers.constants.AddressZero
   ) {
-    // not beeing able to register the managing DAO means that something is not right with the framework deployment used.
-    // Either a fruntrun happened or something else. Thus we abort here
     throw new Error(
-      `A DAO with ${daoSubdomain}.${daoDomain} is already registered! Aborting...`
+      `A DAO with ${daoSubdomain}.${daoDomain} is registered and owned by 
+      someone other than ENSSubdomainRegistrar ${daoENSSubdomainRegistrar}.`
     );
   }
-  // Register `managingDAO` on `DAORegistry`.
-  const registerTx = await daoRegistryContract.register(
-    managingDAOAddress,
-    deployer.address,
-    daoSubdomain
-  );
-  await registerTx.wait();
-  console.log(
-    `Registered the (managingDAO: ${managingDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
-  );
+
+  if (owner === ethers.constants.AddressZero) {
+    // Register `managingDAO` on `DAORegistry`.
+    const registerTx = await daoRegistryContract.register(
+      managingDAOAddress,
+      deployer.address,
+      daoSubdomain
+    );
+    await registerTx.wait();
+    console.log(
+      `Registered the (managingDAO: ${managingDAOAddress}) on (DAORegistry: ${daoRegistryAddress}), see (tx: ${registerTx.hash})`
+    );
+  }
 
   // Set Metadata for the Managing DAO
   const managingDaoContract = DAO__factory.connect(
@@ -67,10 +77,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  const setMetadataTX = await managingDaoContract.setMetadata(
-    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`))
+  const hasMetadataPermission = await managingDaoContract.hasPermission(
+    managingDaoContract.address,
+    deployer.address,
+    ethers.utils.id('SET_METADATA_PERMISSION'),
+    '0x'
   );
-  await setMetadataTX.wait();
+
+  if (hasMetadataPermission) {
+    const setMetadataTX = await managingDaoContract.setMetadata(
+      ethers.utils.hexlify(
+        ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`)
+      )
+    );
+    await setMetadataTX.wait();
+  }
 };
 export default func;
 func.tags = ['New', 'RegisterManagingDAO'];

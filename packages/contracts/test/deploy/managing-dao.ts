@@ -1,8 +1,5 @@
-import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
-import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
-import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
-import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
-import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+
 import {
   DAO,
   DAORegistry,
@@ -14,10 +11,19 @@ import {
   Multisig__factory,
   PluginRepoRegistry,
   PluginRepoRegistry__factory,
+  PluginSetupProcessorUpgradeable,
+  PluginSetupProcessorUpgradeable__factory,
 } from '../../typechain';
+
+import daoArtifactData from '../../artifacts/src/core/dao/DAO.sol/DAO.json';
+import daoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol/DAORegistry.json';
+import pluginRepoRegistryArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+import pluginRepoArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol/PluginRepo.json';
+import ensSubdomainRegistrarArtifactData from '../../artifacts/@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol/ENSSubdomainRegistrar.json';
+import pspUpgradeableArtifactData from '../../artifacts/src/zksync/PluginSetupProcessorUpgradeable.sol/PluginSetupProcessorUpgradeable.json';
+
 import {readImplementationValuesFromSlot} from '../../utils/storage';
 import {initializeDeploymentFixture} from '../test-utils/fixture';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import hre, {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {Deployment} from 'hardhat-deploy/dist/types';
@@ -38,6 +44,7 @@ describe('Managing DAO', function () {
   let pluginRepoRegistry: PluginRepoRegistry;
   let ensSubdomainRegistrarDeployments: Deployment[];
   let ensSubdomainRegistrars: ENSSubdomainRegistrar[];
+  let psp: PluginSetupProcessorUpgradeable;
 
   async function createUpgradeProposal(
     contractAddress: string[],
@@ -48,9 +55,12 @@ describe('Managing DAO', function () {
       'upgradeTo',
       [newImplementationAddress]
     );
-    const actions = contractAddress.map(contract => {
-      return {to: contract, value: 0, data: data};
-    });
+    const actions = contractAddress
+      .filter(address => address != '')
+      .map(contract => {
+        return {to: contract, value: 0, data: data};
+      });
+
     await multisig.createProposal(
       '0x', // metadata
       actions,
@@ -89,6 +99,13 @@ describe('Managing DAO', function () {
     pluginRepoRegistryDeployment = await deployments.get('PluginRepoRegistry');
     pluginRepoRegistry = PluginRepoRegistry__factory.connect(
       pluginRepoRegistryDeployment.address,
+      signers[0]
+    );
+
+    // PSP
+    let pspDeployment = await deployments.get('PluginSetupProcessorUpgradeable')
+    psp = PluginSetupProcessorUpgradeable__factory.connect(
+      pspDeployment.address,
       signers[0]
     );
 
@@ -194,6 +211,67 @@ describe('Managing DAO', function () {
     )[0];
 
     expect(daoRegistry_v1_0_0_Deployment.address).to.be.equal(
+      implementationAddress
+    );
+  });
+
+  it('Should be able to upgrade `PSP`', async function () {
+     // Grant managing dao first the permission to upgrade psp.
+     const action = {
+      to: managingDao.address,
+      value: 0,
+      data: DAO__factory.createInterface().encodeFunctionData('grant', [
+        psp.address, 
+        managingDao.address, 
+        ethers.utils.id('UPGRADE_PSP_PERMISSION')
+      ])
+    }
+    
+    await multisig.createProposal(
+      '0x', // metadata
+      [action],
+      0, // allowFailureMap
+      true, // approve proposal
+      true, // execute proposal
+      0, // start date: now
+      Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
+    )
+
+    // deploy a new implementation.
+    const pspDeployment = await deployments.deploy(
+      'newPSP',
+      {
+        contract: pspUpgradeableArtifactData,
+        from: ownerAddress,
+        args: [],
+        log: true,
+      }
+    );
+
+    expect(pspDeployment.implementation).to.be.equal(undefined);
+
+    // check new implementation is different from the one on the `PSP`.
+    // read from slot
+    let implementationAddress = (
+      await readImplementationValuesFromSlot([psp.address])
+    )[0];
+
+    expect(pspDeployment.address).not.equal(
+      implementationAddress
+    );
+
+    // create proposal to upgrade to new implementation
+    await createUpgradeProposal(
+      [psp.address],
+      pspDeployment.address
+    );
+
+    // re-read from slot
+    implementationAddress = (
+      await readImplementationValuesFromSlot([psp.address])
+    )[0];
+
+    expect(pspDeployment.address).to.be.equal(
       implementationAddress
     );
   });
@@ -304,17 +382,24 @@ describe('Managing DAO', function () {
       }
     );
 
+    // For some networks, not every repo is deployed, in which case
+    // hre.aragonPluginRepos contains empty string for that repo and
+    // causing the below code to fail.
+    const deployedRepoAddresses = [];
+
+    for (const [key, value] of Object.entries(hre.aragonPluginRepos)) {
+      if (value == '') continue;
+      deployedRepoAddresses.push(value);
+    }
+
     // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
     expect(PluginRepo_v1_0_0_Deployment.implementation).to.be.equal(undefined);
 
     // check new implementation is deferent from the one on the `DaoRegistry`.
     // read from slot
-    let implementationValues = await readImplementationValuesFromSlot([
-      hre.aragonPluginRepos['token-voting'],
-      hre.aragonPluginRepos['address-list-voting'],
-      hre.aragonPluginRepos['admin'],
-      hre.aragonPluginRepos['multisig'],
-    ]);
+    let implementationValues = await readImplementationValuesFromSlot(
+      deployedRepoAddresses
+    );
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];
@@ -330,12 +415,9 @@ describe('Managing DAO', function () {
     );
 
     // re-read from slot
-    implementationValues = await readImplementationValuesFromSlot([
-      hre.aragonPluginRepos['token-voting'],
-      hre.aragonPluginRepos['address-list-voting'],
-      hre.aragonPluginRepos['admin'],
-      hre.aragonPluginRepos['multisig'],
-    ]);
+    implementationValues = await readImplementationValuesFromSlot(
+      deployedRepoAddresses
+    );
 
     for (let index = 0; index < implementationValues.length; index++) {
       const implementationAddress = implementationValues[index];

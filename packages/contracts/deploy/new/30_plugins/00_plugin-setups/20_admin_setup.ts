@@ -1,7 +1,7 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import adminSetupArtifact from '../../../../artifacts/src/plugins/governance/admin/AdminSetup.sol/AdminSetup.json';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipIfZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -17,3 +17,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'AdminSetup'];
+func.skip = async hre => await skipIfZkSync(hre, 'AdminSetup');

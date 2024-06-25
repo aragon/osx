@@ -1,7 +1,6 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
 import {verifyContract} from '../../../utils/etherscan';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -33,5 +32,6 @@ func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(
     hre.network.name === 'localhost' ||
       hre.network.name === 'hardhat' ||
-      hre.network.name === 'coverage'
+      hre.network.name === 'coverage' ||
+      hre.network.name === 'zkLocalTestnet'
   );

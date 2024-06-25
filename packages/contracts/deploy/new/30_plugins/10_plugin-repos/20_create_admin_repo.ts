@@ -1,16 +1,15 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
-import adminReleaseMetadata from '../../../../src/plugins/governance/admin/release-metadata.json';
 import adminBuildMetadata from '../../../../src/plugins/governance/admin/build-metadata.json';
-
+import adminReleaseMetadata from '../../../../src/plugins/governance/admin/release-metadata.json';
 import {
   createPluginRepo,
   populatePluginRepo,
   getContractAddress,
   uploadToIPFS,
+  skipIfZkSync,
 } from '../../../helpers';
 import {ethers} from 'ethers';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating admin repo.`);
@@ -49,3 +48,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['New', 'CreateAdminRepo'];
+func.skip = async hre => await skipIfZkSync(hre, 'CreateAdminRepo');

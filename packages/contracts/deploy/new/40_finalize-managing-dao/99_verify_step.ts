@@ -1,9 +1,8 @@
+import {DAO__factory} from '../../../typechain';
+import {Operation} from '../../../utils/types';
+import {checkPermission, getContractAddress, getPSPAddress} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-
-import {Operation} from '../../../utils/types';
-import {checkPermission, getContractAddress} from '../../helpers';
-import {DAO__factory} from '../../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');
@@ -22,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
   // Get `PluginSetupProcessor` address.
-  const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
+  const pspAddress = await getPSPAddress(hre)
 
   // Check revoked permission.
   await checkPermission(managingDaoContract, {

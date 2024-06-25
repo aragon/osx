@@ -1,36 +1,40 @@
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {Contract, ContractFactory, errors} from 'ethers';
-import {upgrades} from 'hardhat';
+import {errors} from 'ethers';
+import hre from 'hardhat';
 import {DAO} from '../../typechain';
 import {readImplementationValueFromSlot} from '../../utils/storage';
+import {Contract} from 'zksync-ethers';
+
+type options = {
+  args?: Record<string, any>;
+  initArgs?: Record<string, any>;
+  initializer?: string | undefined;
+};
 
 // Deploys and upgrades a contract that is managed by a DAO
 export async function ozUpgradeCheckManagedContract(
-  deployer: SignerWithAddress,
-  upgrader: SignerWithAddress,
+  deployer: number,
+  upgrader: number,
   managingDao: DAO,
-  initArgs: any,
-  initializerName: string,
-  from: ContractFactory,
-  to: ContractFactory,
+  {args = {}, initArgs = {}, initializer = undefined}: options,
+  from: string,
+  to: string,
   upgradePermissionId: string
 ): Promise<{
   proxy: Contract;
   fromImplementation: string;
   toImplementation: string;
 }> {
-  // Deploy the proxy
-  let proxy = await upgrades.deployProxy(
-    from.connect(deployer),
-    Object.values(initArgs),
-    {
-      kind: 'uups',
-      initializer: initializerName,
-      unsafeAllow: ['constructor'],
-      constructorArgs: [],
-    }
-  );
+  const deployerSigner = (await hre.ethers.getSigners())[deployer];
+  const upgraderSigner = (await hre.ethers.getSigners())[upgrader];
+
+  let proxy = await hre.wrapper.deployProxy(deployer, from, {
+    args: Object.values(args),
+    initArgs: Object.values(initArgs),
+    proxySettings: {
+      initializer: initializer,
+    },
+  });
 
   const fromImplementation = await readImplementationValueFromSlot(
     proxy.address
@@ -38,28 +42,26 @@ export async function ozUpgradeCheckManagedContract(
 
   // Check that upgrade permission is required
   await expect(
-    upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
-      unsafeAllow: ['constructor'],
-      constructorArgs: [],
+    hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+      args: Object.values(args),
     })
   )
     .to.be.revertedWithCustomError(proxy, 'DaoUnauthorized')
     .withArgs(
       managingDao.address,
       proxy.address,
-      upgrader.address,
+      upgraderSigner.address,
       upgradePermissionId
     );
 
   // Grant the upgrade permission
   await managingDao
-    .connect(deployer)
-    .grant(proxy.address, upgrader.address, upgradePermissionId);
+    .connect(deployerSigner)
+    .grant(proxy.address, upgraderSigner.address, upgradePermissionId);
 
   // Upgrade the proxy
-  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
-    unsafeAllow: ['constructor'],
-    constructorArgs: [],
+  await hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+    args: Object.values(args),
   });
 
   const toImplementation = await readImplementationValueFromSlot(proxy.address);
@@ -69,52 +71,49 @@ export async function ozUpgradeCheckManagedContract(
 
 // Deploys and upgrades a contract that has its own permission manager
 export async function ozUpgradeCheckManagingContract(
-  deployer: SignerWithAddress,
-  upgrader: SignerWithAddress,
-  initArgs: any,
-  initializerName: string,
-  from: ContractFactory,
-  to: ContractFactory,
+  deployer: number,
+  upgrader: number,
+  {args = {}, initArgs = {}, initializer = undefined}: options,
+  from: string,
+  to: string,
   upgradePermissionId: string
 ): Promise<{
   proxy: Contract;
   fromImplementation: string;
   toImplementation: string;
 }> {
+  const deployerSigner = (await hre.ethers.getSigners())[deployer];
+  const upgraderSigner = (await hre.ethers.getSigners())[upgrader];
+
   // Deploy the proxy
-  let proxy = await upgrades.deployProxy(
-    from.connect(deployer),
-    Object.values(initArgs),
-    {
-      kind: 'uups',
-      initializer: initializerName,
-      unsafeAllow: ['constructor'],
-      constructorArgs: [],
-    }
-  );
+  let proxy = await hre.wrapper.deployProxy(deployer, from, {
+    args: Object.values(args),
+    initArgs: Object.values(initArgs),
+    proxySettings: {
+      initializer: initializer,
+    },
+  });
 
   const fromImplementation = await readImplementationValueFromSlot(
     proxy.address
   );
+
   // Check that upgrade permission is required
   await expect(
-    upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
-      unsafeAllow: ['constructor'],
-      constructorArgs: [],
+    hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+      args: Object.values(args),
     })
   )
     .to.be.revertedWithCustomError(proxy, 'Unauthorized')
-    .withArgs(proxy.address, upgrader.address, upgradePermissionId);
+    .withArgs(proxy.address, upgraderSigner.address, upgradePermissionId);
 
   // Grant the upgrade permission
   await proxy
-    .connect(deployer)
-    .grant(proxy.address, upgrader.address, upgradePermissionId);
+    .connect(deployerSigner)
+    .grant(proxy.address, upgraderSigner.address, upgradePermissionId);
 
-  // Upgrade the proxy
-  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
-    unsafeAllow: ['constructor'],
-    constructorArgs: [],
+  await hre.wrapper.upgradeProxy(upgrader, proxy.address, to, {
+    args: Object.values(args),
   });
 
   const toImplementation = await readImplementationValueFromSlot(proxy.address);

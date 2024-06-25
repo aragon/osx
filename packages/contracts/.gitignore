@@ -10,3 +10,4 @@ docs/osx/03-reference-guide
 #Hardhat files
 cache
 artifacts
+.upgradable

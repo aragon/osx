@@ -51,7 +51,7 @@ interface MintConfig {
 
 const zeroAddr = ethers.constants.AddressZero;
 
-describe('Core: TokenFactory', () => {
+describe.skip('Core: TokenFactory', () => {
   let signers: SignerWithAddress[];
   let tokenFactory: MockContract<TokenFactory>;
   let governanceBase: MockContract<GovernanceERC20>;

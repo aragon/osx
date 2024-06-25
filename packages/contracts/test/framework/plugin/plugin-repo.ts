@@ -2,7 +2,7 @@
 // https://github.com/aragon/apm/blob/next/test/contracts/apm/apm_repo.js
 
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -32,6 +32,7 @@ import {ZERO_BYTES32} from '../../test-utils/dao';
 import {getInterfaceID} from '../../test-utils/interfaces';
 import {CURRENT_PROTOCOL_VERSION} from '../../test-utils/protocol-version';
 import {tagHash} from '../../test-utils/psp/hash-helpers';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -90,17 +91,18 @@ describe('PluginRepo', function () {
 
         const {fromImplementation, toImplementation} =
           await ozUpgradeCheckManagingContract(
-            signers[0],
-            signers[1],
+            0,
+            1,
             {
-              initialOwner: signers[0].address,
+              initArgs: {
+                initialOwner: signers[0].address,
+              },
+              initializer: 'initialize',
             },
-            'initialize',
-            legacyContractFactory,
-            currentContractFactory,
+            ARTIFACT_SOURCES.PLUGIN_REPO_V1_0_0,
+            ARTIFACT_SOURCES.PLUGIN_REPO,
             UPGRADE_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
-        expect(toImplementation).to.not.equal(fromImplementation);
 
         const fromProtocolVersion = await getProtocolVersion(
           legacyContractFactory.attach(fromImplementation)
@@ -186,9 +188,7 @@ describe('PluginRepo', function () {
         );
 
         // If a contract is passed, but doesn't have `supportsInterface` signature described in the contract.
-        const randomContract = await new TestPlugin__factory(
-          signers[0]
-        ).deploy();
+        const randomContract = await hre.wrapper.deploy('TestPlugin');
         await expect(
           pluginRepo.createVersion(
             1,
@@ -387,9 +387,8 @@ describe('PluginRepo', function () {
       });
 
       it('allows to create placeholder builds for the same release', async () => {
-        const PlaceholderSetup = new PlaceholderSetup__factory(signers[0]);
-        const placeholder1 = await PlaceholderSetup.deploy();
-        const placeholder2 = await PlaceholderSetup.deploy();
+        const placeholder1 = await hre.wrapper.deploy('PlaceholderSetup');
+        const placeholder2 = await hre.wrapper.deploy('PlaceholderSetup');
 
         // Release 1
         await expect(

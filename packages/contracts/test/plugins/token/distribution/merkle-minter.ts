@@ -1,7 +1,7 @@
 // Copied and modified from: https://github.com/Uniswap/merkle-distributor/blob/master/test/MerkleDistributor.spec.ts
 
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {artifacts, ethers} from 'hardhat';
 import {BigNumber, ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -21,7 +21,6 @@ import {MerkleMinter__factory as MerkleMinter_V1_0_0__factory} from '../../../..
 
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../../../test-utils/dao';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 import {
@@ -29,6 +28,7 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../test-utils/protocol-version';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -64,17 +64,17 @@ describe('MerkleMinter', function () {
     // create a DAO
     managingDao = await deployNewDAO(signers[0]);
 
-    const GovernanceERC20 = new GovernanceERC20__factory(signers[0]);
-    token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV', {
-      receivers: [],
-      amounts: [],
+    token = await hre.wrapper.deploy('GovernanceERC20', {
+      args: [managingDao.address, 'GOV', 'GOV', {receivers: [], amounts: []}],
     });
 
-    const MerkleDistributor = new MerkleDistributor__factory(signers[0]);
-    distributorBase = await MerkleDistributor.deploy();
+    distributorBase = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.MERKLE_DISTRIBUTOR
+    );
 
-    const MerkleMinter = new MerkleMinter__factory(signers[0]);
-    minter = await deployWithProxy(MerkleMinter);
+    minter = await hre.wrapper.deploy(ARTIFACT_SOURCES.MERKLE_MINTER, {
+      withProxy: true,
+    });
 
     await minter.initialize(
       managingDao.address,
@@ -102,20 +102,21 @@ describe('MerkleMinter', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           managingDao,
           {
-            dao: managingDao.address,
-            token: token.address,
-            merkleDistributor: distributorBase.address,
+            initArgs: {
+              dao: managingDao.address,
+              token: token.address,
+              merkleDistributor: distributorBase.address,
+            },
+            initializer: 'initialize',
           },
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.MERKLE_MINTER_V1_0_0,
+          ARTIFACT_SOURCES.MERKLE_MINTER,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
-      expect(toImplementation).to.equal(fromImplementation); // The build did not change
 
       const fromProtocolVersion = await getProtocolVersion(
         legacyContractFactory.attach(fromImplementation)

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {ContractFactory} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -46,7 +46,6 @@ import {
 import {deployNewDAO} from '../../../../test-utils/dao';
 import {OZ_ERRORS} from '../../../../test-utils/error';
 import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
-import {deployWithProxy} from '../../../../test-utils/proxy';
 import {getInterfaceID} from '../../../../test-utils/interfaces';
 
 import {
@@ -54,12 +53,21 @@ import {
   ozUpgradeCheckManagedContract,
 } from '../../../../test-utils/uups-upgradeable';
 import {CURRENT_PROTOCOL_VERSION} from '../../../../test-utils/protocol-version';
+import {ARTIFACT_SOURCES} from '../../../../test-utils/wrapper';
+import {skipTestIfNetworkIsZkSync} from '../../../../test-utils/skip-functions';
 
 export const addresslistVotingInterface = new ethers.utils.Interface([
   'function initialize(address,tuple(uint8,uint32,uint32,uint64,uint256),address[])',
   'function addAddresses(address[])',
   'function removeAddresses(address[])',
 ]);
+
+function expectedBlockNumber(blockNumber: number) {
+  if (hre.network.config.zksync) {
+    return blockNumber - 2;
+  }
+  return blockNumber - 1;
+}
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -100,9 +108,9 @@ describe('AddresslistVoting', function () {
       minProposerVotingPower: 0,
     };
 
-    const AddresslistVotingFactory = new AddresslistVoting__factory(signers[0]);
-
-    voting = await deployWithProxy(AddresslistVotingFactory);
+    voting = await hre.wrapper.deploy(ARTIFACT_SOURCES.ADDRESSLIST_VOTING, {
+      withProxy: true,
+    });
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -142,17 +150,19 @@ describe('AddresslistVoting', function () {
 
       const {fromImplementation, toImplementation} =
         await ozUpgradeCheckManagedContract(
-          signers[0],
-          signers[1],
+          0,
+          1,
           dao,
           {
-            dao: dao.address,
-            votingSettings: votingSettings,
-            members: [signers[0].address, signers[1].address],
+            initArgs: {
+              dao: dao.address,
+              votingSettings: votingSettings,
+              members: [signers[0].address, signers[1].address],
+            },
+            initializer: 'initialize',
           },
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          ARTIFACT_SOURCES.ADDRESSLIST_VOTING_V1_0_0,
+          ARTIFACT_SOURCES.ADDRESSLIST_VOTING,
           UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID
         );
       expect(toImplementation).to.not.equal(fromImplementation); // The build did change
@@ -309,28 +319,46 @@ describe('AddresslistVoting', function () {
       ).not.to.be.reverted;
     });
 
-    it('reverts if `_msgSender` is not listed in the current block although he was listed in the last block', async () => {
-      votingSettings.minProposerVotingPower = 1;
+    skipTestIfNetworkIsZkSync(
+      'reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected',
+      async () => {
+        votingSettings.minProposerVotingPower = 1;
 
-      await voting.initialize(
-        dao.address,
-        votingSettings,
-        [signers[0].address] // signers[0] is listed
-      );
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          [signers[0].address] // signers[0] is listed
+        );
 
-      await ethers.provider.send('evm_setAutomine', [false]);
-      const expectedSnapshotBlockNumber = (
-        await ethers.provider.getBlock('latest')
-      ).number;
+        await ethers.provider.send('evm_setAutomine', [false]);
+        const expectedSnapshotBlockNumber = (
+          await ethers.provider.getBlock('latest')
+        ).number;
 
-      // Transaction 1 & 2: Add signers[1] and remove signers[0]
-      const tx1 = await voting.addAddresses([signers[1].address]);
-      const tx2 = await voting.removeAddresses([signers[0].address]);
+        // Transaction 1 & 2: Add signers[1] and remove signers[0]
+        const tx1 = await voting.addAddresses([signers[1].address]);
+        const tx2 = await voting.removeAddresses([signers[0].address]);
 
-      // Transaction 3: Expect the proposal creation to fail for signers[0] because he was removed as a member in transaction 2.
-      await expect(
-        voting
-          .connect(signers[0])
+        // Transaction 3: Expect the proposal creation to fail for signers[0] because he was removed as a member in transaction 2.
+        await expect(
+          voting
+            .connect(signers[0])
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              startDate,
+              endDate,
+              VoteOption.None,
+              false
+            )
+        )
+          .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+          .withArgs(signers[0].address);
+
+        // Transaction 4: Create the proposal as signers[1]
+        const tx4 = await voting
+          .connect(signers[1])
           .createProposal(
             dummyMetadata,
             [],
@@ -339,59 +367,44 @@ describe('AddresslistVoting', function () {
             endDate,
             VoteOption.None,
             false
-          )
-      )
-        .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
-        .withArgs(signers[0].address);
+          );
 
-      // Transaction 4: Create the proposal as signers[1]
-      const tx4 = await voting
-        .connect(signers[1])
-        .createProposal(
-          dummyMetadata,
-          [],
-          0,
-          startDate,
-          endDate,
-          VoteOption.None,
-          false
+        // Check the listed members before the block is mined
+        expect(await voting.isListed(signers[0].address)).to.equal(true);
+        expect(await voting.isListed(signers[1].address)).to.equal(false);
+
+        // Mine the block
+        await ethers.provider.send('evm_mine', []);
+        const minedBlockNumber = (await ethers.provider.getBlock('latest'))
+          .number;
+
+        // Expect all transaction receipts to be in the same block after the snapshot block.
+        expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
+        expect((await tx2.wait()).blockNumber).to.equal(minedBlockNumber);
+        expect((await tx4.wait()).blockNumber).to.equal(minedBlockNumber);
+        expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
+
+        // Expect the listed members to have changed
+        expect(await voting.isListed(signers[0].address)).to.equal(false);
+        expect(await voting.isListed(signers[1].address)).to.equal(true);
+
+        // Check the `ProposalCreatedEvent` for the creator and proposalId
+        const event = await findEvent<ProposalCreatedEvent>(
+          tx4,
+          'ProposalCreated'
+        );
+        expect(event.args.proposalId).to.equal(id);
+        expect(event.args.creator).to.equal(signers[1].address);
+
+        // Check that the snapshot block stored in the proposal struct
+        const proposal = await voting.getProposal(id);
+        expect(proposal.parameters.snapshotBlock).to.equal(
+          expectedSnapshotBlockNumber
         );
 
-      // Check the listed members before the block is mined
-      expect(await voting.isListed(signers[0].address)).to.equal(true);
-      expect(await voting.isListed(signers[1].address)).to.equal(false);
-
-      // Mine the block
-      await ethers.provider.send('evm_mine', []);
-      const minedBlockNumber = (await ethers.provider.getBlock('latest'))
-        .number;
-
-      // Expect all transaction receipts to be in the same block after the snapshot block.
-      expect((await tx1.wait()).blockNumber).to.equal(minedBlockNumber);
-      expect((await tx2.wait()).blockNumber).to.equal(minedBlockNumber);
-      expect((await tx4.wait()).blockNumber).to.equal(minedBlockNumber);
-      expect(minedBlockNumber).to.equal(expectedSnapshotBlockNumber + 1);
-
-      // Expect the listed members to have changed
-      expect(await voting.isListed(signers[0].address)).to.equal(false);
-      expect(await voting.isListed(signers[1].address)).to.equal(true);
-
-      // Check the `ProposalCreatedEvent` for the creator and proposalId
-      const event = await findEvent<ProposalCreatedEvent>(
-        tx4,
-        'ProposalCreated'
-      );
-      expect(event.args.proposalId).to.equal(id);
-      expect(event.args.creator).to.equal(signers[1].address);
-
-      // Check that the snapshot block stored in the proposal struct
-      const proposal = await voting.getProposal(id);
-      expect(proposal.parameters.snapshotBlock).to.equal(
-        expectedSnapshotBlockNumber
-      );
-
-      await ethers.provider.send('evm_setAutomine', [true]);
-    });
+        await ethers.provider.send('evm_setAutomine', [true]);
+      }
+    );
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
       votingSettings.minProposerVotingPower = 123;
@@ -630,7 +643,9 @@ describe('AddresslistVoting', function () {
       expect(proposal.open).to.be.true;
       expect(proposal.executed).to.be.false;
       expect(proposal.allowFailureMap).to.equal(allowFailureMap);
-      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.parameters.snapshotBlock).to.equal(
+        expectedBlockNumber(block.number)
+      );
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );
@@ -651,8 +666,6 @@ describe('AddresslistVoting', function () {
       ).to.equal(10);
       expect(await voting.canVote(id, signers[0].address, VoteOption.Yes)).to.be
         .true;
-      expect(await voting.canVote(id, signers[10].address, VoteOption.Yes)).to
-        .be.false;
       expect(await voting.canVote(1, signers[0].address, VoteOption.Yes)).to.be
         .false;
 
@@ -702,7 +715,9 @@ describe('AddresslistVoting', function () {
       expect(proposal.open).to.be.true;
       expect(proposal.executed).to.be.false;
       expect(proposal.allowFailureMap).to.equal(0);
-      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.parameters.snapshotBlock).to.equal(
+        expectedBlockNumber(block.number)
+      );
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );

@@ -1,8 +1,9 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {getContractAddress} from '../../helpers';
+import {getContractAddress, getPSPAddress} from '../../helpers';
 
 import daoFactoryArtifact from '../../../artifacts/src/framework/dao/DAOFactory.sol/DAOFactory.json';
+import { ZK_SYNC_NETWORKS } from '../../../utils/zkSync';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -12,11 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
-  // Get `PluginSetupProcessor` address.
-  const pluginSetupProcessorAddress = await getContractAddress(
-    'PluginSetupProcessor',
-    hre
-  );
+  let pluginSetupProcessorAddress = await getPSPAddress(hre)
 
   await deploy('DAOFactory', {
     contract: daoFactoryArtifact,

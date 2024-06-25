@@ -22,12 +22,16 @@ contract GovernanceERC20Mock is GovernanceERC20 {
 
     // sets the balance of the address
     // this mints/burns the amount depending on the current balance
-    function setBalance(address to, uint256 amount) public {
-        uint256 old = balanceOf(to);
-        if (old < amount) {
-            _mint(to, amount - old);
-        } else if (old > amount) {
-            _burn(to, old - amount);
+    function setBalances(address[] calldata receivers, uint256[] calldata amounts) public {
+        for (uint i = 0; i < receivers.length; i++) {
+            address to = receivers[i];
+            uint256 amount = amounts[i];
+            uint256 old = balanceOf(to);
+            if (old < amount) {
+                _mint(to, amount - old);
+            } else if (old > amount) {
+                _burn(to, old - amount);
+            }
         }
     }
 }

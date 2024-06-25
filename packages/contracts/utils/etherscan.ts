@@ -19,7 +19,11 @@ export const verifyContract = async (
     'utf8'
   );
   const networksJSON = JSON.parse(networks.toString());
-  if (!Object.keys(networksJSON).includes(currentNetwork)) {
+
+  if (
+    !Object.keys(networksJSON).includes(currentNetwork) &&
+    !HRE.network.config.zksync
+  ) {
     throw Error(
       `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${Object.keys(
         networksJSON
@@ -69,7 +73,7 @@ export const runTaskWithRetry = async (
     } else {
       cleanup();
       console.error(
-        'Errors after all the retries, check the logs for more information.'
+        `Errors after all the retries for contract ${params.contract} at ${params.address}. Please verify manually.`
       );
     }
   } catch (error: any) {

@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AddresslistMock, AddresslistMock__factory} from '../../../typechain';
+import {AddresslistMock} from '../../../typechain';
 
 describe('AddresslistMock', function () {
   let signers: SignerWithAddress[];
@@ -13,8 +13,7 @@ describe('AddresslistMock', function () {
   });
 
   beforeEach(async () => {
-    const AddresslistMock = new AddresslistMock__factory(signers[0]);
-    addresslist = await AddresslistMock.deploy();
+    addresslist = await hre.wrapper.deploy('AddresslistMock');
   });
 
   context('addresslistLength', function () {

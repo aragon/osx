@@ -1,6 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {promises as fs} from 'fs';
+import { DAORegistry } from '../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nPrinting deployed contracts.');
@@ -43,8 +44,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await fs.writeFile(
     'deployed_contracts.json',
-    JSON.stringify(deployedContractAddresses)
+    JSON.stringify(deployedContractAddresses, null, 2)
   );
+
 };
 export default func;
 func.tags = ['New', 'Conclude'];

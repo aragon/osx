@@ -16,6 +16,7 @@ import {
 } from '../typechain';
 import {VersionCreatedEvent} from '../typechain/PluginRepo';
 import {PluginRepoRegisteredEvent} from '../typechain/PluginRepoRegistry';
+import {ZK_SYNC_NETWORKS} from '../utils/zkSync';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -29,24 +30,6 @@ export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
   goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
   mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
   sepolia: '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD',
-};
-
-export const MANAGING_DAO_METADATA = {
-  name: 'Aragon Managing DAO',
-  description:
-    'Aragon OSx includes a group of global smart contracts that allow for a DAO ecosystem to be built on top. These contracts will require future improvements and general maintenance. The Managing DAO is intended to perform such maintenance tasks and holds the permissions to deliver any new capabilities that are added in the future.',
-  avatar:
-    'https://ipfs.eth.aragon.network/ipfs/QmVyy3ci7F2zHG6JUJ1XbcwLKuxWrQ6hqNvSnjmDmdYJzP/',
-  links: [
-    {
-      name: 'Web site',
-      url: 'https://www.aragon.org',
-    },
-    {
-      name: 'Developer Portal',
-      url: 'https://devs.aragon.org/',
-    },
-  ],
 };
 
 export const DAO_PERMISSIONS = [
@@ -69,7 +52,11 @@ export async function uploadToIPFS(
     },
   });
 
-  if (networkName === 'hardhat' || networkName === 'localhost') {
+  if (
+    networkName === 'hardhat' ||
+    networkName === 'localhost' ||
+    networkName === 'zkLocalTestnet'
+  ) {
     // return a dummy path
     return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
   }
@@ -189,21 +176,9 @@ export async function createPluginRepo(
   pluginName: string
 ): Promise<void> {
   const {network} = hre;
-  const signers = await ethers.getSigners();
+  const {deployer} = await hre.getNamedAccounts();
 
-  const pluginDomain =
-    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
-  if (
-    await isENSDomainRegistered(
-      `${pluginName}.${pluginDomain}`,
-      await getENSAddress(hre),
-      signers[0]
-    )
-  ) {
-    // not beeing able to register the plugin repo means that something is not right with the framework deployment used.
-    // Either a frontrun happened or something else. Thus we abort here
-    throw new Error(`${pluginName} is already present! Aborting...`);
-  }
+  const signers = await ethers.getSigners();
 
   const pluginRepoFactoryAddress = await getContractAddress(
     'PluginRepoFactory',
@@ -215,12 +190,58 @@ export async function createPluginRepo(
     pluginRepoFactoryAddress
   );
 
-  const {deployer} = await hre.getNamedAccounts();
+  const pluginDomain =
+    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`];
+
+  const node = ethers.utils.namehash(`${pluginName}.${pluginDomain}`);
+
+  const pluginSubdomainRegistrar = await getContractAddress(
+    'Plugin_ENSSubdomainRegistrar',
+    hre
+  );
+
+  const ensRegistryContract = ENSRegistry__factory.connect(
+    await getENSAddress(hre),
+    signers[0]
+  );
+
+  const owner = await ensRegistryContract.owner(node);
+
+  // ENS subdomain has already been registered by pluginSubdomainRegistrar.
+  // Running the `createPluginRepo` will fail unless skipped.
+  // Since `aragonPluginRepos` is filled in run-time, we still need to refill it.
+  if (owner === pluginSubdomainRegistrar) {
+    const pluginRepoRegistryFactory = new PluginRepoRegistry__factory(
+      signers[0]
+    );
+    const pluginRepoRegistry = pluginRepoRegistryFactory.attach(
+      await getContractAddress('PluginRepoRegistry', hre)
+    );
+    let events = await pluginRepoRegistry.queryFilter(
+      pluginRepoRegistry.filters.PluginRepoRegistered(null, null)
+    );
+    const found = events.filter(event => event?.args?.subdomain == pluginName);
+    if (found && found.length == 1) {
+      hre.aragonPluginRepos[pluginName] = found[0].args.pluginRepo;
+      return;
+    }
+    throw new Error(
+      `Critical: Either the event was not found or none of the plugin repo deployment corresponds to your domain.`
+    );
+  }
+
+  // The owner of the node is already set to someone who is not pluginSubdomainRegistrar.
+  if (owner !== ethers.constants.AddressZero) {
+    throw new Error(
+      `${pluginName}.${pluginDomain} is already owned by someone other than pluginSubdomainRegistrar`
+    );
+  }
 
   const tx = await pluginRepoFactoryContract.createPluginRepo(
     pluginName,
     deployer
   );
+
   console.log(
     `Creating & registering repo for ${pluginName} with tx ${tx.hash}`
   );
@@ -244,6 +265,7 @@ export async function createVersion(
   pluginRepoContract: string,
   pluginSetupContract: string,
   releaseNumber: number,
+  buildNumber: number,
   releaseMetadata: string,
   buildMetadata: string
 ): Promise<void> {
@@ -251,6 +273,18 @@ export async function createVersion(
 
   const PluginRepo = new PluginRepo__factory(signers[0]);
   const pluginRepo = PluginRepo.attach(pluginRepoContract);
+
+  try {
+    // getVersion reverts if the version doesn't exist.
+    await pluginRepo['getVersion((uint8,uint16))']({
+      release: releaseNumber,
+      build: buildNumber,
+    });
+    console.log(
+      `Version already deployed. Skipping the 'createVersion' call on pluginRepo`
+    );
+    return;
+  } catch (err) {}
 
   const tx = await pluginRepo.createVersion(
     releaseNumber,
@@ -330,6 +364,7 @@ export async function populatePluginRepo(
         hre.aragonPluginRepos[pluginRepoName],
         placeholderSetup,
         releaseNumber,
+        i,
         emptyJsonObject,
         ethers.utils.hexlify(
           ethers.utils.toUtf8Bytes(`ipfs://${hre.placeholderBuildCIDPath}`)
@@ -342,6 +377,7 @@ export async function populatePluginRepo(
       hre.aragonPluginRepos[pluginRepoName],
       latestVersion.pluginSetupContract,
       releaseNumber,
+      latestBuildNumber,
       latestVersion.releaseMetadata,
       latestVersion.buildMetadata
     );
@@ -605,13 +641,63 @@ export function getManagingDAOMultisigAddress(
 ): string {
   const {network} = hre;
   const address =
-    process.env[`${network.name.toUpperCase()}_MANAGINGDAO_MULTISIG`];
+    process.env[`${network.name.toUpperCase()}_MANAGEMENT_DAO_MULTISIG`];
   if (!address) {
     throw new Error(
       `Failed to find managing DAO multisig address in env variables for ${network.name}`
     );
   }
   return address;
+}
+
+export async function getPSPAddress(hre: HardhatRuntimeEnvironment) {
+  let name = 'PluginSetupProcessor'
+  if(ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    name = 'PluginSetupProcessorUpgradeable'
+  }
+
+  const address = await getContractAddress(
+    name,
+    hre
+  );
+
+  return address;
+}
+
+export async function getTokenVotingSetupAddress(hre: HardhatRuntimeEnvironment) {
+  let name = 'TokenVotingSetup'
+  if(ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    name = 'TokenVotingSetupZkSync'
+  }
+
+  const address = await getContractAddress(
+    name,
+    hre
+  );
+
+  return address;
+}
+
+export async function skipIfZkSync(
+  hre: HardhatRuntimeEnvironment,
+  stage: string
+) {
+  if (ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    console.log(`Skipping deployment stage: ${stage} due to zkSync network`);
+    return true;
+  }
+  return false;
+}
+
+export async function skipIfNotZkSync(
+  hre: HardhatRuntimeEnvironment,
+  stage: string
+) {
+  if (!ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    console.log(`Skipping deployment stage: ${stage} due to zkSync network`);
+    return true;
+  }
+  return false;
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

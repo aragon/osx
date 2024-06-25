@@ -1,10 +1,10 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-
+import tokenVotingSetupArtifact from '../../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import governanceERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
 import governanceWrappedERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
-import tokenVotingSetupArtifact from '../../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {skipIfZkSync} from '../../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, ethers} = hre;
@@ -51,3 +51,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['New', 'TokenVotingSetup'];
+func.skip = async hre => await skipIfZkSync(hre, 'TokenVotingSetup');
