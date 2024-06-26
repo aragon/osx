@@ -69,10 +69,10 @@
     "chainId": 44,
     "deploy": ["./deploy/new", "./deploy/verification"]
   },
-  "pangolin": {
-    "url": "https://pangolin-rpc.darwinia.network",
+  "koi": {
+    "url": "https://koi-rpc.darwinia.network",
     "isTestnet": true,
-    "chainId": 43,
+    "chainId": 701,
     "deploy": ["./deploy/new", "./deploy/verification"]
   }
 }
