@@ -132,16 +132,16 @@ const config: HardhatUserConfig = {
         network: 'crab',
         chainId: 44,
         urls: {
-          apiURL: 'https://crab.api.subscan.io/api/scan/evm/contract/verifysource',
+          apiURL: 'https://crab-scan.darwinia.network/api',
           browserURL: 'https://crab.subscan.io',
         },
       },
       {
-        network: 'pangolin',
-        chainId: 43,
+        network: 'koi',
+        chainId: 701,
         urls: {
-          apiURL: 'https://pangolin.api.subscan.io/api/scan/evm/contract/verifysource',
-          browserURL: 'https://pangolin.subscan.io',
+          apiURL: 'https://koi-scan.darwinia.network/api',
+          browserURL: 'https://koi-scan.darwinia.network',
         },
       },
     ],
