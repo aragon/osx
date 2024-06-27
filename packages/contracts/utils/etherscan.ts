@@ -9,7 +9,8 @@ function delay(ms: number) {
 
 export const verifyContract = async (
   address: string,
-  constructorArguments: any[]
+  constructorArguments: any[],
+  contract?: string
 ) => {
   const currentNetwork = HRE.network.name;
 
@@ -41,6 +42,7 @@ export const verifyContract = async (
     );
 
     const params = {
+      contract,
       address: address,
       constructorArgs: path,
     };
