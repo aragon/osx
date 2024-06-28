@@ -133,7 +133,7 @@ const config: HardhatUserConfig = {
         chainId: 44,
         urls: {
           apiURL: 'https://crab-scan.darwinia.network/api',
-          browserURL: 'https://crab.subscan.io',
+          browserURL: 'https://crab-scan.darwinia.network',
         },
       },
       {
