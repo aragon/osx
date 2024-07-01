@@ -5,6 +5,10 @@ import {Operation} from '../../../utils/types';
 import {checkPermission, getContractAddress} from '../../helpers';
 import {DAO__factory} from '../../../typechain';
 
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying permissions');
 
@@ -20,6 +24,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress,
     deployer
   );
+
+  // On some chains - such as holesky - wait so previous permission txs
+  // are fully applied and verified.
+  await delay(5000);
 
   // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);

@@ -15,7 +15,13 @@
     "url": "https://sepolia.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": true,
     "chainId": 11155111,
-    "deploy": ["./deploy/new", "./deploy/verification"]
+    "deploy": ["./deploy/new", "./deploy/verification"],
+    "forceDeploy": true
+  },
+  "holesky": { 
+    "chainId": 17000, 
+    "url": "https://ethereum-holesky.publicnode.com", 
+    "deploy": ["./deploy/new", "./deploy/verification"] 
   },
   "polygon": {
     "url": "https://polygon-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",

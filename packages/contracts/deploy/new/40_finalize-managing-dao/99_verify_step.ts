@@ -4,6 +4,10 @@ import {checkPermission, getContractAddress, getPSPAddress} from '../../helpers'
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying managing DAO deployment.');
 
@@ -23,6 +27,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get `PluginSetupProcessor` address.
   const pspAddress = await getPSPAddress(hre)
 
+  // On some chains - such as holesky - wait so previous permission txs
+  // are fully applied and verified.
+  await delay(5000);
+  
   // Check revoked permission.
   await checkPermission(managingDaoContract, {
     operation: Operation.Revoke,

@@ -15,13 +15,13 @@ import 'solidity-coverage';
 import 'solidity-docgen';
 
 // If you're running on zksync, import the below
-import '@matterlabs/hardhat-zksync-upgradable';
-import '@matterlabs/hardhat-zksync-ethers';
-import '@matterlabs/hardhat-zksync-verify';
+// import '@matterlabs/hardhat-zksync-upgradable';
+// import '@matterlabs/hardhat-zksync-ethers';
+// import '@matterlabs/hardhat-zksync-verify';
 
 // If you're running on hardhat, import the following
-// import '@nomicfoundation/hardhat-verify'
-// import '@openzeppelin/hardhat-upgrades'
+import '@nomicfoundation/hardhat-verify'
+import '@openzeppelin/hardhat-upgrades'
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
 
@@ -206,6 +206,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_KEY || '',
       goerli: process.env.ETHERSCAN_KEY || '',
       sepolia: process.env.ETHERSCAN_KEY || '',
+      holesky: process.env.ETHERSCAN_KEY || '',
       polygon: process.env.POLYGONSCAN_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_KEY || '',
       baseMainnet: process.env.BASESCAN_KEY || '',
@@ -246,6 +247,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-sepolia.arbiscan.io/api',
           browserURL: 'https://sepolia.arbiscan.io',
+        },
+      },
+      {
+        network: 'holesky',
+        chainId: 17000,
+        urls: {
+          apiURL: 'https://api-holesky.etherscan.io/api',
+          browserURL: 'https://holesky.etherscan.io',
         },
       },
     ],
