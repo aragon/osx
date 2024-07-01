@@ -100,18 +100,7 @@ contract TokenVotingSetup is PluginSetup {
                 revert TokenNotERC20(token);
             }
 
-            // [0] = IERC20Upgradeable, [1] = IVotesUpgradeable, [2] = IGovernanceWrappedERC20
-            bool[] memory supportedIds = _getTokenInterfaceIds(token);
-
-            if (
-                // If token supports none of them
-                // it's simply ERC20 which gets checked by _isERC20
-                // Currently, not a satisfiable check.
-                (!supportedIds[0] && !supportedIds[1] && !supportedIds[2]) ||
-                // If token supports IERC20, but neither
-                // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
-                (supportedIds[0] && !supportedIds[1] && !supportedIds[2])
-            ) {
+            if (!supportsIVotesInterface(token)) {
                 token = governanceWrappedERC20Base.clone();
                 // User already has a token. We need to wrap it in
                 // GovernanceWrappedERC20 in order to make the token
@@ -201,15 +190,7 @@ contract TokenVotingSetup is PluginSetup {
             revert WrongHelpersArrayLength({length: helperLength});
         }
 
-        // token can be either GovernanceERC20, GovernanceWrappedERC20, or IVotesUpgradeable, which
-        // does not follow the GovernanceERC20 and GovernanceWrappedERC20 standard.
-        address token = _payload.currentHelpers[0];
-
-        bool[] memory supportedIds = _getTokenInterfaceIds(token);
-
-        bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
-
-        permissions = new PermissionLib.MultiTargetPermission[](isGovernanceERC20 ? 4 : 3);
+        permissions = new PermissionLib.MultiTargetPermission[](3);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.MultiTargetPermission(
@@ -235,35 +216,11 @@ contract TokenVotingSetup is PluginSetup {
             PermissionLib.NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
-
-        // Revocation of permission is necessary only if the deployed token is GovernanceERC20,
-        // as GovernanceWrapped does not possess this permission. Only return the following
-        // if it's type of GovernanceERC20, otherwise revoking this permission wouldn't have any effect.
-        if (isGovernanceERC20) {
-            permissions[3] = PermissionLib.MultiTargetPermission(
-                PermissionLib.Operation.Revoke,
-                token,
-                _dao,
-                PermissionLib.NO_CONDITION,
-                GovernanceERC20(token).MINT_PERMISSION_ID()
-            );
-        }
     }
 
     /// @inheritdoc IPluginSetup
     function implementation() external view virtual override returns (address) {
         return address(tokenVotingBase);
-    }
-
-    /// @notice Retrieves the interface identifiers supported by the token contract.
-    /// @dev It is crucial to verify if the provided token address represents a valid contract before using the below.
-    /// @param token The token address
-    function _getTokenInterfaceIds(address token) private view returns (bool[] memory) {
-        bytes4[] memory interfaceIds = new bytes4[](3);
-        interfaceIds[0] = type(IERC20Upgradeable).interfaceId;
-        interfaceIds[1] = type(IVotesUpgradeable).interfaceId;
-        interfaceIds[2] = type(IGovernanceWrappedERC20).interfaceId;
-        return token.getSupportedInterfaces(interfaceIds);
     }
 
     /// @notice Unsatisfiably determines if the contract is an ERC20 token.
@@ -274,5 +231,26 @@ contract TokenVotingSetup is PluginSetup {
             abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
         );
         return success && data.length == 0x20;
+    }
+
+    /// @notice Unsatisfiably determines if the token is an IVotes interface.
+    /// @dev Many tokens don't use ERC165 even though they still support IVotes.
+    function supportsIVotesInterface(address token) private view returns (bool) {
+        (bool success1, bytes memory data1) = token.staticcall(
+            abi.encodeWithSelector(IVotesUpgradeable.getPastTotalSupply.selector, 0)
+        );
+        (bool success2, bytes memory data2) = token.staticcall(
+            abi.encodeWithSelector(IVotesUpgradeable.getVotes.selector, address(this))
+        );
+        (bool success3, bytes memory data3) = token.staticcall(
+            abi.encodeWithSelector(IVotesUpgradeable.getPastVotes.selector, address(this), 0)
+        );
+
+        return (success1 &&
+            data1.length == 0x20 &&
+            success2 &&
+            data2.length == 0x20 &&
+            success3 &&
+            data3.length == 0x20);
     }
 }
