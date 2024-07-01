@@ -18,5 +18,6 @@
       "**/matchstick-as",
       "**/matchstick-as/**"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
