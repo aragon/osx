@@ -1,0 +1,21 @@
+{
+  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
+  "network": "darwinia",
+  "dataSources": {
+    "DAORegistry": {
+      "name": "DAORegistry",
+      "address": "0xBCfc761c28029517Bc47AF499980410121EDA660",
+      "startBlock": 3032212
+    },
+    "PluginRepoRegistry": {
+      "name": "PluginRepoRegistry",
+      "address": "0x4f21931068FdD66aCAa7F4d964A005f6A757382B",
+      "startBlock": 3032217
+    },
+    "PluginSetupProcessors": {
+      "name": "PluginSetupProcessor",
+      "address": "0x8Cc101741204a973b4BB03ED05Ad6c93BFA15DD0",
+      "startBlock": 3032222
+    }
+  }
+}
