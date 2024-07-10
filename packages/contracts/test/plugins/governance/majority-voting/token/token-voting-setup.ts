@@ -13,6 +13,7 @@ import {
   IGovernanceWrappedERC20__factory,
   IVotesUpgradeable,
   IVotesUpgradeable__factory,
+  TokenVoting,
   TokenVotingSetup,
   TokenVotingSetup__factory,
   TokenVoting__factory,
@@ -57,11 +58,12 @@ const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe.only('TokenVotingSetup', function () {
+describe('TokenVotingSetup', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
   let governanceERC20Base: GovernanceERC20;
   let governanceWrappedERC20Base: GovernanceWrappedERC20;
+  let tokenVotingBase: TokenVoting;
   let implementationAddress: string;
   let targetDao: any;
   let erc20Token: ERC20;
@@ -105,8 +107,12 @@ describe.only('TokenVotingSetup', function () {
       emptySymbol
     );
 
+    const tokenVotingFactory = new TokenVoting__factory(signers[0]);
+    tokenVotingBase = await tokenVotingFactory.deploy();
+
     const TokenVotingSetup = new TokenVotingSetup__factory(signers[0]);
     tokenVotingSetup = await TokenVotingSetup.deploy(
+      tokenVotingBase.address,
       governanceERC20Base.address,
       governanceWrappedERC20Base.address
     );
@@ -133,6 +139,9 @@ describe.only('TokenVotingSetup', function () {
     );
     expect(await tokenVotingSetup.governanceWrappedERC20Base()).to.be.eq(
       governanceWrappedERC20Base.address
+    );
+    expect(await tokenVotingSetup.implementation()).to.be.eq(
+      tokenVotingBase.address
     );
   });
 
@@ -251,7 +260,8 @@ describe.only('TokenVotingSetup', function () {
         data
       );
 
-      expect(await tokenVotingSetup.supportsIVotesInterface(erc20Token.address)).to.be.false;
+      expect(await tokenVotingSetup.supportsIVotesInterface(erc20Token.address))
+        .to.be.false;
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -316,16 +326,35 @@ describe.only('TokenVotingSetup', function () {
         erc20Token.address
       );
 
-      expect(await tokenVotingSetup.supportsIVotesInterface(erc20Token.address)).to.be.false;
+      expect(await tokenVotingSetup.supportsIVotesInterface(erc20Token.address))
+        .to.be.false;
 
       // If a token address is not passed, it must have deployed GovernanceERC20.
-      const ivotesInterfaceId = getInterfaceID(IVotesUpgradeable__factory.createInterface());
-      const iERC20InterfaceId = getInterfaceID(IERC20Upgradeable__factory.createInterface());
-      const iGovernanceWrappedERC20 = getInterfaceID(IGovernanceWrappedERC20__factory.createInterface());
+      const ivotesInterfaceId = getInterfaceID(
+        IVotesUpgradeable__factory.createInterface()
+      );
+      const iERC20InterfaceId = getInterfaceID(
+        IERC20Upgradeable__factory.createInterface()
+      );
+      const iGovernanceWrappedERC20 = getInterfaceID(
+        IGovernanceWrappedERC20__factory.createInterface()
+      );
 
-      expect(await governanceWrappedERC20Contract.supportsInterface(ivotesInterfaceId)).to.be.true;
-      expect(await governanceWrappedERC20Contract.supportsInterface(iERC20InterfaceId)).to.be.true;
-      expect(await governanceWrappedERC20Contract.supportsInterface(iGovernanceWrappedERC20)).to.be.true;
+      expect(
+        await governanceWrappedERC20Contract.supportsInterface(
+          ivotesInterfaceId
+        )
+      ).to.be.true;
+      expect(
+        await governanceWrappedERC20Contract.supportsInterface(
+          iERC20InterfaceId
+        )
+      ).to.be.true;
+      expect(
+        await governanceWrappedERC20Contract.supportsInterface(
+          iGovernanceWrappedERC20
+        )
+      ).to.be.true;
     });
 
     it('correctly returns plugin, helpers and permissions, when a governance token address is supplied', async () => {
@@ -360,7 +389,9 @@ describe.only('TokenVotingSetup', function () {
         data
       );
 
-      expect(await tokenVotingSetup.supportsIVotesInterface(governanceERC20.address)).to.be.true;
+      expect(
+        await tokenVotingSetup.supportsIVotesInterface(governanceERC20.address)
+      ).to.be.true;
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -413,7 +444,11 @@ describe.only('TokenVotingSetup', function () {
         defaultData
       );
 
-      expect(await tokenVotingSetup.supportsIVotesInterface(defaultTokenSettings.addr)).to.be.false;
+      expect(
+        await tokenVotingSetup.supportsIVotesInterface(
+          defaultTokenSettings.addr
+        )
+      ).to.be.false;
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -473,7 +508,7 @@ describe.only('TokenVotingSetup', function () {
       });
 
       await tokenVotingSetup.prepareInstallation(daoAddress, data);
-      
+
       // check plugin
       const PluginFactory = new TokenVoting__factory(signers[0]);
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
@@ -507,11 +542,17 @@ describe.only('TokenVotingSetup', function () {
       expect(await governanceTokenContract.symbol()).to.be.equal(tokenSymbol);
 
       // If a token address is not passed, it must have deployed GovernanceERC20.
-      const ivotesInterfaceId = getInterfaceID(IVotesUpgradeable__factory.createInterface());
-      const iERC20InterfaceId = getInterfaceID(IERC20Upgradeable__factory.createInterface());
+      const ivotesInterfaceId = getInterfaceID(
+        IVotesUpgradeable__factory.createInterface()
+      );
+      const iERC20InterfaceId = getInterfaceID(
+        IERC20Upgradeable__factory.createInterface()
+      );
 
-      expect(await governanceTokenContract.supportsInterface(ivotesInterfaceId)).to.be.true;
-      expect(await governanceTokenContract.supportsInterface(iERC20InterfaceId)).to.be.true;
+      expect(await governanceTokenContract.supportsInterface(ivotesInterfaceId))
+        .to.be.true;
+      expect(await governanceTokenContract.supportsInterface(iERC20InterfaceId))
+        .to.be.true;
     });
   });
 

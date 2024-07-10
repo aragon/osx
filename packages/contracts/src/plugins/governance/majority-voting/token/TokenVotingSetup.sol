@@ -61,10 +61,11 @@ contract TokenVotingSetup is PluginSetup {
     /// @param _governanceERC20Base The base `GovernanceERC20` contract to create clones from.
     /// @param _governanceWrappedERC20Base The base `GovernanceWrappedERC20` contract to create clones from.
     constructor(
+        TokenVoting _tokenVotingBase,
         GovernanceERC20 _governanceERC20Base,
         GovernanceWrappedERC20 _governanceWrappedERC20Base
     ) {
-        tokenVotingBase = new TokenVoting();
+        tokenVotingBase = _tokenVotingBase;
         governanceERC20Base = address(_governanceERC20Base);
         governanceWrappedERC20Base = address(_governanceWrappedERC20Base);
     }
