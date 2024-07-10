@@ -235,7 +235,7 @@ contract TokenVotingSetup is PluginSetup {
 
     /// @notice Unsatisfiably determines if the token is an IVotes interface.
     /// @dev Many tokens don't use ERC165 even though they still support IVotes.
-    function supportsIVotesInterface(address token) private view returns (bool) {
+    function supportsIVotesInterface(address token) public view returns (bool) {
         (bool success1, bytes memory data1) = token.staticcall(
             abi.encodeWithSelector(IVotesUpgradeable.getPastTotalSupply.selector, 0)
         );

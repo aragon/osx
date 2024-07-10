@@ -57,7 +57,7 @@ const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe('TokenVotingSetup', function () {
+describe.only('TokenVotingSetup', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
   let governanceERC20Base: GovernanceERC20;
@@ -251,6 +251,8 @@ describe('TokenVotingSetup', function () {
         data
       );
 
+      expect(await tokenVotingSetup.supportsIVotesInterface(erc20Token.address)).to.be.false;
+
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
       expect(helpers).to.be.deep.equal([anticipatedWrappedTokenAddress]);
@@ -313,6 +315,9 @@ describe('TokenVotingSetup', function () {
       expect(await governanceWrappedERC20Contract.underlying()).to.be.equal(
         erc20Token.address
       );
+
+      expect(await tokenVotingSetup.supportsIVotesInterface(erc20Token.address)).to.be.false;
+
       // If a token address is not passed, it must have deployed GovernanceERC20.
       const ivotesInterfaceId = getInterfaceID(IVotesUpgradeable__factory.createInterface());
       const iERC20InterfaceId = getInterfaceID(IERC20Upgradeable__factory.createInterface());
@@ -354,6 +359,8 @@ describe('TokenVotingSetup', function () {
         targetDao.address,
         data
       );
+
+      expect(await tokenVotingSetup.supportsIVotesInterface(governanceERC20.address)).to.be.true;
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -405,6 +412,8 @@ describe('TokenVotingSetup', function () {
         targetDao.address,
         defaultData
       );
+
+      expect(await tokenVotingSetup.supportsIVotesInterface(defaultTokenSettings.addr)).to.be.false;
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
