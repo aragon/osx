@@ -3,7 +3,7 @@
     "url": "https://mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": false,
     "chainId": 1,
-    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
+    "deploy": ["./deploy/token/mainnet", "./deploy/verification"]
   },
   "goerli": {
     "url": "https://goerli.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
@@ -15,14 +15,19 @@
     "url": "https://sepolia.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": true,
     "chainId": 11155111,
-    "deploy": ["./deploy/new", "./deploy/verification"]
+    "deploy": ["./deploy/token/sepolia", "./deploy/verification"]
   },
   "polygon": {
     "url": "https://polygon-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": false,
     "chainId": 137,
     "feesUrl": "https://gasstation-mainnet.matic.network/v2",
-    "deploy": ["./deploy/update/to_v1.3.0", "./deploy/verification"]
+    "deploy": ["./deploy/token/polygon", "./deploy/verification"]
+  },
+  "holesky": { 
+    "chainId": 17000, 
+    "url": "https://ethereum-holesky.publicnode.com", 
+    "deploy": ["./deploy/token/holesky", "./deploy/verification"]
   },
   "mumbai": {
     "url": "https://polygon-mumbai.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
@@ -35,7 +40,7 @@
     "url": "https://base-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": false,
     "chainId": 8453,
-    "deploy": ["./deploy/new", "./deploy/verification"],
+    "deploy": ["./deploy/token/baseMainnet", "./deploy/verification"],
     "gasPrice": 1000
   },
   "baseGoerli": {
@@ -55,7 +60,7 @@
     "url": "https://arbitrum-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
     "isTestnet": false,
     "chainId": 42161,
-    "deploy": ["./deploy/new", "./deploy/verification"]
+    "deploy": ["./deploy/token/arbitrum", "./deploy/verification"]
   },
   "arbitrumGoerli": {
     "url": "https://arbitrum-goerli.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
