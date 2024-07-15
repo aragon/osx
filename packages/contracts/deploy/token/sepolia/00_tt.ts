@@ -25,6 +25,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
     log: true,
   });
+
+  const TokenVotingSetupDeployment = await deployments.get('TokenVotingSetup');
+  
+  hre.aragonToVerifyContracts.push({
+    contract:
+      'src/plugins/governance/majority-voting/token/TokenVotingSetup.sol:TokenVotingSetup',
+    ...TokenVotingSetupDeployment,
+  });
 };
 export default func;
 func.tags = ['New', 'TokenVotingSetup'];

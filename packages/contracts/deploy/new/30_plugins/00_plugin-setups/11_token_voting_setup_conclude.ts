@@ -29,16 +29,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await hre.deployments.get('GovernanceWrappedERC20')
   );
 
+  hre.aragonToVerifyContracts.push(
+    await hre.deployments.get('TokenVoting')
+  );
+
   hre.aragonToVerifyContracts.push({
     contract:
       'src/plugins/governance/majority-voting/token/TokenVotingSetup.sol:TokenVotingSetup',
     ...TokenVotingSetupDeployment,
-  });
-  hre.aragonToVerifyContracts.push({
-    contract:
-      'src/plugins/governance/majority-voting/token/TokenVoting.sol:TokenVoting',
-    address: await tokenVotingSetup.implementation(),
-    args: [],
   });
 };
 

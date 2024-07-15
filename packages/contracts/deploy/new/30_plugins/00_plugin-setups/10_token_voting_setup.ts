@@ -3,6 +3,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import governanceERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json';
 import governanceWrappedERC20Artifact from '../../../../artifacts/src/token/ERC20/governance/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
+import TokenVotingArtifact from '../../../../artifacts/src/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json';
+
 import tokenVotingSetupArtifact from '../../../../artifacts/src/plugins/governance/majority-voting/token/TokenVotingSetup.sol/TokenVotingSetup.json';
 import {MintSettings} from '../../../../test/token/erc20/governance-erc20';
 
@@ -38,11 +40,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   );
 
+  const tokenVoting = await deploy(
+    'TokenVoting',
+    {
+      contract: TokenVotingArtifact,
+      from: deployer.address,
+      args: [],
+      log: true,
+    }
+  );
+
   // Deploy the TokenVotingSetup and provide the bases in the constructor
   await deploy('TokenVotingSetup', {
     contract: tokenVotingSetupArtifact,
     from: deployer.address,
     args: [
+      tokenVoting.address,
       governanceERC20DeployResult.address,
       governanceWrappedERC20DeployResult.address,
     ],
