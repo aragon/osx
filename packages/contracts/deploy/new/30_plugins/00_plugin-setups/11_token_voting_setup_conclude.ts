@@ -29,9 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await hre.deployments.get('GovernanceWrappedERC20')
   );
 
-  hre.aragonToVerifyContracts.push(
-    await hre.deployments.get('TokenVoting')
-  );
+  hre.aragonToVerifyContracts.push(await hre.deployments.get('TokenVoting'));
 
   hre.aragonToVerifyContracts.push({
     contract:

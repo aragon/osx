@@ -40,15 +40,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   );
 
-  const tokenVoting = await deploy(
-    'TokenVoting',
-    {
-      contract: TokenVotingArtifact,
-      from: deployer.address,
-      args: [],
-      log: true,
-    }
-  );
+  const tokenVoting = await deploy('TokenVoting', {
+    contract: TokenVotingArtifact,
+    from: deployer.address,
+    args: [],
+    log: true,
+  });
 
   // Deploy the TokenVotingSetup and provide the bases in the constructor
   await deploy('TokenVotingSetup', {

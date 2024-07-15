@@ -9,8 +9,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await ethers.getSigners();
 
   const governanceERC20Base = '0xd8C229F3644576b200319cB3919B0E87716f47d8';
-  const governanceWrappedERC20Base = '0x7870837ffe670E62d4e601393D454f1b8649F7f9'
-  const tokenVotingBase = '0x908BB81ABeb86FfEa97f1b95b59c4AA8E71d84aA'
+  const governanceWrappedERC20Base =
+    '0x7870837ffe670E62d4e601393D454f1b8649F7f9';
+  const tokenVotingBase = '0x908BB81ABeb86FfEa97f1b95b59c4AA8E71d84aA';
 
   // build metadata: "0x697066733a2f2f"
 
@@ -18,11 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('TokenVotingSetup', {
     contract: tokenVotingSetupArtifact,
     from: deployer.address,
-    args: [
-        tokenVotingBase,
-        governanceERC20Base,
-        governanceWrappedERC20Base
-    ],
+    args: [tokenVotingBase, governanceERC20Base, governanceWrappedERC20Base],
     log: true,
   });
 };

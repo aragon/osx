@@ -24,9 +24,9 @@
     "feesUrl": "https://gasstation-mainnet.matic.network/v2",
     "deploy": ["./deploy/token/polygon", "./deploy/verification"]
   },
-  "holesky": { 
-    "chainId": 17000, 
-    "url": "https://ethereum-holesky.publicnode.com", 
+  "holesky": {
+    "chainId": 17000,
+    "url": "https://ethereum-holesky.publicnode.com",
     "deploy": ["./deploy/token/holesky", "./deploy/verification"]
   },
   "mumbai": {
