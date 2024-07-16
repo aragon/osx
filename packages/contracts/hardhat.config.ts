@@ -99,9 +99,9 @@ const config: HardhatUserConfig = {
       baseGoerli: process.env.BASESCAN_KEY || '',
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumGoerli: process.env.ARBISCAN_KEY || '',
-      koi: process.env.SUBSCAN_KEY || '',
-      crab: process.env.SUBSCAN_KEY || '',
-      darwinia: process.env.SUBSCAN_KEY || '',
+      koi: process.env.BLOCKSCOUT_KEY || '',
+      crab: process.env.BLOCKSCOUT_KEY || '',
+      darwinia: process.env.BLOCKSCOUT_KEY || '',
     },
     customChains: [
       {
@@ -124,8 +124,8 @@ const config: HardhatUserConfig = {
         network: 'darwinia',
         chainId: 46,
         urls: {
-          apiURL: 'https://darwinia.api.subscan.io/api/scan/evm/contract/verifysource',
-          browserURL: 'https://darwinia.subscan.io',
+          apiURL: 'https://explorer.darwinia.network/api',
+          browserURL: 'https://explorer.darwinia.network',
         },
       },
       {
