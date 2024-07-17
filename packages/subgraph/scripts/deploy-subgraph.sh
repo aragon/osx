@@ -31,8 +31,8 @@ fi
 
 # Prepare subgraph name
 FULLNAME=$SUBGRAPH_NAME-$NETWORK_NAME
-if [ "$STAGING" ]; then
-  FULLNAME=$FULLNAME-staging
+if [ "$DEV" ]; then
+  FULLNAME=$FULLNAME-dev
 fi
 echo ''
 echo '> Deploying subgraph: '$FULLNAME
