@@ -34,7 +34,8 @@ abstract contract PermissionManager is Initializable {
     enum Option {
         NONE,
         canFreeze,
-        canAddRemove
+        canAddRemove,
+        canBoth
     }
 
     struct Access {
@@ -45,10 +46,13 @@ abstract contract PermissionManager is Initializable {
 
     struct Role {
         bool isFrozen;
-        bool isFresh;
+        bool isStale;
         mapping(address => Access) members;
     }
 
+    // keccak256(where + permissionId)
+    // or
+    // keccak256(where + selector)
     mapping(bytes32 => Role) internal roles;
 
     /// @notice Thrown if a call is unauthorized.
@@ -129,6 +133,15 @@ abstract contract PermissionManager is Initializable {
         _initializePermissionManager({_initialOwner: _initialOwner});
     }
 
+    function setPermission(address[] calldata _members, address _where, bytes4 _selector) public {
+        bytes32 hash = keccak256(abi.encode(_where, _selector));
+        for (uint256 i = 0; i < _members.length; i++) {
+            roles[hash].members[i].since = block.timestamp;
+        }
+
+        roles[hash].isStale = true;
+    }
+
     modifier onlyPermissionManager(address _where, bytes32 _permissionId) {
         Role storage role = roles[roleHash(_where, _permissionId)];
 
@@ -139,7 +152,7 @@ abstract contract PermissionManager is Initializable {
 
         // role hasn't been assigned a PM and hasn't been frozen.
         // In this case, this operation can only be permitted by ROOT Holder.
-        if (role.isFresh) {
+        if (!role.isStale) {
             bool isRoot = isGranted(address(this), msg.sender, ROOT_PERMISSION_ID, "0x");
 
             if (!isRoot) {
@@ -162,34 +175,38 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
-    function updateManagers(
+    function addManagers(
         address _where,
         bytes32 _permissionId,
-        address[] members,
-        bool _update
+        address[] _members,
+        Option[] _options
     ) external {
-        Role storage role = roles[roleHash(_where, _permissionId)];
+        Role storage role = roles[roleHash1(_where, _permissionId)];
 
-        // Role has been frozen, so nobody can do anything on it.
-        if (role.isFrozen) {
-            revert NotPossible();
-        }
+        _addManagers(role, _members, _options);
+    }
 
-        // Just because caller is the ROOT or manager, he still can't update managers unless
-        // he was assigned a special right by the ROOT when he got chosen as a manager.
-        Access access = role.members[msg.sender];
+    function addManagers(
+        address _where,
+        bytes4 _selector,
+        address[] _members,
+        Option[] _options
+    ) external {
+        Role storage role = roles[roleHash2(_where, _selector)];
 
-        if (access.option == Option.NONE) {
-            revert NotPossible();
-        }
+        _addManagers(role, _members, _options);
+    }
 
-        if (access.option != canAddRemove) {
-            revert NotPossible();
-        }
+    function removeManagers(address _where, bytes32 _permissionId, address[] _members) external {
+        Role storage role = roles[roleHash1(_where, _permissionId)];
 
-        for (uint256 i = 0; i < members.length; i++) {
-            role.members[members[i]].isManager = _update;
-        }
+        _removeManagers(role, _members);
+    }
+
+    function removeManagers(address _where, bytes4 _selector, address[] _members) external {
+        Role storage role = roles[roleHash2(_where, _selector)];
+
+        _removeManagers(role, _members);
     }
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
@@ -547,6 +564,54 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
+    function _addManagers(Role storage _role, address[] _members, Option[] _options) internal {
+        // Role has been frozen, so nobody can do anything on it.
+        if (_role.isFrozen) {
+            revert NotPossible();
+        }
+
+        Access storage access = _role.members[msg.sender];
+
+        // If role is not stale(i.e it's fresh), only ROOT can add managers
+        if (!_role.isStale) {
+            bool isRoot = isGranted(address(this), msg.sender, ROOT_PERMISSION_ID, "0x");
+
+            if (!isRoot) {
+                revert NotPossible();
+            }
+        } else {
+            if (access.option != canAddRemove && access.option != canBoth) {
+                revert NotPossible();
+            }
+        }
+
+        for (uint256 i = 0; i < _members.length; i++) {
+            if (_options[i] == Option.canAddRemove || _options[i] == Option.canBoth) {
+                _role.isStale = true;
+            }
+            access.isManager = true;
+            access.option = _options[i];
+        }
+    }
+
+    function _removeManagers(Role storage _role, address[] calldata _members) internal {
+        // Role has been frozen, so nobody can do anything on it.
+        if (_role.isFrozen) {
+            revert NotPossible();
+        }
+
+        Access storage access = _role.members[msg.sender];
+
+        if (access.option != canAddRemove && access.option != canBoth) {
+            revert NotPossible();
+        }
+
+        for (uint256 i = 0; i < _members.length; i++) {
+            access.isManager = false;
+            access.option = Option.NONE;
+        }
+    }
+
     /// @notice This method is used in the public `revoke` method of the permission manager.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _who The address (EOA or contract) owning the permission.
@@ -602,11 +667,19 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionId The permission identifier.
     /// @return The role hash.
-    function roleHash(
+    function roleHash1(
         address _where,
         bytes32 _permissionId
     ) internal pure virtual returns (bytes32) {
-        return keccak256(abi.encodePacked("ROLE", _where, _permissionId));
+        return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
+    }
+
+    /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionId The permission identifier.
+    /// @return The role hash.
+    function roleHash2(address _where, bytes4 _selector) internal pure virtual returns (bytes32) {
+        return keccak256(abi.encodePacked("ROLE_SELECTOR", _where, _selector));
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
