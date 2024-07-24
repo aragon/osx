@@ -31,6 +31,26 @@ abstract contract PermissionManager is Initializable {
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
     mapping(bytes32 => address) internal permissionsHashed;
 
+    enum Option {
+        NONE,
+        canFreeze,
+        canAddRemove
+    }
+
+    struct Access {
+        Option option;
+        uint48 since;
+        bool isManager;
+    }
+
+    struct Role {
+        bool isFrozen;
+        bool isFresh;
+        mapping(address => Access) members;
+    }
+
+    mapping(bytes32 => Role) internal roles;
+
     /// @notice Thrown if a call is unauthorized.
     /// @param where The context in which the authorization reverted.
     /// @param who The address (EOA or contract) missing the permission.
@@ -109,6 +129,69 @@ abstract contract PermissionManager is Initializable {
         _initializePermissionManager({_initialOwner: _initialOwner});
     }
 
+    modifier onlyPermissionManager(address _where, bytes32 _permissionId) {
+        Role storage role = roles[roleHash(_where, _permissionId)];
+
+        // role has been frozen. So nobody can do anything anymore on this.
+        if (role.isFrozen) {
+            revert NotPossible();
+        }
+
+        // role hasn't been assigned a PM and hasn't been frozen.
+        // In this case, this operation can only be permitted by ROOT Holder.
+        if (role.isFresh) {
+            bool isRoot = isGranted(address(this), msg.sender, ROOT_PERMISSION_ID, "0x");
+
+            if (!isRoot) {
+                revert NotPossible();
+            }
+        }
+
+        // If the caller is not manager of this role, don't allow.
+        if (!role.members[msg.sender].isManager) {
+            revert NotPossible();
+        }
+    }
+
+    function freezeRole(address _where, bytes32 _permissionId) external {
+        Role storage role = roles[roleHash(_where, _permissionId)];
+
+        if (role.members[msg.sender].option.canFreeze) {
+            role.isFrozen = true;
+            // TODO: emit role frozen
+        }
+    }
+
+    function updateManagers(
+        address _where,
+        bytes32 _permissionId,
+        address[] members,
+        bool _update
+    ) external {
+        Role storage role = roles[roleHash(_where, _permissionId)];
+
+        // Role has been frozen, so nobody can do anything on it.
+        if (role.isFrozen) {
+            revert NotPossible();
+        }
+
+        // Just because caller is the ROOT or manager, he still can't update managers unless
+        // he was assigned a special right by the ROOT when he got chosen as a manager.
+        Access access = role.members[msg.sender];
+
+        if (access.option == Option.NONE) {
+            revert NotPossible();
+        }
+
+        if (access.option != canAddRemove) {
+            revert NotPossible();
+        }
+
+        for (uint256 i = 0; i < members.length; i++) {
+            role.members[members[i]].isManager = _update;
+        }
+    }
+
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the target contract for which `_who` receives permission.
@@ -119,8 +202,26 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual auth(ROOT_PERMISSION_ID) {
+    ) external virtual onlyPermissionManager(_where, _permissionId) {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
+    }
+
+    function grantWithDelay(
+        address _where,
+        address _who,
+        bytes32 _permissionId,
+        uint48 _delay
+    ) external virtual onlyPermissionManager(_where, _permissionId) {
+        _grant({_where: _where, _who: _who, _permissionId: _permissionId});
+
+        Role storage role = roles[roleHash(_where, _permissionId)];
+
+        // new member
+        if (role.members[_who].since == 0) {
+            role.members[_who].since = block.timestamp + _delay;
+        } else {
+            role.members[_who].since += _delay;
+        }
     }
 
     /// @notice Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier if the referenced condition permits it.
@@ -135,7 +236,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external virtual auth(ROOT_PERMISSION_ID) {
+    ) external virtual onlyPermissionManager(_where, _permissionId) {
         _grantWithCondition({
             _where: _where,
             _who: _who,
@@ -154,7 +255,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual auth(ROOT_PERMISSION_ID) {
+    ) external virtual onlyPermissionManager(_where, _permissionId) {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -221,6 +322,8 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         bytes memory _data
     ) public view virtual returns (bool) {
+        bytes32 hash = roleHash(_where, _permissionId);
+
         // Specific caller (`_who`) and target (`_where`) permission check
         {
             // This permission may have been granted directly via the `grant` function or with a condition via the `grantWithCondition` function.
@@ -229,7 +332,15 @@ abstract contract PermissionManager is Initializable {
             ];
 
             // If the permission was granted directly, return `true`.
-            if (specificCallerTargetPermission == ALLOW_FLAG) return true;
+            if (specificCallerTargetPermission == ALLOW_FLAG) {
+                uint48 since = roles[hash].members[_who].since;
+
+                if (since == 0 || since <= block.timestamp) {
+                    return true;
+                }
+
+                return false;
+            }
 
             // If the permission was granted with a condition, check the condition and return the result.
             if (specificCallerTargetPermission != UNSET_FLAG) {
@@ -450,6 +561,14 @@ abstract contract PermissionManager is Initializable {
         if (permissionsHashed[permHash] != UNSET_FLAG) {
             permissionsHashed[permHash] = UNSET_FLAG;
 
+            Role storage role = roles[roleHash(_where, _permissionId)];
+
+            if (role.members[account].since == 0) {
+                return false;
+            }
+
+            delete role.members[account];
+
             emit Revoked({permissionId: _permissionId, here: msg.sender, where: _where, who: _who});
         }
     }
@@ -477,6 +596,17 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId
     ) internal pure virtual returns (bytes32) {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _permissionId));
+    }
+
+    /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionId The permission identifier.
+    /// @return The role hash.
+    function roleHash(
+        address _where,
+        bytes32 _permissionId
+    ) internal pure virtual returns (bytes32) {
+        return keccak256(abi.encodePacked("ROLE", _where, _permissionId));
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.

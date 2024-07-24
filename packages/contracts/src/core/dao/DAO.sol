@@ -268,6 +268,21 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
+        // validate
+
+        for (uint256 i = 0; i < _actions.length; i++) {
+            bytes32 roleKey = defaultRoles[msg.sender];
+            if (roleKey == adminRoleKey) {
+                _actions[i].to.call(_actions[i].data);
+            } else {
+                if (roles[roleKey][_actions[i].to][bytes4(_actions[i].data)]) {
+                    _actions[i].to.call(_actions[i].data);
+                } else {
+                    revert NotPossible();
+                }
+            }
+        }
+
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
 
