@@ -268,20 +268,23 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
-        // validate
-        for (uint256 i = 0; i < _actions.length; i++) {
-            bytes32 hash = keccak256(abi.encode(_actions[i].to, bytes4(_actions[i].data)));
-            Role storage role = roles[hash];
+        // validate the permissions.
+        for (uint256 i = 0; i < _actions.length; ) {
+            bytes32 id = keccak256(bytes4(actions[i].data));
+            address target = actions[i].to;
 
-            if (!role.isStale) {
-                // allow as permission hasn't been set yet.
-            } else {
-                // check that sender has permission
-                if (role.members[msg.sender].since == 0) {
+            Role storage role = roles[roleHash(target, id)];
+            
+            if(role.isRegistered) {
+                // if permission is registered, make sure that caller is allowed.
+                bool allowed = isGranted(target, msg.sender, id, msg.data);
+                if(!allowed) {
                     revert NotPossible();
                 }
             }
+            
         }
+
 
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
@@ -458,3 +461,47 @@ contract DAO is
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[46] private __gap;
 }
+
+
+
+
+//
+
+// DECISION 1:
+// Assume pluginA and pluginB both have EXECUTE_PERMISSION without a condition. So they both can call dao with whatever actions they wish so.
+// Now, we want only pluginA(not pluginB) to be able to call pluginC:
+// 1. grant pluginB EXECUTE_PERMISSION with this condition.
+// 2. register the pluginC permission.
+// 3. pluginA still has EXECUTE_PERMISSION with no condition, so it can still call pluginC, but pluginB's call comes into the condition and
+// doesn't allow it.
+
+// The actual problem  is that someone has to be manager of EXECUTE_PERMISSION, which means that that person can just revoke pluginB's condition
+// and directly grant it without condition - bypassing the permission selector approach. Note that each target+selector permission will have
+// its manager, so only that person must be able to bypass. If someone else has EXECUTE_PERMISSION, he shouldn't be able to bypass. Because of this,
+// condition approach can NOT work.
+
+// DECISION 2: We have to decide whether we want to also support granular permissions or not. In case we want to, we can NOT add all this code
+// inside PM. The reason being is granular permissions are huge code and we shouldn't make PM a gigantic thing. In such case, we should create a new contract
+// where it stores granular permissions and PM just redirects the request check to it. 
+
+// DECISION 3: In case we don't plan on granular permissions in 1.x versions, then the next decision is what the identifier has to be for bytes4 + address.
+// In the old permissions, we got address where + bytes32 permissionId where in the new system, we also need address where + bytes4 selector. Since
+// the types are different, we would need to have separate functions.
+
+// DECISION 4: should we have a canFreeze separately ? there're 2 options:
+//  1. canFreeze doesn't exist and in order to actually freeze, someone who has canRemove permission must remove all managers including himself
+//  2. no need to remove, just call freeze and that's it.
+
+
+// SPEC
+old type of permissions(as it's currently implemented) in PM continue to work the same way. The `grant/revoke` functions for bytes32 permissionId's 
+are useful for "receiver" contracts.
+In order to allow Separation of power, we come up with new type of permissions - address where + bytes4 selector. 
+
+
+// SPEC
+
+// 1. In the beginning, ROOT is who governs all permissions.
+// 2. ROOT can add managers on a specific permission with also canGrantRevoke capability only. In such cases, ROOT still maintains the manager capability
+// for that permission - i.e it can still add others managers and continue governing this permission. As long as ROOT - for the first time - adds
+// manager with canAddRemove capability, ROOT loses the manager capability right away.
