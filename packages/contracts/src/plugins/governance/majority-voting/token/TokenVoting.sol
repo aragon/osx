@@ -115,12 +115,10 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
             }
         }
 
-        uint48 snapshotBlock;
-        unchecked {
-            snapshotBlock = clock() - 1; // The snapshot block must be mined already to protect the transaction against backrunning transactions causing census changes.
-        }
+        uint256 snapshotBlock = block.number - 1;
+        uint48 snapshotTimepoint = clock() - 1; // The snapshot timepoint must be mined already to protect the transaction against backrunning transactions causing census changes.
 
-        uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
+        uint256 totalVotingPower_ = totalVotingPower(snapshopTimepoint);
 
         if (totalVotingPower_ == 0) {
             revert NoVotingPower();
@@ -142,7 +140,8 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
 
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
-        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
+        proposal_.pragmeters.snpashotTimepoint = snapshotTimepoint;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minVotingPower = _applyRatioCeiled(
@@ -185,7 +184,7 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock);
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotTimepoint);
         VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
@@ -239,7 +238,7 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
         }
 
         // The voter has no voting power.
-        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotBlock) == 0) {
+        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotTimepoint) == 0) {
             return false;
         }
 
@@ -252,6 +251,23 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
         }
 
         return true;
+    }
+
+    /// @inheritdoc MajorityVotingBase
+    function isSupportThresholdReachedEarly(
+        uint256 _proposalId
+    ) public view virtual returns (bool) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        uint256 noVotesWorstCase = totalVotingPower(proposal_.parameters.snpashotTimepoint) -
+            proposal_.tally.yes -
+            proposal_.tally.abstain;
+
+        // The code below implements the formula of the early execution support criterion explained in the top of this file.
+        // `(1 - supportThreshold) * N_yes > supportThreshold *  N_no,worst-case`
+        return
+            (RATIO_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
+            proposal_.parameters.supportThreshold * noVotesWorstCase;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
