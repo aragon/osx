@@ -115,10 +115,9 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
             }
         }
 
-        uint256 snapshotBlock = block.number - 1;
         uint48 snapshotTimepoint = clock() - 1; // The snapshot timepoint must be mined already to protect the transaction against backrunning transactions causing census changes.
 
-        uint256 totalVotingPower_ = totalVotingPower(snapshopTimepoint);
+        uint256 totalVotingPower_ = totalVotingPower(snapshotTimepoint);
 
         if (totalVotingPower_ == 0) {
             revert NoVotingPower();
@@ -140,8 +139,8 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
 
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
-        proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
-        proposal_.pragmeters.snpashotTimepoint = snapshotTimepoint;
+        proposal_.parameters.snapshotBlock = (block.number - 1).toUint64();
+        proposal_.parameters.snapshotTimepoint = snapshotTimepoint;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minVotingPower = _applyRatioCeiled(
@@ -256,10 +255,10 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function isSupportThresholdReachedEarly(
         uint256 _proposalId
-    ) public view virtual returns (bool) {
+    ) public view virtual override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        uint256 noVotesWorstCase = totalVotingPower(proposal_.parameters.snpashotTimepoint) -
+        uint256 noVotesWorstCase = totalVotingPower(proposal_.parameters.snapshotTimepoint) -
             proposal_.tally.yes -
             proposal_.tally.abstain;
 

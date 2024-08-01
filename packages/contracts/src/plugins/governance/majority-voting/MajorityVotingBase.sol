@@ -148,7 +148,7 @@ abstract contract MajorityVotingBase is
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
-    /// @param snpashotTimepoint The timepoint to the proposal creation.
+    /// @param snapshotTimepoint The timepoint to the proposal creation.
     /// @param minVotingPower The minimum voting power needed.
     struct ProposalParameters {
         VotingMode votingMode;
@@ -156,7 +156,7 @@ abstract contract MajorityVotingBase is
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
-        uint48 snapshopTimepoint;
+        uint48 snapshotTimepoint;
         uint256 minVotingPower;
     }
 
