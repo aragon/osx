@@ -21,6 +21,10 @@ contract SelectorRoleModifierCondition {
     // 3. pluginA still has EXECUTE_PERMISSION with no condition, so it can still call pluginC, but pluginB's call comes into the condition and
     // doesn't allow it.
 
+    // The actual problem  is that someone has to be manager of EXECUTE_PERMISSION, which means that that person can just revoke pluginB's condition
+    // and directly grant it without condition - bypassing the permission selector approach. Note that each target+selector permission will have
+    // its manager, so only that person must be able to bypass. If someone else has EXECUTE_PERMISSION, he shouldn't be able to bypass.
+
     /// @notice Checks if a call is permitted.
     /// @param _where The address of the target contract.
     /// @param _who The address (EOA or contract) for which the permissions are checked.

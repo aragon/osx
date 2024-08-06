@@ -199,6 +199,9 @@ contract DAO is
                 _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
             });
         }
+
+
+        __PermissionManager_initV2();
     }
 
     /// @inheritdoc PermissionManager
@@ -246,6 +249,8 @@ contract DAO is
         _setMetadata(_metadata);
     }
 
+
+
     /// @inheritdoc IDAO
     function execute(
         bytes32 _callId,
@@ -255,7 +260,7 @@ contract DAO is
         external
         override
         nonReentrant
-        auth(EXECUTE_PERMISSION_ID)
+        auth(EXECUTE_PERMISSION)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
         // Check that the action array length is within bounds.
@@ -268,30 +273,112 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
-        // validate the permissions.
+        // Problem 1: we need dao not to have ROOT on itself, otherwise if dao has ROOT on itself, then whoever has EXECUTE permission is automatically root.
+        // Solution 1: make createPermission function on address(this) as initialized right away at the time of PM upgrade. Then, This way, it will go 
+        // in the first `if` and it will be the caller that must have ROOT, so createPermission action calls can still be done at the plugin installation.
+        // Note that this way requires that caller must have ROOT, but just because I want to install plugin, that shouldn't mean that I also should have ROOT, because
+        // if i have ROOT, it's dangerous as I can createPermission at any time. So plugin installation must occur without needing to have ROOT.
+
+
+        // Problem 2: it becomes less comfortable to do grant/revoke stuff in the same tx actions. Because caller on grant/revoke will be the dao
+        // and for sure, dao won't be the manager for those grant/revoke at the beginning. So if you want to actually grant a permission that is completely new,
+        // we need to do the following actions:
+        //  i.  createPermission(where, selectorHashOrPermissionId, address(dao)) // i.e you set manager to be the dao
+        //  ii. grant(where, selectorHashOrPermissionId)
+        
+        // In this flow, dao stays the manager after actions are done. Note that if you remove dao as a manager, nobody will be manager so no one will be able 
+        // to add a manager anymore and hence no more grant will be ever possible.
+
+        // In both of these problems, dao has ROOT on itself, otherwise if dao doesn't have ROOT, we have even more problems than above 2.
+
+        // assuming dao doesn't have ROOT on itself.
+        
+        
+        // validate the permissions.     
         for (uint256 i = 0; i < _actions.length; ) {
             bytes32 id = keccak256(bytes4(actions[i].data));
             address target = actions[i].to;
 
-            Role storage role = roles[roleHash(target, id)];
+            Permission storage permission = permissions[roleHash(target, id)];
             
-            if(role.isRegistered) {
-                // if permission is registered, make sure that caller is allowed.
-                bool allowed = isGranted(target, msg.sender, id, msg.data);
-                if(!allowed) {
-                    revert NotPossible();
-                }
+            bool isAllowed;
+            if(permission.isInitialized) {
+                isAllowed = isGranted(target, msg.sender, id, msg.data);
+            } else {
+                isAllowed = isGranted(address(this), msg.sender, EXECUTE_PERMISSION_ID, msg.data);
             }
-            
+
+            if(!isAllowed) {
+                revert NotPossible();
+            }
         }
 
+
+        // In the current way(old way), when creating dao, we were granting UPGRADE_DAO_PERMISSION to the dao itself, meaning that whoever had EXECUTE_PERMISSION
+        // would be able to upgrade the dao as action would be to call dao itself with `upgradeToAndCall`.
+
+        // Since we're changing the approach such that dao shouldn't have ROOT on itself, that means on the dao creation, creator must pass an address that 
+        // will be the initial ROOT and who would have UPGRADE permission. So it's clear that in the new approach, someone other than dao would have UPGRADE.
+        // This means that whoever that entity is, can anyways upgrade the dao contract and modify its code as necessary. Ok, let's continue.
+
+        // I was thinking where to put this validation logic(permission.isInitialized, e.t.c) which we have in `execute`. At one glance, I thought
+        // we could put it in another contract and from dao.execute, we would call it and this would allow people to modify this validation logic
+        // by replacing the contract without even upgrading the dao contract, but this presented a risk that whoever had this permission to update
+        // this contract address, could bypass the new permission system as updating this address would cause `isinitialized` validation to not exist anymore
+        // and all calls going through. While I really couldn't come up who should have this permission, it got me also thinking: don't we have the same
+        // dangerous risk from the entity that has UPGRADE_PERMISSION ? because they can anyways upgrade and also remove validation code completely. 
+        // I think that we can put this validation logic in another contract and allow updating address of this contract on dao by the entity that has the same
+        // permission as UPGRADE_DAO_PERMISSION. Ofc, the naming of this permission would be wrong, but maybe we come up with a different permission name
+        // but strict rule must be that whoever has UPGRADE_DAO_PERMISSION, that entity must be the only one that also has UPDATE_VALIDATION_CONTRACT permission.
+
+        // Ok, I think we now know that adding this logic in another contract is definitely not that dangerous as we thought.  can we go further and add
+        // it in condition as having `function execute(...) auth(EXECUTE_PERMISSION_ID)` ? It's much harder. The reason is that we got the same danger as above.
+        // If we say to solve it the same way as we solved the above situation, that means that EXECUTE_PERMISSION_ID's manager must be an entity that
+        // is super legit and also has UPGRADE_PERMISSION_ID. While that's not a problem, what actually is the problem is by default, nobody can call `execute`
+        // which is the correct behaviour. But who would start giving `EXECUTE_PERMISSION_ID` condition to people ? we already said that EXECUTE_PERMISSION_ID manager must
+        // be owned by someone who is super legit - as legit as someone who has UPGRADE_PERMISSION_ID. In such case, this manager would be the only person making sure
+        // execute can be called.
+
+        // To reiterate simply, What's the difference between going with condition versus going with separate contract without condition ?
+        // With separate contract, `UPDATE_VALIDATION_CONTRACT` and `EXECUTE_PERMISSION_ID` can be given to different people. Only the owner of UPDATE-VALIDATION_CONTRACT
+        // can bypass the validation logic, but if this owner behaves well,  EXECUTE_PERMISSION_ID owner can continue granting/revoking this execute permission separately.
+        // In condition system, `EXECUTE_PERMISSION_ID` manager is the only one that can grant/revoke this permission + that manager must be legit. 
+        // So basically, in separate contract, less things are dangerous because in conditional way, there's higher chance of single point of failure.
+
+
+
+
+        
+        // In order to install a plugin:
+        // 1. entity needs to be the manager on APPLY_TARGET_PERMISSION_ID and in order for entity to become the manager of this, ROOT has to first call
+        // createPermission with this permissionId - i.e ROOT decides who is able to install plugins.
+        // 2.  
+
+        // Problem: Assume entityA wants to install the plugin. So we said that entityA needs to be a manager for APPLY_TARGET_PERMISSION_ID, the reason
+        // being is that we need to grant this permission to PSP and our flow is that only managers of this permission can grant it. If so, in this 
+        // implementation above, all we check is if entity is granted the permission which is not enough as we also should be checking if caller is manager.
+        // One solution is to also check above if caller is manager, but that check is only needed for grant/revoke/freeze in which case we would need
+        // to write if/else statements.
+        // Sarkawt said that delegateCalls have a problem such that in case it's needed, it would never be possible such that grant/revoke is called by the 
+        // dao and we said that this could be needed for some cases. While I agree, don't we have the same problem in this option 1 approach ? we said that
+        // if manager of grant/revoke selectors become the dao, this means dao is bricked as 303 line would not allow the call as only dao is the manager.
+        // 
 
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
 
-            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
-                _actions[i].data
-            );
+            bool success, bytes memory result;
+
+            if(_actions[i].to == address(this)) {
+                (success, result) = _actions[i].to.delegateCall(
+                    _actions[i].data
+                );
+            } else {
+                (success, result) = _actions[i].to.call{value: _actions[i].value}(
+                    _actions[i].data
+                );
+            }
+        
             gasAfter = gasleft();
 
             // Check if failure is allowed

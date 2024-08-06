@@ -5,45 +5,21 @@ pragma solidity ^0.8.8;
 contract ModifierRoles is Ownable {
     DAO public dao;
 
-    enum Option {
-        NONE,
-        canFreeze,
-        canAddRemove,
-        canBoth
-    }
-
-    struct Access {
-        Option option;
-        uint48 since;
-        bool isManager;
-    }
-
-    struct Role {
-        bool isFrozen;
-        bool isRegistered;
-        mapping(address => Access) members;
-    }
-
     constructor(address _dao) {
         dao = DAO(_dao);
     }
 
-    function isGranted(
-        address _where,
-        address _who,
-        bytes32 _permissionId,
-        bytes calldata _data
-    ) external view returns (bool isPermitted) {
-        (, IDAO.Action[] memory actions, ) = abi.decode(data, (bytes32, IDAO.Action[], uint256));
+    function execute(bytes32 callId, Action[] calldata actions, uint256 allowFailureMap) {
+        for (uint256 i = 0; i < _actions.length; ) {
+            bytes32 id = keccak256(bytes4(actions[i].data));
+            address target = actions[i].to;
 
-        address[] memory targets = new address[](actions.length);
-        bytes4[] memory selectors = new bytes4[](actions.length);
-
-        for (uint i = 0; i < actions.length; i++) {
-            targets[i] = actions[i].to;
-            selectors = bytes4(actions[i].data[0:4]);
+            bool kk = dao.isFunctionCallsAllowed(actions);
+            if (!kk) {
+                revert;
+            }
         }
 
-        return dao.isFunctionCallsAllowed(_who, targets, selectors);
+        dao.delegatecall(execute, [callId, actions, allowFailureMap]);
     }
 }

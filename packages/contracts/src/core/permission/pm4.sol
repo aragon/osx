@@ -147,18 +147,6 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
-    function setRoleAdmin(uint64 roleId, uint64 admin) public {
-        _roles[roleId].admin = admin;
-    }
-
-    function setTargetFunctionRole(
-        address target,
-        bytes4 calldata selector,
-        uint64 roleId
-    ) public virtual onlyAuthorized {
-        _targets[target].allowedRoles[selector] = roleId;
-    }
-
     
     function createPermission(
         address _where,

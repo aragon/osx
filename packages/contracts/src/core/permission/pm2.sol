@@ -279,8 +279,6 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         uint48 _delay
     ) external virtual onlyPermissionManager(_where, _permissionId) {
-        _grant({_where: _where, _who: _who, _permissionId: _permissionId});
-
         Role storage role = roles[roleHash(_where, _permissionId)];
 
         // new member
