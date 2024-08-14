@@ -98,7 +98,7 @@ contract TokenVoting is IMembership, IERC6372Upgradeable, MajorityVotingBase {
         uint64 _endDate,
         VoteOption _voteOption,
         bool _tryEarlyExecution
-    ) external override returns (uint256 proposalId) {
+    ) external virtual override returns (uint256 proposalId) {
         // Check that either `_msgSender` owns enough tokens or has enough voting power from being a delegatee.
         {
             uint256 minProposerVotingPower_ = minProposerVotingPower();
