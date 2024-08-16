@@ -36,9 +36,9 @@ abstract contract PermissionManager is Initializable {
 
     enum Option {
         NONE,
-        canFreeze,
-        canAddRemove,
-        canGrantRevoke
+        grantOwner,
+        reokeOwner,
+        freezeOwner
     }
 
     struct Permission {
@@ -46,7 +46,13 @@ abstract contract PermissionManager is Initializable {
         bool created;
         bool isInitialized;
         mapping(address => mapping(bytes32 => bool)) approvals; // managers can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => Option) managers;
+        mapping(address => Manager) managers;
+    }
+
+    struct Manager {
+        uint64 delay;
+        uint64 timeframe;
+        uint8 permission;
     }
 
     mapping(bytes32 => Permission) internal permissions;
@@ -144,8 +150,8 @@ abstract contract PermissionManager is Initializable {
 
         bool isRoot = _isRoot(msg.sender);
 
-        if (permission.created) {
-            if (!hasPermission(permission.managers[msg.sender].option, _option)) {
+        if (permission.created && permission.managers[msg.sender].permission != uint8(0)) {
+            if (!hasPermission(permission.managers[msg.sender], _option)) {
                 revert NotPossible();
             }
         } else if (!isRoot) {
@@ -191,7 +197,7 @@ abstract contract PermissionManager is Initializable {
         if (permission.isFrozen) {
             revert NotPossible();
         }
-
+// TODO: Check delegation case and apply changes here
         if (!hasPermission(permission.managers[msg.sender].option, Option.canAddRemove)) {
             revert NotPossible();
         }
@@ -203,6 +209,8 @@ abstract contract PermissionManager is Initializable {
         address _where,
         bytes32 _permissionIdOrSelector,
         address _manager,
+        uint64 _delay,
+        uint64 _timeframe,
         Option[] calldata _options
     ) external {
         if (_manager == address(0)) {
@@ -224,17 +232,33 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        if (!hasPermission(permission.managers[msg.sender].option, Option.canAddRemove)) {
-            revert NotPossible();
+        for (uint256 i = 0; i < options.length; i++) {
+            Option option = _options[i];
+
+            if (option == Option.revokeOwner && !hasPermission(permission.managers[msg.sender], Option.revokeOwner)) {
+                revert NotPossible();
+            }
+
+            if (option == Option.grantOwner && !hasPermission(permission.managers[msg.sender], Option.grantOwner)) {
+                revert NotPossible();
+            }
+
+            if (option == Option.freezeOwner && !hasPermission(permission.managers[msg.sender], Option.freezeOwner)) {
+                revert NotPossible();
+            }
         }
 
-        permission.managers[_manager].option = combinePermissions(_options[i]);
+        permission.managers[_manager] = Manager({
+            permission: combinePermissions(_options),
+            delay: block.timestamp + _delay,
+            timeframe: _timeframe + block.timestamp + delay
+        })
     }
 
     function removeManager(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _manager
+        Option[] _options
     ) external {
         if (_manager == address(0)) {
             revert NotPossible();
@@ -246,17 +270,14 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        if (!hasPermission(_permission.managers[msg.sender].option, option.canAddRemove)) {
-            revert NotPossible();
-        }
-
-        _permission.managers[_manager].option = Option.NONE;
+        _permission.managers[msg.sender].permission = removePermission(_permission.managers[msg.sender].permission, _options);
     }
 
     function initializePermission(address _where, bytes32 _permissionSelector) public {
         Permission storage permission = permissions[roleHash(_where, _selector)];
 
-        if (!hasPermission(_permission.managers[msg.sender].option, option.canAddRemove)) {
+// TODO: Extend here the owner logic as well
+        if (!hasPermission(_permission.managers[msg.sender], option.canAddRemove)) {
             revert NotPossible();
         }
 
@@ -364,7 +385,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.approvals[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.managers[msg.sender].option, Option.canGrantRevoke)
+                    !hasPermission(permission.managers[msg.sender], Option.canGrantRevoke)
                 ) {
                     revert NotPossible();
                 }
@@ -404,7 +425,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.delegatees[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.managers[msg.sender].option, Option.canGrantRevoke)
+                    !hasPermission(permission.managers[msg.sender], Option.canGrantRevoke)
                 ) {
                     revert NotPossible();
                 }
@@ -782,8 +803,21 @@ abstract contract PermissionManager is Initializable {
         return combined;
     }
 
-    function hasPermission(uint8 userPermissions, Option permission) public pure returns (bool) {
-        return (userPermissions & uint8(1 << uint8(permission))) != 0;
+    function removePermissions(uint8 permission, Option[] memory _options) public pure returns (uint8) {
+        uint8 mask = 0;
+        for (uint256 i = 0; i < _options.length; i++) {
+            mask = uint8(1 << uint8(_options[i]));
+        }
+
+        return permission ^ mask;
+    }
+
+    function hasPermission(Manager manager, Option permission) public pure returns (bool) {
+        if((manager.permission & uint8(1 << uint8(permission))) != 0 && block.timestamp >= manager.delay && block.timestamp < manager.timeframe) {
+            return true;
+        }
+
+        return false;
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
