@@ -302,10 +302,10 @@ abstract contract PermissionManager is Initializable {
     }
 
     function _checkTimeframe(Manager _manager) private returns (bool) {
-        return manager.timeframe != uint256(0) && manager.delay != uint256(0) && 
+        return _manager.timeframe != uint256(0) && _manager.delay != uint256(0) && 
         (
-            block.timestamp < (manager.timestamp + manager.delay + manager.timeframe) ||
-            block.timestamp > (manager.delay + manager.timestamp)
+            block.timestamp < (_manager.timestamp + _manager.delay + _manager.timeframe) ||
+            block.timestamp > (_manager.delay + _manager.timestamp)
         );
     }
 
