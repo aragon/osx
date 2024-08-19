@@ -236,8 +236,8 @@ abstract contract PermissionManager is Initializable {
         if (_isRoot(msg.sender) && permission.counter === uint256(0)) {
             permission.managers[_manager] = Manager({
                 permission: combinePermissions(_options),
-                start: block.timestamp + _delay,
-                end: _timeframe + block.timestamp + delay
+                delay: _delay,
+                timeframe: _timeframe
                 timestamp: block.timestamp
             });
             permission.counter++;
