@@ -37,7 +37,7 @@ abstract contract PermissionManager is Initializable {
     enum Option {
         NONE,
         grantOwner,
-        reokeOwner,
+        revokeOwner,
         freezeOwner
     }
 
@@ -45,6 +45,7 @@ abstract contract PermissionManager is Initializable {
         bool isFrozen;
         bool created;
         bool isInitialized;
+        uint256 counter;
         mapping(address => mapping(bytes32 => bool)) approvals; // managers can delegate the permission so delegatees can only grant it one time only.
         mapping(address => Manager) managers;
     }
@@ -232,27 +233,35 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        for (uint256 i = 0; i < options.length; i++) {
-            Option option = _options[i];
+        if (_isRoot(msg.sender) && permission.counter === uint256(0)) {
+            permission.managers[_manager] = Manager({
+                permission: combinePermissions(_options),
+                start: block.timestamp + _delay,
+                end: _timeframe + block.timestamp + delay
+                timestamp: block.timestamp
+            });
+            permission.counter++;
+        } else {
+            for (uint256 i = 0; i < options.length; i++) {
+                Option option = _options[i];
 
-            if (option == Option.revokeOwner && !hasPermission(permission.managers[msg.sender], Option.revokeOwner)) {
+                if (!hasPermission(permission.managers[msg.sender], option)) {
+                    revert NotPossible();
+                }
+            }
+
+            if (!_checkTimeframe(permission.managers[msg.sender])) {
                 revert NotPossible();
             }
 
-            if (option == Option.grantOwner && !hasPermission(permission.managers[msg.sender], Option.grantOwner)) {
-                revert NotPossible();
-            }
-
-            if (option == Option.freezeOwner && !hasPermission(permission.managers[msg.sender], Option.freezeOwner)) {
-                revert NotPossible();
-            }
+            permission.managers[_manager] = Manager({
+                permission: combinePermissions(_options),
+                delay: _delay,
+                timeframe: _timeframe
+                timestamp: block.timestamp
+            });
+            permission.counter++;
         }
-
-        permission.managers[_manager] = Manager({
-            permission: combinePermissions(_options),
-            delay: block.timestamp + _delay,
-            timeframe: _timeframe + block.timestamp + delay
-        })
     }
 
     function removeManager(
@@ -265,12 +274,39 @@ abstract contract PermissionManager is Initializable {
         }
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Manager storage manager = permission.managers[msg.sender]:
 
         if (_permission.isFrozen) {
             revert NotPossible();
         }
 
-        _permission.managers[msg.sender].permission = removePermission(_permission.managers[msg.sender].permission, _options);
+        if (_isRoot(msg.sender) && permission.counter === uint256(0)) {
+            manager.permission = removePermission(manager.permission, _options);
+            permission.counter--;
+        } else {
+            for (uint256 i = 0; i < options.length; i++) {
+                Option option = _options[i];
+
+                if (!hasPermission(manager, option)) {
+                    revert NotPossible();
+                }
+            }
+
+            if (!_checkTimeframe(manager)) {
+                revert NotPossible();
+            }
+
+            manager.permission = removePermission(manager, _options);
+            permission.counter--;
+        }
+    }
+
+    function _checkTimeframe(Manager _manager) private returns (bool) {
+        return manager.timeframe != uint256(0) && manager.delay != uint256(0) && 
+        (
+            block.timestamp < (manager.timestamp + manager.delay + manager.timeframe) ||
+            block.timestamp > (manager.delay + manager.timestamp)
+        );
     }
 
     function initializePermission(address _where, bytes32 _permissionSelector) public {
@@ -730,9 +766,9 @@ abstract contract PermissionManager is Initializable {
 
         // Give the very first manager all capabilities.
         Option[] memory options = new Option[](3);
-        options[0] = Option.canAddRemove;
-        options[1] = Option.canFreeze;
-        options[2] = Option.canGrantRevoke;
+        options[0] = Option.grantOwner;
+        options[1] = Option.freezeOwner;
+        options[2] = Option.revokeOwner;
 
         permission.managers[_manager].option = combinePermissions(_options);
 
@@ -743,6 +779,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.isInitialized = _initialize;
+        permission.counter++;
     }
 
     function _setAllowedContractForApplyTarget(address _addr) internal {
