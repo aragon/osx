@@ -42,7 +42,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     struct Permission {
-        mapping(address => mapping(bytes32 => bool)) approvals; // Owners can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => mapping(bytes32 => bool)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
         mapping(address => Owner) owners;
         bool isFrozen;
         bool created;
@@ -185,34 +185,32 @@ abstract contract PermissionManager is Initializable {
         permission.isFrozen = true;
     }
 
-    function approvePermission(
+    function delegatePermission(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _who,
         address _condition,
         address _delegatee,
-        bool _approve
-    ) public {
+        bool _delegate
+    ) public { 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
         if (permission.isFrozen) {
             revert NotPossible();
         }
 
-        if (!_validateOwnerCallPermissions( // TODO: Instead of passing that options array I better create another method
+        Owner owner = permission.owners[msg.sender];
+
+        if (!_validateOwnerCallPermissions(
                 permission,
-                permission.owners[msg.sender],
-                [
-                    Option.freezeOwner,
-                    Option.grantOwner,
-                    Option.revokeOwner
-                ]
+                owner,
+                owner.permission // TODO: Create additional method or overload to be able to pass bitmap
             )
         ) {
             revert NotPossible();
         }
 
-        permission.approvals[_delegatee][keccak256(abi.encode(_who, _condition))] = _approve;
+        permission.delegations[_delegatee][keccak256(abi.encode(_who, _condition))] = _delegate;
     }
 
     function addOwner(
@@ -376,7 +374,7 @@ abstract contract PermissionManager is Initializable {
             // TODO: take this in helper function
             if (permission.created) {
                 if (
-                    !permission.approvals[msg.sender][
+                    !permission.delegations[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
                     !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke)
