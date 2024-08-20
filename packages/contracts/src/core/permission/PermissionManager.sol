@@ -191,6 +191,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         address _condition,
         address _delegatee,
+        Option[] calldata _options
         bool _delegate
     ) public { 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
@@ -201,12 +202,7 @@ abstract contract PermissionManager is Initializable {
 
         Owner owner = permission.owners[msg.sender];
 
-        if (!_validateOwnerCallPermissions(
-                permission,
-                owner,
-                owner.permission // TODO: Create additional method or overload to be able to pass bitmap
-            )
-        ) {
+        if (!_validateOwnerCallPermissions(permission, owner, _options)) {
             revert NotPossible();
         }
 
