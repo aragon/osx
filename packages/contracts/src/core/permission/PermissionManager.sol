@@ -42,8 +42,8 @@ abstract contract PermissionManager is Initializable {
     }
 
     struct Permission {
-        mapping(address => mapping(bytes32 => bool)) approvals; // managers can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => Manager) managers;
+        mapping(address => mapping(bytes32 => bool)) approvals; // Owners can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => Owner) owners;
         bool isFrozen;
         bool created;
         bool isInitialized;
@@ -52,7 +52,7 @@ abstract contract PermissionManager is Initializable {
         uint64 freezeCounter;
     }
 
-    struct Manager {
+    struct Owner {
         uint64 delay;
         uint64 timeframe;
         uint8 permission;
@@ -140,7 +140,7 @@ abstract contract PermissionManager is Initializable {
         _initializePermissionManager({_initialOwner: _initialOwner});
     }
 
-    modifier onlyPermissionManager(
+    modifier onlyPermissionOwners(
         address _where,
         bytes32 _permissionId,
         Option _option
@@ -151,13 +151,11 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        bool isRoot = _isRoot(msg.sender);
-
-        if (permission.created && permission.managers[msg.sender].permission != uint8(0)) {
-            if (!hasPermission(permission.managers[msg.sender], _option)) {
+        if (permission.created) {
+            if (!hasPermission(permission.owners[msg.sender], _option)) {
                 revert NotPossible();
             }
-        } else if (!isRoot) {
+        } else if (!_isRoot(msg.sender)) {
             revert NotPossible();
         }
 
@@ -171,17 +169,17 @@ abstract contract PermissionManager is Initializable {
     function createPermission(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _manager,
+        address _owner,
         address[] calldata _whos,
         bool initialize
     ) external auth(ROOT_PERMISSION_ID) {
-        _createPermission(_where, _permissionIdOrSelector, _manager, _whos, initialize);
+        _createPermission(_where, _permissionIdOrSelector, _owner, _whos, initialize);
     }
 
     function freezePermission(
         address _where,
         bytes32 _permissionIdOrSelector
-    ) external onlyPermissionManager(_where, _permissionIdOrSelector, Option.canFreeze) {
+    ) external onlyPermissionOwners(_where, _permissionIdOrSelector, Option.canFreeze) {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
         permission.isFrozen = true;
@@ -200,23 +198,32 @@ abstract contract PermissionManager is Initializable {
         if (permission.isFrozen) {
             revert NotPossible();
         }
-// TODO: Check delegation case and apply changes here
-        if (!hasPermission(permission.managers[msg.sender].option, Option.canAddRemove)) {
+
+        if (!_validateOwnerCallPermissions( // TODO: Instead of passing that options array I better create another method
+                permission,
+                permission.owners[msg.sender],
+                [
+                    Option.freezeOwner,
+                    Option.grantOwner,
+                    Option.revokeOwner
+                ]
+            )
+        ) {
             revert NotPossible();
         }
 
         permission.approvals[_delegatee][keccak256(abi.encode(_who, _condition))] = _approve;
     }
 
-    function addManager(
+    function addOwner(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _manager,
+        address _owner,
         uint64 _delay,
         uint64 _timeframe,
         Option[] calldata _options
     ) external {
-        if (_manager == address(0)) {
+        if (_owner == address(0)) {
             revert NotPossible();
         }
 
@@ -228,7 +235,7 @@ abstract contract PermissionManager is Initializable {
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        if (!_validateManagerCallPermissions(permission, permission.managers[msg.sender], _options)) {
+        if (!_validateOwnerCallPermissions(permission, permission.owners[msg.sender], _options)) {
             revert NotPossible();
         }
         
@@ -248,7 +255,7 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        permission.managers[_manager] = Manager({
+        permission.owners[_owner] = Owner({
             permission: combinePermissions(_options),
             delay: _delay,
             timeframe: _timeframe
@@ -256,19 +263,19 @@ abstract contract PermissionManager is Initializable {
         });
     }
 
-    function removeManager(
+    function removeOwner(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _manager,
+        address _owner,
         Option[] _options
     ) external {
-        if (_manager == address(0)) {
+        if (_owner == address(0)) {
             revert NotPossible();
         }
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        if (!_validateManagerCallPermissions(permission, permission.managers[msg.sender], _options)) {
+        if (!_validateOwnerCallPermissions(permission, permission.owners[msg.sender], _options)) {
             revert NotPossible();
         }
 
@@ -288,43 +295,21 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        Manager manager = permission.managers[_manager];
-        manager.permission = removePermissions(manager.permission, combinePermissions(_options));
+        Owner owner = permission.owners[_owner];
+        owner.permission = removePermissions(owner.permission, combinePermissions(_options));
     }
 
     function initializePermission(address _where, bytes32 _permissionSelector) public {
         Permission storage permission = permissions[roleHash(_where, _selector)];
 
 // TODO: Extend here the owner logic as well
-        if (!hasPermission(_permission.managers[msg.sender], option.canAddRemove)) {
+        if (!hasPermission(_permission.owners[msg.sender], option.canAddRemove)) {
             revert NotPossible();
         }
 
         if (!permission.isInitialized) {
             permission.isInitialized = true;
         }
-    }
-
-    // Not needed as of now, but could be needed in case other contract
-    // needs to be checking this permissions
-    function isFunctionCallsAllowed(
-        address _who,
-        address[] calldata _targets,
-        bytes4[] calldata _selectors
-    ) view returns (bool) {
-        if (_targets.length != _selectors.length) {
-            revert NotPossible();
-        }
-
-        for (uint256 i = 0; i < _targets.length; i++) {
-            bytes32 hash = keccak256(abi.encode(_targets[i], _selectors[i]));
-
-            if (permissions[hash].isInitialized && !permissions[hash].members[_who]) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
@@ -337,7 +322,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual onlyPermissionManager(_where, _permissionId, Option.canGrantRevoke) {
+    ) external virtual onlyPermissionOwners(_where, _permissionId, Option.canGrantRevoke) {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -353,7 +338,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external virtual onlyPermissionManager(_where, _permissionId, Option.canGrantRevoke) {
+    ) external virtual onlyPermissionOwners(_where, _permissionId, Option.canGrantRevoke) {
         _grantWithCondition({
             _where: _where,
             _who: _who,
@@ -372,19 +357,9 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual onlyPermissionManager(_where, _permissionId, Option.canGrantRevoke) {
+    ) external virtual onlyPermissionOwners(_where, _permissionId, Option.canGrantRevoke) {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
-
-    // TODO 1: if 2 plugins are prepared, and if manager only wants to delegate permission for pluginA's permission, what could occur is
-    // pluginB could be applyInstalled first and boom, pluginA won't be able to install. So manager delegated for pluginA but pluginB occured.
-    // This becomes possible because permission is where + permissionId and pluginA could be granting it to x1 whereas pluginB could be granting it to x2
-    // and manager only wanted x1. So I think in `delegatePermission` function, we should also pass `_who`  and i thought about making `delegatees` mapping to be
-    // mapping(address => (address => bool)) delegates but this structure is not delegates anymore because delegatees mean that you delegate permission such that
-    // delegate is free to grant this exact permission to as he wishes, but if _who is also restricted, then delegatee is really out of choice. maybe come up with a different name ?
-    // ah, also, condition must be also passed.
-
-    // TODO 2: We need undelegatepermission or something like that for a manager to remove a delegate in case manager changed his mind.
 
     /// @notice Applies an array of permission operations on a single target contracts `_where`.
     /// @param _where The address of the single target contract.
@@ -404,7 +379,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.approvals[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.managers[msg.sender], Option.canGrantRevoke)
+                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke)
                 ) {
                     revert NotPossible();
                 }
@@ -444,7 +419,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.delegatees[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.managers[msg.sender], Option.canGrantRevoke)
+                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke)
                 ) {
                     revert NotPossible();
                 }
@@ -735,7 +710,7 @@ abstract contract PermissionManager is Initializable {
     function _createPermission(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _manager,
+        address _owner,
         address[] calldata _whos,
         bool _initialize
     ) internal {
@@ -747,13 +722,13 @@ abstract contract PermissionManager is Initializable {
 
         permission.created = true;
 
-        // Give the very first manager all capabilities.
+        // Give the very first owner all capabilities.
         Option[] memory options = new Option[](3);
         options[0] = Option.grantOwner;
         options[1] = Option.freezeOwner;
         options[2] = Option.revokeOwner;
 
-        permission.managers[_manager].option = combinePermissions(_options);
+        permission.owners[_owner].option = combinePermissions(_options);
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
@@ -823,23 +798,23 @@ abstract contract PermissionManager is Initializable {
         return combined;
     }
 
-    function removePermissions(uint8 permission, uint8 permissionMask) public pure returns (uint8) {
-        return permission ^ permissionMask;
+    function removePermissions(uint8 _permission, uint8 _permissionMask) public pure returns (uint8) {
+        return _permission ^ _permissionMask;
     }
 
-    function hasPermissions(uint8 permission, uint8 permissionToCheck) public pure returns (bool) {
-        return (permission & permissionToCheck) != permissionToCheck;
+    function hasPermissions(uint8 _permission, uint8 _permissionToCheck) public pure returns (bool) {
+        return (_permission & _permissionToCheck) != _permissionToCheck;
     }
 
-    function hasPermission(Manager manager, Option permission) public pure returns (bool) {
-        if((manager.permission & uint8(1 << uint8(permission))) != 0) {
+    function hasPermission(Owner _owner, Option _permission) public pure returns (bool) {
+        if((_owner.permission & uint8(1 << uint8(_permission))) != 0) {
             return true;
         }
 
         return false;
     }
 
-    function _validateManagerCallPermissions(Permission memory _permission, Manager memory _manager, Option[] memory _options) private returns (bool) {
+    function _validateOwnerCallPermissions(Permission memory _permission, Owner memory _owner, Option[] memory _options) private returns (bool) {
         // Return false in case the permission is frozen
         if (_permission.isFrozen) {
             return false;
@@ -847,10 +822,10 @@ abstract contract PermissionManager is Initializable {
 
         // Check Timeframe & Delay
         if (
-            _manager.timeframe != uint256(0) && _manager.delay != uint256(0) && 
+            _owner.timeframe != uint256(0) && _owner.delay != uint256(0) && 
             (
-                block.timestamp < (_manager.timestamp + _manager.delay + _manager.timeframe) ||
-                block.timestamp > (_manager.delay + _manager.timestamp)
+                block.timestamp < (_owner.timestamp + _owner.delay + _owner.timeframe) ||
+                block.timestamp > (_owner.delay + _owner.timestamp)
             )
         ) {
             return false
@@ -878,7 +853,7 @@ abstract contract PermissionManager is Initializable {
         } 
         
         // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if (!hasPermissions(_manager, combinePermissions(_options)))) {
+        if (!hasPermissions(_owner, combinePermissions(_options)))) {
             return false;
         }
     }
