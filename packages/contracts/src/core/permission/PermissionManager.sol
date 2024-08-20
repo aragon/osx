@@ -377,7 +377,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.delegations[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke)
+                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke) // TODO: Add new permission check here
                 ) {
                     revert NotPossible();
                 }
@@ -417,7 +417,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.delegatees[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke)
+                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke) // TODO: Add new permission check here
                 ) {
                     revert NotPossible();
                 }
@@ -805,11 +805,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     function hasPermission(Owner _owner, Option _permission) public pure returns (bool) {
-        if((_owner.permission & uint8(1 << uint8(_permission))) != 0) {
-            return true;
-        }
-
-        return false;
+        return (_owner.permission & uint8(1 << uint8(_permission))) != 0;
     }
 
     function _validateOwnerCallPermissions(Permission memory _permission, Owner memory _owner, Option[] memory _options) private returns (bool) {
