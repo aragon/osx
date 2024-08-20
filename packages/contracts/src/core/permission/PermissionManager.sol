@@ -55,7 +55,7 @@ abstract contract PermissionManager is Initializable {
     struct Owner {
         uint64 delay;
         uint64 timeframe;
-        uint8 permission;
+        uint8 flags;
     }
 
     mapping(bytes32 => Permission) internal permissions;
@@ -152,7 +152,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (permission.created) {
-            if (!hasPermission(permission.owners[msg.sender], _option)) {
+            if (!hasPermission(permission.owners[msg.sender].flags, _option)) {
                 revert NotPossible();
             }
         } else if (!_isRoot(msg.sender)) {
@@ -191,7 +191,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         address _condition,
         address _delegatee,
-        Option[] calldata _options
+        Option[] calldata _options,
         bool _delegate
     ) public { 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
@@ -200,7 +200,7 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        Owner owner = permission.owners[msg.sender];
+        Owner storage owner = permission.owners[msg.sender];
 
         if (!_validateOwnerCallPermissions(permission, owner, _options)) {
             revert NotPossible();
@@ -252,7 +252,7 @@ abstract contract PermissionManager is Initializable {
         permission.owners[_owner] = Owner({
             permission: combinePermissions(_options),
             delay: _delay,
-            timeframe: _timeframe
+            timeframe: _timeframe,
             timestamp: _timeframe != uint256(0) && _delay != uint256(0) ? block.timestamp : 0;
         });
     }
@@ -261,7 +261,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         bytes32 _permissionIdOrSelector,
         address _owner,
-        Option[] _options
+        Option[] calldata _options
     ) external {
         if (_owner == address(0)) {
             revert NotPossible();
@@ -290,14 +290,14 @@ abstract contract PermissionManager is Initializable {
         }
 
         Owner owner = permission.owners[_owner];
-        owner.permission = removePermissions(owner.permission, combinePermissions(_options));
+        owner.flags = removePermissions(owner.flags, combinePermissions(_options));
     }
 
     function initializePermission(address _where, bytes32 _permissionSelector) public {
         Permission storage permission = permissions[roleHash(_where, _selector)];
 
 // TODO: Extend here the owner logic as well
-        if (!hasPermission(_permission.owners[msg.sender], option.canAddRemove)) {
+        if (!hasPermission(_permission.owners[msg.sender].flagss, Option.canAddRemove)) {
             revert NotPossible();
         }
 
@@ -373,7 +373,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.delegations[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke) // TODO: Add new permission check here
+                    !hasPermission(permission.owners[msg.sender].flags, Option.canGrantRevoke) // TODO: Add new permission check here
                 ) {
                     revert NotPossible();
                 }
@@ -413,7 +413,7 @@ abstract contract PermissionManager is Initializable {
                     !permission.delegatees[msg.sender][
                         keccak256(abi.encode(item.who, item.condition))
                     ] &&
-                    !hasPermission(permission.owners[msg.sender], Option.canGrantRevoke) // TODO: Add new permission check here
+                    !hasPermission(permission.owners[msg.sender].flags, Option.canGrantRevoke) // TODO: Add new permission check here
                 ) {
                     revert NotPossible();
                 }
@@ -782,9 +782,9 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId
     ) internal pure virtual returns (bytes32) {
         return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
-    }
+    }   
 
-    function combinePermissions(Option[] memory _options) public pure returns (uint8) {
+    function combinePermissions(Option[] calldata _options) public pure returns (uint8) {
         uint8 combined = 0;
         for (uint i = 0; i < _options.length; i++) {
             combined |= uint8(1 << uint8(_options[i]));
@@ -800,11 +800,11 @@ abstract contract PermissionManager is Initializable {
         return (_permission & _permissionToCheck) != _permissionToCheck;
     }
 
-    function hasPermission(Owner _owner, Option _permission) public pure returns (bool) {
-        return (_owner.permission & uint8(1 << uint8(_permission))) != 0;
+    function hasPermission(uint8 _permission, Option memory _permission) public pure returns (bool) {
+        return (permission & uint8(1 << uint8(_permission))) != 0;
     }
 
-    function _validateOwnerCallPermissions(Permission memory _permission, Owner memory _owner, Option[] memory _options) private returns (bool) {
+    function _validateOwnerCallPermissions(Permission storage _permission, Owner storage _owner, Option[] calldata _options) private returns (bool) {
         // Return false in case the permission is frozen
         if (_permission.isFrozen) {
             return false;
@@ -843,7 +843,7 @@ abstract contract PermissionManager is Initializable {
         } 
         
         // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if (!hasPermissions(_owner, combinePermissions(_options)))) {
+        if (!hasPermissions(_owner.flags, combinePermissions(_options)))) {
             return false;
         }
     }
