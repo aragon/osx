@@ -800,7 +800,7 @@ abstract contract PermissionManager is Initializable {
         return (_permission & _permissionToCheck) != _permissionToCheck;
     }
 
-    function hasPermission(uint8 _permission, Option memory _permission) public pure returns (bool) {
+    function hasPermission(uint8 _permission, Option _permission) public pure returns (bool) {
         return (permission & uint8(1 << uint8(_permission))) != 0;
     }
 
