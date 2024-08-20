@@ -42,14 +42,14 @@ abstract contract PermissionManager is Initializable {
     }
 
     struct Permission {
+        mapping(address => mapping(bytes32 => bool)) approvals; // managers can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => Manager) managers;
         bool isFrozen;
         bool created;
         bool isInitialized;
         uint64 grantCounter;
         uint64 revokeCounter; 
         uint64 freezeCounter;
-        mapping(address => mapping(bytes32 => bool)) approvals; // managers can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => Manager) managers;
     }
 
     struct Manager {
