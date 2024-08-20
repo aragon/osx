@@ -45,7 +45,9 @@ abstract contract PermissionManager is Initializable {
         bool isFrozen;
         bool created;
         bool isInitialized;
-        uint256 counter;
+        uint64 grantCounter;
+        uint64 revokeCounter; 
+        uint64 freezeCounter;
         mapping(address => mapping(bytes32 => bool)) approvals; // managers can delegate the permission so delegatees can only grant it one time only.
         mapping(address => Manager) managers;
     }
@@ -218,9 +220,6 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        // TODO 1: shall we give ROOT the capability to add managers if no managers have been set yet ?
-        // we're kind of doing the same with grants - i.e if no manager is set, we allow ROOT to grant, so why not do the same here ?
-
         // TODO 2: in applyMultiTargetPermissions, I think we also should change the logic such that if it's called by ROOT and permission
         // has no manager then allow it, if it's not ROOT, then check if caller has APPLY_TARGET_PERMISSION_ID. Though if we go like this,
         // we lose the ability to do conditions on applyMultiTargetPermissions.
@@ -229,44 +228,38 @@ abstract contract PermissionManager is Initializable {
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        if (permission.isFrozen) {
+        if (!_validateManagerCallPermissions(permission, permission.managers[msg.sender], _options)) {
             revert NotPossible();
         }
+        
+        for (uint256 i = 0; i < options.length; i++) {
+            Option option = _options[i];
 
-        if (_isRoot(msg.sender) && permission.counter === uint256(0)) {
-            permission.managers[_manager] = Manager({
-                permission: combinePermissions(_options),
-                delay: _delay,
-                timeframe: _timeframe
-                timestamp: block.timestamp
-            });
-            permission.counter++;
-        } else {
-            for (uint256 i = 0; i < options.length; i++) {
-                Option option = _options[i];
-
-                if (!hasPermission(permission.managers[msg.sender], option)) {
-                    revert NotPossible();
-                }
+            if (option == Option.grantOwner) {
+                permission.grantOwnerCounter++;
             }
 
-            if (!_checkTimeframe(permission.managers[msg.sender])) {
-                revert NotPossible();
+            if (option == Option.revokeOwner) {
+                permission.revokeOwnerCounter++;
             }
 
-            permission.managers[_manager] = Manager({
-                permission: combinePermissions(_options),
-                delay: _delay,
-                timeframe: _timeframe
-                timestamp: block.timestamp
-            });
-            permission.counter++;
+            if (option == Option.freezeOwner) {
+                permission.freezeOwnerCounter++;
+            }
         }
+
+        permission.managers[_manager] = Manager({
+            permission: combinePermissions(_options),
+            delay: _delay,
+            timeframe: _timeframe
+            timestamp: _timeframe != uint256(0) && _delay != uint256(0) ? block.timestamp : 0;
+        });
     }
 
     function removeManager(
         address _where,
         bytes32 _permissionIdOrSelector,
+        address _manager,
         Option[] _options
     ) external {
         if (_manager == address(0)) {
@@ -274,39 +267,29 @@ abstract contract PermissionManager is Initializable {
         }
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
-        Manager storage manager = permission.managers[msg.sender]:
 
-        if (_permission.isFrozen) {
+        if (!_validateManagerCallPermissions(permission, permission.managers[msg.sender], _options)) {
             revert NotPossible();
         }
 
-        if (_isRoot(msg.sender) && permission.counter === uint256(0)) {
-            manager.permission = removePermission(manager.permission, _options);
-            permission.counter--;
-        } else {
-            for (uint256 i = 0; i < options.length; i++) {
-                Option option = _options[i];
+        for (uint256 i = 0; i < options.length; i++) { // Those counters are needed to be able to apply the "ROOT default" 
+            Option option = _options[i];
 
-                if (!hasPermission(manager, option)) {
-                    revert NotPossible();
-                }
+            if (option == Option.grantOwner) {
+                permission.grantOwnerCounter--;
             }
 
-            if (!_checkTimeframe(manager)) {
-                revert NotPossible();
+            if (option == Option.revokeOwner) {
+                permission.revokeOwnerCounter--;
             }
 
-            manager.permission = removePermission(manager, _options);
-            permission.counter--;
+            if (option == Option.freezeOwner) {
+                permission.freezeOwnerCounter--;
+            }
         }
-    }
 
-    function _checkTimeframe(Manager _manager) private returns (bool) {
-        return _manager.timeframe != uint256(0) && _manager.delay != uint256(0) && 
-        (
-            block.timestamp < (_manager.timestamp + _manager.delay + _manager.timeframe) ||
-            block.timestamp > (_manager.delay + _manager.timestamp)
-        );
+        Manager manager = permission.managers[_manager];
+        manager.permission = removePermissions(manager.permission, combinePermissions(_options));
     }
 
     function initializePermission(address _where, bytes32 _permissionSelector) public {
@@ -840,21 +823,64 @@ abstract contract PermissionManager is Initializable {
         return combined;
     }
 
-    function removePermissions(uint8 permission, Option[] memory _options) public pure returns (uint8) {
-        uint8 mask = 0;
-        for (uint256 i = 0; i < _options.length; i++) {
-            mask = uint8(1 << uint8(_options[i]));
-        }
+    function removePermissions(uint8 permission, uint8 permissionMask) public pure returns (uint8) {
+        return permission ^ permissionMask;
+    }
 
-        return permission ^ mask;
+    function hasPermissions(uint8 permission, uint8 permissionToCheck) public pure returns (bool) {
+        return (permission & permissionToCheck) != permissionToCheck;
     }
 
     function hasPermission(Manager manager, Option permission) public pure returns (bool) {
-        if((manager.permission & uint8(1 << uint8(permission))) != 0 && block.timestamp >= manager.delay && block.timestamp < manager.timeframe) {
+        if((manager.permission & uint8(1 << uint8(permission))) != 0) {
             return true;
         }
 
         return false;
+    }
+
+    function _validateManagerCallPermissions(Permission memory _permission, Manager memory _manager, Option[] memory _options) private returns (bool) {
+        // Return false in case the permission is frozen
+        if (_permission.isFrozen) {
+            return false;
+        }
+
+        // Check Timeframe & Delay
+        if (
+            _manager.timeframe != uint256(0) && _manager.delay != uint256(0) && 
+            (
+                block.timestamp < (_manager.timestamp + _manager.delay + _manager.timeframe) ||
+                block.timestamp > (_manager.delay + _manager.timestamp)
+            )
+        ) {
+            return false
+        }
+
+        // Check if the ROOT default case is applicable 
+        if (_isRoot(msg.sender)) {
+            for (uint256 i = 0; i < options.length; i++) {
+                Option option = _options[i];
+
+                if (option == Option.grantOwner && permission.grantOwnerCounter != uint64(0)) {
+                    return false;
+                }
+
+                if (option == Option.revokeOwner && permission.revokeOwnerCounter != uint64(0)) {
+                    return false;
+                }
+
+                if (option == Option.freezeOwner && permission.freezeOwnerCounter != uint64(0)) {
+                    return false;
+                }
+            } 
+
+            return true;
+        } 
+        
+        // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
+        if (!hasPermissions(_manager, combinePermissions(_options)))) {
+            return false;
+        }
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
