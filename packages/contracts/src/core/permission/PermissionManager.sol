@@ -42,7 +42,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     struct Permission {
-        mapping(address => mapping(bytes32 => bool)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => mapping(bytes32 => Owner)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
         mapping(address => Owner) owners;
         bool isFrozen;
         bool created;
@@ -191,8 +191,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         address _condition,
         address _delegatee,
-        uint8 flags,
-        bool _delegate
+        uint8 _flags
     ) public {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
@@ -206,7 +205,9 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        permission.delegations[_delegatee][keccak256(abi.encode(_who, _condition))] = _delegate;
+        permission.delegations[_delegatee][keccak256(abi.encode(_who, _condition))] = Owner({
+            flags: _flags
+        });
     }
 
     function addOwner(
@@ -353,26 +354,9 @@ abstract contract PermissionManager is Initializable {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
-            uint8 flags = permission.owners[msg.sender].flags
 
-            if (permission.created) {
-                if (
-                    !permission.delegatees[msg.sender][keccak256(abi.encode(item.who, item.condition))] ||
-                    (
-                        (item.operation == PermissionLib.Operation.Grant || item.operation == PermissionLib.Operation.GrantWithCondition) && 
-                        !hasPermission(flags, Option.grantOwner)
-                    ) || 
-                    (
-                        item.operation == PermissionLib.Operation.Revoke && 
-                        !hasPermission(flags, Option.revokeOwner)
-                    )
-                ) {
-                    revert NotPossible();
-                }
-
-                delete permission.delegates[msg.sender][
-                    keccak256(abi.encode(item.who, item.condition))
-                ];
+            if (permission.created && !_checkPermissionsForApplyTargetMethods(permission, item.who, item.condition, item.operation)) {
+                revert NotPossible();
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -397,26 +381,9 @@ abstract contract PermissionManager is Initializable {
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
-            uint8 flags = permission.owners[msg.sender].flags
 
-            if (permission.created) {
-                if (
-                    !permission.delegatees[msg.sender][keccak256(abi.encode(item.who, item.condition))] ||
-                    (
-                        (item.operation == PermissionLib.Operation.Grant || item.operation == PermissionLib.Operation.GrantWithCondition) && 
-                        !hasPermission(flags, Option.grantOwner)
-                    ) || 
-                    (
-                        item.operation == PermissionLib.Operation.Revoke && 
-                        !hasPermission(flags, Option.revokeOwner)
-                    )
-                ) {
-                    revert NotPossible();
-                }
-               
-                delete permission.delegates[msg.sender][
-                    keccak256(abi.encode(item.who, item.condition))
-                ];
+            if (permission.created && !_checkPermissionsForApplyTargetMethods(permission, item.who, item.condition, item.operation)) {
+                revert NotPossible();
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -792,7 +759,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if ((_owner.flags & _flags) != _flags) {
+        if ((_owner.flags ^ _flags) != _flags) {
             return true;
         }
 
@@ -814,6 +781,31 @@ abstract contract PermissionManager is Initializable {
         }
 
         return false;
+    }
+
+    function _checkPermissionsForApplyTargetMethods(Permission storage _permission, address _who, address _condition, PermissionLib.Operation _operation) private returns (bool) {
+        uint8 flags = permission.delegatees[msg.sender][keccak256(abi.encode(_who, _condition))].flags;
+
+        if (flags == 0) {
+            flags = permission.owners[msg.sender].flags;
+        }
+
+        if (
+            (
+                (_operation == PermissionLib.Operation.Grant || _operation == PermissionLib.Operation.GrantWithCondition) && 
+                !hasPermission(flags, Option.grantOwner)
+            ) || 
+            (
+                _operation == PermissionLib.Operation.Revoke && 
+                !hasPermission(flags, Option.revokeOwner)
+            )
+        ) {
+            return false;
+        }
+
+        delete permission.delegates[msg.sender][keccak256(abi.encode(item.who, item.condition))];
+
+        return true;
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
