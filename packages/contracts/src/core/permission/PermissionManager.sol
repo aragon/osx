@@ -788,15 +788,15 @@ abstract contract PermissionManager is Initializable {
 
         // Check if the ROOT default case is applicable
         if (_isRoot(msg.sender)) {
-            if (hasPermission(flags, uint8(1)) && permission.grantOwnerCounter != uint64(0)) {
+            if (hasPermission(flags, Option.grantOwner) && permission.grantOwnerCounter != uint64(0)) {
                 return false;
             }
 
-            if (hasPermission(flags, uint8(2)) && permission.revokeOwnerCounter != uint64(0)) {
+            if (hasPermission(flags, Option.revokeOwner) && permission.revokeOwnerCounter != uint64(0)) {
                 return false;
             }
 
-            if (hasPermission(flags, uint8(3)) && permission.freezeOwnerCounter != uint64(0)) {
+            if (hasPermission(flags, Option.freezeOwner) && permission.freezeOwnerCounter != uint64(0)) {
                 return false;
             }
 
