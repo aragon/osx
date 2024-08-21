@@ -191,7 +191,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         address _condition,
         address _delegatee,
-        Option[] calldata _options,
+        uint8 flags,
         bool _delegate
     ) public {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
@@ -202,7 +202,7 @@ abstract contract PermissionManager is Initializable {
 
         Owner storage owner = permission.owners[msg.sender];
 
-        if (!_validateOwnerCallPermissions(permission, owner, _options)) {
+        if (!_validateOwnerCallPermissions(permission, owner, _flags)) {
             revert NotPossible();
         }
 
@@ -215,7 +215,7 @@ abstract contract PermissionManager is Initializable {
         address _owner,
         uint64 _howLong,
         uint64 _since,
-        Option[] calldata _options
+        uint8 _flags
     ) external {
         if (_owner == address(0)) {
             revert NotPossible();
@@ -229,32 +229,26 @@ abstract contract PermissionManager is Initializable {
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        if (!_validateOwnerCallPermissions(permission, permission.owners[msg.sender], _options)) {
+        if (!_validateOwnerCallPermissions(permission, permission.owners[msg.sender], _flags)) {
             revert NotPossible();
         }
 
         Owner storage owner = permission.owners[_owner];
 
-        for (uint256 i = 0; i < options.length; i++) {
-            Option option = _options[i];
+        if (!hasPermission(owner.flags, Option.grantOwner) && hasPermission(_flags, Option.grantOwner)) {
+            permission.grantOwnerCounter++;
+        }
 
-            if (!hasPermission(owner.flags, _option)) {
-                if (option == Option.grantOwner) {
-                    permission.grantOwnerCounter++;
-                }
+        if (!hasPermission(owner.flags, Option.revokeOwner) && hasPermission(_flags, Option.revokeOwner)) {
+            permission.revokeOwnerCounter++;
+        }
 
-                if (option == Option.revokeOwner) {
-                    permission.revokeOwnerCounter++;
-                }
-
-                if (option == Option.freezeOwner) {
-                    permission.freezeOwnerCounter++;
-                }
-            }
+        if (!hasPermission(owner.flags, Option.freezeOwner) && hasPermission(_flags, Option.freezeOwner)) {
+            permission.freezeOwnerCounter++;
         }
 
         permission.owners[_owner] = Owner({
-            permission: combinePermissions(owner.flags, _options),
+            flags: owner.flags | _flags, // Combining the flags
             howLong: _howLong,
             since: _since == uint256(0) ? block.timestamp : _since
         });
@@ -263,38 +257,28 @@ abstract contract PermissionManager is Initializable {
     function removeOwner(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _owner,
-        Option[] calldata _options
+        uint8 _flags
     ) external {
         if (_owner == address(0)) {
             revert NotPossible();
         }
 
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Owner storage owner = permission.owners[msg.sender];
 
-        if (!_validateOwnerCallPermissions(permission, permission.owners[msg.sender], _options)) {
-            revert NotPossible();
+        if (hasPermission(flags, Option.grantOwner) && hasPermission(owner.flags, Option.grantOwner)) {
+            permission.grantOwnerCounter--;
         }
 
-        for (uint256 i = 0; i < options.length; i++) {
-            // Those counters are needed to be able to apply the "ROOT default"
-            Option option = _options[i];
-
-            if (option == Option.grantOwner) {
-                permission.grantOwnerCounter--;
-            }
-
-            if (option == Option.revokeOwner) {
-                permission.revokeOwnerCounter--;
-            }
-
-            if (option == Option.freezeOwner) {
-                permission.freezeOwnerCounter--;
-            }
+        if (hasPermission(flags, Option.revokeOwner) && hasPermission(owner.flags, Option.revokeOwner)) {
+            permission.revokeOwnerCounter--;
         }
 
-        Owner owner = permission.owners[_owner];
-        owner.flags = removePermissions(owner.flags, combinePermissions(_options));
+        if (hasPermission(flags, Option.freezeOwner) && hasPermission(owner.flags, Option.freezeOwner)) {
+            permission.freezeOwnerCounter--;
+        }
+
+        owner.flags = owner.flags ^ _flags; // remove permissions
     }
 
     function initializePermission(address _where, bytes32 _permissionSelector) public {
@@ -717,14 +701,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.created = true;
-
-        // Give the very first owner all capabilities.
-        Option[] memory options = new Option[](3);
-        options[0] = Option.grantOwner;
-        options[1] = Option.freezeOwner;
-        options[2] = Option.revokeOwner;
-
-        permission.owners[_owner].option = combinePermissions(uint8(0), _options);
+        permission.owners[_owner].flags = uint8(15); // set flags to 00001111
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
@@ -786,30 +763,6 @@ abstract contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
     }
 
-    function combinePermissions(
-        uint8 flags,
-        Option[] calldata _options
-    ) public pure returns (uint8) {
-        for (uint256 i = 0; i < _options.length; i++) {
-            flags |= uint8(1 << uint8(_options[i]));
-        }
-        return flags;
-    }
-
-    function removePermissions(
-        uint8 _permission,
-        uint8 _permissionMask
-    ) public pure returns (uint8) {
-        return _permission ^ _permissionMask;
-    }
-
-    function hasPermissions(
-        uint8 _permission,
-        uint8 _permissionToCheck
-    ) public pure returns (bool) {
-        return (_permission & _permissionToCheck) != _permissionToCheck;
-    }
-
     function hasPermission(uint8 _permission, Option _permission) public pure returns (bool) {
         return (permission & uint8(1 << uint8(_permission))) != 0;
     }
@@ -817,7 +770,7 @@ abstract contract PermissionManager is Initializable {
     function _validateOwnerCallPermissions(
         Permission storage _permission,
         Owner storage _owner,
-        Option[] calldata _options
+        uint8 _flags
     ) private returns (bool) {
         // Return false in case the permission is frozen
         if (_permission.isFrozen) {
@@ -829,26 +782,22 @@ abstract contract PermissionManager is Initializable {
         }
 
         // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if (hasPermissions(_owner.flags, combinePermissions(uint8(0), _options))) {
+        if ((_owner.flags & _flags) != _flags) {
             return true;
         }
 
         // Check if the ROOT default case is applicable
         if (_isRoot(msg.sender)) {
-            for (uint256 i = 0; i < options.length; i++) {
-                Option option = _options[i];
+            if (hasPermission(flags, uint8(1)) && permission.grantOwnerCounter != uint64(0)) {
+                return false;
+            }
 
-                if (option == Option.grantOwner && permission.grantOwnerCounter != uint64(0)) {
-                    return false;
-                }
+            if (hasPermission(flags, uint8(2)) && permission.revokeOwnerCounter != uint64(0)) {
+                return false;
+            }
 
-                if (option == Option.revokeOwner && permission.revokeOwnerCounter != uint64(0)) {
-                    return false;
-                }
-
-                if (option == Option.freezeOwner && permission.freezeOwnerCounter != uint64(0)) {
-                    return false;
-                }
+            if (hasPermission(flags, uint8(3)) && permission.freezeOwnerCounter != uint64(0)) {
+                return false;
             }
 
             return true;
