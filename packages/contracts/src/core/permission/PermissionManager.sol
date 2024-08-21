@@ -352,20 +352,19 @@ abstract contract PermissionManager is Initializable {
     ) external virtual auth(APPLY_TARGET_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
-
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
+            uint8 flags = permission.owners[msg.sender].flags
 
-            // TODO: take this in helper function
             if (permission.created) {
                 if (
                     !permission.delegatees[msg.sender][keccak256(abi.encode(item.who, item.condition))] ||
                     (
                         (item.operation == PermissionLib.Operation.Grant || item.operation == PermissionLib.Operation.GrantWithCondition) && 
-                        !hasPermission(permission.owners[msg.sender].flags, Option.grantOwner)
+                        !hasPermission(flags, Option.grantOwner)
                     ) || 
                     (
                         item.operation == PermissionLib.Operation.Revoke && 
-                        !hasPermission(permission.owners[msg.sender].flags, Option.revokeOwner)
+                        !hasPermission(flags, Option.revokeOwner)
                     )
                 ) {
                     revert NotPossible();
@@ -397,20 +396,19 @@ abstract contract PermissionManager is Initializable {
     ) external virtual auth(APPLY_TARGET_PERMISSION_ID) {
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
-
-            // TODO: take this in helper function
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
+            uint8 flags = permission.owners[msg.sender].flags
 
             if (permission.created) {
                 if (
                     !permission.delegatees[msg.sender][keccak256(abi.encode(item.who, item.condition))] ||
                     (
                         (item.operation == PermissionLib.Operation.Grant || item.operation == PermissionLib.Operation.GrantWithCondition) && 
-                        !hasPermission(permission.owners[msg.sender].flags, Option.grantOwner)
+                        !hasPermission(flags, Option.grantOwner)
                     ) || 
                     (
                         item.operation == PermissionLib.Operation.Revoke && 
-                        !hasPermission(permission.owners[msg.sender].flags, Option.revokeOwner)
+                        !hasPermission(flags, Option.revokeOwner)
                     )
                 ) {
                     revert NotPossible();
