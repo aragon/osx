@@ -286,7 +286,7 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[roleHash(_where, _selector)];
 
         // TODO: Extend here the owner logic as well
-        if (!hasPermission(_permission.owners[msg.sender].flagss, Option.canAddRemove)) {
+        if (!hasPermission(_permission.owners[msg.sender].flags, Option.canAddRemove)) {
             revert NotPossible();
         }
 
