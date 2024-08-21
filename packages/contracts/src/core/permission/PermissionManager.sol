@@ -254,7 +254,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.owners[_owner] = Owner({
-            permission: combinePermissions(_options),
+            permission: combinePermissions(owner.flags, _options),
             howLong: _howLong,
             since: _since == uint256(0) ? block.timestamp : _since
         });
@@ -724,7 +724,7 @@ abstract contract PermissionManager is Initializable {
         options[1] = Option.freezeOwner;
         options[2] = Option.revokeOwner;
 
-        permission.owners[_owner].option = combinePermissions(_options);
+        permission.owners[_owner].option = combinePermissions(uint8(0), _options);
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
@@ -786,12 +786,14 @@ abstract contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
     }
 
-    function combinePermissions(Option[] calldata _options) public pure returns (uint8) {
-        uint8 combined = 0;
-        for (uint i = 0; i < _options.length; i++) {
-            combined |= uint8(1 << uint8(_options[i]));
+    function combinePermissions(
+        uint8 flags,
+        Option[] calldata _options
+    ) public pure returns (uint8) {
+        for (uint256 i = 0; i < _options.length; i++) {
+            flags |= uint8(1 << uint8(_options[i]));
         }
-        return combined;
+        return flags;
     }
 
     function removePermissions(
@@ -827,7 +829,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if (hasPermissions(_owner.flags, combinePermissions(_options))) {
+        if (hasPermissions(_owner.flags, combinePermissions(uint8(0), _options))) {
             return true;
         }
 
