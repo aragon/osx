@@ -358,9 +358,15 @@ abstract contract PermissionManager is Initializable {
             // TODO: take this in helper function
             if (permission.created) {
                 if (
-                    !permission.delegations[msg.sender][
-                        keccak256(abi.encode(item.who, item.condition))
-                    ] && !hasPermission(permission.owners[msg.sender].flags, Option.canGrantRevoke) // TODO: Add new permission check here
+                    !permission.delegatees[msg.sender][keccak256(abi.encode(item.who, item.condition))] ||
+                    (
+                        (item.operation == PermissionLib.Operation.Grant || item.operation == PermissionLib.Operation.GrantWithCondition) && 
+                        !hasPermission(permission.owners[msg.sender].flags, Option.grantOwner)
+                    ) || 
+                    (
+                        item.operation == PermissionLib.Operation.Revoke && 
+                        !hasPermission(permission.owners[msg.sender].flags, Option.revokeOwner)
+                    )
                 ) {
                     revert NotPossible();
                 }
@@ -397,13 +403,19 @@ abstract contract PermissionManager is Initializable {
 
             if (permission.created) {
                 if (
-                    !permission.delegatees[msg.sender][
-                        keccak256(abi.encode(item.who, item.condition))
-                    ] && !hasPermission(permission.owners[msg.sender].flags, Option.canGrantRevoke) // TODO: Add new permission check here
+                    !permission.delegatees[msg.sender][keccak256(abi.encode(item.who, item.condition))] ||
+                    (
+                        (item.operation == PermissionLib.Operation.Grant || item.operation == PermissionLib.Operation.GrantWithCondition) && 
+                        !hasPermission(permission.owners[msg.sender].flags, Option.grantOwner)
+                    ) || 
+                    (
+                        item.operation == PermissionLib.Operation.Revoke && 
+                        !hasPermission(permission.owners[msg.sender].flags, Option.revokeOwner)
+                    )
                 ) {
                     revert NotPossible();
                 }
-
+               
                 delete permission.delegates[msg.sender][
                     keccak256(abi.encode(item.who, item.condition))
                 ];
@@ -794,7 +806,7 @@ abstract contract PermissionManager is Initializable {
 
             if (hasPermission(flags, Option.revokeOwner) && permission.revokeOwnerCounter != uint64(0)) {
                 return false;
-            }
+            }   
 
             if (hasPermission(flags, Option.freezeOwner) && permission.freezeOwnerCounter != uint64(0)) {
                 return false;
