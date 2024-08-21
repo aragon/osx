@@ -100,6 +100,10 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if `Operation.GrantWithCondition` is requested as an operation but the method does not support it.
     error GrantWithConditionNotSupported();
 
+    error PermissionAlreadyCreated();
+
+    error NotPossible();
+
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is granted.
@@ -267,15 +271,15 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        if (hasPermission(flags, Option.grantOwner) && hasPermission(owner.flags, Option.grantOwner)) {
+        if (hasPermission(_flags, Option.grantOwner) && hasPermission(owner.flags, Option.grantOwner)) {
             permission.grantOwnerCounter--;
         }
 
-        if (hasPermission(flags, Option.revokeOwner) && hasPermission(owner.flags, Option.revokeOwner)) {
+        if (hasPermission(_flags, Option.revokeOwner) && hasPermission(owner.flags, Option.revokeOwner)) {
             permission.revokeOwnerCounter--;
         }
 
-        if (hasPermission(flags, Option.freezeOwner) && hasPermission(owner.flags, Option.freezeOwner)) {
+        if (hasPermission(_flags, Option.freezeOwner) && hasPermission(owner.flags, Option.freezeOwner)) {
             permission.freezeOwnerCounter--;
         }
 
@@ -740,8 +744,8 @@ abstract contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
     }
 
-    function hasPermission(uint8 _permission, Option _permission) public pure returns (bool) {
-        return (permission & uint8(1 << uint8(_permission))) != 0;
+    function hasPermission(uint8 _permission, Option _checkPermission) public pure returns (bool) {
+        return (_permission & uint8(1 << uint8(_checkPermission))) != 0;
     }
 
     function _validateOwnerCallPermissions(
@@ -765,15 +769,15 @@ abstract contract PermissionManager is Initializable {
 
         // Check if the ROOT default case is applicable
         if (_isRoot(msg.sender)) {
-            if (hasPermission(flags, Option.grantOwner) && permission.grantOwnerCounter != uint64(0)) {
+            if (hasPermission(_flags, Option.grantOwner) && _permission.grantOwnerCounter != uint64(0)) {
                 return false;
             }
 
-            if (hasPermission(flags, Option.revokeOwner) && permission.revokeOwnerCounter != uint64(0)) {
+            if (hasPermission(_flags, Option.revokeOwner) && _permission.revokeOwnerCounter != uint64(0)) {
                 return false;
             }   
 
-            if (hasPermission(flags, Option.freezeOwner) && permission.freezeOwnerCounter != uint64(0)) {
+            if (hasPermission(_flags, Option.freezeOwner) && _permission.freezeOwnerCounter != uint64(0)) {
                 return false;
             }
 
@@ -784,7 +788,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     function _checkPermissionsForApplyTargetMethods(Permission storage _permission, address _who, address _condition, PermissionLib.Operation _operation) private returns (bool) {
-        uint8 flags = permission.delegatees[msg.sender][keccak256(abi.encode(_who, _condition))].flags;
+        uint8 flags = _permission.delegatees[msg.sender][keccak256(abi.encode(_who, _condition))].flags;
 
         if (flags == 0) {
             flags = permission.owners[msg.sender].flags;
@@ -803,7 +807,7 @@ abstract contract PermissionManager is Initializable {
             return false;
         }
 
-        delete permission.delegates[msg.sender][keccak256(abi.encode(item.who, item.condition))];
+        delete permission.delegates[msg.sender][keccak256(abi.encode(_who, _condition))];
 
         return true;
     }
