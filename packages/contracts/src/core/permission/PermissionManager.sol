@@ -791,7 +791,7 @@ abstract contract PermissionManager is Initializable {
         uint8 flags = _permission.delegatees[msg.sender][keccak256(abi.encode(_who, _condition))].flags;
 
         if (flags == 0) {
-            flags = permission.owners[msg.sender].flags;
+            flags = _permission.owners[msg.sender].flags;
         }
 
         if (
@@ -807,7 +807,7 @@ abstract contract PermissionManager is Initializable {
             return false;
         }
 
-        delete permission.delegates[msg.sender][keccak256(abi.encode(_who, _condition))];
+        delete _permission.delegates[msg.sender][keccak256(abi.encode(_who, _condition))];
 
         return true;
     }
