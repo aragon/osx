@@ -263,6 +263,10 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
         Owner storage owner = permission.owners[msg.sender];
 
+        if ((owner.flags & _flags) != _flags) { // Check if the user has those permissions he wants to remove/flip below
+            revert NotPossible();
+        }
+
         if (hasPermission(flags, Option.grantOwner) && hasPermission(owner.flags, Option.grantOwner)) {
             permission.grantOwnerCounter--;
         }
