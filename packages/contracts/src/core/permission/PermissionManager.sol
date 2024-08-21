@@ -259,10 +259,6 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         uint8 _flags
     ) external {
-        if (_owner == address(0)) {
-            revert NotPossible();
-        }
-
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
         Owner storage owner = permission.owners[msg.sender];
 
@@ -792,7 +788,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if ((_owner.flags & _flags) != _flags) {
+        if ((_owner.flags & _flags) == _flags) {
             return true;
         }
 
