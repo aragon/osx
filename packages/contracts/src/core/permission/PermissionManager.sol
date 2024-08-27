@@ -37,25 +37,15 @@ abstract contract PermissionManager is Initializable {
     enum Option {
         NONE,
         grantOwner,
-        revokeOwner,
-        freezeOwner
+        revokeOwner
     }
 
     struct Permission {
-        mapping(address => mapping(bytes32 => Owner)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => Owner) owners;
-        bool isFrozen;
+        mapping(address => mapping(bytes32 => uint256)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => uint256) owners;
         bool created;
-        bool isInitialized;
         uint64 grantCounter;
         uint64 revokeCounter;
-        uint64 freezeCounter;
-    }
-
-    struct Owner {
-        uint64 howLong;
-        uint64 since;
-        uint8 flags;
     }
 
     mapping(bytes32 => Permission) internal permissions;
@@ -147,20 +137,38 @@ abstract contract PermissionManager is Initializable {
     modifier onlyPermissionOwner(
         address _where,
         bytes32 _permissionId,
-        Option _option
+        uint8 _flags
     ) {
+        if (_flags == 0) {
+            FlagCanNotBeZero();
+        }
+
         Permission storage permission = permissions[roleHash(_where, _permissionId)];
 
-        if (permission.isFrozen) {
+        if (_isPermissionFrozen(permission)) {
             revert NotPossible();
         }
 
-        if (permission.created) {
-            if (!hasPermission(permission.owners[msg.sender].flags, _option)) {
-                revert NotPossible();
+        bool isRoot_ = _isRoot(msg.sender);
+        bytes4 selector = bytes4[_msgData()[0:4]];
+
+        // If ROOT is the caller for `grant/revoke/grantWithCondition` functions,
+        // ensure that no owner exists by using counters.
+        if (isRoot_) {
+            if (
+                (selector == this.grant.selector || selector == this.grantWithCondition.selector) &&
+                _permission.grantOwnerCounter == 0
+            ) {
+                return true;
             }
-        } else if (!_isRoot(msg.sender)) {
-            revert NotPossible();
+
+            if (selector == this.revoke.selector && _permission.revokeOwnerCounter == 0) {
+                return true;
+            }
+        }
+
+        if (!hasPermission(permission.owners[msg.sender], _flags)) {
+            return false;
         }
 
         _;
@@ -174,19 +182,9 @@ abstract contract PermissionManager is Initializable {
         address _where,
         bytes32 _permissionIdOrSelector,
         address _owner,
-        address[] calldata _whos,
-        bool initialize
+        address[] calldata _whos
     ) external auth(ROOT_PERMISSION_ID) {
-        _createPermission(_where, _permissionIdOrSelector, _owner, _whos, initialize);
-    }
-
-    function freezePermission(
-        address _where,
-        bytes32 _permissionIdOrSelector
-    ) external onlyPermissionOwner(_where, _permissionIdOrSelector, Option.canFreeze) {
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
-
-        permission.isFrozen = true;
+        _createPermission(_where, _permissionIdOrSelector, _owner, _whos);
     }
 
     function delegatePermission(
@@ -195,108 +193,103 @@ abstract contract PermissionManager is Initializable {
         address _who,
         address _condition,
         address _delegatee,
-        uint8 _flags
+        uint256 _flags,
+        bool _delegateSwitch
     ) public {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        if (permission.isFrozen) {
+        if (_isPermissionFrozen(permission)) {
+            revert PermissionFrozen();
+        }
+
+        if (!hasPermission(permission.owners[msg.sender], _flags)) {
             revert NotPossible();
         }
 
-        Owner storage owner = permission.owners[msg.sender];
+        bytes32 hash = keccak256(abi.encode(_who, _condition));
 
-        if (!_validateOwnerCallPermissions(permission, owner, _flags)) {
-            revert NotPossible();
+        // Means it's being delegated
+        if (_delegateSwitch) {
+            permission.delegations[_delegatee][hash] = currentFlags | _flags;
+        } else {
+            permission.delegations[_delegatee][hash] = currentFlags ^ _flags;
         }
-
-        permission.delegations[_delegatee][keccak256(abi.encode(_who, _condition))] = Owner({
-            flags: _flags
-        });
     }
 
     function addOwner(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _owner,
-        uint64 _howLong,
-        uint64 _since,
-        uint8 _flags
+        uint256 _flags
     ) external {
         if (_owner == address(0)) {
             revert NotPossible();
         }
 
-        // TODO 2: in applyMultiTargetPermissions, I think we also should change the logic such that if it's called by ROOT and permission
-        // has no manager then allow it, if it's not ROOT, then check if caller has APPLY_TARGET_PERMISSION_ID. Though if we go like this,
-        // we lose the ability to do conditions on applyMultiTargetPermissions.
-
-        // TODO 3: Don't allow granting ROOT to address(this).
-
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        if (!_validateOwnerCallPermissions(permission, permission.owners[msg.sender], _flags)) {
+        if (_isPermissionFrozen(permission)) {
+            revert PermissionFrozen();
+        }
+
+        if (!hasPermission(permission.owners[msg.sender], _flags)) {
             revert NotPossible();
         }
 
-        Owner storage owner = permission.owners[_owner];
+        uint256 currentFlags = permission.owners[_owner];
 
-        if (!hasPermission(owner.flags, Option.grantOwner) && hasPermission(_flags, Option.grantOwner)) {
+        if (
+            hasPermission(_flags, Option.grantOwner) &&
+            !hasPermission(currentFlags, Option.grantOwner)
+        ) {
             permission.grantOwnerCounter++;
         }
 
-        if (!hasPermission(owner.flags, Option.revokeOwner) && hasPermission(_flags, Option.revokeOwner)) {
+        if (
+            hasPermission(_flags, Option.revokeOwner) &&
+            !hasPermission(currentFlags, Option.revokeOwner)
+        ) {
             permission.revokeOwnerCounter++;
         }
 
-        if (!hasPermission(owner.flags, Option.freezeOwner) && hasPermission(_flags, Option.freezeOwner)) {
-            permission.freezeOwnerCounter++;
-        }
-
-        permission.owners[_owner] = Owner({
-            flags: owner.flags | _flags, // Combining the flags
-            howLong: _howLong,
-            since: _since == uint256(0) ? block.timestamp : _since
-        });
+        permission.owners[_owner] = currentFlags | _flags;
     }
 
-    function removeOwner(
-        address _where,
-        bytes32 _permissionIdOrSelector,
-        uint8 _flags
-    ) external {
+    function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint8 _flags) external {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
-        Owner storage owner = permission.owners[msg.sender];
 
-        if ((owner.flags & _flags) != _flags) { // Check if the user has those permissions he wants to remove/flip below
+        uint256 currentFlags = permission.owners[msg.sender];
+
+        // TODO: if the permission is frozen, should we still allow removing oneself ?
+        // If so, add isFrozen check as well.
+        if (!hasPermission(currentFlags, _flags)) {
             revert NotPossible();
         }
 
-        if (hasPermission(_flags, Option.grantOwner) && hasPermission(owner.flags, Option.grantOwner)) {
+        if (
+            hasPermission(_flags, Option.grantOwner) &&
+            hasPermission(currentFlags, Option.grantOwner)
+        ) {
             permission.grantOwnerCounter--;
         }
 
-        if (hasPermission(_flags, Option.revokeOwner) && hasPermission(owner.flags, Option.revokeOwner)) {
+        if (
+            hasPermission(_flags, Option.revokeOwner) &&
+            hasPermission(currentFlags, Option.revokeOwner)
+        ) {
             permission.revokeOwnerCounter--;
         }
 
-        if (hasPermission(_flags, Option.freezeOwner) && hasPermission(owner.flags, Option.freezeOwner)) {
-            permission.freezeOwnerCounter--;
-        }
-
-        owner.flags = owner.flags ^ _flags; // remove permissions
+        permissions.owners[msg.sender] = currentFlags ^ _flags; // remove permissions
     }
 
-    function initializePermission(address _where, bytes32 _permissionSelector) public {
-        Permission storage permission = permissions[roleHash(_where, _selector)];
+    function isPermissionFrozen(
+        address _where,
+        bytes32 _permissionIdOrSelector
+    ) public view returns (bool) {
+        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        // TODO: Extend here the owner logic as well
-        if (!hasPermission(_permission.owners[msg.sender].flags, Option.canAddRemove)) {
-            revert NotPossible();
-        }
-
-        if (!permission.isInitialized) {
-            permission.isInitialized = true;
-        }
+        return _isPermissionFrozen(permission);
     }
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
@@ -309,7 +302,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual onlyPermissionOwner(_where, _permissionId, Option.canGrantRevoke) {
+    ) external virtual onlyPermissionOwner(_where, _permissionId, uint8(Option.grantOwner)) {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -325,7 +318,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external virtual onlyPermissionOwner(_where, _permissionId, Option.canGrantRevoke) {
+    ) external virtual onlyPermissionOwner(_where, _permissionId, uint8(Option.grantOwner)) {
         _grantWithCondition({
             _where: _where,
             _who: _who,
@@ -344,7 +337,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual onlyPermissionOwner(_where, _permissionId, Option.canGrantRevoke) {
+    ) external virtual onlyPermissionOwner(_where, _permissionId, uint8(Option.revokeOwner)) {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -359,7 +352,15 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.SingleTargetPermission memory item = items[i];
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
 
-            if (permission.created && !_checkPermissionsForApplyTargetMethods(permission, item.who, item.condition, item.operation)) {
+            if (
+                permission.created &&
+                !_checkPermissionsForApplyTargetMethods(
+                    permission,
+                    item.who,
+                    item.condition,
+                    item.operation
+                )
+            ) {
                 revert NotPossible();
             }
 
@@ -386,7 +387,15 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.MultiTargetPermission memory item = _items[i];
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
 
-            if (permission.created && !_checkPermissionsForApplyTargetMethods(permission, item.who, item.condition, item.operation)) {
+            if (
+                permission.created &&
+                !_checkPermissionsForApplyTargetMethods(
+                    permission,
+                    item.who,
+                    item.condition,
+                    item.operation
+                )
+            ) {
                 revert NotPossible();
             }
 
@@ -672,8 +681,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         bytes32 _permissionIdOrSelector,
         address _owner,
-        address[] calldata _whos,
-        bool _initialize
+        address[] calldata _whos
     ) internal {
         // let's say ROOT is the dao and only dao can call `createPermission`.
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
@@ -690,8 +698,14 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        permission.isInitialized = _initialize;
-        permission.counter++;
+        permission.grantOwnerCounter++;
+    }
+
+    function _isPermissionFrozen(Permission storage permission) private view returns (bool) {
+        return
+            permission.grantOwnerCounter == 0 &&
+            permission.revokeOwnerCounter == 0 &&
+            permission.owners(address(1)).since != 0;
     }
 
     function _setAllowedContractForApplyTarget(address _addr) internal {
@@ -744,70 +758,40 @@ abstract contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
     }
 
-    function hasPermission(uint8 _permission, Option _checkPermission) public pure returns (bool) {
-        return (_permission & uint8(1 << uint8(_checkPermission))) != 0;
+    function hasPermission(uint8 _permission, uint8 _flags) public pure returns (bool) {
+        return (_permission & _flags) == _flags;
     }
 
-    function _validateOwnerCallPermissions(
+    function _checkPermissionsForApplyTargetMethods(
         Permission storage _permission,
-        Owner storage _owner,
-        uint8 _flags
+        address _who,
+        address _condition,
+        PermissionLib.Operation _operation
     ) private returns (bool) {
-        // Return false in case the permission is frozen
-        if (_permission.isFrozen) {
-            return false;
-        }
+        bytes32 hash = keccak256(abi.encode(_who, _condition));
 
-        if (block.timestamp < _owner.since || block.timestamp > _owner.since + _owner.howLong) {
-            return false;
-        }
-
-        // If the caller isnt a root caller and there are managers existing then check the actual permissions of that manager
-        if ((_owner.flags & _flags) == _flags) {
-            return true;
-        }
-
-        // Check if the ROOT default case is applicable
-        if (_isRoot(msg.sender)) {
-            if (hasPermission(_flags, Option.grantOwner) && _permission.grantOwnerCounter != uint64(0)) {
-                return false;
-            }
-
-            if (hasPermission(_flags, Option.revokeOwner) && _permission.revokeOwnerCounter != uint64(0)) {
-                return false;
-            }   
-
-            if (hasPermission(_flags, Option.freezeOwner) && _permission.freezeOwnerCounter != uint64(0)) {
-                return false;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function _checkPermissionsForApplyTargetMethods(Permission storage _permission, address _who, address _condition, PermissionLib.Operation _operation) private returns (bool) {
-        uint8 flags = _permission.delegatees[msg.sender][keccak256(abi.encode(_who, _condition))].flags;
+        uint8 flags = _permission.delegatees[msg.sender][hash];
 
         if (flags == 0) {
             flags = _permission.owners[msg.sender].flags;
         }
 
         if (
-            (
-                (_operation == PermissionLib.Operation.Grant || _operation == PermissionLib.Operation.GrantWithCondition) && 
-                !hasPermission(flags, Option.grantOwner)
-            ) || 
-            (
-                _operation == PermissionLib.Operation.Revoke && 
-                !hasPermission(flags, Option.revokeOwner)
-            )
+            _operation == PermissionLib.Operation.Grant ||
+            _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            return false;
+            if (!hasPermission(flags, Option.grantOwner)) {
+                return false;
+            }
         }
 
-        delete _permission.delegates[msg.sender][keccak256(abi.encode(_who, _condition))];
+        if (_operation == PermissionLib.Operation.Revoke) {
+            if (!hasPermission(flags, Option.revokeOwner)) {
+                return false;
+            }
+        }
+
+        delete _permission.delegates[msg.sender][hash];
 
         return true;
     }

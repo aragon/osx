@@ -279,7 +279,7 @@ contract DAO is
             Permission storage permission = permissions[roleHash(target, id)];
             
             bool isAllowed;
-            if(permission.isInitialized) {
+            if(permission.created) {
                 isAllowed = isGranted(target, msg.sender, id, msg.data);
             } else {
                 isAllowed = isGranted(address(this), msg.sender, EXECUTE_PERMISSION_ID, msg.data);
