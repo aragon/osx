@@ -203,18 +203,17 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
     /// @param _who The address of the target contract for which 'who' received permissions.  
-    /// @param _condition The potential conditional permission contract.
     /// @param _delegatee The addresses who gets the permission delegated.
     /// @param _flags The flags as uint8 the permission owner wants to give this specific delegatee.
     function delegatePermission(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _who,
-        address _condition,
         address _delegatee,
         uint8 _flags
     ) public {
-        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
+        bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
+        Permission storage permission = permissions[permHash];
 
         if (_isPermissionFrozen(permission)) {
             revert PermissionFrozen();
@@ -224,7 +223,6 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        bytes32 permHash = keccak256(abi.encodePacked(_who, _condition));
         uint8 currentFlags = permission.delegations[_delegatee][permHash];
 
         permission.delegations[_delegatee][permHash] = currentFlags | _flags;
@@ -233,25 +231,23 @@ abstract contract PermissionManager is Initializable {
     /// @notice Function to remove sepcific flags from the delegatee
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _who The address of the target contract for which 'who' received permissions.  
-    /// @param _condition The potential conditional permission contract.
+    /// @param _who The address of the target contract for which 'who' received permissions.
     /// @param _delegatee The addresses we want to undelegate specifc flags.
     /// @param _flags The flags as uint8 the permission owner wants to remove from this specific delegatee.
     function undelegatePermission(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _who,
-        address _condition,
         address _delegatee,
         uint8 _flags
     ) public {
-        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
+        bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
+        Permission storage permission = permissions[permHash];
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
             revert NotPossible();
         }
 
-        bytes32 permHash = keccak256(abi.encodePacked(_who, _condition));
         uint8 currentFlags = permission.delegations[_delegatee][permHash];
         
         permission.delegations[_delegatee][permHash] = currentFlags ^ _flags;
@@ -414,8 +410,8 @@ abstract contract PermissionManager is Initializable {
                 permission.created &&
                 !_checkPermissionsForApplyTargetMethods(
                     permission,
-                    item.who,
-                    item.condition,
+                    item.where,
+                    item.permissionId,
                     item.operation
                 )
             ) {
@@ -828,19 +824,19 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Checks the permissions for the applyTarget methods used by the plugin setup processor.
     /// @param _permission The Permission struct.
-    /// @param _who The address (EOA or contract) owning the permission.
-    /// @param _condition The permission condition contract that might be in use otherwise a zero address.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionId The permission identifier.
     /// @param _operation The operation to check the permission against.
     /// @return True if the permission checks succeded otherwise false.
     function _checkPermissionsForApplyTargetMethods(
         Permission storage _permission,
-        address _who,
-        address _condition,
+        address _where,
+        address _permissionId,
         PermissionLib.Operation _operation
     ) private returns (bool) {
-        bytes32 permHash = delegationHash(_who, _condition);
+        bytes32 permHash = permissionHash(_where, _permissionId);
 
-        uint8 flags = _permission.delegatees[msg.sender][permHash];
+        uint8 flags = _permission.delegations[msg.sender][permHash];
 
         if (flags == 0) {
             flags = _permission.owners[msg.sender].flags;
@@ -864,14 +860,6 @@ abstract contract PermissionManager is Initializable {
         delete _permission.delegates[msg.sender][permHash];
 
         return true;
-    }
-
-    /// @notice Creates the hash needed for delegations
-    /// @param _who The address (EOA or contract) owning the permission.
-    /// @param _condition The permission condition contract that might be in use otherwise a zero address.
-    /// @return Returns the hash
-    function delegationHash(address _who, address _condition) private returns (bytes32) {
-        return keccak256(abi.encodePacked(_who, _condition));
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
