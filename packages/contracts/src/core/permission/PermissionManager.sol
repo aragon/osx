@@ -41,8 +41,8 @@ abstract contract PermissionManager is Initializable {
     }
 
     struct Permission {
-        mapping(address => mapping(bytes32 => uint256)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => uint256) owners;
+        mapping(address => mapping(bytes32 => uint8)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => uint8) owners;
         bool created;
         uint64 grantCounter;
         uint64 revokeCounter;
@@ -90,9 +90,17 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if `Operation.GrantWithCondition` is requested as an operation but the method does not support it.
     error GrantWithConditionNotSupported();
 
+    /// @notice Throw if the permission is already created
     error PermissionAlreadyCreated();
 
+    /// @notice Throw if the action isnt allowed
     error NotPossible();
+
+    /// @notice Throw if the passed flag is set to zero
+    error FlagCanNotBeZero();
+
+    /// @notice Throw if the permission is frozen
+    error PermissionFrozen();
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
@@ -140,7 +148,7 @@ abstract contract PermissionManager is Initializable {
         uint8 _flags
     ) {
         if (_flags == 0) {
-            FlagCanNotBeZero();
+            revert FlagCanNotBeZero();
         }
 
         Permission storage permission = permissions[roleHash(_where, _permissionId)];
@@ -149,35 +157,39 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        bool isRoot_ = _isRoot(msg.sender);
-        bytes4 selector = bytes4[_msgData()[0:4]];
-
         // If ROOT is the caller for `grant/revoke/grantWithCondition` functions,
         // ensure that no owner exists by using counters.
-        if (isRoot_) {
+        if (_isRoot(msg.sender)) {
             if (
-                (selector == this.grant.selector || selector == this.grantWithCondition.selector) &&
-                _permission.grantOwnerCounter == 0
-            ) {
-                return true;
+                (msg.sig == this.grant.selector || msg.sig == this.grantWithCondition.selector) &&
+                permission.grantCounter != 0
+            ) { 
+                revert NotPossible();
             }
 
-            if (selector == this.revoke.selector && _permission.revokeOwnerCounter == 0) {
-                return true;
+            if (msg.sig == this.revoke.selector && permission.revokeCounter != 0) {
+                revert NotPossible();
             }
         }
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            return false;
+            revert NotPossible();
         }
 
         _;
     }
 
+    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
+    /// @param _addr The address of the target contract for which `_who` receives permission.
     function setAllowedContractForApplyTarget(address _addr) public auth(ROOT_PERMISSION_ID) {
         _setAllowedContractForApplyTarget(_addr);
     }
 
+    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _owner The initial owner of this newly created permission.  
+    /// @param _whos The addresses of the target contracts for which `_who` receives permission.
     function createPermission(
         address _where,
         bytes32 _permissionIdOrSelector,
@@ -187,14 +199,20 @@ abstract contract PermissionManager is Initializable {
         _createPermission(_where, _permissionIdOrSelector, _owner, _whos);
     }
 
+    /// @notice Function to delegate specific flags of a permission. 
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _who The address of the target contract for which 'who' received permissions.  
+    /// @param _condition The potential conditional permission contract.
+    /// @param _delegatee The addresses who gets the permission delegated.
+    /// @param _flags The flags as uint8 the permission owner wants to give this specific delegatee.
     function delegatePermission(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _who,
         address _condition,
         address _delegatee,
-        uint256 _flags,
-        bool _delegateSwitch
+        uint8 _flags
     ) public {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
@@ -206,21 +224,49 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        bytes32 hash = keccak256(abi.encode(_who, _condition));
+        bytes32 permissionHash = keccak256(abi.encode(_who, _condition));
+        uint8 currentFlags = permission.delegations[_delegatee][permissionHash];
 
-        // Means it's being delegated
-        if (_delegateSwitch) {
-            permission.delegations[_delegatee][hash] = currentFlags | _flags;
-        } else {
-            permission.delegations[_delegatee][hash] = currentFlags ^ _flags;
-        }
+        permission.delegations[_delegatee][permissionHash] = currentFlags | _flags;
     }
 
+    /// @notice Function to remove sepcific flags from the delegatee
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _who The address of the target contract for which 'who' received permissions.  
+    /// @param _condition The potential conditional permission contract.
+    /// @param _delegatee The addresses we want to undelegate specifc flags.
+    /// @param _flags The flags as uint8 the permission owner wants to remove from this specific delegatee.
+    function undelegatePermission(
+        address _where,
+        bytes32 _permissionIdOrSelector,
+        address _who,
+        address _condition,
+        address _delegatee,
+        uint8 _flags
+    ) public {
+        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+
+        if (!hasPermission(permission.owners[msg.sender], _flags)) {
+            revert NotPossible();
+        }
+
+        bytes32 permissionHash = keccak256(abi.encode(_who, _condition));
+        uint8 currentFlags = permission.delegations[_delegatee][permissionHash];
+        
+        permission.delegations[_delegatee][permissionHash] = currentFlags ^ _flags;
+    }
+
+    /// @notice Function to add a new owner to a permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _owner The new manager for this permission.
+    /// @param _flags The flags as uint8 to restrict what this specifc owner actually can do. (only revoke? only grant? both?)
     function addOwner(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _owner,
-        uint256 _flags
+        uint8 _flags
     ) external {
         if (_owner == address(0)) {
             revert NotPossible();
@@ -236,29 +282,37 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        uint256 currentFlags = permission.owners[_owner];
+        uint8 currentFlags = permission.owners[_owner];
 
         if (
-            hasPermission(_flags, Option.grantOwner) &&
-            !hasPermission(currentFlags, Option.grantOwner)
+            hasPermission(_flags, uint8(Option.grantOwner)) &&
+            !hasPermission(currentFlags, uint8(Option.grantOwner))
         ) {
-            permission.grantOwnerCounter++;
+            permission.grantCounter++;
         }
 
         if (
-            hasPermission(_flags, Option.revokeOwner) &&
-            !hasPermission(currentFlags, Option.revokeOwner)
+            hasPermission(_flags, uint8(Option.revokeOwner)) &&
+            !hasPermission(currentFlags, uint8(Option.revokeOwner))
         ) {
-            permission.revokeOwnerCounter++;
+            permission.revokeCounter++;
         }
 
         permission.owners[_owner] = currentFlags | _flags;
     }
 
-    function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint8 _flags) external {
+    /// @notice Function that a owner can remove itself as owner.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _flags The flags as uint8 to remove specifc rights the calling owner does have. (only revoke? only grant? both?)
+    function removeOwner(
+        address _where,
+        bytes32 _permissionIdOrSelector,
+        uint8 _flags
+    ) external {
         Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
 
-        uint256 currentFlags = permission.owners[msg.sender];
+        uint8 currentFlags = permission.owners[msg.sender];
 
         // TODO: if the permission is frozen, should we still allow removing oneself ?
         // If so, add isFrozen check as well.
@@ -267,22 +321,26 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (
-            hasPermission(_flags, Option.grantOwner) &&
-            hasPermission(currentFlags, Option.grantOwner)
+            hasPermission(_flags, uint8(Option.grantOwner)) &&
+            hasPermission(currentFlags, uint8(Option.grantOwner))
         ) {
-            permission.grantOwnerCounter--;
+            permission.grantCounter--;
         }
 
         if (
-            hasPermission(_flags, Option.revokeOwner) &&
-            hasPermission(currentFlags, Option.revokeOwner)
+            hasPermission(_flags, uint8(Option.revokeOwner)) &&
+            hasPermission(currentFlags, uint8(Option.revokeOwner))
         ) {
-            permission.revokeOwnerCounter--;
+            permission.revokeCounter--;
         }
 
-        permissions.owners[msg.sender] = currentFlags ^ _flags; // remove permissions
+        permission.owners[msg.sender] = currentFlags ^ _flags; // remove permissions
     }
 
+    /// @notice Function to check if this specific permission is frozen.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @return True if the permission is frozen and otherwise false
     function isPermissionFrozen(
         address _where,
         bytes32 _permissionIdOrSelector
@@ -347,7 +405,7 @@ abstract contract PermissionManager is Initializable {
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external virtual auth(APPLY_TARGET_PERMISSION_ID) {
+    ) external virtual auth(APPLY_TARGET_PERMISSION_ID) { // TODO: Check types here 
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
             Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
@@ -673,10 +731,19 @@ abstract contract PermissionManager is Initializable {
         }
     }
 
+    /// @notice Function to check if the given address is ROOT.
+    /// @param _who The address to check for.
+    /// @return True if the given address is ROOT and otherwise false
     function _isRoot(address _who) private returns (bool) {
         return isGranted(address(this), _who, ROOT_PERMISSION_ID, msg.data);
     }
-
+    
+    /// @notice Internal function to create a new permission.
+    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _owner The initial owner of this newly created permission.  
+    /// @param _whos The addresses of the target contracts for which `_who` receives permission.
     function _createPermission(
         address _where,
         bytes32 _permissionIdOrSelector,
@@ -701,11 +768,14 @@ abstract contract PermissionManager is Initializable {
         permission.grantOwnerCounter++;
     }
 
-    function _isPermissionFrozen(Permission storage permission) private view returns (bool) {
+    /// @notice Internal function to check if this specific permission is frozen.
+    /// @param _permission Permission struct to check.
+    /// @return True if the permission is frozen and otherwise false
+    function _isPermissionFrozen(Permission storage _permission) private view returns (bool) {
         return
-            permission.grantOwnerCounter == 0 &&
-            permission.revokeOwnerCounter == 0 &&
-            permission.owners(address(1)).since != 0;
+            _permission.grantOwnerCounter == 0 &&
+            _permission.revokeOwnerCounter == 0 &&
+            _permission.owners(address(1)).since != 0;
     }
 
     function _setAllowedContractForApplyTarget(address _addr) internal {
@@ -716,16 +786,6 @@ abstract contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(bytes32 _permissionId) internal view virtual {
         if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
-            revert Unauthorized({
-                where: address(this),
-                who: msg.sender,
-                permissionId: _permissionId
-            });
-        }
-    }
-
-    function _auth(bytes32 _permissionId) internal view virtual {
-        if (!isGranted(address(this), msg.sender, keccak256(bytes4(msg.data)), msg.data)) {
             revert Unauthorized({
                 where: address(this),
                 who: msg.sender,
@@ -758,10 +818,20 @@ abstract contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("ROLE_PERMISSION_ID", _where, _permissionId));
     }
 
+    /// @notice Checks the permission bitmap against the passed flags.
+    /// @param _permission uint8 bitmap to check against.
+    /// @param _flags uint8 bitmap to check.
+    /// @return True if the bit's are flipped as expected and false otherwise.
     function hasPermission(uint8 _permission, uint8 _flags) public pure returns (bool) {
         return (_permission & _flags) == _flags;
     }
 
+    /// @notice Checks the permissions for the applyTarget methods used by the plugin setup processor.
+    /// @param _permission The Permission struct.
+    /// @param _who The address (EOA or contract) owning the permission.
+    /// @param _condition The permission condition contract that might be in use otherwise a zero address.
+    /// @param _operation The operation to check the permission against.
+    /// @return True if the permission checks succeded otherwise false.
     function _checkPermissionsForApplyTargetMethods(
         Permission storage _permission,
         address _who,
@@ -780,13 +850,13 @@ abstract contract PermissionManager is Initializable {
             _operation == PermissionLib.Operation.Grant ||
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            if (!hasPermission(flags, Option.grantOwner)) {
+            if (!hasPermission(flags, uint8(Option.grantOwner))) {
                 return false;
             }
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
-            if (!hasPermission(flags, Option.revokeOwner)) {
+            if (!hasPermission(flags, uint8(Option.revokeOwner))) {
                 return false;
             }
         }
@@ -794,6 +864,11 @@ abstract contract PermissionManager is Initializable {
         delete _permission.delegates[msg.sender][hash];
 
         return true;
+    }
+
+    // TODO: Check those private hashing methods if actually multiples are needed
+    function roleHash(address _where, bytes32 _permissionIdOrSelector) private returns (bytes32) {
+        return keccak256(abi.encodePacked(_where, _permissionIdOrSelector));
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
