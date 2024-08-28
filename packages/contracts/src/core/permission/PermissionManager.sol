@@ -404,13 +404,13 @@ abstract contract PermissionManager is Initializable {
     ) external virtual auth(APPLY_TARGET_PERMISSION_ID) { // TODO: Check types here 
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
-            Permission storage permission = permissions[permissionHash(item.where, item.permissionId)];
+            Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
             if (
                 permission.created &&
                 !_checkPermissionsForApplyTargetMethods(
                     permission,
-                    item.where,
+                    _where,
                     item.permissionId,
                     item.operation
                 )
@@ -446,7 +446,7 @@ abstract contract PermissionManager is Initializable {
                 !_checkPermissionsForApplyTargetMethods(
                     permission,
                     item.who,
-                    item.condition,
+                    item.permissionId,
                     item.operation
                 )
             ) {
@@ -753,7 +753,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.created = true;
-        permission.owners[_owner].flags = uint8(15); // set flags to 00001111
+        permission.owners[_owner] = uint8(15); // set flags to 00001111
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
@@ -761,17 +761,14 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        permission.grantOwnerCounter++;
+        permission.grantCounter++;
     }
 
     /// @notice Internal function to check if this specific permission is frozen.
     /// @param _permission Permission struct to check.
     /// @return True if the permission is frozen and otherwise false
     function _isPermissionFrozen(Permission storage _permission) private view returns (bool) {
-        return
-            _permission.grantOwnerCounter == 0 &&
-            _permission.revokeOwnerCounter == 0 &&
-            _permission.owners(address(1)).since != 0;
+        return _permission.grantCounter == 0 && _permission.revokeCounter == 0;
     }
 
     function _setAllowedContractForApplyTarget(address _addr) internal {
@@ -831,7 +828,7 @@ abstract contract PermissionManager is Initializable {
     function _checkPermissionsForApplyTargetMethods(
         Permission storage _permission,
         address _where,
-        address _permissionId,
+        bytes32 _permissionId,
         PermissionLib.Operation _operation
     ) private returns (bool) {
         bytes32 permHash = permissionHash(_where, _permissionId);
@@ -839,7 +836,7 @@ abstract contract PermissionManager is Initializable {
         uint8 flags = _permission.delegations[msg.sender][permHash];
 
         if (flags == 0) {
-            flags = _permission.owners[msg.sender].flags;
+            flags = _permission.owners[msg.sender];
         }
 
         if (
@@ -857,7 +854,7 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        delete _permission.delegates[msg.sender][permHash];
+        delete _permission.delegations[msg.sender][permHash];
 
         return true;
     }
