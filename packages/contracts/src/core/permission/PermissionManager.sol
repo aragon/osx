@@ -151,7 +151,7 @@ abstract contract PermissionManager is Initializable {
             revert FlagCanNotBeZero();
         }
 
-        Permission storage permission = permissions[roleHash(_where, _permissionId)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionId)];
 
         if (_isPermissionFrozen(permission)) {
             revert NotPossible();
@@ -214,7 +214,7 @@ abstract contract PermissionManager is Initializable {
         address _delegatee,
         uint8 _flags
     ) public {
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
 
         if (_isPermissionFrozen(permission)) {
             revert PermissionFrozen();
@@ -224,10 +224,10 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        bytes32 permissionHash = keccak256(abi.encode(_who, _condition));
-        uint8 currentFlags = permission.delegations[_delegatee][permissionHash];
+        bytes32 permHash = keccak256(abi.encodePacked(_who, _condition));
+        uint8 currentFlags = permission.delegations[_delegatee][permHash];
 
-        permission.delegations[_delegatee][permissionHash] = currentFlags | _flags;
+        permission.delegations[_delegatee][permHash] = currentFlags | _flags;
     }
 
     /// @notice Function to remove sepcific flags from the delegatee
@@ -245,16 +245,16 @@ abstract contract PermissionManager is Initializable {
         address _delegatee,
         uint8 _flags
     ) public {
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
             revert NotPossible();
         }
 
-        bytes32 permissionHash = keccak256(abi.encode(_who, _condition));
-        uint8 currentFlags = permission.delegations[_delegatee][permissionHash];
+        bytes32 permHash = keccak256(abi.encodePacked(_who, _condition));
+        uint8 currentFlags = permission.delegations[_delegatee][permHash];
         
-        permission.delegations[_delegatee][permissionHash] = currentFlags ^ _flags;
+        permission.delegations[_delegatee][permHash] = currentFlags ^ _flags;
     }
 
     /// @notice Function to add a new owner to a permission.
@@ -272,7 +272,7 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
 
         if (_isPermissionFrozen(permission)) {
             revert PermissionFrozen();
@@ -310,7 +310,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         uint8 _flags
     ) external {
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
 
         uint8 currentFlags = permission.owners[msg.sender];
 
@@ -345,7 +345,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         bytes32 _permissionIdOrSelector
     ) public view returns (bool) {
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
 
         return _isPermissionFrozen(permission);
     }
@@ -408,7 +408,7 @@ abstract contract PermissionManager is Initializable {
     ) external virtual auth(APPLY_TARGET_PERMISSION_ID) { // TODO: Check types here 
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
-            Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
+            Permission storage permission = permissions[permissionHash(item.where, item.permissionId)];
 
             if (
                 permission.created &&
@@ -443,7 +443,7 @@ abstract contract PermissionManager is Initializable {
     ) external virtual auth(APPLY_TARGET_PERMISSION_ID) {
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
-            Permission storage permission = permissions[roleHash(item.where, item.permissionId)];
+            Permission storage permission = permissions[permissionHash(item.where, item.permissionId)];
 
             if (
                 permission.created &&
@@ -751,7 +751,7 @@ abstract contract PermissionManager is Initializable {
         address[] calldata _whos
     ) internal {
         // let's say ROOT is the dao and only dao can call `createPermission`.
-        Permission storage permission = permissions[roleHash(_where, _permissionIdOrSelector)];
+        Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
         if (permission.created) {
             revert PermissionAlreadyCreated();
         }
@@ -838,9 +838,9 @@ abstract contract PermissionManager is Initializable {
         address _condition,
         PermissionLib.Operation _operation
     ) private returns (bool) {
-        bytes32 hash = keccak256(abi.encode(_who, _condition));
+        bytes32 permHash = delegationHash(_who, _condition);
 
-        uint8 flags = _permission.delegatees[msg.sender][hash];
+        uint8 flags = _permission.delegatees[msg.sender][permHash];
 
         if (flags == 0) {
             flags = _permission.owners[msg.sender].flags;
@@ -861,14 +861,17 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        delete _permission.delegates[msg.sender][hash];
+        delete _permission.delegates[msg.sender][permHash];
 
         return true;
     }
 
-    // TODO: Check those private hashing methods if actually multiples are needed
-    function roleHash(address _where, bytes32 _permissionIdOrSelector) private returns (bytes32) {
-        return keccak256(abi.encodePacked(_where, _permissionIdOrSelector));
+    /// @notice Creates the hash needed for delegations
+    /// @param _who The address (EOA or contract) owning the permission.
+    /// @param _condition The permission condition contract that might be in use otherwise a zero address.
+    /// @return Returns the hash
+    function delegationHash(address _who, address _condition) private returns (bytes32) {
+        return keccak256(abi.encodePacked(_who, _condition));
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
