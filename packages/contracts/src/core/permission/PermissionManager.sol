@@ -96,11 +96,23 @@ abstract contract PermissionManager is Initializable {
     /// @notice Throw if the action isnt allowed
     error NotPossible();
 
+    /// @notice Throw if an account with ROOT permissions is calling a restricted method only for permission owners.
+    error OwnerExisting(address where, bytes4 signature, Option option);
+
+    /// @notice Throw if the calling account doesnt have the correct permission flags set. 
+    error InvalidOwnerPermission(address caller, uint8 callerFlags, uint8 flags);
+
+    /// @notice Throw if the delegatee isnt existing or the wrong flags were delegated
+    error InvalidDelegation(address caller, address where, bytes32 permissionId);
+
+    /// @notice Throw if an argument passed is a zero address
+    error ZeroAddress();
+
     /// @notice Throw if the passed flag is set to zero
     error FlagCanNotBeZero();
 
     /// @notice Throw if the permission is frozen
-    error PermissionFrozen();
+    error PermissionFrozen(address where, bytes32 permissionId);
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
@@ -182,7 +194,7 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[permissionHash(_where, _permissionId)];
 
         if (_isPermissionFrozen(permission)) {
-            revert NotPossible();
+            revert PermissionFrozen(_where, _permissionId);
         }
 
         // If ROOT is the caller for `grant/revoke/grantWithCondition` functions,
@@ -192,16 +204,16 @@ abstract contract PermissionManager is Initializable {
                 (msg.sig == this.grant.selector || msg.sig == this.grantWithCondition.selector) &&
                 permission.grantCounter != 0
             ) { 
-                revert NotPossible();
+                revert OwnerExisting(_where, msg.sig, Option.grantOwner);
             }
 
             if (msg.sig == this.revoke.selector && permission.revokeCounter != 0) {
-                revert NotPossible();
+                revert OwnerExisting(_where, msg.sig, Option.revokeOwner);
             }
         }
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert NotPossible();
+            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         _;
@@ -242,11 +254,11 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[permHash];
 
         if (_isPermissionFrozen(permission)) {
-            revert PermissionFrozen();
+            revert PermissionFrozen(_where, _permissionIdOrSelector);
         }
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert NotPossible();
+            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint8 newFlags = permission.delegations[_delegatee][permHash] | _flags;
@@ -270,7 +282,7 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[permHash];
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert NotPossible();
+            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint8 newFlags = permission.delegations[_delegatee][permHash] ^ _flags;
@@ -291,17 +303,17 @@ abstract contract PermissionManager is Initializable {
         uint8 _flags
     ) external {
         if (_owner == address(0)) {
-            revert NotPossible();
+            revert ZeroAddress();
         }
 
         Permission storage permission = permissions[permissionHash(_where, _permissionIdOrSelector)];
 
         if (_isPermissionFrozen(permission)) {
-            revert PermissionFrozen();
+            revert PermissionFrozen(_where, _permissionIdOrSelector);
         }
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert NotPossible();
+            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint8 currentFlags = permission.owners[_owner];
@@ -341,7 +353,7 @@ abstract contract PermissionManager is Initializable {
         // TODO: if the permission is frozen, should we still allow removing oneself ?
         // If so, add isFrozen check as well.
         if (!hasPermission(currentFlags, _flags)) {
-            revert NotPossible();
+            revert InvalidOwnerPermission(msg.sender, currentFlags, _flags);
         }
 
         if (
@@ -446,7 +458,7 @@ abstract contract PermissionManager is Initializable {
                     item.operation
                 )
             ) {
-                revert NotPossible();
+                revert InvalidDelegation(msg.sender, _where, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -481,7 +493,7 @@ abstract contract PermissionManager is Initializable {
                     item.operation
                 )
             ) {
-                revert NotPossible();
+                revert InvalidDelegation(msg.sender, item.where, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
