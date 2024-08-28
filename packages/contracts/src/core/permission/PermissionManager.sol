@@ -128,6 +128,27 @@ abstract contract PermissionManager is Initializable {
         address indexed who
     );
 
+    event PermissionDelegated(
+        address indexed where,
+        bytes32 indexed _permissionIdOrSelector,
+        address indexed delegatee,
+        uint8 newFlags
+    );
+    
+    event PermissionUndelegated(
+        address indexed where,
+        bytes32 indexed _permissionIdOrSelector,
+        address indexed delegatee,
+        uint8 newFlags
+    );
+
+    event OwnerAdded(
+        address indexed where, 
+        bytes32 indexed permissionIdOrSelector, 
+        address indexed owner, 
+        uint8 flags
+    );
+
     /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
@@ -202,13 +223,11 @@ abstract contract PermissionManager is Initializable {
     /// @notice Function to delegate specific flags of a permission. 
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _who The address of the target contract for which 'who' received permissions.  
     /// @param _delegatee The addresses who gets the permission delegated.
     /// @param _flags The flags as uint8 the permission owner wants to give this specific delegatee.
     function delegatePermission(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _who,
         address _delegatee,
         uint8 _flags
     ) public {
@@ -224,20 +243,20 @@ abstract contract PermissionManager is Initializable {
         }
 
         uint8 currentFlags = permission.delegations[_delegatee][permHash];
+        uint8 newFlags = currentFlags | _flags;
+        permission.delegations[_delegatee][permHash] = newFlags;
 
-        permission.delegations[_delegatee][permHash] = currentFlags | _flags;
+        emit PermissionDelegated(_where, _permissionIdOrSelector, _delegatee, newFlags);
     }
 
     /// @notice Function to remove sepcific flags from the delegatee
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _who The address of the target contract for which 'who' received permissions.
     /// @param _delegatee The addresses we want to undelegate specifc flags.
     /// @param _flags The flags as uint8 the permission owner wants to remove from this specific delegatee.
     function undelegatePermission(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _who,
         address _delegatee,
         uint8 _flags
     ) public {
@@ -249,8 +268,10 @@ abstract contract PermissionManager is Initializable {
         }
 
         uint8 currentFlags = permission.delegations[_delegatee][permHash];
-        
-        permission.delegations[_delegatee][permHash] = currentFlags ^ _flags;
+        uint8 newFlags = currentFlags ^ _flags;
+        permission.delegations[_delegatee][permHash] = newFlags;
+
+        emit PermissionUndelegated(_where, _permissionIdOrSelector, _delegatee, newFlags);
     }
 
     /// @notice Function to add a new owner to a permission.
@@ -295,6 +316,8 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.owners[_owner] = currentFlags | _flags;
+
+        emit OwnerAdded(_where, _permissionIdOrSelector, _owner, _flags);
     }
 
     /// @notice Function that a owner can remove itself as owner.
@@ -330,7 +353,10 @@ abstract contract PermissionManager is Initializable {
             permission.revokeCounter--;
         }
 
-        permission.owners[msg.sender] = currentFlags ^ _flags; // remove permissions
+        uint8 newFlags = currentFlags ^ _flags;
+        permission.owners[msg.sender] = newFlags; // remove permissions
+
+        emit OwnerRemoved(_where, _permissionIdOrSelector, msg.sender, newFlags);
     }
 
     /// @notice Function to check if this specific permission is frozen.
