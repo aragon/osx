@@ -100,9 +100,6 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if the calling account doesnt have the correct permission flags set.
     error InvalidOwnerPermission(address caller, uint256 callerFlags, uint256 flags);
 
-    /// @notice Thrown if the delegatee isnt existing or the wrong flags were delegated
-    error InvalidDelegation(address caller, address where, bytes32 permissionId);
-
     /// @notice Thrown if the calling account doesnt have the permission.
     error InvalidPermission(address caller, address where, bytes32 permissionId);
 
@@ -538,7 +535,7 @@ abstract contract PermissionManager is Initializable {
                     isRoot_
                 )
             ) {
-                revert InvalidDelegation(msg.sender, item.where, item.permissionId);
+                revert InvalidPermission(msg.sender, item.where, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
