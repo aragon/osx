@@ -216,7 +216,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (!_checkOwner(permission, _where, _permissionId, _operation, isRoot_)) {
-             revert Unauthorized(_where, msg.sender, _permissionId);
+            revert Unauthorized(_where, msg.sender, _permissionId);
         }
 
         _;
@@ -361,7 +361,7 @@ abstract contract PermissionManager is Initializable {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
         }
-        
+
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
@@ -417,7 +417,11 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant, uint256(Option.grantOwner)) {
+    )
+        external
+        virtual
+        ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant, uint256(Option.grantOwner))
+    {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -433,7 +437,16 @@ abstract contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.GrantWithCondition, uint256(Option.grantOwner)) {
+    )
+        external
+        virtual
+        ownerAuth(
+            _where,
+            _permissionId,
+            PermissionLib.Operation.GrantWithCondition,
+            uint256(Option.grantOwner)
+        )
+    {
         _grantWithCondition({
             _where: _where,
             _who: _who,
@@ -452,7 +465,16 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.Revoke, uint256(Option.revokeOwner)) {
+    )
+        external
+        virtual
+        ownerAuth(
+            _where,
+            _permissionId,
+            PermissionLib.Operation.Revoke,
+            uint256(Option.revokeOwner)
+        )
+    {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -474,7 +496,7 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
-            if (!_checkOwner( permission, _where, item.permissionId, item.operation, isRoot_)) {
+            if (!_checkOwner(permission, _where, item.permissionId, item.operation, isRoot_)) {
                 revert Unauthorized(_where, msg.sender, item.permissionId);
             }
 
@@ -888,9 +910,9 @@ abstract contract PermissionManager is Initializable {
         bool isRoot
     ) private returns (bool) {
         if (!_permission.created) {
-             return isRoot;
+            return isRoot;
         }
-        
+
         bytes32 permHash = permissionHash(_where, _permissionId);
 
         // Check either caller is delegated or an owner.
@@ -906,23 +928,15 @@ abstract contract PermissionManager is Initializable {
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
             if (!hasPermission(flags, uint256(Option.grantOwner))) {
-                if (!(isRoot && _permission.grantCounter == 0)) {
-                    return false;
-                }
-
-                return true;
+                return isRoot && _permission.grantCounter == 0;
             }
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
             if (!hasPermission(flags, uint256(Option.revokeOwner))) {
-                if (!(isRoot && _permission.revokeCounter == 0)) {
-                    return false;
-                }
-
-                return true;
+                return isRoot && _permission.revokeCounter == 0;
             }
-        }  
+        }
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
