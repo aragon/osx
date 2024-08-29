@@ -887,42 +887,42 @@ abstract contract PermissionManager is Initializable {
         PermissionLib.Operation _operation,
         bool isRoot
     ) private returns (bool) {
-        if (_permission.created) {
-            bytes32 permHash = permissionHash(_where, _permissionId);
-
-            // Check either caller is delegated or an owner.
-            uint256 flags = _permission.delegations[msg.sender][permHash];
-            if (flags == 0) {
-                flags = _permission.owners[msg.sender];
-            } else {
-                delete _permission.delegations[msg.sender][permHash];
-            }
-
-            if (
-                _operation == PermissionLib.Operation.Grant ||
-                _operation == PermissionLib.Operation.GrantWithCondition
-            ) {
-                if (!hasPermission(flags, uint256(Option.grantOwner))) {
-                    if (!(isRoot && _permission.grantCounter == 0)) {
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-
-            if (_operation == PermissionLib.Operation.Revoke) {
-                if (!hasPermission(flags, uint256(Option.revokeOwner))) {
-                    if (!(isRoot && _permission.revokeCounter == 0)) {
-                        return false;
-                    }
-
-                    return true;
-                }
-            }  
-        } 
+        if (!_permission.created) {
+             return isRoot;
+        }
         
-        return isRoot;
+        bytes32 permHash = permissionHash(_where, _permissionId);
+
+        // Check either caller is delegated or an owner.
+        uint256 flags = _permission.delegations[msg.sender][permHash];
+        if (flags == 0) {
+            flags = _permission.owners[msg.sender];
+        } else {
+            delete _permission.delegations[msg.sender][permHash];
+        }
+
+        if (
+            _operation == PermissionLib.Operation.Grant ||
+            _operation == PermissionLib.Operation.GrantWithCondition
+        ) {
+            if (!hasPermission(flags, uint256(Option.grantOwner))) {
+                if (!(isRoot && _permission.grantCounter == 0)) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        if (_operation == PermissionLib.Operation.Revoke) {
+            if (!hasPermission(flags, uint256(Option.revokeOwner))) {
+                if (!(isRoot && _permission.revokeCounter == 0)) {
+                    return false;
+                }
+
+                return true;
+            }
+        }  
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
