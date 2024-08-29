@@ -50,8 +50,6 @@ abstract contract PermissionManager is Initializable {
 
     mapping(bytes32 => Permission) internal permissions;
 
-    address public allowedContract;
-
     /// @notice Thrown if a call is unauthorized.
     /// @param where The context in which the authorization reverted.
     /// @param who The address (EOA or contract) missing the permission.
@@ -709,14 +707,6 @@ abstract contract PermissionManager is Initializable {
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
         if (_where == ANY_ADDR || _who == ANY_ADDR) {
             revert PermissionsForAnyAddressDisallowed();
-        }
-
-        // Make sure that this special permission is only granted
-        // to the address allowed by ROOT.
-        if (_permissionId == APPLY_TARGET_PERMISSION_ID) {
-            if (allowedContract == address(0) || allowedContract != _who) {
-                revert NotPossible();
-            }
         }
 
         bytes32 permHash = permissionHash({
