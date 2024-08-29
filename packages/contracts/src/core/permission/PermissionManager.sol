@@ -50,8 +50,6 @@ abstract contract PermissionManager is Initializable {
 
     mapping(bytes32 => Permission) internal permissions;
 
-    address public allowedContract;
-
     /// @notice Thrown if a call is unauthorized.
     /// @param where The context in which the authorization reverted.
     /// @param who The address (EOA or contract) missing the permission.
@@ -471,10 +469,10 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Applies an array of permission operations on a single target contracts `_where`.
     /// @param _where The address of the single target contract.
-    /// @param items The array of single-targeted permission operations to apply.
+    /// @param _items The array of single-targeted permission operations to apply.
     function applySingleTargetPermissions(
         address _where,
-        PermissionLib.SingleTargetPermission[] calldata items
+        PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
         bool isRoot_ = _isRoot(msg.sender);
         if (
@@ -483,10 +481,9 @@ abstract contract PermissionManager is Initializable {
             revert NotPossible();
         }
 
-        for (uint256 i; i < items.length; ) {
-            PermissionLib.SingleTargetPermission memory item = items[i];
+        for (uint256 i; i < _items.length; ) {
+            PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
-            bool isOwnerAndRoot = permission.owners[msg.sender] != 0 && isRoot_;
 
             if (
                 !_checkOwnerForApplyTargetMethods(
@@ -696,14 +693,6 @@ abstract contract PermissionManager is Initializable {
             revert PermissionsForAnyAddressDisallowed();
         }
 
-        // Make sure that this special permission is only granted
-        // to the address allowed by ROOT.
-        if (_permissionId == APPLY_TARGET_PERMISSION_ID) {
-            if (allowedContract == address(0) || allowedContract != _who) {
-                revert NotPossible();
-            }
-        }
-
         bytes32 permHash = permissionHash({
             _where: _where,
             _who: _who,
@@ -862,7 +851,10 @@ abstract contract PermissionManager is Initializable {
     /// @param _permission Permission struct to check.
     /// @return True if the permission is frozen and otherwise false
     function _isPermissionFrozen(Permission storage _permission) private view returns (bool) {
-        return _permission.grantCounter == 0 && _permission.revokeCounter == 0;
+        return
+            _permission.grantCounter == 0 &&
+            _permission.revokeCounter == 0 &&
+            _permission.owners[address(1)] != 0;
     }
 
     /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
