@@ -91,14 +91,8 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if the permission is already created
     error PermissionAlreadyCreated();
 
-    /// @notice Thrown if the action isnt allowed
-    error NotPossible();
-
     /// @notice Thrown if the calling account doesnt have the correct permission flags set.
-    error InvalidOwnerPermission(address caller, uint256 callerFlags, uint256 flags);
-
-    /// @notice Thrown if the calling account doesnt have the permission.
-    error InvalidPermission(address caller, address where, bytes32 permissionId);
+    error UnauthorizedOwner(address caller, uint256 callerFlags, uint256 flags);
 
     /// @notice Thrown if an argument passed is a zero address
     error ZeroAddress();
@@ -222,7 +216,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (!_checkOwner(permission, _where, _permissionId, _operation, isRoot_)) {
-            revert InvalidPermission(msg.sender, _where, _permissionId);
+             revert Unauthorized(_where, msg.sender, _permissionId);
         }
 
         _;
@@ -265,7 +259,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
+            revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint256 newFlags = permission.delegations[_delegatee][permHash] | _flags;
@@ -293,7 +287,7 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[permHash];
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
+            revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint256 currentFlags = permission.delegations[_delegatee][permHash];
@@ -335,7 +329,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
+            revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint256 currentFlags = permission.owners[_owner];
@@ -473,7 +467,7 @@ abstract contract PermissionManager is Initializable {
         if (
             !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_
         ) {
-            revert NotPossible();
+            revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
 
         for (uint256 i; i < _items.length; ) {
@@ -481,7 +475,7 @@ abstract contract PermissionManager is Initializable {
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
             if (!_checkOwner( permission, _where, item.permissionId, item.operation, isRoot_)) {
-                revert InvalidPermission(msg.sender, _where, item.permissionId);
+                revert Unauthorized(_where, msg.sender, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -507,7 +501,7 @@ abstract contract PermissionManager is Initializable {
         if (
             !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_
         ) {
-            revert NotPossible();
+            revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
 
         for (uint256 i; i < _items.length; ) {
@@ -517,7 +511,7 @@ abstract contract PermissionManager is Initializable {
             ];
 
             if (!_checkOwner(permission, item.who, item.permissionId, item.operation, isRoot_)) {
-                revert InvalidPermission(msg.sender, item.where, item.permissionId);
+                revert Unauthorized(item.where, msg.sender, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
