@@ -865,7 +865,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _permission Permission struct to check.
     /// @return True if the permission is frozen and otherwise false
     function _isPermissionFrozen(Permission storage _permission) private view returns (bool) {
-        return _permission.grantCounter == 0 && _permission.revokeCounter == 0;
+        return _permission.grantCounter == 0 && _permission.revokeCounter == 0 && _permission.owners[address(1)] != 0;
     }
 
     /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
