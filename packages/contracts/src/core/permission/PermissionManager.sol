@@ -208,14 +208,13 @@ abstract contract PermissionManager is Initializable {
             revert FlagCanNotBeZero();
         }
 
-        bool isRoot_ = _isRoot(msg.sender);
         Permission storage permission = permissions[permissionHash(_where, _permissionId)];
 
         if (_isPermissionFrozen(permission)) {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (!_checkOwner(permission, _where, _permissionId, _operation, isRoot_)) {
+        if (!_checkOwner(permission, _where, _permissionId, _operation, _isRoot(msg.sender))) {
             revert Unauthorized(_where, msg.sender, _permissionId);
         }
 
@@ -348,7 +347,7 @@ abstract contract PermissionManager is Initializable {
             permission.revokeCounter++;
         }
 
-        permission.owners[_owner] = currentFlags | _flags;
+        permission.owners[_owner] = currentFlags | _flags; // Update owner permission 
 
         emit OwnerAdded(_where, _permissionIdOrSelector, _owner, _flags);
     }
@@ -386,8 +385,8 @@ abstract contract PermissionManager is Initializable {
             permission.revokeCounter--;
         }
 
-        uint256 newFlags = currentFlags ^ _flags;
-        permission.owners[msg.sender] = newFlags; // remove permissions
+        uint256 newFlags = currentFlags ^ _flags; // remove permissions
+        permission.owners[msg.sender] = newFlags;
 
         emit OwnerRemoved(_where, _permissionIdOrSelector, msg.sender, newFlags);
     }
@@ -821,7 +820,6 @@ abstract contract PermissionManager is Initializable {
         address _owner,
         address[] calldata _whos
     ) internal {
-        // let's say ROOT is the dao and only dao can call `createPermission`.
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
