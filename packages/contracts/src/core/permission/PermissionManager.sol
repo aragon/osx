@@ -207,7 +207,7 @@ abstract contract PermissionManager is Initializable {
     modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
-        PermissionLib.Operation _operation
+        PermissionLib.Operation _operation,
         uint256 _flags
     ) {
         if (_flags == 0) {
@@ -928,11 +928,7 @@ abstract contract PermissionManager is Initializable {
             }  
         } 
         
-        if (!isRoot) (
-            return false;
-        )
-
-        return true;
+        return isRoot;
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
