@@ -467,18 +467,18 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Applies an array of permission operations on a single target contracts `_where`.
     /// @param _where The address of the single target contract.
-    /// @param items The array of single-targeted permission operations to apply.
+    /// @param _items The array of single-targeted permission operations to apply.
     function applySingleTargetPermissions(
         address _where,
-        PermissionLib.SingleTargetPermission[] calldata items
+        PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual { 
         bool isRoot_ = _isRoot(msg.sender);
         if (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_) {
             revert NotPossible();
         }
 
-        for (uint256 i; i < items.length; ) {
-            PermissionLib.SingleTargetPermission memory item = items[i];
+        for (uint256 i; i < _items.length; ) {
+            PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
             bool isOwnerAndRoot = permission.owners[msg.sender] != 0 && isRoot_;
 
