@@ -188,7 +188,7 @@ abstract contract PermissionManager is Initializable {
         _initializePermissionManager({_initialOwner: _initialOwner});
     }
 
-    modifier onlyPermissionOwner(
+    modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
         uint256 _flags
@@ -410,7 +410,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual onlyPermissionOwner(_where, _permissionId, uint256(Option.grantOwner)) {
+    ) external virtual ownerAuth(_where, _permissionId, uint256(Option.grantOwner)) {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -426,7 +426,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external virtual onlyPermissionOwner(_where, _permissionId, uint256(Option.grantOwner)) {
+    ) external virtual ownerAuth(_where, _permissionId, uint256(Option.grantOwner)) {
         _grantWithCondition({
             _where: _where,
             _who: _who,
@@ -445,7 +445,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual onlyPermissionOwner(_where, _permissionId, uint256(Option.revokeOwner)) {
+    ) external virtual ownerAuth(_where, _permissionId, uint256(Option.revokeOwner)) {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -455,7 +455,7 @@ abstract contract PermissionManager is Initializable {
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external virtual auth(APPLY_TARGET_PERMISSION_ID) { // TODO: Check types here 
+    ) external virtual auth(APPLY_TARGET_PERMISSION_ID) { 
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
@@ -816,6 +816,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.grantCounter++;
+        permission.revokeCounter++;
     }
 
     /// @notice Internal function to check if this specific permission is frozen.
