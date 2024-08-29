@@ -250,12 +250,6 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _addr The address of the target contract for which `_who` receives permission.
-    function setAllowedContractForApplyTarget(address _addr) public auth(ROOT_PERMISSION_ID) {
-        _setAllowedContractForApplyTarget(_addr);
-    }
-
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
     /// @param _owner The initial owner of this newly created permission.  
@@ -479,14 +473,21 @@ abstract contract PermissionManager is Initializable {
     function applySingleTargetPermissions(
         address _where,
         PermissionLib.SingleTargetPermission[] calldata items
-    ) external virtual auth(APPLY_TARGET_PERMISSION_ID) { 
+    ) external virtual { 
+        bool isRoot_ = _isRoot(msg.sender);
+        if (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_) {
+            revert NotPossible();
+        }
+
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
+            bool isOwnerAndRoot = permission.owners[msg.sender] != 0 && isRoot_;
 
             if (
+                (!isRoot_ || isOwnerAndRoot) &&
                 permission.created &&
-                !_checkPermissionsForApplyTargetMethods(
+                !_checkOwnerForApplyTargetMethods(
                     permission,
                     _where,
                     item.permissionId,
@@ -497,8 +498,16 @@ abstract contract PermissionManager is Initializable {
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
+                if (!isOwnerAndRoot || (isRoot_ && permission.grantCounter != 0)) {
+                    revert NotPossible();
+                }
+
                 _grant({_where: _where, _who: item.who, _permissionId: item.permissionId});
             } else if (item.operation == PermissionLib.Operation.Revoke) {
+                if (!isOwnerAndRoot || (isRoot_ && permission.revokeCounter != 0)) {
+                    revert NotPossible();
+                }
+
                 _revoke({_where: _where, _who: item.who, _permissionId: item.permissionId});
             } else if (item.operation == PermissionLib.Operation.GrantWithCondition) {
                 revert GrantWithConditionNotSupported();
@@ -514,14 +523,21 @@ abstract contract PermissionManager is Initializable {
     /// @param _items The array of multi-targeted permission operations to apply.
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
-    ) external virtual auth(APPLY_TARGET_PERMISSION_ID) {
+    ) external virtual {
+        bool isRoot_ = _isRoot(msg.sender);
+        if (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_) {
+            revert NotPossible();
+        }
+
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(item.where, item.permissionId)];
+            bool isOwnerAndRoot = permission.owners[msg.sender] != 0 && isRoot_;
 
             if (
+                (!isRoot_ || isOwnerAndRoot) &&
                 permission.created &&
-                !_checkPermissionsForApplyTargetMethods(
+                !_checkOwnerForApplyTargetMethods(
                     permission,
                     item.who,
                     item.permissionId,
@@ -532,10 +548,22 @@ abstract contract PermissionManager is Initializable {
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
+                if (!isOwnerAndRoot || (isRoot_ && permission.grantCounter != 0)) {
+                    revert NotPossible();
+                }
+
                 _grant({_where: item.where, _who: item.who, _permissionId: item.permissionId});
             } else if (item.operation == PermissionLib.Operation.Revoke) {
+                if (!isOwnerAndRoot || (isRoot_ && permission.revokeCounter != 0)) {
+                    revert NotPossible();
+                }
+
                 _revoke({_where: item.where, _who: item.who, _permissionId: item.permissionId});
             } else if (item.operation == PermissionLib.Operation.GrantWithCondition) {
+                if (!isOwnerAndRoot || (isRoot_ && permission.grantCounter != 0)) {
+                    revert NotPossible();
+                }
+
                 _grantWithCondition({
                     _where: item.where,
                     _who: item.who,
@@ -831,7 +859,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.created = true;
-        permission.owners[_owner] = uint256(6); // set flags to 00000110
+        permission.owners[_owner] = uint256(6); // set flags to 0...110
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
@@ -848,10 +876,6 @@ abstract contract PermissionManager is Initializable {
     /// @return True if the permission is frozen and otherwise false
     function _isPermissionFrozen(Permission storage _permission) private view returns (bool) {
         return _permission.grantCounter == 0 && _permission.revokeCounter == 0;
-    }
-
-    function _setAllowedContractForApplyTarget(address _addr) internal {
-        allowedContract = _addr;
     }
 
     /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
@@ -904,7 +928,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier.
     /// @param _operation The operation to check the permission against.
     /// @return True if the permission checks succeded otherwise false.
-    function _checkPermissionsForApplyTargetMethods(
+    function _checkOwnerForApplyTargetMethods(
         Permission storage _permission,
         address _where,
         bytes32 _permissionId,
