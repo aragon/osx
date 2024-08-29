@@ -253,6 +253,10 @@ abstract contract PermissionManager is Initializable {
         address _delegatee,
         uint256 _flags
     ) public {
+        if (_flags == 0) {
+            revert FlagCanNotBeZero();
+        }
+
         bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
         Permission storage permission = permissions[permHash];
 
@@ -281,6 +285,10 @@ abstract contract PermissionManager is Initializable {
         address _delegatee,
         uint256 _flags
     ) public {
+        if (_flags == 0) {
+            revert FlagCanNotBeZero();
+        }
+
         bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
         Permission storage permission = permissions[permHash];
 
@@ -310,6 +318,10 @@ abstract contract PermissionManager is Initializable {
         address _owner,
         uint256 _flags
     ) external {
+        if (_flags == 0) {
+            revert FlagCanNotBeZero();
+        }
+
         if (_owner == address(0)) {
             revert ZeroAddress();
         }
@@ -352,15 +364,17 @@ abstract contract PermissionManager is Initializable {
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
     /// @param _flags The flags as uint256 to remove specifc rights the calling owner does have. (only revoke? only grant? both?)
     function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint256 _flags) external {
+        if (_flags == 0) {
+            revert FlagCanNotBeZero();
+        }
+        
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
 
         uint256 currentFlags = permission.owners[msg.sender];
 
-        // TODO: if the permission is frozen, should we still allow removing oneself ?
-        // If so, add isFrozen check as well.
-        if (_flags == 0 || !hasPermission(currentFlags, _flags)) {
+        if (hasPermission(currentFlags, _flags)) {
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
