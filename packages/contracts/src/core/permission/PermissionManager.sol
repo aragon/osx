@@ -146,20 +146,35 @@ abstract contract PermissionManager is Initializable {
         address indexed who
     );
 
+    /// @notice Emitted when a permission does get delegated.
+    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param permissionIdOrSelector The permission identifier.
+    /// @param delegatee The address of the delegatee.
+    /// @param flags The flags delegated to the delegatee.
     event PermissionDelegated(
         address indexed where,
-        bytes32 indexed _permissionIdOrSelector,
+        bytes32 indexed permissionIdOrSelector,
         address indexed delegatee,
-        uint256 newFlags
+        uint256 flags
     );
     
+    /// @notice Emitted when a permission does get undelegated.
+    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param permissionIdOrSelector The permission identifier.
+    /// @param delegatee The address of the delegatee.
+    /// @param flags The current flags delegated to the delegatee.
     event PermissionUndelegated(
         address indexed where,
-        bytes32 indexed _permissionIdOrSelector,
+        bytes32 indexed permissionIdOrSelector,
         address indexed delegatee,
-        uint256 newFlags
+        uint256 flags
     );
 
+    /// @notice Emitted when a owner does get added.
+    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param permissionIdOrSelector The permission identifier.
+    /// @param owner The address of the new owner.
+    /// @param flags The flags of the owner.
     event OwnerAdded(
         address indexed where, 
         bytes32 indexed permissionIdOrSelector, 
@@ -167,6 +182,11 @@ abstract contract PermissionManager is Initializable {
         uint256 flags
     );
 
+    /// @notice Emitted when a owner does get removed.
+    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param permissionIdOrSelector The permission identifier.
+    /// @param owner The address of the new owner.
+    /// @param flags The new flags of the owner.
     event OwnerRemoved(
         address indexed where, 
         bytes32 indexed permissionIdOrSelector, 
