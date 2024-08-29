@@ -904,7 +904,7 @@ abstract contract PermissionManager is Initializable {
                 delete _permission.delegations[msg.sender][permHash];
             }
 
-             if (
+            if (
                 _operation == PermissionLib.Operation.Grant ||
                 _operation == PermissionLib.Operation.GrantWithCondition
             ) {
@@ -912,6 +912,8 @@ abstract contract PermissionManager is Initializable {
                     if (!(isRoot && _permission.grantCounter == 0)) {
                         return false;
                     }
+
+                    return true;
                 }
             }
 
@@ -920,9 +922,13 @@ abstract contract PermissionManager is Initializable {
                     if (!(isRoot && _permission.revokeCounter == 0)) {
                         return false;
                     }
+
+                    return true;
                 }
             }  
-        } else if (!isRoot) (
+        } 
+        
+        if (!isRoot) (
             return false;
         )
 
