@@ -147,7 +147,7 @@ abstract contract PermissionManager is Initializable {
     );
 
     /// @notice Emitted when a permission does get delegated.
-    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param where The address of the target contract for which the delegatee does get permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param delegatee The address of the delegatee.
     /// @param flags The flags delegated to the delegatee.
@@ -159,7 +159,7 @@ abstract contract PermissionManager is Initializable {
     );
     
     /// @notice Emitted when a permission does get undelegated.
-    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param where The address of the target contract for which the delegatee loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param delegatee The address of the delegatee.
     /// @param flags The current flags delegated to the delegatee.
@@ -171,7 +171,7 @@ abstract contract PermissionManager is Initializable {
     );
 
     /// @notice Emitted when a owner does get added.
-    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param where The address of the target contract for which the owner does get permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param owner The address of the new owner.
     /// @param flags The flags of the owner.
@@ -183,7 +183,7 @@ abstract contract PermissionManager is Initializable {
     );
 
     /// @notice Emitted when a owner does get removed.
-    /// @param where The address of the target contract for which `_who` loses permission.
+    /// @param where The address of the target contract for which the owner loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param owner The address of the new owner.
     /// @param flags The new flags of the owner.
@@ -208,6 +208,10 @@ abstract contract PermissionManager is Initializable {
         _initializePermissionManager({_initialOwner: _initialOwner});
     }
 
+    /// @notice Modifier used to protect PM methods from only being called by allowed owners.
+    /// @param _where The target contract to revoke or give permissions on. 
+    /// @param _permissionId The permission to check the permissions for.
+    /// @param _flags The flag/s to check on that permission.
     modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
