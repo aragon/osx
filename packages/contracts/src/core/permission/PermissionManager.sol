@@ -838,8 +838,8 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        permission.grantCounter++;
-        permission.revokeCounter++;
+        permission.grantCounter = 1;
+        permission.revokeCounter = 1;
     }
 
     /// @notice Internal function to check if this specific permission is frozen.
