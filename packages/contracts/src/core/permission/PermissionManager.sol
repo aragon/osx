@@ -466,15 +466,7 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
-            if (
-                !_checkOwner(
-                    permission,
-                    _where,
-                    item.permissionId,
-                    item.operation,
-                    isRoot_
-                )
-            ) {
+            if (!_checkOwner( permission, _where, item.permissionId, item.operation, isRoot_)) {
                 revert InvalidPermission(msg.sender, _where, item.permissionId);
             }
 
@@ -510,15 +502,7 @@ abstract contract PermissionManager is Initializable {
                 permissionHash(item.where, item.permissionId)
             ];
 
-            if (
-                !_checkOwner(
-                    permission,
-                    item.who,
-                    item.permissionId,
-                    item.operation,
-                    isRoot_
-                )
-            ) {
+            if (!_checkOwner(permission, item.who, item.permissionId, item.operation, isRoot_)) {
                 revert InvalidPermission(msg.sender, item.where, item.permissionId);
             }
 
