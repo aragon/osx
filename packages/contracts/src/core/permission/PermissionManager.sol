@@ -94,9 +94,6 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if the action isnt allowed
     error NotPossible();
 
-    /// @notice Thrown if an account with ROOT permissions is calling a restricted method only for permission owners.
-    error OwnerExisting(address where, bytes4 signature, Option option);
-
     /// @notice Thrown if the calling account doesnt have the correct permission flags set.
     error InvalidOwnerPermission(address caller, uint256 callerFlags, uint256 flags);
 
@@ -226,18 +223,19 @@ abstract contract PermissionManager is Initializable {
         // ensure that no owner exists by using counters.
         if (_isRoot(msg.sender)) {
             if (
-                (msg.sig == this.grant.selector || msg.sig == this.grantWithCondition.selector) &&
-                permission.grantCounter != 0
+                ((msg.sig == this.grant.selector || msg.sig == this.grantWithCondition.selector) && permission.grantCounter != 0) || 
+                !hasPermission(permission.owners[msg.sender], Option.grantOwner)
             ) {
-                revert OwnerExisting(_where, msg.sig, Option.grantOwner);
+                revert InvalidPermission(msg.sender, _where, _permissionId);
             }
 
-            if (msg.sig == this.revoke.selector && permission.revokeCounter != 0) {
-                revert OwnerExisting(_where, msg.sig, Option.revokeOwner);
+            if (
+                (msg.sig == this.revoke.selector && permission.revokeCounter != 0) || 
+                !hasPermission(permission.owners[msg.sender], Option.revokeOwner)
+            ) {
+                revert InvalidPermission(msg.sender, _where, _permissionId);
             }
-        }
-
-        if (!hasPermission(permission.owners[msg.sender], _flags)) {
+        } else if (!hasPermission(permission.owners[msg.sender], _flags)) {
             revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
         }
 
