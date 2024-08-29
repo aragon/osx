@@ -363,7 +363,7 @@ abstract contract PermissionManager is Initializable {
 
         // TODO: if the permission is frozen, should we still allow removing oneself ?
         // If so, add isFrozen check as well.
-        if (!hasPermission(currentFlags, _flags)) {
+        if (_flags == 0 || !hasPermission(currentFlags, _flags)) {
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
