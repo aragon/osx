@@ -221,21 +221,21 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (
-            (msg.sig == this.grant.selector && permission.grantCounter != 0) || 
+            msg.sig == this.grant.selector &&
             !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.Grant, isRoot_)
         ) {
             revert InvalidPermission(msg.sender, _where, _permissionId);
         }
 
         if (
-            (msg.sig == this.grantWithCondition.selector && permission.grantCounter != 0) || 
+            msg.sig == this.grantWithCondition.selector &&
             !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.GrantWithCondition, isRoot_)
         ) {
             revert InvalidPermission(msg.sender, _where, _permissionId);
         }
 
         if (
-            (msg.sig == this.revoke.selector && permission.revokeCounter != 0) || 
+            msg.sig == this.revoke.selector &&
             !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.Revoke, isRoot_)
         ) {
             revert InvalidPermission(msg.sender, _where, _permissionId);
