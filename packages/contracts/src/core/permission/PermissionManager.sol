@@ -207,6 +207,7 @@ abstract contract PermissionManager is Initializable {
     modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
+        PermissionLib.Operation _operation
         uint256 _flags
     ) {
         if (_flags == 0) {
@@ -220,24 +221,7 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (
-            msg.sig == this.grant.selector &&
-            !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.Grant, isRoot_)
-        ) {
-            revert InvalidPermission(msg.sender, _where, _permissionId);
-        }
-
-        if (
-            msg.sig == this.grantWithCondition.selector &&
-            !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.GrantWithCondition, isRoot_)
-        ) {
-            revert InvalidPermission(msg.sender, _where, _permissionId);
-        }
-
-        if (
-            msg.sig == this.revoke.selector &&
-            !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.Revoke, isRoot_)
-        ) {
+        if (!_checkOwner(permission, _where, _permissionId, _operation, isRoot_)) {
             revert InvalidPermission(msg.sender, _where, _permissionId);
         }
 
@@ -425,7 +409,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual ownerAuth(_where, _permissionId, uint256(Option.grantOwner)) {
+    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant, uint256(Option.grantOwner)) {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -441,7 +425,7 @@ abstract contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId,
         IPermissionCondition _condition
-    ) external virtual ownerAuth(_where, _permissionId, uint256(Option.grantOwner)) {
+    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.GrantWithCondition, uint256(Option.grantOwner)) {
         _grantWithCondition({
             _where: _where,
             _who: _who,
@@ -460,7 +444,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    ) external virtual ownerAuth(_where, _permissionId, uint256(Option.revokeOwner)) {
+    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.Revoke, uint256(Option.revokeOwner)) {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
