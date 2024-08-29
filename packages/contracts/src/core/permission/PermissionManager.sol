@@ -213,30 +213,32 @@ abstract contract PermissionManager is Initializable {
             revert FlagCanNotBeZero();
         }
 
+        bool isRoot_ = _isRoot(msg.sender);
         Permission storage permission = permissions[permissionHash(_where, _permissionId)];
 
         if (_isPermissionFrozen(permission)) {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        // If ROOT is the caller for `grant/revoke/grantWithCondition` functions,
-        // ensure that no owner exists by using counters.
-        if (_isRoot(msg.sender)) {
-            if (
-                ((msg.sig == this.grant.selector || msg.sig == this.grantWithCondition.selector) && permission.grantCounter != 0) || 
-                !hasPermission(permission.owners[msg.sender], Option.grantOwner)
-            ) {
-                revert InvalidPermission(msg.sender, _where, _permissionId);
-            }
+        if (
+            (msg.sig == this.grant.selector && permission.grantCounter != 0) || 
+            !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.Grant, isRoot_)
+        ) {
+            revert InvalidPermission(msg.sender, _where, _permissionId);
+        }
 
-            if (
-                (msg.sig == this.revoke.selector && permission.revokeCounter != 0) || 
-                !hasPermission(permission.owners[msg.sender], Option.revokeOwner)
-            ) {
-                revert InvalidPermission(msg.sender, _where, _permissionId);
-            }
-        } else if (!hasPermission(permission.owners[msg.sender], _flags)) {
-            revert InvalidOwnerPermission(msg.sender, permission.owners[msg.sender], _flags);
+        if (
+            (msg.sig == this.grantWithCondition.selector && permission.grantCounter != 0) || 
+            !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.GrantWithCondition, isRoot_)
+        ) {
+            revert InvalidPermission(msg.sender, _where, _permissionId);
+        }
+
+        if (
+            (msg.sig == this.revoke.selector && permission.revokeCounter != 0) || 
+            !_checkOwner(permission, _where, _permissionId, PermissionLib.Operation.Revoke, isRoot_)
+        ) {
+            revert InvalidPermission(msg.sender, _where, _permissionId);
         }
 
         _;
@@ -481,7 +483,7 @@ abstract contract PermissionManager is Initializable {
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
             if (
-                !_checkOwnerForApplyTargetMethods(
+                !_checkOwner(
                     permission,
                     _where,
                     item.permissionId,
@@ -525,7 +527,7 @@ abstract contract PermissionManager is Initializable {
             ];
 
             if (
-                !_checkOwnerForApplyTargetMethods(
+                !_checkOwner(
                     permission,
                     item.who,
                     item.permissionId,
@@ -902,7 +904,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier.
     /// @param _operation The operation to check the permission against.
     /// @return True if the permission checks succeded otherwise false.
-    function _checkOwnerForApplyTargetMethods(
+    function _checkOwner(
         Permission storage _permission,
         address _where,
         bytes32 _permissionId,
@@ -910,7 +912,6 @@ abstract contract PermissionManager is Initializable {
         bool isRoot
     ) private returns (bool) {
         bytes32 permHash = permissionHash(_where, _permissionId);
-
         uint256 flags;
 
         // If permission is created, check either caller is delegated or an owner.
@@ -918,6 +919,8 @@ abstract contract PermissionManager is Initializable {
             flags = _permission.delegations[msg.sender][permHash];
             if (flags == 0) {
                 flags = _permission.owners[msg.sender];
+            } else {
+                delete _permission.delegations[msg.sender][permHash];
             }
         }
 
@@ -939,8 +942,6 @@ abstract contract PermissionManager is Initializable {
                 }
             }
         }
-
-        delete _permission.delegations[msg.sender][permHash];
 
         return true;
     }
