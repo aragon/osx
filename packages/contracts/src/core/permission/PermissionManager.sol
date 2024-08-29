@@ -893,37 +893,38 @@ abstract contract PermissionManager is Initializable {
         PermissionLib.Operation _operation,
         bool isRoot
     ) private returns (bool) {
-        bytes32 permHash = permissionHash(_where, _permissionId);
-        uint256 flags;
-
-        // If permission is created, check either caller is delegated or an owner.
         if (_permission.created) {
-            flags = _permission.delegations[msg.sender][permHash];
+            bytes32 permHash = permissionHash(_where, _permissionId);
+
+            // Check either caller is delegated or an owner.
+            uint256 flags = _permission.delegations[msg.sender][permHash];
             if (flags == 0) {
                 flags = _permission.owners[msg.sender];
             } else {
                 delete _permission.delegations[msg.sender][permHash];
             }
-        }
 
-        if (
-            _operation == PermissionLib.Operation.Grant ||
-            _operation == PermissionLib.Operation.GrantWithCondition
-        ) {
-            if (!hasPermission(flags, uint256(Option.grantOwner))) {
-                if (!(isRoot && _permission.grantCounter == 0)) {
-                    return false;
+             if (
+                _operation == PermissionLib.Operation.Grant ||
+                _operation == PermissionLib.Operation.GrantWithCondition
+            ) {
+                if (!hasPermission(flags, uint256(Option.grantOwner))) {
+                    if (!(isRoot && _permission.grantCounter == 0)) {
+                        return false;
+                    }
                 }
             }
-        }
 
-        if (_operation == PermissionLib.Operation.Revoke) {
-            if (!hasPermission(flags, uint256(Option.revokeOwner))) {
-                if (!(isRoot && _permission.revokeCounter == 0)) {
-                    return false;
+            if (_operation == PermissionLib.Operation.Revoke) {
+                if (!hasPermission(flags, uint256(Option.revokeOwner))) {
+                    if (!(isRoot && _permission.revokeCounter == 0)) {
+                        return false;
+                    }
                 }
-            }
-        }
+            }  
+        } else if (!isRoot) (
+            return false;
+        )
 
         return true;
     }
