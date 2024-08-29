@@ -831,7 +831,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.created = true;
-        permission.owners[_owner] = uint256(15); // set flags to 00001111
+        permission.owners[_owner] = uint256(6); // set flags to 00000110
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
