@@ -197,17 +197,12 @@ abstract contract PermissionManager is Initializable {
     /// @notice Modifier used to protect PM methods from only being called by allowed owners.
     /// @param _where The target contract to revoke or give permissions on.
     /// @param _permissionId The permission to check the permissions for.
-    /// @param _flags The flag/s to check on that permission.
+    /// @param _operation The operation used to check ownership
     modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
-        PermissionLib.Operation _operation,
-        uint256 _flags
+        PermissionLib.Operation _operation
     ) {
-        if (_flags == 0) {
-            revert FlagCanNotBeZero();
-        }
-
         Permission storage permission = permissions[permissionHash(_where, _permissionId)];
 
         if (_isPermissionFrozen(permission)) {
@@ -419,7 +414,7 @@ abstract contract PermissionManager is Initializable {
     )
         external
         virtual
-        ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant, uint256(Option.grantOwner))
+        ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant)
     {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
@@ -439,12 +434,7 @@ abstract contract PermissionManager is Initializable {
     )
         external
         virtual
-        ownerAuth(
-            _where,
-            _permissionId,
-            PermissionLib.Operation.GrantWithCondition,
-            uint256(Option.grantOwner)
-        )
+        ownerAuth(_where, _permissionId, PermissionLib.Operation.GrantWithCondition)
     {
         _grantWithCondition({
             _where: _where,
@@ -467,12 +457,7 @@ abstract contract PermissionManager is Initializable {
     )
         external
         virtual
-        ownerAuth(
-            _where,
-            _permissionId,
-            PermissionLib.Operation.Revoke,
-            uint256(Option.revokeOwner)
-        )
+        ownerAuth(_where, _permissionId, PermissionLib.Operation.Revoke)
     {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
