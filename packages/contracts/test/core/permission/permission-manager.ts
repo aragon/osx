@@ -12,6 +12,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
+const APPLY_TARGET_PERMISSION_ID = ethers.utils.id('APPLY_TARGET_PERMISSION_ID');
 const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
   DAO_PERMISSIONS.ROOT_PERMISSION_ID,
   ethers.utils.id('TEST_PERMISSION_1'),
@@ -144,7 +145,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          ADMIN_PERMISSION_ID
         );
     });
 
@@ -200,7 +201,7 @@ describe('Core: PermissionManager', function () {
           nonConditionContract.address
         )
       )
-        .to.be.revertedWithCustomError(pm, 'ConditionInterfaceNotSupported')
+        .to.be.revertedWithCustomError(pm, 'ConditionInterfacNotSupported')
         .withArgs(nonConditionContract.address);
     });
 
@@ -331,7 +332,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          ADMIN_PERMISSION_ID
         );
     });
 
@@ -391,7 +392,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          ADMIN_PERMISSION_ID
         );
     });
 
@@ -413,7 +414,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          ADMIN_PERMISSION_ID
         );
     });
 
@@ -428,7 +429,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          ADMIN_PERMISSION_ID
         );
     });
   });
@@ -539,7 +540,7 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    it('throws Unauthorized error when caller does not have ROOT_PERMISSION_ID permission', async () => {
+    it('throws Unauthorized error when caller does not have the apply target permission', async () => {
       const signers = await ethers.getSigners();
       const bulkItems: MultiTargetPermission[] = [
         {
@@ -558,7 +559,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           signers[2].address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          APPLY_TARGET_PERMISSION_ID
         );
     });
   });
@@ -732,7 +733,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          APPLY_TARGET_PERMISSION_ID
         );
     });
 
@@ -754,7 +755,7 @@ describe('Core: PermissionManager', function () {
         .withArgs(
           pm.address,
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          APPLY_TARGET_PERMISSION_ID
         );
     });
   });
