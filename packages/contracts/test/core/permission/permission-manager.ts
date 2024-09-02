@@ -564,7 +564,7 @@ describe('Core: PermissionManager', function () {
         );
     });
 
-    it('should revert if the caller doesnt have the grant flag set', async () => {
+    it('should revert if the caller doesnt have the grantWithCondition flag set', async () => {
       await pm
         .connect(ownerSigner)
         .createPermission(
@@ -592,7 +592,7 @@ describe('Core: PermissionManager', function () {
         );
     });
 
-    it('should allow the root user as fallback if the permission is created but no grant owners are existing anymore', async () => {
+    it('should allow the root user as fallback if the permission is created but no grantWithCondition owners are existing anymore', async () => {
       await pm
         .connect(ownerSigner)
         .createPermission(
@@ -636,7 +636,7 @@ describe('Core: PermissionManager', function () {
         .to.emit(pm, 'Granted');
     });
 
-    it('should allow the delegatee to call grant once', async () => {
+    it('should allow the delegatee to call grantWithCondition once', async () => {
       await pm
         .connect(ownerSigner)
         .createPermission(
@@ -754,6 +754,173 @@ describe('Core: PermissionManager', function () {
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
+        );
+    });
+
+    it('should revert if the permission is frozen', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .addOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          '0x0000000000000000000000000000000000000001',
+          2
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          6
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if the caller doesnt have the revoke flag set', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should allow the root user as fallback if the permission is created but no revoke owners are existing anymore', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          4
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Revoked');
+    });
+
+    it('should allow the root user as fallback if the permission isnt created', async () => {
+      await pm
+        .connect(ownerSigner)
+        .grant(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.emit(pm, 'Revoked');
+    });
+
+    it('should allow the delegatee to call revoke once', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.emit(pm, 'Revoked');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
         );
     });
   });
