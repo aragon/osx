@@ -326,6 +326,51 @@ describe('Core: PermissionManager', function () {
           '0x0000000000000000000000000000000000000000000000000000000012345678'
         );
     });
+
+    it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .undelegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        )
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
   });
 
   describe('grantWithCondition', () => {
@@ -684,6 +729,52 @@ describe('Core: PermissionManager', function () {
           '0x0000000000000000000000000000000000000000000000000000000012345678'
         );
     });
+
+    it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .undelegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        )
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
   });
 
   describe('revoke', () => {
@@ -906,6 +997,51 @@ describe('Core: PermissionManager', function () {
           )
       )
         .to.emit(pm, 'Revoked');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if undelegate got called before revoke got called by the delegatee', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .undelegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        )
 
       await expect(
         pm
