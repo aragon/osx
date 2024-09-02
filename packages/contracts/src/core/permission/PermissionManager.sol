@@ -197,7 +197,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Modifier used to protect PM methods from only being called by allowed owners.
     /// @param _where The target contract to revoke or give permissions on.
     /// @param _permissionId The permission to check the permissions for.
-    /// @param _operation The operation used to check ownership
+    /// @param _operation The operation used to check ownership. The use of the PermissionLib.Operation type here instead of PM.Option simplifies the code (see applyTarget methods).
     modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
@@ -328,22 +328,24 @@ abstract contract PermissionManager is Initializable {
 
         uint256 currentFlags = permission.owners[_owner];
 
-        if (
-            hasPermission(_flags, uint256(Option.grantOwner)) &&
-            !hasPermission(currentFlags, uint256(Option.grantOwner))
-        ) {
-            permission.grantCounter++;
-        }
+        if (_owner != address(1)) {
+            if (
+                hasPermission(_flags, uint256(Option.grantOwner)) &&
+                !hasPermission(currentFlags, uint256(Option.grantOwner))
+            ) {
+                permission.grantCounter++;
+            }
 
-        if (
-            hasPermission(_flags, uint256(Option.revokeOwner)) &&
-            !hasPermission(currentFlags, uint256(Option.revokeOwner))
-        ) {
-            permission.revokeCounter++;
+            if (
+                hasPermission(_flags, uint256(Option.revokeOwner)) &&
+                !hasPermission(currentFlags, uint256(Option.revokeOwner))
+            ) {
+                permission.revokeCounter++;
+            }
         }
 
         permission.owners[_owner] = currentFlags | _flags; // Update owner permission 
-
+        
         emit OwnerAdded(_where, _permissionIdOrSelector, _owner, _flags);
     }
 
@@ -362,21 +364,15 @@ abstract contract PermissionManager is Initializable {
 
         uint256 currentFlags = permission.owners[msg.sender];
 
-        if (hasPermission(currentFlags, _flags)) {
+        if (!hasPermission(currentFlags, _flags)) { // Check if the removal flags have more bit set as the owner currently has
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
-        if (
-            hasPermission(_flags, uint256(Option.grantOwner)) &&
-            hasPermission(currentFlags, uint256(Option.grantOwner))
-        ) {
+        if (hasPermission(_flags, uint256(2))) { // Check if he has the grantOwner bit set
             permission.grantCounter--;
         }
 
-        if (
-            hasPermission(_flags, uint256(Option.revokeOwner)) &&
-            hasPermission(currentFlags, uint256(Option.revokeOwner))
-        ) {
+        if (hasPermission(_flags, uint256(4))) { // Check if he as the revokeOwner bit set
             permission.revokeCounter--;
         }
 
@@ -808,6 +804,7 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
+        
         if (permission.created) {
             revert PermissionAlreadyCreated();
         }
@@ -910,15 +907,19 @@ abstract contract PermissionManager is Initializable {
             _operation == PermissionLib.Operation.Grant ||
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            if (!hasPermission(flags, uint256(Option.grantOwner))) {
-                return isRoot && _permission.grantCounter == 0;
+            if (hasPermission(flags, uint256(2))) {
+                return true;
             }
+
+            return isRoot && _permission.grantCounter == 0;
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
-            if (!hasPermission(flags, uint256(Option.revokeOwner))) {
-                return isRoot && _permission.revokeCounter == 0;
+            if (hasPermission(flags, uint256(4))) {
+                return true;
             }
+
+            return isRoot && _permission.revokeCounter == 0;
         }
     }
 
