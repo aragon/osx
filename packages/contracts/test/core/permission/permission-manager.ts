@@ -309,6 +309,22 @@ describe('Core: PermissionManager', function () {
           )
       )
         .to.emit(pm, 'Granted');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
     });
   });
 
