@@ -519,6 +519,171 @@ describe('Core: PermissionManager', function () {
           DAO_PERMISSIONS.ROOT_PERMISSION_ID
         );
     });
+
+    it('should revert if the permission is frozen', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .addOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          '0x0000000000000000000000000000000000000001',
+          2
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          6
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if the caller doesnt have the grant flag set', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should allow the root user as fallback if the permission is created but no grant owners are existing anymore', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          2
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      ).to.emit(pm, 'Granted');
+    });
+
+    it('should allow the root user as fallback if the permission isnt created', async () => {
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.emit(pm, 'Granted');
+    });
+
+    it('should allow the delegatee to call grant once', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          2
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.emit(pm, 'Granted');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
   });
 
   describe('revoke', () => {
