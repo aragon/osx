@@ -78,6 +78,156 @@ describe('Core: PermissionManager', function () {
     });
   });
 
+  describe('addOwner', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      )
+    });
+
+    it('should add an owner with all the flags passed', async () => {
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      ).to.emit(
+        pm,
+        'OwnerAdded'
+      ).withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+      );
+    });
+
+    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          0
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'FlagCanNotBeZero'
+      );
+    });
+
+    it('should revert with ZeroAddress if _owner is address(0)', async () => {
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          '0x0000000000000000000000000000000000000000',
+          6
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'ZeroAddress'
+      );
+    });
+
+    it('should revert with ZeroAddress if _where is address(0)', async () => {
+      await expect(
+        pm.addOwner(
+          '0x0000000000000000000000000000000000000000',
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'ZeroAddress'
+      );
+    });
+
+    it('should revert with PermissionFrozen if the permission is frozen', async () => {
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        '0x0000000000000000000000000000000000000001',
+        6
+      )
+
+      await pm.removeOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        6
+      );
+
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'PermissionFrozen'
+      ).withArgs(
+        pm.address,
+        ADMIN_PERMISSION_ID
+      );
+    });
+
+    it('should revert with UnauthorizedOwner if the caller doesnt have ownership for revoke', async () => {
+      await pm.removeOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        4
+      );
+
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          4
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'UnauthorizedOwner'
+      ).withArgs(
+        ownerSigner.address,
+        2,
+        4
+      );
+    });
+
+    it('should revert with UnauthorizedOwner if the caller doesnt have ownership for grant', async () => {
+      await pm.removeOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        2
+      );
+
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          2
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'UnauthorizedOwner'
+      ).withArgs(
+        ownerSigner.address,
+        4,
+        2
+      );
+    });
+  });
+
   describe('grant', () => {
     it('should add permission', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);

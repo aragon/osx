@@ -310,7 +310,7 @@ abstract contract PermissionManager is Initializable {
             revert FlagCanNotBeZero();
         }
 
-        if (_owner == address(0)) {
+        if (_owner == address(0) || _where == address(0)) {
             revert ZeroAddress();
         }
 
@@ -329,13 +329,11 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[_owner];
 
         if (_owner != address(1)) {
-            if (hasPermission(_flags, uint256(2)) && !hasPermission(currentFlags, uint256(2))
-            ) {
+            if (hasPermission(_flags, uint256(2)) && !hasPermission(currentFlags, uint256(2))) {
                 permission.grantCounter++;
             }
 
-            if (hasPermission(_flags, uint256(4)) && !hasPermission(currentFlags, uint256(4))
-            ) {
+            if (hasPermission(_flags, uint256(4)) && !hasPermission(currentFlags, uint256(4))) {
                 permission.revokeCounter++;
             }
         }
