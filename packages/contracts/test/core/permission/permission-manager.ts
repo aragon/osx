@@ -85,7 +85,7 @@ describe('Core: PermissionManager', function () {
         ADMIN_PERMISSION_ID,
         ownerSigner.address,
         ['0xb794f5ea0ba39494ce839613fffba74279579268']
-      )
+      );
     });
 
     it('should add an owner with all the flags passed', async () => {
@@ -223,6 +223,66 @@ describe('Core: PermissionManager', function () {
       ).withArgs(
         ownerSigner.address,
         4,
+        2
+      );
+    });
+  });
+
+  describe('removeOwner', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+    });
+
+    it('should remove the passed flags from the owner', async () => {
+      await expect(
+        pm.removeOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          6
+        )
+      ).to.emit(
+        pm.address,
+        'OwnerRemoved'
+      ).withArgs(
+        pm.address, 
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        1
+      );
+    });
+
+    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      await expect(
+        pm.removeOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          0
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'FlagCanNotBeZero'
+      );
+    });
+
+    it('should revert with InvalidFlagsForRemovalPassed if flags are tried to be removed that do not exist', async () => {
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2);
+
+      await expect(
+        pm.removeOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          2
+        )
+      ).to.be.revertedWithCustomError(
+        pm,
+        'InvalidFlagsForRemovalPassed'
+      ).withArgs(
+        4, 
         2
       );
     });
