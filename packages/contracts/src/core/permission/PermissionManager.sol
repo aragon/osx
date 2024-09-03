@@ -209,7 +209,7 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (!_checkOwner(permission, _where, _permissionId, _operation, _isRoot(msg.sender))) {
+        if (!_checkOwner(permission, _where, msg.sender, _permissionId, _operation, _isRoot(msg.sender))) {
             revert Unauthorized(_where, msg.sender, _permissionId);
         }
 
@@ -465,9 +465,8 @@ abstract contract PermissionManager is Initializable {
         address _where,
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
-        bool isRoot_ = _isRoot(msg.sender);
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_
+            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !_isRoot(msg.sender)
         ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -476,8 +475,8 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
-            if (!_checkOwner(permission, _where, item.permissionId, item.operation, isRoot_)) {
-                revert Unauthorized(_where, msg.sender, item.permissionId);
+            if (!_checkOwner(permission, _where, item.who, item.permissionId, item.operation, _isRoot(item.who))) {
+                revert Unauthorized(_where, item.who, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -499,9 +498,8 @@ abstract contract PermissionManager is Initializable {
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
-        bool isRoot_ = _isRoot(msg.sender);
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_
+            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !_isRoot(msg.sender)
         ) {
             revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -512,8 +510,8 @@ abstract contract PermissionManager is Initializable {
                 permissionHash(item.where, item.permissionId)
             ];
 
-            if (!_checkOwner(permission, item.who, item.permissionId, item.operation, isRoot_)) {
-                revert Unauthorized(item.where, msg.sender, item.permissionId);
+            if (!_checkOwner(permission, item.where, item.who, item.permissionId, item.operation, _isRoot(item.who))) {
+                revert Unauthorized(item.where, item.who, item.permissionId);
             }
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -885,6 +883,7 @@ abstract contract PermissionManager is Initializable {
     function _checkOwner(
         Permission storage _permission,
         address _where,
+        address _who,
         bytes32 _permissionId,
         PermissionLib.Operation _operation,
         bool isRoot
@@ -896,11 +895,11 @@ abstract contract PermissionManager is Initializable {
         bytes32 permHash = permissionHash(_where, _permissionId);
 
         // Check either caller is delegated or an owner.
-        uint256 flags = _permission.delegations[msg.sender][permHash];
+        uint256 flags = _permission.delegations[_who][permHash];
         if (flags == 0) {
-            flags = _permission.owners[msg.sender];
+            flags = _permission.owners[_who];
         } else {
-            delete _permission.delegations[msg.sender][permHash];
+            delete _permission.delegations[_who][permHash];
         }
 
         if (
