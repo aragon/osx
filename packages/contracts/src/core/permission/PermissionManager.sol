@@ -209,7 +209,16 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (!_checkOwner(permission, _where, msg.sender, _permissionId, _operation, _isRoot(msg.sender))) {
+        if (
+            !_checkOwner(
+                permission,
+                _where,
+                msg.sender,
+                _permissionId,
+                _operation,
+                _isRoot(msg.sender)
+            )
+        ) {
             revert Unauthorized(_where, msg.sender, _permissionId);
         }
 
@@ -338,8 +347,8 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        permission.owners[_owner] = currentFlags | _flags; // Update owner permission 
-        
+        permission.owners[_owner] = currentFlags | _flags; // Update owner permission
+
         emit OwnerAdded(_where, _permissionIdOrSelector, _owner, _flags);
     }
 
@@ -358,15 +367,18 @@ abstract contract PermissionManager is Initializable {
 
         uint256 currentFlags = permission.owners[msg.sender];
 
-        if (!hasPermission(currentFlags, _flags)) { // Check if the removal flags have more bit set as the owner currently has
+        if (!hasPermission(currentFlags, _flags)) {
+            // Check if the removal flags have more bit set as the owner currently has
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
-        if (hasPermission(_flags, uint256(2))) { // Check if he has the grantOwner bit set
+        if (hasPermission(_flags, uint256(2))) {
+            // Check if he has the grantOwner bit set
             permission.grantCounter--;
         }
 
-        if (hasPermission(_flags, uint256(4))) { // Check if he as the revokeOwner bit set
+        if (hasPermission(_flags, uint256(4))) {
+            // Check if he as the revokeOwner bit set
             permission.revokeCounter--;
         }
 
@@ -401,11 +413,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    )
-        external
-        virtual
-        ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant)
-    {
+    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.Grant) {
         _grant({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -444,11 +452,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId
-    )
-        external
-        virtual
-        ownerAuth(_where, _permissionId, PermissionLib.Operation.Revoke)
-    {
+    ) external virtual ownerAuth(_where, _permissionId, PermissionLib.Operation.Revoke) {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
@@ -460,7 +464,8 @@ abstract contract PermissionManager is Initializable {
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !_isRoot(msg.sender)
+            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) &&
+            !_isRoot(msg.sender)
         ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -469,7 +474,16 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
-            if (!_checkOwner(permission, _where, item.who, item.permissionId, item.operation, _isRoot(item.who))) {
+            if (
+                !_checkOwner(
+                    permission,
+                    _where,
+                    item.who,
+                    item.permissionId,
+                    item.operation,
+                    _isRoot(item.who)
+                )
+            ) {
                 revert Unauthorized(_where, item.who, item.permissionId);
             }
 
@@ -493,7 +507,8 @@ abstract contract PermissionManager is Initializable {
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !_isRoot(msg.sender)
+            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) &&
+            !_isRoot(msg.sender)
         ) {
             revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -504,7 +519,16 @@ abstract contract PermissionManager is Initializable {
                 permissionHash(item.where, item.permissionId)
             ];
 
-            if (!_checkOwner(permission, item.where, item.who, item.permissionId, item.operation, _isRoot(item.who))) {
+            if (
+                !_checkOwner(
+                    permission,
+                    item.where,
+                    item.who,
+                    item.permissionId,
+                    item.operation,
+                    _isRoot(item.who)
+                )
+            ) {
                 revert Unauthorized(item.where, item.who, item.permissionId);
             }
 
@@ -796,7 +820,7 @@ abstract contract PermissionManager is Initializable {
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
-        
+
         if (permission.created) {
             revert PermissionAlreadyCreated();
         }
