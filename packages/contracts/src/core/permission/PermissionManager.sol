@@ -329,16 +329,12 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[_owner];
 
         if (_owner != address(1)) {
-            if (
-                hasPermission(_flags, uint256(Option.grantOwner)) &&
-                !hasPermission(currentFlags, uint256(Option.grantOwner))
+            if (hasPermission(_flags, uint256(2)) && !hasPermission(currentFlags, uint256(2))
             ) {
                 permission.grantCounter++;
             }
 
-            if (
-                hasPermission(_flags, uint256(Option.revokeOwner)) &&
-                !hasPermission(currentFlags, uint256(Option.revokeOwner))
+            if (hasPermission(_flags, uint256(4)) && !hasPermission(currentFlags, uint256(4))
             ) {
                 permission.revokeCounter++;
             }
