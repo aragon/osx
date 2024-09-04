@@ -180,6 +180,18 @@ abstract contract PermissionManager is Initializable {
         uint256 flags
     );
 
+    /// @notice Emitted when a permission does get created
+    /// @param where The address of the target contract 
+    /// @param permissionIdOrSelector The permission identifier
+    /// @param owner The initial owner of that permission 
+    /// @param whos The addresses passed that to grant the permission to them
+    event PermissionCreated(
+        address indexed where,
+        bytes32 indexed permissionIdOrSelector,
+        address indexed owner,
+        address[] whos
+    );
+
     /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
@@ -836,6 +848,8 @@ abstract contract PermissionManager is Initializable {
 
         permission.grantCounter = 1;
         permission.revokeCounter = 1;
+
+        emit PermissionCreated(_where, _permissionIdOrSelector, _owner, _whos);
     }
 
     /// @notice Internal function to check if this specific permission is frozen.

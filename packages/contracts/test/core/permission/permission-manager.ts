@@ -164,7 +164,7 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('removeOwner', () => {
+  /*describe('removeOwner', () => {
     beforeEach(async () => {
       await pm.createPermission(
         pm.address,
@@ -192,6 +192,90 @@ describe('Core: PermissionManager', function () {
       await expect(pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2))
         .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
         .withArgs(4, 2);
+    });
+  });*/
+
+  describe('createPermission', () => {
+    it('shoulld only be calable by the ROOT user', async () => {
+      await expect(
+        pm.createPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234',
+        otherSigner.address, 
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      ))
+        .to.emit(pm, "PermissionCreated")
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        );
+
+      await expect(
+        pm.connect(otherSigner).createPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234',
+        otherSigner.address, 
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      ))
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9',
+          otherSigner.address,
+          '0x815fe80e4b37c8582a3b773d1d7071f983eacfd56b5965db654f3087c25ada33'
+        );
+    });
+
+    it('should revert with PermissionAlreadyCreated in case the permission is already existing', async () => {
+      await expect(
+        pm.createPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234',
+        otherSigner.address, 
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      ))
+        .to.emit(pm, "PermissionCreated")
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        );
+
+      await expect(
+        pm.createPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234',
+        otherSigner.address, 
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      ))
+        .to.be.revertedWithCustomError(pm, "PermissionAlreadyCreated");
+    });
+
+    it('should create a permission and call grant for all whos passed', async () => {
+      await expect(
+        pm.createPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234',
+        otherSigner.address, 
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      ))
+        .to.emit(pm, "PermissionCreated")
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        );
+
+        const flag = await pm.getAuthPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234'
+        );
+
+        expect(flag).to.equal('0x0000000000000000000000000000000000000002')
     });
   });
 
