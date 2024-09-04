@@ -356,6 +356,67 @@ describe('Core: PermissionManager', function () {
     });
   });
 
+  describe('undelegatePermission', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+
+      await pm.delegatePermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        6
+      );
+    });
+
+    it('should revert with FlagCanNotBeZero when a zero flag is passed', async () => {
+      await expect(
+        pm.undelegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          0
+        )
+      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+    });
+
+    it('should revert with UnauthorizedOwner if the caller isnt the owner of the permission he wants to undelegate', async () => {
+      await expect(
+        pm
+          .connect(otherSigner)
+          .undelegatePermission(
+            pm.address,
+            ADMIN_PERMISSION_ID,
+            otherSigner.address,
+            6
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
+        .withArgs(
+          otherSigner.address,
+          0,
+          6
+        );
+    });
+
+    it('should emit PermissionUndelegated when the permissiion got undelegated successfully', async () => {
+      await expect(
+        pm.undelegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          4
+        )
+      )
+        .to.emit(pm, 'PermissionUndelegated')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 2);
+    });
+  });
+
   describe('grant', () => {
     it('should add permission', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
