@@ -181,9 +181,9 @@ abstract contract PermissionManager is Initializable {
     );
 
     /// @notice Emitted when a permission does get created
-    /// @param where The address of the target contract 
+    /// @param where The address of the target contract
     /// @param permissionIdOrSelector The permission identifier
-    /// @param owner The initial owner of that permission 
+    /// @param owner The initial owner of that permission
     /// @param whos The addresses passed that to grant the permission to them
     event PermissionCreated(
         address indexed where,

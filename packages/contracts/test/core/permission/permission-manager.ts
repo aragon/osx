@@ -396,11 +396,7 @@ describe('Core: PermissionManager', function () {
           )
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
-        .withArgs(
-          otherSigner.address,
-          0,
-          6
-        );
+        .withArgs(otherSigner.address, 0, 6);
     });
 
     it('should emit PermissionUndelegated when the permissiion got undelegated successfully', async () => {
