@@ -379,18 +379,18 @@ abstract contract PermissionManager is Initializable {
 
         uint256 currentFlags = permission.owners[msg.sender];
 
+        // Check if the removal flags have more bit set as the owner currently has
         if (!hasPermission(currentFlags, _flags)) {
-            // Check if the removal flags have more bit set as the owner currently has
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
+        // Check if he has the grantOwner bit set
         if (hasPermission(_flags, uint256(2))) {
-            // Check if he has the grantOwner bit set
             permission.grantCounter--;
         }
 
+        // Check if he as the revokeOwner bit set
         if (hasPermission(_flags, uint256(4))) {
-            // Check if he as the revokeOwner bit set
             permission.revokeCounter--;
         }
 

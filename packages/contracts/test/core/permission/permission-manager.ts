@@ -164,7 +164,7 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  /*describe('removeOwner', () => {
+  describe('removeOwner', () => {
     beforeEach(async () => {
       await pm.createPermission(
         pm.address,
@@ -174,11 +174,11 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should remove the passed flags from the owner', async () => {
+    /*it('should remove the passed flags from the owner', async () => {
       await expect(pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6))
         .to.emit(pm.address, 'OwnerRemoved')
         .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 1);
-    });
+    });*/
 
     it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
       await expect(
@@ -193,18 +193,19 @@ describe('Core: PermissionManager', function () {
         .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
         .withArgs(4, 2);
     });
-  });*/
+  });
 
   describe('createPermission', () => {
     it('shoulld only be calable by the ROOT user', async () => {
       await expect(
         pm.createPermission(
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0x0000000000000000000000000000000000000000000000000000000000001234',
-        otherSigner.address, 
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
-      ))
-        .to.emit(pm, "PermissionCreated")
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
         .withArgs(
           '0xb794F5eA0ba39494cE839613fffBA74279579268',
           '0x0000000000000000000000000000000000000000000000000000000000001234',
@@ -213,15 +214,18 @@ describe('Core: PermissionManager', function () {
         );
 
       await expect(
-        pm.connect(otherSigner).createPermission(
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0x0000000000000000000000000000000000000000000000000000000000001234',
-        otherSigner.address, 
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
-      ))
+        pm
+          .connect(otherSigner)
+          .createPermission(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            '0x0000000000000000000000000000000000000000000000000000000000001234',
+            otherSigner.address,
+            ['0xb794f5ea0ba39494ce839613fffba74279579268']
+          )
+      )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
-          '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9',
+          '0x4826533B4897376654Bb4d4AD88B7faFD0C98528',
           otherSigner.address,
           '0x815fe80e4b37c8582a3b773d1d7071f983eacfd56b5965db654f3087c25ada33'
         );
@@ -230,12 +234,13 @@ describe('Core: PermissionManager', function () {
     it('should revert with PermissionAlreadyCreated in case the permission is already existing', async () => {
       await expect(
         pm.createPermission(
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0x0000000000000000000000000000000000000000000000000000000000001234',
-        otherSigner.address, 
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
-      ))
-        .to.emit(pm, "PermissionCreated")
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
         .withArgs(
           '0xb794F5eA0ba39494cE839613fffBA74279579268',
           '0x0000000000000000000000000000000000000000000000000000000000001234',
@@ -245,23 +250,24 @@ describe('Core: PermissionManager', function () {
 
       await expect(
         pm.createPermission(
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0x0000000000000000000000000000000000000000000000000000000000001234',
-        otherSigner.address, 
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
-      ))
-        .to.be.revertedWithCustomError(pm, "PermissionAlreadyCreated");
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      ).to.be.revertedWithCustomError(pm, 'PermissionAlreadyCreated');
     });
 
     it('should create a permission and call grant for all whos passed', async () => {
       await expect(
         pm.createPermission(
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0x0000000000000000000000000000000000000000000000000000000000001234',
-        otherSigner.address, 
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
-      ))
-        .to.emit(pm, "PermissionCreated")
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
         .withArgs(
           '0xb794F5eA0ba39494cE839613fffBA74279579268',
           '0x0000000000000000000000000000000000000000000000000000000000001234',
@@ -269,13 +275,84 @@ describe('Core: PermissionManager', function () {
           ['0xb794F5eA0ba39494cE839613fffBA74279579268']
         );
 
-        const flag = await pm.getAuthPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234'
-        );
+      const flag = await pm.getAuthPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234'
+      );
 
-        expect(flag).to.equal('0x0000000000000000000000000000000000000002')
+      expect(flag).to.equal('0x0000000000000000000000000000000000000002');
+    });
+  });
+
+  describe('delegatePermission', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+    });
+
+    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          0
+        )
+      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+    });
+
+    it('should revert with PermissionFrozen if the permission is actually frozen', async () => {
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        '0x0000000000000000000000000000000000000001',
+        6
+      );
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6);
+
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID);
+    });
+
+    it('should revert with UnauthorizedOwner if the caller isnt the owner of the permission he wants to delegate', async () => {
+      await expect(
+        pm
+          .connect(otherSigner)
+          .delegatePermission(
+            pm.address,
+            ADMIN_PERMISSION_ID,
+            otherSigner.address,
+            6
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
+        .withArgs(otherSigner.address, 0, 6);
+    });
+
+    it('should emit PermissionDelegated when the permission got delegated successfully', async () => {
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      )
+        .to.emit(pm, 'PermissionDelegated')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6);
     });
   });
 
