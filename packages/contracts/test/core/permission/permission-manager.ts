@@ -196,7 +196,7 @@ describe('Core: PermissionManager', function () {
   });
 
   describe('createPermission', () => {
-    it('shoulld only be calable by the ROOT user', async () => {
+    it('should only be callable by the ROOT user', async () => {
       await expect(
         pm.createPermission(
           '0xb794f5ea0ba39494ce839613fffba74279579268',

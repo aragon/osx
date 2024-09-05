@@ -273,7 +273,7 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionIdOrSelector);
         }
 
-        if (!hasPermission(permission.owners[msg.sender], _flags)) {
+        if (!_checkFlags(permission.owners[msg.sender], _flags)) {
             revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
@@ -301,12 +301,12 @@ abstract contract PermissionManager is Initializable {
         bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
         Permission storage permission = permissions[permHash];
 
-        if (!hasPermission(permission.owners[msg.sender], _flags)) {
+        if (!_checkFlags(permission.owners[msg.sender], _flags)) {
             revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint256 currentFlags = permission.delegations[_delegatee][permHash];
-        if (!hasPermission(currentFlags, _flags)) {
+        if (!_checkFlags(currentFlags, _flags)) {
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
@@ -343,18 +343,18 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionIdOrSelector);
         }
 
-        if (!hasPermission(permission.owners[msg.sender], _flags)) {
+        if (!_checkFlags(permission.owners[msg.sender], _flags)) {
             revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
         uint256 currentFlags = permission.owners[_owner];
 
         if (_owner != address(1)) {
-            if (hasPermission(_flags, uint256(2)) && !hasPermission(currentFlags, uint256(2))) {
+            if (_checkFlags(_flags, uint256(2)) && !_checkFlags(currentFlags, uint256(2))) {
                 permission.grantCounter++;
             }
 
-            if (hasPermission(_flags, uint256(4)) && !hasPermission(currentFlags, uint256(4))) {
+            if (_checkFlags(_flags, uint256(4)) && !_checkFlags(currentFlags, uint256(4))) {
                 permission.revokeCounter++;
             }
         }
@@ -380,17 +380,17 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[msg.sender];
 
         // Check if the removal flags have more bit set as the owner currently has
-        if (!hasPermission(currentFlags, _flags)) {
+        if (!_checkFlags(currentFlags, _flags)) {
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
         // Check if he has the grantOwner bit set
-        if (hasPermission(_flags, uint256(2))) {
+        if (_checkFlags(_flags, uint256(2))) {
             permission.grantCounter--;
         }
 
         // Check if he as the revokeOwner bit set
-        if (hasPermission(_flags, uint256(4))) {
+        if (_checkFlags(_flags, uint256(4))) {
             permission.revokeCounter--;
         }
 
@@ -902,7 +902,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _permission uint256 bitmap to check against.
     /// @param _flags uint256 bitmap to check.
     /// @return True if the bit's are flipped as expected and false otherwise.
-    function hasPermission(uint256 _permission, uint256 _flags) public pure returns (bool) {
+    function _checkFlags(uint256 _permission, uint256 _flags) private pure returns (bool) {
         return (_permission & _flags) == _flags;
     }
 
@@ -938,7 +938,7 @@ abstract contract PermissionManager is Initializable {
             _operation == PermissionLib.Operation.Grant ||
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            if (hasPermission(flags, uint256(2))) {
+            if (_checkFlags(flags, uint256(2))) {
                 return true;
             }
 
@@ -946,7 +946,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
-            if (hasPermission(flags, uint256(4))) {
+            if (_checkFlags(flags, uint256(4))) {
                 return true;
             }
 
