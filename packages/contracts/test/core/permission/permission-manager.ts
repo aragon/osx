@@ -225,7 +225,7 @@ describe('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
-          '0x4826533B4897376654Bb4d4AD88B7faFD0C98528',
+          pm.address,
           otherSigner.address,
           '0x815fe80e4b37c8582a3b773d1d7071f983eacfd56b5965db654f3087c25ada33'
         );
