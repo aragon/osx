@@ -18,6 +18,16 @@
     "deploy": ["./deploy/new", "./deploy/verification"],
     "forceDeploy": true
   },
+  "modeTestnet": {
+    "url": "https://sepolia.mode.network",
+    "chainId": 919,
+    "deploy": ["./deploy/new", "./deploy/verification"]
+  },
+  "modeMainnet": {
+    "url": "https://mainnet.mode.network",
+    "chainId": 34443,
+    "deploy": ["./deploy/new", "./deploy/verification"]
+  },
   "holesky": { 
     "chainId": 17000, 
     "url": "https://ethereum-holesky.publicnode.com", 

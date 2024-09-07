@@ -128,14 +128,20 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
-      throwOnTransactionFailures: true,
-      throwOnCallFailures: true,
-      blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
-      gasPrice: 80000000000,
-      deploy: ENABLE_DEPLOY_TEST
-        ? ['./deploy']
-        : ['./deploy/new', './deploy/verification'],
+      forking: {
+        url: 'https://sepolia.mode.network',
+        blockNumber: 18922281
+      }
     },
+    // hardhat: {
+    //   throwOnTransactionFailures: true,
+    //   throwOnCallFailures: true,
+    //   blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
+    //   gasPrice: 80000000000,
+    //   deploy: ENABLE_DEPLOY_TEST
+    //     ? ['./deploy']
+    //     : ['./deploy/new', './deploy/verification'],
+    // },
     zkLocalTestnet: {
       url: 'http://127.0.0.1:8011',
       ethNetwork: 'http://127.0.0.1:8545',
@@ -202,6 +208,8 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      modeTestnet: 'modeTestnet',
+      modeMainnet: 'modeMainnet',
       mainnet: process.env.ETHERSCAN_KEY || '',
       rinkeby: process.env.ETHERSCAN_KEY || '',
       goerli: process.env.ETHERSCAN_KEY || '',
@@ -255,6 +263,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-holesky.etherscan.io/api',
           browserURL: 'https://holesky.etherscan.io',
+        },
+      },
+      {
+        network: 'modeTestnet',
+        chainId: 919,
+        urls: {
+          apiURL: 'https://api.routescan.io/v2/network/testnet/evm/919/etherscan',
+          browserURL: 'https://testnet.modescan.io',
+        },
+      },
+      {
+        network: 'modeMainnet',
+        chainId: 34443,
+        urls: {
+          apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
+          browserURL: 'https://modescan.io',
         },
       },
     ],
