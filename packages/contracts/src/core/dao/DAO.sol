@@ -251,13 +251,7 @@ contract DAO is
         bytes32 _callId,
         Action[] calldata _actions,
         uint256 _allowFailureMap
-    )
-        external
-        override
-        nonReentrant
-        auth(EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory execResults, uint256 failureMap)
-    {
+    ) external override nonReentrant returns (bytes[] memory execResults, uint256 failureMap) {
         // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
@@ -268,12 +262,48 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
+        bool hasExecutePermission = isGranted(
+            address(this),
+            msg.sender,
+            EXECUTE_PERMISSION_ID,
+            msg.data
+        );
+
+        for (uint256 i = 0; i < _actions.length; ) {
+            bytes32 id = keccak256(abi.encode(bytes4(_actions[i].data)));
+
+            Permission storage targetPermission = permissions[permissionHash(_actions[i].to, id)];
+
+            bool isAllowed = targetPermission.created
+                ? isGranted(_actions[i].to, msg.sender, id, _actions[i].data)
+                : hasExecutePermission;
+
+            if (!isAllowed) {
+                // TODO: revert error
+                // revert NotPossible();
+            }
+        }
+
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
+            bool success;
+            bytes memory data;
 
-            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
-                _actions[i].data
-            );
+            (success, data) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+            if (_actions[i].to == address(this)) {
+                if (!success) {
+                    bytes4 result;
+
+                    assembly {
+                        result := mload(add(data, 32))
+                    }
+
+                    if (result == Unauthorized.selector || result == UnauthorizedOwner.selector) {
+                        (success, data) = _actions[i].to.delegatecall(_actions[i].data);
+                    }
+                }
+            }
+
             gasAfter = gasleft();
 
             // Check if failure is allowed
@@ -297,7 +327,7 @@ contract DAO is
                 }
             }
 
-            execResults[i] = result;
+            execResults[i] = data;
 
             unchecked {
                 ++i;
