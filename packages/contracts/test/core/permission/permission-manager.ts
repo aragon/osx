@@ -12,6 +12,9 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
+const APPLY_TARGET_PERMISSION_ID = ethers.utils.id(
+  'APPLY_TARGET_PERMISSION_ID'
+);
 const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
   DAO_PERMISSIONS.ROOT_PERMISSION_ID,
   ethers.utils.id('TEST_PERMISSION_1'),
@@ -74,6 +77,339 @@ describe('Core: PermissionManager', function () {
         DAO_PERMISSIONS.ROOT_PERMISSION_ID
       );
       expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+  });
+
+  describe('addOwner', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+    });
+
+    it('should add an owner with all the flags passed', async () => {
+      await expect(
+        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6)
+      )
+        .to.emit(pm, 'OwnerAdded')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6);
+    });
+
+    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      await expect(
+        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 0)
+      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+    });
+
+    it('should revert with ZeroAddress if _owner is address(0)', async () => {
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          '0x0000000000000000000000000000000000000000',
+          6
+        )
+      ).to.be.revertedWithCustomError(pm, 'ZeroAddress');
+    });
+
+    it('should revert with ZeroAddress if _where is address(0)', async () => {
+      await expect(
+        pm.addOwner(
+          '0x0000000000000000000000000000000000000000',
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      ).to.be.revertedWithCustomError(pm, 'ZeroAddress');
+    });
+
+    it('should revert with PermissionFrozen if the permission is frozen', async () => {
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        '0x0000000000000000000000000000000000000001',
+        6
+      );
+
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6);
+
+      await expect(
+        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6)
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID);
+    });
+
+    it('should revert with UnauthorizedOwner if the caller doesnt have ownership for revoke', async () => {
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 4);
+
+      await expect(
+        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 4)
+      )
+        .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
+        .withArgs(ownerSigner.address, 2, 4);
+    });
+
+    it('should revert with UnauthorizedOwner if the caller doesnt have ownership for grant', async () => {
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2);
+
+      await expect(
+        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 2)
+      )
+        .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
+        .withArgs(ownerSigner.address, 4, 2);
+    });
+  });
+
+  describe('removeOwner', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+    });
+
+    /*it('should remove the passed flags from the owner', async () => {
+      await expect(pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6))
+        .to.emit(pm.address, 'OwnerRemoved')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 1);
+    });*/
+
+    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      await expect(
+        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 0)
+      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+    });
+
+    it('should revert with InvalidFlagsForRemovalPassed if flags are tried to be removed that do not exist', async () => {
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2);
+
+      await expect(pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2))
+        .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
+        .withArgs(4, 2);
+    });
+  });
+
+  describe('createPermission', () => {
+    it('should only be callable by the ROOT user', async () => {
+      await expect(
+        pm.createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .createPermission(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            '0x0000000000000000000000000000000000000000000000000000000000001234',
+            otherSigner.address,
+            ['0xb794f5ea0ba39494ce839613fffba74279579268']
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          '0x815fe80e4b37c8582a3b773d1d7071f983eacfd56b5965db654f3087c25ada33'
+        );
+    });
+
+    it('should revert with PermissionAlreadyCreated in case the permission is already existing', async () => {
+      await expect(
+        pm.createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        );
+
+      await expect(
+        pm.createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      ).to.be.revertedWithCustomError(pm, 'PermissionAlreadyCreated');
+    });
+
+    it('should create a permission and call grant for all whos passed', async () => {
+      await expect(
+        pm.createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          otherSigner.address,
+          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        );
+
+      const flag = await pm.getAuthPermission(
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0xb794f5ea0ba39494ce839613fffba74279579268',
+        '0x0000000000000000000000000000000000000000000000000000000000001234'
+      );
+
+      expect(flag).to.equal('0x0000000000000000000000000000000000000002');
+    });
+  });
+
+  describe('delegatePermission', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+    });
+
+    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          0
+        )
+      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+    });
+
+    it('should revert with PermissionFrozen if the permission is actually frozen', async () => {
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        '0x0000000000000000000000000000000000000001',
+        6
+      );
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6);
+
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID);
+    });
+
+    it('should revert with UnauthorizedOwner if the caller isnt the owner of the permission he wants to delegate', async () => {
+      await expect(
+        pm
+          .connect(otherSigner)
+          .delegatePermission(
+            pm.address,
+            ADMIN_PERMISSION_ID,
+            otherSigner.address,
+            6
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
+        .withArgs(otherSigner.address, 0, 6);
+    });
+
+    it('should emit PermissionDelegated when the permission got delegated successfully', async () => {
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          6
+        )
+      )
+        .to.emit(pm, 'PermissionDelegated')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6);
+    });
+  });
+
+  describe('undelegatePermission', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+      );
+
+      await pm.delegatePermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        6
+      );
+    });
+
+    it('should revert with FlagCanNotBeZero when a zero flag is passed', async () => {
+      await expect(
+        pm.undelegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          0
+        )
+      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+    });
+
+    it('should revert with UnauthorizedOwner if the caller isnt the owner of the permission he wants to undelegate', async () => {
+      await expect(
+        pm
+          .connect(otherSigner)
+          .undelegatePermission(
+            pm.address,
+            ADMIN_PERMISSION_ID,
+            otherSigner.address,
+            6
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
+        .withArgs(otherSigner.address, 0, 6);
+    });
+
+    it('should emit PermissionUndelegated when the permissiion got undelegated successfully', async () => {
+      await expect(
+        pm.undelegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          4
+        )
+      )
+        .to.emit(pm, 'PermissionUndelegated')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 2);
     });
   });
 
@@ -141,11 +477,7 @@ describe('Core: PermissionManager', function () {
           .grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
     });
 
     it('should not allow for non ROOT', async () => {
@@ -164,6 +496,208 @@ describe('Core: PermissionManager', function () {
           pm.address,
           otherSigner.address,
           DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+    });
+
+    it('should revert if the permission is frozen', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .addOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          '0x0000000000000000000000000000000000000001',
+          2
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          6
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if the caller doesnt have the grant flag set', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should allow the root user as fallback if the permission is created but no grant owners are existing anymore', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          2
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Granted');
+    });
+
+    it('should allow the root user as fallback if the permission isnt created', async () => {
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Granted');
+    });
+
+    it('should allow the delegatee to call grant once', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          2
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Granted');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .undelegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grant(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
         );
     });
   });
@@ -200,7 +734,7 @@ describe('Core: PermissionManager', function () {
           nonConditionContract.address
         )
       )
-        .to.be.revertedWithCustomError(pm, 'ConditionInterfaceNotSupported')
+        .to.be.revertedWithCustomError(pm, 'ConditionInterfacNotSupported')
         .withArgs(nonConditionContract.address);
     });
 
@@ -328,11 +862,7 @@ describe('Core: PermissionManager', function () {
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
     });
 
     it('reverts if the caller does not have `ROOT_PERMISSION_ID`', async () => {
@@ -357,6 +887,215 @@ describe('Core: PermissionManager', function () {
           pm.address,
           otherSigner.address,
           DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+    });
+
+    it('should revert if the permission is frozen', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .addOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          '0x0000000000000000000000000000000000000001',
+          2
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          6
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if the caller doesnt have the grantWithCondition flag set', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should allow the root user as fallback if the permission is created but no grantWithCondition owners are existing anymore', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          2
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      ).to.emit(pm, 'Granted');
+    });
+
+    it('should allow the root user as fallback if the permission isnt created', async () => {
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      ).to.emit(pm, 'Granted');
+    });
+
+    it('should allow the delegatee to call grantWithCondition once', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          2
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      ).to.emit(pm, 'Granted');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .undelegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .grantWithCondition(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            conditionMock.address
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
         );
     });
   });
@@ -388,11 +1127,7 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
     });
 
     it('should not emit revoked if already revoked', async () => {
@@ -410,11 +1145,7 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
     });
 
     it('should not allow for non ROOT', async () => {
@@ -425,36 +1156,241 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+    });
+
+    it('should revert if the permission is frozen', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [ownerSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .addOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          '0x0000000000000000000000000000000000000001',
+          2
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          6
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
         .withArgs(
-          pm.address,
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if the caller doesnt have the revoke flag set', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
           otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should allow the root user as fallback if the permission is created but no revoke owners are existing anymore', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          4
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Revoked');
+    });
+
+    it('should allow the root user as fallback if the permission isnt created', async () => {
+      await pm
+        .connect(ownerSigner)
+        .grant(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+
+      await expect(
+        pm
+          .connect(ownerSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Revoked');
+    });
+
+    it('should allow the delegatee to call revoke once', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      ).to.emit(pm, 'Revoked');
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
+        );
+    });
+
+    it('should revert if undelegate got called before revoke got called by the delegatee', async () => {
+      await pm
+        .connect(ownerSigner)
+        .createPermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          ownerSigner.address,
+          [otherSigner.address]
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .delegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await pm
+        .connect(ownerSigner)
+        .undelegatePermission(
+          '0xb794f5ea0ba39494ce839613fffba74279579268',
+          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          otherSigner.address,
+          4
+        );
+
+      await expect(
+        pm
+          .connect(otherSigner)
+          .revoke(
+            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            otherSigner.address,
+            '0x0000000000000000000000000000000000000000000000000000000012345678'
+          )
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          '0xb794F5eA0ba39494cE839613fffBA74279579268',
+          otherSigner.address,
+          '0x0000000000000000000000000000000000000000000000000000000012345678'
         );
     });
   });
 
   describe('bulk on multiple target', () => {
     it('should bulk grant ADMIN_PERMISSION on different targets', async () => {
-      const signers = await ethers.getSigners();
-      await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.Grant,
-          where: signers[1].address,
-          who: signers[2].address,
+          where: otherSigner.address,
+          who: ownerSigner.address,
           condition: addressZero,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Grant,
-          where: signers[2].address,
-          who: signers[3].address,
+          where: ownerSigner.address,
+          who: ownerSigner.address,
           condition: addressZero,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
 
       await pm.applyMultiTargetPermissions(bulkItems);
+
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           item.where,
@@ -465,35 +1401,115 @@ describe('Core: PermissionManager', function () {
       }
     });
 
+    it('should bulk grant ADMIN_PERMISSION with apply target permission and owners defined', async () => {
+      const bulkItem: MultiTargetPermission = {
+        operation: Operation.Grant,
+        where: ownerSigner.address,
+        who: otherSigner.address,
+        condition: addressZero,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+
+      await pm.createPermission(
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+      );
+      await pm.grant(
+        pm.address,
+        otherSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+
+      await pm.connect(otherSigner).applyMultiTargetPermissions([bulkItem]);
+
+      const permission = await pm.getAuthPermission(
+        bulkItem.where,
+        bulkItem.who,
+        bulkItem.permissionId
+      );
+
+      expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
+    it('should bulk grant ADMIN_PERMISSION as root with apply target permission who is an owner as well', async () => {
+      const bulkItem: MultiTargetPermission = {
+        operation: Operation.Grant,
+        where: otherSigner.address,
+        who: ownerSigner.address,
+        condition: addressZero,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+
+      await pm.createPermission(
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+      );
+      await pm.grant(
+        pm.address,
+        ownerSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+
+      await pm.connect(ownerSigner).applyMultiTargetPermissions([bulkItem]);
+
+      const permission = await pm.getAuthPermission(
+        bulkItem.where,
+        bulkItem.who,
+        bulkItem.permissionId
+      );
+
+      expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
+    it('should bulk grant ADMIN_PERMISSION with apply target permission where the caller is root without having a permission created for item.where', async () => {
+      const bulkItem: MultiTargetPermission = {
+        operation: Operation.Grant,
+        where: otherSigner.address,
+        who: ownerSigner.address,
+        condition: addressZero,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+
+      await pm.grant(
+        pm.address,
+        otherSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+      await pm.applyMultiTargetPermissions([bulkItem]);
+
+      const permission = await pm.getAuthPermission(
+        bulkItem.where,
+        bulkItem.who,
+        bulkItem.permissionId
+      );
+
+      expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
     it('should bulk revoke', async () => {
-      const signers = await ethers.getSigners();
-      await pm.grant(
-        signers[1].address,
-        signers[0].address,
-        ADMIN_PERMISSION_ID
-      );
-      await pm.grant(
-        signers[2].address,
-        signers[0].address,
-        ADMIN_PERMISSION_ID
-      );
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.Revoke,
-          where: signers[1].address,
-          who: signers[0].address,
+          where: otherSigner.address,
+          who: ownerSigner.address,
           condition: addressZero,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Revoke,
-          where: signers[2].address,
-          who: signers[0].address,
+          where: otherSigner.address,
+          who: ownerSigner.address,
           condition: addressZero,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
+
       await pm.applyMultiTargetPermissions(bulkItems);
+
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           item.where,
@@ -505,30 +1521,29 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should grant with condition', async () => {
-      const signers = await ethers.getSigners();
-
       const conditionMock2 = await new PermissionConditionMock__factory(
         signers[0]
       ).deploy();
 
-      await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.GrantWithCondition,
-          where: signers[1].address,
-          who: signers[0].address,
+          where: otherSigner.address,
+          who: ownerSigner.address,
           condition: conditionMock.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.GrantWithCondition,
-          where: signers[2].address,
-          who: signers[0].address,
+          where: ownerSigner.address,
+          who: ownerSigner.address,
           condition: conditionMock2.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
+
       await pm.applyMultiTargetPermissions(bulkItems);
+
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           item.where,
@@ -539,47 +1554,47 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    it('throws Unauthorized error when caller does not have ROOT_PERMISSION_ID permission', async () => {
-      const signers = await ethers.getSigners();
+    it('throws Unauthorized error when caller does not have the apply target permission and isnt root', async () => {
+      await pm.revoke(
+        pm.address,
+        otherSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.Grant,
-          where: signers[1].address,
-          who: signers[0].address,
+          where: ownerSigner.address,
+          who: otherSigner.address,
           condition: addressZero,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
 
       await expect(
-        pm.connect(signers[2]).applyMultiTargetPermissions(bulkItems)
+        pm.connect(otherSigner).applyMultiTargetPermissions(bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          signers[2].address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
     });
   });
 
   describe('bulk on single target', () => {
     it('should bulk grant ADMIN_PERMISSION', async () => {
-      const signers = await ethers.getSigners();
       const bulkItems: SingleTargetPermission[] = [
         {
           operation: Operation.Grant,
-          who: signers[1].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Grant,
-          who: signers[2].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Grant,
-          who: signers[3].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
@@ -594,25 +1609,114 @@ describe('Core: PermissionManager', function () {
       }
     });
 
+    it('should bulk grant ADMIN_PERMISSION with apply target permission and owners defined', async () => {
+      const bulkItem: SingleTargetPermission = {
+        operation: Operation.Grant,
+        who: otherSigner.address,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+
+      await pm.createPermission(
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+      );
+
+      await pm.grant(
+        pm.address,
+        otherSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+
+      await pm.setAllowedContract(otherSigner.address);
+
+      await pm
+        .connect(otherSigner)
+        .applySingleTargetPermissions(ownerSigner.address, [bulkItem]);
+
+      const permission = await pm.getAuthPermission(
+        ownerSigner.address,
+        bulkItem.who,
+        bulkItem.permissionId
+      );
+
+      expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
+    it('should bulk grant ADMIN_PERMISSION as root with apply target permission who is an owner as well', async () => {
+      const bulkItem: SingleTargetPermission = {
+        operation: Operation.Grant,
+        who: ownerSigner.address,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+
+      await pm.createPermission(
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+      );
+      await pm.grant(
+        pm.address,
+        ownerSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+
+      await pm
+        .connect(ownerSigner)
+        .applySingleTargetPermissions(otherSigner.address, [bulkItem]);
+
+      const permission = await pm.getAuthPermission(
+        otherSigner.address,
+        bulkItem.who,
+        bulkItem.permissionId
+      );
+
+      expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
+    it('should bulk grant ADMIN_PERMISSION with apply target permission where the caller is root without having a permission created for item.where', async () => {
+      const bulkItem: SingleTargetPermission = {
+        operation: Operation.Grant,
+        who: ownerSigner.address,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+
+      await pm.grant(
+        pm.address,
+        otherSigner.address,
+        APPLY_TARGET_PERMISSION_ID
+      );
+      await pm.applySingleTargetPermissions(otherSigner.address, [bulkItem]);
+
+      const permission = await pm.getAuthPermission(
+        otherSigner.address,
+        bulkItem.who,
+        bulkItem.permissionId
+      );
+
+      expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
     it('should bulk revoke', async () => {
-      const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[2].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
       const bulkItems: SingleTargetPermission[] = [
         {
           operation: Operation.Revoke,
-          who: signers[1].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Revoke,
-          who: signers[2].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Revoke,
-          who: signers[3].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
@@ -628,11 +1732,10 @@ describe('Core: PermissionManager', function () {
     });
 
     it('reverts for `Operation.GrantWithCondition` ', async () => {
-      const signers = await ethers.getSigners();
       const bulkItems: SingleTargetPermission[] = [
         {
           operation: Operation.GrantWithCondition,
-          who: signers[1].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
@@ -642,18 +1745,23 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should handle bulk mixed', async () => {
-      const signers = await ethers.getSigners();
-      await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        ownerSigner.address,
+        [otherSigner.address]
+      );
+
       const bulkItems: SingleTargetPermission[] = [
         {
           operation: Operation.Revoke,
-          who: signers[1].address,
+          who: otherSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Grant,
-          who: signers[2].address,
-          permissionId: ADMIN_PERMISSION_ID,
+          who: ownerSigner.address,
+          permissionId: APPLY_TARGET_PERMISSION_ID,
         },
       ];
 
@@ -661,31 +1769,30 @@ describe('Core: PermissionManager', function () {
       expect(
         await pm.getAuthPermission(
           pm.address,
-          signers[1].address,
+          otherSigner.address,
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(UNSET_FLAG);
       expect(
         await pm.getAuthPermission(
           pm.address,
-          signers[2].address,
-          ADMIN_PERMISSION_ID
+          ownerSigner.address,
+          APPLY_TARGET_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
     });
 
     it('should emit correct events on bulk', async () => {
-      const signers = await ethers.getSigners();
-      await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, ownerSigner.address, ADMIN_PERMISSION_ID);
       const bulkItems: SingleTargetPermission[] = [
         {
           operation: Operation.Revoke,
-          who: signers[1].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
         {
           operation: Operation.Grant,
-          who: signers[2].address,
+          who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
@@ -696,20 +1803,20 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID,
           ownerSigner.address,
           pm.address,
-          signers[1].address
+          ownerSigner.address
         )
         .to.emit(pm, 'Granted')
         .withArgs(
           ADMIN_PERMISSION_ID,
           ownerSigner.address,
           pm.address,
-          signers[2].address,
+          ownerSigner.address,
           ALLOW_FLAG
         );
       expect(
         await pm.getAuthPermission(
           pm.address,
-          signers[2].address,
+          ownerSigner.address,
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
@@ -729,11 +1836,7 @@ describe('Core: PermissionManager', function () {
           .applySingleTargetPermissions(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
     });
 
     it('should not allow for non ROOT', async () => {
@@ -751,11 +1854,7 @@ describe('Core: PermissionManager', function () {
           .applySingleTargetPermissions(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          otherSigner.address,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID
-        );
+        .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
     });
   });
 
