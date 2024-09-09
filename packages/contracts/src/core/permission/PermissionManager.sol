@@ -31,17 +31,14 @@ abstract contract PermissionManager is Initializable {
     /// @notice A special address encoding if a permission is allowed.
     address internal constant ALLOW_FLAG = address(2);
 
-    /// @notice Flag used to check owner flags or to assign it
-    uint256 internal constant GRANT_OWNER_FLAG = uint256(2);
-
-    /// @notice Flag used to check owner flags or to assign it
-    uint256 internal constant REVOKE_OWNER_FLAG = uint256(4);
-
-    /// @notice Flag used to check owner flags or to assign it
-    uint256 internal constant FULL_OWNER_FLAG = uint256(6);
-
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
     mapping(bytes32 => address) internal permissionsHashed;
+
+    enum Option {
+        NONE,
+        grantOwner,
+        revokeOwner
+    }
 
     struct Permission {
         mapping(address => uint256) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
@@ -353,11 +350,11 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[_owner];
 
         if (_owner != address(1)) {
-            if (_checkFlags(_flags, GRANT_OWNER_FLAG) && !_checkFlags(currentFlags, GRANT_OWNER_FLAG)) {
+            if (_checkFlags(_flags, uint256(2)) && !_checkFlags(currentFlags, uint256(2))) {
                 permission.grantCounter++;
             }
 
-            if (_checkFlags(_flags, REVOKE_OWNER_FLAG) && !_checkFlags(currentFlags, REVOKE_OWNER_FLAG)) {
+            if (_checkFlags(_flags, uint256(4)) && !_checkFlags(currentFlags, uint256(4))) {
                 permission.revokeCounter++;
             }
         }
@@ -387,11 +384,13 @@ abstract contract PermissionManager is Initializable {
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
-        if (_checkFlags(_flags, GRANT_OWNER_FLAG)) {
+        // Check if he has the grantOwner bit set
+        if (_checkFlags(_flags, uint256(2))) {
             permission.grantCounter--;
         }
 
-        if (_checkFlags(_flags, REVOKE_OWNER_FLAG)) {
+        // Check if he has the revokeOwner bit set
+        if (_checkFlags(_flags, uint256(4))) {
             permission.revokeCounter--;
         }
 
@@ -843,7 +842,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         permission.created = true;
-        permission.owners[_owner] = FULL_OWNER_FLAG;
+        permission.owners[_owner] = uint256(6); // set flags to 0...110
 
         if (_whos.length > 0) {
             for (uint256 i = 0; i < _whos.length; i++) {
@@ -943,7 +942,7 @@ abstract contract PermissionManager is Initializable {
             _operation == PermissionLib.Operation.Grant ||
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            if (_checkFlags(flags, GRANT_OWNER_FLAG)) {
+            if (_checkFlags(flags, uint256(2))) {
                 return true;
             }
 
@@ -951,7 +950,7 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
-            if (_checkFlags(flags, REVOKE_OWNER_FLAG)) {
+            if (_checkFlags(flags, uint256(4))) {
                 return true;
             }
 

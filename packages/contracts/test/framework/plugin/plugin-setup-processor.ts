@@ -579,7 +579,7 @@ describe('PluginSetupProcessor', function () {
           .withArgs(
             targetDao.address,
             psp.address,
-            '0xf40ef0af1ef5603c5d084dc17659d339ea90c8ff31545c1ffcadc8207aefa8af'
+            DAO_PERMISSIONS.ROOT_PERMISSION_ID
           );
       });
 
@@ -1165,7 +1165,7 @@ describe('PluginSetupProcessor', function () {
           .withArgs(
             targetDao.address,
             psp.address,
-            '0xf40ef0af1ef5603c5d084dc17659d339ea90c8ff31545c1ffcadc8207aefa8af'
+            DAO_PERMISSIONS.ROOT_PERMISSION_ID
           );
       });
 
@@ -1827,7 +1827,7 @@ describe('PluginSetupProcessor', function () {
         .withArgs(
           targetDao.address,
           psp.address,
-          '0xf40ef0af1ef5603c5d084dc17659d339ea90c8ff31545c1ffcadc8207aefa8af'
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
         );
     });
 
