@@ -1465,7 +1465,7 @@ describe('Core: PermissionManager', function () {
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
 
-    it('should bulk grant ADMIN_PERMISSION with apply target permission where item.who is the root without having a permission created for item.where', async () => {
+    it('should bulk grant ADMIN_PERMISSION with apply target permission where the caller is root without having a permission created for item.where', async () => {
       const bulkItem: MultiTargetPermission = {
         operation: Operation.Grant,
         where: otherSigner.address,
@@ -1479,7 +1479,7 @@ describe('Core: PermissionManager', function () {
         otherSigner.address,
         APPLY_TARGET_PERMISSION_ID
       );
-      await pm.connect(otherSigner).applyMultiTargetPermissions([bulkItem]);
+      await pm.applyMultiTargetPermissions([bulkItem]);
 
       const permission = await pm.getAuthPermission(
         bulkItem.where,
@@ -1673,7 +1673,7 @@ describe('Core: PermissionManager', function () {
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
 
-    it('should bulk grant ADMIN_PERMISSION with apply target permission where item.who is the root without having a permission created for item.where', async () => {
+    it('should bulk grant ADMIN_PERMISSION with apply target permission where the caller is root without having a permission created for item.where', async () => {
       const bulkItem: SingleTargetPermission = {
         operation: Operation.Grant,
         who: ownerSigner.address,
@@ -1686,7 +1686,6 @@ describe('Core: PermissionManager', function () {
         APPLY_TARGET_PERMISSION_ID
       );
       await pm
-        .connect(otherSigner)
         .applySingleTargetPermissions(otherSigner.address, [bulkItem]);
 
       const permission = await pm.getAuthPermission(
@@ -1747,7 +1746,7 @@ describe('Core: PermissionManager', function () {
       await pm.createPermission(
         pm.address,
         ADMIN_PERMISSION_ID,
-        otherSigner.address,
+        ownerSigner.address,
         [otherSigner.address]
       );
 

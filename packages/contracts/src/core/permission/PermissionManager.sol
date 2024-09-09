@@ -389,7 +389,7 @@ abstract contract PermissionManager is Initializable {
             permission.grantCounter--;
         }
 
-        // Check if he as the revokeOwner bit set
+        // Check if he has the revokeOwner bit set
         if (_checkFlags(_flags, uint256(4))) {
             permission.revokeCounter--;
         }
@@ -475,9 +475,11 @@ abstract contract PermissionManager is Initializable {
         address _where,
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
+        bool isRoot_ = _isRoot(msg.sender);
+
         if (
             !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) &&
-            !_isRoot(msg.sender)
+            !isRoot_
         ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -490,10 +492,10 @@ abstract contract PermissionManager is Initializable {
                 !_checkOwner(
                     permission,
                     _where,
-                    item.who,
+                    msg.sender,
                     item.permissionId,
                     item.operation,
-                    _isRoot(item.who)
+                    isRoot_
                 )
             ) {
                 revert Unauthorized(_where, item.who, item.permissionId);
@@ -518,6 +520,8 @@ abstract contract PermissionManager is Initializable {
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
+        bool isRoot_ = _isRoot(msg.sender);
+
         if (
             !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) &&
             !_isRoot(msg.sender)
@@ -535,10 +539,10 @@ abstract contract PermissionManager is Initializable {
                 !_checkOwner(
                     permission,
                     item.where,
-                    item.who,
+                    msg.sender,
                     item.permissionId,
                     item.operation,
-                    _isRoot(item.who)
+                    isRoot_
                 )
             ) {
                 revert Unauthorized(item.where, item.who, item.permissionId);
@@ -915,7 +919,7 @@ abstract contract PermissionManager is Initializable {
     function _checkOwner(
         Permission storage _permission,
         address _where,
-        address _who,
+        address _who, // TODO: remove _who and set it to msg.sender 
         bytes32 _permissionId,
         PermissionLib.Operation _operation,
         bool isRoot
