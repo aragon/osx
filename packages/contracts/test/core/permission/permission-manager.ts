@@ -1685,8 +1685,7 @@ describe('Core: PermissionManager', function () {
         otherSigner.address,
         APPLY_TARGET_PERMISSION_ID
       );
-      await pm
-        .applySingleTargetPermissions(otherSigner.address, [bulkItem]);
+      await pm.applySingleTargetPermissions(otherSigner.address, [bulkItem]);
 
       const permission = await pm.getAuthPermission(
         otherSigner.address,

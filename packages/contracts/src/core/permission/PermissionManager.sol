@@ -53,6 +53,8 @@ abstract contract PermissionManager is Initializable {
 
     mapping(bytes32 => Permission) internal permissions;
 
+    address allowedContract;
+
     /// @notice Thrown if a call is unauthorized.
     /// @param where The context in which the authorization reverted.
     /// @param who The address (EOA or contract) missing the permission.
@@ -479,6 +481,12 @@ abstract contract PermissionManager is Initializable {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
+    /// @notice Only this contract is allowed to call the apply target methods below
+    /// @param _allowedContract The address with the allowances
+    function setAllowedContract(address _allowedContract) public auth(ROOT_PERMISSION_ID) {
+        allowedContract = _allowedContract;
+    }
+
     /// @notice Applies an array of permission operations on a single target contracts `_where`.
     /// @param _where The address of the single target contract.
     /// @param _items The array of single-targeted permission operations to apply.
@@ -489,7 +497,9 @@ abstract contract PermissionManager is Initializable {
         bool isRoot_ = _isRoot(msg.sender);
 
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_
+            !isRoot_ &&
+            (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) ||
+                msg.sender != allowedContract)
         ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -982,5 +992,5 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZeppelin's guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 }
