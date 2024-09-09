@@ -251,13 +251,7 @@ contract DAO is
         bytes32 _callId,
         Action[] calldata _actions,
         uint256 _allowFailureMap
-    )
-        external
-        override
-        nonReentrant
-        auth(EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory execResults, uint256 failureMap)
-    {
+    ) external override nonReentrant returns (bytes[] memory execResults, uint256 failureMap) {
         // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
@@ -267,6 +261,30 @@ contract DAO is
 
         uint256 gasBefore;
         uint256 gasAfter;
+
+        bool hasExecutePermission = isGranted(
+            address(this),
+            msg.sender,
+            EXECUTE_PERMISSION_ID,
+            msg.data
+        );
+
+        for (uint256 i = 0; i < _actions.length; ) {
+            bool isAllowed;
+
+            bytes32 id = keccak256(bytes4(_actions[i].data));
+            address target = _actions[i].to;
+
+            Permission storage targetPermission = permissions[permissionHash(target, id)];
+
+            bool isAllowed = targetPermission.created
+                ? isGranted(target, msg.sender, id, _actions[i].data)
+                : hasExecutePermission;
+
+            if (!isAllowed) {
+                revert NotPossible();
+            }
+        }
 
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
