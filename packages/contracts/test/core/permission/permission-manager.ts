@@ -1622,7 +1622,7 @@ describe('Core: PermissionManager', function () {
         otherSigner.address,
         ['0xb794F5eA0ba39494cE839613fffBA74279579268']
       );
-      
+
       await pm.grant(
         pm.address,
         otherSigner.address,

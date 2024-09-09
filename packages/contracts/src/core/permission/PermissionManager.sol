@@ -226,16 +226,7 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (
-            !_checkOwner(
-                permission,
-                _where,
-                msg.sender,
-                _permissionId,
-                _operation,
-                _isRoot(msg.sender)
-            )
-        ) {
+        if (!_checkOwner(permission, msg.sender, _operation, _isRoot(msg.sender))) {
             revert Unauthorized(_where, msg.sender, _permissionId);
         }
 
@@ -504,16 +495,7 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
 
-            if (
-                !_checkOwner(
-                    permission,
-                    _where,
-                    msg.sender,
-                    item.permissionId,
-                    item.operation,
-                    isRoot_
-                )
-            ) {
+            if (!_checkOwner(permission, msg.sender, item.operation, isRoot_)) {
                 revert Unauthorized(_where, item.who, item.permissionId);
             }
 
@@ -551,16 +533,7 @@ abstract contract PermissionManager is Initializable {
                 permissionHash(item.where, item.permissionId)
             ];
 
-            if (
-                !_checkOwner(
-                    permission,
-                    item.where,
-                    msg.sender,
-                    item.permissionId,
-                    item.operation,
-                    isRoot_
-                )
-            ) {
+            if (!_checkOwner(permission, msg.sender, item.operation, isRoot_)) {
                 revert Unauthorized(item.where, item.who, item.permissionId);
             }
 
@@ -833,7 +806,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Function to check if the given address is ROOT.
     /// @param _who The address to check for.
     /// @return True if the given address is ROOT and otherwise false
-    function _isRoot(address _who) private returns (bool) {
+    function _isRoot(address _who) private view returns (bool) {
         return isGranted(address(this), _who, ROOT_PERMISSION_ID, msg.data);
     }
 
@@ -928,23 +901,18 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Checks the permissions for the applyTarget methods used by the plugin setup processor.
     /// @param _permission The Permission struct.
-    /// @param _where The address of the target contract for which `_who` receives permission.
-    /// @param _permissionId The permission identifier.
+    /// @param _who The address to check
     /// @param _operation The operation to check the permission against.
     /// @return True if the permission checks succeded otherwise false.
     function _checkOwner(
         Permission storage _permission,
-        address _where,
-        address _who, // TODO: remove _who and set it to msg.sender
-        bytes32 _permissionId,
+        address _who,
         PermissionLib.Operation _operation,
         bool isRoot
     ) private returns (bool) {
         if (!_permission.created) {
             return isRoot;
         }
-
-        bytes32 permHash = permissionHash(_where, _permissionId);
 
         // Check either caller is delegated or an owner.
         uint256 flags = _permission.delegations[_who];
