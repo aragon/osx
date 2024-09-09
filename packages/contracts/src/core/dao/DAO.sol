@@ -270,10 +270,24 @@ contract DAO is
 
         for (uint256 i = 0; i < _actions.length; ) {
             gasBefore = gasleft();
+            bool success;
+            bytes memory data;
 
-            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
-                _actions[i].data
-            );
+            (success, data) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+            if (_actions[i].to == address(this)) {
+                if (!success) {
+                    bytes4 result;
+
+                    assembly {
+                        result := mload(add(data, 32))
+                    }
+
+                    if (result == Unauthorized.selector || result == UnauthorizedOwner.selector) {
+                        (success, data) = _actions[i].to.delegatecall(_actions[i].data);
+                    }
+                }
+            }
+
             gasAfter = gasleft();
 
             // Check if failure is allowed
@@ -297,7 +311,7 @@ contract DAO is
                 }
             }
 
-            execResults[i] = result;
+            execResults[i] = data;
 
             unchecked {
                 ++i;
