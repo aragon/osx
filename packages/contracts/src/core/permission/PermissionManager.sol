@@ -355,11 +355,17 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[_owner];
 
         if (_owner != address(1)) {
-            if (_checkFlags(_flags, GRANT_OWNER_FLAG) && !_checkFlags(currentFlags, GRANT_OWNER_FLAG)) {
+            if (
+                _checkFlags(_flags, GRANT_OWNER_FLAG) &&
+                !_checkFlags(currentFlags, GRANT_OWNER_FLAG)
+            ) {
                 permission.grantCounter++;
             }
 
-            if (_checkFlags(_flags, REVOKE_OWNER_FLAG) && !_checkFlags(currentFlags, REVOKE_OWNER_FLAG)) {
+            if (
+                _checkFlags(_flags, REVOKE_OWNER_FLAG) &&
+                !_checkFlags(currentFlags, REVOKE_OWNER_FLAG)
+            ) {
                 permission.revokeCounter++;
             }
         }
@@ -472,7 +478,7 @@ abstract contract PermissionManager is Initializable {
     }
 
     /// @notice Only this contract is allowed to call the apply target methods below
-    /// @param _allowedContract The address with the allowances   
+    /// @param _allowedContract The address with the allowances
     function setAllowedContract(address _allowedContract) public auth(ROOT_PERMISSION_ID) {
         allowedContract = _allowedContract;
     }
@@ -486,10 +492,14 @@ abstract contract PermissionManager is Initializable {
     ) external virtual {
         bool isRoot_ = _isRoot(msg.sender);
 
-        if (!isRoot_ && (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) || msg.sender != allowedContract)) {
+        if (
+            !isRoot_ &&
+            (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) ||
+                msg.sender != allowedContract)
+        ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
-        
+
         for (uint256 i; i < _items.length; ) {
             PermissionLib.SingleTargetPermission memory item = _items[i];
             Permission storage permission = permissions[permissionHash(_where, item.permissionId)];
@@ -925,7 +935,7 @@ abstract contract PermissionManager is Initializable {
     function _checkOwner(
         Permission storage _permission,
         address _where,
-        address _who, // TODO: remove _who and set it to msg.sender 
+        address _who, // TODO: remove _who and set it to msg.sender
         bytes32 _permissionId,
         PermissionLib.Operation _operation,
         bool isRoot
