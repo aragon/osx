@@ -270,19 +270,17 @@ contract DAO is
         );
 
         for (uint256 i = 0; i < _actions.length; ) {
-            bool isAllowed;
+            bytes32 id = keccak256(abi.encode(bytes4(_actions[i].data)));
 
-            bytes32 id = keccak256(bytes4(_actions[i].data));
-            address target = _actions[i].to;
-
-            Permission storage targetPermission = permissions[permissionHash(target, id)];
+            Permission storage targetPermission = permissions[permissionHash(_actions[i].to, id)];
 
             bool isAllowed = targetPermission.created
-                ? isGranted(target, msg.sender, id, _actions[i].data)
+                ? isGranted(_actions[i].to, msg.sender, id, _actions[i].data)
                 : hasExecutePermission;
 
             if (!isAllowed) {
-                revert NotPossible();
+                // TODO: revert error
+                // revert NotPossible();
             }
         }
 
