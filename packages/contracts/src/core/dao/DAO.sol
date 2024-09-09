@@ -64,6 +64,11 @@ contract DAO is
     bytes32 public constant VALIDATE_SIGNATURE_PERMISSION_ID =
         keccak256("VALIDATE_SIGNATURE_PERMISSION");
 
+    enum CallType {
+        call,
+        delegatecall
+    }
+
     /// @notice The internal constant storing the maximal action array length.
     uint256 internal constant MAX_ACTIONS = 256;
 
@@ -251,16 +256,39 @@ contract DAO is
         bytes32 _callId,
         Action[] calldata _actions,
         uint256 _allowFailureMap
-    )
-        external
-        override
-        nonReentrant
-        auth(EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory execResults, uint256 failureMap)
-    {
+    ) external override nonReentrant returns (bytes[] memory execResults, uint256 failureMap) {
         // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
+        }
+
+        // validate the permissions.
+        bool hasExecutePermission = isGranted(
+            address(this),
+            msg.sender,
+            EXECUTE_PERMISSION_ID,
+            msg.data
+        );
+
+        CallType[] memory callTypes = new CallType[](_actions.length);
+
+        for (uint256 i = 0; i < _actions.length; ) {
+            bool isAllowed;
+
+            bytes32 id = keccak256(actions[i].data[0:4]);
+            address target = actions[i].to;
+
+            Permission storage targetPermission = permissions[permissionHash(target, id)];
+
+            isAllowed = targetPermission.created
+                ? isGranted(target, msg.sender, id, msg.data)
+                : hasExecutePermission;
+
+            if (!isAllowed) {
+                revert NotPossible();
+            }
+
+            callTypes[i] = getCallType(actions[i].to, actions[i].data);
         }
 
         execResults = new bytes[](_actions.length);
@@ -312,6 +340,99 @@ contract DAO is
             failureMap: failureMap,
             execResults: execResults
         });
+    }
+
+    function getCallType(address _to, bytes memory _data) private view returns (CallType callType) {
+        bytes4 selector = bytes4(_data[:4]);
+        bytes memory params = _data[4:];
+
+        callType = _to == address(this) ? CallType.delegatecall : CallType.call;
+
+        if (_to != address(this)) {
+            CallType.call;
+        }
+
+        address where;
+        bytes32 permissionId;
+
+        if (
+            selector == this.grant.selector ||
+            selector == this.revoke.selector ||
+            selector == this.grantWithCondition.selector
+        ) {
+            PermissionLib.Operation op = this.grant.selector
+                ? PermissionLib.Operation.Grant
+                : this.revoke.selector
+                ? PermissionLib.Operation.Revoke
+                : PermissionLib.Operation.GrantWithCondition;
+            // Decode the parameters for grant, revoke, or grantWithCondition
+            (where, , permissionId) = abi.decode(params, (address, address, bytes32));
+
+            // Fetch the permission from storage
+            Permission storage permission = permissions[permissionHash(where, permissionId)];
+
+            // Check the owner and set the call type accordingly
+            return
+                _checkOwner(
+                    permission,
+                    where,
+                    address(this),
+                    permissionId,
+                    op,
+                    _isRoot(address(this))
+                )
+                    ? CallType.call
+                    : CallType.delegatecall;
+        }
+
+        if (
+            selector == this.addOwner.selector ||
+            selector == this.removeOwner.selector ||
+            selector == this.delegatePermission.selector ||
+            selector == this.undelegatePermission.selector
+        ) {
+            uint256 flags;
+            // Decode the parameters for addOwner, removeOwner, delegatePermission, or undelegatePermission
+            (where, permissionId, flags) = abi.decode(params, (address, bytes32, uint256));
+
+            // Fetch the permission from storage
+            Permission storage permission = permissions[permissionHash(where, permissionId)];
+
+            return
+                hasPermission(permission.owners[address(this)], flags)
+                    ? CallType.call
+                    : CallType.delegatecall;
+        }
+
+        if (selector == this.registerStandardCallback.selector) {
+            permissionId = REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
+        }
+        if (selector == this.setDaoURI.selector || selector == this.setMetadata.selector) {
+            permissionId = SET_METADATA_PERMISSION_ID;
+        }
+        if (selector == this.upgradeToAndCall.selector || selector == this.upgradeTo.selector) {
+            permissionId = UPGRADE_DAO_PERMISSION_ID;
+        }
+
+        if (permissionId != bytes32(0)) {
+            return
+                isGranted(address(this), permissionId, address(this), _data)
+                    ? CallType.call
+                    : CallType.delegatecall;
+        }
+
+        return CallType.delegatecall;
+    }
+
+    /// @inheritdoc IDAO
+    function registerStandardCallback(
+        bytes4 _interfaceId,
+        bytes4 _callbackSelector,
+        bytes4 _magicNumber
+    ) external override auth(REGISTER_STANDARD_CALLBACK_PERMISSION_ID) {
+        _registerInterface(_interfaceId);
+        _registerCallback(_callbackSelector, _magicNumber);
+        emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
     }
 
     /// @inheritdoc IDAO
@@ -408,17 +529,6 @@ contract DAO is
             IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector,
             IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector
         );
-    }
-
-    /// @inheritdoc IDAO
-    function registerStandardCallback(
-        bytes4 _interfaceId,
-        bytes4 _callbackSelector,
-        bytes4 _magicNumber
-    ) external override auth(REGISTER_STANDARD_CALLBACK_PERMISSION_ID) {
-        _registerInterface(_interfaceId);
-        _registerCallback(_callbackSelector, _magicNumber);
-        emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
     }
 
     /// @inheritdoc IEIP4824

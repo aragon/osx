@@ -224,17 +224,21 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (
-            !_checkOwner(
-                permission,
-                _where,
-                msg.sender,
-                _permissionId,
-                _operation,
-                _isRoot(msg.sender)
-            )
-        ) {
-            revert Unauthorized(_where, msg.sender, _permissionId);
+        // If the caller is the same contract, it's up to that caller to
+        // ensure that it had permission to do so.
+        if (msg.sender != address(this)) {
+            if (
+                !_checkOwner(
+                    permission,
+                    _where,
+                    msg.sender,
+                    _permissionId,
+                    _operation,
+                    _isRoot(msg.sender)
+                )
+            ) {
+                revert Unauthorized(_where, msg.sender, _permissionId);
+            }
         }
 
         _;
@@ -353,11 +357,17 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[_owner];
 
         if (_owner != address(1)) {
-            if (_checkFlags(_flags, GRANT_OWNER_FLAG) && !_checkFlags(currentFlags, GRANT_OWNER_FLAG)) {
+            if (
+                _checkFlags(_flags, GRANT_OWNER_FLAG) &&
+                !_checkFlags(currentFlags, GRANT_OWNER_FLAG)
+            ) {
                 permission.grantCounter++;
             }
 
-            if (_checkFlags(_flags, REVOKE_OWNER_FLAG) && !_checkFlags(currentFlags, REVOKE_OWNER_FLAG)) {
+            if (
+                _checkFlags(_flags, REVOKE_OWNER_FLAG) &&
+                !_checkFlags(currentFlags, REVOKE_OWNER_FLAG)
+            ) {
                 permission.revokeCounter++;
             }
         }
@@ -479,8 +489,7 @@ abstract contract PermissionManager is Initializable {
         bool isRoot_ = _isRoot(msg.sender);
 
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) &&
-            !isRoot_
+            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) && !isRoot_
         ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -870,12 +879,14 @@ abstract contract PermissionManager is Initializable {
     /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(bytes32 _permissionId) internal view virtual {
-        if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
-            revert Unauthorized({
-                where: address(this),
-                who: msg.sender,
-                permissionId: _permissionId
-            });
+        if (msg.sender != address(this)) {
+            if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
+                revert Unauthorized({
+                    where: address(this),
+                    who: msg.sender,
+                    permissionId: _permissionId
+                });
+            }
         }
     }
 
@@ -920,7 +931,7 @@ abstract contract PermissionManager is Initializable {
     function _checkOwner(
         Permission storage _permission,
         address _where,
-        address _who, // TODO: remove _who and set it to msg.sender 
+        address _who, // TODO: remove _who and set it to msg.sender
         bytes32 _permissionId,
         PermissionLib.Operation _operation,
         bool isRoot
