@@ -44,7 +44,7 @@ abstract contract PermissionManager is Initializable {
     mapping(bytes32 => address) internal permissionsHashed;
 
     struct Permission {
-        mapping(address => mapping(bytes32 => uint256)) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
+        mapping(address => uint256) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
         mapping(address => uint256) owners;
         bool created;
         uint64 grantCounter;
@@ -280,8 +280,8 @@ abstract contract PermissionManager is Initializable {
             revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
-        uint256 newFlags = permission.delegations[_delegatee][permHash] | _flags;
-        permission.delegations[_delegatee][permHash] = newFlags;
+        uint256 newFlags = permission.delegations[_delegatee] | _flags;
+        permission.delegations[_delegatee] = newFlags;
 
         emit PermissionDelegated(_where, _permissionIdOrSelector, _delegatee, newFlags);
     }
@@ -308,13 +308,13 @@ abstract contract PermissionManager is Initializable {
             revert UnauthorizedOwner(msg.sender, permission.owners[msg.sender], _flags);
         }
 
-        uint256 currentFlags = permission.delegations[_delegatee][permHash];
+        uint256 currentFlags = permission.delegations[_delegatee];
         if (!_checkFlags(currentFlags, _flags)) {
             revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
         }
 
         uint256 newFlags = currentFlags ^ _flags;
-        permission.delegations[_delegatee][permHash] = newFlags;
+        permission.delegations[_delegatee] = newFlags;
 
         emit PermissionUndelegated(_where, _permissionIdOrSelector, _delegatee, newFlags);
     }
@@ -932,11 +932,11 @@ abstract contract PermissionManager is Initializable {
         bytes32 permHash = permissionHash(_where, _permissionId);
 
         // Check either caller is delegated or an owner.
-        uint256 flags = _permission.delegations[_who][permHash];
+        uint256 flags = _permission.delegations[_who];
         if (flags == 0) {
             flags = _permission.owners[_who];
         } else {
-            delete _permission.delegations[_who][permHash];
+            delete _permission.delegations[_who];
         }
 
         if (
