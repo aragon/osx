@@ -28,6 +28,7 @@ import {IEIP4824} from "./IEIP4824.sol";
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 /// @custom:security-contact sirt@aragon.org
+/// @custom:oz-upgrades-unsafe-allow constructor constructor delegatecall
 contract DAO is
     IEIP4824,
     Initializable,
@@ -135,7 +136,6 @@ contract DAO is
     }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

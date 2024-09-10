@@ -23,7 +23,7 @@ export async function deployWithProxy<T>(
   return upgrades.deployProxy(contractFactory, [], {
     kind: options.proxyType || 'uups',
     initializer: false,
-    unsafeAllow: ['constructor'],
+    unsafeAllow: ['constructor', 'delegatecall'],
     constructorArgs: options.constructurArgs || [],
   }) as unknown as Promise<T>;
 }
