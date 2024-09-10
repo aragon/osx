@@ -562,6 +562,82 @@ describe('DAO', function () {
         .withArgs(1);
     });
 
+    it('reverts if a permission is created and the caller doesnt have the permissions to call it', async () => {
+      await dao.createPermission(
+        data.succeedAction.to,
+        data.succeedAction.data.substr(0, 10) +
+          '00000000000000000000000000000000000000000000000000000000',
+        ownerAddress,
+        [signers[1].address]
+      );
+
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
+          data.succeedAction.to,
+          ownerAddress,
+          '0xd6de8f5b676b1c14d09eb59df296ac2f098dc1e04fee3ab54c87f2d3cb70adb4'
+        );
+    });
+
+    it('succeeds if a permission is created and the caller doesnt have execution rights', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
+
+      await dao.createPermission(
+        data.succeedAction.to,
+        data.succeedAction.data.substr(0, 10) +
+          '00000000000000000000000000000000000000000000000000000000',
+        ownerAddress,
+        [ownerAddress]
+      );
+
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0)).to.emit(
+        dao,
+        'Executed'
+      );
+    });
+
+    it('should fail for the caller with only execution permission if the other caller has the permission to call something', async () => {
+      await dao.grant(
+        dao.address,
+        signers[1].address,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
+
+      await dao.createPermission(
+        data.succeedAction.to,
+        data.succeedAction.data.substr(0, 10) +
+          '00000000000000000000000000000000000000000000000000000000',
+        ownerAddress,
+        [ownerAddress]
+      );
+
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
+
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0)).to.emit(
+        dao,
+        'Executed'
+      );
+
+      await expect(
+        dao.connect(signers[1]).execute(ZERO_BYTES32, [data.succeedAction], 0)
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
+          data.succeedAction.to,
+          signers[1].address,
+          '0xd6de8f5b676b1c14d09eb59df296ac2f098dc1e04fee3ab54c87f2d3cb70adb4'
+        );
+    });
+
     it('succeeds if action is failable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = flipBit(0, num);
