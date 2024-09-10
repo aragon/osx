@@ -290,6 +290,7 @@ contract DAO is
             bytes memory data;
 
             (success, data) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+
             if (_actions[i].to == address(this)) {
                 if (!success) {
                     bytes4 result;

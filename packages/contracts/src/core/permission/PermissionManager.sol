@@ -51,9 +51,11 @@ abstract contract PermissionManager is Initializable {
         uint64 revokeCounter;
     }
 
+    /// @notice A mapping storing owners and delegations of each permission.
     mapping(bytes32 => Permission) internal permissions;
 
-    address allowedContract;
+    /// @notice The address that can be granted APPLY_TARGET_PERMISSION_ID.
+    address public applyTargetMethodGrantee;
 
     /// @notice Thrown if a call is unauthorized.
     /// @param where The context in which the authorization reverted.
@@ -110,6 +112,9 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice Thrown if the permission is frozen
     error PermissionFrozen(address where, bytes32 permissionId);
+
+    /// @notice Thrown if the APPLY_TARGET_PERMISSION_ID is granted to the incorrect address.
+    error IncorrectApplyTargetMethodGranteeSet(address applyTargetMethodGrantee);
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
@@ -196,6 +201,9 @@ abstract contract PermissionManager is Initializable {
         address indexed owner,
         address[] whos
     );
+
+    /// @notice Emitted when a ROOT sets applyTargetMethodGrantee
+    event ApplyTargetMethodGranteeSet(address indexed applyTargetMethodGrantee);
 
     /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
@@ -468,10 +476,14 @@ abstract contract PermissionManager is Initializable {
         _revoke({_where: _where, _who: _who, _permissionId: _permissionId});
     }
 
-    /// @notice Only this contract is allowed to call the apply target methods below
-    /// @param _allowedContract The address with the allowances
-    function setAllowedContract(address _allowedContract) public auth(ROOT_PERMISSION_ID) {
-        allowedContract = _allowedContract;
+    /// @notice Only this contract is allowed to call the apply target methods below.
+    /// @param _applyTargetMethodGrantee The address that can be granted APPLY_TARGET_PERMISSION_ID.
+    function setApplyTargetMethodGrantee(
+        address _applyTargetMethodGrantee
+    ) public virtual auth(ROOT_PERMISSION_ID) {
+        applyTargetMethodGrantee = _applyTargetMethodGrantee;
+
+        emit ApplyTargetMethodGranteeSet(_applyTargetMethodGrantee);
     }
 
     /// @notice Applies an array of permission operations on a single target contracts `_where`.
@@ -484,9 +496,7 @@ abstract contract PermissionManager is Initializable {
         bool isRoot_ = _isRoot(msg.sender);
 
         if (
-            !isRoot_ &&
-            (!isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) ||
-                msg.sender != allowedContract)
+            !isRoot_ && !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data)
         ) {
             revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -521,8 +531,7 @@ abstract contract PermissionManager is Initializable {
         bool isRoot_ = _isRoot(msg.sender);
 
         if (
-            !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data) &&
-            !_isRoot(msg.sender)
+            !isRoot_ && !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data)
         ) {
             revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
@@ -687,6 +696,14 @@ abstract contract PermissionManager is Initializable {
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
         if (_where == ANY_ADDR || _who == ANY_ADDR) {
             revert PermissionsForAnyAddressDisallowed();
+        }
+
+        // Make sure that this special permission is only granted
+        // to the address allowed by ROOT.
+        if (_permissionId == APPLY_TARGET_PERMISSION_ID) {
+            if (applyTargetMethodGrantee == address(0) || applyTargetMethodGrantee != _who) {
+                revert IncorrectApplyTargetMethodGranteeSet(applyTargetMethodGrantee);
+            }
         }
 
         bytes32 permHash = permissionHash({
@@ -940,6 +957,8 @@ abstract contract PermissionManager is Initializable {
 
             return isRoot && _permission.revokeCounter == 0;
         }
+
+        return false;
     }
 
     /// @notice Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
