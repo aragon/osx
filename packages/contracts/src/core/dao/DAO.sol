@@ -269,27 +269,41 @@ contract DAO is
             msg.data
         );
 
-        for (uint256 i = 0; i < _actions.length; i++) { // TODO: Merge this loop with the below one.
+        for (uint256 i = 0; i < _actions.length; i++) {
+            // TODO: Merge this loop with the below one.
             Action calldata action = _actions[i];
-            bytes4 id = bytes4(action.data[:4]);
-            bytes32 permHash = permissionHash(action.to, id);
-            Permission storage targetPermission = permissions[permHash];
 
-            bool isAllowed = targetPermission.created
-                ? isGranted(action.to, msg.sender, id, action.data)
-                : hasExecutePermission;
+            bool isAllowed = hasExecutePermission;
+            bytes32 permissionId = EXECUTE_PERMISSION_ID;
+
+            // TODO: do we want to have some special way to allow registering permission for `transfer` out of this contract ?
+            // This could be useful as there's no function selector for such scenario and currently, to do transfer, EXECUTE_PERMISSION
+            // is enough, but it could be desirable that some special permission is created and even if member has EXECUTE, still won't be able
+            // to execute withdraw action.
+            if (action.data.length >= 4) {
+                bytes32 id = keccak256(action.data[:4]);
+                Permission storage targetPermission = permissions[permissionHash(action.to, id)];
+
+                if (targetPermission.created) {
+                    isAllowed = isGranted(action.to, msg.sender, id, action.data);
+                    permissionId = id;
+                }
+            }
 
             if (!isAllowed) {
-                revert Unauthorized(action.to, msg.sender, permHash);
+                revert Unauthorized(action.to, msg.sender, permissionId);
             }
         }
 
         for (uint256 i = 0; i < _actions.length; ) {
-            gasBefore = gasleft();
             bool success;
             bytes memory data;
 
+            gasBefore = gasleft();
+
             (success, data) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+
+            gasAfter = gasleft();
 
             if (_actions[i].to == address(this)) {
                 if (!success) {
@@ -300,12 +314,12 @@ contract DAO is
                     }
 
                     if (result == Unauthorized.selector || result == UnauthorizedOwner.selector) {
+                        gasBefore = gasleft();
                         (success, data) = _actions[i].to.delegatecall(_actions[i].data);
+                        gasAfter = gasleft();
                     }
                 }
             }
-
-            gasAfter = gasleft();
 
             // Check if failure is allowed
             if (!hasBit(_allowFailureMap, uint8(i))) {
