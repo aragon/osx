@@ -506,7 +506,7 @@ describe('DAO', function () {
       await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
-          dao.address,
+          data.succeedAction.to,
           ownerAddress,
           DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
         );
@@ -562,35 +562,37 @@ describe('DAO', function () {
         .withArgs(1);
     });
 
-    it('reverts if a permission is created and the caller doesnt have the permissions to call it', async () => {
+    it('reverts if a permission is created and the caller does not have the permission to call it', async () => {
+      const permissionId = ethers.utils.keccak256(
+        data.succeedAction.data.substr(0, 10)
+      );
+
       await dao.createPermission(
         data.succeedAction.to,
-        data.succeedAction.data.substr(0, 10) +
-          '00000000000000000000000000000000000000000000000000000000',
+        permissionId,
         ownerAddress,
         [signers[1].address]
       );
 
       await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          data.succeedAction.to,
-          ownerAddress,
-          '0xd6de8f5b676b1c14d09eb59df296ac2f098dc1e04fee3ab54c87f2d3cb70adb4'
-        );
+        .withArgs(data.succeedAction.to, ownerAddress, permissionId);
     });
 
-    it('succeeds if a permission is created and the caller doesnt have execution rights', async () => {
+    it('succeeds if a permission is created and the caller does not have execution rights', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
         DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
       );
 
+      const permissionId = ethers.utils.keccak256(
+        data.succeedAction.data.substr(0, 10)
+      );
+
       await dao.createPermission(
         data.succeedAction.to,
-        data.succeedAction.data.substr(0, 10) +
-          '00000000000000000000000000000000000000000000000000000000',
+        permissionId,
         ownerAddress,
         [ownerAddress]
       );
@@ -608,10 +610,13 @@ describe('DAO', function () {
         DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
       );
 
+      const permissionId = ethers.utils.keccak256(
+        data.succeedAction.data.substr(0, 10)
+      );
+
       await dao.createPermission(
         data.succeedAction.to,
-        data.succeedAction.data.substr(0, 10) +
-          '00000000000000000000000000000000000000000000000000000000',
+        permissionId,
         ownerAddress,
         [ownerAddress]
       );
@@ -631,11 +636,114 @@ describe('DAO', function () {
         dao.connect(signers[1]).execute(ZERO_BYTES32, [data.succeedAction], 0)
       )
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          data.succeedAction.to,
-          signers[1].address,
-          '0xd6de8f5b676b1c14d09eb59df296ac2f098dc1e04fee3ab54c87f2d3cb70adb4'
-        );
+        .withArgs(data.succeedAction.to, signers[1].address, permissionId);
+    });
+
+    it('reverts if neither dao nor caller has permission to call PM function', async () => {
+      await dao.revoke(
+        dao.address,
+        dao.address,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const action = {
+        to: dao.address,
+        data: iface.encodeFunctionData('grant', [
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+        ]),
+        value: 0,
+      };
+
+      await expect(dao.execute(ZERO_BYTES32, [action], 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(0);
+      expect(
+        await dao.hasPermission(
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.false;
+    });
+
+    it('succeeds if only dao has permission to call PM function', async () => {
+      await dao.grant(
+        dao.address,
+        dao.address,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const action = {
+        to: dao.address,
+        data: iface.encodeFunctionData('grant', [
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+        ]),
+        value: 0,
+      };
+
+      await expect(dao.execute(ZERO_BYTES32, [action], 0)).to.not.be.reverted;
+      expect(
+        await dao.hasPermission(
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.true;
+    });
+
+    it('succeeds if only caller has permission to call PM function', async () => {
+      await dao.revoke(
+        dao.address,
+        dao.address,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const action = {
+        to: dao.address,
+        data: iface.encodeFunctionData('grant', [
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+        ]),
+        value: 0,
+      };
+
+      await expect(dao.execute(ZERO_BYTES32, [action], 0)).to.not.be.reverted;
+      expect(
+        await dao.hasPermission(
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.true;
     });
 
     it('succeeds if action is failable but allowFailureMap allows it', async () => {
