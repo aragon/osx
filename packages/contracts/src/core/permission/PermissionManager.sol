@@ -178,11 +178,11 @@ abstract contract PermissionManager is Initializable {
         uint256 flags
     );
 
-    /// @notice Emitted when a owner does get removed.
+    /// @notice Emitted when an owner does get removed.
     /// @param where The address of the target contract for which the owner loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
-    /// @param owner The address of the new owner.
-    /// @param flags The new flags of the owner.
+    /// @param owner The address of the owner.
+    /// @param flags The flags to remove from the owner.
     event OwnerRemoved(
         address indexed where,
         bytes32 indexed permissionIdOrSelector,
