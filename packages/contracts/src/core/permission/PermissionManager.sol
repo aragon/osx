@@ -110,7 +110,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if the passed flag is set to zero.
     error FlagCanNotBeZero();
 
-    /// @notice Thrown if the permission is frozen
+    /// @notice Thrown if the permission is frozen.
     error PermissionFrozen(address where, bytes32 permissionId);
 
     /// @notice Thrown if the APPLY_TARGET_PERMISSION_ID is granted to the incorrect address.
