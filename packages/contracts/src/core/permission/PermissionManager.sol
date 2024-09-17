@@ -43,12 +43,18 @@ abstract contract PermissionManager is Initializable {
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
     mapping(bytes32 => address) internal permissionsHashed;
 
+    /// @notice A struct containing the information for a permission.
+    /// @param delegations Owners can delegate the permission so delegatees can only grant it one time only.
+    /// @param owners The current owners of the permission with their own specific flags capabilities.
+    /// @param created Whether the permission has been created or not - used in consumer contracts(such as DAO.sol) to make decisions whether permission exists or not.
+    /// @param grantCounter How many owners(that have grant capabilities) are currently set for a permission.
+    /// @param revokeCounter How many owners(that have revoke capabilities) are currently set for a permission.
     struct Permission {
-        mapping(address => uint256) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => uint256) owners; // The current owners of the permission with their own specific flags capabilities.
-        bool created; // Whether the permission has been created or not - used in consumer contracts(such as DAO.sol) to make decisions whether permission exists or not.
-        uint64 grantCounter; // How many owners(that have grant capabilities) are currently set for a permission.
-        uint64 revokeCounter; // How many owners(that have revoke capabilities) are currently set for a permission.
+        mapping(address => uint256) delegations;
+        mapping(address => uint256) owners;
+        bool created;
+        uint64 grantCounter;
+        uint64 revokeCounter;
     }
 
     /// @notice A mapping storing owners and delegations of each permission.
