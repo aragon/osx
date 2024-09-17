@@ -287,10 +287,10 @@ abstract contract PermissionManager is Initializable {
         emit PermissionDelegated(_where, _permissionIdOrSelector, _delegatee, newFlags);
     }
 
-    /// @notice Function to remove sepcific flags from the delegatee
+    /// @notice Function to remove specific flags from the delegatee
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _delegatee The addresses we want to undelegate specifc flags.
+    /// @param _delegatee The addresses we want to undelegate specific flags.
     /// @param _flags The flags as uint256 the permission owner wants to remove from this specific delegatee.
     function undelegatePermission(
         address _where,
