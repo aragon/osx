@@ -107,7 +107,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if the passed removal flags are invalid. The caller can only pass flags the user already has.
     error InvalidFlagsForRemovalPassed(uint256 currentFlags, uint256 removalFlags);
 
-    /// @notice Thrown if the passed flag is set to zero
+    /// @notice Thrown if the passed flag is set to zero.
     error FlagCanNotBeZero();
 
     /// @notice Thrown if the permission is frozen
