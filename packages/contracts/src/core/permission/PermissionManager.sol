@@ -222,7 +222,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Modifier used to protect PM methods from only being called by allowed owners.
     /// @param _where The target contract to revoke or give permissions on.
     /// @param _permissionId The permission to check the permissions for.
-    /// @param _operation The operation used to check ownership. The use of the PermissionLib.Operation type here instead of PM.Option simplifies the code (see applyTarget methods).
+    /// @param _operation The operation used to check ownership.
     modifier ownerAuth(
         address _where,
         bytes32 _permissionId,
@@ -751,7 +751,7 @@ abstract contract PermissionManager is Initializable {
                 type(IPermissionCondition).interfaceId
             )
         ) {
-            revert ConditionInterfacNotSupported(_condition);
+            revert ConditionInterfaceNotSupported(_condition);
         }
 
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
