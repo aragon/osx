@@ -377,7 +377,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Function that a owner can remove itself as owner.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _flags The flags as uint256 to remove specifc rights the calling owner does have. (only revoke? only grant? both?)
+    /// @param _flags The flags as uint256 to remove specific rights the calling owner does have. (only revoke? only grant? both?)
     function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint256 _flags) external {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
