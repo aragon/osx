@@ -95,7 +95,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if `Operation.GrantWithCondition` is requested as an operation but the method does not support it.
     error GrantWithConditionNotSupported();
 
-    /// @notice Thrown if the permission is already created
+    /// @notice Thrown if the permission is already created.
     error PermissionAlreadyCreated();
 
     /// @notice Thrown if the calling account doesnt have the correct permission flags set.
