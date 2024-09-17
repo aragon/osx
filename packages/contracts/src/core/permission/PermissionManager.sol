@@ -205,13 +205,6 @@ abstract contract PermissionManager is Initializable {
     /// @notice Emitted when a ROOT sets applyTargetMethodGrantee.
     event ApplyTargetMethodGranteeSet(address indexed applyTargetMethodGrantee);
 
-    /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
-    /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    modifier auth(bytes32 _permissionId) {
-        _auth(_permissionId);
-        _;
-    }
-
     /// @notice Initialization method to set the initial owner of the permission manager.
     /// @dev The initial owner is granted the `ROOT_PERMISSION_ID` permission.
     /// @param _initialOwner The initial owner of the permission manager.
@@ -228,16 +221,14 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionId,
         PermissionLib.Operation _operation
     ) {
-        Permission storage permission = permissions[permissionHash(_where, _permissionId)];
+        _ownerAuth(_where, _permissionId, _operation);
+        _;
+    }
 
-        if (_isPermissionFrozen(permission)) {
-            revert PermissionFrozen(_where, _permissionId);
-        }
-
-        if (!_checkOwner(permission, msg.sender, _operation, _isRoot(msg.sender))) {
-            revert Unauthorized(_where, msg.sender, _permissionId);
-        }
-
+    /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
+    /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
+    modifier auth(bytes32 _permissionId) {
+        _auth(_permissionId);
         _;
     }
 
@@ -872,7 +863,7 @@ abstract contract PermissionManager is Initializable {
             _permission.owners[address(1)] != 0;
     }
 
-    /// @notice A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
+    /// @notice An internal function to be used to check permissions on the permission manager contract (`address(this)`) itself.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(bytes32 _permissionId) internal view virtual {
         if (!isGranted(address(this), msg.sender, _permissionId, msg.data)) {
@@ -881,6 +872,26 @@ abstract contract PermissionManager is Initializable {
                 who: msg.sender,
                 permissionId: _permissionId
             });
+        }
+    }
+
+    /// @notice An internal function used to protect PM methods from only being called by allowed owners or ROOT in case no owner is set.
+    /// @param _where The target contract to revoke or give permissions on.
+    /// @param _permissionId The permission to check the permissions for.
+    /// @param _operation The operation used to check ownership.
+    function _ownerAuth(
+        address _where,
+        bytes32 _permissionId,
+        PermissionLib.Operation _operation
+    ) internal virtual {
+        Permission storage permission = permissions[permissionHash(_where, _permissionId)];
+
+        if (_isPermissionFrozen(permission)) {
+            revert PermissionFrozen(_where, _permissionId);
+        }
+
+        if (!_checkOwner(permission, msg.sender, _operation, _isRoot(msg.sender))) {
+            revert Unauthorized(_where, msg.sender, _permissionId);
         }
     }
 
