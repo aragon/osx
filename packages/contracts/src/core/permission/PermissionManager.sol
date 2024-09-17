@@ -258,7 +258,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Function to delegate specific flags of a permission.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _delegatee The addresses who gets the permission delegated.
+    /// @param _delegatee The addresses `who` gets the permission delegated.
     /// @param _flags The flags as uint256 the permission owner wants to give this specific delegatee.
     function delegatePermission(
         address _where,
