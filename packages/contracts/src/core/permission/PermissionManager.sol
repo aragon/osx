@@ -321,7 +321,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         address _owner,
         uint256 _flags
-    ) external {
+    ) public {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
         }
@@ -369,7 +369,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
     /// @param _flags The flags as uint256 to remove specific rights the calling owner does have. (only revoke? only grant? both?)
-    function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint256 _flags) external {
+    function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint256 _flags) public {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
         }
@@ -412,6 +412,38 @@ abstract contract PermissionManager is Initializable {
         ];
 
         return _isPermissionFrozen(permission);
+    }
+
+    /// @notice Function to retrieve the owner and delegate flags of an `_owner` on a permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @return The counts of how many owners are on a permission and whether permission has been created or not yet.
+    function getPermissionData(
+        address _where,
+        bytes32 _permissionIdOrSelector
+    ) public view returns (bool, uint64, uint64) {
+        Permission storage permission = permissions[
+            permissionHash(_where, _permissionIdOrSelector)
+        ];
+
+        return (permission.created, permission.grantCounter, permission.revokeCounter);
+    }
+
+    /// @notice Function to retrieve the owner and delegate flags of an `_owner` on a permission.
+    /// @param _where The address of the target contract for which `_who` receives permission.
+    /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
+    /// @param _owner The address for which to return the current flags.
+    /// @return The owner and delegate flags.
+    function getFlags(
+        address _where,
+        bytes32 _permissionIdOrSelector,
+        address _owner
+    ) public view returns (uint256, uint256) {
+        Permission storage permission = permissions[
+            permissionHash(_where, _permissionIdOrSelector)
+        ];
+
+        return (permission.owners[_owner], permission.delegations[_owner]);
     }
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
