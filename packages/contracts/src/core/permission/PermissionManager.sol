@@ -19,7 +19,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
+    /// @notice The ID of the permission required to call the `applyMultiTargetPermissions` function.
     bytes32 public constant APPLY_TARGET_PERMISSION_ID = keccak256("APPLY_TARGET_PERMISSION_ID");
 
     /// @notice A special address encoding permissions that are valid for any address `who` or `where`.
