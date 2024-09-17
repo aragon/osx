@@ -39,7 +39,16 @@ interface SingleTargetPermission {
   permissionId: string;
 }
 
-describe('Core: PermissionManager', function () {
+const GRANT_OWNER_FLAG = 2;
+const REVOKE_OWNER_FLAG = 4;
+const FULL_OWNER_FLAG = 6;
+const FREEZE_ADDRESS = '0x0000000000000000000000000000000000000001';
+
+const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
+const somePermissionId =
+  '0x0000000000000000000000000000000000000000000000000000000012345678';
+
+describe.only('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
@@ -86,81 +95,217 @@ describe('Core: PermissionManager', function () {
         pm.address,
         ADMIN_PERMISSION_ID,
         ownerSigner.address,
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        []
       );
     });
 
     it('should add an owner with all the flags passed', async () => {
       await expect(
-        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6)
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          FULL_OWNER_FLAG
+        )
       )
         .to.emit(pm, 'OwnerAdded')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6);
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          FULL_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([FULL_OWNER_FLAG, 0]);
     });
 
-    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+    it('should add an owner with only specific flags passed', async () => {
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          GRANT_OWNER_FLAG
+        )
+      )
+        .to.emit(pm, 'OwnerAdded')
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          GRANT_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([GRANT_OWNER_FLAG, 0]);
+
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          REVOKE_OWNER_FLAG
+        )
+      )
+        .to.emit(pm, 'OwnerAdded')
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          REVOKE_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([FULL_OWNER_FLAG, 0]);
+    });
+
+    it('should correctly increase owner counters', async () => {
+      const newOwner = otherSigner.address;
+
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        newOwner,
+        GRANT_OWNER_FLAG
+      );
+
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 2, 1]);
+
+      // If the same flag that `newOwner` already holds is added,
+      // it shouldn't increase counts and neither emit the event
+      await expect(
+        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, newOwner, GRANT_OWNER_FLAG)
+      ).to.not.emit(pm, 'OwnerAdded');
+
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 2, 1]);
+
+      // Add the same owner but with revoke which should increase revoke counter only.
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          newOwner,
+          REVOKE_OWNER_FLAG
+        )
+      ).to.emit(pm, 'OwnerAdded');
+
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 2, 2]);
+    });
+
+    it('should revert if a zero flag is passed', async () => {
       await expect(
         pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 0)
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
-    it('should revert with ZeroAddress if _owner is address(0)', async () => {
+    it('should revert if an _owner passed is address(0)', async () => {
       await expect(
         pm.addOwner(
           pm.address,
           ADMIN_PERMISSION_ID,
-          '0x0000000000000000000000000000000000000000',
-          6
+          ethers.constants.AddressZero,
+          FULL_OWNER_FLAG
         )
       ).to.be.revertedWithCustomError(pm, 'ZeroAddress');
     });
 
-    it('should revert with ZeroAddress if _where is address(0)', async () => {
+    it('should revert if _where passed is address(0)', async () => {
       await expect(
         pm.addOwner(
-          '0x0000000000000000000000000000000000000000',
+          ethers.constants.AddressZero,
           ADMIN_PERMISSION_ID,
           otherSigner.address,
-          6
+          FULL_OWNER_FLAG
         )
       ).to.be.revertedWithCustomError(pm, 'ZeroAddress');
     });
 
-    it('should revert with PermissionFrozen if the permission is frozen', async () => {
+    it('should revert if the permission is frozen', async () => {
+      const freezeAddr = FREEZE_ADDRESS;
+
       await pm.addOwner(
         pm.address,
         ADMIN_PERMISSION_ID,
-        '0x0000000000000000000000000000000000000001',
-        6
+        freezeAddr,
+        FULL_OWNER_FLAG
       );
 
-      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6);
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG);
 
       await expect(
-        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6)
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          FULL_OWNER_FLAG
+        )
       )
         .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
         .withArgs(pm.address, ADMIN_PERMISSION_ID);
     });
 
-    it('should revert with UnauthorizedOwner if the caller doesnt have ownership for revoke', async () => {
-      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 4);
+    it('should revert if the caller does not have ownership for revoke', async () => {
+      const someAddress = await ethers.Wallet.createRandom().getAddress();
+
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG);
 
       await expect(
-        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 4)
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          someAddress,
+          REVOKE_OWNER_FLAG
+        )
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
-        .withArgs(ownerSigner.address, 2, 4);
+        .withArgs(ownerSigner.address, GRANT_OWNER_FLAG, REVOKE_OWNER_FLAG);
+
+      // Note that it should still have grant owner capability.
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          someAddress,
+          GRANT_OWNER_FLAG
+        )
+      ).to.not.be.reverted;
     });
 
-    it('should revert with UnauthorizedOwner if the caller doesnt have ownership for grant', async () => {
-      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2);
+    it('should revert if the caller does not have ownership for grant', async () => {
+      const someAddress = await ethers.Wallet.createRandom().getAddress();
+
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
       await expect(
-        pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 2)
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          someAddress,
+          GRANT_OWNER_FLAG
+        )
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
-        .withArgs(ownerSigner.address, 4, 2);
+        .withArgs(ownerSigner.address, REVOKE_OWNER_FLAG, GRANT_OWNER_FLAG);
+
+      // Note that it should still have revoke owner capability.
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          someAddress,
+          REVOKE_OWNER_FLAG
+        )
+      ).to.not.be.reverted;
     });
   });
 
@@ -170,28 +315,98 @@ describe('Core: PermissionManager', function () {
         pm.address,
         ADMIN_PERMISSION_ID,
         ownerSigner.address,
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        []
       );
     });
 
-    /*it('should remove the passed flags from the owner', async () => {
-      await expect(pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6))
-        .to.emit(pm.address, 'OwnerRemoved')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 1);
-    });*/
+    it('should remove the FULL_OWNER_FLAGS from the owner', async () => {
+      await expect(
+        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG)
+      )
+        .to.emit(pm, 'OwnerRemoved')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 0);
 
-    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address)
+      ).to.deep.equal([0, 0]);
+    });
+
+    it('should remove the specific flag from the owner', async () => {
+      await expect(
+        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
+      )
+        .to.emit(pm, 'OwnerRemoved')
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address,
+          REVOKE_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address)
+      ).to.deep.equal([REVOKE_OWNER_FLAG, 0]);
+
+      await expect(
+        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG)
+      )
+        .to.emit(pm, 'OwnerRemoved')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 0);
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address)
+      ).to.deep.equal([0, 0]);
+    });
+
+    it('should revert if a zero flag is passed', async () => {
       await expect(
         pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 0)
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
-    it('should revert with InvalidFlagsForRemovalPassed if flags are tried to be removed that do not exist', async () => {
-      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2);
+    it('should revert if flags that dont exist are removed', async () => {
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
-      await expect(pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 2))
+      await expect(
+        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
+      )
         .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
-        .withArgs(4, 2);
+        .withArgs(REVOKE_OWNER_FLAG, GRANT_OWNER_FLAG);
+    });
+
+    it('should correctly decrease owner counters', async () => {
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 1, 1]);
+
+      const newOwner = otherSigner.address;
+
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        newOwner,
+        FULL_OWNER_FLAG
+      );
+
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 2, 2]);
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
+
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 1, 2]);
+
+      await pm
+        .connect(otherSigner)
+        .removeOwner(pm.address, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG);
+
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 1, 1]);
     });
   });
 
@@ -199,89 +414,93 @@ describe('Core: PermissionManager', function () {
     it('should only be callable by the ROOT user', async () => {
       await expect(
         pm.createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          pm.address,
+          ADMIN_PERMISSION_ID,
           otherSigner.address,
-          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+          []
         )
       )
         .to.emit(pm, 'PermissionCreated')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
-          otherSigner.address,
-          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
-        );
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, []);
 
       await expect(
         pm
           .connect(otherSigner)
           .createPermission(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            '0x0000000000000000000000000000000000000000000000000000000000001234',
+            pm.address,
+            ethers.utils.id('TEST_PERMISSION_1'),
             otherSigner.address,
-            ['0xb794f5ea0ba39494ce839613fffba74279579268']
+            []
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
           pm.address,
           otherSigner.address,
-          '0x815fe80e4b37c8582a3b773d1d7071f983eacfd56b5965db654f3087c25ada33'
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
         );
     });
 
-    it('should revert with PermissionAlreadyCreated in case the permission is already existing', async () => {
-      await expect(
-        pm.createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
-          otherSigner.address,
-          ['0xb794f5ea0ba39494ce839613fffba74279579268']
-        )
-      )
-        .to.emit(pm, 'PermissionCreated')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
-          otherSigner.address,
-          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
-        );
+    it('should revert in case the permission is already existing', async () => {
+      await pm.createPermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        []
+      );
 
       await expect(
         pm.createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          pm.address,
+          ADMIN_PERMISSION_ID,
           otherSigner.address,
-          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+          []
         )
       ).to.be.revertedWithCustomError(pm, 'PermissionAlreadyCreated');
     });
 
     it('should create a permission and call grant for all whos passed', async () => {
+      const someAddress = await ethers.Wallet.createRandom().getAddress();
       await expect(
         pm.createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
+          pm.address,
+          ADMIN_PERMISSION_ID,
           otherSigner.address,
-          ['0xb794f5ea0ba39494ce839613fffba74279579268']
+          [someAddress]
         )
       )
         .to.emit(pm, 'PermissionCreated')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000000001234',
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, [
+          someAddress,
+        ]);
+
+      expect(
+        await pm.isGranted(pm.address, someAddress, ADMIN_PERMISSION_ID, '0x')
+      ).to.be.true;
+    });
+
+    it('should create a permission with an owner of full capability', async () => {
+      const someAddress = await ethers.Wallet.createRandom().getAddress();
+      await expect(
+        pm.createPermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
           otherSigner.address,
-          ['0xb794F5eA0ba39494cE839613fffBA74279579268']
-        );
+          [someAddress]
+        )
+      )
+        .to.emit(pm, 'PermissionCreated')
+        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, [
+          someAddress,
+        ]);
 
-      const flag = await pm.getAuthPermission(
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0xb794f5ea0ba39494ce839613fffba74279579268',
-        '0x0000000000000000000000000000000000000000000000000000000000001234'
-      );
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([FULL_OWNER_FLAG, 0]);
 
-      expect(flag).to.equal('0x0000000000000000000000000000000000000002');
+      expect(
+        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+      ).to.deep.equal([true, 1, 1]);
     });
   });
 
@@ -291,11 +510,11 @@ describe('Core: PermissionManager', function () {
         pm.address,
         ADMIN_PERMISSION_ID,
         ownerSigner.address,
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        []
       );
     });
 
-    it('should revert with FlagCanNotBeZero if a zero flag is passed', async () => {
+    it('should revert if a zero flag is passed', async () => {
       await expect(
         pm.delegatePermission(
           pm.address,
@@ -306,28 +525,28 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
-    it('should revert with PermissionFrozen if the permission is actually frozen', async () => {
+    it('should revert if the permission is actually frozen', async () => {
       await pm.addOwner(
         pm.address,
         ADMIN_PERMISSION_ID,
-        '0x0000000000000000000000000000000000000001',
-        6
+        FREEZE_ADDRESS,
+        FULL_OWNER_FLAG
       );
-      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 6);
+      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG);
 
       await expect(
         pm.delegatePermission(
           pm.address,
           ADMIN_PERMISSION_ID,
           otherSigner.address,
-          6
+          FULL_OWNER_FLAG
         )
       )
         .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
         .withArgs(pm.address, ADMIN_PERMISSION_ID);
     });
 
-    it('should revert with UnauthorizedOwner if the caller isnt the owner of the permission he wants to delegate', async () => {
+    it('should revert if the caller is not the owner of the permission he/she wants to delegate', async () => {
       await expect(
         pm
           .connect(otherSigner)
@@ -335,24 +554,80 @@ describe('Core: PermissionManager', function () {
             pm.address,
             ADMIN_PERMISSION_ID,
             otherSigner.address,
-            6
+            FULL_OWNER_FLAG
           )
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
-        .withArgs(otherSigner.address, 0, 6);
+        .withArgs(otherSigner.address, 0, FULL_OWNER_FLAG);
     });
 
-    it('should emit PermissionDelegated when the permission got delegated successfully', async () => {
+    it('should emit PermissionDelegated and correctly store the flags', async () => {
       await expect(
         pm.delegatePermission(
           pm.address,
           ADMIN_PERMISSION_ID,
           otherSigner.address,
-          6
+          GRANT_OWNER_FLAG
         )
       )
         .to.emit(pm, 'PermissionDelegated')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 6);
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          GRANT_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([0, GRANT_OWNER_FLAG]);
+
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          REVOKE_OWNER_FLAG
+        )
+      )
+        .to.emit(pm, 'PermissionDelegated')
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          FULL_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([0, FULL_OWNER_FLAG]);
+    });
+
+    it('should not emit PermissionDelegated if the same flags are added', async () => {
+      await pm.delegatePermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        GRANT_OWNER_FLAG
+      );
+
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          GRANT_OWNER_FLAG
+        )
+      ).to.not.emit(pm, 'PermissionDelegated');
+
+      await expect(
+        pm.delegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          REVOKE_OWNER_FLAG
+        )
+      ).to.emit(pm, 'PermissionDelegated');
     });
   });
 
@@ -362,18 +637,18 @@ describe('Core: PermissionManager', function () {
         pm.address,
         ADMIN_PERMISSION_ID,
         ownerSigner.address,
-        ['0xb794f5ea0ba39494ce839613fffba74279579268']
+        []
       );
 
       await pm.delegatePermission(
         pm.address,
         ADMIN_PERMISSION_ID,
         otherSigner.address,
-        6
+        FULL_OWNER_FLAG
       );
     });
 
-    it('should revert with FlagCanNotBeZero when a zero flag is passed', async () => {
+    it('should revert when a zero flag is passed', async () => {
       await expect(
         pm.undelegatePermission(
           pm.address,
@@ -384,7 +659,7 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
-    it('should revert with UnauthorizedOwner if the caller isnt the owner of the permission he wants to undelegate', async () => {
+    it('should revert if the caller is not the owner of the permission he/she wants to undelegate', async () => {
       await expect(
         pm
           .connect(otherSigner)
@@ -392,24 +667,33 @@ describe('Core: PermissionManager', function () {
             pm.address,
             ADMIN_PERMISSION_ID,
             otherSigner.address,
-            6
+            FULL_OWNER_FLAG
           )
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
-        .withArgs(otherSigner.address, 0, 6);
+        .withArgs(otherSigner.address, 0, FULL_OWNER_FLAG);
     });
 
-    it('should emit PermissionUndelegated when the permissiion got undelegated successfully', async () => {
+    it('should emit PermissionUndelegated and correctly update the flags', async () => {
       await expect(
         pm.undelegatePermission(
           pm.address,
           ADMIN_PERMISSION_ID,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         )
       )
         .to.emit(pm, 'PermissionUndelegated')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 2);
+        .withArgs(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address,
+          GRANT_OWNER_FLAG
+        );
+
+      expect(
+        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+      ).to.deep.equal([0, GRANT_OWNER_FLAG]);
     });
   });
 
@@ -457,6 +741,27 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
+    it('reverts if special `APPLY_TARGET_PERMISSION_ID` is granted to non-allowed address', async () => {
+      const allowedApplyTargetMethodGrantee =
+        await pm.applyTargetMethodGrantee();
+
+      await expect(
+        pm.grant(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID)
+      )
+        .to.be.revertedWithCustomError(
+          pm,
+          'IncorrectApplyTargetMethodGranteeSet'
+        )
+        .withArgs(allowedApplyTargetMethodGrantee);
+
+      // It should succeed if it's allowed.
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+
+      await expect(
+        pm.grant(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID)
+      ).to.not.be.reverted;
+    });
+
     it('should emit Granted', async () => {
       await expect(
         pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
@@ -502,103 +807,69 @@ describe('Core: PermissionManager', function () {
     it('should revert if the permission is frozen', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
           ownerSigner.address,
-          [ownerSigner.address]
-        );
+        ]);
 
       await pm
         .connect(ownerSigner)
         .addOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          '0x0000000000000000000000000000000000000001',
-          2
+          someWhere,
+          somePermissionId,
+          FREEZE_ADDRESS,
+          GRANT_OWNER_FLAG
         );
 
       await pm
         .connect(ownerSigner)
-        .removeOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          6
-        );
+        .removeOwner(someWhere, somePermissionId, FULL_OWNER_FLAG);
 
+      -0xb794f5ea0ba39494ce839613fffba74279579268 +
+        0xb794f5ea0ba39494ce839613fffba74279579268;
       await expect(
         pm
           .connect(ownerSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, somePermissionId);
     });
 
-    it('should revert if the caller doesnt have the grant flag set', async () => {
+    it('should revert if the caller does not have the grant flag set', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await expect(
         pm
           .connect(otherSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
 
     it('should allow the root user as fallback if the permission is created but no grant owners are existing anymore', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          otherSigner.address,
-          [ownerSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, otherSigner.address, [
+          ownerSigner.address,
+        ]);
 
       await pm
         .connect(otherSigner)
-        .removeOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          2
-        );
+        .removeOwner(someWhere, somePermissionId, GRANT_OWNER_FLAG);
 
       await expect(
         pm
           .connect(ownerSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       ).to.emit(pm, 'Granted');
     });
 
-    it('should allow the root user as fallback if the permission isnt created', async () => {
+    it('should allow the root user as fallback if the permission is not created', async () => {
       await expect(
         pm
           .connect(ownerSigner)
@@ -613,92 +884,66 @@ describe('Core: PermissionManager', function () {
     it('should allow the delegatee to call grant once', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
           ownerSigner.address,
-          [ownerSigner.address]
-        );
+        ]);
 
       await pm
         .connect(ownerSigner)
         .delegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          2
+          GRANT_OWNER_FLAG
         );
 
       await expect(
         pm
           .connect(otherSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       ).to.emit(pm, 'Granted');
 
       await expect(
         pm
           .connect(otherSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
 
     it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await pm
         .connect(ownerSigner)
         .delegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await pm
         .connect(ownerSigner)
         .undelegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await expect(
         pm
           .connect(otherSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
   });
 
@@ -736,6 +981,37 @@ describe('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'ConditionInterfaceNotSupported')
         .withArgs(nonConditionContract.address);
+    });
+
+    it('reverts if special `APPLY_TARGET_PERMISSION_ID` is granted to non-allowed address', async () => {
+      const allowedApplyTargetMethodGrantee =
+        await pm.applyTargetMethodGrantee();
+
+      await expect(
+        pm.grantWithCondition(
+          pm.address,
+          otherSigner.address,
+          APPLY_TARGET_PERMISSION_ID,
+          conditionMock.address
+        )
+      )
+        .to.be.revertedWithCustomError(
+          pm,
+          'IncorrectApplyTargetMethodGranteeSet'
+        )
+        .withArgs(allowedApplyTargetMethodGrantee);
+
+      // It should succeed if it's allowed.
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+
+      await expect(
+        pm.grantWithCondition(
+          pm.address,
+          otherSigner.address,
+          APPLY_TARGET_PERMISSION_ID,
+          conditionMock.address
+        )
+      ).to.not.be.reverted;
     });
 
     it('should add permission', async () => {
@@ -893,100 +1169,76 @@ describe('Core: PermissionManager', function () {
     it('should revert if the permission is frozen', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
           ownerSigner.address,
-          [ownerSigner.address]
-        );
+        ]);
 
       await pm
         .connect(ownerSigner)
         .addOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          '0x0000000000000000000000000000000000000001',
-          2
+          someWhere,
+          somePermissionId,
+          FREEZE_ADDRESS,
+          GRANT_OWNER_FLAG
         );
 
       await pm
         .connect(ownerSigner)
-        .removeOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          6
-        );
+        .removeOwner(someWhere, somePermissionId, FULL_OWNER_FLAG);
 
       await expect(
         pm
           .connect(ownerSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, somePermissionId);
     });
 
     it('should revert if the caller doesnt have the grantWithCondition flag set', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await expect(
         pm
           .connect(otherSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
 
     it('should allow the root user as fallback if the permission is created but no grantWithCondition owners are existing anymore', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          otherSigner.address,
-          [ownerSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, otherSigner.address, [
+          ownerSigner.address,
+        ]);
 
       await pm
         .connect(otherSigner)
-        .removeOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          2
-        );
+        .removeOwner(someWhere, somePermissionId, GRANT_OWNER_FLAG);
 
       await expect(
         pm
           .connect(ownerSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       ).to.emit(pm, 'Granted');
@@ -997,9 +1249,9 @@ describe('Core: PermissionManager', function () {
         pm
           .connect(ownerSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       ).to.emit(pm, 'Granted');
@@ -1008,29 +1260,26 @@ describe('Core: PermissionManager', function () {
     it('should allow the delegatee to call grantWithCondition once', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
           ownerSigner.address,
-          [ownerSigner.address]
-        );
+        ]);
 
       await pm
         .connect(ownerSigner)
         .delegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          2
+          GRANT_OWNER_FLAG
         );
 
       await expect(
         pm
           .connect(otherSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       ).to.emit(pm, 'Granted');
@@ -1039,64 +1288,53 @@ describe('Core: PermissionManager', function () {
         pm
           .connect(otherSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
 
     it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await pm
         .connect(ownerSigner)
         .delegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await pm
         .connect(ownerSigner)
         .undelegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await expect(
         pm
           .connect(otherSigner)
           .grantWithCondition(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
+            someWhere,
             otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678',
+            somePermissionId,
             conditionMock.address
           )
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
   });
 
@@ -1162,211 +1400,141 @@ describe('Core: PermissionManager', function () {
     it('should revert if the permission is frozen', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
           ownerSigner.address,
-          [ownerSigner.address]
-        );
+        ]);
 
       await pm
         .connect(ownerSigner)
         .addOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          '0x0000000000000000000000000000000000000001',
-          2
+          someWhere,
+          somePermissionId,
+          FREEZE_ADDRESS,
+          GRANT_OWNER_FLAG
         );
 
       await pm
         .connect(ownerSigner)
-        .removeOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          6
-        );
+        .removeOwner(someWhere, somePermissionId, FULL_OWNER_FLAG);
 
       await expect(
         pm
           .connect(ownerSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, somePermissionId);
     });
 
     it('should revert if the caller doesnt have the revoke flag set', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await expect(
         pm
           .connect(otherSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
 
     it('should allow the root user as fallback if the permission is created but no revoke owners are existing anymore', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+        .createPermission(someWhere, somePermissionId, otherSigner.address, [
           otherSigner.address,
-          [otherSigner.address]
-        );
+        ]);
 
       await pm
         .connect(otherSigner)
-        .removeOwner(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          4
-        );
+        .removeOwner(someWhere, somePermissionId, REVOKE_OWNER_FLAG);
 
       await expect(
         pm
           .connect(ownerSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       ).to.emit(pm, 'Revoked');
     });
 
     it('should allow the root user as fallback if the permission isnt created', async () => {
       await pm
         .connect(ownerSigner)
-        .grant(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .grant(someWhere, otherSigner.address, somePermissionId);
 
       await expect(
         pm
           .connect(ownerSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       ).to.emit(pm, 'Revoked');
     });
 
     it('should allow the delegatee to call revoke once', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await pm
         .connect(ownerSigner)
         .delegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await expect(
         pm
           .connect(otherSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       ).to.emit(pm, 'Revoked');
 
       await expect(
         pm
           .connect(otherSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
 
     it('should revert if undelegate got called before revoke got called by the delegatee', async () => {
       await pm
         .connect(ownerSigner)
-        .createPermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
-          ownerSigner.address,
-          [otherSigner.address]
-        );
+        .createPermission(someWhere, somePermissionId, ownerSigner.address, [
+          otherSigner.address,
+        ]);
 
       await pm
         .connect(ownerSigner)
         .delegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await pm
         .connect(ownerSigner)
         .undelegatePermission(
-          '0xb794f5ea0ba39494ce839613fffba74279579268',
-          '0x0000000000000000000000000000000000000000000000000000000012345678',
+          someWhere,
+          somePermissionId,
           otherSigner.address,
-          4
+          REVOKE_OWNER_FLAG
         );
 
       await expect(
         pm
           .connect(otherSigner)
-          .revoke(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .revoke(someWhere, otherSigner.address, somePermissionId)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          '0xb794F5eA0ba39494cE839613fffBA74279579268',
-          otherSigner.address,
-          '0x0000000000000000000000000000000000000000000000000000000012345678'
-        );
+        .withArgs(someWhere, otherSigner.address, somePermissionId);
     });
   });
 
@@ -1414,8 +1582,11 @@ describe('Core: PermissionManager', function () {
         ownerSigner.address,
         ADMIN_PERMISSION_ID,
         otherSigner.address,
-        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        [someWhere]
       );
+
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+
       await pm.grant(
         pm.address,
         otherSigner.address,
@@ -1446,8 +1617,11 @@ describe('Core: PermissionManager', function () {
         ownerSigner.address,
         ADMIN_PERMISSION_ID,
         otherSigner.address,
-        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        [someWhere]
       );
+
+      await pm.setApplyTargetMethodGrantee(ownerSigner.address);
+
       await pm.grant(
         pm.address,
         ownerSigner.address,
@@ -1473,6 +1647,8 @@ describe('Core: PermissionManager', function () {
         condition: addressZero,
         permissionId: ADMIN_PERMISSION_ID,
       };
+
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
 
       await pm.grant(
         pm.address,
@@ -1577,6 +1753,42 @@ describe('Core: PermissionManager', function () {
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
     });
+
+    it('should revert if at least one of the permission is frozen', async () => {
+      const permissionId1 = ethers.utils.id('TEST_PERMISSION_1');
+      const permissionId2 = ethers.utils.id('TEST_PERMISSION_2');
+
+      const where = someWhere;
+
+      const bulkItems: MultiTargetPermission[] = [
+        {
+          operation: Operation.Grant,
+          where: where,
+          who: otherSigner.address,
+          condition: addressZero,
+          permissionId: permissionId1,
+        },
+        {
+          operation: Operation.Grant,
+          where: where,
+          who: otherSigner.address,
+          condition: addressZero,
+          permissionId: permissionId2,
+        },
+      ];
+
+      // Let's freeze one of the permission.
+      await pm.createPermission(where, permissionId2, ownerSigner.address, []);
+      await pm.addOwner(where, permissionId2, FREEZE_ADDRESS, FULL_OWNER_FLAG);
+      await pm.removeOwner(where, permissionId2, FULL_OWNER_FLAG);
+
+      // make sure that permission is really frozen.
+      expect(await pm.isPermissionFrozen(where, permissionId2)).to.be.true;
+
+      await expect(pm.applyMultiTargetPermissions(bulkItems))
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(where, permissionId2);
+    });
   });
 
   describe('bulk on single target', () => {
@@ -1620,8 +1832,10 @@ describe('Core: PermissionManager', function () {
         ownerSigner.address,
         ADMIN_PERMISSION_ID,
         otherSigner.address,
-        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+        [someWhere]
       );
+
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
 
       await pm.grant(
         pm.address,
@@ -1629,7 +1843,7 @@ describe('Core: PermissionManager', function () {
         APPLY_TARGET_PERMISSION_ID
       );
 
-      await pm.setAllowedContract(otherSigner.address);
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
 
       await pm
         .connect(otherSigner)
@@ -1657,6 +1871,9 @@ describe('Core: PermissionManager', function () {
         otherSigner.address,
         ['0xb794F5eA0ba39494cE839613fffBA74279579268']
       );
+
+      await pm.setApplyTargetMethodGrantee(ownerSigner.address);
+
       await pm.grant(
         pm.address,
         ownerSigner.address,
@@ -1683,11 +1900,14 @@ describe('Core: PermissionManager', function () {
         permissionId: ADMIN_PERMISSION_ID,
       };
 
+      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+
       await pm.grant(
         pm.address,
         otherSigner.address,
         APPLY_TARGET_PERMISSION_ID
       );
+
       await pm.applySingleTargetPermissions(otherSigner.address, [bulkItem]);
 
       const permission = await pm.getAuthPermission(
@@ -1731,6 +1951,40 @@ describe('Core: PermissionManager', function () {
       }
     });
 
+    it('should revert if at least one of the permission is frozen', async () => {
+      const permissionId1 = ethers.utils.id('TEST_PERMISSION_1');
+      const permissionId2 = ethers.utils.id('TEST_PERMISSION_2');
+
+      const where = someWhere;
+
+      const bulkItems: MultiTargetPermission[] = [
+        {
+          operation: Operation.Grant,
+          who: otherSigner.address,
+          condition: addressZero,
+          permissionId: permissionId1,
+        },
+        {
+          operation: Operation.Grant,
+          who: otherSigner.address,
+          condition: addressZero,
+          permissionId: permissionId2,
+        },
+      ];
+
+      // Let's freeze one of the permission.
+      await pm.createPermission(where, permissionId2, ownerSigner.address, []);
+      await pm.addOwner(where, permissionId2, FREEZE_ADDRESS, FULL_OWNER_FLAG);
+      await pm.removeOwner(where, permissionId2, FULL_OWNER_FLAG);
+
+      // make sure that permission is really frozen.
+      expect(await pm.isPermissionFrozen(where, permissionId2)).to.be.true;
+
+      await expect(pm.applySingleTargetPermissions(where, bulkItems))
+        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
+        .withArgs(where, permissionId2);
+    });
+
     it('reverts for `Operation.GrantWithCondition` ', async () => {
       const bulkItems: SingleTargetPermission[] = [
         {
@@ -1752,16 +2006,19 @@ describe('Core: PermissionManager', function () {
         [otherSigner.address]
       );
 
+      const permissionId1 = ethers.utils.id('TEST_PERMISSION_1');
+      const permissionId2 = ethers.utils.id('TEST_PERMISSION_2');
+
       const bulkItems: SingleTargetPermission[] = [
         {
           operation: Operation.Revoke,
           who: otherSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
+          permissionId: permissionId1,
         },
         {
           operation: Operation.Grant,
           who: ownerSigner.address,
-          permissionId: APPLY_TARGET_PERMISSION_ID,
+          permissionId: permissionId2,
         },
       ];
 
@@ -1770,14 +2027,14 @@ describe('Core: PermissionManager', function () {
         await pm.getAuthPermission(
           pm.address,
           otherSigner.address,
-          ADMIN_PERMISSION_ID
+          permissionId1
         )
       ).to.be.equal(UNSET_FLAG);
       expect(
         await pm.getAuthPermission(
           pm.address,
           ownerSigner.address,
-          APPLY_TARGET_PERMISSION_ID
+          permissionId2
         )
       ).to.be.equal(ALLOW_FLAG);
     });
