@@ -202,7 +202,7 @@ abstract contract PermissionManager is Initializable {
         address[] whos
     );
 
-    /// @notice Emitted when a ROOT sets applyTargetMethodGrantee
+    /// @notice Emitted when a ROOT sets applyTargetMethodGrantee.
     event ApplyTargetMethodGranteeSet(address indexed applyTargetMethodGrantee);
 
     /// @notice A modifier to make functions on inheriting contracts authorized. Permissions to call the function are checked through this permission manager.
