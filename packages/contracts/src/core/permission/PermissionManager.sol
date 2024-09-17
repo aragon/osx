@@ -411,7 +411,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Function to check if this specific permission is frozen.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @return True if the permission is frozen and otherwise false
+    /// @return True if the permission is frozen and otherwise false.
     function isPermissionFrozen(
         address _where,
         bytes32 _permissionIdOrSelector
