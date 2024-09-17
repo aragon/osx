@@ -45,10 +45,10 @@ abstract contract PermissionManager is Initializable {
 
     struct Permission {
         mapping(address => uint256) delegations; // Owners can delegate the permission so delegatees can only grant it one time only.
-        mapping(address => uint256) owners;
-        bool created;
-        uint64 grantCounter;
-        uint64 revokeCounter;
+        mapping(address => uint256) owners; // The current owners of the permission with their own specific flags capabilities.
+        bool created; // Whether the permission has been created or not - used in consumer contracts(such as DAO.sol) to make decisions whether permission exists or not.
+        uint64 grantCounter; // How many owners(that have grant capabilities) are currently set for a permission.
+        uint64 revokeCounter; // How many owners(that have revoke capabilities) are currently set for a permission.
     }
 
     /// @notice A mapping storing owners and delegations of each permission.
