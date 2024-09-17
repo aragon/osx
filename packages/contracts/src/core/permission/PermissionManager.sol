@@ -158,7 +158,7 @@ abstract contract PermissionManager is Initializable {
     /// @param where The address of the target contract for which the delegatee loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param delegatee The address of the delegatee.
-    /// @param flags The current flags delegated to the delegatee.
+    /// @param flags The current flags undelegated to the delegatee.
     event PermissionUndelegated(
         address indexed where,
         bytes32 indexed permissionIdOrSelector,
