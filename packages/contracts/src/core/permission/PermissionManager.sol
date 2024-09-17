@@ -101,7 +101,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice Thrown if the calling account doesn't have the correct permission flags set.
     error UnauthorizedOwner(address caller, uint256 callerFlags, uint256 flags);
 
-    /// @notice Thrown if an argument passed is a zero address
+    /// @notice Thrown if an argument passed is a zero address.
     error ZeroAddress();
 
     /// @notice Thrown if the passed removal flags are invalid. The caller can only pass flags the user already has.
