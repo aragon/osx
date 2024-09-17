@@ -166,11 +166,11 @@ abstract contract PermissionManager is Initializable {
         uint256 flags
     );
 
-    /// @notice Emitted when a owner does get added.
+    /// @notice Emitted when an owner does get added.
     /// @param where The address of the target contract for which the owner does get permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param owner The address of the new owner.
-    /// @param flags The flags of the owner.
+    /// @param flags The new flags of the owner.
     event OwnerAdded(
         address indexed where,
         bytes32 indexed permissionIdOrSelector,
