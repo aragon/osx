@@ -364,7 +364,7 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
-    it('should revert if flags that dont exist are removed', async () => {
+    it("should revert if flags that don't exist are removed", async () => {
       await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
       await expect(
@@ -672,6 +672,27 @@ describe('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
         .withArgs(otherSigner.address, 0, FULL_OWNER_FLAG);
+    });
+
+    it('should revert if flags to undelegate are not delegated', async () => {
+      const bob = signers[3];
+      await pm.delegatePermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        bob.address,
+        GRANT_OWNER_FLAG
+      );
+
+      await expect(
+        pm.undelegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          bob.address,
+          FULL_OWNER_FLAG
+        )
+      )
+        .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
+        .withArgs(GRANT_OWNER_FLAG, FULL_OWNER_FLAG);
     });
 
     it('should emit PermissionUndelegated and correctly update the flags', async () => {
