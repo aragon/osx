@@ -108,7 +108,7 @@ async function getAnticipatedAddress(from: string) {
   return anticipatedAddress;
 }
 
-describe.only('DAOFactory: ', function () {
+describe('DAOFactory: ', function () {
   let daoFactory: DAOFactory;
   let managingDao: any;
 

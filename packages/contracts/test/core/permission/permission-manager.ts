@@ -48,7 +48,7 @@ const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
 const somePermissionId =
   '0x0000000000000000000000000000000000000000000000000000000012345678';
 
-describe.only('Core: PermissionManager', function () {
+describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
