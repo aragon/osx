@@ -1035,6 +1035,17 @@ describe('Core: PermissionManager', function () {
       ).to.not.be.reverted;
     });
 
+    it('reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR', async () => {
+      await expect(
+        pm.grantWithCondition(
+          ANY_ADDR,
+          ANY_ADDR,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+          conditionMock.address
+        )
+      ).to.be.revertedWithCustomError(pm, 'AnyAddressDisallowedForWhoAndWhere');
+    });
+
     it('should add permission', async () => {
       await pm.grantWithCondition(
         pm.address,
@@ -1556,6 +1567,45 @@ describe('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(someWhere, otherSigner.address, somePermissionId);
+    });
+  });
+
+  describe('setApplyTargetMethodGrantee', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+      );
+    });
+
+    it('should store the applyTargetMethodGrantee ', async () => {
+      expect(await pm.applyTargetMethodGrantee()).to.be.equal(addressZero);
+      await pm.setApplyTargetMethodGrantee(ownerSigner.address);
+
+      expect(await pm.applyTargetMethodGrantee()).to.be.equal(
+        ownerSigner.address
+      );
+    });
+
+    it('should emit ApplyTargetMethodGranteeSet', async () => {
+      await expect(pm.setApplyTargetMethodGrantee(ownerSigner.address)).to.emit(
+        pm,
+        'ApplyTargetMethodGranteeSet'
+      );
+    });
+
+    it('should revert if not allowed', async () => {
+      await expect(
+        pm.connect(otherSigner).setApplyTargetMethodGrantee(ownerSigner.address)
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
