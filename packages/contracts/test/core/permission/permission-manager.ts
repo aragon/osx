@@ -843,8 +843,6 @@ describe.only('Core: PermissionManager', function () {
         .connect(ownerSigner)
         .removeOwner(someWhere, somePermissionId, FULL_OWNER_FLAG);
 
-      -0xb794f5ea0ba39494ce839613fffba74279579268 +
-        0xb794f5ea0ba39494ce839613fffba74279579268;
       await expect(
         pm
           .connect(ownerSigner)
@@ -892,11 +890,7 @@ describe.only('Core: PermissionManager', function () {
       await expect(
         pm
           .connect(ownerSigner)
-          .grant(
-            '0xb794f5ea0ba39494ce839613fffba74279579268',
-            otherSigner.address,
-            '0x0000000000000000000000000000000000000000000000000000000012345678'
-          )
+          .grant(someWhere, otherSigner.address, somePermissionId)
       ).to.emit(pm, 'Granted');
     });
 
@@ -929,6 +923,57 @@ describe.only('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(someWhere, otherSigner.address, somePermissionId);
+    });
+
+    it('should succeed if a caller is both delegated and an owner but holds different flags', async () => {
+      let owner = signers[3];
+      let alice = signers[4];
+
+      await pm.createPermission(someWhere, somePermissionId, owner.address, []);
+
+      // Alice became a delegate of `GRANT_OWNER_FLAG` on this permission
+      await pm
+        .connect(owner)
+        .delegatePermission(
+          someWhere,
+          somePermissionId,
+          alice.address,
+          REVOKE_OWNER_FLAG
+        );
+      await pm
+        .connect(owner)
+        .addOwner(someWhere, somePermissionId, alice.address, GRANT_OWNER_FLAG);
+
+      await pm.connect(alice).grant(someWhere, someWhere, somePermissionId);
+    });
+
+    it('should still keep the other flag for delegatee if only one flag is used/depleted', async () => {
+      let owner = signers[3];
+      let alice = signers[4];
+
+      await pm.createPermission(someWhere, somePermissionId, owner.address, []);
+
+      // Alice became a delegate of `GRANT_OWNER_FLAG` on this permission
+      await pm
+        .connect(owner)
+        .delegatePermission(
+          someWhere,
+          somePermissionId,
+          alice.address,
+          FULL_OWNER_FLAG
+        );
+
+      await pm.connect(alice).grant(someWhere, someWhere, somePermissionId);
+
+      let currentFlags = await pm.getFlags(
+        someWhere,
+        somePermissionId,
+        alice.address
+      );
+      expect(currentFlags).to.deep.equal([0, REVOKE_OWNER_FLAG]);
+      await expect(
+        pm.connect(alice).revoke(someWhere, someWhere, somePermissionId)
+      ).to.not.be.reverted;
     });
 
     it('should revert if undelegate got called before grantWithCondition got called by the delegatee', async () => {
