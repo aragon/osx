@@ -534,7 +534,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
-        (bool hasRoot, bool hasApplyTargetPermission) = canApplyTarget();
+        (bool hasRoot, bool hasApplyTargetPermission) = _canApplyTarget();
 
         for (uint256 i; i < _items.length; ) {
             PermissionLib.SingleTargetPermission memory item = _items[i];
@@ -574,7 +574,7 @@ abstract contract PermissionManager is Initializable {
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
-        (bool hasRoot, bool hasApplyTargetPermission) = canApplyTarget();
+        (bool hasRoot, bool hasApplyTargetPermission) = _canApplyTarget();
 
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];

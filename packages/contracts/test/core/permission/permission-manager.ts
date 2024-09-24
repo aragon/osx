@@ -1796,6 +1796,41 @@ describe.only('Core: PermissionManager', function () {
 
         expect(permission).to.be.equal(ALLOW_FLAG);
       });
+
+      it('should succeed if caller is delegated', async () => {
+        let caller = signers[3];
+        let owner = signers[2];
+
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          []
+        );
+
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.be.revertedWithCustomError(pm, 'Unauthorized');
+
+        await pm
+          .connect(owner)
+          .delegatePermission(
+            someWhere,
+            ADMIN_PERMISSION_ID,
+            caller.address,
+            GRANT_OWNER_FLAG
+          );
+
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.emit(pm, 'Granted');
+      });
     });
 
     it('should bulk revoke', async () => {
@@ -2083,6 +2118,41 @@ describe.only('Core: PermissionManager', function () {
         );
 
         expect(permission).to.be.equal(ALLOW_FLAG);
+      });
+
+      it('should succeed if caller is delegated', async () => {
+        let caller = signers[3];
+        let owner = signers[2];
+
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          []
+        );
+
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.be.revertedWithCustomError(pm, 'Unauthorized');
+
+        await pm
+          .connect(owner)
+          .delegatePermission(
+            someWhere,
+            ADMIN_PERMISSION_ID,
+            caller.address,
+            GRANT_OWNER_FLAG
+          );
+
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.emit(pm, 'Granted');
       });
     });
 
