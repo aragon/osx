@@ -1030,19 +1030,16 @@ abstract contract PermissionManager is Initializable {
             return isRoot;
         }
 
-        // Check either caller is delegated or an owner.
         uint256 delegationFlags = _permission.delegations[_who];
-        uint256 ownerFlags = _permission.owners[_who];
-        uint256 flags = delegationFlags | ownerFlags;
 
         if (
             _operation == PermissionLib.Operation.Grant ||
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            if (_checkFlags(flags, GRANT_OWNER_FLAG)) {
-                if (_checkFlags(delegationFlags, GRANT_OWNER_FLAG)) {
-                    _permission.delegations[_who] = delegationFlags ^ GRANT_OWNER_FLAG;
-                }
+            if (_checkFlags(delegationFlags, GRANT_OWNER_FLAG)) {
+                _permission.delegations[_who] = delegationFlags ^ GRANT_OWNER_FLAG;
+                return true;
+            } else if (_checkFlags(_permission.owners[_who], GRANT_OWNER_FLAG)) {
                 return true;
             }
 
@@ -1050,10 +1047,10 @@ abstract contract PermissionManager is Initializable {
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
-            if (_checkFlags(flags, REVOKE_OWNER_FLAG)) {
-                if (_checkFlags(delegationFlags, REVOKE_OWNER_FLAG)) {
-                    _permission.delegations[_who] = delegationFlags ^ REVOKE_OWNER_FLAG;
-                }
+            if (_checkFlags(delegationFlags, REVOKE_OWNER_FLAG)) {
+                _permission.delegations[_who] = delegationFlags ^ REVOKE_OWNER_FLAG;
+                return true;
+            } else if (_checkFlags(_permission.owners[_who], REVOKE_OWNER_FLAG)) {
                 return true;
             }
 
