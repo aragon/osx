@@ -946,7 +946,7 @@ abstract contract PermissionManager is Initializable {
     /// @notice An internal function to check if the caller is allowed to call applyTarget functions.
     /// @dev Reverts in case the caller has none of these permissions.
     /// @return hasRoot whether the caller has ROOT and `APPLY_TARGET_PERMISSION_ID` permissions.
-    function canApplyTarget() internal view returns (bool hasRoot, bool hasApplyTargetPermission) {
+    function _canApplyTarget() internal view returns (bool hasRoot, bool hasApplyTargetPermission) {
         hasRoot = _isRoot(msg.sender);
 
         if (!hasRoot) {
