@@ -947,7 +947,7 @@ describe.only('Core: PermissionManager', function () {
       await pm.connect(alice).grant(someWhere, someWhere, somePermissionId);
     });
 
-    it('should still keep the other flag for delegatee if only one flag is used/depleted', async () => {
+    it('should still keep `REVOKE_OWNER_FLAG` for delegatee if only `GRANT_OWNER_FLAG` is used/depleted', async () => {
       let owner = signers[3];
       let alice = signers[4];
 
@@ -1576,6 +1576,35 @@ describe.only('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(someWhere, otherSigner.address, somePermissionId);
+    });
+
+    it('should still keep `GRANT_OWNER_FLAG` for delegatee if only `REVOKE_OWNER_FLAG` is used/depleted', async () => {
+      let owner = signers[3];
+      let alice = signers[4];
+
+      await pm.createPermission(someWhere, somePermissionId, owner.address, []);
+
+      // Alice became a delegate of `GRANT_OWNER_FLAG` on this permission
+      await pm
+        .connect(owner)
+        .delegatePermission(
+          someWhere,
+          somePermissionId,
+          alice.address,
+          FULL_OWNER_FLAG
+        );
+
+      await pm.connect(alice).revoke(someWhere, someWhere, somePermissionId);
+
+      let currentFlags = await pm.getFlags(
+        someWhere,
+        somePermissionId,
+        alice.address
+      );
+      expect(currentFlags).to.deep.equal([0, GRANT_OWNER_FLAG]);
+      await expect(
+        pm.connect(alice).grant(someWhere, someWhere, somePermissionId)
+      ).to.not.be.reverted;
     });
 
     it('should revert if undelegate got called before revoke got called by the delegatee', async () => {
