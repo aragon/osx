@@ -1620,7 +1620,7 @@ describe.only('Core: PermissionManager', function () {
       };
     });
 
-    it('throws `Unauthorized` error when caller does not have `APPLY_TARGET_PERMISSION` and isnt root', async () => {
+    it("throws `Unauthorized` error when caller does not have `APPLY_TARGET_PERMISSION` and isn't root", async () => {
       let caller = signers[3];
 
       await expect(pm.connect(caller).applyMultiTargetPermissions([bulkItem]))
