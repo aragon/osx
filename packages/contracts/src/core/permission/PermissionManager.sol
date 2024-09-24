@@ -20,7 +20,7 @@ abstract contract PermissionManager is Initializable {
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
     /// @notice The ID of the permission required to call the `applyMultiTargetPermissions` function.
-    bytes32 public constant APPLY_TARGET_PERMISSION_ID = keccak256("APPLY_TARGET_PERMISSION_ID");
+    bytes32 public constant APPLY_TARGET_PERMISSION_ID = keccak256("APPLY_TARGET_PERMISSION");
 
     /// @notice A special address encoding permissions that are valid for any address `who` or `where`.
     address internal constant ANY_ADDR = address(type(uint160).max);
@@ -534,13 +534,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
-        bool isRoot_ = _isRoot(msg.sender);
-
-        if (
-            !isRoot_ && !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data)
-        ) {
-            revert Unauthorized(_where, msg.sender, APPLY_TARGET_PERMISSION_ID);
-        }
+        (bool hasRoot, bool hasApplyTargetPermission) = canApplyTarget();
 
         for (uint256 i; i < _items.length; ) {
             PermissionLib.SingleTargetPermission memory item = _items[i];
@@ -550,7 +544,14 @@ abstract contract PermissionManager is Initializable {
                 revert PermissionFrozen(_where, item.permissionId);
             }
 
-            if (!_checkOwner(permission, msg.sender, item.operation, isRoot_)) {
+            if (
+                !_checkOwner(
+                    permission,
+                    msg.sender,
+                    item.operation,
+                    hasRoot || hasApplyTargetPermission
+                )
+            ) {
                 revert Unauthorized(_where, item.who, item.permissionId);
             }
 
@@ -573,13 +574,7 @@ abstract contract PermissionManager is Initializable {
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
-        bool isRoot_ = _isRoot(msg.sender);
-
-        if (
-            !isRoot_ && !isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data)
-        ) {
-            revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
-        }
+        (bool hasRoot, bool hasApplyTargetPermission) = canApplyTarget();
 
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
@@ -591,7 +586,14 @@ abstract contract PermissionManager is Initializable {
                 revert PermissionFrozen(item.where, item.permissionId);
             }
 
-            if (!_checkOwner(permission, msg.sender, item.operation, isRoot_)) {
+            if (
+                !_checkOwner(
+                    permission,
+                    msg.sender,
+                    item.operation,
+                    hasRoot || hasApplyTargetPermission
+                )
+            ) {
                 revert Unauthorized(item.where, item.who, item.permissionId);
             }
 
@@ -938,6 +940,26 @@ abstract contract PermissionManager is Initializable {
                 who: msg.sender,
                 permissionId: _permissionId
             });
+        }
+    }
+
+    /// @notice An internal function to check if the caller is allowed to call applyTarget functions.
+    /// @dev Reverts in case the caller has none of these permissions.
+    /// @return hasRoot whether the caller has ROOT and `APPLY_TARGET_PERMISSION_ID` permissions.
+    function canApplyTarget() internal view returns (bool hasRoot, bool hasApplyTargetPermission) {
+        hasRoot = _isRoot(msg.sender);
+
+        if (!hasRoot) {
+            hasApplyTargetPermission = isGranted(
+                address(this),
+                msg.sender,
+                APPLY_TARGET_PERMISSION_ID,
+                msg.data
+            );
+
+            if (!hasApplyTargetPermission) {
+                revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
+            }
         }
     }
 

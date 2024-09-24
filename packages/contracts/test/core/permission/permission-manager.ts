@@ -12,9 +12,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
-const APPLY_TARGET_PERMISSION_ID = ethers.utils.id(
-  'APPLY_TARGET_PERMISSION_ID'
-);
+const APPLY_TARGET_PERMISSION_ID = ethers.utils.id('APPLY_TARGET_PERMISSION');
 const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
   DAO_PERMISSIONS.ROOT_PERMISSION_ID,
   ethers.utils.id('TEST_PERMISSION_1'),
@@ -1610,27 +1608,46 @@ describe.only('Core: PermissionManager', function () {
   });
 
   describe('bulk on multiple target', () => {
-    it('should bulk grant ADMIN_PERMISSION on different targets', async () => {
-      const bulkItems: MultiTargetPermission[] = [
+    let bulkItem: MultiTargetPermission;
+
+    before(async () => {
+      bulkItem = {
+        operation: Operation.Grant,
+        where: someWhere,
+        who: someWhere,
+        condition: addressZero,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+    });
+
+    it('throws `Unauthorized` error when caller does not have `APPLY_TARGET_PERMISSION` and isnt root', async () => {
+      let caller = signers[3];
+
+      await expect(pm.connect(caller).applyMultiTargetPermissions([bulkItem]))
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
+    });
+
+    it('should bulk grant multiple permissions', async () => {
+      const items: MultiTargetPermission[] = [
         {
           operation: Operation.Grant,
-          where: otherSigner.address,
-          who: ownerSigner.address,
+          where: signers[1].address,
+          who: signers[2].address,
           condition: addressZero,
-          permissionId: ADMIN_PERMISSION_ID,
+          permissionId: ethers.utils.id('TEST_PERMISSION_1'),
         },
         {
           operation: Operation.Grant,
-          where: ownerSigner.address,
-          who: ownerSigner.address,
+          where: signers[3].address,
+          who: signers[4].address,
           condition: addressZero,
-          permissionId: ADMIN_PERMISSION_ID,
+          permissionId: ethers.utils.id('TEST_PERMISSION_2'),
         },
       ];
 
-      await pm.applyMultiTargetPermissions(bulkItems);
-
-      for (const item of bulkItems) {
+      await pm.applyMultiTargetPermissions(items);
+      for (const item of items) {
         const permission = await pm.getAuthPermission(
           item.where,
           item.who,
@@ -1640,101 +1657,145 @@ describe.only('Core: PermissionManager', function () {
       }
     });
 
-    it('should bulk grant ADMIN_PERMISSION with apply target permission and owners defined', async () => {
-      const bulkItem: MultiTargetPermission = {
-        operation: Operation.Grant,
-        where: ownerSigner.address,
-        who: otherSigner.address,
-        condition: addressZero,
-        permissionId: ADMIN_PERMISSION_ID,
-      };
+    describe('When permission does not have an owner', async () => {
+      it('should succeed if caller has ROOT', async () => {
+        let caller = signers[2];
 
-      await pm.createPermission(
-        ownerSigner.address,
-        ADMIN_PERMISSION_ID,
-        otherSigner.address,
-        [someWhere]
-      );
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
 
-      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.emit(pm, 'Granted');
 
-      await pm.grant(
-        pm.address,
-        otherSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
+        const permission = await pm.getAuthPermission(
+          bulkItem.where,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
 
-      await pm.connect(otherSigner).applyMultiTargetPermissions([bulkItem]);
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
 
-      const permission = await pm.getAuthPermission(
-        bulkItem.where,
-        bulkItem.who,
-        bulkItem.permissionId
-      );
+      it('should succeed if caller has `APPLY_TARGET_PERMISSION`', async () => {
+        let caller = signers[2];
 
-      expect(permission).to.be.equal(ALLOW_FLAG);
+        await pm.setApplyTargetMethodGrantee(caller.address);
+        await pm.grant(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
+
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.emit(pm, 'Granted');
+
+        const permission = await pm.getAuthPermission(
+          bulkItem.where,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
+
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
     });
 
-    it('should bulk grant ADMIN_PERMISSION as root with apply target permission who is an owner as well', async () => {
-      const bulkItem: MultiTargetPermission = {
-        operation: Operation.Grant,
-        where: otherSigner.address,
-        who: ownerSigner.address,
-        condition: addressZero,
-        permissionId: ADMIN_PERMISSION_ID,
-      };
+    describe('When permission has an owner', async () => {
+      it('should revert if caller has `APPLY_TARGET_PERMISSION but is not an owner', async () => {
+        let owner = signers[3];
+        let caller = signers[2];
 
-      await pm.createPermission(
-        ownerSigner.address,
-        ADMIN_PERMISSION_ID,
-        otherSigner.address,
-        [someWhere]
-      );
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          []
+        );
 
-      await pm.setApplyTargetMethodGrantee(ownerSigner.address);
+        await pm.setApplyTargetMethodGrantee(caller.address);
+        await pm.grant(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
 
-      await pm.grant(
-        pm.address,
-        ownerSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.be.revertedWithCustomError(pm, 'Unauthorized');
+      });
 
-      await pm.connect(ownerSigner).applyMultiTargetPermissions([bulkItem]);
+      it('should revert if caller has `ROOT` but is not an owner', async () => {
+        let caller = signers[2];
+        let owner = signers[3];
 
-      const permission = await pm.getAuthPermission(
-        bulkItem.where,
-        bulkItem.who,
-        bulkItem.permissionId
-      );
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          []
+        );
 
-      expect(permission).to.be.equal(ALLOW_FLAG);
-    });
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
 
-    it('should bulk grant ADMIN_PERMISSION with apply target permission where the caller is root without having a permission created for item.where', async () => {
-      const bulkItem: MultiTargetPermission = {
-        operation: Operation.Grant,
-        where: otherSigner.address,
-        who: ownerSigner.address,
-        condition: addressZero,
-        permissionId: ADMIN_PERMISSION_ID,
-      };
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.be.revertedWithCustomError(pm, 'Unauthorized');
+      });
 
-      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+      it('should succeed if caller has `APPLY_TARGET_PERMISSION` and is an owner', async () => {
+        let caller = signers[3];
 
-      await pm.grant(
-        pm.address,
-        otherSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
-      await pm.applyMultiTargetPermissions([bulkItem]);
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          caller.address,
+          []
+        );
 
-      const permission = await pm.getAuthPermission(
-        bulkItem.where,
-        bulkItem.who,
-        bulkItem.permissionId
-      );
+        await pm.setApplyTargetMethodGrantee(caller.address);
+        await pm.grant(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
 
-      expect(permission).to.be.equal(ALLOW_FLAG);
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.emit(pm, 'Granted');
+
+        const permission = await pm.getAuthPermission(
+          bulkItem.where,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
+
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
+
+      it('should succeed if caller has `ROOT` and is an owner', async () => {
+        let caller = signers[3];
+
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          caller.address,
+          []
+        );
+
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+
+        await expect(
+          pm.connect(caller).applyMultiTargetPermissions([bulkItem])
+        ).to.emit(pm, 'Granted');
+
+        const permission = await pm.getAuthPermission(
+          bulkItem.where,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
+
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
     });
 
     it('should bulk revoke', async () => {
@@ -1775,17 +1836,17 @@ describe.only('Core: PermissionManager', function () {
       const bulkItems: MultiTargetPermission[] = [
         {
           operation: Operation.GrantWithCondition,
-          where: otherSigner.address,
-          who: ownerSigner.address,
-          condition: conditionMock.address,
-          permissionId: ADMIN_PERMISSION_ID,
+          where: signers[3].address,
+          who: signers[3].address,
+          condition: conditionMock2.address,
+          permissionId: ethers.utils.id('TEST_PERMISSION_1'),
         },
         {
           operation: Operation.GrantWithCondition,
-          where: ownerSigner.address,
-          who: ownerSigner.address,
+          where: signers[4].address,
+          who: signers[4].address,
           condition: conditionMock2.address,
-          permissionId: ADMIN_PERMISSION_ID,
+          permissionId: ethers.utils.id('TEST_PERMISSION_2'),
         },
       ];
 
@@ -1799,30 +1860,6 @@ describe.only('Core: PermissionManager', function () {
         );
         expect(permission).to.be.equal(item.condition);
       }
-    });
-
-    it('throws Unauthorized error when caller does not have the apply target permission and isnt root', async () => {
-      await pm.revoke(
-        pm.address,
-        otherSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
-
-      const bulkItems: MultiTargetPermission[] = [
-        {
-          operation: Operation.Grant,
-          where: ownerSigner.address,
-          who: otherSigner.address,
-          condition: addressZero,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-      ];
-
-      await expect(
-        pm.connect(otherSigner).applyMultiTargetPermissions(bulkItems)
-      )
-        .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
     });
 
     it('should revert if at least one of the permission is frozen', async () => {
@@ -1863,28 +1900,44 @@ describe.only('Core: PermissionManager', function () {
   });
 
   describe('bulk on single target', () => {
-    it('should bulk grant ADMIN_PERMISSION', async () => {
-      const bulkItems: SingleTargetPermission[] = [
+    let bulkItem: SingleTargetPermission;
+
+    before(async () => {
+      bulkItem = {
+        operation: Operation.Grant,
+        who: someWhere,
+        permissionId: ADMIN_PERMISSION_ID,
+      };
+    });
+
+    it('throws `Unauthorized` error when caller does not have `APPLY_TARGET_PERMISSION` and isnt root', async () => {
+      let caller = signers[3];
+
+      await expect(
+        pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
+    });
+
+    it('should bulk grant multiple permissions', async () => {
+      const items: MultiTargetPermission[] = [
         {
           operation: Operation.Grant,
-          who: ownerSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
+          who: signers[1].address,
+          permissionId: ethers.utils.id('TEST_PERMISSION_1'),
         },
         {
           operation: Operation.Grant,
-          who: ownerSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-        {
-          operation: Operation.Grant,
-          who: ownerSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
+          who: signers[2].address,
+          permissionId: ethers.utils.id('TEST_PERMISSION_2'),
         },
       ];
-      await pm.applySingleTargetPermissions(pm.address, bulkItems);
-      for (const item of bulkItems) {
+
+      await pm.applySingleTargetPermissions(someWhere, items);
+      for (const item of items) {
         const permission = await pm.getAuthPermission(
-          pm.address,
+          someWhere,
           item.who,
           item.permissionId
         );
@@ -1892,134 +1945,158 @@ describe.only('Core: PermissionManager', function () {
       }
     });
 
-    it('should bulk grant ADMIN_PERMISSION with apply target permission and owners defined', async () => {
-      const bulkItem: SingleTargetPermission = {
-        operation: Operation.Grant,
-        who: otherSigner.address,
-        permissionId: ADMIN_PERMISSION_ID,
-      };
+    describe('When permission does not have an owner', async () => {
+      it('should succeed if caller has ROOT', async () => {
+        let caller = signers[2];
 
-      await pm.createPermission(
-        ownerSigner.address,
-        ADMIN_PERMISSION_ID,
-        otherSigner.address,
-        [someWhere]
-      );
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
 
-      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.emit(pm, 'Granted');
 
-      await pm.grant(
-        pm.address,
-        otherSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
+        const permission = await pm.getAuthPermission(
+          someWhere,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
 
-      await pm.setApplyTargetMethodGrantee(otherSigner.address);
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
 
-      await pm
-        .connect(otherSigner)
-        .applySingleTargetPermissions(ownerSigner.address, [bulkItem]);
+      it('should succeed if caller has `APPLY_TARGET_PERMISSION`', async () => {
+        let caller = signers[2];
 
-      const permission = await pm.getAuthPermission(
-        ownerSigner.address,
-        bulkItem.who,
-        bulkItem.permissionId
-      );
+        await pm.setApplyTargetMethodGrantee(caller.address);
+        await pm.grant(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
 
-      expect(permission).to.be.equal(ALLOW_FLAG);
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.emit(pm, 'Granted');
+
+        const permission = await pm.getAuthPermission(
+          someWhere,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
+
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
     });
 
-    it('should bulk grant ADMIN_PERMISSION as root with apply target permission who is an owner as well', async () => {
-      const bulkItem: SingleTargetPermission = {
-        operation: Operation.Grant,
-        who: ownerSigner.address,
-        permissionId: ADMIN_PERMISSION_ID,
-      };
+    describe('When permission has an owner', async () => {
+      it('should revert if caller has `APPLY_TARGET_PERMISSION but is not an owner', async () => {
+        let owner = signers[3];
+        let caller = signers[2];
 
-      await pm.createPermission(
-        ownerSigner.address,
-        ADMIN_PERMISSION_ID,
-        otherSigner.address,
-        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
-      );
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          []
+        );
 
-      await pm.setApplyTargetMethodGrantee(ownerSigner.address);
+        await pm.setApplyTargetMethodGrantee(caller.address);
+        await pm.grant(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
 
-      await pm.grant(
-        pm.address,
-        ownerSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.be.revertedWithCustomError(pm, 'Unauthorized');
+      });
 
-      await pm
-        .connect(ownerSigner)
-        .applySingleTargetPermissions(otherSigner.address, [bulkItem]);
+      it('should revert if caller has `ROOT` but is not an owner', async () => {
+        let owner = signers[3];
+        let caller = signers[2];
 
-      const permission = await pm.getAuthPermission(
-        otherSigner.address,
-        bulkItem.who,
-        bulkItem.permissionId
-      );
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          []
+        );
 
-      expect(permission).to.be.equal(ALLOW_FLAG);
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.be.revertedWithCustomError(pm, 'Unauthorized');
+      });
+
+      it('should succeed if caller has `APPLY_TARGET_PERMISSION` and is an owner', async () => {
+        let caller = signers[3];
+
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          caller.address,
+          []
+        );
+
+        await pm.setApplyTargetMethodGrantee(caller.address);
+        await pm.grant(pm.address, caller.address, APPLY_TARGET_PERMISSION_ID);
+
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.emit(pm, 'Granted');
+
+        const permission = await pm.getAuthPermission(
+          someWhere,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
+
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
+
+      it('should succeed if caller has `ROOT` and is an owner', async () => {
+        let caller = signers[3];
+
+        await pm.createPermission(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          caller.address,
+          []
+        );
+
+        await pm.grant(
+          pm.address,
+          caller.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
+
+        await expect(
+          pm.connect(caller).applySingleTargetPermissions(someWhere, [bulkItem])
+        ).to.emit(pm, 'Granted');
+
+        const permission = await pm.getAuthPermission(
+          someWhere,
+          bulkItem.who,
+          bulkItem.permissionId
+        );
+
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      });
     });
 
-    it('should bulk grant ADMIN_PERMISSION with apply target permission where the caller is root without having a permission created for item.where', async () => {
-      const bulkItem: SingleTargetPermission = {
-        operation: Operation.Grant,
-        who: ownerSigner.address,
-        permissionId: ADMIN_PERMISSION_ID,
-      };
-
-      await pm.setApplyTargetMethodGrantee(otherSigner.address);
-
-      await pm.grant(
-        pm.address,
-        otherSigner.address,
-        APPLY_TARGET_PERMISSION_ID
-      );
-
-      await pm.applySingleTargetPermissions(otherSigner.address, [bulkItem]);
-
-      const permission = await pm.getAuthPermission(
-        otherSigner.address,
-        bulkItem.who,
-        bulkItem.permissionId
-      );
-
-      expect(permission).to.be.equal(ALLOW_FLAG);
-    });
-
-    it('should bulk revoke', async () => {
-      await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      await pm.grant(pm.address, signers[2].address, ADMIN_PERMISSION_ID);
-      await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
+    it('reverts for `Operation.GrantWithCondition` ', async () => {
       const bulkItems: SingleTargetPermission[] = [
         {
-          operation: Operation.Revoke,
-          who: ownerSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-        {
-          operation: Operation.Revoke,
-          who: ownerSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-        {
-          operation: Operation.Revoke,
+          operation: Operation.GrantWithCondition,
           who: ownerSigner.address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
-      await pm.applySingleTargetPermissions(pm.address, bulkItems);
-      for (const item of bulkItems) {
-        const permission = await pm.getAuthPermission(
-          pm.address,
-          item.who,
-          item.permissionId
-        );
-        expect(permission).to.be.equal(UNSET_FLAG);
-      }
+      await expect(
+        pm.applySingleTargetPermissions(pm.address, bulkItems)
+      ).to.be.revertedWithCustomError(pm, 'GrantWithConditionNotSupported');
     });
 
     it('should revert if at least one of the permission is frozen', async () => {
@@ -2054,19 +2131,6 @@ describe.only('Core: PermissionManager', function () {
       await expect(pm.applySingleTargetPermissions(where, bulkItems))
         .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
         .withArgs(where, permissionId2);
-    });
-
-    it('reverts for `Operation.GrantWithCondition` ', async () => {
-      const bulkItems: SingleTargetPermission[] = [
-        {
-          operation: Operation.GrantWithCondition,
-          who: ownerSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-      ];
-      await expect(
-        pm.applySingleTargetPermissions(pm.address, bulkItems)
-      ).to.be.revertedWithCustomError(pm, 'GrantWithConditionNotSupported');
     });
 
     it('should handle bulk mixed', async () => {
@@ -2148,41 +2212,6 @@ describe.only('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
-    });
-
-    it('should not allow', async () => {
-      const bulkItems: SingleTargetPermission[] = [
-        {
-          operation: Operation.Grant,
-          who: otherSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-      ];
-      await expect(
-        pm
-          .connect(otherSigner)
-          .applySingleTargetPermissions(pm.address, bulkItems)
-      )
-        .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
-    });
-
-    it('should not allow for non ROOT', async () => {
-      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const bulkItems: SingleTargetPermission[] = [
-        {
-          operation: Operation.Grant,
-          who: otherSigner.address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-      ];
-      await expect(
-        pm
-          .connect(otherSigner)
-          .applySingleTargetPermissions(pm.address, bulkItems)
-      )
-        .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(pm.address, otherSigner.address, APPLY_TARGET_PERMISSION_ID);
     });
   });
 
