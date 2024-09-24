@@ -12,12 +12,15 @@ import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
+import util from 'util';
 
 dotenv.config();
+
+const exec = util.promisify(require('child_process').exec);
 
 const ETH_KEY = process.env.ETH_KEY;
 const accounts = ETH_KEY ? ETH_KEY.split(',') : [];
@@ -51,6 +54,15 @@ extendEnvironment(hre => {
   hre.managementDAOMultisigPluginAddress = ''; // TODO This must be removed after the deploy script got refactored (see https://github.com/aragon/osx/pull/582)
   hre.managementDAOActions = [];
   hre.testingFork = testingFork;
+});
+
+// Needed to override and extend in order to make coverage work with typechain
+// Without this, it doesn't generate typechains the way we want with custom scripts.
+task('coverage').setAction(async (args, hre, runSuper) => {
+  await exec('yarn typechain:osx');
+  await exec('yarn typechain:osx-versions');
+
+  await runSuper();
 });
 
 const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
