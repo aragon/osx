@@ -835,7 +835,7 @@ describe('DAO', function () {
 
     it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
-      let gasConsumer = await GasConsumer.deploy();
+      const gasConsumer = await GasConsumer.deploy();
 
       // Prepare an action array calling `consumeGas` twenty times.
       const gasConsumingAction = {
@@ -856,7 +856,7 @@ describe('DAO', function () {
       // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(3000),
+          gasLimit: expectedGas.sub(3200),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
@@ -870,12 +870,12 @@ describe('DAO', function () {
 
     it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
-      let gasConsumer = await GasConsumer.deploy();
+      const gasConsumer = await GasConsumer.deploy();
 
       // Prepare an action array calling `consumeGas` one times.
       const gasConsumingAction = {
         to: gasConsumer.address,
-        data: GasConsumer.interface.encodeFunctionData('consumeGas', [1]),
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [2]),
         value: 0,
       };
 

@@ -48,7 +48,7 @@ const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
 const somePermissionId =
   '0x0000000000000000000000000000000000000000000000000000000012345678';
 
-describe.only('Core: PermissionManager', function () {
+describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
@@ -364,7 +364,7 @@ describe.only('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
-    it('should revert if flags that dont exist are removed', async () => {
+    it("should revert if flags that don't exist are removed", async () => {
       await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
       await expect(
@@ -672,6 +672,27 @@ describe.only('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'UnauthorizedOwner')
         .withArgs(otherSigner.address, 0, FULL_OWNER_FLAG);
+    });
+
+    it('should revert if flags to undelegate are not delegated', async () => {
+      const bob = signers[3];
+      await pm.delegatePermission(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        bob.address,
+        GRANT_OWNER_FLAG
+      );
+
+      await expect(
+        pm.undelegatePermission(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          bob.address,
+          FULL_OWNER_FLAG
+        )
+      )
+        .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
+        .withArgs(GRANT_OWNER_FLAG, FULL_OWNER_FLAG);
     });
 
     it('should emit PermissionUndelegated and correctly update the flags', async () => {
@@ -1012,6 +1033,17 @@ describe.only('Core: PermissionManager', function () {
           conditionMock.address
         )
       ).to.not.be.reverted;
+    });
+
+    it('reverts if both `_who == ANY_ADDR` and `_where == ANY_ADDR', async () => {
+      await expect(
+        pm.grantWithCondition(
+          ANY_ADDR,
+          ANY_ADDR,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+          conditionMock.address
+        )
+      ).to.be.revertedWithCustomError(pm, 'AnyAddressDisallowedForWhoAndWhere');
     });
 
     it('should add permission', async () => {
@@ -1535,6 +1567,45 @@ describe.only('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(someWhere, otherSigner.address, somePermissionId);
+    });
+  });
+
+  describe('setApplyTargetMethodGrantee', () => {
+    beforeEach(async () => {
+      await pm.createPermission(
+        ownerSigner.address,
+        ADMIN_PERMISSION_ID,
+        otherSigner.address,
+        ['0xb794F5eA0ba39494cE839613fffBA74279579268']
+      );
+    });
+
+    it('should store the applyTargetMethodGrantee ', async () => {
+      expect(await pm.applyTargetMethodGrantee()).to.be.equal(addressZero);
+      await pm.setApplyTargetMethodGrantee(ownerSigner.address);
+
+      expect(await pm.applyTargetMethodGrantee()).to.be.equal(
+        ownerSigner.address
+      );
+    });
+
+    it('should emit ApplyTargetMethodGranteeSet', async () => {
+      await expect(pm.setApplyTargetMethodGrantee(ownerSigner.address)).to.emit(
+        pm,
+        'ApplyTargetMethodGranteeSet'
+      );
+    });
+
+    it('should revert if not allowed', async () => {
+      await expect(
+        pm.connect(otherSigner).setApplyTargetMethodGrantee(ownerSigner.address)
+      )
+        .to.be.revertedWithCustomError(pm, 'Unauthorized')
+        .withArgs(
+          pm.address,
+          otherSigner.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID
+        );
     });
   });
 
