@@ -164,7 +164,7 @@ abstract contract PermissionManager is Initializable {
     /// @param where The address of the target contract for which the delegatee loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param delegatee The address of the delegatee.
-    /// @param flags The current flags undelegated to the delegatee.
+    /// @param flags The current/updated flags left on the delegatee.
     event PermissionUndelegated(
         address indexed where,
         bytes32 indexed permissionIdOrSelector,
@@ -188,12 +188,14 @@ abstract contract PermissionManager is Initializable {
     /// @param where The address of the target contract for which the owner loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param owner The address of the owner.
-    /// @param flags The flags to remove from the owner.
+    /// @param updatedOwnerFlags The updated/current flags left on the owner.
+    /// @param updatedDelegateeFlags The updated/current flags left on the owner.
     event OwnerRemoved(
         address indexed where,
         bytes32 indexed permissionIdOrSelector,
         address indexed owner,
-        uint256 flags
+        uint256 updatedOwnerFlags,
+        uint256 updatedDelegateeFlags
     );
 
     /// @notice Emitted when a permission does get created.
@@ -281,7 +283,7 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.delegations[_delegatee];
 
         // If the same flags that a `delegatee` already holds is added, return early.
-        if (currentFlags == _flags) {
+        if (_checkFlags(currentFlags, _flags)) {
             return;
         }
 
@@ -358,7 +360,7 @@ abstract contract PermissionManager is Initializable {
         uint256 currentFlags = permission.owners[_owner];
 
         // If the same flags that an `owner` already holds is added, return early.
-        if (currentFlags == _flags) {
+        if (_checkFlags(currentFlags, _flags)) {
             return;
         }
 
@@ -396,11 +398,11 @@ abstract contract PermissionManager is Initializable {
             permissionHash(_where, _permissionIdOrSelector)
         ];
 
-        uint256 currentFlags = permission.owners[msg.sender];
+        uint256 ownerFlags = permission.owners[msg.sender];
 
         // Check if the removal flags have more bit set as the owner currently has.
-        if (!_checkFlags(currentFlags, _flags)) {
-            revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
+        if (!_checkFlags(ownerFlags, _flags)) {
+            revert InvalidFlagsForRemovalPassed(ownerFlags, _flags);
         }
 
         if (_checkFlags(_flags, GRANT_OWNER_FLAG)) {
@@ -411,10 +413,25 @@ abstract contract PermissionManager is Initializable {
             permission.revokeCounter--;
         }
 
-        uint256 newFlags = currentFlags ^ _flags; // remove permissions
-        permission.owners[msg.sender] = newFlags;
+        uint256 newOwnerFlags = ownerFlags ^ _flags; // remove permissions
+        permission.owners[msg.sender] = newOwnerFlags;
 
-        emit OwnerRemoved(_where, _permissionIdOrSelector, msg.sender, newFlags);
+        // Renouncing the ownership should also mean to renounce delegation.
+        uint256 delegateeFlags = permission.delegations[msg.sender];
+        uint256 newDelegateeFlags = 0;
+
+        if (_checkFlags(delegateeFlags, _flags)) {
+            newDelegateeFlags = delegateeFlags ^ _flags;
+            permission.delegations[msg.sender] = newDelegateeFlags;
+        }
+
+        emit OwnerRemoved(
+            _where,
+            _permissionIdOrSelector,
+            msg.sender,
+            newOwnerFlags,
+            newDelegateeFlags
+        );
     }
 
     /// @notice Function to check if this specific permission is frozen.
@@ -432,10 +449,12 @@ abstract contract PermissionManager is Initializable {
         return _isPermissionFrozen(permission);
     }
 
-    /// @notice Function to retrieve the owner and delegate flags of an `_owner` on a permission.
+    /// @notice Function to retrieve if permission is created and how many owners it has.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @return The counts of how many owners are on a permission and whether permission has been created or not yet.
+    /// @return Whether the permission has been created or not.
+    /// @return How many grant owners this permission has currently.
+    /// @return How many revoke owners this permission has currently.
     function getPermissionData(
         address _where,
         bytes32 _permissionIdOrSelector
@@ -447,21 +466,22 @@ abstract contract PermissionManager is Initializable {
         return (permission.created, permission.grantCounter, permission.revokeCounter);
     }
 
-    /// @notice Function to retrieve the owner and delegate flags of an `_owner` on a permission.
+    /// @notice Function to retrieve the owner and delegate flags of an `_account` on a permission.
     /// @param _where The address of the target contract for which `_who` receives permission.
     /// @param _permissionIdOrSelector The permission hash or function selector used for this permission.
-    /// @param _owner The address for which to return the current flags.
-    /// @return The owner and delegate flags.
+    /// @param _account The address for which to return the current flags.
+    /// @return uint256 Returns owner flags. 0 if an `account` is not an owner.
+    /// @return uint256 Returns delegatee flags. 0 if an `account` is not a delegatee.
     function getFlags(
         address _where,
         bytes32 _permissionIdOrSelector,
-        address _owner
+        address _account
     ) public view returns (uint256, uint256) {
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
 
-        return (permission.owners[_owner], permission.delegations[_owner]);
+        return (permission.owners[_account], permission.delegations[_account]);
     }
 
     /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
@@ -945,7 +965,8 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice An internal function to check if the caller has either root or apply target permission.
     /// @dev Reverts in case the caller has none of these permissions.
-    /// @return hasRoot whether the caller has ROOT and `APPLY_TARGET_PERMISSION_ID` permissions.
+    /// @return hasRoot True if the caller has ROOT on `address(this)`, otherwise false.
+    /// @return hasApplyTargetPermission True if the caller has `APPLY_TARGET_PERMISSION_ID` on `address(this)`, otherwise false.
     function _canApplyTarget() internal view returns (bool hasRoot, bool hasApplyTargetPermission) {
         hasRoot = _isRoot(msg.sender);
 
@@ -1030,31 +1051,37 @@ abstract contract PermissionManager is Initializable {
             return isRoot;
         }
 
-        uint256 delegationFlags = _permission.delegations[_who];
-
         if (
             _operation == PermissionLib.Operation.Grant ||
             _operation == PermissionLib.Operation.GrantWithCondition
         ) {
-            if (_checkFlags(delegationFlags, GRANT_OWNER_FLAG)) {
-                _permission.delegations[_who] = delegationFlags ^ GRANT_OWNER_FLAG;
+            if (_checkFlags(_permission.owners[_who], GRANT_OWNER_FLAG)) {
                 return true;
-            } else if (_checkFlags(_permission.owners[_who], GRANT_OWNER_FLAG)) {
-                return true;
-            }
+            } else {
+                uint256 delegationFlags = _permission.delegations[_who];
 
-            return isRoot && _permission.grantCounter == 0;
+                if (_checkFlags(delegationFlags, GRANT_OWNER_FLAG)) {
+                    _permission.delegations[_who] = delegationFlags ^ GRANT_OWNER_FLAG;
+                    return true;
+                }
+
+                return isRoot && _permission.grantCounter == 0;
+            }
         }
 
         if (_operation == PermissionLib.Operation.Revoke) {
-            if (_checkFlags(delegationFlags, REVOKE_OWNER_FLAG)) {
-                _permission.delegations[_who] = delegationFlags ^ REVOKE_OWNER_FLAG;
+            if (_checkFlags(_permission.owners[_who], REVOKE_OWNER_FLAG)) {
                 return true;
-            } else if (_checkFlags(_permission.owners[_who], REVOKE_OWNER_FLAG)) {
-                return true;
-            }
+            } else {
+                uint256 delegationFlags = _permission.delegations[_who];
 
-            return isRoot && _permission.revokeCounter == 0;
+                if (_checkFlags(delegationFlags, REVOKE_OWNER_FLAG)) {
+                    _permission.delegations[_who] = delegationFlags ^ REVOKE_OWNER_FLAG;
+                    return true;
+                }
+
+                return isRoot && _permission.revokeCounter == 0;
+            }
         }
 
         return false;

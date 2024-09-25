@@ -43,8 +43,7 @@ const FULL_OWNER_FLAG = 6;
 const FREEZE_ADDRESS = '0x0000000000000000000000000000000000000001';
 
 const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
-const somePermissionId =
-  '0x0000000000000000000000000000000000000000000000000000000012345678';
+const somePermissionId = ethers.utils.id('SOME_PERMISSION');
 
 describe.only('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
@@ -305,12 +304,32 @@ describe.only('Core: PermissionManager', function () {
         )
       ).to.not.be.reverted;
     });
+
+    it('should not emit event if owner already holds the flags that is being added', async () => {
+      const owner = signers[2];
+
+      await pm.addOwner(
+        pm.address,
+        ADMIN_PERMISSION_ID,
+        owner.address,
+        FULL_OWNER_FLAG
+      );
+
+      await expect(
+        pm.addOwner(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          GRANT_OWNER_FLAG
+        )
+      ).to.not.emit(pm, 'OwnerAdded');
+    });
   });
 
   describe('removeOwner', () => {
     beforeEach(async () => {
       await pm.createPermission(
-        pm.address,
+        someWhere,
         ADMIN_PERMISSION_ID,
         ownerSigner.address,
         []
@@ -319,54 +338,55 @@ describe.only('Core: PermissionManager', function () {
 
     it('should remove the FULL_OWNER_FLAGS from the owner', async () => {
       await expect(
-        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG)
+        pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG)
       )
         .to.emit(pm, 'OwnerRemoved')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 0);
+        .withArgs(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address, 0, 0);
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address)
+        await pm.getFlags(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address)
       ).to.deep.equal([0, 0]);
     });
 
     it('should remove the specific flag from the owner', async () => {
       await expect(
-        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
+        pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
       )
         .to.emit(pm, 'OwnerRemoved')
         .withArgs(
-          pm.address,
+          someWhere,
           ADMIN_PERMISSION_ID,
           ownerSigner.address,
-          REVOKE_OWNER_FLAG
+          REVOKE_OWNER_FLAG,
+          0
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address)
+        await pm.getFlags(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address)
       ).to.deep.equal([REVOKE_OWNER_FLAG, 0]);
 
       await expect(
-        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG)
+        pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG)
       )
         .to.emit(pm, 'OwnerRemoved')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address, 0);
+        .withArgs(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address, 0, 0);
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, ownerSigner.address)
+        await pm.getFlags(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address)
       ).to.deep.equal([0, 0]);
     });
 
     it('should revert if a zero flag is passed', async () => {
       await expect(
-        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, 0)
+        pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, 0)
       ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
     });
 
     it("should revert if flags that don't exist are removed", async () => {
-      await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
+      await pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
       await expect(
-        pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
+        pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
       )
         .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
         .withArgs(REVOKE_OWNER_FLAG, GRANT_OWNER_FLAG);
@@ -374,37 +394,69 @@ describe.only('Core: PermissionManager', function () {
 
     it('should correctly decrease owner counters', async () => {
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 1]);
 
       const newOwner = otherSigner.address;
 
       await pm.addOwner(
-        pm.address,
+        someWhere,
         ADMIN_PERMISSION_ID,
         newOwner,
         FULL_OWNER_FLAG
       );
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 2, 2]);
 
       await pm
         .connect(otherSigner)
-        .removeOwner(pm.address, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
+        .removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 2]);
 
       await pm
         .connect(otherSigner)
-        .removeOwner(pm.address, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG);
+        .removeOwner(someWhere, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG);
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 1]);
+    });
+
+    it('should also remove delegatee flags when removing the owner flags', async () => {
+      const owner = signers[2];
+
+      await pm.addOwner(
+        someWhere,
+        ADMIN_PERMISSION_ID,
+        owner.address,
+        FULL_OWNER_FLAG
+      );
+
+      await pm.delegatePermission(
+        someWhere,
+        ADMIN_PERMISSION_ID,
+        owner.address,
+        FULL_OWNER_FLAG
+      );
+
+      await expect(
+        pm
+          .connect(owner)
+          .removeOwner(someWhere, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG)
+      )
+        .to.emit(pm, 'OwnerRemoved')
+        .withArgs(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          owner.address,
+          GRANT_OWNER_FLAG,
+          GRANT_OWNER_FLAG
+        );
     });
   });
 
@@ -602,30 +654,23 @@ describe.only('Core: PermissionManager', function () {
     });
 
     it('should not emit PermissionDelegated if the same flags are added', async () => {
+      const delegatee = signers[2];
+
       await pm.delegatePermission(
         pm.address,
         ADMIN_PERMISSION_ID,
-        otherSigner.address,
-        GRANT_OWNER_FLAG
+        delegatee.address,
+        FULL_OWNER_FLAG
       );
 
       await expect(
         pm.delegatePermission(
           pm.address,
           ADMIN_PERMISSION_ID,
-          otherSigner.address,
+          delegatee.address,
           GRANT_OWNER_FLAG
         )
       ).to.not.emit(pm, 'PermissionDelegated');
-
-      await expect(
-        pm.delegatePermission(
-          pm.address,
-          ADMIN_PERMISSION_ID,
-          otherSigner.address,
-          REVOKE_OWNER_FLAG
-        )
-      ).to.emit(pm, 'PermissionDelegated');
     });
   });
 
