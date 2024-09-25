@@ -990,6 +990,28 @@ describe.only('Core: PermissionManager', function () {
         .addOwner(someWhere, somePermissionId, alice.address, GRANT_OWNER_FLAG);
 
       await pm.connect(alice).grant(someWhere, someWhere, somePermissionId);
+      await pm.connect(alice).revoke(someWhere, someWhere, somePermissionId);
+    });
+
+    it('should still keep the flag for delegation if a caller is an owner and delegate and calls grant', async () => {
+      let owner = signers[4];
+
+      await pm.createPermission(someWhere, somePermissionId, owner.address, []);
+
+      await pm
+        .connect(owner)
+        .delegatePermission(
+          someWhere,
+          somePermissionId,
+          owner.address,
+          GRANT_OWNER_FLAG
+        );
+
+      await pm.connect(owner).grant(someWhere, someWhere, somePermissionId);
+
+      expect(
+        await pm.getFlags(someWhere, somePermissionId, owner.address)
+      ).to.deep.equal([FULL_OWNER_FLAG, GRANT_OWNER_FLAG]);
     });
 
     it('should still keep `REVOKE_OWNER_FLAG` for delegatee if only `GRANT_OWNER_FLAG` is used/depleted', async () => {
@@ -1621,6 +1643,27 @@ describe.only('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(someWhere, otherSigner.address, somePermissionId);
+    });
+
+    it('should still keep the flag for delegation if a caller is an owner and delegate and calls revoke', async () => {
+      let owner = signers[4];
+
+      await pm.createPermission(someWhere, somePermissionId, owner.address, []);
+
+      await pm
+        .connect(owner)
+        .delegatePermission(
+          someWhere,
+          somePermissionId,
+          owner.address,
+          REVOKE_OWNER_FLAG
+        );
+
+      await pm.connect(owner).revoke(someWhere, someWhere, somePermissionId);
+
+      expect(
+        await pm.getFlags(someWhere, somePermissionId, owner.address)
+      ).to.deep.equal([FULL_OWNER_FLAG, REVOKE_OWNER_FLAG]);
     });
 
     it('should still keep `GRANT_OWNER_FLAG` for delegatee if only `REVOKE_OWNER_FLAG` is used/depleted', async () => {
