@@ -109,6 +109,8 @@ const EMPTY_DATA = '0x';
 
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
+const APPLY_TARGET_PERMISSION_ID = ethers.utils.id('APPLY_TARGET_PERMISSION');
+
 describe('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
@@ -579,7 +581,7 @@ describe('PluginSetupProcessor', function () {
           .withArgs(
             targetDao.address,
             psp.address,
-            '0xf40ef0af1ef5603c5d084dc17659d339ea90c8ff31545c1ffcadc8207aefa8af'
+            APPLY_TARGET_PERMISSION_ID
           );
       });
 
@@ -1165,7 +1167,7 @@ describe('PluginSetupProcessor', function () {
           .withArgs(
             targetDao.address,
             psp.address,
-            '0xf40ef0af1ef5603c5d084dc17659d339ea90c8ff31545c1ffcadc8207aefa8af'
+            APPLY_TARGET_PERMISSION_ID
           );
       });
 
@@ -1827,7 +1829,7 @@ describe('PluginSetupProcessor', function () {
         .withArgs(
           targetDao.address,
           psp.address,
-          '0xf40ef0af1ef5603c5d084dc17659d339ea90c8ff31545c1ffcadc8207aefa8af'
+          APPLY_TARGET_PERMISSION_ID
         );
     });
 

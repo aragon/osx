@@ -120,6 +120,9 @@ contract DAO is
     /// @notice Thrown when a function is removed but left to not corrupt the interface ID.
     error FunctionRemoved();
 
+    /// @notice Thrown when initialize is called after it has already been executed.
+    error AlreadyInitialized();
+
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
     event NewURI(string daoURI);
@@ -135,6 +138,15 @@ contract DAO is
         _;
 
         _reentrancyStatus = _NOT_ENTERED;
+    }
+
+    /// @notice This ensures that the initialize function cannot be called during the upgrade process.
+    modifier onlyCallAtInitialization() {
+        if (_getInitializedVersion() != 0) {
+            revert AlreadyInitialized();
+        }
+
+        _;
     }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
@@ -157,7 +169,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external reinitializer(3) {
+    ) external onlyCallAtInitialization reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
@@ -274,8 +286,7 @@ contract DAO is
             msg.data
         );
 
-        for (uint256 i = 0; i < _actions.length; i++) {
-            // TODO: Merge this loop with the below one.
+        for (uint256 i = 0; i < _actions.length; ) {
             Action calldata action = _actions[i];
 
             bool isAllowed = hasExecutePermission;
@@ -298,9 +309,7 @@ contract DAO is
             if (!isAllowed) {
                 revert Unauthorized(action.to, msg.sender, permissionId);
             }
-        }
 
-        for (uint256 i = 0; i < _actions.length; ) {
             bool success;
             bytes memory data;
 
