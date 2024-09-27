@@ -299,7 +299,7 @@ describe('DAOFactory: ', function () {
       .withArgs(daoSettings.daoURI);
   });
 
-  it.only('creates a dao with a plugin and emits correct events', async () => {
+  it('creates a dao with a plugin and emits correct events', async () => {
     const expectedDao = await getAnticipatedAddress(daoFactory.address);
     const expectedPlugin = await getAnticipatedAddress(
       pluginSetupV1Mock.address
