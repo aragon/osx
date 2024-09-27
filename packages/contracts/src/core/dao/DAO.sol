@@ -18,7 +18,7 @@ import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versionin
 import {VersionComparisonLib} from "@aragon/osx-commons-contracts/src/utils/versioning/VersionComparisonLib.sol";
 import {hasBit, flipBit} from "@aragon/osx-commons-contracts/src/utils/math/BitMap.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
-import {IExecutor} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
+import {IExecutor, Action} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
