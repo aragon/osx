@@ -45,7 +45,7 @@ const FREEZE_ADDRESS = '0x0000000000000000000000000000000000000001';
 const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
 const somePermissionId = ethers.utils.id('SOME_PERMISSION');
 
-describe.only('Core: PermissionManager', function () {
+describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;

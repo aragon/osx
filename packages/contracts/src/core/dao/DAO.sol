@@ -18,6 +18,7 @@ import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versionin
 import {VersionComparisonLib} from "@aragon/osx-commons-contracts/src/utils/versioning/VersionComparisonLib.sol";
 import {hasBit, flipBit} from "@aragon/osx-commons-contracts/src/utils/math/BitMap.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {IExecutor, Action} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
@@ -35,6 +36,7 @@ contract DAO is
     IERC1271,
     ERC165StorageUpgradeable,
     IDAO,
+    IExecutor,
     UUPSUpgradeable,
     ProtocolVersion,
     PermissionManager,
@@ -159,6 +161,7 @@ contract DAO is
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
         _registerInterface(type(IDAO).interfaceId);
+        _registerInterface(type(IExecutor).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
         _registerInterface(type(IProtocolVersion).interfaceId); // added in v1.3.0
@@ -198,6 +201,8 @@ contract DAO is
                 _who: address(this),
                 _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
             });
+
+            _registerInterface(type(IExecutor).interfaceId);
         }
     }
 
@@ -246,7 +251,7 @@ contract DAO is
         _setMetadata(_metadata);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IExecutor
     function execute(
         bytes32 _callId,
         Action[] calldata _actions,

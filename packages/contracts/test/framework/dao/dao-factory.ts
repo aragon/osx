@@ -45,6 +45,7 @@ import {PluginUUPSUpgradeableV2Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
 const EVENTS = {
