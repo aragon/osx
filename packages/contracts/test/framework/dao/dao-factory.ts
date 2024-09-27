@@ -305,62 +305,6 @@ describe('DAOFactory: ', function () {
       pluginSetupV1Mock.address
     );
 
-    const calldata = DAOFactory__factory.createInterface().encodeFunctionData(
-      'createDao',
-      [
-        [ethers.constants.AddressZero, 'daoURI', 'evantestdao26sep', '0x'],
-        [
-          [
-            [
-              [1, 2], // multisig version to install
-              '0x9e7956C8758470dE159481e5DD0d08F8B59217A2', // multisigrepo
-            ],
-            defaultAbiCoder.encode(
-              ['address[]', 'tuple(bool, uint16)'],
-              [['0x455e3DEFBC6b48D9127CF6acC609F5cEa87cA759'], [true, 1]]
-            ),
-          ],
-          [
-            [
-              [1, 2], // tokenvoting version to install
-              '0x424F4cA6FA9c24C03f2396DF0E96057eD11CF7dF', // tokenvotingrepo
-            ],
-            defaultAbiCoder.encode(
-              [
-                'tuple(uint8, uint32, uint32, uint64, uint256)',
-                'tuple(address, string, string)',
-                'tuple(address[], uint256[])',
-              ],
-              [
-                [1, 10000, 10000, 3600, 0],
-                [ethers.constants.AddressZero, 'evantoken', 'evansymbol'],
-                [['0x455e3DEFBC6b48D9127CF6acC609F5cEa87cA759'], [1000000]],
-              ]
-            ),
-          ],
-        ],
-      ]
-    );
-
-    console.log(calldata, ' oe');
-
-    //     3600  blax
-    // BigNumber { value: "10000" }
-    // BigNumber { value: "10000" }
-
-    // address[] receivers;
-    // uint256[] amounts;
-
-    // address addr;
-    //     string name;
-    //     string symbol;
-
-    // VotingMode votingMode;
-    // uint32 supportThreshold;
-    // uint32 minParticipation;
-    // uint64 minDuration;
-    // uint256 minProposerVotingPower;
-
     const {
       plugin,
       preparedSetupData: {permissions, helpers},
