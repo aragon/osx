@@ -14,8 +14,6 @@ async function generateTypechain(): Promise<void> {
     excludedDirs.add(path.join(artifactsDir, OSX_VERSION_ALIASES[i]));
   }
 
-  console.log(excludedDirs)
-
   const jsonFiles: string[] = [];
 
   console.log('Searching for files...');
@@ -31,7 +29,8 @@ async function generateTypechain(): Promise<void> {
 
     const dirPath = path.dirname(filePath);
 
-    // Only arrange the contracts' paths in the current directory without previous versions.
+    // Only arrange the contracts' paths in the current 
+    // directory without previous versions.
     const containsPrefix = Array.from(excludedDirs).some(prefix => dirPath.startsWith(prefix));
     
     if (!containsPrefix) {
@@ -43,7 +42,6 @@ async function generateTypechain(): Promise<void> {
 
   const filesArg = jsonFiles.join(' ');
 
-  // console.log(filesArg, ' kk')
   if (filesArg) {
     await execPromise(
       `typechain --target ethers-v5 --out-dir ./typechain ${filesArg}`
