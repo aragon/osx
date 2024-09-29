@@ -172,6 +172,9 @@ contract DAO is
     ) external onlyCallAtInitialization reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
+        // In addition to the current interfaceId, also support previous version of the interfaceId.
+        _registerInterface(type(IDAO).interfaceId ^ IExecutor.execute.selector);
+
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IExecutor).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
@@ -214,6 +217,7 @@ contract DAO is
                 _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
             });
 
+            _registerInterface(type(IDAO).interfaceId);
             _registerInterface(type(IExecutor).interfaceId);
         }
     }
