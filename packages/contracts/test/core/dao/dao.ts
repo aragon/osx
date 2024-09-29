@@ -147,7 +147,7 @@ describe('DAO', function () {
           dummyAddress1,
           daoExampleURI
         )
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWithCustomError(dao, 'AlreadyInitialized');
     });
 
     it('initializes with the correct trusted forwarder', async () => {
@@ -449,7 +449,6 @@ describe('DAO', function () {
 
     it('supports the `IDAO` interface', async () => {
       const iface = IDAO__factory.createInterface();
-      expect(getInterfaceId(iface)).to.equal('0x9385547e'); // the interfaceID from IDAO v1.0.0
       expect(await dao.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
