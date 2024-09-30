@@ -48,6 +48,8 @@ import {expect} from 'chai';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
+const APPLY_TARGET_PERMISSION_ID = ethers.utils.id('APPLY_TARGET_PERMISSION');
+
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
   DAORegistered: 'DAORegistered',
@@ -60,6 +62,7 @@ const EVENTS = {
   NewURI: 'NewURI',
   Revoked: 'Revoked',
   Granted: 'Granted',
+  ApplyMethodGranteeSet: 'ApplyTargetMethodGranteeSet',
 };
 
 const ALLOW_FLAG = '0x0000000000000000000000000000000000000002';
@@ -435,9 +438,13 @@ describe('DAOFactory: ', function () {
 
     // Check that events were emitted.
     await expect(tx)
+      .to.emit(daoContract, EVENTS.ApplyMethodGranteeSet)
+      .withArgs(psp.address);
+
+    await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(
-        DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+        APPLY_TARGET_PERMISSION_ID,
         daoFactory.address,
         dao,
         psp.address
@@ -475,6 +482,15 @@ describe('DAOFactory: ', function () {
         dao,
         psp.address,
         DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+        '0x'
+      )
+    ).to.be.false;
+
+    expect(
+      await daoContract.hasPermission(
+        dao,
+        psp.address,
+        APPLY_TARGET_PERMISSION_ID,
         '0x'
       )
     ).to.be.false;

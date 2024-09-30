@@ -12,10 +12,22 @@ import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/Permis
 import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
 
 import {DAO} from "../../core/dao/DAO.sol";
-import {PluginRepo} from "../plugin/repo/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/setup/PluginSetupProcessor.sol";
 import {hashHelpers, PluginSetupRef} from "../plugin/setup/PluginSetupProcessorHelpers.sol";
 import {DAORegistry} from "./DAORegistry.sol";
+
+// Permission Identifiers necessary to create and set up the dao.
+bytes32 constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
+bytes32 constant APPLY_INSTALLATION_PERMISSION_ID = keccak256("APPLY_INSTALLATION_PERMISSION");
+bytes32 constant APPLY_TARGET_PERMISSION_ID = keccak256("APPLY_TARGET_PERMISSION");
+bytes32 constant UPGRADE_DAO_PERMISSION_ID = keccak256("UPGRADE_DAO_PERMISSION");
+bytes32 constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION");
+bytes32 constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID = keccak256(
+    "REGISTER_STANDARD_CALLBACK_PERMISSION"
+);
+bytes32 constant SET_TRUSTED_FORWARDER_PERMISSION_ID = keccak256(
+    "SET_TRUSTED_FORWARDER_PERMISSION"
+);
 
 /// @title DAOFactory
 /// @author Aragon X - 2022-2023
@@ -93,20 +105,21 @@ contract DAOFactory is ERC165, ProtocolVersion {
         // Register DAO.
         daoRegistry.register(createdDao, msg.sender, _daoSettings.subdomain);
 
-        // Get Permission IDs
-        bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
-        bytes32 applyInstallationPermissionID = pluginSetupProcessor
-            .APPLY_INSTALLATION_PERMISSION_ID();
+        // Set the psp to be the allowed grantee for `APPLY_TARGET_PERMISSION_ID`.
+        createdDao.setApplyTargetMethodGrantee(address(pluginSetupProcessor));
 
-        // Grant the temporary permissions.
-        // Grant Temporarily `ROOT_PERMISSION` to `pluginSetupProcessor`.
-        createdDao.grant(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
+        // Grant Temporarily `APPLY_TARGET_PERMISSION_ID` to `pluginSetupProcessor`.
+        createdDao.grant(
+            address(createdDao),
+            address(pluginSetupProcessor),
+            APPLY_TARGET_PERMISSION_ID
+        );
 
         // Grant Temporarily `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
         createdDao.grant(
             address(pluginSetupProcessor),
             address(this),
-            applyInstallationPermissionID
+            APPLY_INSTALLATION_PERMISSION_ID
         );
 
         // Install plugins on the newly created DAO.
@@ -139,19 +152,23 @@ contract DAOFactory is ERC165, ProtocolVersion {
         _setDAOPermissions(createdDao);
 
         // Revoke the temporarily granted permissions.
-        // Revoke Temporarily `ROOT_PERMISSION` from `pluginSetupProcessor`.
-        createdDao.revoke(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
+        // Revoke Temporarily `APPLY_TARGET_PERMISSION_ID` from `pluginSetupProcessor`.
+        createdDao.revoke(
+            address(createdDao),
+            address(pluginSetupProcessor),
+            APPLY_TARGET_PERMISSION_ID
+        );
 
         // Revoke `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` from this `DAOFactory` .
         createdDao.revoke(
             address(pluginSetupProcessor),
             address(this),
-            applyInstallationPermissionID
+            APPLY_INSTALLATION_PERMISSION_ID
         );
 
         // Revoke Temporarily `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implicitly granted to this `DaoFactory`
         // at the create dao step `address(this)` being the initial owner of the new created DAO.
-        createdDao.revoke(address(createdDao), address(this), rootPermissionID);
+        createdDao.revoke(address(createdDao), address(this), ROOT_PERMISSION_ID);
     }
 
     /// @notice Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the initial owner.
@@ -187,27 +204,27 @@ contract DAOFactory is ERC165, ProtocolVersion {
         items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.ROOT_PERMISSION_ID()
+            ROOT_PERMISSION_ID
         );
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.UPGRADE_DAO_PERMISSION_ID()
+            UPGRADE_DAO_PERMISSION_ID
         );
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+            SET_TRUSTED_FORWARDER_PERMISSION_ID
         );
         items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.SET_METADATA_PERMISSION_ID()
+            SET_METADATA_PERMISSION_ID
         );
         items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID()
+            REGISTER_STANDARD_CALLBACK_PERMISSION_ID
         );
 
         _dao.applySingleTargetPermissions(address(_dao), items);
