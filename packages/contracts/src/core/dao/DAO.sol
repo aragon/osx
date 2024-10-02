@@ -63,6 +63,9 @@ contract DAO is
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
+    /// @notice The ID of the permission that allows to withdraw native eth by allowed entities.
+    bytes32 private constant ETH_TRANSFER_PERMISSION_ID = keccak256("");
+
     /// @notice The ID of the permission required to validate [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signatures.
     bytes32 public constant VALIDATE_SIGNATURE_PERMISSION_ID =
         keccak256("VALIDATE_SIGNATURE_PERMISSION");
@@ -296,18 +299,21 @@ contract DAO is
             bool isAllowed = hasExecutePermission;
             bytes32 permissionId = EXECUTE_PERMISSION_ID;
 
-            // TODO: do we want to have some special way to allow registering permission for `transfer` out of this contract ?
-            // This could be useful as there's no function selector for such scenario and currently, to do transfer, EXECUTE_PERMISSION
-            // is enough, but it could be desirable that some special permission is created and even if member has EXECUTE, still won't be able
-            // to execute withdraw action.
-            if (action.data.length >= 4) {
-                bytes32 id = keccak256(action.data[:4]);
-                Permission storage targetPermission = permissions[permissionHash(action.to, id)];
+            bytes32 id;
 
-                if (targetPermission.created) {
-                    isAllowed = isGranted(action.to, msg.sender, id, action.data);
-                    permissionId = id;
-                }
+            // If action.data is 0 length, it's native eth transfer
+            // which is checked the same way, though `id` is keccak256('0x').
+            if (action.data.length >= 4) {
+                id = keccak256(action.data[:4]);
+            } else if (action.data.length == 0) {
+                id = ETH_TRANSFER_PERMISSION_ID;
+            }
+
+            (bool created, , ) = getPermissionData(action.to, id);
+
+            if (created) {
+                isAllowed = isGranted(action.to, msg.sender, id, action.data);
+                permissionId = id;
             }
 
             if (!isAllowed) {
@@ -319,11 +325,11 @@ contract DAO is
 
             gasBefore = gasleft();
 
-            (success, data) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+            (success, data) = action.to.call{value: action.value}(action.data);
 
             gasAfter = gasleft();
 
-            if (_actions[i].to == address(this)) {
+            if (action.to == address(this)) {
                 if (!success) {
                     bytes4 result;
 
@@ -333,7 +339,7 @@ contract DAO is
 
                     if (result == Unauthorized.selector || result == UnauthorizedOwner.selector) {
                         gasBefore = gasleft();
-                        (success, data) = _actions[i].to.delegatecall(_actions[i].data);
+                        (success, data) = action.to.delegatecall(action.data);
                         gasAfter = gasleft();
                     }
                 }

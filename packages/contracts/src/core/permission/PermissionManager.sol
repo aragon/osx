@@ -40,9 +40,6 @@ abstract contract PermissionManager is Initializable {
     /// @notice Full owner flag to check or assign full ownership rights for a permission
     uint256 internal constant FULL_OWNER_FLAG = uint256(6);
 
-    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
-    mapping(bytes32 => address) internal permissionsHashed;
-
     /// @notice A struct containing the information for a permission.
     /// @param delegations Owners can delegate the permission so delegatees can only grant it one time only.
     /// @param owners The current owners of the permission with their own specific flags capabilities.
@@ -57,8 +54,11 @@ abstract contract PermissionManager is Initializable {
         uint64 revokeCounter;
     }
 
+    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
+    mapping(bytes32 => address) internal permissionsHashed;
+
     /// @notice A mapping storing owners and delegations of each permission.
-    mapping(bytes32 => Permission) internal permissions;
+    mapping(bytes32 => Permission) private permissions;
 
     /// @notice The address that can be granted APPLY_TARGET_PERMISSION_ID.
     address public applyTargetMethodGrantee;

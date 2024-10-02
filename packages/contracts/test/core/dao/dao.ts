@@ -984,6 +984,95 @@ describe('DAO', function () {
           const newBalance = await ethers.provider.getBalance(recipient);
           expect(newBalance.sub(currentBalance)).to.equal(amount);
         });
+
+        it('reverts if ETH transfer permission is created and caller lacks it, but still holds EXECUTE_PERMISSION_ID', async () => {
+          // put native tokens into the DAO
+          await dao.deposit(
+            ethers.constants.AddressZero,
+            amount,
+            'ref',
+            options
+          );
+
+          const caller = signers[0].address;
+
+          // make sure caller still has EXECUTE_PERMISSION
+          expect(
+            await dao.hasPermission(
+              dao.address,
+              caller,
+              DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+              '0x'
+            )
+          ).to.be.true;
+
+          // create transfer action
+          const action = {
+            to: signers[1].address,
+            value: amount,
+            data: '0x',
+          };
+
+          const permissionId = ethers.utils.keccak256(action.data);
+          console.log(permissionId, ' awesome');
+          console.log(ethers.utils.arrayify('0x'));
+          // 0x3b2499523ca0a1602b15162f870801607afd4d14133043cfc5fa4b8dcc12f88b
+          // 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+
+          // create a permission where permissionId is the hash of empty data.
+          await dao.createPermission(
+            action.to,
+            permissionId,
+            signers[1].address,
+            []
+          );
+
+          // This must fail as caller doesn't have this specific permission
+          await expect(dao.execute(ZERO_BYTES32, [action], 0))
+            .to.be.revertedWithCustomError(dao, 'Unauthorized')
+            .withArgs(action.to, caller, permissionId);
+        });
+
+        it('succeeds if ETH transfer permission is created and caller holds it, but but lacks EXECUTE_PERMISSION_ID', async () => {
+          // put native tokens into the DAO
+          await dao.deposit(
+            ethers.constants.AddressZero,
+            amount,
+            'ref',
+            options
+          );
+
+          // use caller that doesn't hold EXECUTE_PERMISSION in which case
+          // it still should succeed.
+          const caller = signers[2];
+
+          // create transfer action
+          const action = {
+            to: signers[1].address,
+            value: amount,
+            data: '0x',
+          };
+
+          const recipient = action.to;
+          const currentBalance = await ethers.provider.getBalance(recipient);
+
+          const permissionId = ethers.utils.keccak256(action.data);
+
+          // create a permission where permissionId is the hash of empty data.
+          await dao.createPermission(
+            action.to,
+            permissionId,
+            signers[1].address,
+            [caller.address] // grant to caller
+          );
+
+          // This must fail as caller doesn't have this specific permission
+          await expect(dao.connect(caller).execute(ZERO_BYTES32, [action], 0))
+            .to.not.be.reverted;
+
+          const newBalance = await ethers.provider.getBalance(recipient);
+          expect(newBalance.sub(currentBalance)).to.equal(amount);
+        });
       });
 
       describe('ERC20 Transfer', async () => {
