@@ -264,7 +264,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         address _delegatee,
         uint256 _flags
-    ) public {
+    ) public virtual {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
         }
@@ -303,7 +303,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         address _delegatee,
         uint256 _flags
-    ) public {
+    ) public virtual {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
         }
@@ -336,7 +336,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         address _owner,
         uint256 _flags
-    ) public {
+    ) public virtual {
         if (_flags == 0) {
             revert FlagCanNotBeZero();
         }
@@ -917,7 +917,7 @@ abstract contract PermissionManager is Initializable {
         bytes32 _permissionIdOrSelector,
         address _owner,
         address[] calldata _whos
-    ) internal {
+    ) internal virtual {
         Permission storage permission = permissions[
             permissionHash(_where, _permissionIdOrSelector)
         ];
