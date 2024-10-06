@@ -32,13 +32,13 @@ abstract contract PermissionManager is Initializable {
     address internal constant ALLOW_FLAG = address(2);
 
     /// @notice Grant owner flag to check or assign grant ownership right for a permission
-    uint256 internal constant GRANT_OWNER_FLAG = uint256(2);
+    uint256 internal constant GRANT_OWNER_FLAG = uint256(1);
 
     /// @notice Revoke owner flag to check or assign revoke ownership right for a permission
-    uint256 internal constant REVOKE_OWNER_FLAG = uint256(4);
+    uint256 internal constant REVOKE_OWNER_FLAG = uint256(2);
 
     /// @notice Full owner flag to check or assign full ownership rights for a permission
-    uint256 internal constant FULL_OWNER_FLAG = uint256(6);
+    uint256 internal constant FULL_OWNER_FLAG = uint256(3);
 
     /// @notice A struct containing the information for a permission.
     /// @param delegations Owners can delegate the permission so delegatees can only grant it one time only.
@@ -554,7 +554,11 @@ abstract contract PermissionManager is Initializable {
         address _where,
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
-        (bool hasRoot, bool hasApplyTargetPermission) = _canApplyTarget();
+        bool allowed = _canApplyTarget();
+
+        if (!allowed) {
+            revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
+        }
 
         for (uint256 i; i < _items.length; ) {
             PermissionLib.SingleTargetPermission memory item = _items[i];
@@ -564,14 +568,7 @@ abstract contract PermissionManager is Initializable {
                 revert PermissionFrozen(_where, item.permissionId);
             }
 
-            if (
-                !_checkOwner(
-                    permission,
-                    msg.sender,
-                    item.operation,
-                    hasRoot || hasApplyTargetPermission
-                )
-            ) {
+            if (!_checkOwner(permission, msg.sender, item.operation, allowed)) {
                 revert Unauthorized(_where, item.who, item.permissionId);
             }
 
@@ -594,7 +591,11 @@ abstract contract PermissionManager is Initializable {
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
-        (bool hasRoot, bool hasApplyTargetPermission) = _canApplyTarget();
+        bool allowed = _canApplyTarget();
+
+        if (!allowed) {
+            revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
+        }
 
         for (uint256 i; i < _items.length; ) {
             PermissionLib.MultiTargetPermission memory item = _items[i];
@@ -606,14 +607,7 @@ abstract contract PermissionManager is Initializable {
                 revert PermissionFrozen(item.where, item.permissionId);
             }
 
-            if (
-                !_checkOwner(
-                    permission,
-                    msg.sender,
-                    item.operation,
-                    hasRoot || hasApplyTargetPermission
-                )
-            ) {
+            if (!_checkOwner(permission, msg.sender, item.operation, allowed)) {
                 revert Unauthorized(item.where, item.who, item.permissionId);
             }
 
@@ -965,22 +959,12 @@ abstract contract PermissionManager is Initializable {
 
     /// @notice An internal function to check if the caller has either root or apply target permission.
     /// @dev Reverts in case the caller has none of these permissions.
-    /// @return hasRoot True if the caller has ROOT on `address(this)`, otherwise false.
-    /// @return hasApplyTargetPermission True if the caller has `APPLY_TARGET_PERMISSION_ID` on `address(this)`, otherwise false.
-    function _canApplyTarget() internal view returns (bool hasRoot, bool hasApplyTargetPermission) {
-        hasRoot = _isRoot(msg.sender);
+    /// @return isAllowed True if the caller has either ROOT or `APPLY_TARGET_PERMISSION_ID` on `address(this)`, otherwise false.
+    function _canApplyTarget() internal view virtual returns (bool isAllowed) {
+        isAllowed = _isRoot(msg.sender);
 
-        if (!hasRoot) {
-            hasApplyTargetPermission = isGranted(
-                address(this),
-                msg.sender,
-                APPLY_TARGET_PERMISSION_ID,
-                msg.data
-            );
-
-            if (!hasApplyTargetPermission) {
-                revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
-            }
+        if (!isAllowed) {
+            isAllowed = isGranted(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID, msg.data);
         }
     }
 

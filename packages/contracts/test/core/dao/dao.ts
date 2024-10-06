@@ -1014,10 +1014,6 @@ describe('DAO', function () {
           };
 
           const permissionId = ethers.utils.keccak256(action.data);
-          console.log(permissionId, ' awesome');
-          console.log(ethers.utils.arrayify('0x'));
-          // 0x3b2499523ca0a1602b15162f870801607afd4d14133043cfc5fa4b8dcc12f88b
-          // 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
 
           // create a permission where permissionId is the hash of empty data.
           await dao.createPermission(

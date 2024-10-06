@@ -37,9 +37,9 @@ interface SingleTargetPermission {
   permissionId: string;
 }
 
-const GRANT_OWNER_FLAG = 2;
-const REVOKE_OWNER_FLAG = 4;
-const FULL_OWNER_FLAG = 6;
+const GRANT_OWNER_FLAG = 1;
+const REVOKE_OWNER_FLAG = 2;
+const FULL_OWNER_FLAG = 3;
 const FREEZE_ADDRESS = '0x0000000000000000000000000000000000000001';
 
 const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
