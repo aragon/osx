@@ -557,9 +557,7 @@ abstract contract PermissionManager is Initializable {
         address _where,
         PermissionLib.SingleTargetPermission[] calldata _items
     ) external virtual {
-        bool allowed = _canApplyTarget();
-
-        if (!allowed) {
+        if (!_canApplyTarget()) {
             revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
 
@@ -571,7 +569,7 @@ abstract contract PermissionManager is Initializable {
                 revert PermissionFrozen(_where, item.permissionId);
             }
 
-            if (!_checkOwner(permission, msg.sender, item.operation, allowed)) {
+            if (!_canManage(permission, msg.sender, item.operation, true)) {
                 revert Unauthorized(_where, item.who, item.permissionId);
             }
 
@@ -594,9 +592,7 @@ abstract contract PermissionManager is Initializable {
     function applyMultiTargetPermissions(
         PermissionLib.MultiTargetPermission[] calldata _items
     ) external virtual {
-        bool allowed = _canApplyTarget();
-
-        if (!allowed) {
+        if (!_canApplyTarget()) {
             revert Unauthorized(address(this), msg.sender, APPLY_TARGET_PERMISSION_ID);
         }
 
@@ -610,7 +606,7 @@ abstract contract PermissionManager is Initializable {
                 revert PermissionFrozen(item.where, item.permissionId);
             }
 
-            if (!_checkOwner(permission, msg.sender, item.operation, allowed)) {
+            if (!_canManage(permission, msg.sender, item.operation, true)) {
                 revert Unauthorized(item.where, item.who, item.permissionId);
             }
 
@@ -986,7 +982,7 @@ abstract contract PermissionManager is Initializable {
             revert PermissionFrozen(_where, _permissionId);
         }
 
-        if (!_checkOwner(permission, msg.sender, _operation, _isRoot(msg.sender))) {
+        if (!_canManage(permission, msg.sender, _operation, _isRoot(msg.sender))) {
             revert Unauthorized(_where, msg.sender, _permissionId);
         }
     }
@@ -1023,12 +1019,13 @@ abstract contract PermissionManager is Initializable {
         return (_permission & _flags) == _flags;
     }
 
-    /// @notice Checks the permissions for the applyTarget methods used by the plugin setup processor.
+    /// @notice Checks if `_who` is allowed for the operation.
+    /// @dev If the permission is created, either the `_who` must be an owner/delegatee or ROOT only if permission has no owners.
     /// @param _permission The Permission struct.
     /// @param _who The address to check
     /// @param _operation The operation to check the permission against.
     /// @return True if the permission checks succeded otherwise false.
-    function _checkOwner(
+    function _canManage(
         Permission storage _permission,
         address _who,
         PermissionLib.Operation _operation,
