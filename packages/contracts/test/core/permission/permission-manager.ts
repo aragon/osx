@@ -40,7 +40,7 @@ interface SingleTargetPermission {
 const GRANT_OWNER_FLAG = 1;
 const REVOKE_OWNER_FLAG = 2;
 const FULL_OWNER_FLAG = 3;
-const FREEZE_ADDRESS = '0x0000000000000000000000000000000000000001';
+const FREEZE_OWNER = '0x0000000000000000000000000000000000000001';
 
 const someWhere = '0xb794F5eA0ba39494cE839613fffBA74279579268';
 const somePermissionId = ethers.utils.id('SOME_PERMISSION');
@@ -114,7 +114,11 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([FULL_OWNER_FLAG, 0]);
     });
 
@@ -136,7 +140,11 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([GRANT_OWNER_FLAG, 0]);
 
       await expect(
@@ -156,7 +164,11 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([FULL_OWNER_FLAG, 0]);
     });
 
@@ -171,7 +183,7 @@ describe('Core: PermissionManager', function () {
       );
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(pm.address, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 2, 1]);
 
       // If the same flag that `newOwner` already holds is added,
@@ -181,7 +193,7 @@ describe('Core: PermissionManager', function () {
       ).to.not.emit(pm, 'OwnerAdded');
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(pm.address, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 2, 1]);
 
       // Add the same owner but with revoke which should increase revoke counter only.
@@ -195,14 +207,14 @@ describe('Core: PermissionManager', function () {
       ).to.emit(pm, 'OwnerAdded');
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(pm.address, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 2, 2]);
     });
 
     it('should revert if a zero flag is passed', async () => {
       await expect(
         pm.addOwner(pm.address, ADMIN_PERMISSION_ID, otherSigner.address, 0)
-      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+      ).to.be.revertedWithCustomError(pm, 'InvalidEmptyFlag');
     });
 
     it('should revert if an _owner passed is address(0)', async () => {
@@ -228,7 +240,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should revert if the permission is frozen', async () => {
-      const freezeAddr = FREEZE_ADDRESS;
+      const freezeAddr = FREEZE_OWNER;
 
       await pm.addOwner(
         pm.address,
@@ -340,11 +352,15 @@ describe('Core: PermissionManager', function () {
       await expect(
         pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG)
       )
-        .to.emit(pm, 'OwnerRemoved')
+        .to.emit(pm, 'OwnerRenounced')
         .withArgs(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address, 0, 0);
 
       expect(
-        await pm.getFlags(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address)
+        await pm.getPermissionFlags(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address
+        )
       ).to.deep.equal([0, 0]);
     });
 
@@ -352,7 +368,7 @@ describe('Core: PermissionManager', function () {
       await expect(
         pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
       )
-        .to.emit(pm, 'OwnerRemoved')
+        .to.emit(pm, 'OwnerRenounced')
         .withArgs(
           someWhere,
           ADMIN_PERMISSION_ID,
@@ -362,24 +378,32 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address)
+        await pm.getPermissionFlags(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address
+        )
       ).to.deep.equal([REVOKE_OWNER_FLAG, 0]);
 
       await expect(
         pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG)
       )
-        .to.emit(pm, 'OwnerRemoved')
+        .to.emit(pm, 'OwnerRenounced')
         .withArgs(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address, 0, 0);
 
       expect(
-        await pm.getFlags(someWhere, ADMIN_PERMISSION_ID, ownerSigner.address)
+        await pm.getPermissionFlags(
+          someWhere,
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address
+        )
       ).to.deep.equal([0, 0]);
     });
 
     it('should revert if a zero flag is passed', async () => {
       await expect(
         pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, 0)
-      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+      ).to.be.revertedWithCustomError(pm, 'InvalidEmptyFlag');
     });
 
     it("should revert if flags that don't exist are removed", async () => {
@@ -388,13 +412,13 @@ describe('Core: PermissionManager', function () {
       await expect(
         pm.removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG)
       )
-        .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
+        .to.be.revertedWithCustomError(pm, 'InvalidMissingFlags')
         .withArgs(REVOKE_OWNER_FLAG, GRANT_OWNER_FLAG);
     });
 
     it('should correctly decrease owner counters', async () => {
       expect(
-        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 1]);
 
       const newOwner = otherSigner.address;
@@ -407,7 +431,7 @@ describe('Core: PermissionManager', function () {
       );
 
       expect(
-        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 2, 2]);
 
       await pm
@@ -415,7 +439,7 @@ describe('Core: PermissionManager', function () {
         .removeOwner(someWhere, ADMIN_PERMISSION_ID, GRANT_OWNER_FLAG);
 
       expect(
-        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 2]);
 
       await pm
@@ -423,7 +447,7 @@ describe('Core: PermissionManager', function () {
         .removeOwner(someWhere, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG);
 
       expect(
-        await pm.getPermissionData(someWhere, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(someWhere, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 1]);
     });
 
@@ -449,7 +473,7 @@ describe('Core: PermissionManager', function () {
           .connect(owner)
           .removeOwner(someWhere, ADMIN_PERMISSION_ID, REVOKE_OWNER_FLAG)
       )
-        .to.emit(pm, 'OwnerRemoved')
+        .to.emit(pm, 'OwnerRenounced')
         .withArgs(
           someWhere,
           ADMIN_PERMISSION_ID,
@@ -545,11 +569,15 @@ describe('Core: PermissionManager', function () {
         ]);
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([FULL_OWNER_FLAG, 0]);
 
       expect(
-        await pm.getPermissionData(pm.address, ADMIN_PERMISSION_ID)
+        await pm.getPermissionStatus(pm.address, ADMIN_PERMISSION_ID)
       ).to.deep.equal([true, 1, 1]);
     });
   });
@@ -572,14 +600,14 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           0
         )
-      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+      ).to.be.revertedWithCustomError(pm, 'InvalidEmptyFlag');
     });
 
     it('should revert if the permission is actually frozen', async () => {
       await pm.addOwner(
         pm.address,
         ADMIN_PERMISSION_ID,
-        FREEZE_ADDRESS,
+        FREEZE_OWNER,
         FULL_OWNER_FLAG
       );
       await pm.removeOwner(pm.address, ADMIN_PERMISSION_ID, FULL_OWNER_FLAG);
@@ -629,7 +657,11 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([0, GRANT_OWNER_FLAG]);
 
       await expect(
@@ -649,7 +681,11 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([0, FULL_OWNER_FLAG]);
     });
 
@@ -699,7 +735,7 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           0
         )
-      ).to.be.revertedWithCustomError(pm, 'FlagCanNotBeZero');
+      ).to.be.revertedWithCustomError(pm, 'InvalidEmptyFlag');
     });
 
     it('should revert if the caller is not the owner of the permission he/she wants to undelegate', async () => {
@@ -734,7 +770,7 @@ describe('Core: PermissionManager', function () {
           FULL_OWNER_FLAG
         )
       )
-        .to.be.revertedWithCustomError(pm, 'InvalidFlagsForRemovalPassed')
+        .to.be.revertedWithCustomError(pm, 'InvalidMissingFlags')
         .withArgs(GRANT_OWNER_FLAG, FULL_OWNER_FLAG);
     });
 
@@ -756,7 +792,11 @@ describe('Core: PermissionManager', function () {
         );
 
       expect(
-        await pm.getFlags(pm.address, ADMIN_PERMISSION_ID, otherSigner.address)
+        await pm.getPermissionFlags(
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          otherSigner.address
+        )
       ).to.deep.equal([0, GRANT_OWNER_FLAG]);
     });
   });
@@ -814,7 +854,7 @@ describe('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(
           pm,
-          'IncorrectApplyTargetMethodGranteeSet'
+          'UnrecognizedApplyPermissionsGrantee'
         )
         .withArgs(allowedApplyTargetMethodGrantee);
 
@@ -877,12 +917,7 @@ describe('Core: PermissionManager', function () {
 
       await pm
         .connect(ownerSigner)
-        .addOwner(
-          someWhere,
-          somePermissionId,
-          FREEZE_ADDRESS,
-          GRANT_OWNER_FLAG
-        );
+        .addOwner(someWhere, somePermissionId, FREEZE_OWNER, GRANT_OWNER_FLAG);
 
       await pm
         .connect(ownerSigner)
@@ -1010,7 +1045,7 @@ describe('Core: PermissionManager', function () {
       await pm.connect(owner).grant(someWhere, someWhere, somePermissionId);
 
       expect(
-        await pm.getFlags(someWhere, somePermissionId, owner.address)
+        await pm.getPermissionFlags(someWhere, somePermissionId, owner.address)
       ).to.deep.equal([FULL_OWNER_FLAG, GRANT_OWNER_FLAG]);
     });
 
@@ -1032,7 +1067,7 @@ describe('Core: PermissionManager', function () {
 
       await pm.connect(alice).grant(someWhere, someWhere, somePermissionId);
 
-      let currentFlags = await pm.getFlags(
+      let currentFlags = await pm.getPermissionFlags(
         someWhere,
         somePermissionId,
         alice.address
@@ -1128,7 +1163,7 @@ describe('Core: PermissionManager', function () {
       )
         .to.be.revertedWithCustomError(
           pm,
-          'IncorrectApplyTargetMethodGranteeSet'
+          'UnrecognizedApplyPermissionsGrantee'
         )
         .withArgs(allowedApplyTargetMethodGrantee);
 
@@ -1317,12 +1352,7 @@ describe('Core: PermissionManager', function () {
 
       await pm
         .connect(ownerSigner)
-        .addOwner(
-          someWhere,
-          somePermissionId,
-          FREEZE_ADDRESS,
-          GRANT_OWNER_FLAG
-        );
+        .addOwner(someWhere, somePermissionId, FREEZE_OWNER, GRANT_OWNER_FLAG);
 
       await pm
         .connect(ownerSigner)
@@ -1548,12 +1578,7 @@ describe('Core: PermissionManager', function () {
 
       await pm
         .connect(ownerSigner)
-        .addOwner(
-          someWhere,
-          somePermissionId,
-          FREEZE_ADDRESS,
-          GRANT_OWNER_FLAG
-        );
+        .addOwner(someWhere, somePermissionId, FREEZE_OWNER, GRANT_OWNER_FLAG);
 
       await pm
         .connect(ownerSigner)
@@ -1662,7 +1687,7 @@ describe('Core: PermissionManager', function () {
       await pm.connect(owner).revoke(someWhere, someWhere, somePermissionId);
 
       expect(
-        await pm.getFlags(someWhere, somePermissionId, owner.address)
+        await pm.getPermissionFlags(someWhere, somePermissionId, owner.address)
       ).to.deep.equal([FULL_OWNER_FLAG, REVOKE_OWNER_FLAG]);
     });
 
@@ -1684,7 +1709,7 @@ describe('Core: PermissionManager', function () {
 
       await pm.connect(alice).revoke(someWhere, someWhere, somePermissionId);
 
-      let currentFlags = await pm.getFlags(
+      let currentFlags = await pm.getPermissionFlags(
         someWhere,
         somePermissionId,
         alice.address
@@ -2084,7 +2109,7 @@ describe('Core: PermissionManager', function () {
 
       // Let's freeze one of the permission.
       await pm.createPermission(where, permissionId2, ownerSigner.address, []);
-      await pm.addOwner(where, permissionId2, FREEZE_ADDRESS, FULL_OWNER_FLAG);
+      await pm.addOwner(where, permissionId2, FREEZE_OWNER, FULL_OWNER_FLAG);
       await pm.removeOwner(where, permissionId2, FULL_OWNER_FLAG);
 
       // make sure that permission is really frozen.
@@ -2354,7 +2379,7 @@ describe('Core: PermissionManager', function () {
 
       // Let's freeze one of the permission.
       await pm.createPermission(where, permissionId2, ownerSigner.address, []);
-      await pm.addOwner(where, permissionId2, FREEZE_ADDRESS, FULL_OWNER_FLAG);
+      await pm.addOwner(where, permissionId2, FREEZE_OWNER, FULL_OWNER_FLAG);
       await pm.removeOwner(where, permissionId2, FULL_OWNER_FLAG);
 
       // make sure that permission is really frozen.

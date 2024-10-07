@@ -40,18 +40,21 @@ abstract contract PermissionManager is Initializable {
     /// @notice Full owner flag to check or assign full ownership rights for a permission
     uint256 internal constant FULL_OWNER_FLAG = uint256(3);
 
+    /// @notice To freeze the permission, `FREEZE_OWNER` must be added as an owner first.
+    address internal constant FREEZE_OWNER = address(1);
+
     /// @notice A struct containing the information for a permission.
     /// @param delegations Owners can delegate the permission so delegatees can only grant it one time only.
     /// @param owners The current owners of the permission with their own specific flags capabilities.
     /// @param created Whether the permission has been created or not - used in consumer contracts(such as DAO.sol) to make decisions whether permission exists or not.
-    /// @param grantCounter How many owners(that have grant capabilities) are currently set for a permission.
-    /// @param revokeCounter How many owners(that have revoke capabilities) are currently set for a permission.
+    /// @param grantOwnerCounter How many owners(that have grant capabilities) are currently set for a permission.
+    /// @param revokeOwnerCounter How many owners(that have revoke capabilities) are currently set for a permission.
     struct Permission {
         mapping(address => uint256) delegations;
         mapping(address => uint256) owners;
         bool created;
-        uint64 grantCounter;
-        uint64 revokeCounter;
+        uint64 grantOwnerCounter;
+        uint64 revokeOwnerCounter;
     }
 
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
@@ -111,16 +114,16 @@ abstract contract PermissionManager is Initializable {
     error ZeroAddress();
 
     /// @notice Thrown if the passed removal flags are invalid. The caller can only pass flags the user already has.
-    error InvalidFlagsForRemovalPassed(uint256 currentFlags, uint256 removalFlags);
+    error InvalidMissingFlags(uint256 currentFlags, uint256 removalFlags);
 
     /// @notice Thrown if the passed flag is set to zero.
-    error FlagCanNotBeZero();
+    error InvalidEmptyFlag();
 
     /// @notice Thrown if the permission is frozen.
     error PermissionFrozen(address where, bytes32 permissionId);
 
     /// @notice Thrown if the APPLY_TARGET_PERMISSION_ID is granted to the incorrect address.
-    error IncorrectApplyTargetMethodGranteeSet(address applyTargetMethodGrantee);
+    error UnrecognizedApplyPermissionsGrantee(address applyTargetMethodGrantee);
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
     /// @param permissionId The permission identifier.
@@ -184,13 +187,13 @@ abstract contract PermissionManager is Initializable {
         uint256 flags
     );
 
-    /// @notice Emitted when an owner does get removed.
+    /// @notice Emitted when an owner gets renounced.
     /// @param where The address of the target contract for which the owner loses permissions.
     /// @param permissionIdOrSelector The permission identifier.
     /// @param owner The address of the owner.
     /// @param updatedOwnerFlags The updated/current flags left on the owner.
     /// @param updatedDelegateeFlags The updated/current flags left on the owner.
-    event OwnerRemoved(
+    event OwnerRenounced(
         address indexed where,
         bytes32 indexed permissionIdOrSelector,
         address indexed owner,
@@ -266,7 +269,7 @@ abstract contract PermissionManager is Initializable {
         uint256 _flags
     ) public virtual {
         if (_flags == 0) {
-            revert FlagCanNotBeZero();
+            revert InvalidEmptyFlag();
         }
 
         bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
@@ -305,7 +308,7 @@ abstract contract PermissionManager is Initializable {
         uint256 _flags
     ) public virtual {
         if (_flags == 0) {
-            revert FlagCanNotBeZero();
+            revert InvalidEmptyFlag();
         }
 
         bytes32 permHash = permissionHash(_where, _permissionIdOrSelector);
@@ -317,7 +320,7 @@ abstract contract PermissionManager is Initializable {
 
         uint256 currentFlags = permission.delegations[_delegatee];
         if (!_checkFlags(currentFlags, _flags)) {
-            revert InvalidFlagsForRemovalPassed(currentFlags, _flags);
+            revert InvalidMissingFlags(currentFlags, _flags);
         }
 
         uint256 newFlags = currentFlags ^ _flags;
@@ -338,7 +341,7 @@ abstract contract PermissionManager is Initializable {
         uint256 _flags
     ) public virtual {
         if (_flags == 0) {
-            revert FlagCanNotBeZero();
+            revert InvalidEmptyFlag();
         }
 
         if (_owner == address(0) || _where == address(0)) {
@@ -364,19 +367,19 @@ abstract contract PermissionManager is Initializable {
             return;
         }
 
-        if (_owner != address(1)) {
+        if (_owner != FREEZE_OWNER) {
             if (
                 _checkFlags(_flags, GRANT_OWNER_FLAG) &&
                 !_checkFlags(currentFlags, GRANT_OWNER_FLAG)
             ) {
-                permission.grantCounter++;
+                permission.grantOwnerCounter++;
             }
 
             if (
                 _checkFlags(_flags, REVOKE_OWNER_FLAG) &&
                 !_checkFlags(currentFlags, REVOKE_OWNER_FLAG)
             ) {
-                permission.revokeCounter++;
+                permission.revokeOwnerCounter++;
             }
         }
 
@@ -391,7 +394,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _flags The flags as uint256 to remove specific rights the calling owner does have. (only revoke? only grant? both?)
     function removeOwner(address _where, bytes32 _permissionIdOrSelector, uint256 _flags) public {
         if (_flags == 0) {
-            revert FlagCanNotBeZero();
+            revert InvalidEmptyFlag();
         }
 
         Permission storage permission = permissions[
@@ -402,15 +405,15 @@ abstract contract PermissionManager is Initializable {
 
         // Check if the removal flags have more bit set as the owner currently has.
         if (!_checkFlags(ownerFlags, _flags)) {
-            revert InvalidFlagsForRemovalPassed(ownerFlags, _flags);
+            revert InvalidMissingFlags(ownerFlags, _flags);
         }
 
         if (_checkFlags(_flags, GRANT_OWNER_FLAG)) {
-            permission.grantCounter--;
+            permission.grantOwnerCounter--;
         }
 
         if (_checkFlags(_flags, REVOKE_OWNER_FLAG)) {
-            permission.revokeCounter--;
+            permission.revokeOwnerCounter--;
         }
 
         uint256 newOwnerFlags = ownerFlags ^ _flags; // remove permissions
@@ -425,7 +428,7 @@ abstract contract PermissionManager is Initializable {
             permission.delegations[msg.sender] = newDelegateeFlags;
         }
 
-        emit OwnerRemoved(
+        emit OwnerRenounced(
             _where,
             _permissionIdOrSelector,
             msg.sender,
@@ -455,7 +458,7 @@ abstract contract PermissionManager is Initializable {
     /// @return Whether the permission has been created or not.
     /// @return How many grant owners this permission has currently.
     /// @return How many revoke owners this permission has currently.
-    function getPermissionData(
+    function getPermissionStatus(
         address _where,
         bytes32 _permissionIdOrSelector
     ) public view returns (bool, uint64, uint64) {
@@ -463,7 +466,7 @@ abstract contract PermissionManager is Initializable {
             permissionHash(_where, _permissionIdOrSelector)
         ];
 
-        return (permission.created, permission.grantCounter, permission.revokeCounter);
+        return (permission.created, permission.grantOwnerCounter, permission.revokeOwnerCounter);
     }
 
     /// @notice Function to retrieve the owner and delegate flags of an `_account` on a permission.
@@ -472,7 +475,7 @@ abstract contract PermissionManager is Initializable {
     /// @param _account The address for which to return the current flags.
     /// @return uint256 Returns owner flags. 0 if an `account` is not an owner.
     /// @return uint256 Returns delegatee flags. 0 if an `account` is not a delegatee.
-    function getFlags(
+    function getPermissionFlags(
         address _where,
         bytes32 _permissionIdOrSelector,
         address _account
@@ -767,7 +770,7 @@ abstract contract PermissionManager is Initializable {
         // to the address allowed by ROOT.
         if (_permissionId == APPLY_TARGET_PERMISSION_ID) {
             if (applyTargetMethodGrantee == address(0) || applyTargetMethodGrantee != _who) {
-                revert IncorrectApplyTargetMethodGranteeSet(applyTargetMethodGrantee);
+                revert UnrecognizedApplyPermissionsGrantee(applyTargetMethodGrantee);
             }
         }
 
@@ -836,7 +839,7 @@ abstract contract PermissionManager is Initializable {
         // to the address allowed by ROOT.
         if (_permissionId == APPLY_TARGET_PERMISSION_ID) {
             if (applyTargetMethodGrantee == address(0) || applyTargetMethodGrantee != _who) {
-                revert IncorrectApplyTargetMethodGranteeSet(applyTargetMethodGrantee);
+                revert UnrecognizedApplyPermissionsGrantee(applyTargetMethodGrantee);
             }
         }
 
@@ -929,8 +932,8 @@ abstract contract PermissionManager is Initializable {
             }
         }
 
-        permission.grantCounter = 1;
-        permission.revokeCounter = 1;
+        permission.grantOwnerCounter = 1;
+        permission.revokeOwnerCounter = 1;
 
         emit PermissionCreated(_where, _permissionIdOrSelector, _owner, _whos);
     }
@@ -940,9 +943,9 @@ abstract contract PermissionManager is Initializable {
     /// @return True if the permission is frozen and otherwise false
     function _isPermissionFrozen(Permission storage _permission) private view returns (bool) {
         return
-            _permission.grantCounter == 0 &&
-            _permission.revokeCounter == 0 &&
-            _permission.owners[address(1)] != 0;
+            _permission.grantOwnerCounter == 0 &&
+            _permission.revokeOwnerCounter == 0 &&
+            _permission.owners[FREEZE_OWNER] != 0;
     }
 
     /// @notice An internal function to be used to check permissions on the permission manager contract (`address(this)`) itself.
@@ -1049,7 +1052,7 @@ abstract contract PermissionManager is Initializable {
                     return true;
                 }
 
-                return isRoot && _permission.grantCounter == 0;
+                return isRoot && _permission.grantOwnerCounter == 0;
             }
         }
 
@@ -1064,7 +1067,7 @@ abstract contract PermissionManager is Initializable {
                     return true;
                 }
 
-                return isRoot && _permission.revokeCounter == 0;
+                return isRoot && _permission.revokeOwnerCounter == 0;
             }
         }
 
