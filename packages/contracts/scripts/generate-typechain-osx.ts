@@ -28,7 +28,12 @@ async function generateTypechain(): Promise<void> {
     }
 
     const dirPath = path.dirname(filePath);
-    if (!excludedDirs.has(dirPath)) {
+
+    // Only arrange the contracts' paths in the current 
+    // directory without previous versions.
+    const containsPrefix = Array.from(excludedDirs).some(prefix => dirPath.startsWith(prefix));
+    
+    if (!containsPrefix) {
       jsonFiles.push(filePath);
     }
   });

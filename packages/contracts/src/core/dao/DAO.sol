@@ -18,6 +18,7 @@ import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versionin
 import {VersionComparisonLib} from "@aragon/osx-commons-contracts/src/utils/versioning/VersionComparisonLib.sol";
 import {hasBit, flipBit} from "@aragon/osx-commons-contracts/src/utils/math/BitMap.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {IExecutor, Action} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";
@@ -28,12 +29,14 @@ import {IEIP4824} from "./IEIP4824.sol";
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 /// @custom:security-contact sirt@aragon.org
+/// @custom:oz-upgrades-unsafe-allow constructor constructor delegatecall
 contract DAO is
     IEIP4824,
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
     IDAO,
+    IExecutor,
     UUPSUpgradeable,
     ProtocolVersion,
     PermissionManager,
@@ -59,6 +62,9 @@ contract DAO is
     /// @notice The ID of the permission required to call the `registerStandardCallback` function.
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
+
+    /// @notice The ID of the permission that allows to withdraw native eth by allowed entities.
+    bytes32 private constant ETH_TRANSFER_PERMISSION_ID = keccak256("");
 
     /// @notice The ID of the permission required to validate [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signatures.
     bytes32 public constant VALIDATE_SIGNATURE_PERMISSION_ID =
@@ -117,6 +123,9 @@ contract DAO is
     /// @notice Thrown when a function is removed but left to not corrupt the interface ID.
     error FunctionRemoved();
 
+    /// @notice Thrown when initialize is called after it has already been executed.
+    error AlreadyInitialized();
+
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
     event NewURI(string daoURI);
@@ -134,8 +143,16 @@ contract DAO is
         _reentrancyStatus = _NOT_ENTERED;
     }
 
+    /// @notice This ensures that the initialize function cannot be called during the upgrade process.
+    modifier onlyCallAtInitialization() {
+        if (_getInitializedVersion() != 0) {
+            revert AlreadyInitialized();
+        }
+
+        _;
+    }
+
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
-    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
@@ -155,10 +172,14 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external reinitializer(3) {
+    ) external onlyCallAtInitialization reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
+        // In addition to the current interfaceId, also support previous version of the interfaceId.
+        _registerInterface(type(IDAO).interfaceId ^ IExecutor.execute.selector);
+
         _registerInterface(type(IDAO).interfaceId);
+        _registerInterface(type(IExecutor).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
         _registerInterface(type(IProtocolVersion).interfaceId); // added in v1.3.0
@@ -198,6 +219,9 @@ contract DAO is
                 _who: address(this),
                 _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
             });
+
+            _registerInterface(type(IDAO).interfaceId);
+            _registerInterface(type(IExecutor).interfaceId);
         }
     }
 
@@ -246,18 +270,12 @@ contract DAO is
         _setMetadata(_metadata);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IExecutor
     function execute(
         bytes32 _callId,
         Action[] calldata _actions,
         uint256 _allowFailureMap
-    )
-        external
-        override
-        nonReentrant
-        auth(EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory execResults, uint256 failureMap)
-    {
+    ) external override nonReentrant returns (bytes[] memory execResults, uint256 failureMap) {
         // Check that the action array length is within bounds.
         if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
@@ -268,13 +286,64 @@ contract DAO is
         uint256 gasBefore;
         uint256 gasAfter;
 
+        bool hasExecutePermission = isGranted(
+            address(this),
+            msg.sender,
+            EXECUTE_PERMISSION_ID,
+            msg.data
+        );
+
         for (uint256 i = 0; i < _actions.length; ) {
+            Action calldata action = _actions[i];
+
+            bool isAllowed = hasExecutePermission;
+            bytes32 permissionId = EXECUTE_PERMISSION_ID;
+
+            bytes32 id;
+
+            // If action.data is 0 length, it's native eth transfer
+            // which is checked the same way, though `id` is keccak256('0x').
+            if (action.data.length >= 4) {
+                id = keccak256(action.data[:4]);
+            } else if (action.data.length == 0) {
+                id = ETH_TRANSFER_PERMISSION_ID;
+            }
+
+            (bool created, , ) = getPermissionStatus(action.to, id);
+
+            if (created) {
+                isAllowed = isGranted(action.to, msg.sender, id, action.data);
+                permissionId = id;
+            }
+
+            if (!isAllowed) {
+                revert Unauthorized(action.to, msg.sender, permissionId);
+            }
+
+            bool success;
+            bytes memory data;
+
             gasBefore = gasleft();
 
-            (bool success, bytes memory result) = _actions[i].to.call{value: _actions[i].value}(
-                _actions[i].data
-            );
+            (success, data) = action.to.call{value: action.value}(action.data);
+
             gasAfter = gasleft();
+
+            if (action.to == address(this)) {
+                if (!success) {
+                    bytes4 result;
+
+                    assembly {
+                        result := mload(add(data, 32))
+                    }
+
+                    if (result == Unauthorized.selector || result == UnauthorizedOwner.selector) {
+                        gasBefore = gasleft();
+                        (success, data) = action.to.delegatecall(action.data);
+                        gasAfter = gasleft();
+                    }
+                }
+            }
 
             // Check if failure is allowed
             if (!hasBit(_allowFailureMap, uint8(i))) {
@@ -297,7 +366,7 @@ contract DAO is
                 }
             }
 
-            execResults[i] = result;
+            execResults[i] = data;
 
             unchecked {
                 ++i;

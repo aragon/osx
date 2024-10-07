@@ -17,9 +17,14 @@ import {
   IProtocolVersion__factory,
   PermissionConditionMock__factory,
   PermissionConditionMock,
+  IExecutor__factory,
+  IDAO,
+  ERC165,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
+import {IDAO__factory as IDAO_V1_0_0_factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/IDAO.sol';
 import {DAO__factory as DAO_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
+import {IDAO__factory as IDAO_V3_0_0_factory} from '../../../typechain/@aragon/osx-v1.3.0/core/dao/IDAO.sol';
 import {ExecutedEvent} from '../../../typechain/DAO';
 import {
   getActions,
@@ -142,7 +147,7 @@ describe('DAO', function () {
           dummyAddress1,
           daoExampleURI
         )
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWithCustomError(dao, 'AlreadyInitialized');
     });
 
     it('initializes with the correct trusted forwarder', async () => {
@@ -301,12 +306,35 @@ describe('DAO', function () {
         ).toNumber()
       ).to.equal(0);
     });
+
+    it('registers IExecutor interface for versions < 1.4.0', async () => {
+      // Create an uninitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      expect(
+        await uninitializedDao.supportsInterface(
+          getInterfaceId(IExecutor__factory.createInterface())
+        )
+      ).to.be.false;
+
+      await uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA);
+
+      expect(
+        await uninitializedDao.supportsInterface(
+          getInterfaceId(IExecutor__factory.createInterface())
+        )
+      ).to.be.true;
+    });
   });
 
   describe('Upgrades', async () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
     let initArgs: any;
+
+    const IExecutorInterfaceId = getInterfaceId(
+      IExecutor__factory.createInterface()
+    );
 
     before(() => {
       currentContractFactory = new DAO__factory(signers[0]);
@@ -333,7 +361,7 @@ describe('DAO', function () {
     it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
+      const {proxy, fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
@@ -357,12 +385,23 @@ describe('DAO', function () {
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
       expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
+
+      await proxy.initializeFrom([1, 0, 0], EMPTY_DATA);
+
+      // Check that it still supports old interfaceId for backwards compatibility.
+      expect(
+        await proxy.supportsInterface(
+          getInterfaceId(IDAO_V1_0_0_factory.createInterface())
+        )
+      ).to.be.true;
+
+      expect(await proxy.supportsInterface(IExecutorInterfaceId)).to.be.true;
     });
 
     it('from v1.3.0', async () => {
       legacyContractFactory = new DAO_V1_3_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
+      const {proxy, fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
@@ -384,6 +423,17 @@ describe('DAO', function () {
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
       expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
+
+      await proxy.initializeFrom([1, 3, 0], EMPTY_DATA);
+
+      // Check that it still supports old interfaceId for backwards compatibility.
+      expect(
+        await proxy.supportsInterface(
+          getInterfaceId(IDAO_V3_0_0_factory.createInterface())
+        )
+      ).to.be.true;
+
+      expect(await proxy.supportsInterface(IExecutorInterfaceId)).to.be.true;
     });
   });
 
@@ -399,7 +449,6 @@ describe('DAO', function () {
 
     it('supports the `IDAO` interface', async () => {
       const iface = IDAO__factory.createInterface();
-      expect(getInterfaceId(iface)).to.equal('0x9385547e'); // the interfaceID from IDAO v1.0.0
       expect(await dao.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 
@@ -506,7 +555,7 @@ describe('DAO', function () {
       await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
-          dao.address,
+          data.succeedAction.to,
           ownerAddress,
           DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
         );
@@ -560,6 +609,190 @@ describe('DAO', function () {
       await expect(dao.execute(ZERO_BYTES32, actions, 0))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(1);
+    });
+
+    it('reverts if a permission is created and the caller does not have the permission to call it', async () => {
+      const permissionId = ethers.utils.keccak256(
+        data.succeedAction.data.substr(0, 10)
+      );
+
+      await dao.createPermission(
+        data.succeedAction.to,
+        permissionId,
+        ownerAddress,
+        [signers[1].address]
+      );
+
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(data.succeedAction.to, ownerAddress, permissionId);
+    });
+
+    it('succeeds if a permission is created and the caller does not have execution rights', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
+
+      const permissionId = ethers.utils.keccak256(
+        data.succeedAction.data.substr(0, 10)
+      );
+
+      await dao.createPermission(
+        data.succeedAction.to,
+        permissionId,
+        ownerAddress,
+        [ownerAddress]
+      );
+
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0)).to.emit(
+        dao,
+        'Executed'
+      );
+    });
+
+    it('should fail for the caller with only execution permission if the other caller has the permission to call something', async () => {
+      await dao.grant(
+        dao.address,
+        signers[1].address,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
+
+      const permissionId = ethers.utils.keccak256(
+        data.succeedAction.data.substr(0, 10)
+      );
+
+      await dao.createPermission(
+        data.succeedAction.to,
+        permissionId,
+        ownerAddress,
+        [ownerAddress]
+      );
+
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.EXECUTE_PERMISSION_ID
+      );
+
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0)).to.emit(
+        dao,
+        'Executed'
+      );
+
+      await expect(
+        dao.connect(signers[1]).execute(ZERO_BYTES32, [data.succeedAction], 0)
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(data.succeedAction.to, signers[1].address, permissionId);
+    });
+
+    it('reverts if neither dao nor caller has permission to call PM function', async () => {
+      await dao.revoke(
+        dao.address,
+        dao.address,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const action = {
+        to: dao.address,
+        data: iface.encodeFunctionData('grant', [
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+        ]),
+        value: 0,
+      };
+
+      await expect(dao.execute(ZERO_BYTES32, [action], 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(0);
+      expect(
+        await dao.hasPermission(
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.false;
+    });
+
+    it('succeeds if only dao has permission to call PM function', async () => {
+      await dao.grant(
+        dao.address,
+        dao.address,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const action = {
+        to: dao.address,
+        data: iface.encodeFunctionData('grant', [
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+        ]),
+        value: 0,
+      };
+
+      await expect(dao.execute(ZERO_BYTES32, [action], 0)).to.not.be.reverted;
+      expect(
+        await dao.hasPermission(
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.true;
+    });
+
+    it('succeeds if only caller has permission to call PM function', async () => {
+      await dao.revoke(
+        dao.address,
+        dao.address,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+      await dao.grant(
+        dao.address,
+        ownerAddress,
+        DAO_PERMISSIONS.ROOT_PERMISSION_ID
+      );
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const action = {
+        to: dao.address,
+        data: iface.encodeFunctionData('grant', [
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+        ]),
+        value: 0,
+      };
+
+      await expect(dao.execute(ZERO_BYTES32, [action], 0)).to.not.be.reverted;
+      expect(
+        await dao.hasPermission(
+          ownerAddress,
+          ownerAddress,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.true;
     });
 
     it('succeeds if action is failable but allowFailureMap allows it', async () => {
@@ -651,7 +884,7 @@ describe('DAO', function () {
 
     it('reverts if failure is allowed but not enough gas is provided (many actions)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
-      let gasConsumer = await GasConsumer.deploy();
+      const gasConsumer = await GasConsumer.deploy();
 
       // Prepare an action array calling `consumeGas` twenty times.
       const gasConsumingAction = {
@@ -672,7 +905,7 @@ describe('DAO', function () {
       // Provide too little gas so that the last `to.call` fails, but the remaining gas is enough to finish the subsequent operations.
       await expect(
         dao.execute(ZERO_BYTES32, [gasConsumingAction], allowFailureMap, {
-          gasLimit: expectedGas.sub(3000),
+          gasLimit: expectedGas.sub(3200),
         })
       ).to.be.revertedWithCustomError(dao, 'InsufficientGas');
 
@@ -686,12 +919,12 @@ describe('DAO', function () {
 
     it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
       const GasConsumer = new GasConsumer__factory(signers[0]);
-      let gasConsumer = await GasConsumer.deploy();
+      const gasConsumer = await GasConsumer.deploy();
 
       // Prepare an action array calling `consumeGas` one times.
       const gasConsumingAction = {
         to: gasConsumer.address,
-        data: GasConsumer.interface.encodeFunctionData('consumeGas', [1]),
+        data: GasConsumer.interface.encodeFunctionData('consumeGas', [2]),
         value: 0,
       };
 
@@ -748,6 +981,91 @@ describe('DAO', function () {
 
           const transferAction = {to: recipient, value: amount, data: '0x'};
           await dao.execute(ZERO_BYTES32, [transferAction], 0);
+          const newBalance = await ethers.provider.getBalance(recipient);
+          expect(newBalance.sub(currentBalance)).to.equal(amount);
+        });
+
+        it('reverts if ETH transfer permission is created and caller lacks it, but still holds EXECUTE_PERMISSION_ID', async () => {
+          // put native tokens into the DAO
+          await dao.deposit(
+            ethers.constants.AddressZero,
+            amount,
+            'ref',
+            options
+          );
+
+          const caller = signers[0].address;
+
+          // make sure caller still has EXECUTE_PERMISSION
+          expect(
+            await dao.hasPermission(
+              dao.address,
+              caller,
+              DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
+              '0x'
+            )
+          ).to.be.true;
+
+          // create transfer action
+          const action = {
+            to: signers[1].address,
+            value: amount,
+            data: '0x',
+          };
+
+          const permissionId = ethers.utils.keccak256(action.data);
+
+          // create a permission where permissionId is the hash of empty data.
+          await dao.createPermission(
+            action.to,
+            permissionId,
+            signers[1].address,
+            []
+          );
+
+          // This must fail as caller doesn't have this specific permission
+          await expect(dao.execute(ZERO_BYTES32, [action], 0))
+            .to.be.revertedWithCustomError(dao, 'Unauthorized')
+            .withArgs(action.to, caller, permissionId);
+        });
+
+        it('succeeds if ETH transfer permission is created and caller holds it, but but lacks EXECUTE_PERMISSION_ID', async () => {
+          // put native tokens into the DAO
+          await dao.deposit(
+            ethers.constants.AddressZero,
+            amount,
+            'ref',
+            options
+          );
+
+          // use caller that doesn't hold EXECUTE_PERMISSION in which case
+          // it still should succeed.
+          const caller = signers[2];
+
+          // create transfer action
+          const action = {
+            to: signers[1].address,
+            value: amount,
+            data: '0x',
+          };
+
+          const recipient = action.to;
+          const currentBalance = await ethers.provider.getBalance(recipient);
+
+          const permissionId = ethers.utils.keccak256(action.data);
+
+          // create a permission where permissionId is the hash of empty data.
+          await dao.createPermission(
+            action.to,
+            permissionId,
+            signers[1].address,
+            [caller.address] // grant to caller
+          );
+
+          // This must fail as caller doesn't have this specific permission
+          await expect(dao.connect(caller).execute(ZERO_BYTES32, [action], 0))
+            .to.not.be.reverted;
+
           const newBalance = await ethers.provider.getBalance(recipient);
           expect(newBalance.sub(currentBalance)).to.equal(amount);
         });

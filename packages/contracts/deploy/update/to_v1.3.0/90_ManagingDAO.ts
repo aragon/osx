@@ -1,6 +1,9 @@
 import {DAOFactory__factory, DAO__factory} from '../../../typechain';
 import {getContractAddress} from '../../helpers';
-import {IMPLICIT_INITIAL_PROTOCOL_VERSION} from '@aragon/osx-commons-sdk';
+import {
+  getProtocolVersion,
+  IMPLICIT_INITIAL_PROTOCOL_VERSION,
+} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -24,7 +27,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const upgradeTX = await managementDAO.populateTransaction.upgradeToAndCall(
     newDaoImplementation,
     managementDAO.interface.encodeFunctionData('initializeFrom', [
-      IMPLICIT_INITIAL_PROTOCOL_VERSION,
+      // Get the managing dao's protocol version from which upgrade will happen.
+      await getProtocolVersion(managementDAO),
       [],
     ])
   );
@@ -38,6 +42,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     value: 0,
     description: `Upgrade the <strong>management DAO</strong> (<code>${managementDAOAddress}</code>) to the new <strong>implementation</strong> (<code>${newDaoImplementation}</code>).`,
   });
+
+  console.log(hre.managementDAOActions);
 };
 export default func;
 func.tags = ['ManagementDAO', 'v1.3.0'];
