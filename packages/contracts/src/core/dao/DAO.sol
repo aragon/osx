@@ -309,7 +309,7 @@ contract DAO is
                 id = ETH_TRANSFER_PERMISSION_ID;
             }
 
-            (bool created, , ) = getPermissionData(action.to, id);
+            (bool created, , ) = getPermissionStatus(action.to, id);
 
             if (created) {
                 isAllowed = isGranted(action.to, msg.sender, id, action.data);
