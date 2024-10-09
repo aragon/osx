@@ -58,13 +58,13 @@
     "deploy": ["./deploy/new", "./deploy/verification"]
   },
   "darwinia": {
-    "url": "https://rpc.darwinia.network",
+    "url": "http://c1.darwinia-rpc.itering.io:9944",
     "isTestnet": false,
     "chainId": 46,
     "deploy": ["./deploy/new", "./deploy/verification"]
   },
   "crab": {
-    "url": "https://crab-rpc.darwinia.network",
+    "url": "http://c1.crab-rpc.itering.io:9944",
     "isTestnet": false,
     "chainId": 44,
     "deploy": ["./deploy/new", "./deploy/verification"]
