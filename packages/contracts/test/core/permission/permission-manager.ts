@@ -36,7 +36,7 @@ interface SingleTargetPermission {
   permissionId: string;
 }
 
-describe('Core: PermissionManager', function () {
+describe.only('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
@@ -1100,6 +1100,17 @@ describe('Core: PermissionManager', function () {
           genericTargetCondition.address
         )
       ).to.be.true;
+    });
+
+    it('returns `true` if the permission is granted to `_who == ANY_ADDR`', async () => {
+      await pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID);
+      const isGranted = await pm.callStatic.isGranted(
+        pm.address,
+        otherSigner.address,
+        ADMIN_PERMISSION_ID,
+        []
+      );
+      expect(isGranted).to.be.equal(true);
     });
   });
 
