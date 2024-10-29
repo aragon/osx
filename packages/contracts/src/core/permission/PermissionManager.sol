@@ -252,12 +252,14 @@ abstract contract PermissionManager is Initializable {
             // If this permission is not set, continue.
         }
 
-        // Generic caller (`_who: ANY_ADDR`) condition check
+        // Generic caller (`_who: ANY_ADDR`)
         {
-            // This permission can only be granted in conjunction with a condition via the `grantWithCondition` function.
             address genericCallerPermission = permissionsHashed[
                 permissionHash({_where: _where, _who: ANY_ADDR, _permissionId: _permissionId})
             ];
+
+            // If the permission was granted directly to (`_who: ANY_ADDR`), return `true`.
+            if (genericCallerPermission == ALLOW_FLAG) return true;
 
             // If the permission was granted with a condition, check the condition and return the result.
             if (genericCallerPermission != UNSET_FLAG) {
