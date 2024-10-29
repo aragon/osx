@@ -1,4 +1,4 @@
-import networks from '../networks';
+import {networkExtensions} from '../networks';
 import fs from 'fs';
 import HRE from 'hardhat';
 import {file} from 'tmp-promise';
@@ -14,10 +14,10 @@ export const verifyContract = async (
 ) => {
   const currentNetwork = HRE.network.name;
 
-  if (!Object.keys(networks).includes(currentNetwork)) {
+  if (!Object.keys(networkExtensions).includes(currentNetwork)) {
     throw Error(
       `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${Object.keys(
-        networks
+        networkExtensions
       ).join(',')}`
     );
   }

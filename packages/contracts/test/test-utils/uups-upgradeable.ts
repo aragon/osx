@@ -149,7 +149,7 @@ export async function deployAndUpgradeFromToCheck(
   }
 
   // Upgrade the proxy to a new implementation from a different factory
-  await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
+  proxy = await upgrades.upgradeProxy(proxy.address, to.connect(upgrader), {
     unsafeAllow: ['constructor'],
     constructorArgs: [],
   });
