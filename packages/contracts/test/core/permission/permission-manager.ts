@@ -36,7 +36,7 @@ interface SingleTargetPermission {
   permissionId: string;
 }
 
-describe.only('Core: PermissionManager', function () {
+describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
