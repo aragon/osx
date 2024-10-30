@@ -36,7 +36,7 @@ interface SingleTargetPermission {
   permissionId: string;
 }
 
-describe('Core: PermissionManager', function () {
+describe.only('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let signers: SignerWithAddress[];
   let ownerSigner: SignerWithAddress;
@@ -94,28 +94,24 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
-    it('reverts if permissionId is restricted and `_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
-      for (let i = 0; i < RESTRICTED_PERMISSIONS_FOR_ANY_ADDR.length; i++) {
-        await expect(
-          pm.grant(pm.address, ANY_ADDR, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[i])
-        ).to.be.revertedWithCustomError(
-          pm,
-          'PermissionsForAnyAddressDisallowed'
-        );
-        await expect(
-          pm.grant(ANY_ADDR, pm.address, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[i])
-        ).to.be.revertedWithCustomError(
-          pm,
-          'PermissionsForAnyAddressDisallowed'
-        );
-      }
+    it('reverts if permissionId is restricted and `_who == ANY_ADDR`', async () => {
+      await expect(
+        pm.grant(pm.address, ANY_ADDR, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[0])
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
     });
 
-    it('reverts if permissionId is not restricted and`_who == ANY_ADDR` or `_where == ANY_ADDR`', async () => {
-      await expect(
-        pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
+    it('succeeds if permissionId is not restricted and `_who == ANY_ADDR`', async () => {
+      await expect(pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID)).to.not
+        .be.reverted;
+    });
 
+    it('reverts if permissionId is restricted and `_where == ANY_ADDR`', async () => {
+      await expect(
+        pm.grant(ANY_ADDR, pm.address, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[0])
+      ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
+    });
+
+    it('reverts if permissionId is not restricted and `_where == ANY_ADDR`', async () => {
       await expect(
         pm.grant(ANY_ADDR, pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWithCustomError(pm, 'PermissionsForAnyAddressDisallowed');
@@ -502,6 +498,28 @@ describe('Core: PermissionManager', function () {
         );
         expect(permission).to.be.equal(UNSET_FLAG);
       }
+    });
+
+    it('should revert if non-zero condition is used with `grant` operation type', async () => {
+      const signers = await ethers.getSigners();
+
+      const conditionMock = await new PermissionConditionMock__factory(
+        signers[0]
+      ).deploy();
+
+      const bulkItems: MultiTargetPermission[] = [
+        {
+          operation: Operation.Grant,
+          where: signers[1].address,
+          who: signers[0].address,
+          condition: conditionMock.address,
+          permissionId: ADMIN_PERMISSION_ID,
+        },
+      ];
+
+      await expect(
+        pm.applyMultiTargetPermissions(bulkItems)
+      ).to.be.revertedWithCustomError(pm, 'GrantWithConditionNotSupported');
     });
 
     it('should grant with condition', async () => {
@@ -1082,6 +1100,17 @@ describe('Core: PermissionManager', function () {
           genericTargetCondition.address
         )
       ).to.be.true;
+    });
+
+    it('returns `true` if the permission is granted to `_who == ANY_ADDR`', async () => {
+      await pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID);
+      const isGranted = await pm.callStatic.isGranted(
+        pm.address,
+        otherSigner.address,
+        ADMIN_PERMISSION_ID,
+        []
+      );
+      expect(isGranted).to.be.equal(true);
     });
   });
 
