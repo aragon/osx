@@ -4,7 +4,7 @@ export {
   AdminChangedEvent,
   BeaconUpgradedEvent,
   PluginRepoRegisteredEvent,
-} from '../../types/framework/plugin/repo/PluginRepoRegistry';
+} from '../../types/src/framework/plugin/repo/PluginRepoRegistry';
 
 export type EventName =
   | 'Upgraded'

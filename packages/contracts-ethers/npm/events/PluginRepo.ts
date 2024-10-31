@@ -7,7 +7,7 @@ export {
   BeaconUpgradedEvent,
   VersionCreatedEvent,
   ReleaseMetadataUpdatedEvent,
-} from '../../types/framework/plugin/repo/PluginRepo';
+} from '../../types/src/framework/plugin/repo/PluginRepo';
 
 export type EventName =
   | 'Granted'
