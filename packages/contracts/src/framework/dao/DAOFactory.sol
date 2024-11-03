@@ -181,8 +181,8 @@ contract DAOFactory is ERC165, ProtocolVersion {
         DAOSettings calldata _daoSettings,
         address _initialOwner
     ) internal returns (DAO dao) {
-        // Create a DAO proxy and initialize it with the DAOFactory (`address(this)`) as the initial owner.
-        // As a result, the DAOFactory has `ROOT_PERMISSION_`ID` permission on the DAO.
+        // Create a DAO proxy and initialize it with the initial owner.
+        // As a result, the `_initialOwner` address has `ROOT_PERMISSION_`ID` permission on the DAO.
         dao = DAO(
             payable(
                 daoBase.deployUUPSProxy(
