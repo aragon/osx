@@ -112,7 +112,59 @@ async function getAnticipatedAddress(from: string) {
   return anticipatedAddress;
 }
 
-describe.only('DAOFactory: ', function () {
+async function validateSetDaoPermissions(
+  dao: string,
+  daoFactory: DAOFactory,
+  signer: SignerWithAddress,
+  tx: any
+): Promise<void> {
+  const factory = new DAO__factory(signer);
+  const daoContract = factory.attach(dao);
+
+  await expect(tx)
+    .to.emit(daoContract, EVENTS.Granted)
+    .withArgs(
+      DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+      daoFactory.address,
+      dao,
+      dao,
+      ALLOW_FLAG
+    )
+    .to.emit(daoContract, EVENTS.Granted)
+    .withArgs(
+      DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
+      daoFactory.address,
+      dao,
+      dao,
+      ALLOW_FLAG
+    )
+    .to.emit(daoContract, EVENTS.Granted)
+    .withArgs(
+      DAO_PERMISSIONS.SET_TRUSTED_FORWARDER_PERMISSION_ID,
+      daoFactory.address,
+      dao,
+      dao,
+      ALLOW_FLAG
+    )
+    .to.emit(daoContract, EVENTS.Granted)
+    .withArgs(
+      DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID,
+      daoFactory.address,
+      dao,
+      dao,
+      ALLOW_FLAG
+    )
+    .to.emit(daoContract, EVENTS.Granted)
+    .withArgs(
+      DAO_PERMISSIONS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID,
+      daoFactory.address,
+      dao,
+      dao,
+      ALLOW_FLAG
+    );
+}
+
+describe('DAOFactory: ', function () {
   let daoFactory: DAOFactory;
   let managingDao: any;
 
@@ -389,50 +441,7 @@ describe.only('DAOFactory: ', function () {
       );
       const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-      const factory = new DAO__factory(signers[0]);
-      const daoContract = factory.attach(dao);
-
-      await expect(tx)
-        .to.emit(daoContract, EVENTS.Granted)
-        .withArgs(
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
-          daoFactory.address,
-          dao,
-          dao,
-          ALLOW_FLAG
-        )
-        .to.emit(daoContract, EVENTS.Granted)
-        .withArgs(
-          DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
-          daoFactory.address,
-          dao,
-          dao,
-          ALLOW_FLAG
-        )
-        .to.emit(daoContract, EVENTS.Granted)
-        .withArgs(
-          DAO_PERMISSIONS.SET_TRUSTED_FORWARDER_PERMISSION_ID,
-          daoFactory.address,
-          dao,
-          dao,
-          ALLOW_FLAG
-        )
-        .to.emit(daoContract, EVENTS.Granted)
-        .withArgs(
-          DAO_PERMISSIONS.SET_METADATA_PERMISSION_ID,
-          daoFactory.address,
-          dao,
-          dao,
-          ALLOW_FLAG
-        )
-        .to.emit(daoContract, EVENTS.Granted)
-        .withArgs(
-          DAO_PERMISSIONS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID,
-          daoFactory.address,
-          dao,
-          dao,
-          ALLOW_FLAG
-        );
+      await validateSetDaoPermissions(dao, daoFactory, signers[0], tx);
     });
 
     it('revokes all temporarly granted permissions', async () => {
@@ -570,7 +579,7 @@ describe.only('DAOFactory: ', function () {
 
       // Validate the plugins installation
       expect(installedPlugins.length).to.equal(2);
-      installedPlugins.forEach((installedPlugin, index) => {
+      installedPlugins.forEach(installedPlugin => {
         expect(installedPlugin.plugin).to.not.equal(AddressZero);
         expect(installedPlugin.preparedSetupData.length).to.equal(2);
       });
@@ -597,6 +606,49 @@ describe.only('DAOFactory: ', function () {
         .withArgs(daoSettings.trustedForwarder)
         .to.emit(daoContract, EVENTS.NewURI)
         .withArgs(daoSettings.daoURI);
+    });
+
+    it('creates a dao and sets its own permissions correctly on itself', async () => {
+      const tx = await daoFactory[CREATE_DAO_SIGNATURE](daoSettings);
+      const dao = findEventTopicLog<DAORegisteredEvent>(
+        await tx.wait(),
+        DAORegistry__factory.createInterface(),
+        EVENTS.DAORegistered
+      ).args.dao;
+
+      await validateSetDaoPermissions(dao, daoFactory, signers[0], tx);
+    });
+
+    it('revokes ROOT_PERMISSION that is granted with DAO initialization', async () => {
+      const tx = await daoFactory[CREATE_DAO_SIGNATURE](daoSettings);
+      const dao = findEventTopicLog<DAORegisteredEvent>(
+        await tx.wait(),
+        DAORegistry__factory.createInterface(),
+        EVENTS.DAORegistered
+      ).args.dao;
+
+      const factory = new DAO__factory(signers[0]);
+      const daoContract = factory.attach(dao);
+
+      // Check that events were emitted.
+      await expect(tx)
+        .to.emit(daoContract, EVENTS.Revoked)
+        .withArgs(
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+          daoFactory.address,
+          dao,
+          daoFactory.address
+        );
+
+      // Direct check to ensure since these permissions are extra dangerous to stay on.
+      expect(
+        await daoContract.hasPermission(
+          dao,
+          daoFactory.address,
+          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+          '0x'
+        )
+      ).to.be.false;
     });
 
     it('should grant EXECUTE_PERMISSION to the DAO creator', async function () {
