@@ -34,6 +34,10 @@ import {
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {
+  CREATE_DAO_SIGNATURE,
+  CREATE_DAO_WITH_PLUGINS_SIGNATURE,
+} from './dao-factory-constants';
+import {
   findEventTopicLog,
   DAO_PERMISSIONS,
   DAO_REGISTRY_PERMISSIONS,
@@ -108,7 +112,7 @@ async function getAnticipatedAddress(from: string) {
   return anticipatedAddress;
 }
 
-describe('DAOFactory: ', function () {
+describe.only('DAOFactory: ', function () {
   let daoFactory: DAOFactory;
   let managingDao: any;
 
@@ -277,10 +281,10 @@ describe('DAOFactory: ', function () {
     });
   });
 
-  context('createDaoWithPlugins', async () => {
+  context('createDao with plugins', async () => {
     it('reverts if no plugin is provided', async () => {
       await expect(
-        daoFactory.createDaoWithPlugins(daoSettings, [])
+        daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](daoSettings, [])
       ).to.be.revertedWithCustomError(daoFactory, 'NoPluginProvided');
     });
 
@@ -291,7 +295,7 @@ describe('DAOFactory: ', function () {
       const daoContract = factory.attach(dao);
 
       expect(
-        await daoFactory.createDaoWithPlugins(daoSettings, [
+        await daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](daoSettings, [
           pluginInstallationData,
         ])
       )
@@ -317,9 +321,10 @@ describe('DAOFactory: ', function () {
         pluginInstallationData.data
       );
 
-      const tx = await daoFactory.createDaoWithPlugins(daoSettings, [
-        pluginInstallationData,
-      ]);
+      const tx = await daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](
+        daoSettings,
+        [pluginInstallationData]
+      );
       const {dao} = await extractInfoFromCreateDaoTx(tx);
 
       const pluginRepoPointer: PluginRepoPointer = [
@@ -355,9 +360,10 @@ describe('DAOFactory: ', function () {
     });
 
     it('creates a dao with a plugin and sets plugin permissions on dao correctly', async () => {
-      const tx = await daoFactory.createDaoWithPlugins(daoSettings, [
-        pluginInstallationData,
-      ]);
+      const tx = await daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](
+        daoSettings,
+        [pluginInstallationData]
+      );
       const {dao, permissions} = await extractInfoFromCreateDaoTx(tx);
 
       const factory = new DAO__factory(signers[0]);
@@ -377,9 +383,10 @@ describe('DAOFactory: ', function () {
     });
 
     it('creates a dao and sets its own permissions correctly on itself', async () => {
-      const tx = await daoFactory.createDaoWithPlugins(daoSettings, [
-        pluginInstallationData,
-      ]);
+      const tx = await daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](
+        daoSettings,
+        [pluginInstallationData]
+      );
       const {dao} = await extractInfoFromCreateDaoTx(tx);
 
       const factory = new DAO__factory(signers[0]);
@@ -429,9 +436,10 @@ describe('DAOFactory: ', function () {
     });
 
     it('revokes all temporarly granted permissions', async () => {
-      const tx = await daoFactory.createDaoWithPlugins(daoSettings, [
-        pluginInstallationData,
-      ]);
+      const tx = await daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](
+        daoSettings,
+        [pluginInstallationData]
+      );
       const {dao} = await extractInfoFromCreateDaoTx(tx);
 
       const factory = new DAO__factory(signers[0]);
@@ -514,7 +522,10 @@ describe('DAOFactory: ', function () {
       };
 
       const plugins = [plugin1, plugin2];
-      const tx = await daoFactory.createDaoWithPlugins(daoSettings, plugins);
+      const tx = await daoFactory[CREATE_DAO_WITH_PLUGINS_SIGNATURE](
+        daoSettings,
+        plugins
+      );
 
       // Count how often the event was emitted by inspecting the logs
       const receipt = await tx.wait();
@@ -550,24 +561,25 @@ describe('DAOFactory: ', function () {
       const plugins = [plugin1, plugin2];
 
       // Execute the function
-      const [createdDao, installedPlugins] =
-        await daoFactory.callStatic.createDaoWithPlugins(daoSettings, plugins);
+      const [createdDao, installedPlugins] = await daoFactory.callStatic[
+        CREATE_DAO_WITH_PLUGINS_SIGNATURE
+      ](daoSettings, plugins);
 
       // Validate the DAO creation
       expect(createdDao).to.not.equal(AddressZero);
 
       // Validate the plugins installation
       expect(installedPlugins.length).to.equal(2);
-      installedPlugins.forEach((plugin, index) => {
-        expect(plugin.plugin).to.not.equal(AddressZero);
-        expect(plugin.helpers.length).to.equal(2);
+      installedPlugins.forEach((installedPlugin, index) => {
+        expect(installedPlugin.plugin).to.not.equal(AddressZero);
+        expect(installedPlugin.preparedSetupData.length).to.equal(2);
       });
     });
   });
 
   context('createDao', async () => {
     it('creates a dao and initializes with correct args', async function () {
-      const tx = await daoFactory.createDao(daoSettings);
+      const tx = await daoFactory[CREATE_DAO_SIGNATURE](daoSettings);
 
       const dao = findEventTopicLog<DAORegisteredEvent>(
         await tx.wait(),
@@ -587,8 +599,8 @@ describe('DAOFactory: ', function () {
         .withArgs(daoSettings.daoURI);
     });
 
-    it('should grant ROOT_PERMISSION to the DAO creator', async function () {
-      const tx = await daoFactory.createDao(daoSettings);
+    it('should grant EXECUTE_PERMISSION to the DAO creator', async function () {
+      const tx = await daoFactory[CREATE_DAO_SIGNATURE](daoSettings);
 
       const createdDao = findEventTopicLog<DAORegisteredEvent>(
         await tx.wait(),
@@ -603,7 +615,7 @@ describe('DAOFactory: ', function () {
         await daoContract.hasPermission(
           createdDao,
           ownerAddress,
-          DAO_PERMISSIONS.ROOT_PERMISSION_ID,
+          DAO_PERMISSIONS.EXECUTE_PERMISSION_ID,
           '0x'
         )
       ).to.equal(true);

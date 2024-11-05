@@ -58,7 +58,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @param helpers The array of helper contract addresses associated with this plugin instance.
     struct InstalledPlugin {
         address plugin;
-        address[] helpers;
+        IPluginSetup.PreparedSetupData preparedSetupData;
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -83,12 +83,22 @@ contract DAOFactory is ERC165, ProtocolVersion {
             super.supportsInterface(_interfaceId);
     }
 
-    /// @notice Creates a new DAO with specified settings and the msg.sender being granted ROOT_PERMISSION.
+    /// @notice Creates a new DAO with specified settings and the msg.sender being granted `EXECUTE_PERMISSION`.
     /// @param _daoSettings The DAO settings to be set during the DAO initialization.
     /// @return createdDao The address of the newly created DAO.
     function createDao(DAOSettings calldata _daoSettings) external returns (DAO createdDao) {
         // Create DAO.
-        createdDao = _createDAOAndRegister(_daoSettings, msg.sender);
+        // This will grant `ROOT_PERMISSION` to this `DAOFactory` as part of the DAO's initialization.
+        createdDao = _createDAOAndRegister(_daoSettings);
+
+        // Grant EXECUTE_PERMISSION_ID to msg.sender
+        createdDao.grant(address(createdDao), msg.sender, createdDao.EXECUTE_PERMISSION_ID());
+
+        // Set the rest of DAO's permissions.
+        _setDAOPermissions(createdDao);
+
+        // Revoke the initial `ROOT_PERMISSION` from `DAOFactory`.
+        createdDao.revoke(address(createdDao), address(this), createdDao.ROOT_PERMISSION_ID());
     }
 
     /// @notice Creates a new DAO, registers it on the  DAO registry, and installs a list of plugins via the plugin setup processor.
@@ -96,7 +106,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @param _pluginSettings The array containing references to plugins and their settings to be installed after the DAO has been created.
     /// @return createdDao The address of the newly created DAO instance.
     /// @return installedPlugins An array of `InstalledPlugin` structs, each containing the plugin address and associated helper contracts.
-    function createDaoWithPlugins(
+    function createDao(
         DAOSettings calldata _daoSettings,
         PluginSettings[] calldata _pluginSettings
     ) external returns (DAO createdDao, InstalledPlugin[] memory) {
@@ -106,7 +116,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
         }
 
         // Create DAO.
-        createdDao = _createDAOAndRegister(_daoSettings, address(this));
+        createdDao = _createDAOAndRegister(_daoSettings);
 
         // Get Permission IDs
         bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
@@ -151,7 +161,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
                 )
             );
 
-            installedPlugins[i] = InstalledPlugin(plugin, preparedSetupData.helpers);
+            installedPlugins[i] = InstalledPlugin(plugin, preparedSetupData);
         }
 
         // Set the rest of DAO's permissions.
@@ -177,12 +187,9 @@ contract DAOFactory is ERC165, ProtocolVersion {
 
     /// @notice Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the initial owner.
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
-    function _createDAOAndRegister(
-        DAOSettings calldata _daoSettings,
-        address _initialOwner
-    ) internal returns (DAO dao) {
-        // Create a DAO proxy and initialize it with the initial owner.
-        // As a result, the `_initialOwner` address has `ROOT_PERMISSION_`ID` permission on the DAO.
+    function _createDAOAndRegister(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
+        // Create a DAO proxy and initialize it with the DAOFactory (`address(this)`) as the initial owner.
+        // As a result, the DAOFactory has `ROOT_PERMISSION_`ID` permission on the DAO.
         dao = DAO(
             payable(
                 daoBase.deployUUPSProxy(
@@ -190,7 +197,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
                         DAO.initialize,
                         (
                             _daoSettings.metadata,
-                            _initialOwner,
+                            address(this),
                             _daoSettings.trustedForwarder,
                             _daoSettings.daoURI
                         )
