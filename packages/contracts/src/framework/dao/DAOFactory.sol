@@ -33,6 +33,14 @@ contract DAOFactory is ERC165, ProtocolVersion {
     /// @notice The plugin setup processor for installing plugins on the newly created `DAO`s.
     PluginSetupProcessor public immutable pluginSetupProcessor;
 
+    // Cache permission IDs for optimized access
+    bytes32 internal immutable ROOT_PERMISSION_ID;
+    bytes32 internal immutable UPGRADE_DAO_PERMISSION_ID;
+    bytes32 internal immutable SET_TRUSTED_FORWARDER_PERMISSION_ID;
+    bytes32 internal immutable SET_METADATA_PERMISSION_ID;
+    bytes32 internal immutable REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
+    bytes32 internal immutable EXECUTE_PERMISSION_ID;
+
     /// @notice The container for the DAO settings to be set during the DAO initialization.
     /// @param trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param daoURI The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
@@ -71,7 +79,16 @@ contract DAOFactory is ERC165, ProtocolVersion {
         daoRegistry = _registry;
         pluginSetupProcessor = _pluginSetupProcessor;
 
-        daoBase = address(new DAO());
+        DAO dao = new DAO();
+        daoBase = address(dao);
+
+        // Cache permission IDs for reduced gas usage in future function calls
+        ROOT_PERMISSION_ID = dao.ROOT_PERMISSION_ID();
+        UPGRADE_DAO_PERMISSION_ID = dao.UPGRADE_DAO_PERMISSION_ID();
+        SET_TRUSTED_FORWARDER_PERMISSION_ID = dao.SET_TRUSTED_FORWARDER_PERMISSION_ID();
+        SET_METADATA_PERMISSION_ID = dao.SET_METADATA_PERMISSION_ID();
+        REGISTER_STANDARD_CALLBACK_PERMISSION_ID = dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID();
+        EXECUTE_PERMISSION_ID = dao.EXECUTE_PERMISSION_ID();
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -90,15 +107,16 @@ contract DAOFactory is ERC165, ProtocolVersion {
         // Create DAO.
         // This will grant `ROOT_PERMISSION` to this `DAOFactory` as part of the DAO's initialization.
         createdDao = _createDAOAndRegister(_daoSettings);
+        address daoAddress = address(createdDao);
 
         // Grant EXECUTE_PERMISSION_ID to msg.sender
-        createdDao.grant(address(createdDao), msg.sender, createdDao.EXECUTE_PERMISSION_ID());
+        createdDao.grant(daoAddress, msg.sender, EXECUTE_PERMISSION_ID);
 
         // Set the rest of DAO's permissions.
-        _setDAOPermissions(createdDao);
+        _setDAOPermissions(daoAddress);
 
         // Revoke the initial `ROOT_PERMISSION` from `DAOFactory`.
-        createdDao.revoke(address(createdDao), address(this), createdDao.ROOT_PERMISSION_ID());
+        createdDao.revoke(daoAddress, address(this), ROOT_PERMISSION_ID);
     }
 
     /// @notice Creates a new DAO, registers it on the  DAO registry, and installs a list of plugins via the plugin setup processor.
@@ -118,21 +136,20 @@ contract DAOFactory is ERC165, ProtocolVersion {
         // Create DAO.
         createdDao = _createDAOAndRegister(_daoSettings);
 
-        // Get Permission IDs
-        bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
+        // Get APPLY_INSTALLATION_PERMISSION_ID.
         bytes32 applyInstallationPermissionID = pluginSetupProcessor
             .APPLY_INSTALLATION_PERMISSION_ID();
 
+        // Cache addresses to save gas
+        address daoAddress = address(createdDao);
+        address pluginSetupProcessorAddress = address(pluginSetupProcessor);
+
         // Grant the temporary permissions.
         // Grant Temporarily `ROOT_PERMISSION` to `pluginSetupProcessor`.
-        createdDao.grant(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
+        createdDao.grant(daoAddress, pluginSetupProcessorAddress, ROOT_PERMISSION_ID);
 
         // Grant Temporarily `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
-        createdDao.grant(
-            address(pluginSetupProcessor),
-            address(this),
-            applyInstallationPermissionID
-        );
+        createdDao.grant(pluginSetupProcessorAddress, address(this), applyInstallationPermissionID);
 
         InstalledPlugin[] memory installedPlugins = new InstalledPlugin[](_pluginSettings.length);
 
@@ -143,7 +160,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
                 address plugin,
                 IPluginSetup.PreparedSetupData memory preparedSetupData
             ) = pluginSetupProcessor.prepareInstallation(
-                    address(createdDao),
+                    daoAddress,
                     PluginSetupProcessor.PrepareInstallationParams(
                         _pluginSettings[i].pluginSetupRef,
                         _pluginSettings[i].data
@@ -152,7 +169,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
 
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
-                address(createdDao),
+                daoAddress,
                 PluginSetupProcessor.ApplyInstallationParams(
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
@@ -165,22 +182,22 @@ contract DAOFactory is ERC165, ProtocolVersion {
         }
 
         // Set the rest of DAO's permissions.
-        _setDAOPermissions(createdDao);
+        _setDAOPermissions(daoAddress);
 
         // Revoke the temporarily granted permissions.
         // Revoke Temporarily `ROOT_PERMISSION` from `pluginSetupProcessor`.
-        createdDao.revoke(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
+        createdDao.revoke(daoAddress, pluginSetupProcessorAddress, ROOT_PERMISSION_ID);
 
         // Revoke `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` from this `DAOFactory` .
         createdDao.revoke(
-            address(pluginSetupProcessor),
+            pluginSetupProcessorAddress,
             address(this),
             applyInstallationPermissionID
         );
 
         // Revoke Temporarily `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implicitly granted to this `DaoFactory`
         // at the create dao step `address(this)` being the initial owner of the new created DAO.
-        createdDao.revoke(address(createdDao), address(this), rootPermissionID);
+        createdDao.revoke(daoAddress, address(this), ROOT_PERMISSION_ID);
 
         return (createdDao, installedPlugins);
     }
@@ -211,8 +228,8 @@ contract DAOFactory is ERC165, ProtocolVersion {
     }
 
     /// @notice Sets the required permissions for the new DAO.
-    /// @param _dao The DAO instance just created.
-    function _setDAOPermissions(DAO _dao) internal {
+    /// @param _daoAddress The address of the DAO just created.
+    function _setDAOPermissions(address _daoAddress) internal {
         // set permissionIds on the dao itself.
         PermissionLib.SingleTargetPermission[]
             memory items = new PermissionLib.SingleTargetPermission[](5);
@@ -220,30 +237,30 @@ contract DAOFactory is ERC165, ProtocolVersion {
         // Grant DAO all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
-            address(_dao),
-            _dao.ROOT_PERMISSION_ID()
+            _daoAddress,
+            ROOT_PERMISSION_ID
         );
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
-            address(_dao),
-            _dao.UPGRADE_DAO_PERMISSION_ID()
+            _daoAddress,
+            UPGRADE_DAO_PERMISSION_ID
         );
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
-            address(_dao),
-            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+            _daoAddress,
+            SET_TRUSTED_FORWARDER_PERMISSION_ID
         );
         items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
-            address(_dao),
-            _dao.SET_METADATA_PERMISSION_ID()
+            _daoAddress,
+            SET_METADATA_PERMISSION_ID
         );
         items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
-            address(_dao),
-            _dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID()
+            _daoAddress,
+            REGISTER_STANDARD_CALLBACK_PERMISSION_ID
         );
 
-        _dao.applySingleTargetPermissions(address(_dao), items);
+        DAO(payable(_daoAddress)).applySingleTargetPermissions(_daoAddress, items);
     }
 }
