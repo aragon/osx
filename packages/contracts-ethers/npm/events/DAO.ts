@@ -12,7 +12,7 @@ export {
   TrustedForwarderSetEvent,
   NativeTokenDepositedEvent,
   StandardCallbackRegisteredEvent,
-} from '../../types/core/dao/DAO';
+} from '../../types/src/core/dao/DAO';
 
 export type EventName =
   | 'Granted'

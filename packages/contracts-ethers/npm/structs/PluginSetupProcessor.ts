@@ -2,7 +2,7 @@ import {
   PluginSetupProcessor,
   PluginSetupRefStruct as PluginSetupRefStruct_,
   PluginSetupRefStructOutput as PluginSetupRefStructOutput_,
-} from '../../types/framework/plugin/setup/PluginSetupProcessor';
+} from '../../types/src/framework/plugin/setup/PluginSetupProcessor';
 
 export type ApplyInstallationParamsStruct =
   PluginSetupProcessor.ApplyInstallationParamsStruct;
