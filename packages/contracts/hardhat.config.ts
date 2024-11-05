@@ -103,6 +103,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_KEY || '',
       goerli: process.env.ETHERSCAN_KEY || '',
       sepolia: process.env.ETHERSCAN_KEY || '',
+      holesky: process.env.ETHERSCAN_KEY || '',
       polygon: process.env.POLYGONSCAN_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_KEY || '',
       baseMainnet: process.env.BASESCAN_KEY || '',
@@ -143,6 +144,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-sepolia.arbiscan.io/api',
           browserURL: 'https://sepolia.arbiscan.io',
+        },
+      },
+      {
+        network: 'holesky',
+        chainId: 17000,
+        urls: {
+          apiURL: 'https://api-holesky.etherscan.io/api',
+          browserURL: 'https://holesky.etherscan.io',
         },
       },
     ],
