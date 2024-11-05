@@ -63,7 +63,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
 
     /// @notice The container with the information about an installed plugin on a DAO.
     /// @param plugin The address of the deployed plugin instance.
-    /// @param helpers The array of helper contract addresses associated with this plugin instance.
+    /// @param preparedSetupData The applied preparedSetupData which contains arrays of helpers and permissions.
     struct InstalledPlugin {
         address plugin;
         IPluginSetup.PreparedSetupData preparedSetupData;
