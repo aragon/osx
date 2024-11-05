@@ -112,6 +112,8 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumGoerli: process.env.ARBISCAN_KEY || '',
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
+      modeTestnet: 'modeTestnet',
+      modeMainnet: 'modeMainnet',
     },
     customChains: [
       {
@@ -152,6 +154,24 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-holesky.etherscan.io/api',
           browserURL: 'https://holesky.etherscan.io',
+        },
+      },
+      {
+        network: 'modeTestnet',
+        chainId: 919,
+        urls: {
+          apiURL:
+            'https://api.routescan.io/v2/network/testnet/evm/919/etherscan',
+          browserURL: 'https://testnet.modescan.io',
+        },
+      },
+      {
+        network: 'modeMainnet',
+        chainId: 34443,
+        urls: {
+          apiURL:
+            'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
+          browserURL: 'https://modescan.io',
         },
       },
     ],
