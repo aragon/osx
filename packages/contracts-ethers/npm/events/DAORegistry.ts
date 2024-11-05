@@ -4,7 +4,7 @@ export {
   BeaconUpgradedEvent,
   DAORegisteredEvent,
   InitializedEvent,
-} from '../../types/framework/dao/DAORegistry';
+} from '../../types/src/framework/dao/DAORegistry';
 
 export type EventName =
   | 'Upgraded'

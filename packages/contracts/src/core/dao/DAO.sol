@@ -17,6 +17,8 @@ import {IProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioni
 import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol";
 import {VersionComparisonLib} from "@aragon/osx-commons-contracts/src/utils/versioning/VersionComparisonLib.sol";
 import {hasBit, flipBit} from "@aragon/osx-commons-contracts/src/utils/math/BitMap.sol";
+import {Action} from "@aragon/osx-commons-contracts/src/executors/Executor.sol";
+import {IExecutor} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
@@ -24,7 +26,7 @@ import {CallbackHandler} from "../utils/CallbackHandler.sol";
 import {IEIP4824} from "./IEIP4824.sol";
 
 /// @title DAO
-/// @author Aragon X - 2021-2023
+/// @author Aragon X - 2021-2024
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 /// @custom:security-contact sirt@aragon.org
@@ -34,6 +36,7 @@ contract DAO is
     IERC1271,
     ERC165StorageUpgradeable,
     IDAO,
+    IExecutor,
     UUPSUpgradeable,
     ProtocolVersion,
     PermissionManager,
@@ -117,6 +120,9 @@ contract DAO is
     /// @notice Thrown when a function is removed but left to not corrupt the interface ID.
     error FunctionRemoved();
 
+    /// @notice Thrown when initialize is called after it has already been executed.
+    error AlreadyInitialized();
+
     /// @notice Emitted when a new DAO URI is set.
     /// @param daoURI The new URI.
     event NewURI(string daoURI);
@@ -132,6 +138,15 @@ contract DAO is
         _;
 
         _reentrancyStatus = _NOT_ENTERED;
+    }
+
+    /// @notice This ensures that the initialize function cannot be called during the upgrade process.
+    modifier onlyCallAtInitialization() {
+        if (_getInitializedVersion() != 0) {
+            revert AlreadyInitialized();
+        }
+
+        _;
     }
 
     /// @notice Disables the initializers on the implementation contract to prevent it from being left uninitialized.
@@ -155,10 +170,14 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder,
         string calldata daoURI_
-    ) external reinitializer(3) {
+    ) external onlyCallAtInitialization reinitializer(3) {
         _reentrancyStatus = _NOT_ENTERED; // added in v1.3.0
 
+        // In addition to the current interfaceId, also support previous version of the interfaceId.
+        _registerInterface(type(IDAO).interfaceId ^ IExecutor.execute.selector);
+
         _registerInterface(type(IDAO).interfaceId);
+        _registerInterface(type(IExecutor).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
         _registerInterface(type(IProtocolVersion).interfaceId); // added in v1.3.0
@@ -198,6 +217,9 @@ contract DAO is
                 _who: address(this),
                 _permissionId: keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION")
             });
+
+            _registerInterface(type(IDAO).interfaceId);
+            _registerInterface(type(IExecutor).interfaceId);
         }
     }
 
@@ -246,7 +268,7 @@ contract DAO is
         _setMetadata(_metadata);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IExecutor
     function execute(
         bytes32 _callId,
         Action[] calldata _actions,

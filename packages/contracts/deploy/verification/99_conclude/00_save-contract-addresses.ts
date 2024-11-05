@@ -48,5 +48,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = ['New', 'Conclude'];
+func.tags = ['New', 'Conclude', 'ConcludeEnd'];
 func.runAtTheEnd = true;

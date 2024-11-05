@@ -191,6 +191,12 @@ abstract contract PermissionManager is Initializable {
             PermissionLib.MultiTargetPermission memory item = _items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
+                // Ensure a non-zero condition isn't passed, as `_grant` can't handle conditions.
+                // This avoids the false impression that a conditional grant occurred,
+                // since the transaction would still succeed without conditions.
+                if (item.condition != address(0)) {
+                    revert GrantWithConditionNotSupported();
+                }
                 _grant({_where: item.where, _who: item.who, _permissionId: item.permissionId});
             } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke({_where: item.where, _who: item.who, _permissionId: item.permissionId});
@@ -246,12 +252,14 @@ abstract contract PermissionManager is Initializable {
             // If this permission is not set, continue.
         }
 
-        // Generic caller (`_who: ANY_ADDR`) condition check
+        // Generic caller (`_who: ANY_ADDR`)
         {
-            // This permission can only be granted in conjunction with a condition via the `grantWithCondition` function.
             address genericCallerPermission = permissionsHashed[
                 permissionHash({_where: _where, _who: ANY_ADDR, _permissionId: _permissionId})
             ];
+
+            // If the permission was granted directly to (`_who: ANY_ADDR`), return `true`.
+            if (genericCallerPermission == ALLOW_FLAG) return true;
 
             // If the permission was granted with a condition, check the condition and return the result.
             if (genericCallerPermission != UNSET_FLAG) {
@@ -336,8 +344,17 @@ abstract contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier.
     /// @dev Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
     function _grant(address _where, address _who, bytes32 _permissionId) internal virtual {
-        if (_where == ANY_ADDR || _who == ANY_ADDR) {
+        if (_where == ANY_ADDR) {
             revert PermissionsForAnyAddressDisallowed();
+        }
+
+        if (_who == ANY_ADDR) {
+            if (
+                _permissionId == ROOT_PERMISSION_ID ||
+                isPermissionRestrictedForAnyAddr(_permissionId)
+            ) {
+                revert PermissionsForAnyAddressDisallowed();
+            }
         }
 
         bytes32 permHash = permissionHash({

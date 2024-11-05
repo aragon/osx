@@ -17,9 +17,12 @@ import {
   IProtocolVersion__factory,
   PermissionConditionMock__factory,
   PermissionConditionMock,
+  IExecutor__factory,
 } from '../../../typechain';
 import {DAO__factory as DAO_V1_0_0__factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/DAO.sol';
+import {IDAO__factory as IDAO_V1_0_0_factory} from '../../../typechain/@aragon/osx-v1.0.1/core/dao/IDAO.sol';
 import {DAO__factory as DAO_V1_3_0__factory} from '../../../typechain/@aragon/osx-v1.3.0/core/dao/DAO.sol';
+import {IDAO__factory as IDAO_V3_0_0_factory} from '../../../typechain/@aragon/osx-v1.3.0/core/dao/IDAO.sol';
 import {ExecutedEvent} from '../../../typechain/DAO';
 import {
   getActions,
@@ -142,7 +145,7 @@ describe('DAO', function () {
           dummyAddress1,
           daoExampleURI
         )
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWithCustomError(dao, 'AlreadyInitialized');
     });
 
     it('initializes with the correct trusted forwarder', async () => {
@@ -301,12 +304,35 @@ describe('DAO', function () {
         ).toNumber()
       ).to.equal(0);
     });
+
+    it('registers IExecutor interface for versions < 1.4.0', async () => {
+      // Create an uninitialized DAO.
+      const uninitializedDao = await deployWithProxy<DAO>(DAO);
+
+      expect(
+        await uninitializedDao.supportsInterface(
+          getInterfaceId(IExecutor__factory.createInterface())
+        )
+      ).to.be.false;
+
+      await uninitializedDao.initializeFrom([1, 3, 0], EMPTY_DATA);
+
+      expect(
+        await uninitializedDao.supportsInterface(
+          getInterfaceId(IExecutor__factory.createInterface())
+        )
+      ).to.be.true;
+    });
   });
 
   describe('Upgrades', async () => {
     let legacyContractFactory: ContractFactory;
     let currentContractFactory: ContractFactory;
     let initArgs: any;
+
+    const IExecutorInterfaceId = getInterfaceId(
+      IExecutor__factory.createInterface()
+    );
 
     before(() => {
       currentContractFactory = new DAO__factory(signers[0]);
@@ -330,10 +356,10 @@ describe('DAO', function () {
       );
     });
 
-    it('upgrades from v1.0.0', async () => {
+    it('from v1.0.0', async () => {
       legacyContractFactory = new DAO_V1_0_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
+      const {proxy, fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
@@ -343,6 +369,7 @@ describe('DAO', function () {
           currentContractFactory,
           DAO_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID
         );
+
       expect(toImplementation).to.not.equal(fromImplementation);
 
       const fromProtocolVersion = await getProtocolVersion(
@@ -357,12 +384,23 @@ describe('DAO', function () {
         IMPLICIT_INITIAL_PROTOCOL_VERSION
       );
       expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
+
+      await proxy.initializeFrom([1, 0, 0], EMPTY_DATA);
+
+      // Check that it still supports old interfaceId for backwards compatibility.
+      expect(
+        await proxy.supportsInterface(
+          getInterfaceId(IDAO_V1_0_0_factory.createInterface())
+        )
+      ).to.be.true;
+
+      expect(await proxy.supportsInterface(IExecutorInterfaceId)).to.be.true;
     });
 
     it('from v1.3.0', async () => {
       legacyContractFactory = new DAO_V1_3_0__factory(signers[0]);
 
-      const {fromImplementation, toImplementation} =
+      const {proxy, fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
           signers[0],
           signers[1],
@@ -384,6 +422,17 @@ describe('DAO', function () {
       expect(fromProtocolVersion).to.not.deep.equal(toProtocolVersion);
       expect(fromProtocolVersion).to.deep.equal([1, 3, 0]);
       expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
+
+      await proxy.initializeFrom([1, 3, 0], EMPTY_DATA);
+
+      // Check that it still supports old interfaceId for backwards compatibility.
+      expect(
+        await proxy.supportsInterface(
+          getInterfaceId(IDAO_V3_0_0_factory.createInterface())
+        )
+      ).to.be.true;
+
+      expect(await proxy.supportsInterface(IExecutorInterfaceId)).to.be.true;
     });
   });
 
@@ -400,6 +449,11 @@ describe('DAO', function () {
     it('supports the `IDAO` interface', async () => {
       const iface = IDAO__factory.createInterface();
       expect(getInterfaceId(iface)).to.equal('0x9385547e'); // the interfaceID from IDAO v1.0.0
+      expect(await dao.supportsInterface(getInterfaceId(iface))).to.be.true;
+    });
+
+    it('supports the `IExecutor` interface', async () => {
+      const iface = IExecutor__factory.createInterface();
       expect(await dao.supportsInterface(getInterfaceId(iface))).to.be.true;
     });
 

@@ -5,7 +5,7 @@ export {
   InstallationPreparedEvent,
   UninstallationAppliedEvent,
   UninstallationPreparedEvent,
-} from '../../types/framework/plugin/setup/PluginSetupProcessor';
+} from '../../types/src/framework/plugin/setup/PluginSetupProcessor';
 
 export type EventName =
   | 'UpdateApplied'
