@@ -1,5 +1,5 @@
 import {DAO__factory} from '../../../typechain';
-import {checkPermission, getContractAddress} from '../../helpers';
+import {checkPermission, delay, getContractAddress} from '../../helpers';
 import {Operation} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -26,6 +26,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoRegistryAddress = await getContractAddress('DAORegistryProxy', hre);
   // Get `PluginSetupProcessor` address.
   const pspAddress = await getContractAddress('PluginSetupProcessor', hre);
+
+  // On some chains - such as holesky - wait so
+  // previous permission txs are fully applied and verified.
+  await delay(5000);
 
   // Check revoked permission.
   await checkPermission(managementDaoContract, {

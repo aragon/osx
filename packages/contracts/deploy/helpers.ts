@@ -25,12 +25,14 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   sepolia: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  holesky: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
 };
 
 export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
   goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
   mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
   sepolia: '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD',
+  holesky: '0x9010A27463717360cAD99CEA8bD39b8705CCA238',
 };
 
 export const DAO_PERMISSIONS = [
@@ -383,6 +385,10 @@ export async function transferSubnodeChain(
       domain = daoDomainSplitted[i];
     }
   }
+}
+
+export async function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // hh-deploy cannot process files without default exports
