@@ -34,10 +34,6 @@ import {
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
 import {
-  CREATE_DAO_SIGNATURE,
-  CREATE_DAO_WITH_PLUGINS_SIGNATURE,
-} from './dao-factory-constants';
-import {
   findEventTopicLog,
   DAO_PERMISSIONS,
   DAO_REGISTRY_PERMISSIONS,
