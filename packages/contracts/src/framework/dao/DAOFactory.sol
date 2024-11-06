@@ -40,6 +40,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
     bytes32 internal immutable SET_METADATA_PERMISSION_ID;
     bytes32 internal immutable REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     bytes32 internal immutable EXECUTE_PERMISSION_ID;
+    bytes32 internal immutable APPLY_INSTALLATION_PERMISSION_ID;
 
     /// @notice The container for the DAO settings to be set during the DAO initialization.
     /// @param trustedForwarder The address of the trusted forwarder required for meta transactions.
@@ -89,6 +90,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
         SET_METADATA_PERMISSION_ID = dao.SET_METADATA_PERMISSION_ID();
         REGISTER_STANDARD_CALLBACK_PERMISSION_ID = dao.REGISTER_STANDARD_CALLBACK_PERMISSION_ID();
         EXECUTE_PERMISSION_ID = dao.EXECUTE_PERMISSION_ID();
+        APPLY_INSTALLATION_PERMISSION_ID = pluginSetupProcessor.APPLY_INSTALLATION_PERMISSION_ID();
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -123,10 +125,6 @@ contract DAOFactory is ERC165, ProtocolVersion {
 
         // Install plugins if plugin settings are provided.
         if (_pluginSettings.length != 0) {
-            // Get APPLY_INSTALLATION_PERMISSION_ID.
-            bytes32 applyInstallationPermissionID = pluginSetupProcessor
-                .APPLY_INSTALLATION_PERMISSION_ID();
-
             installedPlugins = new InstalledPlugin[](_pluginSettings.length);
 
             // Cache address to save gas
@@ -140,7 +138,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
             createdDao.grant(
                 pluginSetupProcessorAddress,
                 address(this),
-                applyInstallationPermissionID
+                APPLY_INSTALLATION_PERMISSION_ID
             );
 
             // Install plugins on the newly created DAO.
@@ -179,7 +177,7 @@ contract DAOFactory is ERC165, ProtocolVersion {
             createdDao.revoke(
                 pluginSetupProcessorAddress,
                 address(this),
-                applyInstallationPermissionID
+                APPLY_INSTALLATION_PERMISSION_ID
             );
         } else {
             // if no plugin setting is provided, grant EXECUTE_PERMISSION_ID to msg.sender
