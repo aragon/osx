@@ -99,7 +99,7 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   };
 }
 
-async function getAnticipatedAddress(from: string, offset=0) {
+async function getAnticipatedAddress(from: string, offset = 0) {
   let nonce = await ethers.provider.getTransactionCount(from);
   const anticipatedAddress = ethers.utils.getContractAddress({
     from: from,
@@ -355,7 +355,8 @@ describe('DAOFactory: ', function () {
         pluginInstallationData,
       ]);
 
-      const {dao, plugin, helpers, permissions} = await extractInfoFromCreateDaoTx(tx);
+      const {dao, plugin, helpers, permissions} =
+        await extractInfoFromCreateDaoTx(tx);
 
       const pluginRepoPointer: PluginRepoPointer = [
         pluginSetupMockRepoAddress,
@@ -533,9 +534,10 @@ describe('DAOFactory: ', function () {
       );
 
       const expectedDao = await getAnticipatedAddress(daoFactory.address);
-      const expectedPlugins = [await getAnticipatedAddress(
-        pluginSetupV1Mock.address
-      ), await getAnticipatedAddress(pluginSetupV1Mock.address, 1)];
+      const expectedPlugins = [
+        await getAnticipatedAddress(pluginSetupV1Mock.address),
+        await getAnticipatedAddress(pluginSetupV1Mock.address, 1),
+      ];
 
       // Setup plugins for installation
       const plugin1 = {...pluginInstallationData};
