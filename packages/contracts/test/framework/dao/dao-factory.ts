@@ -99,11 +99,11 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   };
 }
 
-async function getAnticipatedAddress(from: string) {
+async function getAnticipatedAddress(from: string, offset=0) {
   let nonce = await ethers.provider.getTransactionCount(from);
   const anticipatedAddress = ethers.utils.getContractAddress({
     from: from,
-    nonce,
+    nonce: nonce + offset,
   });
   return anticipatedAddress;
 }
@@ -351,18 +351,11 @@ describe('DAOFactory: ', function () {
         pluginSetupV1Mock.address
       );
 
-      const {
-        plugin,
-        preparedSetupData: {permissions, helpers},
-      } = await pluginSetupV1Mock.callStatic.prepareInstallation(
-        expectedDao,
-        pluginInstallationData.data
-      );
-
       const tx = await daoFactory.createDao(daoSettings, [
         pluginInstallationData,
       ]);
-      const {dao} = await extractInfoFromCreateDaoTx(tx);
+
+      const {dao, plugin, helpers, permissions} = await extractInfoFromCreateDaoTx(tx);
 
       const pluginRepoPointer: PluginRepoPointer = [
         pluginSetupMockRepoAddress,
@@ -539,6 +532,11 @@ describe('DAOFactory: ', function () {
         '0x11'
       );
 
+      const expectedDao = await getAnticipatedAddress(daoFactory.address);
+      const expectedPlugins = [await getAnticipatedAddress(
+        pluginSetupV1Mock.address
+      ), await getAnticipatedAddress(pluginSetupV1Mock.address, 1)];
+
       // Setup plugins for installation
       const plugin1 = {...pluginInstallationData};
       const plugin2 = {...pluginInstallationData};
@@ -553,12 +551,12 @@ describe('DAOFactory: ', function () {
         await daoFactory.callStatic.createDao(daoSettings, plugins);
 
       // Validate the DAO creation
-      expect(createdDao).to.not.equal(AddressZero);
+      expect(createdDao).to.equal(expectedDao);
 
       // Validate the plugins installation
       expect(installedPlugins.length).to.equal(2);
-      installedPlugins.forEach(installedPlugin => {
-        expect(installedPlugin.plugin).to.not.equal(AddressZero);
+      installedPlugins.forEach((installedPlugin, index) => {
+        expect(installedPlugin.plugin).to.equal(expectedPlugins[index]);
         expect(installedPlugin.preparedSetupData.length).to.equal(2);
       });
     });
@@ -652,12 +650,14 @@ describe('DAOFactory: ', function () {
     });
 
     it('correctly returns created DAO and empty installed plugins', async () => {
+      const expectedDao = await getAnticipatedAddress(daoFactory.address);
+
       // Execute the function
       const [createdDao, installedPlugins] =
         await daoFactory.callStatic.createDao(daoSettings, []);
 
       // Validate the DAO creation
-      expect(createdDao).to.not.equal(AddressZero);
+      expect(createdDao).to.equal(expectedDao);
 
       // Validate the plugins installation
       expect(installedPlugins.length).to.equal(0);
