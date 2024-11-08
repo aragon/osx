@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the `FunctionDeprecated` error to `DAO`.
 - Added a storage gap to `PluginRepo`.
 - Added `initializeFrom` placeholder function to `PluginRepo`.
+- `applyMultiTargetPermissions` will revoke when operation is `Grant` and a condition is provided.
 
 ### Changed
 
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `managingDAO` during deployment to `managementDAO`.
 - Aligned contract names during deployment with the names given in `@aragon/osx-commons-configs`.
 - Move events `ReleaseMetadataUpdated`and `VersionCreated` from `PluginRepo` to `IPluginRepo`.
+- Allow granting permission to `_who: ANY_ADDR`.
 
 ### Removed
 
