@@ -163,9 +163,9 @@
 :xref-PluginSetupProcessor-UpdateApplied-address-address-bytes32-bytes32-: xref:osx-contracts.adoc#PluginSetupProcessor-UpdateApplied-address-address-bytes32-bytes32-
 :xref-PluginSetupProcessor-UninstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-struct-IPluginSetup-SetupPayload-struct-PermissionLib-MultiTargetPermission---: xref:osx-contracts.adoc#PluginSetupProcessor-UninstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-struct-IPluginSetup-SetupPayload-struct-PermissionLib-MultiTargetPermission---
 :xref-PluginSetupProcessor-UninstallationApplied-address-address-bytes32-: xref:osx-contracts.adoc#PluginSetupProcessor-UninstallationApplied-address-address-bytes32-
-= The title here osx contracts
+= OSX
 
-This is for testing purposes for osx contracts.
+This is the reference guide of the link:https://github.com/aragon/osx[osx contracts] package.
 
 == Core
 
