@@ -1,6 +1,6 @@
 name: osx-contracts
 title: OSX Contracts
-version: 1.x
+version: 2.x
 prerelease: false
 nav:
   - modules/ROOT/nav.adoc
