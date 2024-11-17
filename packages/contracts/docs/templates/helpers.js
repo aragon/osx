@@ -29,14 +29,6 @@ module.exports['getExternalLink'] = absolutePath => {
   return 'github.com';
 };
 
-// module.exports['isAragonInherittedContract1'] = contract => {
-//   console.log(contract, 'oe');
-// };
-
-// module.exports['getExternalLink1'] = item => {
-//   // console.log(item, 'oe');
-// };
-
 module.exports.names = params => params?.map(p => p.name).join(', ');
 
 module.exports['typed-params'] = params => {

@@ -1,0 +1,32 @@
+= The title here osx contracts
+
+This is for testing purposes for osx contracts.
+
+== Core
+
+{{DAO}}
+
+{{IDAO}}
+
+{{PermissionManager}}
+
+{{CallbackHandler}}
+
+== Factories
+
+{{DAOFactory}}
+
+{{PluginRepoFactory}}
+
+
+== Registries
+
+{{DAORegistry}}
+
+{{PluginRepoRegistry}}
+
+== Framework 
+
+{{PluginRepo}}
+
+{{PluginSetupProcessor}}

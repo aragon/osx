@@ -12,6 +12,6 @@ module.exports = {
     const sourcesDir = path.resolve(config.root, config.sourcesDir);
     let dir = path.resolve(config.root, file.absolutePath);
 
-    return 'Multisig' + config.pageExtension;
+    return 'osx-contracts' + config.pageExtension;
   },
 };

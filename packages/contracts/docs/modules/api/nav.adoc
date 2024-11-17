@@ -1,2 +1,2 @@
 .API
-* xref:Multisig.adoc[Multisig]
+* xref:osx-contracts.adoc[Osx Contracts]
