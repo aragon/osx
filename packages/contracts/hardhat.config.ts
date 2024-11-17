@@ -186,14 +186,7 @@ const config: HardhatUserConfig = {
     artifacts: './artifacts',
     deploy: './deploy',
   },
-  docgen: {
-    outputDir: 'docs/developer-portal/03-reference-guide',
-    theme: 'markdown',
-    pages: 'files',
-    templates: 'docs/templates',
-    collapseNewlines: true,
-    exclude: ['test'],
-  },
+  // docgen: require('./docs/config.js'),
   mocha: {
     timeout: 90_000, // 90 seconds // increase the timeout for subdomain validation tests
   },
