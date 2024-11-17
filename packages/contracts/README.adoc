@@ -1,6 +1,6 @@
-= The title here osx contracts
+= OSX
 
-This is for testing purposes for osx contracts.
+This is the reference guide of the link:https://github.com/aragon/osx[osx contracts] package.
 
 == Core
 
