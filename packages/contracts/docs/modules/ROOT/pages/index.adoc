@@ -1,1 +1,79 @@
-= This is Osx docs.
+= Aragon OSx
+
+## The Contracts Behind the Protocol
+
+The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
+
+The Aragon OSx protocol provides **three primitives** for users to build their organization:
+
+- **DAO contract:** the main body and identity of your organization containing the core functionality. It holds your assets, executes actions, and manages permissions.
+- **Permissions**: define relationships between plugins, DAOs, and other addresses.
+- **Plugins**: provide custom functionality for your organization and are managed in on-chain plugin repositories. They can be plugged in and out into your DAO without writing or deploying any contract code yourself.
+
+Through permissions and plugins, DAO builders are able to build and customize their DAO to suit their needs.
+
+Developers can implement their own plugin by inheriting from one of our **plugin base classes**, writing a **plugin setup** and publishing it in an on-chain **plugin repository**.
+
+To facilitate this, Aragon OSx runs a set of **framework contracts**:
+
+- **DAO Factory and registry contract:** create and curate DAOs.
+- **Plugin repo factory and registry contract:** create and version plugin repositories.
+- **Plugin Setup Processor contract:** sets up plugins from a plugin repository in a DAO (installation, update, uninstallation).
+
+## Getting Started
+
+Users interact with the Aragon OSx protocol through the link:https://app.aragon.org[Aragon App], link:https://devs.aragon.org/docs/sdk[Aragon SDK] or directly calling on the link:https://github.com/aragon/osx[protocol contracts] - as well as through any third-party projects built using our stack.
+
+To **add the contracts to your project**, open a terminal in the root folder of your Solidity project and run:
+
+```shell
+yarn add @aragon/osx
+```
+
+Then, to use the contracts within your project, **import the contracts** through something like:
+
+```solidity
+// contracts/Box.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// Import Auth from the access-control subdirectory
+import "./access-control/Auth.sol";
+
+contract Box {
+    uint256 private _value;
+    Auth private _auth;
+
+    event ValueChanged(uint256 value);
+
+    constructor() {
+        _auth = new Auth(msg.sender);
+    }
+
+    function store(uint256 value) public {
+        // Require that the caller is registered as an administrator in Auth
+        require(_auth.isAdministrator(msg.sender), "Unauthorized");
+
+        _value = value;
+        emit ValueChanged(value);
+    }
+
+    function retrieve() public view returns (uint256) {
+        return _value;
+    }
+}
+```
+
+## Customize your DAO
+
+DAO Plugins are the best way to customize your DAO. These are modular extendable pieces of software which you can install or uninstall from your DAO as it evolves and grows.
+
+To learn more about plugins, check out our guide xref:how-to-guides/plugin-development/index.adoc[here].
+
+### Walkthrough
+
+This documentation is divided into conceptual and practical sections as well as the reference guide.
+
+- Conceptual xref:how-it-works/index.adoc[How It Works articles] explain the architecture behind our protocol.
+- Practical xref:how-to-guides/index.adoc[How-to Guides] explain how to use and leverage our protocol.
+- The TODO:GIORGI [Reference Guide](03-reference-guide/index.md) generated from the NatSpec comments of the latest `@aragon/osx` release documents each individual Solidity contract, function, and variable.
