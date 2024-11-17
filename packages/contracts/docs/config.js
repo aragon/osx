@@ -9,9 +9,6 @@ module.exports = {
   pageExtension: '.adoc',
   collapseNewlines: true,
   pages: (_, file, config) => {
-    const sourcesDir = path.resolve(config.root, config.sourcesDir);
-    let dir = path.resolve(config.root, file.absolutePath);
-
     return 'osx-contracts' + config.pageExtension;
   },
 };

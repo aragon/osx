@@ -1,4 +1,6 @@
 :github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]
+:xref-DAO-nonReentrant--: xref:osx-contracts.adoc#DAO-nonReentrant--
+:xref-DAO-onlyCallAtInitialization--: xref:osx-contracts.adoc#DAO-onlyCallAtInitialization--
 :xref-DAO-constructor--: xref:osx-contracts.adoc#DAO-constructor--
 :xref-DAO-initialize-bytes-address-address-string-: xref:osx-contracts.adoc#DAO-initialize-bytes-address-address-string-
 :xref-DAO-initializeFrom-uint8-3--bytes-: xref:osx-contracts.adoc#DAO-initializeFrom-uint8-3--bytes-
@@ -47,6 +49,7 @@
 :xref-CallbackHandler-CallbackReceived-address-bytes4-bytes-: xref:osx-contracts.adoc#CallbackHandler-CallbackReceived-address-bytes4-bytes-
 :xref-PermissionManager-Granted-bytes32-address-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Granted-bytes32-address-address-address-address-
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Revoked-bytes32-address-address-address-
+:xref-PermissionManager-auth-bytes32-: xref:osx-contracts.adoc#PermissionManager-auth-bytes32-
 :xref-PermissionManager-__PermissionManager_init-address-: xref:osx-contracts.adoc#PermissionManager-__PermissionManager_init-address-
 :xref-PermissionManager-grant-address-address-bytes32-: xref:osx-contracts.adoc#PermissionManager-grant-address-address-bytes32-
 :xref-PermissionManager-grantWithCondition-address-address-bytes32-contract-IPermissionCondition-: xref:osx-contracts.adoc#PermissionManager-grantWithCondition-address-address-bytes32-contract-IPermissionCondition-
@@ -144,6 +147,7 @@
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Revoked-bytes32-address-address-address-
 :xref-IPluginRepo-VersionCreated-uint8-uint16-address-bytes-: xref:osx-contracts.adoc#IPluginRepo-VersionCreated-uint8-uint16-address-bytes-
 :xref-IPluginRepo-ReleaseMetadataUpdated-uint8-bytes-: xref:osx-contracts.adoc#IPluginRepo-ReleaseMetadataUpdated-uint8-bytes-
+:xref-PluginSetupProcessor-canApply-address-bytes32-: xref:osx-contracts.adoc#PluginSetupProcessor-canApply-address-bytes32-
 :xref-PluginSetupProcessor-constructor-contract-PluginRepoRegistry-: xref:osx-contracts.adoc#PluginSetupProcessor-constructor-contract-PluginRepoRegistry-
 :xref-PluginSetupProcessor-prepareInstallation-address-struct-PluginSetupProcessor-PrepareInstallationParams-: xref:osx-contracts.adoc#PluginSetupProcessor-prepareInstallation-address-struct-PluginSetupProcessor-PrepareInstallationParams-
 :xref-PluginSetupProcessor-applyInstallation-address-struct-PluginSetupProcessor-ApplyInstallationParams-: xref:osx-contracts.adoc#PluginSetupProcessor-applyInstallation-address-struct-PluginSetupProcessor-ApplyInstallationParams-
@@ -215,6 +219,14 @@ This is the reference guide of the link:https://github.com/aragon/osx[osx contra
 === `++DAO++` link:https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v/src/core/dao/DAO.sol[{github-icon},role=heading-link]
 
 Public API of the Aragon DAO framework.
+
+[.contract-index]
+.Modifiers
+--
+* {xref-DAO-nonReentrant--}[`++nonReentrant()++`]
+* {xref-DAO-onlyCallAtInitialization--}[`++onlyCallAtInitialization()++`]
+
+--
 
 [.contract-index]
 .Functions
@@ -783,6 +795,13 @@ The internal constant storing the maximal action array length.
 [.contract]
 [[PermissionManager]]
 === `++PermissionManager++` link:https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v/src/core/permission/PermissionManager.sol[{github-icon},role=heading-link]
+
+[.contract-index]
+.Modifiers
+--
+* {xref-PermissionManager-auth-bytes32-}[`++auth(_permissionId)++`]
+
+--
 
 [.contract-index]
 .Functions
@@ -2189,6 +2208,13 @@ The mapping between the plugin setup address and its corresponding version hash.
 === `++PluginSetupProcessor++` link:https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v/src/framework/plugin/setup/PluginSetupProcessor.sol[{github-icon},role=heading-link]
 
 This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
+
+[.contract-index]
+.Modifiers
+--
+* {xref-PluginSetupProcessor-canApply-address-bytes32-}[`++canApply(_dao, _permissionId)++`]
+
+--
 
 [.contract-index]
 .Functions

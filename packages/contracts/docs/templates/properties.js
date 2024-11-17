@@ -24,12 +24,6 @@ module.exports.inheritance = function ({item, build}) {
     throw new Error('used inherited-items on non-contract');
   }
 
-  // console.log(
-  //   item.linearizedBaseContracts
-  //     .map(id => build.deref('ContractDefinition', id))
-  //     .filter((c, i) => c.name !== 'Context' || i === 0),
-  //   ' awesome'
-  // );
   return item.linearizedBaseContracts
     .map(id => build.deref('ContractDefinition', id))
     .filter((c, i) => c.name !== 'Context' || i === 0);

@@ -9,21 +9,20 @@
 
 {{{natspec.dev}}}
 
-{{!-- {{#if modifiers}}
+{{#if modifiers}}
 [.contract-index]
 .Modifiers
 --
-{{#if (isLocalContract contract.name)}}
 {{#each modifiers}}
+{{#if (isLocalContract __item_context.contract.name)}}
 * {xref-{{anchor~}} }[`++{{name}}({{names params}})++`]
-{{/each}}
-{{else if (isAragonInherittedContract contract) }}
-{{#each modifiers}}
+{{else if (isAragonInherittedContract __item_context.file.absolutePath) }}
 * link:{{getExternalLink __item_context.file.absolutePath}}[{{name}}]
-{{/each}}
 {{/if}}
+{{/each}}
+
 --
-{{/if}} --}}
+{{/if}}
 
 {{#if has-functions}}
 [.contract-index]
