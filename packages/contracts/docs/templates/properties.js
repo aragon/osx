@@ -81,13 +81,5 @@ module.exports['inherited-functions'] = function ({item}) {
     ),
   }));
 
-  // d.map(item => {
-  //   // console.log(item.contract.name);
-  //   // console.log('starts');
-  //   item.functions.map(item2 => {
-  //     console.log(item2);
-  //   });
-  //   console.log('ends');
-  // });
   return d;
 };

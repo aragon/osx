@@ -18,10 +18,6 @@ module.exports['isAragonInherittedContract'] = (absolutePath, options) => {
   return absolutePath.startsWith('@aragon');
 };
 
-module.exports['giorgihelp'] = blax => {
-  console.log(blax, ' kk');
-};
-
 module.exports['getExternalLink'] = absolutePath => {
   if (absolutePath.startsWith('@aragon/osx-commons-contracts')) {
     return absolutePath.replace(
