@@ -216,7 +216,7 @@ This is the reference guide of the link:https://github.com/aragon/osx[osx contra
 
 [.contract]
 [[DAO]]
-=== `++DAO++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/dao/DAO.sol[{github-icon},role=heading-link]
+=== `++DAO++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/dao/DAO.sol[{github-icon},role=heading-link]
 
 Public API of the Aragon DAO framework.
 
@@ -794,7 +794,7 @@ The internal constant storing the maximal action array length.
 
 [.contract]
 [[PermissionManager]]
-=== `++PermissionManager++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/permission/PermissionManager.sol[{github-icon},role=heading-link]
+=== `++PermissionManager++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/permission/PermissionManager.sol[{github-icon},role=heading-link]
 
 [.contract-index]
 .Modifiers
@@ -1070,7 +1070,7 @@ A mapping storing permissions as hashes (i.e., &#x60;permissionHash(where, who, 
 
 [.contract]
 [[CallbackHandler]]
-=== `++CallbackHandler++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/utils/CallbackHandler.sol[{github-icon},role=heading-link]
+=== `++CallbackHandler++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/utils/CallbackHandler.sol[{github-icon},role=heading-link]
 
 This callback handling functionality is intended to be used by executor contracts (i.e., `DAO.sol`).
 
@@ -1163,7 +1163,7 @@ The magic number refering to unregistered callbacks.
 
 [.contract]
 [[DAOFactory]]
-=== `++DAOFactory++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/dao/DAOFactory.sol[{github-icon},role=heading-link]
+=== `++DAOFactory++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/dao/DAOFactory.sol[{github-icon},role=heading-link]
 
 [.contract-index]
 .Functions
@@ -1323,7 +1323,7 @@ Thrown if &#x60;PluginSettings&#x60; array is empty, and no plugin is provided.
 
 [.contract]
 [[PluginRepoFactory]]
-=== `++PluginRepoFactory++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/repo/PluginRepoFactory.sol[{github-icon},role=heading-link]
+=== `++PluginRepoFactory++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/repo/PluginRepoFactory.sol[{github-icon},role=heading-link]
 
 [.contract-index]
 .Functions
@@ -1418,7 +1418,7 @@ The address of the &#x60;PluginRepo&#x60; base contract to proxy to..
 
 [.contract]
 [[DAORegistry]]
-=== `++DAORegistry++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/dao/DAORegistry.sol[{github-icon},role=heading-link]
+=== `++DAORegistry++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/dao/DAORegistry.sol[{github-icon},role=heading-link]
 
 [.contract-index]
 .Functions
@@ -1598,7 +1598,7 @@ Thrown if the DAO subdomain doesn&#x27;t match the regex &#x60;[0-9a-z\-]&#x60;
 
 [.contract]
 [[PluginRepoRegistry]]
-=== `++PluginRepoRegistry++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/repo/PluginRepoRegistry.sol[{github-icon},role=heading-link]
+=== `++PluginRepoRegistry++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/repo/PluginRepoRegistry.sol[{github-icon},role=heading-link]
 
 [.contract-index]
 .Functions
@@ -1804,7 +1804,7 @@ Thrown if the plugin repository subdomain is empty.
 
 [.contract]
 [[PluginRepo]]
-=== `++PluginRepo++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/repo/PluginRepo.sol[{github-icon},role=heading-link]
+=== `++PluginRepo++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/repo/PluginRepo.sol[{github-icon},role=heading-link]
 
 [.contract-index]
 .Functions
@@ -2205,7 +2205,7 @@ The mapping between the plugin setup address and its corresponding version hash.
 
 [.contract]
 [[PluginSetupProcessor]]
-=== `++PluginSetupProcessor++` link:git+https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/setup/PluginSetupProcessor.sol[{github-icon},role=heading-link]
+=== `++PluginSetupProcessor++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/framework/plugin/setup/PluginSetupProcessor.sol[{github-icon},role=heading-link]
 
 This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
 
