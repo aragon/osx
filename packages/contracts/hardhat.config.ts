@@ -36,6 +36,11 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
   }
+
+  if (typeof networkExtensions[network] == 'undefined') {
+    continue;
+  }
+
   hardhatNetworks[network].accounts = accounts;
   hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
