@@ -84,6 +84,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     '0x'
   );
 
+  console.log(`\nShould set metadata of ManagementDAO:`, hasMetadataPermission);
+
   if (hasMetadataPermission) {
     const setMetadataTX = await managingDaoContract.setMetadata(
       ethers.utils.hexlify(

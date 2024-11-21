@@ -34,6 +34,7 @@ yarn-error.log*
 deployments
 deployments-zk
 deployed_contracts.json
+deployed_contracts_detailed.json
 managingDAOTX.json
 
 # generated

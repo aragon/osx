@@ -31,7 +31,7 @@ export const ENS_PUBLIC_RESOLVERS: {[key: string]: string} = {
   goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
   mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
   sepolia: '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD',
-  holesky: '0x9010A27463717360cAD99CEA8bD39b8705CCA238'
+  holesky: '0x9010A27463717360cAD99CEA8bD39b8705CCA238',
 };
 
 export const DAO_PERMISSIONS = [
@@ -224,7 +224,11 @@ export async function createPluginRepo(
     );
     const found = events.filter(event => event?.args?.subdomain == pluginName);
     if (found && found.length == 1) {
-      hre.aragonPluginRepos[pluginName] = found[0].args.pluginRepo;
+      hre.aragonPluginRepos[pluginName] = {
+        address: found[0].args.pluginRepo,
+        blockNumber: found[0].blockNumber,
+        transactionHash: found[0].transactionHash || null,
+      };
       return;
     }
     throw new Error(
@@ -247,7 +251,8 @@ export async function createPluginRepo(
   console.log(
     `Creating & registering repo for ${pluginName} with tx ${tx.hash}`
   );
-  await tx.wait();
+
+  const receipt = await tx.wait();
 
   const event = await findEventTopicLog<PluginRepoRegisteredEvent>(
     tx,
@@ -256,7 +261,11 @@ export async function createPluginRepo(
   );
   const repoAddress = event.args.pluginRepo;
 
-  hre.aragonPluginRepos[pluginName] = repoAddress;
+  hre.aragonPluginRepos[pluginName] = {
+    address: repoAddress,
+    blockNumber: receipt.blockNumber,
+    transactionHash: tx.hash,
+  };
 
   console.log(
     `Created & registered repo for ${pluginName} at address: ${repoAddress}` //, with contentURI ${ethers.utils.toUtf8String(releaseMetadata)}`
@@ -363,7 +372,7 @@ export async function populatePluginRepo(
 
     for (let i = 1; i < latestBuildNumber; i++) {
       await createVersion(
-        hre.aragonPluginRepos[pluginRepoName],
+        hre.aragonPluginRepos[pluginRepoName].address,
         placeholderSetup,
         releaseNumber,
         i,
@@ -376,7 +385,7 @@ export async function populatePluginRepo(
 
     // create latest builds
     await createVersion(
-      hre.aragonPluginRepos[pluginRepoName],
+      hre.aragonPluginRepos[pluginRepoName].address,
       latestVersion.pluginSetupContract,
       releaseNumber,
       latestBuildNumber,
@@ -653,29 +662,25 @@ export function getManagingDAOMultisigAddress(
 }
 
 export async function getPSPAddress(hre: HardhatRuntimeEnvironment) {
-  let name = 'PluginSetupProcessor'
-  if(ZK_SYNC_NETWORKS.includes(hre.network.name)) {
-    name = 'PluginSetupProcessorUpgradeable'
+  let name = 'PluginSetupProcessor';
+  if (ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    name = 'PluginSetupProcessorUpgradeable';
   }
 
-  const address = await getContractAddress(
-    name,
-    hre
-  );
+  const address = await getContractAddress(name, hre);
 
   return address;
 }
 
-export async function getTokenVotingSetupAddress(hre: HardhatRuntimeEnvironment) {
-  let name = 'TokenVotingSetup'
-  if(ZK_SYNC_NETWORKS.includes(hre.network.name)) {
-    name = 'TokenVotingSetupZkSync'
+export async function getTokenVotingSetupAddress(
+  hre: HardhatRuntimeEnvironment
+) {
+  let name = 'TokenVotingSetup';
+  if (ZK_SYNC_NETWORKS.includes(hre.network.name)) {
+    name = 'TokenVotingSetupZkSync';
   }
 
-  const address = await getContractAddress(
-    name,
-    hre
-  );
+  const address = await getContractAddress(name, hre);
 
   return address;
 }

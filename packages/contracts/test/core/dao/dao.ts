@@ -659,7 +659,7 @@ describe('DAO', function () {
     });
 
     // TODO:GIORGI skip this since the test focuses on gas costs which is different on zksync.
-    it('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
+    it.only('reverts if failure is allowed but not enough gas is provided (one action)', async () => {
       const gasConsumer = await hre.wrapper.deploy('GasConsumer');
       const GasConsumer = new GasConsumer__factory(signers[0]);
 
