@@ -18,6 +18,16 @@
     "deploy": ["./deploy/new", "./deploy/verification"],
     "forceDeploy": true
   },
+  "lineaSepolia": {
+    "url": "https://linea-sepolia.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT",
+    "chainId": 59141,
+    "deploy": ["./deploy/new", "./deploy/verification"]
+  },
+  "lineaMainnet": {
+    "url": "https://linea-mainnet.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT",
+    "chainId": 59144,
+    "deploy": ["./deploy/new", "./deploy/verification"]
+  },
   "modeTestnet": {
     "url": "https://sepolia.mode.network",
     "chainId": 919,
@@ -28,10 +38,10 @@
     "chainId": 34443,
     "deploy": ["./deploy/new", "./deploy/verification"]
   },
-  "holesky": { 
-    "chainId": 17000, 
-    "url": "https://ethereum-holesky.publicnode.com", 
-    "deploy": ["./deploy/new", "./deploy/verification"] 
+  "holesky": {
+    "chainId": 17000,
+    "url": "https://ethereum-holesky.publicnode.com",
+    "deploy": ["./deploy/new", "./deploy/verification"]
   },
   "polygon": {
     "url": "https://polygon-mainnet.infura.io/v3/481a4cdc7c774286b8627f21c6827f48",
