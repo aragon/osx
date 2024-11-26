@@ -49,13 +49,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           )) as DAOFactory;
           const daoBaseAddress = await daoFactory.daoBase();
 
-          pluginRepoBaseDetail = {
+          deployedContractDetails['DAOBase'] = {
             address: daoBaseAddress,
             blockNumber: contractDetails.blockNumber,
             deploymentTx: contractDetails.deploymentTx,
           };
-
-          deployedContractDetails['DAOBase'] = pluginRepoBaseDetail;
 
           console.log(`DAOBase: ${daoBaseAddress}`);
           break;
@@ -72,11 +70,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           const pluginRepoBaseAddress =
             await pluginRepoFactory.pluginRepoBase();
 
-          deployedContractDetails['PluginRepoBase'] = {
+          pluginRepoBaseDetail = {
             address: pluginRepoBaseAddress,
             blockNumber: contractDetails.blockNumber,
             deploymentTx: contractDetails.deploymentTx,
           };
+
+          deployedContractDetails['PluginRepoBase'] = pluginRepoBaseDetail;
+
           console.log(`PluginRepoBase: ${pluginRepoBaseAddress}`);
           break;
 
