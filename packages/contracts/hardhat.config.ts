@@ -6,9 +6,9 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@matterlabs/hardhat-zksync-deploy';
-import '@matterlabs/hardhat-zksync-solc';
-import '@matterlabs/hardhat-zksync-node';
+// import '@matterlabs/hardhat-zksync-deploy';
+// import '@matterlabs/hardhat-zksync-solc';
+// import '@matterlabs/hardhat-zksync-node';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -133,8 +133,8 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: 'https://linea-sepolia.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT',
-        blockNumber: 6048520,
+        url: 'https://linea-mainnet.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT',
+        blockNumber: 12640744,
       },
     },
     // hardhat: {
@@ -213,7 +213,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       lineaSepolia: process.env.LINEASCAN_KEY || '',
-      lineaMainnet: process.env.LINEASCAN_KEY || '',
+      linea: process.env.LINEASCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
       mainnet: process.env.ETHERSCAN_KEY || '',
@@ -298,7 +298,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'lineaMainnet',
+        network: 'linea',
         chainId: 59144,
         urls: {
           apiURL: 'https://api.lineascan.build/api',
@@ -327,6 +327,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 6000000, // 60 seconds // increase the timeout for subdomain validation tests
+    reporter: './logFailedTests.js',
   },
 };
 

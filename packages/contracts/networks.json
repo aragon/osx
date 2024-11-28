@@ -23,7 +23,7 @@
     "chainId": 59141,
     "deploy": ["./deploy/new", "./deploy/verification"]
   },
-  "lineaMainnet": {
+  "linea": {
     "url": "https://linea-mainnet.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT",
     "chainId": 59144,
     "deploy": ["./deploy/new", "./deploy/verification"]
