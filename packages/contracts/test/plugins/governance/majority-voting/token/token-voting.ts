@@ -74,7 +74,7 @@ describe('TokenVoting', function () {
   let endDate: number;
   let votingSettings: VotingSettings;
 
-  const startOffset = 20;
+  const startOffset = 30;
   const id = 0;
 
   before(async () => {

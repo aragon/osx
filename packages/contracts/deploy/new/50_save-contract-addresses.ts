@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {promises as fs} from 'fs';
-import { DAORegistry } from '../../typechain';
+import {DAORegistry} from '../../typechain';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nPrinting deployed contracts.');
@@ -38,15 +38,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   for (const pluginRepo in aragonPluginRepos) {
     deployedContractAddresses[`${pluginRepo}-repo`] =
-      aragonPluginRepos[pluginRepo];
-    console.log(`${pluginRepo}-repo: ${aragonPluginRepos[pluginRepo]}`);
+      aragonPluginRepos[pluginRepo].address;
+    console.log(`${pluginRepo}-repo: ${aragonPluginRepos[pluginRepo].address}`);
   }
 
   await fs.writeFile(
     'deployed_contracts.json',
     JSON.stringify(deployedContractAddresses, null, 2)
   );
-
 };
 export default func;
 func.tags = ['New', 'Conclude'];

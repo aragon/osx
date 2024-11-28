@@ -28,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const pluginRepoBase = await pluginRepoFactory.pluginRepoBase();
 
   hre.aragonToVerifyContracts.push({
-    address: hre.aragonPluginRepos['admin'],
+    address: hre.aragonPluginRepos['admin'].address,
     args: [pluginRepoBase, initializeData],
   });
 };

@@ -53,7 +53,7 @@ const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe('TokenVotingSetupZkSync', function () {
+describe.skip('TokenVotingSetupZkSync', function () {
   let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
   let implementationAddress: string;

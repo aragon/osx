@@ -1,11 +1,29 @@
 export type AragonPluginRepos = {
-  'address-list-voting': string;
-  'token-voting': string;
-  // prettier-ignore
-  'admin': string;
-  // prettier-ignore
-  'multisig': string;
-  [index: string]: string;
+  'address-list-voting': {
+    address: string;
+    blockNumber: number | null;
+    transactionHash: string | null;
+  };
+  'token-voting': {
+    address: string;
+    blockNumber: number | null;
+    transactionHash: string | null;
+  };
+  admin: {
+    address: string;
+    blockNumber: number | null;
+    transactionHash: string | null;
+  };
+  multisig: {
+    address: string;
+    blockNumber: number | null;
+    transactionHash: string | null;
+  };
+  [index: string]: {
+    address: string;
+    blockNumber: number | null;
+    transactionHash: string | null;
+  };
 };
 
 export type AragonVerifyEntry = {

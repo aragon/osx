@@ -6,9 +6,9 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@matterlabs/hardhat-zksync-deploy';
-import '@matterlabs/hardhat-zksync-solc';
-import '@matterlabs/hardhat-zksync-node';
+// import '@matterlabs/hardhat-zksync-deploy';
+// import '@matterlabs/hardhat-zksync-solc';
+// import '@matterlabs/hardhat-zksync-node';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
@@ -20,8 +20,8 @@ import 'solidity-docgen';
 // import '@matterlabs/hardhat-zksync-verify';
 
 // If you're running on hardhat, import the following
-import '@nomicfoundation/hardhat-verify'
-import '@openzeppelin/hardhat-upgrades'
+import '@nomicfoundation/hardhat-verify';
+import '@openzeppelin/hardhat-upgrades';
 
 import {AragonPluginRepos, TestingFork} from './utils/types';
 
@@ -69,7 +69,7 @@ task('deploy-contracts').setAction(async (args, hre) => {
 task('test-contracts').setAction(async (args, hre) => {
   await hre.run('build-contracts');
   const imp = await import('./test/test-utils/wrapper');
-  
+
   const wrapper = await imp.Wrapper.create(
     hre.network.name,
     hre.ethers.provider
@@ -82,10 +82,14 @@ task('test-contracts').setAction(async (args, hre) => {
 // Extend HardhatRuntimeEnvironment
 extendEnvironment((hre: HardhatRuntimeEnvironment) => {
   const aragonPluginRepos: AragonPluginRepos = {
-    'address-list-voting': '',
-    'token-voting': '',
-    admin: '',
-    multisig: '',
+    'address-list-voting': {
+      address: '',
+      blockNumber: null,
+      transactionHash: null,
+    },
+    'token-voting': {address: '', blockNumber: null, transactionHash: null},
+    admin: {address: '', blockNumber: null, transactionHash: null},
+    multisig: {address: '', blockNumber: null, transactionHash: null},
   };
   const testingFork: TestingFork = {
     network: '',
@@ -129,9 +133,9 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: 'https://sepolia.mode.network',
-        blockNumber: 18922281
-      }
+        url: 'https://linea-mainnet.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT',
+        blockNumber: 12640744,
+      },
     },
     // hardhat: {
     //   throwOnTransactionFailures: true,
@@ -208,6 +212,8 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      lineaSepolia: process.env.LINEASCAN_KEY || '',
+      linea: process.env.LINEASCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
       mainnet: process.env.ETHERSCAN_KEY || '',
@@ -269,7 +275,8 @@ const config: HardhatUserConfig = {
         network: 'modeTestnet',
         chainId: 919,
         urls: {
-          apiURL: 'https://api.routescan.io/v2/network/testnet/evm/919/etherscan',
+          apiURL:
+            'https://api.routescan.io/v2/network/testnet/evm/919/etherscan',
           browserURL: 'https://testnet.modescan.io',
         },
       },
@@ -277,8 +284,25 @@ const config: HardhatUserConfig = {
         network: 'modeMainnet',
         chainId: 34443,
         urls: {
-          apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
+          apiURL:
+            'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
           browserURL: 'https://modescan.io',
+        },
+      },
+      {
+        network: 'lineaSepolia',
+        chainId: 59141,
+        urls: {
+          apiURL: 'https://api-sepolia.lineascan.build/api',
+          browserURL: 'https://sepolia.lineascan.build',
+        },
+      },
+      {
+        network: 'linea',
+        chainId: 59144,
+        urls: {
+          apiURL: 'https://api.lineascan.build/api',
+          browserURL: 'https://lineascan.build',
         },
       },
     ],
@@ -303,6 +327,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 6000000, // 60 seconds // increase the timeout for subdomain validation tests
+    reporter: './logFailedTests.js',
   },
 };
 

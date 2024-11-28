@@ -104,14 +104,14 @@ describe('Managing DAO', function () {
 
     // PSP
     try {
-      let pspDeployment = await deployments.get('PluginSetupProcessorUpgradeable')
+      let pspDeployment = await deployments.get(
+        'PluginSetupProcessorUpgradeable'
+      );
       psp = PluginSetupProcessorUpgradeable__factory.connect(
         pspDeployment.address,
         signers[0]
       );
-    } catch(err) {
-
-    }
+    } catch (err) {}
 
     // ENSSubdomainRegistrar
     ensSubdomainRegistrarDeployments = [
@@ -220,20 +220,20 @@ describe('Managing DAO', function () {
   });
 
   it('Should be able to upgrade `PSP`', async function () {
-    if(!psp) {
+    if (!psp) {
       return;
     }
-     // Grant managing dao first the permission to upgrade psp.
-     const action = {
+    // Grant managing dao first the permission to upgrade psp.
+    const action = {
       to: managingDao.address,
       value: 0,
       data: DAO__factory.createInterface().encodeFunctionData('grant', [
-        psp.address, 
-        managingDao.address, 
-        ethers.utils.id('UPGRADE_PSP_PERMISSION')
-      ])
-    }
-    
+        psp.address,
+        managingDao.address,
+        ethers.utils.id('UPGRADE_PSP_PERMISSION'),
+      ]),
+    };
+
     await multisig.createProposal(
       '0x', // metadata
       [action],
@@ -242,18 +242,15 @@ describe('Managing DAO', function () {
       true, // execute proposal
       0, // start date: now
       Math.floor(Date.now() / 1000) + 86400 // end date: now + 1 day
-    )
+    );
 
     // deploy a new implementation.
-    const pspDeployment = await deployments.deploy(
-      'newPSP',
-      {
-        contract: pspUpgradeableArtifactData,
-        from: ownerAddress,
-        args: [],
-        log: true,
-      }
-    );
+    const pspDeployment = await deployments.deploy('newPSP', {
+      contract: pspUpgradeableArtifactData,
+      from: ownerAddress,
+      args: [],
+      log: true,
+    });
 
     expect(pspDeployment.implementation).to.be.equal(undefined);
 
@@ -263,24 +260,17 @@ describe('Managing DAO', function () {
       await readImplementationValuesFromSlot([psp.address])
     )[0];
 
-    expect(pspDeployment.address).not.equal(
-      implementationAddress
-    );
+    expect(pspDeployment.address).not.equal(implementationAddress);
 
     // create proposal to upgrade to new implementation
-    await createUpgradeProposal(
-      [psp.address],
-      pspDeployment.address
-    );
+    await createUpgradeProposal([psp.address], pspDeployment.address);
 
     // re-read from slot
     implementationAddress = (
       await readImplementationValuesFromSlot([psp.address])
     )[0];
 
-    expect(pspDeployment.address).to.be.equal(
-      implementationAddress
-    );
+    expect(pspDeployment.address).to.be.equal(implementationAddress);
   });
 
   it('Should be able to upgrade `PluginRepoRegistry`', async function () {
@@ -395,8 +385,8 @@ describe('Managing DAO', function () {
     const deployedRepoAddresses = [];
 
     for (const [key, value] of Object.entries(hre.aragonPluginRepos)) {
-      if (value == '') continue;
-      deployedRepoAddresses.push(value);
+      if (value.address == '') continue;
+      deployedRepoAddresses.push(value.address);
     }
 
     // make sure new `PluginRepoV2` deployment is just an implementation and not a proxy
@@ -417,7 +407,7 @@ describe('Managing DAO', function () {
 
     // create proposal to upgrade to new implementation
     await createUpgradeProposal(
-      Object.values(hre.aragonPluginRepos),
+      Object.values(hre.aragonPluginRepos).map(repo => repo.address),
       PluginRepo_v1_0_0_Deployment.address
     );
 

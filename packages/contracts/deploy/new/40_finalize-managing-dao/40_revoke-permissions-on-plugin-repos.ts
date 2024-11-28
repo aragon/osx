@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Revoke `ROOT_PERMISSION`, `MAINTAINER_PERMISSION` and `UPGRADE_REPO_PERMISSION` from `Deployer` on the permission manager of each PluginRepo.
   for (const repoName in hre.aragonPluginRepos) {
-    const repoAddress = hre.aragonPluginRepos[repoName];
+    const repoAddress = hre.aragonPluginRepos[repoName].address;
 
     // if repoAddress empty, the deployment must have been marked as skipped.
     if (repoAddress === '') continue;
