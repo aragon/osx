@@ -94,6 +94,5 @@ If it is a new release number, the build number is `1` (e.g., `2.1`).
 3. The `_buildMetadata` URI pointing to a JSON file containing the UI data, setup data, and change description for this specific version.
 4. The `_releaseMetadata` URI pointing to a JSON file containing the plugin name, description, as well as optional data such as images to be shown in the aragonApp frontend.
 
-Other functions present in the contract allow you to query previous versions and to update the release metadata. For more details visit the TODO:CLAUDIA[`PluginRepo` reference guide entry](../../../../03-reference-guide/framework/plugin/repo/PluginRepo.md).
-
+Other functions present in the contract allow you to query previous versions and to update the release metadata. For more details visit the xref:api:framework.adoc#PluginRepo[`PluginRepo` reference guide entry].
 The `PluginRepo` is created for you when you publish the `PluginSetup` contract of your first version to the Aragon OSx protocol, which is explained in the next section: xref:framework/repo-factory-registry.adoc[The Plugin Repo Creation Process].

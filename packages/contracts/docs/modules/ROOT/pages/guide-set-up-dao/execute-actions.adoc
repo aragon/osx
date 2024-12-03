@@ -50,7 +50,8 @@ function exampleGrantCall(
 }
 ```
 
-Here we use the selector of the TODO:GIORGI [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md#external-function-revoke) must be used.
+Here we use the selector of the xref:api:core.adoc#PermissionManager-grant-address-address-bytes32-[`grant` function]. 
+To revoke the permission, the selector of the xref:api:core.adoc#PermissionManager-revoke-address-address-bytes32-[`revoke` function]
 
 If the caller possesses the xref:how-it-works/core/permissions/index.adoc#permissions-native-to-the-dao-contract[`ROOT_PERMISSION_ID` permission] on the DAO contract, the call becomes simpler and cheaper:
 

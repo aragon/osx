@@ -100,4 +100,5 @@ This documentation is divided into conceptual and practical sections as well as 
 
 - Conceptual xref:how-it-works/index.adoc[How It Works articles] explain the architecture behind our protocol.
 - Practical xref:how-to-guides/index.adoc[How-to Guides] explain how to use and leverage our protocol.
-- The TODO:GIORGI [Reference Guide](03-reference-guide/index.md) generated from the NatSpec comments of the latest `@aragon/osx` release documents each individual Solidity contract, function, and variable.
+- The xref:api:core.adoc[Core] and xref:api:framework.adoc[Framework], generated from the NatSpec comments of the latest `@aragon/osx` release documents each individual Solidity contract, function, and variable.
+

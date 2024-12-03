@@ -4,9 +4,8 @@
 
 Two framework contracts manage the `DAO` contract creation process:
 
-- The TODO:GIORGI [`DAOFactory`](../../../03-reference-guide/framework/dao/DAOFactory.md)
-- The TODO:GIORGI [`DAORegistry`](../../../03-reference-guide/framework/dao/DAORegistry.md).
-
+- The xref:api:framework.adoc#DAOFactory[DAOFactory]
+- The xref:api:framework.adoc#DAORegistry[DAORegistry]
 
 ### `DAOFactory`
 
@@ -29,7 +28,7 @@ The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegis
 
 4. Sets the xref:how-it-works/core/permissions/index.adoc##permissions-native-to-the-dao-contract[native permissions] of the `DAO` and revokes its own ownership.
 
-For more details visit the [`DAOFactory` reference guide entry](../../../03-reference-guide/framework/dao/DAOFactory.md). TODO: GIORGI
+For more details visit the xref:api:framework.adoc#DAOFactory[`DAOFactory` reference guide entry].
 
 ### `DAORegistry`
 
@@ -49,4 +48,4 @@ If the requested ENS `subdomain` name xref:how-it-works/framework/ens-names.md[i
 If the `subdomain` parameter is non-empty (not `""`) and still available, the ENS name will be registered.
 If the registration was successful, the DAO name, contract and creator addresses are emitted in an event.
 
-For more details visit the [`DAORegistry` reference guide entry](../../../03-reference-guide/framework/dao/DAORegistry.md). TODO:GIORGI
+For more details visit the xref:api:framework.adoc#DAORegistry[`DAORegistry` reference guide entry].
