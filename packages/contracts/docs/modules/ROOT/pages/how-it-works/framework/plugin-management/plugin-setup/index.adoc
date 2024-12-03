@@ -8,7 +8,7 @@ A DAO can be set up and customized by the **installation, update, and uninstalla
 - **Plugin Setup contract:** contains the instructions needed to install, update, and uninstall the plugin into the DAO. This is done through granting or revoking permissions, enabling plugins to perform actions within the scope of the DAO.
 
 
-image::../../../../../_/images/img/plugins/what_is_a_plugin.png[align="center"]
+image::what_is_a_plugin.png[align="center"]
 
 
 How this works:
@@ -91,8 +91,8 @@ allows you to **transform your entire DAO in one proposal**, for example, to ins
 In the next sections, you will learn about how plugins are curated on Aragon's repository.
 
 
-image::../../../../../_/images/optimized-svg/plugins/plugin-installation.drawio.svg[align="center"]
-image::../../../../../_/images/optimized-svg/plugins/plugin-update.drawio.svg[align="center"]
-image::../../../../../_/images/optimized-svg/plugins/plugin-uninstallation.drawio.svg[align="center"]
+image::plugin-installation.drawio.svg[align="center"]
+image::plugin-update.drawio.svg[align="center"]
+image::plugin-uninstallation.drawio.svg[align="center"]
 
 

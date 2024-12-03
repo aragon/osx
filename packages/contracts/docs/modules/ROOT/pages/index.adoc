@@ -24,7 +24,7 @@ To facilitate this, Aragon OSx runs a set of **framework contracts**:
 
 The Aragon OSx protocol is a DAO framework structured as follows:
 
-image::../../_/images/aragon-os-framework-overview.drawio.svg[align="center"]
+image::aragon-os-framework-overview.drawio.svg[align="center"]
 
 Overview of the Aragon OSx protocol with its structural components and their responsibilities: the governance layer constituted by the framework DAO, the code layer including the framework and core contracts, which depends on external libraries and services
 

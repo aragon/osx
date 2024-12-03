@@ -34,7 +34,7 @@ An Aragon OSx Plugin consists of:
 
 A detailed explanation of the xref:how-to-guides/plugin-development/publication/versioning.adoc[build and release versioning] is found in the How-to sections in our developer portal.
 
-image::../../../../_/images/optimized-svg/plugins/plugin-version.drawio.svg[align="center"]
+image::plugin-version.drawio.svg[align="center"]
 
 The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, 
 the central component of the setup process in the Aragon OSx framework, which is explained 

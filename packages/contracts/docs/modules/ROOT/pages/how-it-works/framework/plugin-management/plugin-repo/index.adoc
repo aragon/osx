@@ -15,7 +15,7 @@ OSx xref:how-it-works/framework/plugin-management/plugin-repo/plugin-repo-creati
 and carry their own xrex:how-it-works/framework/ens-names.adoc[ENS name] that the creator chooses. 
 The xref:how-it-works/framework/plugin-management/plugin-repo/plugin-repo-creation.adoc#the_pluginreporegistry_contract[PluginRepoRegistry] is described in the upcoming subsection.
 
-image::../../../../../_/images/optimized-svg/plugins/plugin-repo-overview.drawio.svg[align="center"]
+image::plugin-repo-overview.drawio.svg[align="center"]
 
 
 ### The `PluginRepo` Contract

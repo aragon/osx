@@ -33,7 +33,7 @@ A DAO manages plugins and interactions between them. In more detail, its permiss
 - authorizes calls to plugin functions carrying the `auth` modifier
 - authorizes calls to DAO functions, for example the `execute` function, allowing to act as the DAO
 
-image::../../../../_/images/optimized-svg/plugins/dao-plugin.drawio.svg[align="center"]
+image::dao-plugin.drawio.svg[align="center"]
 
 
 An exemplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` contract in blue containing the `PermissionManager` in red, respectively, as well as two `Plugin` contracts in green.
