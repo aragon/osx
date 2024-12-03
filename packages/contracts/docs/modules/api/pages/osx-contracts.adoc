@@ -45,10 +45,32 @@
 :xref-PermissionManager-_auth-bytes32-: xref:osx-contracts.adoc#PermissionManager-_auth-bytes32-
 :xref-PermissionManager-permissionHash-address-address-bytes32-: xref:osx-contracts.adoc#PermissionManager-permissionHash-address-address-bytes32-
 :xref-PermissionManager-ROOT_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#PermissionManager-ROOT_PERMISSION_ID-bytes32
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-DAO-NewURI-string-: xref:osx-contracts.adoc#DAO-NewURI-string-
 :xref-CallbackHandler-CallbackReceived-address-bytes4-bytes-: xref:osx-contracts.adoc#CallbackHandler-CallbackReceived-address-bytes4-bytes-
 :xref-PermissionManager-Granted-bytes32-address-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Granted-bytes32-address-address-address-address-
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Revoked-bytes32-address-address-address-
+:xref-IDAO-MetadataSet-bytes-: xref:osx-contracts.adoc#IDAO-MetadataSet-bytes-
+:xref-IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-: xref:osx-contracts.adoc#IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-
+:xref-IDAO-Deposited-address-address-uint256-string-: xref:osx-contracts.adoc#IDAO-Deposited-address-address-uint256-string-
+:xref-IDAO-NativeTokenDeposited-address-uint256-: xref:osx-contracts.adoc#IDAO-NativeTokenDeposited-address-uint256-
+:xref-IDAO-TrustedForwarderSet-address-: xref:osx-contracts.adoc#IDAO-TrustedForwarderSet-address-
+:xref-IDAO-hasPermission-address-address-bytes32-bytes-: xref:osx-contracts.adoc#IDAO-hasPermission-address-address-bytes32-bytes-
+:xref-IDAO-setMetadata-bytes-: xref:osx-contracts.adoc#IDAO-setMetadata-bytes-
+:xref-IDAO-execute-bytes32-struct-IDAO-Action---uint256-: xref:osx-contracts.adoc#IDAO-execute-bytes32-struct-IDAO-Action---uint256-
+:xref-IDAO-deposit-address-uint256-string-: xref:osx-contracts.adoc#IDAO-deposit-address-uint256-string-
+:xref-IDAO-setTrustedForwarder-address-: xref:osx-contracts.adoc#IDAO-setTrustedForwarder-address-
+:xref-IDAO-getTrustedForwarder--: xref:osx-contracts.adoc#IDAO-getTrustedForwarder--
+:xref-IDAO-setSignatureValidator-address-: xref:osx-contracts.adoc#IDAO-setSignatureValidator-address-
+:xref-IDAO-isValidSignature-bytes32-bytes-: xref:osx-contracts.adoc#IDAO-isValidSignature-bytes32-bytes-
+:xref-IDAO-registerStandardCallback-bytes4-bytes4-bytes4-: xref:osx-contracts.adoc#IDAO-registerStandardCallback-bytes4-bytes4-bytes4-
+:xref-IDAO-MetadataSet-bytes-: xref:osx-contracts.adoc#IDAO-MetadataSet-bytes-
+:xref-IDAO-Executed-address-bytes32-struct-IDAO-Action---uint256-uint256-bytes---: xref:osx-contracts.adoc#IDAO-Executed-address-bytes32-struct-IDAO-Action---uint256-uint256-bytes---
+:xref-IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-: xref:osx-contracts.adoc#IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-
+:xref-IDAO-Deposited-address-address-uint256-string-: xref:osx-contracts.adoc#IDAO-Deposited-address-address-uint256-string-
+:xref-IDAO-NativeTokenDeposited-address-uint256-: xref:osx-contracts.adoc#IDAO-NativeTokenDeposited-address-uint256-
+:xref-IDAO-TrustedForwarderSet-address-: xref:osx-contracts.adoc#IDAO-TrustedForwarderSet-address-
+:xref-IDAO-SignatureValidatorSet-address-: xref:osx-contracts.adoc#IDAO-SignatureValidatorSet-address-
 :xref-PermissionManager-auth-bytes32-: xref:osx-contracts.adoc#PermissionManager-auth-bytes32-
 :xref-PermissionManager-__PermissionManager_init-address-: xref:osx-contracts.adoc#PermissionManager-__PermissionManager_init-address-
 :xref-PermissionManager-grant-address-address-bytes32-: xref:osx-contracts.adoc#PermissionManager-grant-address-address-bytes32-
@@ -79,6 +101,7 @@
 :xref-DAOFactory-daoBase-address: xref:osx-contracts.adoc#DAOFactory-daoBase-address
 :xref-DAOFactory-daoRegistry-contract-DAORegistry: xref:osx-contracts.adoc#DAOFactory-daoRegistry-contract-DAORegistry
 :xref-DAOFactory-pluginSetupProcessor-contract-PluginSetupProcessor: xref:osx-contracts.adoc#DAOFactory-pluginSetupProcessor-contract-PluginSetupProcessor
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-PluginRepoFactory-constructor-contract-PluginRepoRegistry-: xref:osx-contracts.adoc#PluginRepoFactory-constructor-contract-PluginRepoRegistry-
 :xref-PluginRepoFactory-supportsInterface-bytes4-: xref:osx-contracts.adoc#PluginRepoFactory-supportsInterface-bytes4-
 :xref-PluginRepoFactory-createPluginRepo-string-address-: xref:osx-contracts.adoc#PluginRepoFactory-createPluginRepo-string-address-
@@ -87,29 +110,36 @@
 :xref-PluginRepoFactory-_createPluginRepo-string-address-: xref:osx-contracts.adoc#PluginRepoFactory-_createPluginRepo-string-address-
 :xref-PluginRepoFactory-pluginRepoRegistry-contract-PluginRepoRegistry: xref:osx-contracts.adoc#PluginRepoFactory-pluginRepoRegistry-contract-PluginRepoRegistry
 :xref-PluginRepoFactory-pluginRepoBase-address: xref:osx-contracts.adoc#PluginRepoFactory-pluginRepoBase-address
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-DAORegistry-constructor--: xref:osx-contracts.adoc#DAORegistry-constructor--
 :xref-DAORegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-: xref:osx-contracts.adoc#DAORegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-
 :xref-DAORegistry-register-contract-IDAO-address-string-: xref:osx-contracts.adoc#DAORegistry-register-contract-IDAO-address-string-
 :xref-DAORegistry-REGISTER_DAO_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#DAORegistry-REGISTER_DAO_PERMISSION_ID-bytes32
 :xref-DAORegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar: xref:osx-contracts.adoc#DAORegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-InterfaceBasedRegistry-__InterfaceBasedRegistry_init-contract-IDAO-bytes4-: xref:osx-contracts.adoc#InterfaceBasedRegistry-__InterfaceBasedRegistry_init-contract-IDAO-bytes4-
 :xref-InterfaceBasedRegistry-_authorizeUpgrade-address-: xref:osx-contracts.adoc#InterfaceBasedRegistry-_authorizeUpgrade-address-
 :xref-InterfaceBasedRegistry-_register-address-: xref:osx-contracts.adoc#InterfaceBasedRegistry-_register-address-
 :xref-InterfaceBasedRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#InterfaceBasedRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32
 :xref-InterfaceBasedRegistry-targetInterfaceId-bytes4: xref:osx-contracts.adoc#InterfaceBasedRegistry-targetInterfaceId-bytes4
 :xref-InterfaceBasedRegistry-entries-mapping-address----bool-: xref:osx-contracts.adoc#InterfaceBasedRegistry-entries-mapping-address----bool-
+:xref-DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-: xref:osx-contracts.adoc#DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-
+:xref-DaoAuthorizableUpgradeable-dao--: xref:osx-contracts.adoc#DaoAuthorizableUpgradeable-dao--
 :xref-DAORegistry-DAORegistered-address-address-string-: xref:osx-contracts.adoc#DAORegistry-DAORegistered-address-address-string-
 :xref-PluginRepoRegistry-constructor--: xref:osx-contracts.adoc#PluginRepoRegistry-constructor--
 :xref-PluginRepoRegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-: xref:osx-contracts.adoc#PluginRepoRegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-
 :xref-PluginRepoRegistry-registerPluginRepo-string-address-: xref:osx-contracts.adoc#PluginRepoRegistry-registerPluginRepo-string-address-
 :xref-PluginRepoRegistry-REGISTER_PLUGIN_REPO_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#PluginRepoRegistry-REGISTER_PLUGIN_REPO_PERMISSION_ID-bytes32
 :xref-PluginRepoRegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar: xref:osx-contracts.adoc#PluginRepoRegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-InterfaceBasedRegistry-__InterfaceBasedRegistry_init-contract-IDAO-bytes4-: xref:osx-contracts.adoc#InterfaceBasedRegistry-__InterfaceBasedRegistry_init-contract-IDAO-bytes4-
 :xref-InterfaceBasedRegistry-_authorizeUpgrade-address-: xref:osx-contracts.adoc#InterfaceBasedRegistry-_authorizeUpgrade-address-
 :xref-InterfaceBasedRegistry-_register-address-: xref:osx-contracts.adoc#InterfaceBasedRegistry-_register-address-
 :xref-InterfaceBasedRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#InterfaceBasedRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32
 :xref-InterfaceBasedRegistry-targetInterfaceId-bytes4: xref:osx-contracts.adoc#InterfaceBasedRegistry-targetInterfaceId-bytes4
 :xref-InterfaceBasedRegistry-entries-mapping-address----bool-: xref:osx-contracts.adoc#InterfaceBasedRegistry-entries-mapping-address----bool-
+:xref-DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-: xref:osx-contracts.adoc#DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-
+:xref-DaoAuthorizableUpgradeable-dao--: xref:osx-contracts.adoc#DaoAuthorizableUpgradeable-dao--
 :xref-PluginRepoRegistry-PluginRepoRegistered-string-address-: xref:osx-contracts.adoc#PluginRepoRegistry-PluginRepoRegistered-string-address-
 :xref-PluginRepo-constructor--: xref:osx-contracts.adoc#PluginRepo-constructor--
 :xref-PluginRepo-initialize-address-: xref:osx-contracts.adoc#PluginRepo-initialize-address-
@@ -143,6 +173,7 @@
 :xref-PermissionManager-permissionHash-address-address-bytes32-: xref:osx-contracts.adoc#PermissionManager-permissionHash-address-address-bytes32-
 :xref-PermissionManager-isPermissionRestrictedForAnyAddr-bytes32-: xref:osx-contracts.adoc#PermissionManager-isPermissionRestrictedForAnyAddr-bytes32-
 :xref-PermissionManager-ROOT_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#PermissionManager-ROOT_PERMISSION_ID-bytes32
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-PermissionManager-Granted-bytes32-address-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Granted-bytes32-address-address-address-address-
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:osx-contracts.adoc#PermissionManager-Revoked-bytes32-address-address-address-
 :xref-IPluginRepo-VersionCreated-uint8-uint16-address-bytes-: xref:osx-contracts.adoc#IPluginRepo-VersionCreated-uint8-uint16-address-bytes-
@@ -161,6 +192,7 @@
 :xref-PluginSetupProcessor-APPLY_UNINSTALLATION_PERMISSION_ID-bytes32: xref:osx-contracts.adoc#PluginSetupProcessor-APPLY_UNINSTALLATION_PERMISSION_ID-bytes32
 :xref-PluginSetupProcessor-states-mapping-bytes32----struct-PluginSetupProcessor-PluginState-: xref:osx-contracts.adoc#PluginSetupProcessor-states-mapping-bytes32----struct-PluginSetupProcessor-PluginState-
 :xref-PluginSetupProcessor-repoRegistry-contract-PluginRepoRegistry: xref:osx-contracts.adoc#PluginSetupProcessor-repoRegistry-contract-PluginRepoRegistry
+:xref-ProtocolVersion-protocolVersion--: xref:osx-contracts.adoc#ProtocolVersion-protocolVersion--
 :xref-PluginSetupProcessor-InstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-bytes-address-struct-IPluginSetup-PreparedSetupData-: xref:osx-contracts.adoc#PluginSetupProcessor-InstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-bytes-address-struct-IPluginSetup-PreparedSetupData-
 :xref-PluginSetupProcessor-InstallationApplied-address-address-bytes32-bytes32-: xref:osx-contracts.adoc#PluginSetupProcessor-InstallationApplied-address-address-bytes32-bytes32-
 :xref-PluginSetupProcessor-UpdatePrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-struct-IPluginSetup-SetupPayload-struct-IPluginSetup-PreparedSetupData-bytes-: xref:osx-contracts.adoc#PluginSetupProcessor-UpdatePrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-struct-IPluginSetup-SetupPayload-struct-IPluginSetup-PreparedSetupData-bytes-
@@ -284,7 +316,7 @@ Public API of the Aragon DAO framework.
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
@@ -365,11 +397,11 @@ Public API of the Aragon DAO framework.
 
 [.contract-subindex-inherited]
 .IDAO
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/dao/IDAO.sol[MetadataSet]
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/dao/IDAO.sol[StandardCallbackRegistered]
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/dao/IDAO.sol[Deposited]
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/dao/IDAO.sol[NativeTokenDeposited]
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/dao/IDAO.sol[TrustedForwarderSet]
+* {xref-IDAO-MetadataSet-bytes-}[`++MetadataSet(metadata)++`]
+* {xref-IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-}[`++StandardCallbackRegistered(interfaceId, callbackSelector, magicNumber)++`]
+* {xref-IDAO-Deposited-address-address-uint256-string-}[`++Deposited(sender, token, amount, _reference)++`]
+* {xref-IDAO-NativeTokenDeposited-address-uint256-}[`++NativeTokenDeposited(sender, amount)++`]
+* {xref-IDAO-TrustedForwarderSet-address-}[`++TrustedForwarderSet(forwarder)++`]
 
 [.contract-subindex-inherited]
 .ERC165StorageUpgradeable
@@ -760,6 +792,156 @@ Thrown when initialize is called after it has already been executed.
 ==== `uint256 [.contract-item-name]#++MAX_ACTIONS++#` [.item-kind]#internal constant#
 
 The internal constant storing the maximal action array length.
+
+:Action: pass:normal[xref:#IDAO-Action[`++Action++`]]
+:hasPermission: pass:normal[xref:#IDAO-hasPermission-address-address-bytes32-bytes-[`++hasPermission++`]]
+:setMetadata: pass:normal[xref:#IDAO-setMetadata-bytes-[`++setMetadata++`]]
+:MetadataSet: pass:normal[xref:#IDAO-MetadataSet-bytes-[`++MetadataSet++`]]
+:execute: pass:normal[xref:#IDAO-execute-bytes32-struct-IDAO-Action---uint256-[`++execute++`]]
+:Executed: pass:normal[xref:#IDAO-Executed-address-bytes32-struct-IDAO-Action---uint256-uint256-bytes---[`++Executed++`]]
+:StandardCallbackRegistered: pass:normal[xref:#IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-[`++StandardCallbackRegistered++`]]
+:deposit: pass:normal[xref:#IDAO-deposit-address-uint256-string-[`++deposit++`]]
+:Deposited: pass:normal[xref:#IDAO-Deposited-address-address-uint256-string-[`++Deposited++`]]
+:NativeTokenDeposited: pass:normal[xref:#IDAO-NativeTokenDeposited-address-uint256-[`++NativeTokenDeposited++`]]
+:setTrustedForwarder: pass:normal[xref:#IDAO-setTrustedForwarder-address-[`++setTrustedForwarder++`]]
+:getTrustedForwarder: pass:normal[xref:#IDAO-getTrustedForwarder--[`++getTrustedForwarder++`]]
+:TrustedForwarderSet: pass:normal[xref:#IDAO-TrustedForwarderSet-address-[`++TrustedForwarderSet++`]]
+:setSignatureValidator: pass:normal[xref:#IDAO-setSignatureValidator-address-[`++setSignatureValidator++`]]
+:SignatureValidatorSet: pass:normal[xref:#IDAO-SignatureValidatorSet-address-[`++SignatureValidatorSet++`]]
+:isValidSignature: pass:normal[xref:#IDAO-isValidSignature-bytes32-bytes-[`++isValidSignature++`]]
+:registerStandardCallback: pass:normal[xref:#IDAO-registerStandardCallback-bytes4-bytes4-bytes4-[`++registerStandardCallback++`]]
+
+[.contract]
+[[IDAO]]
+=== `++IDAO++` link:https://github.com/aragon/osx.git/blob/v1.4.0-rc0/src/core/dao/IDAO.sol[{github-icon},role=heading-link]
+
+[.contract-index]
+.Functions
+--
+* {xref-IDAO-hasPermission-address-address-bytes32-bytes-}[`++hasPermission(_where, _who, _permissionId, _data)++`]
+* {xref-IDAO-setMetadata-bytes-}[`++setMetadata(_metadata)++`]
+* {xref-IDAO-execute-bytes32-struct-IDAO-Action---uint256-}[`++execute(_callId, _actions, _allowFailureMap)++`]
+* {xref-IDAO-deposit-address-uint256-string-}[`++deposit(_token, _amount, _reference)++`]
+* {xref-IDAO-setTrustedForwarder-address-}[`++setTrustedForwarder(_trustedForwarder)++`]
+* {xref-IDAO-getTrustedForwarder--}[`++getTrustedForwarder()++`]
+* {xref-IDAO-setSignatureValidator-address-}[`++setSignatureValidator(_signatureValidator)++`]
+* {xref-IDAO-isValidSignature-bytes32-bytes-}[`++isValidSignature(_hash, _signature)++`]
+* {xref-IDAO-registerStandardCallback-bytes4-bytes4-bytes4-}[`++registerStandardCallback(_interfaceId, _callbackSelector, _magicNumber)++`]
+
+--
+
+[.contract-index]
+.Events
+--
+* {xref-IDAO-MetadataSet-bytes-}[`++MetadataSet(metadata)++`]
+* {xref-IDAO-Executed-address-bytes32-struct-IDAO-Action---uint256-uint256-bytes---}[`++Executed(actor, callId, actions, allowFailureMap, failureMap, execResults)++`]
+* {xref-IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-}[`++StandardCallbackRegistered(interfaceId, callbackSelector, magicNumber)++`]
+* {xref-IDAO-Deposited-address-address-uint256-string-}[`++Deposited(sender, token, amount, _reference)++`]
+* {xref-IDAO-NativeTokenDeposited-address-uint256-}[`++NativeTokenDeposited(sender, amount)++`]
+* {xref-IDAO-TrustedForwarderSet-address-}[`++TrustedForwarderSet(forwarder)++`]
+* {xref-IDAO-SignatureValidatorSet-address-}[`++SignatureValidatorSet(signatureValidator)++`]
+
+--
+
+[.contract-item]
+[[IDAO-hasPermission-address-address-bytes32-bytes-]]
+==== `[.contract-item-name]#++hasPermission++#++(address _where, address _who, bytes32 _permissionId, bytes _data) → bool++` [.item-kind]#external#
+
+Checks if an address has permission on a contract via a permission identifier and considers if &#x60;ANY_ADDRESS&#x60; was used in the granting process.
+
+[.contract-item]
+[[IDAO-setMetadata-bytes-]]
+==== `[.contract-item-name]#++setMetadata++#++(bytes _metadata)++` [.item-kind]#external#
+
+Updates the DAO metadata (e.g., an IPFS hash).
+
+[.contract-item]
+[[IDAO-execute-bytes32-struct-IDAO-Action---uint256-]]
+==== `[.contract-item-name]#++execute++#++(bytes32 _callId, struct IDAO.Action[] _actions, uint256 _allowFailureMap) → bytes[], uint256++` [.item-kind]#external#
+
+Executes a list of actions. If a zero allow-failure map is provided, a failing action reverts the entire execution. If a non-zero allow-failure map is provided, allowed actions can fail without the entire call being reverted.
+
+[.contract-item]
+[[IDAO-deposit-address-uint256-string-]]
+==== `[.contract-item-name]#++deposit++#++(address _token, uint256 _amount, string _reference)++` [.item-kind]#external#
+
+Deposits (native) tokens to the DAO contract with a reference string.
+
+[.contract-item]
+[[IDAO-setTrustedForwarder-address-]]
+==== `[.contract-item-name]#++setTrustedForwarder++#++(address _trustedForwarder)++` [.item-kind]#external#
+
+Setter for the trusted forwarder verifying the meta transaction.
+
+[.contract-item]
+[[IDAO-getTrustedForwarder--]]
+==== `[.contract-item-name]#++getTrustedForwarder++#++() → address++` [.item-kind]#external#
+
+Getter for the trusted forwarder verifying the meta transaction.
+
+[.contract-item]
+[[IDAO-setSignatureValidator-address-]]
+==== `[.contract-item-name]#++setSignatureValidator++#++(address _signatureValidator)++` [.item-kind]#external#
+
+Setter for the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+
+[.contract-item]
+[[IDAO-isValidSignature-bytes32-bytes-]]
+==== `[.contract-item-name]#++isValidSignature++#++(bytes32 _hash, bytes _signature) → bytes4++` [.item-kind]#external#
+
+Checks whether a signature is valid for the provided hash by forwarding the call to the set [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+
+[.contract-item]
+[[IDAO-registerStandardCallback-bytes4-bytes4-bytes4-]]
+==== `[.contract-item-name]#++registerStandardCallback++#++(bytes4 _interfaceId, bytes4 _callbackSelector, bytes4 _magicNumber)++` [.item-kind]#external#
+
+Registers an ERC standard having a callback by registering its [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
+
+[.contract-item]
+[[IDAO-MetadataSet-bytes-]]
+==== `[.contract-item-name]#++MetadataSet++#++(bytes metadata)++` [.item-kind]#event#
+
+Emitted when the DAO metadata is updated.
+
+[.contract-item]
+[[IDAO-Executed-address-bytes32-struct-IDAO-Action---uint256-uint256-bytes---]]
+==== `[.contract-item-name]#++Executed++#++(address indexed actor, bytes32 callId, struct IDAO.Action[] actions, uint256 allowFailureMap, uint256 failureMap, bytes[] execResults)++` [.item-kind]#event#
+
+Emitted when a proposal is executed.
+
+The value of &#x60;callId&#x60; is defined by the component/contract calling the execute function. A &#x60;Plugin&#x60; implementation can use it, for example, as a nonce.
+
+[.contract-item]
+[[IDAO-StandardCallbackRegistered-bytes4-bytes4-bytes4-]]
+==== `[.contract-item-name]#++StandardCallbackRegistered++#++(bytes4 interfaceId, bytes4 callbackSelector, bytes4 magicNumber)++` [.item-kind]#event#
+
+Emitted when a standard callback is registered.
+
+[.contract-item]
+[[IDAO-Deposited-address-address-uint256-string-]]
+==== `[.contract-item-name]#++Deposited++#++(address indexed sender, address indexed token, uint256 amount, string _reference)++` [.item-kind]#event#
+
+Emitted when a token deposit has been made to the DAO.
+
+[.contract-item]
+[[IDAO-NativeTokenDeposited-address-uint256-]]
+==== `[.contract-item-name]#++NativeTokenDeposited++#++(address sender, uint256 amount)++` [.item-kind]#event#
+
+Emitted when a native token deposit has been made to the DAO.
+
+This event is intended to be emitted in the &#x60;receive&#x60; function and is therefore bound by the gas limitations for &#x60;send&#x60;/&#x60;transfer&#x60; calls introduced by [ERC-2929](https://eips.ethereum.org/EIPS/eip-2929).
+
+[.contract-item]
+[[IDAO-TrustedForwarderSet-address-]]
+==== `[.contract-item-name]#++TrustedForwarderSet++#++(address forwarder)++` [.item-kind]#event#
+
+Emitted when a new TrustedForwarder is set on the DAO.
+
+[.contract-item]
+[[IDAO-SignatureValidatorSet-address-]]
+==== `[.contract-item-name]#++SignatureValidatorSet++#++(address signatureValidator)++` [.item-kind]#event#
+
+Emitted when the signature validator address is updated.
 
 :ROOT_PERMISSION_ID: pass:normal[xref:#PermissionManager-ROOT_PERMISSION_ID-bytes32[`++ROOT_PERMISSION_ID++`]]
 :ANY_ADDR: pass:normal[xref:#PermissionManager-ANY_ADDR-address[`++ANY_ADDR++`]]
@@ -1179,7 +1361,7 @@ The magic number refering to unregistered callbacks.
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
@@ -1339,7 +1521,7 @@ Thrown if &#x60;PluginSettings&#x60; array is empty, and no plugin is provided.
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
@@ -1431,7 +1613,7 @@ The address of the &#x60;PluginRepo&#x60; base contract to proxy to..
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
@@ -1447,8 +1629,8 @@ The address of the &#x60;PluginRepo&#x60; base contract to proxy to..
 
 [.contract-subindex-inherited]
 .DaoAuthorizableUpgradeable
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol[__DaoAuthorizableUpgradeable_init]
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol[dao]
+* {xref-DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-}[`++__DaoAuthorizableUpgradeable_init(_dao)++`]
+* {xref-DaoAuthorizableUpgradeable-dao--}[`++dao()++`]
 
 [.contract-subindex-inherited]
 .ContextUpgradeable
@@ -1611,7 +1793,7 @@ Thrown if the DAO subdomain doesn&#x27;t match the regex &#x60;[0-9a-z\-]&#x60;
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
@@ -1627,8 +1809,8 @@ Thrown if the DAO subdomain doesn&#x27;t match the regex &#x60;[0-9a-z\-]&#x60;
 
 [.contract-subindex-inherited]
 .DaoAuthorizableUpgradeable
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol[__DaoAuthorizableUpgradeable_init]
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol[dao]
+* {xref-DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-}[`++__DaoAuthorizableUpgradeable_init(_dao)++`]
+* {xref-DaoAuthorizableUpgradeable-dao--}[`++dao()++`]
 
 [.contract-subindex-inherited]
 .ContextUpgradeable
@@ -1847,7 +2029,7 @@ Thrown if the plugin repository subdomain is empty.
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
@@ -2235,7 +2417,7 @@ This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the 
 
 [.contract-subindex-inherited]
 .ProtocolVersion
-* link:https://github.com/aragon/osx-commons/tree/main/contracts/src/utils/versioning/ProtocolVersion.sol[protocolVersion]
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
 
 [.contract-subindex-inherited]
 .IProtocolVersion
