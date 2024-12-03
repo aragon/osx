@@ -31,6 +31,58 @@ When publishing subsequent builds, you want to use the `createVersion` function 
 To deploy your plugin, follow the steps in the link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/README.md#deployment[osx-plugin-template-hardhat README.md].
 
 
+
+== How to add a new version of your plugin
+
+The Aragon OSx protocol has an on-chain versioning system built-in, which distinguishes between releases and builds.
+
+- **Releases** contain breaking changes, which are incompatible with preexisting installations. Updates to a different release are 
+not possible. Instead, you must install the new plugin release and uninstall the old one.
+- **Builds** are minor/patch versions within a release, and they are meant for compatible upgrades only 
+(adding a feature or fixing a bug without changing anything else).
+
+Builds are particularly important for `UUPSUpgradeable` plugins, whereas a non-upgradeable plugin will work off of only releases.
+
+Given a version tag `RELEASE.BUILD`, we can infer that:
+
+TODO:GIORGI nested list fix.
+
+1.  We are doing a `RELEASE` version when we apply breaking changes affecting the interaction with other contracts on the blockchain to:
+
+    - The `Plugin` implementation contract such as the
+      - change or removal of storage variables
+      - removal of external functions
+      - change of external function headers
+
+2.  We are doing a `BUILD` version when we apply backward compatible changes not affecting the interaction with other contracts on the blockchain to:
+
+    - The `Plugin` implementation contract such as the
+      - addition of
+        - storage variables
+        - external functions
+
+      - change of
+        - external function bodies
+
+      - addition, change, or removal of
+        - internal functions
+        - constants
+        - immutables
+        - events
+        - errors
+
+    - The `PluginSetup` contract such as
+      - addition, change, or removal of
+        - input parameters
+        - helper contracts
+        - requested permissions
+
+    - The release and build `metadata` URIs such as the
+      - change of
+        - the plugin setup ABI
+        - the plugin UI components
+        - the plugin description
+
 == Plugin Metadata Specification
 
 The plugin metadata is necessary to allow the App frontend to interact with any plugins:
@@ -46,7 +98,7 @@ Currently, two kinds of metadata exist:
 
 ### Release Metadata
 
-The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the [PluginRepo](../../../01-how-it-works/02-framework/02-plugin-management/01-plugin-repo/index.md) (see also the section about [versioning](../07-publication/01-versioning.md#)).
+The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the xref:framework/plugin-repos.adoc[PluginRepo](see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
 
 The intention is to provide an appealing overview of each releases functionality.
 It can be updated with each call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md#external-function-createversion) in `IPluginRepo` by the repo maintainer.
@@ -85,7 +137,7 @@ The `release-metadata.json` file consists of the following entries:
 ### Build Metadata
 
 The build metadata is a `.json` file stored on IPFS with its IPFS CID published for each build **only once** 
-in the xref:how-it-works/framework/plugin-management/plugin-repo/index.adoc[PluginRepo] (see also the section about xref:how-to-guides/plugin-development/publication/versioning.adoc[versioning]).
+in the xref:framework/plugin-repos.adoc[PluginRepo] (see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
 
 The intention is to inform about the changes that were introduced in this build compared to the previous one and give instructions to the App frontend and other users on how to interact with the plugin setup and implementation contract.
 It can be published **only once** with the call to TODO:GIORGI [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md#external-function-createversion) in `IPluginRepo` by the repo maintainer.
@@ -183,57 +235,6 @@ By following the Solidity JSON ABI format for the inputs, we followed an establi
   }
 }
 ```
-
-== How to add a new version of your plugin
-
-The Aragon OSx protocol has an on-chain versioning system built-in, which distinguishes between releases and builds.
-
-- **Releases** contain breaking changes, which are incompatible with preexisting installations. Updates to a different release are 
-not possible. Instead, you must install the new plugin release and uninstall the old one.
-- **Builds** are minor/patch versions within a release, and they are meant for compatible upgrades only 
-(adding a feature or fixing a bug without changing anything else).
-
-Builds are particularly important for `UUPSUpgradeable` plugins, whereas a non-upgradeable plugin will work off of only releases.
-
-Given a version tag `RELEASE.BUILD`, we can infer that:
-
-TODO:GIORGI nested list fix.
-
-1.  We are doing a `RELEASE` version when we apply breaking changes affecting the interaction with other contracts on the blockchain to:
-
-    - The `Plugin` implementation contract such as the
-      - change or removal of storage variables
-      - removal of external functions
-      - change of external function headers
-
-2.  We are doing a `BUILD` version when we apply backward compatible changes not affecting the interaction with other contracts on the blockchain to:
-
-    - The `Plugin` implementation contract such as the
-      - addition of
-        - storage variables
-        - external functions
-
-      - change of
-        - external function bodies
-
-      - addition, change, or removal of
-        - internal functions
-        - constants
-        - immutables
-        - events
-        - errors
-
-    - The `PluginSetup` contract such as
-      - addition, change, or removal of
-        - input parameters
-        - helper contracts
-        - requested permissions
-
-    - The release and build `metadata` URIs such as the
-      - change of
-        - the plugin setup ABI
-        - the plugin UI components
-        - the plugin description
 
 
 // TODO merge this sections and clean up redundancy, consider also framework and core sections.

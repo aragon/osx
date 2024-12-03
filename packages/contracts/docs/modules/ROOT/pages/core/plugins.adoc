@@ -21,7 +21,7 @@ Whenever a DAO installs a plugin, an instance of that plugin's base template is 
 
 Each instance of a plugin is installed to a DAO through the granting of permissions.
 
-TIP: Learn more about the different xref:how-to-guides/plugin-development/plugin-types.adoc[plugin types] in our How-to guide.
+TIP: Learn more about the different xref:guide-develop-plugin/design-your-plugin.adoc[plugin types] in our How-to guide.
 
 This raises questions on how the DAO manages plugins and who actually owns plugins.
 

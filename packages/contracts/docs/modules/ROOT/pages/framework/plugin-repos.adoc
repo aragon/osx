@@ -31,7 +31,7 @@ An Aragon OSx Plugin consists of:
   ** Release number
   ** Build number
 
-A detailed explanation of the xref:how-to-guides/plugin-development/index.adoc[build and release versioning] is found in the Guides sections in our developer portal.
+A detailed explanation of the xref:guide-develop-plugin/publishing-plugin.adoc#how_to_add_a_new_version_of_your_plugin[build and release versioning] is found in the Guides sections in our developer portal.
 
 .A schematic depiction of a plugin bundle consisting of a version tag, the plugin setup contract pointing to the plugin implementation contract, and a metadata URI.
 image::../../../../_/images/optimized-svg/plugins/plugin-version.drawio.svg[align="center"]

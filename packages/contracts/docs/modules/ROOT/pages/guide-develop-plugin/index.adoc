@@ -56,11 +56,15 @@ the link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/USAGE_G
 
 For more information on how to develop a plugin, you can check our plugin development guides:
 
-- xref:how-to-guides/plugin-development/best-practices.adoc[Best practices and patterns]
-- xref:how-to-guides/plugin-development/plugin-types.adoc[Different plugin types]
-- xref:how-to-guides/plugin-development/non-upgradeable-plugin/index.adoc[Non-upgradeable plugin]
-- xref:how-to-guides/plugin-development/upgradeable-plugin/index.adoc[Upgradeable plugin]
-- xref:how-to-guides/plugin-development/governance-plugins/index.adoc[Governance plugin]
+- xref:guide-develop-plugin/design-your-plugin.adoc[Design your plugin, different plugin types]
+- xref:guide-develop-plugin/write-plugin-contract.adoc[Writing your plugin contract]
+- xref:guide-develop-plugin/write-plugin-setup-contract.adoc[Writing your plugin setup contract]
+- xref:guide-develop-plugin/write-upgradeable-plugin.adoc[Writing upgradeable plugin]
+- xref:guide-develop-plugin/upgrade-plugin.adoc[Upgrading your plugin]
+- xref:guide-develop-plugin/follow-best-practices.adoc[Best practices and patterns]
+- xref:guide-develop-plugin/publishing-plugin.adoc[Publishing your plugin]
+
+
 
 IMPORTANT: This plugin template uses version TODO:GIORGI `1.4.0-alpha.5` of the Aragon OSx protocol. This version is still in development and 
 is not audited yet.

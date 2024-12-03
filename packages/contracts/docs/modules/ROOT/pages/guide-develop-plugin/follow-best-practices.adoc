@@ -10,7 +10,7 @@
 - Write plugins implementations that need minimal permissions on the DAO.
 - Write `PluginSetup` contracts that remove all permissions on uninstallation that they requested during installation or updates.
 - Plan the lifecycle of your plugin (need for upgrades).
-- Follow our xref:how-to-guides/plugin-development/publication/versioning.adoc[versioning guidelines].
+- Follow our xref:guide-develop-plugin/publishing-plugin.adoc#how_to_add_a_new_version_of_your_plugin[versioning guidelines].
 
 ### DON'Ts ✋
 
