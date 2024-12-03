@@ -56,7 +56,7 @@ Different versions might contain:
 - new features
 - breaking changes
 
-`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the Aragon OSx `PluginRepoRegistry` and carry their own xref:framework/ens-names.adoc[ENS name] that the creator chooses. The xref:framework/repo-factory-registry.adoc[`PluginRepoRegistry` contract] is described in the upcoming subsection.
+`PluginRepo` contracts themselves, each associated with a different plugin, are registered in the Aragon OSx `PluginRepoRegistry` and carry their own xref:framework/ens-registrar.adoc[ENS name] that the creator chooses. The xref:framework/repo-factory-registry.adoc#the_pluginreporegistry_contract[`PluginRepoRegistry` contract] is described in the upcoming subsection.
 
 
 .Schematic depiction of the versioning taking place in the PluginRepoRegistry.

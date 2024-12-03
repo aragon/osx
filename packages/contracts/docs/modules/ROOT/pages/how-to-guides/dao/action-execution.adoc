@@ -4,7 +4,7 @@
 
 Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol[pass an array of actions] to be executed by the DAO contract itself.
 
-However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the xref:how-it-works/core/permissions/index.adoc#permissions-native-to-the-dao-contract[`EXECUTE_PERMISSION`]. This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
+However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the xref:how-it-works/core/permissions/index.adoc#permissions_native_to_the_dao_contract[`EXECUTE_PERMISSION`]. This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
 
 ## How to grant the Execute Permission
 
@@ -52,7 +52,7 @@ function exampleGrantCall(
 
 Here we use the selector of the TODO:GIORGI [`grant` function](../../03-reference-guide/core/permission/PermissionManager.md#external-function-grant). To revoke the permission, the selector of the [`revoke` function](../../03-reference-guide/core/permission/PermissionManager.md#external-function-revoke) must be used.
 
-If the caller possesses the xref:how-it-works/core/permissions/index.adoc#permissions-native-to-the-dao-contract[`ROOT_PERMISSION_ID` permission] on the DAO contract, the call becomes simpler and cheaper:
+If the caller possesses the xref:how-it-works/core/permissions/index.adoc#permissions_native_to_the_dao_contract[`ROOT_PERMISSION_ID` permission] on the DAO contract, the call becomes simpler and cheaper:
 
 CAUTION: Granting the `ROOT_PERMISSION_ID` permission to other contracts other than the `DAO` contract is dangerous and considered as an anti-pattern.
 

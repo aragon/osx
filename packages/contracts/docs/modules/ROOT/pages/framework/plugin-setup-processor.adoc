@@ -57,7 +57,7 @@ TIP: The governance plugin can be a simple majority vote, an optimistic process 
 This gives the DAO members the opportunity to check which permissions the `PluginSetup` contract request before granting/revoking them.
 
 Plugin setup proposals must be carefully examined as they can be a potential security risk if the `PluginSetup` contract comes from an untrusted source. 
-To learn more visit the xref:guide-set-up-dao/keep-dao-safe.adoc[Security] section.
+To learn more visit the xref:guide-set-up-dao/keep-dao-safe.adoc#risks_and_their_mitigation[Security] section.
 
 // <!-- TODO: add a costs sections
 // Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.

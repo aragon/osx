@@ -26,7 +26,7 @@ The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegis
 
 3. Installs the plugins using the `PluginSetupProcessor` (see also the section about xref:framework/plugin-setup-processor.adoc[the plugin setup process]).
 
-4. Sets the xref:core/permissions.adoc##permissions-native-to-the-dao-contract[native permissions] of the `DAO` and revokes its own ownership.
+4. Sets the xref:core/permissions.adoc#permissions_native_to_the_dao_contract[native permissions] of the `DAO` and revokes its own ownership.
 
 For more details visit the xref:api:framework.adoc#DAOFactory[`DAOFactory` reference guide entry].
 
