@@ -24,9 +24,9 @@ The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegis
 
 2. Registers the new contract in the [`DAORegistry`](#daoregistry). TODO:GIORGI
 
-3. Installs the plugins using the `PluginSetupProcessor` (see also the section about xref:how-it-works/framework/plugin-management/plugin-setup/index.adoc[the plugin setup process]).
+3. Installs the plugins using the `PluginSetupProcessor` (see also the section about xref:framework/plugin-setup-processor.adoc[the plugin setup process]).
 
-4. Sets the xref:how-it-works/core/permissions/index.adoc##permissions-native-to-the-dao-contract[native permissions] of the `DAO` and revokes its own ownership.
+4. Sets the xref:core/permissions.adoc##permissions-native-to-the-dao-contract[native permissions] of the `DAO` and revokes its own ownership.
 
 For more details visit the xref:api:framework.adoc#DAOFactory[`DAOFactory` reference guide entry].
 
@@ -44,7 +44,7 @@ function register(
 
 requiring the `REGISTER_DAO_PERMISSION_ID` permission currently held only by the `DAOFactory`.
 
-If the requested ENS `subdomain` name xref:how-it-works/framework/ens-names.md[is valid] and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
+If the requested ENS `subdomain` name xref:framework/ens-registrar.adoc[is valid] and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
 If the `subdomain` parameter is non-empty (not `""`) and still available, the ENS name will be registered.
 If the registration was successful, the DAO name, contract and creator addresses are emitted in an event.
 

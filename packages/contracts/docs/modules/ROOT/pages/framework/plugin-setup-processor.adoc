@@ -2,7 +2,7 @@
 
 == Installing Plugins
 
-## The Smart Contracts Behind Plugins
+### The Smart Contracts Behind Plugins
 
 A DAO can be set up and customized by the **installation, update, and uninstallation** of plugins. Plugins are composed of two key contracts:
 
@@ -19,7 +19,7 @@ How this works:
 - Publishing a Plugin into the Aragon OSx protocol is done through creating the first version of the plugin's `PluginRepo`. The plugin's `PluginRepo` instance stores all plugin versions. You can read more about that xref:guide-develop-plugin/publishing-plugin.adoc[here].
 - Except for the gas costs required, plugins are completely free to install, unless decided otherwise by the developer.
 
-### How are Plugins installed in DAOs?
+#### How are Plugins installed in DAOs?
 
 The `PluginSetup` processing is **security critical** because the permissions it handles are granted to third-party contracts.
 
@@ -32,7 +32,7 @@ This is why we see the installation process in two phases:
 
 The `PluginSetupProcessor` is the Aragon contract in charge of invoking the `prepareInstallation()` function from your plugin's `PluginSetup` contract and use it to prepare the installation and (eventually) apply it once it has been approved by the DAO.
 
-#### What happens during the Plugin Preparation?
+##### What happens during the Plugin Preparation?
 
 The preparation of a `PluginSetup` contract proceeds as follows:
 
@@ -63,7 +63,7 @@ To learn more visit the xref:guide-set-up-dao/keep-dao-safe.adoc[Security] secti
 // Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.
 // -->
 
-#### What happens during the Preparation Application?
+##### What happens during the Preparation Application?
 
 After this initial preparation transaction, the addresses and permissions related to the plugin become apparent. The members of a governance plugin with permissions can decide if the installation proposal should be accepted or denied.
 

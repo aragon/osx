@@ -45,7 +45,8 @@ Each plugin with its different builds and releases is versioned inside its own p
 == Plugin Repositories
 
 
-## What are Plugin Repositories?
+### What are Plugin Repositories?
+
 
 Each plugin has its own Plugin Repository, unique ENS name, and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference using version tags constituted by a **release** and **build** number.
 
@@ -64,7 +65,7 @@ image::../../../../_/images/optimized-svg/plugins/plugin-repo-overview.drawio.sv
 Overview of the plugin versioning and registry in the Aragon OSx protocol. The `PluginRepoRegistry` contract, which is a curated list of ENS named `PluginRepo` contracts, is shown on the left. Each `PluginRepo` contract maintains a list of versions of the `PluginSetup` contract (internally referencing the `Plugin` implementation contract) and the associated UI building blocks as a URI, exemplarily shown on the right.
 
 
-### The `PluginRepo` Contract
+#### The `PluginRepo` Contract
 
 The `PluginRepo` contract versions the releases of a `Plugin`. The first version of a plugin is always published as release 1 and build 1 (version tag `1.1`).
 When you publish the first plugin version, a new plugin repository is automatically created for you by the Aragon OSx protocol in which you 

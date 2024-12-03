@@ -4,10 +4,10 @@
 
 The Aragon OSx protocol is composed of **framework-related contracts** creating and managing the **core contracts**. This includes the
 
-- xref:how-it-works/core/dao/dao-factory-registry.adoc[Creation of DAOs]and initial plugin configuration.
-- xref:how-it-works/core/dao/plugin-factory-registry.adoc[Creation of plugins] and the versioning of different implementations and respective setup contracts.
-- xref:how-it-works/core/dao/plugin-setup-processor.adoc[Installation of plugins] and setting it up on the DAO.
-- xref:how-it-works/core/dao/ens-registrar.adoc[Assignment of ENS Names] to `Plugin` and `DAO` contracts created through the framework.
+- xref:framework/dao-factory-registry.adoc[Creation of DAOs]and initial plugin configuration.
+- xref:framework/repo-factory-registry.adoc[Creation of plugins] and the versioning of different implementations and respective setup contracts.
+- xref:framework/plugin-setup-processor.adoc[Installation of plugins] and setting it up on the DAO.
+- xref:framework/ens-registrar.adoc[Assignment of ENS Names] to `Plugin` and `DAO` contracts created through the framework.
 
 An overview of the framework and core contracts of the Aragon OSx protocol and their interactions is shown below:
 

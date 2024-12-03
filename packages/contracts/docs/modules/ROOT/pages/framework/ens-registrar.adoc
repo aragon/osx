@@ -3,7 +3,7 @@
 == Unique DAO and Plugin Repo Names
 
 To make DAOs and plugin repositories easily identifiable in the Aragon OSx ecosystem, we assign unique ENS names to them upon 
-registration during the xref:how-it-works/framework/dao-creation/index.adoc[DAO creation] and xref:how-it-works/framework/plugin-management/plugin-repo/plugin-repo-creation.md[plugin publishing] processes.
+registration during the xref:framework/dao-factory-registry.adoc[DAO creation] and xref:framework/repo-factory-registry.adoc[plugin publishing] processes.
 
 TIP: You can skip registering an ENS name for your DAO under the `dao.eth` by leaving the xref:api:framework.adoc#DAOFactory[`DAOSettings.subdomain` field] empty when calling the xref:api:framework.adoc#DAOFactory[`createDao`] function.
 
