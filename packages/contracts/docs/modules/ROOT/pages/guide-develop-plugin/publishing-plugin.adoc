@@ -45,51 +45,49 @@ Builds are particularly important for `UUPSUpgradeable` plugins, whereas a non-u
 
 Given a version tag `RELEASE.BUILD`, we can infer that:
 
-TODO:GIORGI nested list fix.
-
 1.  We are doing a `RELEASE` version when we apply breaking changes affecting the interaction with other contracts on the blockchain to:
 
-    - The `Plugin` implementation contract such as the
-      - change or removal of storage variables
-      - removal of external functions
-      - change of external function headers
+* The `Plugin` implementation contract such as the
+** change or removal of storage variables
+** removal of external functions
+** change of external function headers
 
 2.  We are doing a `BUILD` version when we apply backward compatible changes not affecting the interaction with other contracts on the blockchain to:
 
-    - The `Plugin` implementation contract such as the
-      - addition of
-        - storage variables
-        - external functions
+* The `Plugin` implementation contract such as the
+      ** addition of
+        *** storage variables
+        *** external functions
 
-      - change of
-        - external function bodies
+      ** change of
+        *** external function bodies
 
-      - addition, change, or removal of
-        - internal functions
-        - constants
-        - immutables
-        - events
-        - errors
+      ** addition, change, or removal of
+        *** internal functions
+        *** constants
+        *** immutables
+        *** events
+        *** errors
 
-    - The `PluginSetup` contract such as
-      - addition, change, or removal of
-        - input parameters
-        - helper contracts
-        - requested permissions
+* The `PluginSetup` contract such as
+      ** addition, change, or removal of
+        *** input parameters
+        *** helper contracts
+        *** requested permissions
 
-    - The release and build `metadata` URIs such as the
-      - change of
-        - the plugin setup ABI
-        - the plugin UI components
-        - the plugin description
+* The release and build `metadata` URIs such as the
+      ** change of
+        *** the plugin setup ABI
+        *** the plugin UI components
+        *** the plugin description
 
 == Plugin Metadata Specification
 
 The plugin metadata is necessary to allow the App frontend to interact with any plugins:
 
-- Now: generic setup (installation, update, uninstallation)
-  - Allows the frontend to render the necessary fields for the input being required to setup the plugin (e.g., the list of initial members of the Multisig plugin)
-- Future: render a UI in a generic way (buttons, text fields, flows) within the specs of the Open Design System (ODS) (e.g. manage the list of Multisig members or the approval settings)
+* Now: generic setup (installation, update, uninstallation)
+  ** Allows the frontend to render the necessary fields for the input being required to setup the plugin (e.g., the list of initial members of the Multisig plugin)
+* Future: render a UI in a generic way (buttons, text fields, flows) within the specs of the Open Design System (ODS) (e.g. manage the list of Multisig members or the approval settings)
 
 Currently, two kinds of metadata exist:
 
@@ -101,8 +99,9 @@ Currently, two kinds of metadata exist:
 The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the xref:framework/plugin-repos.adoc[PluginRepo](see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
 
 The intention is to provide an appealing overview of each releases functionality.
-It can be updated with each call to [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md#external-function-createversion) in `IPluginRepo` by the repo maintainer.
-It can be replaced at any time with [`updateReleaseMetadata()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md#external-function-updatereleasemetadata) in `IPluginRepo` by the repo maintainer.
+It can be updated with each call to xref:api:framework.adoc#PluginRepo-createVersion-uint8-address-bytes-bytes-[`createVersion()`] in `IPluginRepo` by the repo maintainer.
+
+It can be replaced at any time with xref:api:framework.adoc#PluginRepo-updateReleaseMetadata-uint8-bytes-[`updateReleaseMetadata()`] in `IPluginRepo` by the repo maintainer.
 
 The `release-metadata.json` file consists of the following entries:
 
@@ -140,7 +139,8 @@ The build metadata is a `.json` file stored on IPFS with its IPFS CID published 
 in the xref:framework/plugin-repos.adoc[PluginRepo] (see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
 
 The intention is to inform about the changes that were introduced in this build compared to the previous one and give instructions to the App frontend and other users on how to interact with the plugin setup and implementation contract.
-It can be published **only once** with the call to TODO:GIORGI [`createVersion()`](../../../03-reference-guide/framework/plugin/repo/IPluginRepo.md#external-function-createversion) in `IPluginRepo` by the repo maintainer.
+It can be published **only once** with the call to xref:api:framework.adoc#PluginRepo-createVersion-uint8-address-bytes-bytes-[`createVersion()`] in `IPluginRepo` by the repo maintainer.
+
 
 |===
 |Key |Type |Description
