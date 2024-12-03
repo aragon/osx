@@ -28,12 +28,12 @@
     "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
-    "docs": "scripts/prepare-docs.sh",
+    "docs": "DOCS=true scripts/prepare-docs.sh",
     "clean": "rm -rf artifacts cache deployments typechain"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aragon/osx.git"
+    "url": "https://github.com/aragon/osx"
   },
   "author": "",
   "license": "AGPL-3.0-or-later",
