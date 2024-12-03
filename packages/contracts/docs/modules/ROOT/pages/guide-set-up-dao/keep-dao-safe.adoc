@@ -19,10 +19,6 @@
 - Don't give permissions to directly call functions from the DAO. Better and safer to use a plugin instead.
 - If you're using the Token Voting plugin in your DAO, make sure you don't mint additional tokens without careful consideration. If you mint too many at once, this may lock your DAO, since you will not be able to reach the minimum participation threshold. This happens if there are not enough tokens already on the market to meet the minimum participation percentage and the DAO owns most of the governance tokens.
 
----
-title: Plugin Security and Risks
----
-
 ## Risks and Their Mitigation
 
 Extending the functionality of your DAO in the form of plugins can introduce risks, particularly, if this code comes from unaudited and untrusted sources.
@@ -43,10 +39,9 @@ that might be carelessly or intentionally caused, a malicious plugin can hide **
 
 #### Backdoors
 
-- [metamorphic contracts](https://a16zcrypto.com/metamorphic-smart-contract-detector-tool/) (contracts, that can be redeployed with new code to the same address)
+- link:https://a16zcrypto.com/metamorphic-smart-contract-detector-tool[metamorphic contracts] (contracts, that can be redeployed with new code to the same address)
 - malicious repurposing of storage in an update of an upgradeable plugin contract
 
-<!-- Add statement that Aragon will provide / collaborate with 3rd parties to create tools to check for this-->
 
 #### Permissions
 
