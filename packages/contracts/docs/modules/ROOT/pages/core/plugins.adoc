@@ -40,5 +40,5 @@ An exemplary DAO setup showing interactions between the three core contract piec
   Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if a DeFi-related plugin is allowed to invest in a certain, external contract.
 
 Whereas deployed plugin instances belong to the DAO, the developer of the original plugin implementation owns the implementation 
-and setup contract of the plugin. The plugin developer is the maintainer of an Aragon OSx xref:how-it-works/framework/plugin-management/plugin-repo/index.adoc[plugin repo]. 
+and setup contract of the plugin. The plugin developer is the maintainer of an Aragon OSx xref:framework/plugin-repos.adoc[plugin repo]. 
 Finally, the Aragon OSx protocol manages the registry in which the plugin repositories are listed, which is required to install a plugin using the Aragon OSx framework infrastructure to your DAO.

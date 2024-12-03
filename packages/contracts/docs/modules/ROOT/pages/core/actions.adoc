@@ -44,7 +44,7 @@ Actions can be
 
   - external services (e.g. Uniswap, Compound, etc.)
   - Aragon OSx plugins (e.g., the DAO can be a member of a multisig installed in another DAO),
-  - Aragon OSx protocol infrastructure (e.g., to xref:how-it-works/framework/plugin-management/plugin-setup/index.adoc[setup a plugin]).
+  - Aragon OSx protocol infrastructure (e.g., to xref:framework/plugin-setup-processor.adoc[setup a plugin]).
 
 - transfers of native tokens
 
@@ -66,7 +66,7 @@ dao().execute({_callId: '', _actions: actions, _allowFailureMap: 0});
 
 ```
 
-For the `execute` call to work, the caller must have the required xref:how-it-works/core/permissions/index.adoc[`EXECUTE_PERMISSION_ID` permission] on the DAO contract.
+For the `execute` call to work, the caller must have the required xref:core/permissions.adoc[`EXECUTE_PERMISSION_ID` permission] on the DAO contract.
 
 ### The Action Array
 

@@ -13,9 +13,7 @@ Before diving deeper into this guide, make sure that you understand xref:core/pe
 When you create your DAO, you must **install at least one functioning governance plugin** (meaning one plugin having the `EXECUTION_PERMISSION`) so your have a mechanism of executing actions on behalf of your DAO.
 This is crucial because otherwise nobody can operate the DAO and it would become incapacitated right after it was created. You would have spent gas for nothing.
 
-:::info
-If you create your DAO through the link:https://app.aragon.org[Aragon App] or the link:https://devs.aragon.org/docs/sdk[Aragon SDK], this will be checked and you will be warned in case you have not selected a suitable Aragon plugin.
-:::
+TIP: If you create your DAO through the link:https://app.aragon.org[Aragon App] or the link:https://devs.aragon.org/docs/sdk[Aragon SDK], this will be checked and you will be warned in case you have not selected a suitable Aragon plugin.
 
 Although the easiest (and recommended) way to create your DAO is through the link:https://app.aragon.org[Aragon App] or the link:https://devs.aragon.org/docs/sdk[Aragon SDK], you can also do it directly from the protocol through calling on the link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/dao/DAOFactory.sol#L63[`createDAO` function] from the `DAOFactory` contract and passing it the calldata `DAOSettings` for your DAO as well as the `PluginSettings` array referencing the plugins and the settings to be installed upon DAO creation.
 

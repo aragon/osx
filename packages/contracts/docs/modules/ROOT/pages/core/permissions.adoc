@@ -85,13 +85,13 @@ To prevent these functions from being called by any address, they are themselves
 
 [NOTE]
 ====
-Typically, the `ROOT_PERMISSION_ID` permission is granted only to the `DAO` contract itself. Contracts related to the Aragon infrastructure temporarily require it during the xref:how-it-works/framework/dao-creation/index.adoc[DAO creation] and xref:how-it-works/framework/plugin-management/plugin-setup/index.adoc[plugin setup] processes. 
+Typically, the `ROOT_PERMISSION_ID` permission is granted only to the `DAO` contract itself. Contracts related to the Aragon infrastructure temporarily require it during the xref:framework/dao-creation.adoc[DAO creation] and xref:framework/plugin-setup-processor.adoc[plugin setup] processes. 
 
 This means, that these functions can only be called through the DAO’s `execute` function that, in turn, requires the calling address to have the `EXECUTE_PERMISSION_ID` permission.
 ====
 
 NOTE: Typically, the `EXECUTE_PERMISSION_ID` permission is granted to governance contracts (such as a majority voting plugin owned by the DAO or a multi-sig). Accordingly, a proposal is often required to change permissions.
-Exceptions are, again, the xref:how-it-works/framework/dao-creation/index.adoc[DAO creation] and xref:how-it-works/framework/plugin-management/plugin-setup/index.adoc[plugin setup] processes.
+Exceptions are, again, the xref:framework/dao-creation.adoc[DAO creation] and xref:framework/plugin-setup-processor.adoc[plugin setup] processes.
 
 #### Granting Permission with Conditions
 
@@ -108,9 +108,9 @@ function grantWithCondition(
 
 and specifying the `_condition` contract address. This provides full flexibility to customize the conditions under which the function call is allowed.
 
-Typically, conditions are written specifically for and installed together with xref:how-it-works/core/plugins/index.adoc[plugins]
+Typically, conditions are written specifically for and installed together with xref:core/plugins.adoc[plugins]
 
-To learn more about this advanced topic and possible applications, visit the xref:how-it-works/core/permissions/conditions.adoc[permission conditions].
+To learn more about this advanced topic and possible applications, visit the xref:guide-set-up-dao/custom-permission-condition.adoc[permission conditions].
 
 #### Granting Permission to `ANY_ADDR`
 

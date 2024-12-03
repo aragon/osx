@@ -10,9 +10,9 @@ The `DAO` contract is the identity and basis of your organization. It is the add
 
 The most important and basic functionality of your DAO is the **execution of arbitrary actions**, which allows you to execute the DAO's own functions as well as interacting with the rest of the world, i.e., calling methods in other contracts and sending assets to other addresses.
 
-NOTE: Typically, actions are scheduled in a proposal in a governance - xref:how-it-works/core/plugins/index.adoc[plugin installed to your DAO]
+NOTE: Typically, actions are scheduled in a proposal in a governance - xref:core/plugins.adoc[plugin installed to your DAO]
 
-Multiple `Action` structs can be put into one `Action[]` array and executed in a single transaction via the `execute` function. To learn more about actions and advanced features of the DAO executor, visit the xref:how-it-works/core/dao/actions.adoc[A Deep Dive Into Actions].
+Multiple `Action` structs can be put into one `Action[]` array and executed in a single transaction via the `execute` function. To learn more about actions and advanced features of the DAO executor, visit the xref:core/actions.adoc[A Deep Dive Into Actions].
 
 ### 2. Asset Management
 
@@ -24,7 +24,7 @@ The DAO provides basic **asset management** functionality to deposit, withdraw, 
 - link:https://eips.ethereum.org/EIPS/eip-1155[ERC-1155 (Multi Token Standard)]
 
 tokens in the treasury.
-In the future, more advanced asset management and finance functionality can be added to your DAO in the form of xref:how-it-works/core/plugins/index.adoc[plugins].
+In the future, more advanced asset management and finance functionality can be added to your DAO in the form of xref:core/plugins.adoc[plugins].
 
 ### 3. Upgradeability
 
@@ -48,6 +48,6 @@ By supporting the link:https://eips.ethereum.org/EIPS/eip-721[ERC-721 (NFT Stand
 ### 6. Permission Management
 
 Lastly, it is essential that only the right entities (e.g., the DAO itself or trusted addresses) have permission to use the above-mentioned functionalities. This is why Aragon OSx DAOs contain a flexible and battle-tested **permission manager** being able to assign permissions for the above functionalities to specific addresses.
-Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to EOAs as this poses a security risk to the organization if the account is compromised or acts adversarial. Instead, the permissions for the above-mentioned functionalities are better restricted to the `DAO` contract itself and triggered through governance xref:how-it-works/core/plugins/index.adoc[plugins] that you can install on your DAO.
+Although possible, the permissions to execute arbitrary actions or upgrade the DAO should not be given to EOAs as this poses a security risk to the organization if the account is compromised or acts adversarial. Instead, the permissions for the above-mentioned functionalities are better restricted to the `DAO` contract itself and triggered through governance xref:core/plugins.adoc[plugins] that you can install on your DAO.
 
-To learn more, visit the xref:how-it-works/core/permissions/index.adoc[permission manager] section.
+To learn more, visit the xref:core/permissions.adoc[permission manager] section.
