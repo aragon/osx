@@ -143,7 +143,9 @@
 :xref-PluginSetupProcessor-InvalidUpdateVersion-struct-PluginRepo-Tag-struct-PluginRepo-Tag-: xref:framework.adoc#PluginSetupProcessor-InvalidUpdateVersion-struct-PluginRepo-Tag-struct-PluginRepo-Tag-
 :xref-PluginSetupProcessor-PluginAlreadyInstalled--: xref:framework.adoc#PluginSetupProcessor-PluginAlreadyInstalled--
 :xref-PluginSetupProcessor-InvalidAppliedSetupId-bytes32-bytes32-: xref:framework.adoc#PluginSetupProcessor-InvalidAppliedSetupId-bytes32-bytes32-
-== Framework API
+== Framework Contracts API
+
+The natspec generated API for the framework contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
 
 === Factories
 

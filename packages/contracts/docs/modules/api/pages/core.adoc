@@ -109,9 +109,9 @@
 :xref-CallbackHandler-UnknownCallback-bytes4-bytes4-: xref:core.adoc#CallbackHandler-UnknownCallback-bytes4-bytes4-
 :xref-CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-: xref:core.adoc#CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-
 :xref-CallbackHandler-UNREGISTERED_CALLBACK-bytes4: xref:core.adoc#CallbackHandler-UNREGISTERED_CALLBACK-bytes4
-= OSX
+== Core Contracts API
 
-This is the reference guide of the link:https://github.com/aragon/osx[osx contracts] package.
+The natspec generated API for the core contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
 
 == Core
 
