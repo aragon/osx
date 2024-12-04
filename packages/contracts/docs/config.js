@@ -8,7 +8,7 @@ const helpers = require(path.resolve(__dirname, './templates/helpers'));
 // overwrite the functions.
 helpers.version = () => version;
 helpers.githubURI = () => repository.url;
-helpers['readme-path'] = opts => {
+helpers.readmePath = (opts) => {
   return 'src/' + opts.data.root.id.replace(/\.adoc$/, '') + '/README.adoc';
 };
 
