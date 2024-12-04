@@ -1,0 +1,18 @@
+= ENS Names
+
+== Unique DAO and Plugin Repo Names
+
+To make DAOs and plugin repositories easily identifiable in the Aragon OSx ecosystem, we assign unique ENS names to them upon 
+registration during the xref:framework/dao-factory-registry.adoc[DAO creation] and xref:framework/repo-factory-registry.adoc[plugin publishing] processes.
+
+TIP: You can skip registering an ENS name for your DAO under the `dao.eth` by leaving the xref:api:framework.adoc#DAOFactory[`DAOSettings.subdomain` field] empty when calling the xref:api:framework.adoc#DAOFactory[`createDao`] function.
+
+### Allowed Character Set
+
+We allow the following characters for the subdomain names:
+
+- Lowercase letters `a-z`
+- Digits `0-9`
+- The hyphen `-`
+
+This way, you can name and share the DAO or plugin repo you have created as `my-cool.dao.eth` or `my-handy.plugin.dao.eth` to make their addresses easily shareable and discoverable on ENS-supporting chains.

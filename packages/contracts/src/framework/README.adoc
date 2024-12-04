@@ -1,0 +1,19 @@
+== Framework API
+
+=== Factories
+
+{{DAOFactory}}
+
+{{PluginRepoFactory}}
+
+=== Registries
+
+{{DAORegistry}}
+
+{{PluginRepoRegistry}}
+
+=== Framework
+
+{{PluginRepo}}
+
+{{PluginSetupProcessor}}

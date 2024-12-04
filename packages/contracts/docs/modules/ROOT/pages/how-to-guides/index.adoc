@@ -33,7 +33,7 @@ On the technical level, plugins are composed of two key contracts:
 - ⚡️ The Plugin implementation contract: containing all of the logic and functionality for your DAO, and
 - 👩🏻‍🏫 The Plugin Setup contract: containing the installation, uninstallation and upgrade instructions for your plugin.
 
-image::../../../../../_/images/img/plugins/what_is_a_plugin.png[align="center"]
+image::what_is_a_plugin.png[align="center"]
 
 
 Through plugins, we provide a secure, flexible way for on-chain organizations to iterate as they grow.

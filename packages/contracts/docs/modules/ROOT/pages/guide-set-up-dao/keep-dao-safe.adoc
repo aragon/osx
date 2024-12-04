@@ -1,0 +1,79 @@
+= Best Practices
+
+=== Some Advice When Operating your DAO
+
+### DOs 👌
+
+- Make sure that at least one address (typically a governance plugin) has `EXECUTE_PERMISSION_ID` permission so that something can be executed on behalf of the DAO.
+- Check every proposal asking to install, update, or uninstall a plugin with utmost care and review. Installation means granting an external contract permissions to do things on behalf of your DAO, so you want to be extra careful about:
+  - the implementation contract
+  - the setup contract
+  - the helper contracts
+  - the permissions being granted/revoked
+
+### DON'Ts ✋
+
+- Incapacitate your DAO by revoking all `EXECUTE_PERMISSION`. This means your DAO will be blocked and any assets you hold may be locked in forever. This can happen through:
+  - uninstalling your last governance plugin.
+  - applying an update to your last governance plugin.
+- Don't give permissions to directly call functions from the DAO. Better and safer to use a plugin instead.
+- If you're using the Token Voting plugin in your DAO, make sure you don't mint additional tokens without careful consideration. If you mint too many at once, this may lock your DAO, since you will not be able to reach the minimum participation threshold. This happens if there are not enough tokens already on the market to meet the minimum participation percentage and the DAO owns most of the governance tokens.
+
+## Risks and Their Mitigation
+
+Extending the functionality of your DAO in the form of plugins can introduce risks, particularly, if this code comes from unaudited and untrusted sources.
+
+### Risks
+
+If a plugin has a bug or vulnerability that can be exploited, this can result in loss of funds or compromise the DAO.
+
+Besides, standard vulnerabilities such as
+
+- Re-entrancy
+- Default function visibility
+- Leaving contracts uninitialized
+- Time or oracle manipulation attacks
+- Integer overflow & underflow
+
+that might be carelessly or intentionally caused, a malicious plugin can hide **backdoors** in its code or request **elevated permissions** in the installation, upgrade, or uninstallation process to the attacker.
+
+#### Backdoors
+
+- link:https://a16zcrypto.com/metamorphic-smart-contract-detector-tool[metamorphic contracts] (contracts, that can be redeployed with new code to the same address)
+- malicious repurposing of storage in an update of an upgradeable plugin contract
+
+
+#### Permissions
+
+Examples for elevated permissions, are the [permissions native to the DAO contract](../../../01-core/02-permissions/index.md#permissions_native_to_the_dao_contract) such as
+
+- `ROOT_PERMISSION_ID`
+- `EXECUTE_PERMISSION_ID`
+- `UPGRADE_DAO_PERMISSION_ID`
+
+That should never be granted to untrusted addresses as they can be used to take control over your DAO.
+
+Likewise, one must be careful to not lock your DAO accidentally by
+
+- uninstalling the last governance plugin with `EXECUTE_PERMISSION_ID` permission
+- revoking the `ROOT_PERMISSION_ID` permission from itself or
+- choosing governance settings and execution criteria that most likely can never be met (e.g., requiring 100% participation for a token vote to pass)
+
+### Mitigation
+
+To mitigate the risks mentioned above, proposals requesting the setup of one or multiple plugins must be carefully examined and reviewed by inspecting
+
+- The implementation contract
+- The setup contract, i.e.,
+  - The installation and deployment logic
+  - The requested permission
+  - The helper contracts accompanying the plugin
+- The UI components, i.e.,
+  - Misleading (re-)naming of input fields, buttons, or other elements
+
+Generally, we recommend only installing plugins from trusted, verified sources such as those verified by Aragon.
+
+More information can be found in the How-to guides
+
+- [Operating your DAO](../../../../02-how-to-guides/01-dao/index.md)
+- [Developing a Plugin](../../../../02-how-to-guides/02-plugin-development/index.md)

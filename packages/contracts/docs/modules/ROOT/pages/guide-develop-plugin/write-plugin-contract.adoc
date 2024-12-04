@@ -1,0 +1,185 @@
+= Plugin Contract
+
+// == How to develop Plugin 
+
+This section will be focuses on non-upgradeable plugins development, for upgradeable plugins please check out our xref:guide-develop-plugin/write-upgradeable-plugin.adoc[guide here].
+
+Before continuing make sure you've read our documentation on xref:guide-develop-plugin/design-your-plugin.adoc#choosing_the_plugin_upgradeability[Choosing the Best Type for Your Plugin] to make sure you're selecting the right type of contract for your Plugin.
+
+== How to Initialize the plugin
+
+
+Every plugin should receive and store the address of the DAO it is associated with upon initialization. This is how the plugin will be able to interact with the DAO that has installed it.
+
+In addition, your plugin implementation might want to introduce other storage variables that should be initialized immediately after the contract was created. 
+For example, in the `SimpleAdmin` plugin example (which sets one address as the full admin of the DAO), we'd want to store the `admin` 
+address.
+
+```solidity
+contract SimpleAdmin is Plugin {
+  address public admin;
+}
+```
+
+The way we set up the plugin's `initialize()` function depends on the plugin type selected. To review plugin types in depth, check out 
+our xref:guide-develop-plugin/design-your-plugin.adoc#choosing_the_plugin_upgradeability[guide here].
+
+Additionally, the way we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, 
+there's two ways in which we can deploy our plugin:
+
+- Deployment via Solidity's `new` keyword, OR
+- Deployment via the Minimal Proxy Pattern
+
+### Option A: Deployment via Solidity's `new` Keyword
+
+To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template Aragon created. 
+You can find it link:https://github.com/aragon/osx-commons/blob/develop/contracts/src/plugin/Plugin.sol[here].
+
+In this case, the compiler will force you to write a `constructor` function calling the `Plugin` parent `constructor` and 
+provide it with a contract of type `IDAO`. Inside the constructor, you might want to initialize the storage variables that you have 
+added yourself, such as the `admin` address in the example below.
+
+```solidity
+// SPDX-License-Identifier: AGPL-3.0-or-later
+pragma solidity 0.8.21;
+
+import {Plugin, IDAO} from '@aragon/osx/core/plugin/Plugin.sol';
+
+contract SimpleAdmin is Plugin {
+  address public immutable admin;
+
+  /// @notice Initializes the contract.
+  /// @param _dao The associated DAO.
+  /// @param _admin The address of the admin.
+  constructor(IDAO _dao, address _admin) Plugin(_dao) {
+    admin = _admin;
+  }
+}
+```
+
+NOTE: The `admin` variable is set as `immutable` so that it can never be changed. Immutable variables can only be initialized in 
+the constructor.
+
+This type of constructor implementation stores the `IDAO _dao` reference in the right place. If your plugin is deployed often, which we could expect, we can link:https://blog.openzeppelin.com/workshop-recap-cheap-contract-deployment-through-clones/[save significant amounts of gas by deployment through using the minimal proxy pattern].
+
+### Option B: Deployment via the Minimal Proxy Pattern
+
+To deploy our plugin via the link:https://eips.ethereum.org/EIPS/eip-1167(minimal clones pattern (ERC-1167)), you inherit from the `PluginCloneable` contract introducing the same features as `Plugin`. 
+The only difference is that you now have to remember to write an `initialize` function.
+
+```solidity
+// SPDX-License-Identifier: AGPL-3.0-or-later
+pragma solidity 0.8.21;
+
+import {PluginCloneable, IDAO} from '@aragon/osx/core/plugin/PluginCloneable.sol';
+
+contract SimpleAdmin is PluginCloneable {
+  address public admin;
+
+  /// @notice Initializes the contract.
+  /// @param _dao The associated DAO.
+  /// @param _admin The address of the admin.
+  function initialize(IDAO _dao, address _admin) external initializer {
+    __PluginCloneable_init(_dao);
+    admin = _admin;
+  }
+}
+```
+
+We must protect it from being called multiple times by using link:https://docs.openzeppelin.com/contracts/4.x/api/proxy#Initializable[OpenZeppelin's `initializer` modifier made available through `Initializable`] and 
+call the internal function `__PluginCloneable_init(IDAO _dao)` available through the `PluginCloneable` base contract to 
+store the `IDAO _dao` reference in the right place.
+
+CAUTION: If you forget calling `__PluginCloneable_init(_dao)` inside your `initialize` function, your plugin won't be associated 
+with a DAO and cannot use the DAO's `PermissionManager`.
+
+
+
+
+== How to Build a the plugin
+
+Once we've initialized our plugin (take a look at our guide on xref:how_to_initialize_the_plugin[how to initialize the plugin here]), 
+we can start using the Non-Upgradeable Base Template to perform actions on the DAO.
+
+### 1. Set the Permission Identifier
+
+Firstly, we want to define a xref:core/permissions.adoc#permission_identifiers[permission identifier] `bytes32` constant at the top 
+of the contract and establish a `keccak256` hash of the permission name we want to choose. 
+In this example, we're calling it the `ADMIN_EXECUTE_PERMISSION`.
+
+```solidity
+contract SimpleAdmin is PluginCloneable {
+  /// @notice The ID of the permission required to call the `execute` function.
+  bytes32 public constant ADMIN_EXECUTE_PERMISSION_ID = keccak256('ADMIN_EXECUTE_PERMISSION');
+
+  address public admin;
+
+  /// @notice Initializes the contract.
+  /// @param _dao The associated DAO.
+  /// @param _admin The address of the admin.
+  function initialize(IDAO _dao, address _admin) external initializer {
+    __PluginCloneable_init(_dao);
+    admin = _admin;
+  }
+
+  /// @notice Executes actions in the associated DAO.
+  function execute(IDAO.Action[] calldata _actions) external auth(ADMIN_EXECUTE_PERMISSION_ID) {
+    revert('Not implemented.');
+  }
+}
+```
+
+NOTE:
+You are free to choose the permission name however you like. For example, you could also have used `keccak256('SIMPLE_ADMIN_PLUGIN:PERMISSION_1')`. 
+However, it is important that the permission names are descriptive and cannot be confused with each other.
+
+Setting this permission is key because it ensures only signers who have been granted that permission are able to execute functions.
+
+### 2. Add the logic implementation
+
+Now that we have created the permission, we will use it to protect the implementation. We want to make sure only the authorized callers holding the `ADMIN_EXECUTE_PERMISSION`, can use the function.
+
+Because we have initialized the link:https://github.com/aragon/osx-commons/blob/develop/contracts/src/plugin/PluginCloneable.sol[`PluginCloneable` base contract], 
+we can now use its features, i.e., the link:https://github.com/aragon/osx-commons/blob/1cf46ff15dbda8481f9ee37558e7ea8b257d51f2/contracts/src/permission/auth/DaoAuthorizable.sol#L30-L35[auth modifier] 
+provided through the `DaoAuthorizable` base class. The `auth('ADMIN_EXECUTE_PERMISSION')` returns an error if the address calling 
+on the function has not been granted that permission, effectively protecting from malicious use cases.
+
+Later, we will also use the link:https://github.com/aragon/osx-commons/blob/1cf46ff15dbda8481f9ee37558e7ea8b257d51f2/contracts/src/permission/auth/DaoAuthorizable.sol#L24-L28[dao() getter function from the base contract], 
+which returns the associated DAO for that plugin.
+
+```solidity
+contract SimpleAdmin is PluginCloneable {
+  /// @notice The ID of the permission required to call the `execute` function.
+  bytes32 public constant ADMIN_EXECUTE_PERMISSION_ID = keccak256('ADMIN_EXECUTE_PERMISSION');
+
+  address public admin;
+
+  /// @notice Initializes the contract.
+  /// @param _dao The associated DAO.
+  /// @param _admin The address of the admin.
+  function initialize(IDAO _dao, address _admin) external initializer {
+    __PluginCloneable_init(_dao);
+    admin = _admin;
+  }
+
+  /// @notice Executes actions in the associated DAO.
+  /// @param _actions The actions to be executed by the DAO.
+  function execute(IDAO.Action[] calldata _actions) external auth(ADMIN_EXECUTE_PERMISSION_ID) {
+    dao().execute({callId: 0x0, actions: _actions, allowFailureMap: 0});
+  }
+}
+```
+
+NOTE: In this example, we are building a governance plugin. To increase its capabilities and provide some standardization into the protocol, we recommend completing the governance plugin by 
+xref:guide-develop-plugin/design-your-plugin#how_to_build_a_governance_plugin[implementing the `IProposal` and `IMembership` interfaces].
+Optionally, you can also allow certain actions to fail by using xref:core/actions.adoc#allowing_for_failure[the failure map feature of the DAO executor].
+
+For now, we used default values for the `callId` and `allowFailureMap` parameters required by the DAO's `execute` function. 
+With this, the plugin implementation could be used and deployed already. Feel free to add any additional logic to 
+your plugin's capabilities here.
+
+### 3. Plugin done, Setup contract next!
+
+Now that we have the logic for the plugin implemented, we'll need to define how this plugin should be installed/uninstalled from a DAO. 
+In the next step, we'll write the `PluginSetup` contract - the one containing the installation, uninstallation, and
+upgrading instructions for the plugin.
