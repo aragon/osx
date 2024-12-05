@@ -1,21 +1,12 @@
 = Plugin Repositories
 
-== Plugins
-
 As mentioned earlier, plugins built by Aragon and third-party developers can be added and removed from your DAO to adapt it to your needs.
 
-The management of these plugins is handled for you by the Aragon OSx protocol so that the process of
-
-- Releasing new plugins as well as
-- Installing, updating, and uninstalling them to your DAO
-
-becomes as streamlined as possible.
-
-In the following, we learn what a plugin consists of.
+The management of these plugins is handled for you by the Aragon OSx protocol so that the process of *releasing* new plugins as well as *installing*, *updating*, and *uninstalling* them to your DAO becomes as streamlined as possible.
 
 // <!-- Add subgraphic from the framework overview main graphic-->
 
-### What Does a Plugin Consist Of?
+== What Does a Plugin Consist Of?
 
 An Aragon OSx Plugin consists of:
 
@@ -37,16 +28,11 @@ A detailed explanation of the xref:guide-develop-plugin/publishing-plugin.adoc#h
 image::../../../../_/images/optimized-svg/plugins/plugin-version.drawio.svg[align="center"]
 
 
-The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the Aragon OSx framework, which is explained in the section xref:framework/repo-factory-registry.adoc[The Plugin Setup Process].
+The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the Aragon OSx framework, which is explained in the section xref:framework/plugin-setup-processor.adoc[The Plugin Setup Process].
 
-Each plugin with its different builds and releases is versioned inside its own plugin repositories in a `PluginRepo` contract, which is explained in the next section.
-
+Each plugin with its different builds and releases is versioned inside its own plugin repositories in a `PluginRepo` contract.
 
 == Plugin Repositories
-
-
-### What are Plugin Repositories?
-
 
 Each plugin has its own Plugin Repository, unique ENS name, and on-chain repository contract, the `PluginRepo`, in which different versions of the plugin are stored for reference using version tags constituted by a **release** and **build** number.
 
@@ -65,7 +51,7 @@ image::../../../../_/images/optimized-svg/plugins/plugin-repo-overview.drawio.sv
 Overview of the plugin versioning and registry in the Aragon OSx protocol. The `PluginRepoRegistry` contract, which is a curated list of ENS named `PluginRepo` contracts, is shown on the left. Each `PluginRepo` contract maintains a list of versions of the `PluginSetup` contract (internally referencing the `Plugin` implementation contract) and the associated UI building blocks as a URI, exemplarily shown on the right.
 
 
-#### The `PluginRepo` Contract
+=== The `PluginRepo` Contract
 
 The `PluginRepo` contract versions the releases of a `Plugin`. The first version of a plugin is always published as release 1 and build 1 (version tag `1.1`).
 When you publish the first plugin version, a new plugin repository is automatically created for you by the Aragon OSx protocol in which you 
@@ -95,5 +81,6 @@ If it is a new release number, the build number is `1` (e.g., `2.1`).
 3. The `_buildMetadata` URI pointing to a JSON file containing the UI data, setup data, and change description for this specific version.
 4. The `_releaseMetadata` URI pointing to a JSON file containing the plugin name, description, as well as optional data such as images to be shown in the aragonApp frontend.
 
-Other functions present in the contract allow you to query previous versions and to update the release metadata. For more details visit the xref:api:framework.adoc#PluginRepo[`PluginRepo` reference guide entry].
-The `PluginRepo` is created for you when you publish the `PluginSetup` contract of your first version to the Aragon OSx protocol, which is explained in the next section: xref:framework/repo-factory-registry.adoc[The Plugin Repo Creation Process].
+Other functions present in the contract allow you to query previous versions and to update the release metadata. The `PluginRepo` is created for you when you publish the `PluginSetup` contract of your first version to the Aragon OSx protocol, which is explained in the next section: xref:framework/repo-factory-registry.adoc[The Plugin Repo Creation Process].
+
+NOTE: For more details visit the xref:api:framework.adoc#PluginRepo[`PluginRepo` reference guide entry].
