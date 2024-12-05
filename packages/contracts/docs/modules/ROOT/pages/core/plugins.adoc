@@ -15,7 +15,7 @@ Plugins can be related to:
 
 - And **anything** else that comes to mind!
 
-## Understanding Plugins
+== Understanding Plugins
 
 Whenever a DAO installs a plugin, an instance of that plugin's base template is deployed using the configuration parameters defined by the DAO. For example, you may want to use a specific token for your DAO's voting process, which means you have to determine this within your plugin's configuration parameters.
 
@@ -25,7 +25,7 @@ TIP: Learn more about the different xref:guide-develop-plugin/design-your-plugin
 
 This raises questions on how the DAO manages plugins and who actually owns plugins.
 
-### How Does the DAO Manage a Plugin?
+=== How Does the DAO Manage a Plugin?
 
 A DAO manages plugins and interactions between them. In more detail, its permission manager:
 
@@ -39,6 +39,6 @@ image::dao-plugin.drawio.svg[align="center"]
 An exemplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` contract in blue containing the `PermissionManager` in red, respectively, as well as two `Plugin` contracts in green.
   Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if a DeFi-related plugin is allowed to invest in a certain, external contract.
 
-Whereas deployed plugin instances belong to the DAO, the developer of the original plugin implementation owns the implementation 
-and setup contract of the plugin. The plugin developer is the maintainer of an Aragon OSx xref:framework/plugin-repos.adoc[plugin repo]. 
+Whereas deployed plugin instances belong to the DAO, the developer of the original plugin implementation owns the implementation and setup contract of the plugin. The plugin developer is the maintainer of an Aragon OSx xref:framework/plugin-repos.adoc[plugin repo]. 
+
 Finally, the Aragon OSx protocol manages the registry in which the plugin repositories are listed, which is required to install a plugin using the Aragon OSx framework infrastructure to your DAO.
