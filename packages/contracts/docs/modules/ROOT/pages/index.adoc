@@ -1,6 +1,6 @@
 = Aragon OSx
 
-## The Contracts Behind the Protocol
+== The Contracts Behind the Protocol
 
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
 
@@ -20,7 +20,7 @@ To facilitate this, Aragon OSx runs a set of **framework contracts**:
 - **Plugin repo factory and registry contract:** create and version plugin repositories.
 - **Plugin Setup Processor contract:** sets up plugins from a plugin repository in a DAO (installation, update, uninstallation).
 
-## The Aragon OSx DAO Framework
+== The Aragon OSx DAO Framework
 
 The Aragon OSx protocol is a DAO framework structured as follows:
 
@@ -28,7 +28,7 @@ image::aragon-os-framework-overview.drawio.svg[align="center"]
 
 Overview of the Aragon OSx protocol with its structural components and their responsibilities: the governance layer constituted by the framework DAO, the code layer including the framework and core contracts, which depends on external libraries and services
 
-### Code Layer
+=== Code Layer
 
 The foundation of the Aragon OSx protocol is the **code layer** constituted by the *_framework_* and *_core_* related contracts.
 The xref:core/index.adoc[Core contracts] provide the core primitives intended to be used by users and implemented by developers of the DAO framework.
@@ -37,14 +37,14 @@ Both are built on top of external dependencies, most notably the link:https://ww
 
 The core and framework contracts are free to use, and no additional fees are charged.
 
-### Governance Layer
+=== Governance Layer
 
 To govern the framework infrastructure, an Aragon OSx xref:framework/index.adoc[Framework DAO] is deployed constituting the **governance layer** of the Aragon OSx protocol.
 
 In the next sections, you will learn more about the individual components of the framework.
 
 
-## Getting Started
+== Getting Started
 
 Users interact with the Aragon OSx protocol through the link:https://app.aragon.org[Aragon App], link:https://devs.aragon.org/docs/sdk[Aragon SDK] or directly calling on the link:https://github.com/aragon/osx[protocol contracts] - as well as through any third-party projects built using our stack.
 
@@ -88,13 +88,13 @@ contract Box {
 }
 ```
 
-## Customize your DAO
+== Customize your DAO
 
 DAO Plugins are the best way to customize your DAO. These are modular extendable pieces of software which you can install or uninstall from your DAO as it evolves and grows.
 In the following sections, we'll dive deeper into this topic. You can take a quick look in the xref:guide-develop-plugin/index.adoc[Guide: Developing a Plugin].
 
 
-### Walkthrough
+== Walkthrough
 
 This documentation is divided into conceptual and practical sections as well as the reference guide.
 
