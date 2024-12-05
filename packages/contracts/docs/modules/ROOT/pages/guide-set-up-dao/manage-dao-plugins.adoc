@@ -1,14 +1,12 @@
 = Manage your DAO's Plugins
 
-== How to manage the Plugins within your DAO
-
 // <!-- TODO This page needs improvements -->
 
 You can install, uninstall or update any plugin into your DAO. If you want to dive deeper into plugins, check out xref:core/plugins.adoc[how plugins work here].
 
 Before diving deeper into this guide, make sure that you understand xref:core/permissions.adoc[permissions] and know about the xref:core/dao.adoc[DAO executor].
 
-### How to create a DAO with Plugins
+== How to create a DAO with Plugins
 
 When you create your DAO, you must **install at least one functioning governance plugin** (meaning one plugin having the `EXECUTION_PERMISSION`) so your have a mechanism of executing actions on behalf of your DAO.
 This is crucial because otherwise nobody can operate the DAO and it would become incapacitated right after it was created. You would have spent gas for nothing.
@@ -19,7 +17,7 @@ Although the easiest (and recommended) way to create your DAO is through the lin
 
 // <!-- TODO: Let's add a code example here on how the call to this function would look -->
 
-#### How to change a DAO's Governance Setup after a DAO has been created
+=== How to change a DAO's Governance Setup after a DAO has been created
 
 After a DAO is created with at least one plugin installed with `EXECUTE_PERMISSION` on the DAO, it's likely you may want to change change your governance setup later on by xref:framework/plugin-setup-processor.adoc[installing, updating, or uninstalling plugins].
 
@@ -30,9 +28,9 @@ Here, it is very important that you **maintain at least one functioning governan
 
 If you do that, nobody would be able to create proposals and execute actions on the DAO anymore. Accordingly, DAOs must review proposals requesting to change the governance setup with utmost care before voting for them. In the next section, we explain how to review a proposal properly and what to pay attention too.
 
-<!-- Make a separate section about the DAO executor -->
+// <!-- Make a separate section about the DAO executor -->
 
-### How to maintain Execution Permission on the DAO
+== How to maintain Execution Permission on the DAO
 
 A very important thing to consider when operating your DAO is to make sure that you do not lock it - meaning, you allow it into a state where the DAO cannot execute actions anymore.
 
