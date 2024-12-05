@@ -7,7 +7,7 @@ registration during the xref:framework/dao-factory-registry.adoc[DAO creation] a
 
 TIP: You can skip registering an ENS name for your DAO under the `dao.eth` by leaving the xref:api:framework.adoc#DAOFactory[`DAOSettings.subdomain` field] empty when calling the xref:api:framework.adoc#DAOFactory[`createDao`] function.
 
-### Allowed Character Set
+=== Allowed Character Set
 
 We allow the following characters for the subdomain names:
 
