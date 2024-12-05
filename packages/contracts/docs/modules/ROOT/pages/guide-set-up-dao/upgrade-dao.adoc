@@ -8,4 +8,4 @@ To make it easy for your DAO to switch to future Aragon OSx protocol versions, w
 
 Whenever we provide a new Aragon OSx protocol version, it will be possible to upgrade your DAO and associated plugins through your DAO dashboard.
 
-link:https://aragondevelopers.substack.com/[Add your email here] if you'd like to receive updates when this happens!
+NOTE: link:https://aragondevelopers.substack.com/[Add your email here] if you'd like to receive updates when this happens!
