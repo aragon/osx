@@ -1,10 +1,6 @@
 = Plugin Setup Processor
 
-== Installing Plugins
-
-### The Smart Contracts Behind Plugins
-
-A DAO can be set up and customized by the **installation, update, and uninstallation** of plugins. Plugins are composed of two key contracts:
+A DAO can be set up and customized by the *installation* , *update*, and *uninstallation* of plugins, this process in OSX is handled by the `PluginSetupProcessor` contract. Plugins are composed of two key contracts:
 
 - **Plugin contract:** contains the plugin's implementation logic; everything needed to extend the functionality for DAOs.
 - **Plugin Setup contract:** contains the instructions needed to install, update, and uninstall the plugin into the DAO. This is done through granting or revoking permissions, enabling plugins to perform actions within the scope of the DAO.
@@ -19,7 +15,7 @@ How this works:
 - Publishing a Plugin into the Aragon OSx protocol is done through creating the first version of the plugin's `PluginRepo`. The plugin's `PluginRepo` instance stores all plugin versions. You can read more about that xref:guide-develop-plugin/publishing-plugin.adoc[here].
 - Except for the gas costs required, plugins are completely free to install, unless decided otherwise by the developer.
 
-#### How are Plugins installed in DAOs?
+== How are Plugins installed in DAOs?
 
 The `PluginSetup` processing is **security critical** because the permissions it handles are granted to third-party contracts.
 
@@ -32,7 +28,9 @@ This is why we see the installation process in two phases:
 
 The `PluginSetupProcessor` is the Aragon contract in charge of invoking the `prepareInstallation()` function from your plugin's `PluginSetup` contract and use it to prepare the installation and (eventually) apply it once it has been approved by the DAO.
 
-##### What happens during the Plugin Preparation?
+WARNING: Installation can be done manually by the DAO members or through a proposal, however, we recommend using the `PluginSetupProcessor` to handle this complex process.
+
+=== What happens during the Plugin Preparation?
 
 The preparation of a `PluginSetup` contract proceeds as follows:
 
@@ -40,7 +38,9 @@ The preparation of a `PluginSetup` contract proceeds as follows:
 
 2. The DAO builder defines the parameters and settings that he/she wants for their DAO. Depending on the case, the `prepareInstallation`, `prepareUpdate`, or `prepareUninstallation` method in the `PluginSetup` contract is called through the `PluginSetupProcessor` (and creates a unique setup ID).
 
-3. The link:https://github.com/aragon/osx/blob/e24d9fa3bd6d5a4c9f5936c14ccda1fe9886c2b0/packages/contracts/src/framework/plugin/setup/PluginSetup.sol[`PluginSetup`] contract deploys all the contracts and gathers addresses and other input arguments required for the installation/uninstallation/upgrade instructions. This can include:
+3. The link:https://github.com/aragon/osx/blob/e24d9fa3bd6d5a4c9f5936c14ccda1fe9886c2b0/packages/contracts/src/framework/plugin/setup/PluginSetup.sol[`PluginSetup`] contract deploys all the contracts and gathers addresses and other input arguments required for the installation/uninstallation/upgrade instructions. 
++
+This can include:
 
    * deployment of new contracts
    * initialization of new storage variables
@@ -48,9 +48,10 @@ The preparation of a `PluginSetup` contract proceeds as follows:
    * governance settings or other attributes
    * ...
 
-   Because the addresses of all associated contracts are now known, a static permission list can be emitted, hashed, and stored on-chain.
++
+Because the addresses of all associated contracts are now known, a static permission list can be emitted, hashed, and stored on-chain.
 
-4. Once the Plugin installation has been prepared, we use it as the parameter of the `applyInstallation()` action. Once encoded, this action is what must be added to the `Action[]` array of the installation proposal. That way, when the proposal passes, the action becomes executable and the plugin can be installed in the DAO using the parameters defined in the prepare installation process. For a plugin to be installed, it needs to be approved by the governance mechanism (plugin) of the organization, passed as the encoded action of a proposal, and executed by a signer.
+4. Once the Plugin installation has been prepared, we use it as the parameter of the `applyInstallation()` action. Once encoded, this action is what must be added to the `Action[]` array of the installation proposal. That way, when the proposal passes, the action becomes executable and the plugin can be installed in the DAO using the parameters defined in the prepare installation process. For a plugin to be installed, it needs to be approved by the governance mechanism of the organization, passed as the encoded action of a proposal, and executed by a signer.
 
 TIP: The governance plugin can be a simple majority vote, an optimistic process or an admin governance plugin that does not involve a waiting period. It can be any governance mechanism existing within the DAO which has access to the DAO's `execute` permission.
 
@@ -63,7 +64,7 @@ To learn more visit the xref:guide-set-up-dao/keep-dao-safe.adoc#risks_and_their
 // Optionally, the proposer can also request refunds for the gas spent for the preparation of the plugin in the proposal.
 // -->
 
-##### What happens during the Preparation Application?
+=== What happens during the Preparation Application?
 
 After this initial preparation transaction, the addresses and permissions related to the plugin become apparent. The members of a governance plugin with permissions can decide if the installation proposal should be accepted or denied.
 

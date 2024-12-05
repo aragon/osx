@@ -1,13 +1,18 @@
-= ENS Names
-
-== Unique DAO and Plugin Repo Names
+= ENS Registrar
 
 To make DAOs and plugin repositories easily identifiable in the Aragon OSx ecosystem, we assign unique ENS names to them upon 
-registration during the xref:framework/dao-factory-registry.adoc[DAO creation] and xref:framework/repo-factory-registry.adoc[plugin publishing] processes.
+registration during the xref:framework/dao-factory-registry.adoc[DAO creation] and xref:framework/repo-factory-registry.adoc[Plugin publishing] processes.
 
-TIP: You can skip registering an ENS name for your DAO under the `dao.eth` by leaving the xref:api:framework.adoc#DAOFactory[`DAOSettings.subdomain` field] empty when calling the xref:api:framework.adoc#DAOFactory[`createDao`] function.
+== Aragon's Domain
 
-=== Allowed Character Set
+Aragon owns the `dao.eth` domain, which is used to register DAO ENS names. New DAOs can be registered under this domain (ex: `patito.dao.eth`), and new plugins can be registered under the `plugin.dao.eth` domain (ex: `admin.plugin.dao.eth`).
+
+
+TIP: You can skip registering an ENS for your DAO by leaving the xref:api:framework.adoc#DAOFactory[`DAOSettings.subdomain` field] empty when calling the xref:api:framework.adoc#DAOFactory[`createDao`] function.
+
+WARNING: Plugins cannot be registered without an ENS, we will re-consider this in the future.
+
+== Allowed Character Set
 
 We allow the following characters for the subdomain names:
 
