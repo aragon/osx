@@ -1,16 +1,18 @@
 = Publication of your Plugin into Aragon OSx
 
-== How to publish a plugin into Aragon's plugin registry
-
 Once you've deployed your Plugin Setup contract, you will be able to publish your plugin into Aragon's plugin registry so any 
 Aragon DAO can install it.
 
-### 1. Make sure your plugin is deployed in the right network
+== How to publish new plugin
+
+Publishing a plugin to Aragon OSx involves a few key steps to ensure your plugin is properly registered and accessible to DAOs.
+
+=== Make sure your plugin is deployed in a supported network
 
 Make sure your Plugin Setup contract is deployed in your network of choice (you can find all of the networks we support link:https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json[here]). 
 You will need the address of your Plugin Setup contract to be able to publish the plugin into the protocol.
 
-### 2. Publishing your plugin
+=== Publishing your plugin
 
 Every plugin in Aragon can have future versions, so when publishing a plugin to the Aragon protocol, we're really creating a link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol[PluginRepo] instance for each plugin,
 which will contain all of the plugin's versions.
@@ -24,12 +26,11 @@ You can find all of the addresses of `PluginRepoFactory` contracts by network li
 To create more versions of your plugin in the future, you'll call on the link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L128[createVersion function] 
 from the `PluginRepo` instance of your plugin. When you publish your plugin, you'll be able to find the address of your plugin's `PluginRepo` instance within the transaction data.
 
-### 3. Publishing subsequent builds
+=== Publishing subsequent builds
 
 When publishing subsequent builds, you want to use the `createVersion` function in the `PluginRepo` contract (link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L132[check out the function's source code here]).
 
 To deploy your plugin, follow the steps in the link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/README.md#deployment[osx-plugin-template-hardhat README.md].
-
 
 
 == How to add a new version of your plugin
@@ -94,7 +95,7 @@ Currently, two kinds of metadata exist:
 1. Release metadata
 2. Build metadata
 
-### Release Metadata
+=== Release Metadata
 
 The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the xref:framework/plugin-repos.adoc[PluginRepo](see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
 
@@ -123,7 +124,7 @@ The `release-metadata.json` file consists of the following entries:
 |===
 
 
-#### Example
+==== Example
 
 ```json
 {
@@ -133,7 +134,7 @@ The `release-metadata.json` file consists of the following entries:
 }
 ```
 
-### Build Metadata
+=== Build Metadata
 
 The build metadata is a `.json` file stored on IPFS with its IPFS CID published for each build **only once** 
 in the xref:framework/plugin-repos.adoc[PluginRepo] (see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
@@ -184,7 +185,7 @@ Each `"prepare..."` object contains:
 
 By following the Solidity JSON ABI format for the inputs, we followed an established standard, have support for complex types (tuples, arrays, nested versions of the prior) and allow for future extensibility (such as the human readable description texts that we have added).
 
-#### Example
+==== Example
 
 ```json
 {
@@ -235,6 +236,3 @@ By following the Solidity JSON ABI format for the inputs, we followed an establi
   }
 }
 ```
-
-
-// TODO merge this sections and clean up redundancy, consider also framework and core sections.

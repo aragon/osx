@@ -62,5 +62,4 @@ For more information on how to develop a plugin, you can check our plugin develo
 - xref:how-to-guides/plugin-development/upgradeable-plugin/index.adoc[Upgradeable plugin]
 - xref:how-to-guides/plugin-development/governance-plugins/index.adoc[Governance plugin]
 
-IMPORTANT: This plugin template uses version TODO:GIORGI `1.4.0-alpha.5` of the Aragon OSx protocol. This version is still in development and 
-is not audited yet.
+IMPORTANT: This plugin template uses version TODO:GIORGI `1.4.0-alpha.5` of the Aragon OSx protocol. This version is still in development and is not audited yet.

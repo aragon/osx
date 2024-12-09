@@ -1,12 +1,15 @@
 = Plugin Setup Contract
 
+
+NOTE: This section is a continuation of the xref:guide-develop-plugin/write-plugin-contract.adoc[Writing your plugin contract], and is also focused on non-upgradeable plugins, for upgradeable plugins, see xref:guide-develop-plugin/write-upgradeable-plugin.adoc[Writing your upgradeable plugin].
+
 == What is the Plugin Setup contract?
 
 The Plugin Setup contract is the contract defining the instructions for installing, uninstalling, or upgrading plugins into DAOs. This contract prepares the permission granting or revoking that needs to happen in order for plugins to be able to perform actions on behalf of the DAO.
 
 You need it for the plugin to be installed into the DAO.
 
-### 1. Finish the Plugin contract
+=== 1. Finish the Plugin contract
 
 Before building your Plugin Setup contract, make sure you have the logic for your plugin implemented. In this case, we're building a simple admin plugin which grants one address permission to execute actions on behalf of the DAO.
 
@@ -33,7 +36,7 @@ contract SimpleAdmin is PluginCloneable {
 }
 ```
 
-### 2. How to initialize the Plugin Setup contract
+=== 2. How to initialize the Plugin Setup contract
 
 Each `PluginSetup` contract is deployed only once and we will publish a separate `PluginSetup` instance for each version. Accordingly, we instantiate the `implementation` contract via Solidity's `new` keyword as deployment with the minimal proxy pattern would be more expensive in this case.
 
@@ -60,7 +63,7 @@ contract SimpleAdminSetup is PluginSetup {
 }
 ```
 
-### 3. Build the Skeleton
+=== 3. Build the Skeleton
 
 In order for the Plugin to be easily installed into the DAO, we need to define the permissions the plugin will need.
 
@@ -107,7 +110,7 @@ As you can see, we have a constructor storing the implementation contract instan
 
 Next, we will add the implementation for the `prepareInstallation` and `prepareUninstallation` functions.
 
-### 4. Implementing the `prepareInstallation()` function
+=== 4. Implementing the `prepareInstallation()` function
 
 The `prepareInstallation()` function should take in two parameters:
 
@@ -183,7 +186,7 @@ Finally, we construct and return an array with the permissions that we need for 
 - First, we request granting the `ADMIN_EXECUTE_PERMISSION_ID` to the `admin` address received. This is what gives the address access to use `plugin`'s functionality - in this case, call on the plugin's `execute` function so it can execute actions on behalf of the DAO.
 - Second, we request that our newly deployed plugin can use the `EXECUTE_PERMISSION_ID` permission on the `_dao`. We don't add conditions to the permissions in this case, so we use the `NO_CONDITION` constant provided by `PermissionLib`.
 
-### 5. Implementing the `prepareUninstallation()` function
+=== 5. Implementing the `prepareUninstallation()` function
 
 For the uninstallation, we have to make sure to revoke the two permissions that have been granted during the installation process.
 First, we revoke the `ADMIN_EXECUTE_PERMISSION_ID` from the `admin` address that we have stored in the implementation contract.
@@ -219,7 +222,7 @@ function prepareUninstallation(
 }
 ```
 
-#### 6. Putting Everything Together
+=== 6. Putting Everything Together
 
 Now, it's time to wrap up everything together. You should have a contract that looks like this:
 
@@ -330,7 +333,7 @@ contract SimpleAdminSetup is PluginSetup {
 Once done, our plugin is ready to be published on the Aragon plugin registry. With the address of the `SimpleAdminSetup` contract, we are ready for creating our `PluginRepo`, the plugin's repository where all plugin versions will live. 
 Check out our how to guides on xref:guide-develop-plugin/publishing-plugin.adoc[publishing your plugin here].
 
-### In the future: Subsequent Builds
+=== In the future: Subsequent Builds
 
 For subsequent builds or releases of your plugin, you'll simply write a new implementation and associated Plugin Setup contract providing a new `prepareInstallation` and `prepareUninstallation` function.
 

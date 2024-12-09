@@ -1,12 +1,12 @@
 = Designing your plugin
 
-== Governance Plugins
+This guide explains how to design plugins for Aragon OSx, covering governance plugins, membership management, and upgradeability patterns. You'll learn about the core interfaces, implementation patterns, and how to choose the right base contract for your specific use case.
 
-### How to Build a Governance Plugin
+== Governance Plugins
 
 One of the most common use cases for plugins are governance plugins. Governance plugins are plugins DAOs install to help them make decisions.
 
-#### What are Governance Plugins
+=== What are Governance Plugins
 
 Governance plugins are characterized by the **ability to execute actions in the DAO** they have been installed to. Accordingly, the `EXECUTE_PERMISSION_ID` is granted on installation on the installing DAO to the governance plugin contract.
 
@@ -23,7 +23,7 @@ Beyond this fundamental ability, governance plugins usually implement two interf
 - xref:guide-develop-plugin/design-your-plugin#proposals[The `IProposal` interface] introducing the **notion of proposals** and how they are created and executed.
 - xref:guide-develop-plugin/design-your-plugin#membership[The `IMembership` interface] introducing the **notion of membership** to the DAO.
 
-#### Examples of Governance Plugins
+=== Examples of Governance Plugins
 
 Some examples of governance plugins are:
 
@@ -36,11 +36,7 @@ Some examples of governance plugins are:
 
 // <!-- Add a code example -->
 
-
-
-### Proposals
-
-#### The `IProposal` Interface
+=== The `IProposal` Interface
 
 The `IProposal` interface is used to create and execute proposals containing actions and a description.
 
@@ -78,7 +74,7 @@ interface IProposal {
 
 This interface contains two events and one function
 
-##### `ProposalCreated` event
+==== `ProposalCreated` event
 
 This event should be emitted when a proposal is created. It contains the following parameters:
 
@@ -90,15 +86,15 @@ This event should be emitted when a proposal is created. It contains the followi
 - `actions`: The actions that will be executed if the proposal passes.
 - `allowFailureMap`: A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
 
-##### `ProposalExecuted` event
+==== `ProposalExecuted` event
 
 This event should be emitted when a proposal is executed. It contains the proposal ID as a parameter.
 
-##### `proposalCount` function
+==== `proposalCount` function
 
 This function should return the proposal count determining the next proposal ID.
 
-#### Usage
+==== Usage
 
 ```solidity
 contract MyPlugin is IProposal {
@@ -134,9 +130,9 @@ contract MyPlugin is IProposal {
 }
 ```
 
-### Membership
 
-#### The `IMembership` Interface
+
+=== The `IMembership` Interface
 
 The `IMembership` interface defines common functions and events for for plugins that keep track of membership in a DAO. This plugins can be used to define who can vote on proposals, who can create proposals, etc. The list of members can be defined in the plugin itself or by a contract that defines the membership like an ERC20 or ERC721 token.
 
@@ -167,25 +163,25 @@ interface IMembership {
 
 The interface contains three events and one function.
 
-##### `MembersAdded` event
+==== `MembersAdded` event
 
 The members added event should be emitted when members are added to the DAO plugin. It only contains one `address[] members` parameter that references the list of new members being added.
 
 - `members`: The list of new members being added.
 
-##### `MembersRemoved` event
+==== `MembersRemoved` event
 
 The members added event should be emitted when members are removed from the DAO plugin. It only contains one `address[] members` parameter that references the list of members being removed.
 
-##### `MembershipContractAnnounced` event
+==== `MembershipContractAnnounced` event
 
 This event should be emitted during the initialization of the membership plugin to announce the membership being defined by a contract. It contains the defining contract as a parameter.
 
-##### `isMember` function
+==== `isMember` function
 
 This is a simple function that should be implemented in the plugin contract that introduces the members to the DAO. It checks if an account is a member of the DAO and returns a boolean value.
 
-#### Usage
+==== Usage
 
 ```solidity
 
@@ -222,7 +218,7 @@ contract MyPlugin is IMembership {
 
 == Choosing the Plugin Upgradeability
 
-### How to Choose the Base Contract for Your Plugin
+=== How to Choose your Plugin Upgradeability
 
 Although it is not mandatory to choose one of our interfaces as the base contracts for your plugins, we do offer some options for you to inherit from and speed up development.
 
@@ -240,7 +236,7 @@ In this regard, we provide 3 options for base contracts you can choose from:
 
 Let's take a look at what this means for you.
 
-### Upgradeability & Deployment
+=== Upgradeability & Deployment
 
 Upgradeability and the deployment method of a plugin contract go hand in hand. The motivation behind upgrading smart contracts is nicely summarized by OpenZeppelin:
 
@@ -272,10 +268,10 @@ Some key things to keep in mind:
 | |`new` Instantiation | Minimal Proxy (Clones)| Transparent Proxy| UUPS Proxy
 
 | upgradeability 
-|no  
+| [.no-cell]#no#
 | no       
-| yes     
 | yes  
+| yes
 | gas costs      
 | high 
 | very low 
@@ -292,10 +288,10 @@ Accordingly, we recommend to use link:https://eips.ethereum.org/EIPS/eip-1167[mi
 To help you with developing and deploying your plugin within the Aragon infrastructure, we provide the following implementation that you can inherit from:
 
 - `Plugin` for instantiation via `new`
-- `PluginClones` for [minimal proxy pattern link:https://eips.ethereum.org/EIPS/eip-1167[ERC-1167]] deployment
-- `PluginUUPSUpgradeable` for [UUPS pattern link:https://eips.ethereum.org/EIPS/eip-1822[ERC-1822]] deployment
+- `PluginClones` for link:https://eips.ethereum.org/EIPS/eip-1167[minimal proxy pattern ERC-1167] deployment
+- `PluginUUPSUpgradeable` for link:https://eips.ethereum.org/EIPS/eip-1822[UUPS pattern ERC-1822] deployment
 
-#### Caveats of Non-upgradeable Plugins
+=== Caveats of Non-upgradeable Plugins
 
 Aragon plugins using the non-upgradeable smart contracts bases (`Plugin`, `PluginCloneable`) can be cheap to deploy (i.e., using clones) but **cannot be updated**.
 
