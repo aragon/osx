@@ -95,7 +95,19 @@
 :xref-PluginSetupProcessor-UpdateApplied-address-address-bytes32-bytes32-: xref:framework.adoc#PluginSetupProcessor-UpdateApplied-address-address-bytes32-bytes32-
 :xref-PluginSetupProcessor-UninstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-struct-IPluginSetup-SetupPayload-struct-PermissionLib-MultiTargetPermission---: xref:framework.adoc#PluginSetupProcessor-UninstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-struct-IPluginSetup-SetupPayload-struct-PermissionLib-MultiTargetPermission---
 :xref-PluginSetupProcessor-UninstallationApplied-address-address-bytes32-: xref:framework.adoc#PluginSetupProcessor-UninstallationApplied-address-address-bytes32-
-= Framework API
+:xref-PluginSetupProcessor-SetupApplicationUnauthorized-address-address-bytes32-: xref:framework.adoc#PluginSetupProcessor-SetupApplicationUnauthorized-address-address-bytes32-
+:xref-PluginSetupProcessor-PluginNonupgradeable-address-: xref:framework.adoc#PluginSetupProcessor-PluginNonupgradeable-address-
+:xref-PluginSetupProcessor-PluginProxyUpgradeFailed-address-address-bytes-: xref:framework.adoc#PluginSetupProcessor-PluginProxyUpgradeFailed-address-address-bytes-
+:xref-PluginSetupProcessor-IPluginNotSupported-address-: xref:framework.adoc#PluginSetupProcessor-IPluginNotSupported-address-
+:xref-PluginSetupProcessor-PluginRepoNonexistent--: xref:framework.adoc#PluginSetupProcessor-PluginRepoNonexistent--
+:xref-PluginSetupProcessor-SetupAlreadyPrepared-bytes32-: xref:framework.adoc#PluginSetupProcessor-SetupAlreadyPrepared-bytes32-
+:xref-PluginSetupProcessor-SetupNotApplicable-bytes32-: xref:framework.adoc#PluginSetupProcessor-SetupNotApplicable-bytes32-
+:xref-PluginSetupProcessor-InvalidUpdateVersion-struct-PluginRepo-Tag-struct-PluginRepo-Tag-: xref:framework.adoc#PluginSetupProcessor-InvalidUpdateVersion-struct-PluginRepo-Tag-struct-PluginRepo-Tag-
+:xref-PluginSetupProcessor-PluginAlreadyInstalled--: xref:framework.adoc#PluginSetupProcessor-PluginAlreadyInstalled--
+:xref-PluginSetupProcessor-InvalidAppliedSetupId-bytes32-bytes32-: xref:framework.adoc#PluginSetupProcessor-InvalidAppliedSetupId-bytes32-bytes32-
+== Framework Contracts API
+
+The natspec generated API for the framework contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
 
 == Factories
 

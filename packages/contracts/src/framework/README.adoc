@@ -1,4 +1,6 @@
-= Framework API
+== Framework Contracts API
+
+The natspec generated API for the framework contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
 
 == Factories
 
