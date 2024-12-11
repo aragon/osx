@@ -49,6 +49,30 @@
 :xref-CallbackHandler-CallbackReceived-address-bytes4-bytes-: xref:core.adoc#CallbackHandler-CallbackReceived-address-bytes4-bytes-
 :xref-PermissionManager-Granted-bytes32-address-address-address-address-: xref:core.adoc#PermissionManager-Granted-bytes32-address-address-address-address-
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:core.adoc#PermissionManager-Revoked-bytes32-address-address-address-
+:xref-DAO-ReentrantCall--: xref:core.adoc#DAO-ReentrantCall--
+:xref-DAO-TooManyActions--: xref:core.adoc#DAO-TooManyActions--
+:xref-DAO-ActionFailed-uint256-: xref:core.adoc#DAO-ActionFailed-uint256-
+:xref-DAO-InsufficientGas--: xref:core.adoc#DAO-InsufficientGas--
+:xref-DAO-ZeroAmount--: xref:core.adoc#DAO-ZeroAmount--
+:xref-DAO-NativeTokenDepositAmountMismatch-uint256-uint256-: xref:core.adoc#DAO-NativeTokenDepositAmountMismatch-uint256-uint256-
+:xref-DAO-ProtocolVersionUpgradeNotSupported-uint8-3--: xref:core.adoc#DAO-ProtocolVersionUpgradeNotSupported-uint8-3--
+:xref-DAO-FunctionRemoved--: xref:core.adoc#DAO-FunctionRemoved--
+:xref-DAO-AlreadyInitialized--: xref:core.adoc#DAO-AlreadyInitialized--
+:xref-CallbackHandler-UnknownCallback-bytes4-bytes4-: xref:core.adoc#CallbackHandler-UnknownCallback-bytes4-bytes4-
+:xref-PermissionManager-Unauthorized-address-address-bytes32-: xref:core.adoc#PermissionManager-Unauthorized-address-address-bytes32-
+:xref-PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-: xref:core.adoc#PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-
+:xref-PermissionManager-ConditionNotAContract-contract-IPermissionCondition-: xref:core.adoc#PermissionManager-ConditionNotAContract-contract-IPermissionCondition-
+:xref-PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-: xref:core.adoc#PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-
+:xref-PermissionManager-PermissionsForAnyAddressDisallowed--: xref:core.adoc#PermissionManager-PermissionsForAnyAddressDisallowed--
+:xref-PermissionManager-AnyAddressDisallowedForWhoAndWhere--: xref:core.adoc#PermissionManager-AnyAddressDisallowedForWhoAndWhere--
+:xref-PermissionManager-GrantWithConditionNotSupported--: xref:core.adoc#PermissionManager-GrantWithConditionNotSupported--
+:xref-DAO-MAX_ACTIONS-uint256: xref:core.adoc#DAO-MAX_ACTIONS-uint256
+:xref-CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-: xref:core.adoc#CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-
+:xref-CallbackHandler-UNREGISTERED_CALLBACK-bytes4: xref:core.adoc#CallbackHandler-UNREGISTERED_CALLBACK-bytes4
+:xref-PermissionManager-ANY_ADDR-address: xref:core.adoc#PermissionManager-ANY_ADDR-address
+:xref-PermissionManager-UNSET_FLAG-address: xref:core.adoc#PermissionManager-UNSET_FLAG-address
+:xref-PermissionManager-ALLOW_FLAG-address: xref:core.adoc#PermissionManager-ALLOW_FLAG-address
+:xref-PermissionManager-permissionsHashed-mapping-bytes32----address-: xref:core.adoc#PermissionManager-permissionsHashed-mapping-bytes32----address-
 :xref-PermissionManager-auth-bytes32-: xref:core.adoc#PermissionManager-auth-bytes32-
 :xref-PermissionManager-__PermissionManager_init-address-: xref:core.adoc#PermissionManager-__PermissionManager_init-address-
 :xref-PermissionManager-grant-address-address-bytes32-: xref:core.adoc#PermissionManager-grant-address-address-bytes32-
@@ -68,6 +92,17 @@
 :xref-PermissionManager-ROOT_PERMISSION_ID-bytes32: xref:core.adoc#PermissionManager-ROOT_PERMISSION_ID-bytes32
 :xref-PermissionManager-Granted-bytes32-address-address-address-address-: xref:core.adoc#PermissionManager-Granted-bytes32-address-address-address-address-
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:core.adoc#PermissionManager-Revoked-bytes32-address-address-address-
+:xref-PermissionManager-Unauthorized-address-address-bytes32-: xref:core.adoc#PermissionManager-Unauthorized-address-address-bytes32-
+:xref-PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-: xref:core.adoc#PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-
+:xref-PermissionManager-ConditionNotAContract-contract-IPermissionCondition-: xref:core.adoc#PermissionManager-ConditionNotAContract-contract-IPermissionCondition-
+:xref-PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-: xref:core.adoc#PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-
+:xref-PermissionManager-PermissionsForAnyAddressDisallowed--: xref:core.adoc#PermissionManager-PermissionsForAnyAddressDisallowed--
+:xref-PermissionManager-AnyAddressDisallowedForWhoAndWhere--: xref:core.adoc#PermissionManager-AnyAddressDisallowedForWhoAndWhere--
+:xref-PermissionManager-GrantWithConditionNotSupported--: xref:core.adoc#PermissionManager-GrantWithConditionNotSupported--
+:xref-PermissionManager-ANY_ADDR-address: xref:core.adoc#PermissionManager-ANY_ADDR-address
+:xref-PermissionManager-UNSET_FLAG-address: xref:core.adoc#PermissionManager-UNSET_FLAG-address
+:xref-PermissionManager-ALLOW_FLAG-address: xref:core.adoc#PermissionManager-ALLOW_FLAG-address
+:xref-PermissionManager-permissionsHashed-mapping-bytes32----address-: xref:core.adoc#PermissionManager-permissionsHashed-mapping-bytes32----address-
 :xref-CallbackHandler-_handleCallback-bytes4-bytes-: xref:core.adoc#CallbackHandler-_handleCallback-bytes4-bytes-
 :xref-CallbackHandler-_registerCallback-bytes4-bytes4-: xref:core.adoc#CallbackHandler-_registerCallback-bytes4-bytes4-
 :xref-CallbackHandler-CallbackReceived-address-bytes4-bytes-: xref:core.adoc#CallbackHandler-CallbackReceived-address-bytes4-bytes-
@@ -301,12 +336,29 @@ Public API of the Aragon DAO framework.
 [.contract-index]
 .Errors
 --
+* {xref-DAO-ReentrantCall--}[`++ReentrantCall()++`]
+* {xref-DAO-TooManyActions--}[`++TooManyActions()++`]
+* {xref-DAO-ActionFailed-uint256-}[`++ActionFailed(index)++`]
+* {xref-DAO-InsufficientGas--}[`++InsufficientGas()++`]
+* {xref-DAO-ZeroAmount--}[`++ZeroAmount()++`]
+* {xref-DAO-NativeTokenDepositAmountMismatch-uint256-uint256-}[`++NativeTokenDepositAmountMismatch(expected, actual)++`]
+* {xref-DAO-ProtocolVersionUpgradeNotSupported-uint8-3--}[`++ProtocolVersionUpgradeNotSupported(protocolVersion)++`]
+* {xref-DAO-FunctionRemoved--}[`++FunctionRemoved()++`]
+* {xref-DAO-AlreadyInitialized--}[`++AlreadyInitialized()++`]
 
 [.contract-subindex-inherited]
 .CallbackHandler
+* {xref-CallbackHandler-UnknownCallback-bytes4-bytes4-}[`++UnknownCallback(callbackSelector, magicNumber)++`]
 
 [.contract-subindex-inherited]
 .PermissionManager
+* {xref-PermissionManager-Unauthorized-address-address-bytes32-}[`++Unauthorized(where, who, permissionId)++`]
+* {xref-PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-}[`++PermissionAlreadyGrantedForDifferentCondition(where, who, permissionId, currentCondition, newCondition)++`]
+* {xref-PermissionManager-ConditionNotAContract-contract-IPermissionCondition-}[`++ConditionNotAContract(condition)++`]
+* {xref-PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-}[`++ConditionInterfaceNotSupported(condition)++`]
+* {xref-PermissionManager-PermissionsForAnyAddressDisallowed--}[`++PermissionsForAnyAddressDisallowed()++`]
+* {xref-PermissionManager-AnyAddressDisallowedForWhoAndWhere--}[`++AnyAddressDisallowedForWhoAndWhere()++`]
+* {xref-PermissionManager-GrantWithConditionNotSupported--}[`++GrantWithConditionNotSupported()++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -355,12 +407,19 @@ Public API of the Aragon DAO framework.
 [.contract-index]
 .Internal Variables
 --
+* {xref-DAO-MAX_ACTIONS-uint256}[`++uint256 constant MAX_ACTIONS++`]
 
 [.contract-subindex-inherited]
 .CallbackHandler
+* {xref-CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-}[`++mapping(bytes4 => bytes4)  callbackMagicNumbers++`]
+* {xref-CallbackHandler-UNREGISTERED_CALLBACK-bytes4}[`++bytes4 constant UNREGISTERED_CALLBACK++`]
 
 [.contract-subindex-inherited]
 .PermissionManager
+* {xref-PermissionManager-ANY_ADDR-address}[`++address constant ANY_ADDR++`]
+* {xref-PermissionManager-UNSET_FLAG-address}[`++address constant UNSET_FLAG++`]
+* {xref-PermissionManager-ALLOW_FLAG-address}[`++address constant ALLOW_FLAG++`]
+* {xref-PermissionManager-permissionsHashed-mapping-bytes32----address-}[`++mapping(bytes32 => address)  permissionsHashed++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -412,7 +471,7 @@ Public API of the Aragon DAO framework.
 
 A modifier to protect a function from calling itself, directly or indirectly (reentrancy).
 
-Currently, this modifier is only applied to the &#x60;execute()&#x60; function. If this is used multiple times, private &#x60;_beforeNonReentrant()&#x60; and &#x60;_afterNonReentrant()&#x60; functions should be created to prevent code duplication.
+Currently, this modifier is only applied to the `execute()` function. If this is used multiple times, private `_beforeNonReentrant()` and `_afterNonReentrant()` functions should be created to prevent code duplication.
 
 [.contract-item]
 [[DAO-onlyCallAtInitialization--]]
@@ -431,10 +490,10 @@ Disables the initializers on the implementation contract to prevent it from bein
 ==== `[.contract-item-name]#++initialize++#++(bytes _metadata, address _initialOwner, address _trustedForwarder, string daoURI_)++` [.item-kind]#external#
 
 Initializes the DAO by
-- setting the reentrancy status variable to &#x60;_NOT_ENTERED&#x60;
+- setting the reentrancy status variable to `_NOT_ENTERED`
 - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
 - setting the trusted forwarder for meta transactions
-- giving the &#x60;ROOT_PERMISSION_ID&#x60; permission to the initial owner (that should be revoked and transferred to the DAO after setup).
+- giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
 
 This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
 
@@ -448,9 +507,9 @@ Initializes the DAO after an upgrade from a previous protocol version.
 [[DAO-isPermissionRestrictedForAnyAddr-bytes32-]]
 ==== `[.contract-item-name]#++isPermissionRestrictedForAnyAddr++#++(bytes32 _permissionId) → bool++` [.item-kind]#internal#
 
-Decides if the granting permissionId is restricted when &#x60;_who &#x3D;&#x3D; ANY_ADDR&#x60; or &#x60;_where &#x3D;&#x3D; ANY_ADDR&#x60;.
+Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
 
-By default, every permission is unrestricted and it is the derived contract&#x27;s responsibility to override it. Note, that the &#x60;ROOT_PERMISSION_ID&#x60; is included and not required to be set it again.
+By default, every permission is unrestricted and it is the derived contract's responsibility to override it. Note, that the `ROOT_PERMISSION_ID` is included and not required to be set it again.
 
 [.contract-item]
 [[DAO-_authorizeUpgrade-address-]]
@@ -458,7 +517,7 @@ By default, every permission is unrestricted and it is the derived contract&#x27
 
 Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 
-The caller must have the &#x60;UPGRADE_DAO_PERMISSION_ID&#x60; permission.
+The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
 
 [.contract-item]
 [[DAO-setTrustedForwarder-address-]]
@@ -476,7 +535,7 @@ Getter for the trusted forwarder verifying the meta transaction.
 [[DAO-hasPermission-address-address-bytes32-bytes-]]
 ==== `[.contract-item-name]#++hasPermission++#++(address _where, address _who, bytes32 _permissionId, bytes _data) → bool++` [.item-kind]#external#
 
-Checks if an address has permission on a contract via a permission identifier and considers if &#x60;ANY_ADDRESS&#x60; was used in the granting process.
+Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
 
 [.contract-item]
 [[DAO-setMetadata-bytes-]]
@@ -511,17 +570,17 @@ Introduced in v1.0.0. Removed in v1.4.0.
 Checks whether a signature is valid for a provided hash according to [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271).
 
 Relays the validation logic determining who is allowed to sign on behalf of the DAO to its permission manager.
-Caller specific bypassing can be set direct granting (i.e., &#x60;grant({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID})&#x60;).
-Caller specific signature validation logic can be set by granting with a &#x60;PermissionCondition&#x60; (i.e., &#x60;grantWithCondition({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})&#x60;)
-Generic signature validation logic can be set for all calling contracts by granting with a &#x60;PermissionCondition&#x60; to &#x60;PermissionManager.ANY_ADDR()&#x60; (i.e., &#x60;grantWithCondition({_where: dao, _who: PermissionManager.ANY_ADDR(), _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})&#x60;).
+Caller specific bypassing can be set direct granting (i.e., `grant({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID})`).
+Caller specific signature validation logic can be set by granting with a `PermissionCondition` (i.e., `grantWithCondition({_where: dao, _who: specificErc1271Caller, _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})`)
+Generic signature validation logic can be set for all calling contracts by granting with a `PermissionCondition` to `PermissionManager.ANY_ADDR()` (i.e., `grantWithCondition({_where: dao, _who: PermissionManager.ANY_ADDR(), _permissionId: VALIDATE_SIGNATURE_PERMISSION_ID, _condition: yourConditionImplementation})`).
 
 [.contract-item]
 [[DAO-receive--]]
 ==== `[.contract-item-name]#++receive++#++()++` [.item-kind]#external#
 
-Emits the &#x60;NativeTokenDeposited&#x60; event to track native token deposits that weren&#x27;t made via the deposit method.
+Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.
 
-This call is bound by the gas limitations for &#x60;send&#x60;/&#x60;transfer&#x60; calls introduced by [ERC-2929](https://eips.ethereum.org/EIPS/eip-2929).
+This call is bound by the gas limitations for `send`/`transfer` calls introduced by [ERC-2929](https://eips.ethereum.org/EIPS/eip-2929).
 Gas cost increases in future hard forks might break this function. As an alternative, [ERC-2930](https://eips.ethereum.org/EIPS/eip-2930)-type transactions using access lists can be employed.
 
 [.contract-item]
@@ -552,7 +611,7 @@ Registers an ERC standard having a callback by registering its [ERC-165](https:/
 [[DAO-daoURI--]]
 ==== `[.contract-item-name]#++daoURI++#++() → string++` [.item-kind]#external#
 
-A distinct Uniform Resource Identifier (URI) pointing to a JSON object following the &quot;EIP-4824 DAO JSON-LD Schema&quot;. This JSON file splits into four URIs: membersURI, proposalsURI, activityLogURI, and governanceURI. The membersURI should point to a JSON file that conforms to the &quot;EIP-4824 Members JSON-LD Schema&quot;. The proposalsURI should point to a JSON file that conforms to the &quot;EIP-4824 Proposals JSON-LD Schema&quot;. The activityLogURI should point to a JSON file that conforms to the &quot;EIP-4824 Activity Log JSON-LD Schema&quot;. The governanceURI should point to a flatfile, normatively a .md file. Each of the JSON files named above can be statically hosted or dynamically-generated.
+A distinct Uniform Resource Identifier (URI) pointing to a JSON object following the "EIP-4824 DAO JSON-LD Schema". This JSON file splits into four URIs: membersURI, proposalsURI, activityLogURI, and governanceURI. The membersURI should point to a JSON file that conforms to the "EIP-4824 Members JSON-LD Schema". The proposalsURI should point to a JSON file that conforms to the "EIP-4824 Proposals JSON-LD Schema". The activityLogURI should point to a JSON file that conforms to the "EIP-4824 Activity Log JSON-LD Schema". The governanceURI should point to a flatfile, normatively a .md file. Each of the JSON files named above can be statically hosted or dynamically-generated.
 
 [.contract-item]
 [[DAO-setDaoURI-string-]]
@@ -570,31 +629,31 @@ Sets the new [ERC-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO URI and emi
 [[DAO-EXECUTE_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++EXECUTE_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the &#x60;execute&#x60; function.
+The ID of the permission required to call the `execute` function.
 
 [.contract-item]
 [[DAO-UPGRADE_DAO_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++UPGRADE_DAO_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the &#x60;_authorizeUpgrade&#x60; function.
+The ID of the permission required to call the `_authorizeUpgrade` function.
 
 [.contract-item]
 [[DAO-SET_METADATA_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++SET_METADATA_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the &#x60;setMetadata&#x60; function.
+The ID of the permission required to call the `setMetadata` function.
 
 [.contract-item]
 [[DAO-SET_TRUSTED_FORWARDER_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++SET_TRUSTED_FORWARDER_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the &#x60;setTrustedForwarder&#x60; function.
+The ID of the permission required to call the `setTrustedForwarder` function.
 
 [.contract-item]
 [[DAO-REGISTER_STANDARD_CALLBACK_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++REGISTER_STANDARD_CALLBACK_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the &#x60;registerStandardCallback&#x60; function.
+The ID of the permission required to call the `registerStandardCallback` function.
 
 [.contract-item]
 [[DAO-VALIDATE_SIGNATURE_PERMISSION_ID-bytes32]]
@@ -618,7 +677,7 @@ Thrown if a call is reentrant.
 [[DAO-TooManyActions--]]
 ==== `[.contract-item-name]#++TooManyActions++#++()++` [.item-kind]#error#
 
-Thrown if the action array length is larger than &#x60;MAX_ACTIONS&#x60;.
+Thrown if the action array length is larger than `MAX_ACTIONS`.
 
 [.contract-item]
 [[DAO-ActionFailed-uint256-]]
@@ -749,6 +808,13 @@ The internal constant storing the maximal action array length.
 [.contract-index]
 .Errors
 --
+* {xref-PermissionManager-Unauthorized-address-address-bytes32-}[`++Unauthorized(where, who, permissionId)++`]
+* {xref-PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-}[`++PermissionAlreadyGrantedForDifferentCondition(where, who, permissionId, currentCondition, newCondition)++`]
+* {xref-PermissionManager-ConditionNotAContract-contract-IPermissionCondition-}[`++ConditionNotAContract(condition)++`]
+* {xref-PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-}[`++ConditionInterfaceNotSupported(condition)++`]
+* {xref-PermissionManager-PermissionsForAnyAddressDisallowed--}[`++PermissionsForAnyAddressDisallowed()++`]
+* {xref-PermissionManager-AnyAddressDisallowedForWhoAndWhere--}[`++AnyAddressDisallowedForWhoAndWhere()++`]
+* {xref-PermissionManager-GrantWithConditionNotSupported--}[`++GrantWithConditionNotSupported()++`]
 
 [.contract-subindex-inherited]
 .Initializable
@@ -758,6 +824,10 @@ The internal constant storing the maximal action array length.
 [.contract-index]
 .Internal Variables
 --
+* {xref-PermissionManager-ANY_ADDR-address}[`++address constant ANY_ADDR++`]
+* {xref-PermissionManager-UNSET_FLAG-address}[`++address constant UNSET_FLAG++`]
+* {xref-PermissionManager-ALLOW_FLAG-address}[`++address constant ALLOW_FLAG++`]
+* {xref-PermissionManager-permissionsHashed-mapping-bytes32----address-}[`++mapping(bytes32 => address)  permissionsHashed++`]
 
 [.contract-subindex-inherited]
 .Initializable
@@ -776,7 +846,7 @@ A modifier to make functions on inheriting contracts authorized. Permissions to 
 
 Initialization method to set the initial owner of the permission manager.
 
-The initial owner is granted the &#x60;ROOT_PERMISSION_ID&#x60; permission.
+The initial owner is granted the `ROOT_PERMISSION_ID` permission.
 
 [.contract-item]
 [[PermissionManager-grant-address-address-bytes32-]]
@@ -784,8 +854,8 @@ The initial owner is granted the &#x60;ROOT_PERMISSION_ID&#x60; permission.
 
 Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier.
 
-Requires the &#x60;ROOT_PERMISSION_ID&#x60; permission.
-Note, that granting permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equal to &#x60;ANY_ADDR&#x60; does not replace other permissions with specific &#x60;_who&#x60; and &#x60;_where&#x60; addresses that exist in parallel.
+Requires the `ROOT_PERMISSION_ID` permission.
+Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
 
 [.contract-item]
 [[PermissionManager-grantWithCondition-address-address-bytes32-contract-IPermissionCondition-]]
@@ -793,8 +863,8 @@ Note, that granting permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equa
 
 Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier if the referenced condition permits it.
 
-Requires the &#x60;ROOT_PERMISSION_ID&#x60; permission
-Note, that granting permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equal to &#x60;ANY_ADDR&#x60; does not replace other permissions with specific &#x60;_who&#x60; and &#x60;_where&#x60; addresses that exist in parallel.
+Requires the `ROOT_PERMISSION_ID` permission
+Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
 
 [.contract-item]
 [[PermissionManager-revoke-address-address-bytes32-]]
@@ -802,20 +872,20 @@ Note, that granting permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equa
 
 Revokes permission from an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier.
 
-Requires the &#x60;ROOT_PERMISSION_ID&#x60; permission.
-Note, that revoking permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equal to &#x60;ANY_ADDR&#x60; does not revoke other permissions with specific &#x60;_who&#x60; and &#x60;_where&#x60; addresses that exist in parallel.
+Requires the `ROOT_PERMISSION_ID` permission.
+Note, that revoking permissions with `_who` or `_where` equal to `ANY_ADDR` does not revoke other permissions with specific `_who` and `_where` addresses that exist in parallel.
 
 [.contract-item]
 [[PermissionManager-applySingleTargetPermissions-address-struct-PermissionLib-SingleTargetPermission---]]
 ==== `[.contract-item-name]#++applySingleTargetPermissions++#++(address _where, struct PermissionLib.SingleTargetPermission[] items)++` [.item-kind]#external#
 
-Applies an array of permission operations on a single target contracts &#x60;_where&#x60;.
+Applies an array of permission operations on a single target contracts `_where`.
 
 [.contract-item]
 [[PermissionManager-applyMultiTargetPermissions-struct-PermissionLib-MultiTargetPermission---]]
 ==== `[.contract-item-name]#++applyMultiTargetPermissions++#++(struct PermissionLib.MultiTargetPermission[] _items)++` [.item-kind]#external#
 
-Applies an array of permission operations on multiple target contracts &#x60;items[i].where&#x60;.
+Applies an array of permission operations on multiple target contracts `items[i].where`.
 
 [.contract-item]
 [[PermissionManager-isGranted-address-address-bytes32-bytes-]]
@@ -830,75 +900,75 @@ Checks if the caller address has permission on the target contract via a permiss
 Relays the question if caller address has permission on target contract via a permission identifier to a condition contract.
 Checks a condition contract by doing an external call via try/catch.
 
-If the external call fails, we return &#x60;false&#x60;.
+If the external call fails, we return `false`.
 
 [.contract-item]
 [[PermissionManager-_initializePermissionManager-address-]]
 ==== `[.contract-item-name]#++_initializePermissionManager++#++(address _initialOwner)++` [.item-kind]#internal#
 
-Grants the &#x60;ROOT_PERMISSION_ID&#x60; permission to the initial owner during initialization of the permission manager.
+Grants the `ROOT_PERMISSION_ID` permission to the initial owner during initialization of the permission manager.
 
 [.contract-item]
 [[PermissionManager-_grant-address-address-bytes32-]]
 ==== `[.contract-item-name]#++_grant++#++(address _where, address _who, bytes32 _permissionId)++` [.item-kind]#internal#
 
-This method is used in the external &#x60;grant&#x60; method of the permission manager.
+This method is used in the external `grant` method of the permission manager.
 
-Note, that granting permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equal to &#x60;ANY_ADDR&#x60; does not replace other permissions with specific &#x60;_who&#x60; and &#x60;_where&#x60; addresses that exist in parallel.
+Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
 
 [.contract-item]
 [[PermissionManager-_grantWithCondition-address-address-bytes32-contract-IPermissionCondition-]]
 ==== `[.contract-item-name]#++_grantWithCondition++#++(address _where, address _who, bytes32 _permissionId, contract IPermissionCondition _condition)++` [.item-kind]#internal#
 
-This method is used in the external &#x60;grantWithCondition&#x60; method of the permission manager.
+This method is used in the external `grantWithCondition` method of the permission manager.
 
-Note, that granting permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equal to &#x60;ANY_ADDR&#x60; does not replace other permissions with specific &#x60;_who&#x60; and &#x60;_where&#x60; addresses that exist in parallel.
+Note, that granting permissions with `_who` or `_where` equal to `ANY_ADDR` does not replace other permissions with specific `_who` and `_where` addresses that exist in parallel.
 
 [.contract-item]
 [[PermissionManager-_revoke-address-address-bytes32-]]
 ==== `[.contract-item-name]#++_revoke++#++(address _where, address _who, bytes32 _permissionId)++` [.item-kind]#internal#
 
-This method is used in the public &#x60;revoke&#x60; method of the permission manager.
+This method is used in the public `revoke` method of the permission manager.
 
-Note, that revoking permissions with &#x60;_who&#x60; or &#x60;_where&#x60; equal to &#x60;ANY_ADDR&#x60; does not revoke other permissions with specific &#x60;_who&#x60; and &#x60;_where&#x60; addresses that might have been granted in parallel.
+Note, that revoking permissions with `_who` or `_where` equal to `ANY_ADDR` does not revoke other permissions with specific `_who` and `_where` addresses that might have been granted in parallel.
 
 [.contract-item]
 [[PermissionManager-_auth-bytes32-]]
 ==== `[.contract-item-name]#++_auth++#++(bytes32 _permissionId)++` [.item-kind]#internal#
 
-A private function to be used to check permissions on the permission manager contract (&#x60;address(this)&#x60;) itself.
+A private function to be used to check permissions on the permission manager contract (`address(this)`) itself.
 
 [.contract-item]
 [[PermissionManager-permissionHash-address-address-bytes32-]]
 ==== `[.contract-item-name]#++permissionHash++#++(address _where, address _who, bytes32 _permissionId) → bytes32++` [.item-kind]#internal#
 
-Generates the hash for the &#x60;permissionsHashed&#x60; mapping obtained from the word &quot;PERMISSION&quot;, the contract address, the address owning the permission, and the permission identifier.
+Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
 
 [.contract-item]
 [[PermissionManager-isPermissionRestrictedForAnyAddr-bytes32-]]
 ==== `[.contract-item-name]#++isPermissionRestrictedForAnyAddr++#++(bytes32 _permissionId) → bool++` [.item-kind]#internal#
 
-Decides if the granting permissionId is restricted when &#x60;_who &#x3D;&#x3D; ANY_ADDR&#x60; or &#x60;_where &#x3D;&#x3D; ANY_ADDR&#x60;.
+Decides if the granting permissionId is restricted when `_who == ANY_ADDR` or `_where == ANY_ADDR`.
 
-By default, every permission is unrestricted and it is the derived contract&#x27;s responsibility to override it. Note, that the &#x60;ROOT_PERMISSION_ID&#x60; is included and not required to be set it again.
+By default, every permission is unrestricted and it is the derived contract's responsibility to override it. Note, that the `ROOT_PERMISSION_ID` is included and not required to be set it again.
 
 [.contract-item]
 [[PermissionManager-ROOT_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++ROOT_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the &#x60;grant&#x60;, &#x60;grantWithCondition&#x60;, &#x60;revoke&#x60;, and &#x60;bulk&#x60; function.
+The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
 
 [.contract-item]
 [[PermissionManager-Granted-bytes32-address-address-address-address-]]
 ==== `[.contract-item-name]#++Granted++#++(bytes32 indexed permissionId, address indexed here, address where, address indexed who, address condition)++` [.item-kind]#event#
 
-Emitted when a permission &#x60;permission&#x60; is granted in the context &#x60;here&#x60; to the address &#x60;_who&#x60; for the contract &#x60;_where&#x60;.
+Emitted when a permission `permission` is granted in the context `here` to the address `_who` for the contract `_where`.
 
 [.contract-item]
 [[PermissionManager-Revoked-bytes32-address-address-address-]]
 ==== `[.contract-item-name]#++Revoked++#++(bytes32 indexed permissionId, address indexed here, address where, address indexed who)++` [.item-kind]#event#
 
-Emitted when a permission &#x60;permission&#x60; is revoked in the context &#x60;here&#x60; from the address &#x60;_who&#x60; for the contract &#x60;_where&#x60;.
+Emitted when a permission `permission` is revoked in the context `here` from the address `_who` for the contract `_where`.
 
 [.contract-item]
 [[PermissionManager-Unauthorized-address-address-bytes32-]]
@@ -924,31 +994,31 @@ Thrown if a condition address is not a contract.
 [[PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-]]
 ==== `[.contract-item-name]#++ConditionInterfaceNotSupported++#++(contract IPermissionCondition condition)++` [.item-kind]#error#
 
-Thrown if a condition contract does not support the &#x60;IPermissionCondition&#x60; interface.
+Thrown if a condition contract does not support the `IPermissionCondition` interface.
 
 [.contract-item]
 [[PermissionManager-PermissionsForAnyAddressDisallowed--]]
 ==== `[.contract-item-name]#++PermissionsForAnyAddressDisallowed++#++()++` [.item-kind]#error#
 
-Thrown for &#x60;ROOT_PERMISSION_ID&#x60; or &#x60;EXECUTE_PERMISSION_ID&#x60; permission grants where &#x60;who&#x60; or &#x60;where&#x60; is &#x60;ANY_ADDR&#x60;.
+Thrown for `ROOT_PERMISSION_ID` or `EXECUTE_PERMISSION_ID` permission grants where `who` or `where` is `ANY_ADDR`.
 
 [.contract-item]
 [[PermissionManager-AnyAddressDisallowedForWhoAndWhere--]]
 ==== `[.contract-item-name]#++AnyAddressDisallowedForWhoAndWhere++#++()++` [.item-kind]#error#
 
-Thrown for permission grants where &#x60;who&#x60; and &#x60;where&#x60; are both &#x60;ANY_ADDR&#x60;.
+Thrown for permission grants where `who` and `where` are both `ANY_ADDR`.
 
 [.contract-item]
 [[PermissionManager-GrantWithConditionNotSupported--]]
 ==== `[.contract-item-name]#++GrantWithConditionNotSupported++#++()++` [.item-kind]#error#
 
-Thrown if &#x60;Operation.GrantWithCondition&#x60; is requested as an operation but the method does not support it.
+Thrown if `Operation.GrantWithCondition` is requested as an operation but the method does not support it.
 
 [.contract-item]
 [[PermissionManager-ANY_ADDR-address]]
 ==== `address [.contract-item-name]#++ANY_ADDR++#` [.item-kind]#internal constant#
 
-A special address encoding permissions that are valid for any address &#x60;who&#x60; or &#x60;where&#x60;.
+A special address encoding permissions that are valid for any address `who` or `where`.
 
 [.contract-item]
 [[PermissionManager-UNSET_FLAG-address]]
@@ -966,7 +1036,7 @@ A special address encoding if a permission is allowed.
 [[PermissionManager-permissionsHashed-mapping-bytes32----address-]]
 ==== `mapping(bytes32 &#x3D;&gt; address) [.contract-item-name]#++permissionsHashed++#` [.item-kind]#internal#
 
-A mapping storing permissions as hashes (i.e., &#x60;permissionHash(where, who, permissionId)&#x60;) and their status encoded by an address (unset, allowed, or redirecting to a &#x60;PermissionCondition&#x60;).
+A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status encoded by an address (unset, allowed, or redirecting to a `PermissionCondition`).
 
 :callbackMagicNumbers: pass:normal[xref:#CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-[`++callbackMagicNumbers++`]]
 :UNREGISTERED_CALLBACK: pass:normal[xref:#CallbackHandler-UNREGISTERED_CALLBACK-bytes4[`++UNREGISTERED_CALLBACK++`]]
@@ -999,12 +1069,15 @@ This callback handling functionality is intended to be used by executor contract
 [.contract-index]
 .Errors
 --
+* {xref-CallbackHandler-UnknownCallback-bytes4-bytes4-}[`++UnknownCallback(callbackSelector, magicNumber)++`]
 
 --
 
 [.contract-index]
 .Internal Variables
 --
+* {xref-CallbackHandler-callbackMagicNumbers-mapping-bytes4----bytes4-}[`++mapping(bytes4 => bytes4)  callbackMagicNumbers++`]
+* {xref-CallbackHandler-UNREGISTERED_CALLBACK-bytes4}[`++bytes4 constant UNREGISTERED_CALLBACK++`]
 
 --
 
@@ -1014,7 +1087,7 @@ This callback handling functionality is intended to be used by executor contract
 
 Handles callbacks to adaptively support ERC standards.
 
-This function is supposed to be called via &#x60;_handleCallback(msg.sig, msg.data)&#x60; in the &#x60;fallback()&#x60; function of the inheriting contract.
+This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
 
 [.contract-item]
 [[CallbackHandler-_registerCallback-bytes4-bytes4-]]
@@ -1026,7 +1099,7 @@ Registers a magic number for a callback function selector.
 [[CallbackHandler-CallbackReceived-address-bytes4-bytes-]]
 ==== `[.contract-item-name]#++CallbackReceived++#++(address sender, bytes4 indexed sig, bytes data)++` [.item-kind]#event#
 
-Emitted when &#x60;_handleCallback&#x60; is called.
+Emitted when `_handleCallback` is called.
 
 [.contract-item]
 [[CallbackHandler-UnknownCallback-bytes4-bytes4-]]
