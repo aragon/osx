@@ -7,7 +7,7 @@ Permissions between contracts and wallets allow a DAO to manage and govern its a
 
 Here, you will learn how the permissions in Aragon OSx work, how they can be granted and revoked from wallets and contracts, and how they are managed through the DAO.
 
-As we mentioned earlier, it is essential that only the right person or contract can execute a certain action. As a developer, you might have seen or used link:https://docs.openzeppelin.com/contracts/2.x/api/ownership#Ownable[modifiers such as onlyOwner] in contracts. This `onlyOwner` modifier provides basic access control to your DAO: only the `owner` address is permitted to execute the function to which the modifier is attached.
+As we mentioned earlier, it is essential that only the right person or contract can execute a certain action. As a developer, you might have seen or used link:https://docs.openzeppelin.com/contracts/2.x/api/ownership#Ownable[modifiers such as `onlyOwner`] in contracts. This `onlyOwner` modifier provides basic access control to your DAO: only the `owner` address is permitted to execute the function to which the modifier is attached.
 
 In Aragon OSx, we follow the same approach but provide more advanced functionality:
 Each `DAO` contracts includes a `PermissionManager` contract allowing to flexibly, securely, and collectively manage permissions through the DAO and, thus, govern its actions.
@@ -15,7 +15,7 @@ This `PermissionManager`, called `ACL` in previous Aragon OS versions, was one b
 The code and configuration of a DAO specifies which wallets or contracts (`who`) are allowed to call which authorized functions on a target contract (`where`).
 Identifiers, permissions, and modifiers link everything together.
 
-### Permission Identifiers
+=== Permission Identifiers
 
 To differentiate between different permissions, permission **identifiers** are used that you will frequently find at the top of Aragon OSx contracts. They look something like this:
 
@@ -23,7 +23,7 @@ To differentiate between different permissions, permission **identifiers** are u
 bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
 ```
 
-### Permissions
+=== Permissions
 
 A permission specifies an address `who` being allowed to call certain functions on a contract address `where`. In the `PermissionManager` contract, permissions are defined as the concatenation of the word `"PERMISSION"` with the `who` and `where` address, as well as the `bytes32` permission identifier `permissionId`.
 
@@ -45,7 +45,7 @@ mapping(bytes32 => address) internal permissionsHashed;
 
 Here, the `bytes32` keys are the permission hashes and the `address` values are either zero-address flags, such as `ALLOW_FLAG = address(2)` and `UNSET_FLAG = address(0)` indicating if the permission is set, or an actual address pointing to a `PermissionCondition` contract, which is discussed in the next section of this guide.
 
-### Authorization Modifiers
+=== Authorization Modifiers
 
 Using **authorization modifiers** is how we make functions permissioned. Permissions are associated with functions by adding the `auth` modifier, which includes the permission identifier in the function’s definition header.
 
@@ -63,11 +63,11 @@ function execute(
   returns (bytes[] memory execResults, uint256 failureMap);
 ```
 
-### Managing Permissions
+=== Managing Permissions
 
 To manage permissions, the DAO contract has the `grant`, `revoke` and `grantWithCondition` functions in its public interface.
 
-#### Granting and Revoking Permissions
+==== Granting and Revoking Permissions
 
 The `grant` and `revoke` functions are the main functions we use to manage permissions.
 Both receive the `_permissionId` identifier of the permission and the `_where` and `_who` addresses as arguments.
@@ -93,7 +93,7 @@ This means, that these functions can only be called through the DAO’s `execute
 NOTE: Typically, the `EXECUTE_PERMISSION_ID` permission is granted to governance contracts (such as a majority voting plugin owned by the DAO or a multi-sig). Accordingly, a proposal is often required to change permissions.
 Exceptions are, again, the xref:framework/dao-factory-registry.adoc[DAO creation] and xref:framework/plugin-setup-processor.adoc[plugin setup] processes.
 
-#### Granting Permission with Conditions
+==== Granting Permission with Conditions
 
 Aragon OSx supports relaying the authorization of a function call to another contract inheriting from the `IPermissionCondition` interface. This works by granting the permission with the `grantWithCondition` function
 
@@ -106,13 +106,11 @@ function grantWithCondition(
 ) external auth(_where, ROOT_PERMISSION_ID) {}
 ```
 
-and specifying the `_condition` contract address. This provides full flexibility to customize the conditions under which the function call is allowed.
-
-Typically, conditions are written specifically for and installed together with xref:core/plugins.adoc[plugins]
+and specifying the `_condition` contract address. This provides full flexibility to customize the conditions under which the function call is allowed. Typically, conditions are written specifically for and installed together with xref:core/plugins.adoc[plugins].
 
 To learn more about this advanced topic and possible applications, visit the xref:guide-set-up-dao/custom-permission-condition.adoc[permission conditions].
 
-#### Granting Permission to `ANY_ADDR`
+==== Granting Permission to `ANY_ADDR`
 
 In combination with conditions, the arguments `_where` and `_who` can be set to `ANY_ADDR = address(type(uint160).max)`.
 Granting a permission with `_who: ANY_ADDR` has the effect that any address can now call the function so that it behaves as if the `auth` modifier is not present.
@@ -137,7 +135,7 @@ Moreover, if a condition is set, we return its `isGranted` result and do not fal
 2. Condition with generic `_who: ANY_ADDR` and specific `_where`.
 3. Condition with specific `_where` and generic `_who: ANY_ADDR`.
 
-### Permissions Native to the `DAO` Contract
+=== Permissions Native to the DAO Contract
 
 The following functions in the DAO are permissioned:
 

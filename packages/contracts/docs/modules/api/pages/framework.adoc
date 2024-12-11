@@ -7,14 +7,6 @@
 :xref-DAOFactory-daoBase-address: xref:framework.adoc#DAOFactory-daoBase-address
 :xref-DAOFactory-daoRegistry-contract-DAORegistry: xref:framework.adoc#DAOFactory-daoRegistry-contract-DAORegistry
 :xref-DAOFactory-pluginSetupProcessor-contract-PluginSetupProcessor: xref:framework.adoc#DAOFactory-pluginSetupProcessor-contract-PluginSetupProcessor
-:xref-DAOFactory-NoPluginProvided--: xref:framework.adoc#DAOFactory-NoPluginProvided--
-:xref-DAOFactory-ROOT_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-ROOT_PERMISSION_ID-bytes32
-:xref-DAOFactory-UPGRADE_DAO_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-UPGRADE_DAO_PERMISSION_ID-bytes32
-:xref-DAOFactory-SET_TRUSTED_FORWARDER_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-SET_TRUSTED_FORWARDER_PERMISSION_ID-bytes32
-:xref-DAOFactory-SET_METADATA_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-SET_METADATA_PERMISSION_ID-bytes32
-:xref-DAOFactory-REGISTER_STANDARD_CALLBACK_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-REGISTER_STANDARD_CALLBACK_PERMISSION_ID-bytes32
-:xref-DAOFactory-EXECUTE_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-EXECUTE_PERMISSION_ID-bytes32
-:xref-DAOFactory-APPLY_INSTALLATION_PERMISSION_ID-bytes32: xref:framework.adoc#DAOFactory-APPLY_INSTALLATION_PERMISSION_ID-bytes32
 :xref-PluginRepoFactory-constructor-contract-PluginRepoRegistry-: xref:framework.adoc#PluginRepoFactory-constructor-contract-PluginRepoRegistry-
 :xref-PluginRepoFactory-supportsInterface-bytes4-: xref:framework.adoc#PluginRepoFactory-supportsInterface-bytes4-
 :xref-PluginRepoFactory-createPluginRepo-string-address-: xref:framework.adoc#PluginRepoFactory-createPluginRepo-string-address-
@@ -35,10 +27,6 @@
 :xref-InterfaceBasedRegistry-targetInterfaceId-bytes4: xref:framework.adoc#InterfaceBasedRegistry-targetInterfaceId-bytes4
 :xref-InterfaceBasedRegistry-entries-mapping-address----bool-: xref:framework.adoc#InterfaceBasedRegistry-entries-mapping-address----bool-
 :xref-DAORegistry-DAORegistered-address-address-string-: xref:framework.adoc#DAORegistry-DAORegistered-address-address-string-
-:xref-DAORegistry-InvalidDaoSubdomain-string-: xref:framework.adoc#DAORegistry-InvalidDaoSubdomain-string-
-:xref-InterfaceBasedRegistry-ContractAlreadyRegistered-address-: xref:framework.adoc#InterfaceBasedRegistry-ContractAlreadyRegistered-address-
-:xref-InterfaceBasedRegistry-ContractInterfaceInvalid-address-: xref:framework.adoc#InterfaceBasedRegistry-ContractInterfaceInvalid-address-
-:xref-InterfaceBasedRegistry-ContractERC165SupportInvalid-address-: xref:framework.adoc#InterfaceBasedRegistry-ContractERC165SupportInvalid-address-
 :xref-PluginRepoRegistry-constructor--: xref:framework.adoc#PluginRepoRegistry-constructor--
 :xref-PluginRepoRegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-: xref:framework.adoc#PluginRepoRegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-
 :xref-PluginRepoRegistry-registerPluginRepo-string-address-: xref:framework.adoc#PluginRepoRegistry-registerPluginRepo-string-address-
@@ -51,11 +39,6 @@
 :xref-InterfaceBasedRegistry-targetInterfaceId-bytes4: xref:framework.adoc#InterfaceBasedRegistry-targetInterfaceId-bytes4
 :xref-InterfaceBasedRegistry-entries-mapping-address----bool-: xref:framework.adoc#InterfaceBasedRegistry-entries-mapping-address----bool-
 :xref-PluginRepoRegistry-PluginRepoRegistered-string-address-: xref:framework.adoc#PluginRepoRegistry-PluginRepoRegistered-string-address-
-:xref-PluginRepoRegistry-InvalidPluginSubdomain-string-: xref:framework.adoc#PluginRepoRegistry-InvalidPluginSubdomain-string-
-:xref-PluginRepoRegistry-EmptyPluginRepoSubdomain--: xref:framework.adoc#PluginRepoRegistry-EmptyPluginRepoSubdomain--
-:xref-InterfaceBasedRegistry-ContractAlreadyRegistered-address-: xref:framework.adoc#InterfaceBasedRegistry-ContractAlreadyRegistered-address-
-:xref-InterfaceBasedRegistry-ContractInterfaceInvalid-address-: xref:framework.adoc#InterfaceBasedRegistry-ContractInterfaceInvalid-address-
-:xref-InterfaceBasedRegistry-ContractERC165SupportInvalid-address-: xref:framework.adoc#InterfaceBasedRegistry-ContractERC165SupportInvalid-address-
 :xref-PluginRepo-constructor--: xref:framework.adoc#PluginRepo-constructor--
 :xref-PluginRepo-initialize-address-: xref:framework.adoc#PluginRepo-initialize-address-
 :xref-PluginRepo-initializeFrom-uint8-3--bytes-: xref:framework.adoc#PluginRepo-initializeFrom-uint8-3--bytes-
@@ -92,27 +75,6 @@
 :xref-PermissionManager-Revoked-bytes32-address-address-address-: xref:core.adoc#PermissionManager-Revoked-bytes32-address-address-address-
 :xref-IPluginRepo-VersionCreated-uint8-uint16-address-bytes-: xref:framework.adoc#IPluginRepo-VersionCreated-uint8-uint16-address-bytes-
 :xref-IPluginRepo-ReleaseMetadataUpdated-uint8-bytes-: xref:framework.adoc#IPluginRepo-ReleaseMetadataUpdated-uint8-bytes-
-:xref-PluginRepo-VersionHashDoesNotExist-bytes32-: xref:framework.adoc#PluginRepo-VersionHashDoesNotExist-bytes32-
-:xref-PluginRepo-InvalidPluginSetupInterface--: xref:framework.adoc#PluginRepo-InvalidPluginSetupInterface--
-:xref-PluginRepo-ReleaseZeroNotAllowed--: xref:framework.adoc#PluginRepo-ReleaseZeroNotAllowed--
-:xref-PluginRepo-InvalidReleaseIncrement-uint8-uint8-: xref:framework.adoc#PluginRepo-InvalidReleaseIncrement-uint8-uint8-
-:xref-PluginRepo-PluginSetupAlreadyInPreviousRelease-uint8-uint16-address-: xref:framework.adoc#PluginRepo-PluginSetupAlreadyInPreviousRelease-uint8-uint16-address-
-:xref-PluginRepo-EmptyReleaseMetadata--: xref:framework.adoc#PluginRepo-EmptyReleaseMetadata--
-:xref-PluginRepo-ReleaseDoesNotExist--: xref:framework.adoc#PluginRepo-ReleaseDoesNotExist--
-:xref-PermissionManager-Unauthorized-address-address-bytes32-: xref:core.adoc#PermissionManager-Unauthorized-address-address-bytes32-
-:xref-PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-: xref:core.adoc#PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-
-:xref-PermissionManager-ConditionNotAContract-contract-IPermissionCondition-: xref:core.adoc#PermissionManager-ConditionNotAContract-contract-IPermissionCondition-
-:xref-PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-: xref:core.adoc#PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-
-:xref-PermissionManager-PermissionsForAnyAddressDisallowed--: xref:core.adoc#PermissionManager-PermissionsForAnyAddressDisallowed--
-:xref-PermissionManager-AnyAddressDisallowedForWhoAndWhere--: xref:core.adoc#PermissionManager-AnyAddressDisallowedForWhoAndWhere--
-:xref-PermissionManager-GrantWithConditionNotSupported--: xref:core.adoc#PermissionManager-GrantWithConditionNotSupported--
-:xref-PluginRepo-buildsPerRelease-mapping-uint8----uint16-: xref:framework.adoc#PluginRepo-buildsPerRelease-mapping-uint8----uint16-
-:xref-PluginRepo-versions-mapping-bytes32----struct-PluginRepo-Version-: xref:framework.adoc#PluginRepo-versions-mapping-bytes32----struct-PluginRepo-Version-
-:xref-PluginRepo-latestTagHashForPluginSetup-mapping-address----bytes32-: xref:framework.adoc#PluginRepo-latestTagHashForPluginSetup-mapping-address----bytes32-
-:xref-PermissionManager-ANY_ADDR-address: xref:core.adoc#PermissionManager-ANY_ADDR-address
-:xref-PermissionManager-UNSET_FLAG-address: xref:core.adoc#PermissionManager-UNSET_FLAG-address
-:xref-PermissionManager-ALLOW_FLAG-address: xref:core.adoc#PermissionManager-ALLOW_FLAG-address
-:xref-PermissionManager-permissionsHashed-mapping-bytes32----address-: xref:core.adoc#PermissionManager-permissionsHashed-mapping-bytes32----address-
 :xref-PluginSetupProcessor-canApply-address-bytes32-: xref:framework.adoc#PluginSetupProcessor-canApply-address-bytes32-
 :xref-PluginSetupProcessor-constructor-contract-PluginRepoRegistry-: xref:framework.adoc#PluginSetupProcessor-constructor-contract-PluginRepoRegistry-
 :xref-PluginSetupProcessor-prepareInstallation-address-struct-PluginSetupProcessor-PrepareInstallationParams-: xref:framework.adoc#PluginSetupProcessor-prepareInstallation-address-struct-PluginSetupProcessor-PrepareInstallationParams-
@@ -147,7 +109,7 @@
 
 The natspec generated API for the framework contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
 
-=== Factories
+== Factories
 
 :daoBase: pass:normal[xref:#DAOFactory-daoBase-address[`++daoBase++`]]
 :daoRegistry: pass:normal[xref:#DAOFactory-daoRegistry-contract-DAORegistry[`++daoRegistry++`]]
@@ -203,7 +165,6 @@ The natspec generated API for the framework contracts. You can also find the con
 [.contract-index]
 .Errors
 --
-* {xref-DAOFactory-NoPluginProvided--}[`++NoPluginProvided()++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -222,13 +183,6 @@ The natspec generated API for the framework contracts. You can also find the con
 [.contract-index]
 .Internal Variables
 --
-* {xref-DAOFactory-ROOT_PERMISSION_ID-bytes32}[`++bytes32  ROOT_PERMISSION_ID++`]
-* {xref-DAOFactory-UPGRADE_DAO_PERMISSION_ID-bytes32}[`++bytes32  UPGRADE_DAO_PERMISSION_ID++`]
-* {xref-DAOFactory-SET_TRUSTED_FORWARDER_PERMISSION_ID-bytes32}[`++bytes32  SET_TRUSTED_FORWARDER_PERMISSION_ID++`]
-* {xref-DAOFactory-SET_METADATA_PERMISSION_ID-bytes32}[`++bytes32  SET_METADATA_PERMISSION_ID++`]
-* {xref-DAOFactory-REGISTER_STANDARD_CALLBACK_PERMISSION_ID-bytes32}[`++bytes32  REGISTER_STANDARD_CALLBACK_PERMISSION_ID++`]
-* {xref-DAOFactory-EXECUTE_PERMISSION_ID-bytes32}[`++bytes32  EXECUTE_PERMISSION_ID++`]
-* {xref-DAOFactory-APPLY_INSTALLATION_PERMISSION_ID-bytes32}[`++bytes32  APPLY_INSTALLATION_PERMISSION_ID++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -262,13 +216,13 @@ Checks if this or the parent contract supports an interface by its ID.
 
 Creates a new DAO, registers it in the DAO registry, and optionally installs plugins via the plugin setup processor.
 
-If `_pluginSettings` is empty, the caller is granted `EXECUTE_PERMISSION` on the DAO.
+If &#x60;_pluginSettings&#x60; is empty, the caller is granted &#x60;EXECUTE_PERMISSION&#x60; on the DAO.
 
 [.contract-item]
 [[DAOFactory-_createDAO-struct-DAOFactory-DAOSettings-]]
 ==== `[.contract-item-name]#++_createDAO++#++(struct DAOFactory.DAOSettings _daoSettings) → contract DAO dao++` [.item-kind]#internal#
 
-Deploys a new DAO `ERC1967` proxy, and initialize it with this contract as the initial owner.
+Deploys a new DAO &#x60;ERC1967&#x60; proxy, and initialize it with this contract as the initial owner.
 
 [.contract-item]
 [[DAOFactory-_setDAOPermissions-address-]]
@@ -280,25 +234,25 @@ Sets the required permissions for the new DAO.
 [[DAOFactory-daoBase-address]]
 ==== `[.contract-item-name]#++daoBase++#++() → address++` [.item-kind]#public#
 
-The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
+The DAO base contract, to be used for creating new &#x60;DAO&#x60;s via &#x60;createERC1967Proxy&#x60; function.
 
 [.contract-item]
 [[DAOFactory-daoRegistry-contract-DAORegistry]]
 ==== `[.contract-item-name]#++daoRegistry++#++() → contract DAORegistry++` [.item-kind]#public#
 
-The DAO registry listing the `DAO` contracts created via this contract.
+The DAO registry listing the &#x60;DAO&#x60; contracts created via this contract.
 
 [.contract-item]
 [[DAOFactory-pluginSetupProcessor-contract-PluginSetupProcessor]]
 ==== `[.contract-item-name]#++pluginSetupProcessor++#++() → contract PluginSetupProcessor++` [.item-kind]#public#
 
-The plugin setup processor for installing plugins on the newly created `DAO`s.
+The plugin setup processor for installing plugins on the newly created &#x60;DAO&#x60;s.
 
 [.contract-item]
 [[DAOFactory-NoPluginProvided--]]
 ==== `[.contract-item-name]#++NoPluginProvided++#++()++` [.item-kind]#error#
 
-Thrown if `PluginSettings` array is empty, and no plugin is provided.
+Thrown if &#x60;PluginSettings&#x60; array is empty, and no plugin is provided.
 
 [.contract-item]
 [[DAOFactory-ROOT_PERMISSION_ID-bytes32]]
@@ -372,7 +326,7 @@ Thrown if `PluginSettings` array is empty, and no plugin is provided.
 [[PluginRepoFactory-constructor-contract-PluginRepoRegistry-]]
 ==== `[.contract-item-name]#++constructor++#++(contract PluginRepoRegistry _pluginRepoRegistry)++` [.item-kind]#public#
 
-Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
+Initializes the addresses of the Aragon plugin registry and &#x60;PluginRepo&#x60; base contract to proxy to.
 
 [.contract-item]
 [[PluginRepoFactory-supportsInterface-bytes4-]]
@@ -384,15 +338,15 @@ Checks if this or the parent contract supports an interface by its ID.
 [[PluginRepoFactory-createPluginRepo-string-address-]]
 ==== `[.contract-item-name]#++createPluginRepo++#++(string _subdomain, address _initialOwner) → contract PluginRepo++` [.item-kind]#external#
 
-Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
+Creates a plugin repository proxy pointing to the &#x60;pluginRepoBase&#x60; implementation and registers it in the Aragon plugin registry.
 
 [.contract-item]
 [[PluginRepoFactory-createPluginRepoWithFirstVersion-string-address-address-bytes-bytes-]]
 ==== `[.contract-item-name]#++createPluginRepoWithFirstVersion++#++(string _subdomain, address _pluginSetup, address _maintainer, bytes _releaseMetadata, bytes _buildMetadata) → contract PluginRepo pluginRepo++` [.item-kind]#external#
 
-Creates and registers a `PluginRepo` with an ENS subdomain and publishes an initial version `1.1`.
+Creates and registers a &#x60;PluginRepo&#x60; with an ENS subdomain and publishes an initial version &#x60;1.1&#x60;.
 
-After the creation of the `PluginRepo` and release of the first version by the factory, ownership is transferred to the `_maintainer` address.
+After the creation of the &#x60;PluginRepo&#x60; and release of the first version by the factory, ownership is transferred to the &#x60;_maintainer&#x60; address.
 
 [.contract-item]
 [[PluginRepoFactory-_setPluginRepoPermissions-contract-PluginRepo-address-]]
@@ -400,15 +354,15 @@ After the creation of the `PluginRepo` and release of the first version by the f
 
 Set the final permissions for the published plugin repository maintainer. All permissions are revoked from the plugin factory and granted to the specified plugin maintainer.
 
-The plugin maintainer is granted the `MAINTAINER_PERMISSION_ID`, `UPGRADE_REPO_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
+The plugin maintainer is granted the &#x60;MAINTAINER_PERMISSION_ID&#x60;, &#x60;UPGRADE_REPO_PERMISSION_ID&#x60;, and &#x60;ROOT_PERMISSION_ID&#x60;.
 
 [.contract-item]
 [[PluginRepoFactory-_createPluginRepo-string-address-]]
 ==== `[.contract-item-name]#++_createPluginRepo++#++(string _subdomain, address _initialOwner) → contract PluginRepo pluginRepo++` [.item-kind]#internal#
 
-Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
+Internal method creating a &#x60;PluginRepo&#x60; via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
 
-Passing an empty `_subdomain` will cause the transaction to revert.
+Passing an empty &#x60;_subdomain&#x60; will cause the transaction to revert.
 
 [.contract-item]
 [[PluginRepoFactory-pluginRepoRegistry-contract-PluginRepoRegistry]]
@@ -420,9 +374,9 @@ The Aragon plugin registry contract.
 [[PluginRepoFactory-pluginRepoBase-address]]
 ==== `[.contract-item-name]#++pluginRepoBase++#++() → address++` [.item-kind]#public#
 
-The address of the `PluginRepo` base contract to proxy to..
+The address of the &#x60;PluginRepo&#x60; base contract to proxy to..
 
-=== Registries
+== Registries
 
 :REGISTER_DAO_PERMISSION_ID: pass:normal[xref:#DAORegistry-REGISTER_DAO_PERMISSION_ID-bytes32[`++REGISTER_DAO_PERMISSION_ID++`]]
 :subdomainRegistrar: pass:normal[xref:#DAORegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar[`++subdomainRegistrar++`]]
@@ -526,7 +480,6 @@ The address of the `PluginRepo` base contract to proxy to..
 [.contract-index]
 .Errors
 --
-* {xref-DAORegistry-InvalidDaoSubdomain-string-}[`++InvalidDaoSubdomain(subdomain)++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -536,9 +489,6 @@ The address of the `PluginRepo` base contract to proxy to..
 
 [.contract-subindex-inherited]
 .InterfaceBasedRegistry
-* {xref-InterfaceBasedRegistry-ContractAlreadyRegistered-address-}[`++ContractAlreadyRegistered(registrant)++`]
-* {xref-InterfaceBasedRegistry-ContractInterfaceInvalid-address-}[`++ContractInterfaceInvalid(registrant)++`]
-* {xref-InterfaceBasedRegistry-ContractERC165SupportInvalid-address-}[`++ContractERC165SupportInvalid(registrant)++`]
 
 [.contract-subindex-inherited]
 .DaoAuthorizableUpgradeable
@@ -587,7 +537,7 @@ A subdomain is unique within the Aragon DAO framework and can get stored here.
 [[DAORegistry-REGISTER_DAO_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++REGISTER_DAO_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `register` function.
+The ID of the permission required to call the &#x60;register&#x60; function.
 
 [.contract-item]
 [[DAORegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar]]
@@ -605,7 +555,7 @@ Emitted when a new DAO is registered.
 [[DAORegistry-InvalidDaoSubdomain-string-]]
 ==== `[.contract-item-name]#++InvalidDaoSubdomain++#++(string subdomain)++` [.item-kind]#error#
 
-Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
+Thrown if the DAO subdomain doesn&#x27;t match the regex &#x60;[0-9a-z\-]&#x60;
 
 :REGISTER_PLUGIN_REPO_PERMISSION_ID: pass:normal[xref:#PluginRepoRegistry-REGISTER_PLUGIN_REPO_PERMISSION_ID-bytes32[`++REGISTER_PLUGIN_REPO_PERMISSION_ID++`]]
 :subdomainRegistrar: pass:normal[xref:#PluginRepoRegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar[`++subdomainRegistrar++`]]
@@ -710,8 +660,6 @@ Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
 [.contract-index]
 .Errors
 --
-* {xref-PluginRepoRegistry-InvalidPluginSubdomain-string-}[`++InvalidPluginSubdomain(subdomain)++`]
-* {xref-PluginRepoRegistry-EmptyPluginRepoSubdomain--}[`++EmptyPluginRepoSubdomain()++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -721,9 +669,6 @@ Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
 
 [.contract-subindex-inherited]
 .InterfaceBasedRegistry
-* {xref-InterfaceBasedRegistry-ContractAlreadyRegistered-address-}[`++ContractAlreadyRegistered(registrant)++`]
-* {xref-InterfaceBasedRegistry-ContractInterfaceInvalid-address-}[`++ContractInterfaceInvalid(registrant)++`]
-* {xref-InterfaceBasedRegistry-ContractERC165SupportInvalid-address-}[`++ContractERC165SupportInvalid(registrant)++`]
 
 [.contract-subindex-inherited]
 .DaoAuthorizableUpgradeable
@@ -758,7 +703,7 @@ Used to disallow initializing the implementation contract by an attacker for ext
 [[PluginRepoRegistry-initialize-contract-IDAO-contract-ENSSubdomainRegistrar-]]
 ==== `[.contract-item-name]#++initialize++#++(contract IDAO _dao, contract ENSSubdomainRegistrar _subdomainRegistrar)++` [.item-kind]#external#
 
-Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
+Initializes the contract by setting calling the &#x60;InterfaceBasedRegistry&#x60; base class initialize method.
 
 [.contract-item]
 [[PluginRepoRegistry-registerPluginRepo-string-address-]]
@@ -770,7 +715,7 @@ Registers a plugin repository with a subdomain and address.
 [[PluginRepoRegistry-REGISTER_PLUGIN_REPO_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++REGISTER_PLUGIN_REPO_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `register` function.
+The ID of the permission required to call the &#x60;register&#x60; function.
 
 [.contract-item]
 [[PluginRepoRegistry-subdomainRegistrar-contract-ENSSubdomainRegistrar]]
@@ -788,7 +733,7 @@ Emitted if a new plugin repository is registered.
 [[PluginRepoRegistry-InvalidPluginSubdomain-string-]]
 ==== `[.contract-item-name]#++InvalidPluginSubdomain++#++(string subdomain)++` [.item-kind]#error#
 
-Thrown if the plugin subdomain doesn't match the regex `[0-9a-z\-]`
+Thrown if the plugin subdomain doesn&#x27;t match the regex &#x60;[0-9a-z\-]&#x60;
 
 [.contract-item]
 [[PluginRepoRegistry-EmptyPluginRepoSubdomain--]]
@@ -796,7 +741,7 @@ Thrown if the plugin subdomain doesn't match the regex `[0-9a-z\-]`
 
 Thrown if the plugin repository subdomain is empty.
 
-=== Framework
+== Framework 
 
 :Tag: pass:normal[xref:#PluginRepo-Tag[`++Tag++`]]
 :Version: pass:normal[xref:#PluginRepo-Version[`++Version++`]]
@@ -949,23 +894,9 @@ Thrown if the plugin repository subdomain is empty.
 [.contract-index]
 .Errors
 --
-* {xref-PluginRepo-VersionHashDoesNotExist-bytes32-}[`++VersionHashDoesNotExist(versionHash)++`]
-* {xref-PluginRepo-InvalidPluginSetupInterface--}[`++InvalidPluginSetupInterface()++`]
-* {xref-PluginRepo-ReleaseZeroNotAllowed--}[`++ReleaseZeroNotAllowed()++`]
-* {xref-PluginRepo-InvalidReleaseIncrement-uint8-uint8-}[`++InvalidReleaseIncrement(latestRelease, newRelease)++`]
-* {xref-PluginRepo-PluginSetupAlreadyInPreviousRelease-uint8-uint16-address-}[`++PluginSetupAlreadyInPreviousRelease(release, build, pluginSetup)++`]
-* {xref-PluginRepo-EmptyReleaseMetadata--}[`++EmptyReleaseMetadata()++`]
-* {xref-PluginRepo-ReleaseDoesNotExist--}[`++ReleaseDoesNotExist()++`]
 
 [.contract-subindex-inherited]
 .PermissionManager
-* {xref-PermissionManager-Unauthorized-address-address-bytes32-}[`++Unauthorized(where, who, permissionId)++`]
-* {xref-PermissionManager-PermissionAlreadyGrantedForDifferentCondition-address-address-bytes32-address-address-}[`++PermissionAlreadyGrantedForDifferentCondition(where, who, permissionId, currentCondition, newCondition)++`]
-* {xref-PermissionManager-ConditionNotAContract-contract-IPermissionCondition-}[`++ConditionNotAContract(condition)++`]
-* {xref-PermissionManager-ConditionInterfaceNotSupported-contract-IPermissionCondition-}[`++ConditionInterfaceNotSupported(condition)++`]
-* {xref-PermissionManager-PermissionsForAnyAddressDisallowed--}[`++PermissionsForAnyAddressDisallowed()++`]
-* {xref-PermissionManager-AnyAddressDisallowedForWhoAndWhere--}[`++AnyAddressDisallowedForWhoAndWhere()++`]
-* {xref-PermissionManager-GrantWithConditionNotSupported--}[`++GrantWithConditionNotSupported()++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -1002,16 +933,9 @@ Thrown if the plugin repository subdomain is empty.
 [.contract-index]
 .Internal Variables
 --
-* {xref-PluginRepo-buildsPerRelease-mapping-uint8----uint16-}[`++mapping(uint8 => uint16)  buildsPerRelease++`]
-* {xref-PluginRepo-versions-mapping-bytes32----struct-PluginRepo-Version-}[`++mapping(bytes32 => struct PluginRepo.Version)  versions++`]
-* {xref-PluginRepo-latestTagHashForPluginSetup-mapping-address----bytes32-}[`++mapping(address => bytes32)  latestTagHashForPluginSetup++`]
 
 [.contract-subindex-inherited]
 .PermissionManager
-* {xref-PermissionManager-ANY_ADDR-address}[`++address constant ANY_ADDR++`]
-* {xref-PermissionManager-UNSET_FLAG-address}[`++address constant UNSET_FLAG++`]
-* {xref-PermissionManager-ALLOW_FLAG-address}[`++address constant ALLOW_FLAG++`]
-* {xref-PermissionManager-permissionsHashed-mapping-bytes32----address-}[`++mapping(bytes32 => address)  permissionsHashed++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -1057,7 +981,7 @@ Used to disallow initializing the implementation contract by an attacker for ext
 
 Initializes the contract by
 - initializing the permission manager
-- granting the `MAINTAINER_PERMISSION_ID` permission to the initial owner.
+- granting the &#x60;MAINTAINER_PERMISSION_ID&#x60; permission to the initial owner.
 
 This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
 
@@ -1073,13 +997,13 @@ This function is a placeholder until we require reinitialization.
 [[PluginRepo-createVersion-uint8-address-bytes-bytes-]]
 ==== `[.contract-item-name]#++createVersion++#++(uint8 _release, address _pluginSetup, bytes _buildMetadata, bytes _releaseMetadata)++` [.item-kind]#external#
 
-Creates a new plugin version as the latest build for an existing release number or the first build for a new release number for the provided `PluginSetup` contract address and metadata.
+Creates a new plugin version as the latest build for an existing release number or the first build for a new release number for the provided &#x60;PluginSetup&#x60; contract address and metadata.
 
 [.contract-item]
 [[PluginRepo-updateReleaseMetadata-uint8-bytes-]]
 ==== `[.contract-item-name]#++updateReleaseMetadata++#++(uint8 _release, bytes _releaseMetadata)++` [.item-kind]#external#
 
-Updates the metadata for release with content `@fromHex(_releaseMetadata)`.
+Updates the metadata for release with content &#x60;@fromHex(_releaseMetadata)&#x60;.
 
 [.contract-item]
 [[PluginRepo-getLatestVersion-uint8-]]
@@ -1123,7 +1047,7 @@ The hash of the version tag obtained from the packed, bytes-encoded release and 
 
 Internal method authorizing the upgrade of the contract via the [upgradeability mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 
-The caller must have the `UPGRADE_REPO_PERMISSION_ID` permission.
+The caller must have the &#x60;UPGRADE_REPO_PERMISSION_ID&#x60; permission.
 
 [.contract-item]
 [[PluginRepo-supportsInterface-bytes4-]]
@@ -1135,13 +1059,13 @@ Checks if this or the parent contract supports an interface by its ID.
 [[PluginRepo-MAINTAINER_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++MAINTAINER_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `createVersion` function.
+The ID of the permission required to call the &#x60;createVersion&#x60; function.
 
 [.contract-item]
 [[PluginRepo-UPGRADE_REPO_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++UPGRADE_REPO_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `createVersion` function.
+The ID of the permission required to call the &#x60;createVersion&#x60; function.
 
 [.contract-item]
 [[PluginRepo-latestRelease-uint8]]
@@ -1161,7 +1085,7 @@ Thrown if a version does not exist.
 [[PluginRepo-InvalidPluginSetupInterface--]]
 ==== `[.contract-item-name]#++InvalidPluginSetupInterface++#++()++` [.item-kind]#error#
 
-Thrown if a plugin setup contract does not inherit from `PluginSetup`.
+Thrown if a plugin setup contract does not inherit from &#x60;PluginSetup&#x60;.
 
 [.contract-item]
 [[PluginRepo-ReleaseZeroNotAllowed--]]
@@ -1309,16 +1233,6 @@ This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the 
 [.contract-index]
 .Errors
 --
-* {xref-PluginSetupProcessor-SetupApplicationUnauthorized-address-address-bytes32-}[`++SetupApplicationUnauthorized(dao, caller, permissionId)++`]
-* {xref-PluginSetupProcessor-PluginNonupgradeable-address-}[`++PluginNonupgradeable(plugin)++`]
-* {xref-PluginSetupProcessor-PluginProxyUpgradeFailed-address-address-bytes-}[`++PluginProxyUpgradeFailed(proxy, implementation, initData)++`]
-* {xref-PluginSetupProcessor-IPluginNotSupported-address-}[`++IPluginNotSupported(plugin)++`]
-* {xref-PluginSetupProcessor-PluginRepoNonexistent--}[`++PluginRepoNonexistent()++`]
-* {xref-PluginSetupProcessor-SetupAlreadyPrepared-bytes32-}[`++SetupAlreadyPrepared(preparedSetupId)++`]
-* {xref-PluginSetupProcessor-SetupNotApplicable-bytes32-}[`++SetupNotApplicable(preparedSetupId)++`]
-* {xref-PluginSetupProcessor-InvalidUpdateVersion-struct-PluginRepo-Tag-struct-PluginRepo-Tag-}[`++InvalidUpdateVersion(currentVersionTag, newVersionTag)++`]
-* {xref-PluginSetupProcessor-PluginAlreadyInstalled--}[`++PluginAlreadyInstalled()++`]
-* {xref-PluginSetupProcessor-InvalidAppliedSetupId-bytes32-bytes32-}[`++InvalidAppliedSetupId(currentAppliedSetupId, appliedSetupId)++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -1358,7 +1272,7 @@ Applies the permissions of a prepared installation to a DAO.
 
 Prepares the update of an UUPS upgradeable plugin.
 
-The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happened) on which the update is prepared for.
+The list of &#x60;_params.setupPayload.currentHelpers&#x60; has to be specified in the same order as they were returned from previous setups preparation steps (the latest &#x60;prepareInstallation&#x60; or &#x60;prepareUpdate&#x60; step that has happened) on which the update is prepared for.
 
 [.contract-item]
 [[PluginSetupProcessor-applyUpdate-address-struct-PluginSetupProcessor-ApplyUpdateParams-]]
@@ -1372,7 +1286,7 @@ Applies the permissions of a prepared update of an UUPS upgradeable proxy contra
 
 Prepares the uninstallation of a plugin.
 
-The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happened) on which the uninstallation was prepared for.
+The list of &#x60;_params.setupPayload.currentHelpers&#x60; has to be specified in the same order as they were returned from previous setups preparation steps (the latest &#x60;prepareInstallation&#x60; or &#x60;prepareUpdate&#x60; step that has happened) on which the uninstallation was prepared for.
 
 [.contract-item]
 [[PluginSetupProcessor-applyUninstallation-address-struct-PluginSetupProcessor-ApplyUninstallationParams-]]
@@ -1380,33 +1294,33 @@ The list of `_params.setupPayload.currentHelpers` has to be specified in the sam
 
 Applies the permissions of a prepared uninstallation to a DAO.
 
-The list of `_params.setupPayload.currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happened) on which the uninstallation was prepared for.
+The list of &#x60;_params.setupPayload.currentHelpers&#x60; has to be specified in the same order as they were returned from previous setups preparation steps (the latest &#x60;prepareInstallation&#x60; or &#x60;prepareUpdate&#x60; step that has happened) on which the uninstallation was prepared for.
 
 [.contract-item]
 [[PluginSetupProcessor-validatePreparedSetupId-bytes32-bytes32-]]
 ==== `[.contract-item-name]#++validatePreparedSetupId++#++(bytes32 pluginInstallationId, bytes32 preparedSetupId)++` [.item-kind]#public#
 
-Validates that a setup ID can be applied for `applyInstallation`, `applyUpdate`, or `applyUninstallation`.
+Validates that a setup ID can be applied for &#x60;applyInstallation&#x60;, &#x60;applyUpdate&#x60;, or &#x60;applyUninstallation&#x60;.
 
-If the block number stored in `states[pluginInstallationId].blockNumber` exceeds the one stored in `pluginState.preparedSetupIdToBlockNumber[preparedSetupId]`, the prepared setup with `preparedSetupId` is outdated and not applicable anymore.
+If the block number stored in &#x60;states[pluginInstallationId].blockNumber&#x60; exceeds the one stored in &#x60;pluginState.preparedSetupIdToBlockNumber[preparedSetupId]&#x60;, the prepared setup with &#x60;preparedSetupId&#x60; is outdated and not applicable anymore.
 
 [.contract-item]
 [[PluginSetupProcessor-APPLY_INSTALLATION_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++APPLY_INSTALLATION_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `applyInstallation` function.
+The ID of the permission required to call the &#x60;applyInstallation&#x60; function.
 
 [.contract-item]
 [[PluginSetupProcessor-APPLY_UPDATE_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++APPLY_UPDATE_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `applyUpdate` function.
+The ID of the permission required to call the &#x60;applyUpdate&#x60; function.
 
 [.contract-item]
 [[PluginSetupProcessor-APPLY_UNINSTALLATION_PERMISSION_ID-bytes32]]
 ==== `[.contract-item-name]#++APPLY_UNINSTALLATION_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
-The ID of the permission required to call the `applyUninstallation` function.
+The ID of the permission required to call the &#x60;applyUninstallation&#x60; function.
 
 [.contract-item]
 [[PluginSetupProcessor-states-mapping-bytes32----struct-PluginSetupProcessor-PluginState-]]
@@ -1420,7 +1334,7 @@ This variable is public on purpose to allow future versions to access and migrat
 [[PluginSetupProcessor-repoRegistry-contract-PluginRepoRegistry]]
 ==== `[.contract-item-name]#++repoRegistry++#++() → contract PluginRepoRegistry++` [.item-kind]#public#
 
-The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
+The plugin repo registry listing the &#x60;PluginRepo&#x60; contracts versioning the &#x60;PluginSetup&#x60; contracts.
 
 [.contract-item]
 [[PluginSetupProcessor-InstallationPrepared-address-address-bytes32-contract-PluginRepo-struct-PluginRepo-Tag-bytes-address-struct-IPluginSetup-PreparedSetupData-]]
@@ -1464,7 +1378,7 @@ Emitted after a plugin installation was applied.
 
 Thrown if a setup is unauthorized and cannot be applied because of a missing permission of the associated DAO.
 
-This is thrown if the `APPLY_INSTALLATION_PERMISSION_ID`, `APPLY_UPDATE_PERMISSION_ID`, or APPLY_UNINSTALLATION_PERMISSION_ID is missing.
+This is thrown if the &#x60;APPLY_INSTALLATION_PERMISSION_ID&#x60;, &#x60;APPLY_UPDATE_PERMISSION_ID&#x60;, or APPLY_UNINSTALLATION_PERMISSION_ID is missing.
 
 [.contract-item]
 [[PluginSetupProcessor-PluginNonupgradeable-address-]]
@@ -1476,13 +1390,13 @@ Thrown if a plugin is not upgradeable.
 [[PluginSetupProcessor-PluginProxyUpgradeFailed-address-address-bytes-]]
 ==== `[.contract-item-name]#++PluginProxyUpgradeFailed++#++(address proxy, address implementation, bytes initData)++` [.item-kind]#error#
 
-Thrown if the upgrade of an `UUPSUpgradeable` proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)) failed.
+Thrown if the upgrade of an &#x60;UUPSUpgradeable&#x60; proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)) failed.
 
 [.contract-item]
 [[PluginSetupProcessor-IPluginNotSupported-address-]]
 ==== `[.contract-item-name]#++IPluginNotSupported++#++(address plugin)++` [.item-kind]#error#
 
-Thrown if a contract does not support the `IPlugin` interface.
+Thrown if a contract does not support the &#x60;IPlugin&#x60; interface.
 
 [.contract-item]
 [[PluginSetupProcessor-PluginRepoNonexistent--]]
@@ -1500,7 +1414,7 @@ Thrown if a plugin setup was already prepared indicated by the prepared setup ID
 [[PluginSetupProcessor-SetupNotApplicable-bytes32-]]
 ==== `[.contract-item-name]#++SetupNotApplicable++#++(bytes32 preparedSetupId)++` [.item-kind]#error#
 
-Thrown if a prepared setup ID is not eligible to be applied. This can happen if another setup has been already applied or if the setup wasn't prepared in the first place.
+Thrown if a prepared setup ID is not eligible to be applied. This can happen if another setup has been already applied or if the setup wasn&#x27;t prepared in the first place.
 
 [.contract-item]
 [[PluginSetupProcessor-InvalidUpdateVersion-struct-PluginRepo-Tag-struct-PluginRepo-Tag-]]

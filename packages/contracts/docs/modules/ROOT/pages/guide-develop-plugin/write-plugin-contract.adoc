@@ -1,7 +1,5 @@
 = Plugin Contract
 
-// == How to develop Plugin 
-
 This section will be focuses on non-upgradeable plugins development, for upgradeable plugins please check out our xref:guide-develop-plugin/write-upgradeable-plugin.adoc[guide here].
 
 Before continuing make sure you've read our documentation on xref:guide-develop-plugin/design-your-plugin.adoc#choosing_the_plugin_upgradeability[Choosing the Best Type for Your Plugin] to make sure you're selecting the right type of contract for your Plugin.
@@ -21,16 +19,13 @@ contract SimpleAdmin is Plugin {
 }
 ```
 
-The way we set up the plugin's `initialize()` function depends on the plugin type selected. To review plugin types in depth, check out 
-our xref:guide-develop-plugin/design-your-plugin.adoc#choosing_the_plugin_upgradeability[guide here].
-
-Additionally, the way we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, 
+The way we set up the plugin's `initialize()` function depends on the plugin type selected. Additionally, the way we deploy our contracts is directly correlated with how they're initialized. For Non-Upgradeable Plugins, 
 there's two ways in which we can deploy our plugin:
 
-- Deployment via Solidity's `new` keyword, OR
+- Deployment via Solidity's `new` keyword, or
 - Deployment via the Minimal Proxy Pattern
 
-### Option A: Deployment via Solidity's `new` Keyword
+=== Option A: Deployment via Solidity's `new` Keyword
 
 To instantiate the contract via Solidity's `new` keyword, you should inherit from the `Plugin` Base Template Aragon created. 
 You can find it link:https://github.com/aragon/osx-commons/blob/develop/contracts/src/plugin/Plugin.sol[here].
@@ -62,7 +57,7 @@ the constructor.
 
 This type of constructor implementation stores the `IDAO _dao` reference in the right place. If your plugin is deployed often, which we could expect, we can link:https://blog.openzeppelin.com/workshop-recap-cheap-contract-deployment-through-clones/[save significant amounts of gas by deployment through using the minimal proxy pattern].
 
-### Option B: Deployment via the Minimal Proxy Pattern
+=== Option B: Deployment via the Minimal Proxy Pattern
 
 To deploy our plugin via the link:https://eips.ethereum.org/EIPS/eip-1167(minimal clones pattern (ERC-1167)), you inherit from the `PluginCloneable` contract introducing the same features as `Plugin`. 
 The only difference is that you now have to remember to write an `initialize` function.
@@ -101,7 +96,7 @@ with a DAO and cannot use the DAO's `PermissionManager`.
 Once we've initialized our plugin (take a look at our guide on xref:how_to_initialize_the_plugin[how to initialize the plugin here]), 
 we can start using the Non-Upgradeable Base Template to perform actions on the DAO.
 
-### 1. Set the Permission Identifier
+=== 1. Set the Permission Identifier
 
 Firstly, we want to define a xref:core/permissions.adoc#permission_identifiers[permission identifier] `bytes32` constant at the top 
 of the contract and establish a `keccak256` hash of the permission name we want to choose. 
@@ -135,7 +130,7 @@ However, it is important that the permission names are descriptive and cannot be
 
 Setting this permission is key because it ensures only signers who have been granted that permission are able to execute functions.
 
-### 2. Add the logic implementation
+=== 2. Add the logic implementation
 
 Now that we have created the permission, we will use it to protect the implementation. We want to make sure only the authorized callers holding the `ADMIN_EXECUTE_PERMISSION`, can use the function.
 
@@ -178,7 +173,7 @@ For now, we used default values for the `callId` and `allowFailureMap` parameter
 With this, the plugin implementation could be used and deployed already. Feel free to add any additional logic to 
 your plugin's capabilities here.
 
-### 3. Plugin done, Setup contract next!
+=== 3. Plugin done, Setup contract next!
 
 Now that we have the logic for the plugin implemented, we'll need to define how this plugin should be installed/uninstalled from a DAO. 
 In the next step, we'll write the `PluginSetup` contract - the one containing the installation, uninstallation, and

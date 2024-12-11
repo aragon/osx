@@ -2,7 +2,7 @@
 
 == Advice for Developing a Plugin
 
-### DOs 👌
+=== DOs 👌
 
 - Document your contracts using link:https://docs.soliditylang.org/en/v0.8.17/natspec-format.html[NatSpec].
 - Test your contracts, e.g., using toolkits such as link:https://hardhat.org/hardhat-runner/docs/guides/test-contracts[hardhat (JS)] or link:https://book.getfoundry.sh/forge/tests[Foundry (Rust)].
@@ -12,7 +12,7 @@
 - Plan the lifecycle of your plugin (need for upgrades).
 - Follow our xref:guide-develop-plugin/publishing-plugin.adoc#how_to_add_a_new_version_of_your_plugin[versioning guidelines].
 
-### DON'Ts ✋
+=== DON'Ts ✋
 
 - Leave any contract uninitialized.
 - Grant the `ROOT_PERMISSION_ID` permission to anything or anyone.

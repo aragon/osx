@@ -1,9 +1,6 @@
 = Permission Conditions
 
-== Permission Conditions
-
-Permission conditions relay the decision if an authorized call is permitted to another contract.
-This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface.
+Permission conditions relay the decision if an authorized call is permitted to another contract. This contract must inherit from `PermissionCondition` and implement the `IPermissionCondition` interface.
 
 ```solidity
 interface IPermissionCondition {
@@ -25,32 +22,32 @@ interface IPermissionCondition {
 By implementing the `isGranted` function, any number of custom conditions can be added to the permission.
 These conditions can be based on
 
-- The specific properties of
+* The specific properties of
 
-  - The caller `who`
-  - The target `where`
+  ** The caller `who`
+  ** The target `where`
 
-- The calldata `_data` of the function such as
+* The calldata `_data` of the function such as
 
-  - Function signature
-  - Parameter values
+  ** Function signature
+  ** Parameter values
 
-- General on-chain data such as
+* General on-chain data such as
 
-  - Timestamps
-  - Token ownership
-  - Entries in curated registries
+  ** Timestamps
+  ** Token ownership
+  ** Entries in curated registries
 
-- off-chain data being made available through oracle services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
+ * Off-chain data being made available through oracle services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
 
-  - Market data
-  - Weather data
-  - Scientific data
-  - Sports data
+  ** Market data
+  ** Weather data
+  ** Scientific data
+  ** Sports data
 
-The following examples illustrate
+The following examples illustrate.
 
-## Examples
+== Examples
 
 CAUTION: The following code examples serve educational purposes and are not intended to be used in production.
 
@@ -73,7 +70,7 @@ If this is the case, the function call will succeed, otherwise it will revert.
 We can now add additional constraints to it by using the `grantWithCondition` function.
 Below, we show four exemplary conditions for different 4 different use cases that we could attach to the permission.
 
-### Condition 1: Adding Parameter Constraints
+=== Condition 1: Adding Parameter Constraints
 
 Let’s imagine that we want to make sure that `_amount` is not more than `1 ETH` without changing the code of `Example` contract.
 
@@ -105,7 +102,7 @@ contract ParameterConstraintCondition is PermissionCondition {
 
 Now, after granting the `SEND_COINS_PERMISSION_ID` permission to `_where` and `_who` via the `grantWithCondition` function and pointing to the `ParameterConstraintCondition` condition contract, the `_who` address can only call the `sendCoins` of the `Example` contract deployed at address `_where` successfully if `_amount` is not larger than `_maxValue` stored in the condition contract.
 
-### Condition 2: Delaying a Call With a Timestamp
+=== Condition 2: Delaying a Call With a Timestamp
 
 In another use-case, we might want to make sure that the `sendCoins` can only be called after a certain date. This would look as following:
 
@@ -132,7 +129,7 @@ contract TimeCondition is PermissionCondition {
 
 Here, the permission condition will only allow the call the `_date` specified in the constructor has passed.
 
-### Condition 3: Using Curated Registries
+=== Condition 3: Using Curated Registries
 
 In another use-case, we might want to make sure that the `sendCoins` function can only be called by real humans to prevent sybil attacks. For this, let's say we use the link:https://www.proofofhumanity.id/[Proof of Humanity (PoH)] registry providing a curated list of humans:
 
@@ -163,11 +160,10 @@ contract ProofOfHumanityCondition is PermissionCondition {
 
 Here, the permission condition will only allow the call if the PoH registry confirms that the `_who` address is registered and belongs to a real human.
 
-#### Condition 4: Using a Price Oracle
+=== Condition 4: Using a Price Oracle
 
 In another use-case, we might want to make sure that the `sendCoins` function can only be called if the ETH price in USD is above a certain threshold:
 
-<!-- prettier-ignore -->
 ```solidity
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
@@ -203,6 +199,6 @@ contract PriceOracleCondition is PermissionCondition {
   }
 }
 
-Here, we use https://docs.chain.link/docs/data-feeds/ providing us with the latest ETH/USD price on the Goerli testnet and require that the call is only allowed if the ETH price is over $9000.
-
-````
+/* Here, we use https://docs.chain.link/docs/data-feeds/ providing us with the latest ETH/USD price on 
+the Goerli testnet and require that the call is only allowed if the ETH price is over $9000. */
+```

@@ -1,16 +1,14 @@
-= Executing actions on behalf of the DAO
-
-## Using the DAO Executor
+= Executing actions on the DAO
 
 Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol[pass an array of actions] to be executed by the DAO contract itself.
 
 However, for the `execute` call to work, the address calling the function (the `msg.sender`) needs to have the xref:core/permissions.adoc#permissions_native_to_the_dao_contract[`EXECUTE_PERMISSION`]. This is to prevent anyone from being able to execute actions on behalf of the DAO and keep your assets safe from malicious actors.
 
-## How to grant the Execute Permission
+== How to grant the Execute Permission
 
 Usually, the `EXECUTE_PERMISSION` is granted to a governance plugin of the DAO so that only the approved proposals can be executed. For example, we'd grant the `EXECUTE_PERMISSION` to the address of the Multisig Plugin. That way, when a proposal is approved by the required members of the multisig, the plugin is able to call the `execute` function on the DAO in order to get the actions executed.
 
-To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `PermissionManager`'s link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/permission/PermissionManager.sol#L105[grant function] and pass it 4 parameters:
+To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `PermissionManager` 's link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/permission/PermissionManager.sol#L105[grant function] and pass it 4 parameters:
 
 - `where`: the address of the contract containing the function `who` wants access to
 - `who`: the address (EOA or contract) receiving the permission
@@ -19,9 +17,9 @@ To grant the `EXECUTE_PERMISSION` to an address, you'll want to call on the `Per
 
 CAUTION: You probably don't want to grant `EXECUTE_PERMISSION` to any random address, since this gives the address access to execute any action on behalf of the DAO. We recommend you only grant `EXECUTE_PERMISSION` to governance plugins to ensure the safety of your assets. Granting `EXECUTE_PERMISSION` to an externally owned account is considered an anti-pattern.
 
-## Examples
+== Examples
 
-### Calling a DAO Function
+=== Calling a DAO Function
 
 Imagine you want to call an internal function inside the `DAO` contract, for example, to manually xref:core/permissions.adoc[grant or revoke a permission]. The corresponding `Action` and `execute` function call look as follows:
 
@@ -55,15 +53,15 @@ To revoke the permission, the selector of the xref:api:core.adoc#PermissionManag
 
 If the caller possesses the xref:core/permissions.adoc#permissions_native_to_the_dao_contract[`ROOT_PERMISSION_ID` permission] on the DAO contract, the call becomes simpler and cheaper:
 
-CAUTION: Granting the `ROOT_PERMISSION_ID` permission to other contracts other than the `DAO` contract is dangerous and considered as an anti-pattern.
-
 ```solidity
 function exampleGrantFunction(DAO dao, address _where, address _who, bytes32 _permissionId) {
   dao.grant(_where, _who, _permissionId); // For this to work, the `msg.sender` needs the `ROOT_PERMISSION_ID`
 }
 ```
 
-### Sending Native Tokens
+CAUTION: Granting the `ROOT_PERMISSION_ID` permission to other contracts other than the `DAO` contract is dangerous and considered as an anti-pattern.
+
+=== Sending Native Tokens
 
 Send `0.1 ETH` from the DAO treasury to Alice.
 The corresponding `Action` and `execute` function call would look as follows:
@@ -80,7 +78,7 @@ function exampleNativeTokenTransfer(IDAO dao, bytes32 _callId, address _receiver
 }
 ```
 
-### Calling a Function from an External Contract
+=== Calling a Function from an External Contract
 
 Imagine that you want to call an external function, let's say in a `Calculator` contract that adds two numbers for you. The corresponding `Action` and `execute` function call look as follows:
 
@@ -116,7 +114,7 @@ function exampleFunctionCall(
 }
 ```
 
-### Calling a Payable Function
+=== Calling a Payable Function
 
 Wrap `0.1 ETH` from the DAO treasury into `wETH` by depositing it into the link:https://goerli.etherscan.io/token/0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6#writeContract[Goerli WETH9 contract].
 The corresponding `Action` and `execute` function call look as follows:

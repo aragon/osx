@@ -1,12 +1,10 @@
 = How to build a DAO Plugin
 
-== Plugin Development Quickstart Guide
-
 Plugins are how we extend the functionality for DAOs. In Aragon OSx, everything a DAO can do is based on Plugin functionality enabled through permissions.
 
 In this Quickstart guide, we will use the Aragon Hardhat template to set up a plugin.
 
-## Setting up your environment
+== Setting up your environment
 
 We recommend using our link:https://github.com/aragon/osx-plugin-template-hardhat[hardhat template] to get started. If you don't have
 it installed, you can do so by running:
@@ -61,10 +59,10 @@ For more information on how to develop a plugin, you can check our plugin develo
 - xref:guide-develop-plugin/write-plugin-setup-contract.adoc[Writing your plugin setup contract]
 - xref:guide-develop-plugin/write-upgradeable-plugin.adoc[Writing upgradeable plugin]
 - xref:guide-develop-plugin/upgrade-plugin.adoc[Upgrading your plugin]
-- xref:guide-develop-plugin/follow-best-practices.adoc[Best practices and patterns]
+- xref:guide-develop-plugin/follow-best-practices.adoc[Following best practices]
 - xref:guide-develop-plugin/publishing-plugin.adoc[Publishing your plugin]
 
 
 
-IMPORTANT: This plugin template uses version TODO:GIORGI `1.4.0-alpha.5` of the Aragon OSx protocol. This version is still in development and 
+IMPORTANT: This plugin template uses version `1.4.0-alpha.5` of the Aragon OSx protocol. This version is still in development and 
 is not audited yet.

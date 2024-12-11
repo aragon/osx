@@ -2,19 +2,19 @@
 
 The natspec generated API for the framework contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
 
-=== Factories
+== Factories
 
 {{DAOFactory}}
 
 {{PluginRepoFactory}}
 
-=== Registries
+== Registries
 
 {{DAORegistry}}
 
 {{PluginRepoRegistry}}
 
-=== Framework
+== Framework 
 
 {{PluginRepo}}
 
