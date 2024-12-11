@@ -1,4 +1,4 @@
-= Best Practices
+= Keeping your DAO safe
 
 == Some Advice When Operating your DAO
 

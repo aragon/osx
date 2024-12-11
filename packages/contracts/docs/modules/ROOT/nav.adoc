@@ -23,7 +23,7 @@
 ** xref:guide-develop-plugin/design-your-plugin.adoc[Designing your plugin]
 ** xref:guide-develop-plugin/write-plugin-contract.adoc[Writing your plugin contract]
 ** xref:guide-develop-plugin/write-plugin-setup-contract.adoc[Writing your plugin setup contract]
-** xref:guide-develop-plugin/write-upgradeable-plugin.adoc[Writing your upgradeable plugin]
+** xref:guide-develop-plugin/write-upgradeable-plugin.adoc[Writing an upgradeable plugin]
 ** xref:guide-develop-plugin/upgrade-plugin.adoc[Upgrading your plugin]
 ** xref:guide-develop-plugin/follow-best-practices.adoc[Following best practices]
 ** xref:guide-develop-plugin/publishing-plugin.adoc[Publishing your plugin]

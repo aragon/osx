@@ -1,4 +1,4 @@
-= Plugin Contract
+= Writing your plugin contract
 
 This section will be focuses on non-upgradeable plugins development, for upgradeable plugins please check out our xref:guide-develop-plugin/write-upgradeable-plugin.adoc[guide here].
 

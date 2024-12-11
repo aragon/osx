@@ -1,4 +1,4 @@
-= Executing actions on the DAO
+= Executing actions
 
 Executing actions on behalf of the DAO is done through the `execute` function from the `DAO.sol` contract. This function allows us to link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/core/dao/DAO.sol[pass an array of actions] to be executed by the DAO contract itself.
 

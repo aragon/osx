@@ -1,4 +1,4 @@
-= Actions & Execution
+= Actions
 
 == A Deep Dive into Actions and Execution
 

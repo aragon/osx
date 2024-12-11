@@ -1,7 +1,6 @@
-= The Contracts behind DAOs
+= Core
 
 In a nutshell, your Aragon OSx DAO consists of three pieces **DAO**, **Permission Manager**, and **Plugins**.
-
 
 == The DAO contract
 

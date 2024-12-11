@@ -1,4 +1,4 @@
-= Before Starting
+= Following best practices
 
 == Advice for Developing a Plugin
 

@@ -1,4 +1,4 @@
-= Publication of your Plugin into Aragon OSx
+= Publishing your plugin
 
 Once you've deployed your Plugin Setup contract, you will be able to publish your plugin into Aragon's plugin registry so any 
 Aragon DAO can install it.
@@ -12,7 +12,7 @@ Publishing a plugin to Aragon OSx involves a few key steps to ensure your plugin
 Make sure your Plugin Setup contract is deployed in your network of choice (you can find all of the networks we support link:https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json[here]). 
 You will need the address of your Plugin Setup contract to be able to publish the plugin into the protocol.
 
-=== Publishing your plugin
+=== Publication of your Plugin into Aragon OSx
 
 Every plugin in Aragon can have future versions, so when publishing a plugin to the Aragon protocol, we're really creating a link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol[PluginRepo] instance for each plugin,
 which will contain all of the plugin's versions.
