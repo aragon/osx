@@ -1,4 +1,4 @@
-= Aragon OSx
+= OSx
 
 == The Contracts Behind the Protocol
 
