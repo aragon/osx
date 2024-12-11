@@ -25,7 +25,7 @@ An Aragon OSx Plugin consists of:
 A detailed explanation of the xref:guide-develop-plugin/publishing-plugin.adoc#how_to_add_a_new_version_of_your_plugin[build and release versioning] is found in the Guides sections in our developer portal.
 
 .A schematic depiction of a plugin bundle consisting of a version tag, the plugin setup contract pointing to the plugin implementation contract, and a metadata URI.
-image::../../../../_/images/optimized-svg/plugins/plugin-version.drawio.svg[align="center"]
+image::plugin-version.drawio.svg[align="center"]
 
 
 The `PluginSetup` is written by you, the plugin developer. The processing of the setup is managed by the `PluginSetupProcessor`, the central component of the setup process in the Aragon OSx framework, which is explained in the section xref:framework/plugin-setup-processor.adoc[The Plugin Setup Process].
@@ -46,7 +46,7 @@ Different versions might contain:
 
 
 .Schematic depiction of the versioning taking place in the PluginRepoRegistry.
-image::../../../../_/images/optimized-svg/plugins/plugin-repo-overview.drawio.svg[align="center"]
+image::plugin-repo-overview.drawio.svg[align="center"]
 
 Overview of the plugin versioning and registry in the Aragon OSx protocol. The `PluginRepoRegistry` contract, which is a curated list of ENS named `PluginRepo` contracts, is shown on the left. Each `PluginRepo` contract maintains a list of versions of the `PluginSetup` contract (internally referencing the `Plugin` implementation contract) and the associated UI building blocks as a URI, exemplarily shown on the right.
 

@@ -6,7 +6,7 @@ The Aragon OSx protocol is composed of **framework-related contracts** creating 
 
 An overview of the framework and core contracts of the Aragon OSx protocol and their interactions is shown below:
 
-image::../../../../_/images/optimized-svg/framework/aragon-os-infrastructure-core-overview.drawio.svg[ align="center"]
+image::aragon-os-infrastructure-core-overview.drawio.svg[align="center"]
 
 In the following sections, you will learn more about the framework-related contracts of the Aragon OSx protocol.
 
