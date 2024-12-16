@@ -42,10 +42,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(`${pluginRepo}: ${aragonPluginRepos[pluginRepo]}`);
   }
 
-  await fs.writeFile(
-    'deployed_contracts.json',
-    JSON.stringify(deployedContractAddresses)
-  );
+  const storeInfo = {
+    deployedContractAddresses,
+    managementDAOActions: hre.managementDAOActions,
+  };
+
+  await fs.writeFile('deployed_contracts.json', JSON.stringify(storeInfo));
 };
 export default func;
 func.tags = ['New', 'Conclude', 'ConcludeEnd'];
