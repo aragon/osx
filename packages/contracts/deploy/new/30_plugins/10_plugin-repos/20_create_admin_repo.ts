@@ -20,14 +20,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {network} = hre;
 
-  const adminReleaseCIDPath = await uploadToIPFS(
+  const adminReleaseCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(adminReleaseMetadata),
     network.name
-  );
-  const adminBuildCIDPath = await uploadToIPFS(
+  );*/
+  const adminBuildCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(adminBuildMetadata),
     network.name
-  );
+  );*/
 
   const adminSetupContract = await getContractAddress('AdminSetup', hre);
 

@@ -72,10 +72,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress,
     deployer
   );
-  const metadataCIDPath = await uploadToIPFS(
+  const metadataCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(MANAGING_DAO_METADATA),
     network.name
-  );
+  );*/
 
   const hasMetadataPermission = await managingDaoContract.hasPermission(
     managingDaoContract.address,

@@ -20,14 +20,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {network} = hre;
 
-  const tokenVotingReleaseCIDPath = await uploadToIPFS(
+  const tokenVotingReleaseCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(tokenVotingReleaseMetadata),
     network.name
-  );
-  const tokenVotingBuildCIDPath = await uploadToIPFS(
+  );*/
+  const tokenVotingBuildCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(tokenVotingBuildMetadata),
     network.name
-  );
+  );*/
 
   const tokenVotingSetupContract = await getTokenVotingSetupAddress(hre);
 

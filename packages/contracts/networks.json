@@ -94,5 +94,19 @@
     "isTestnet": true,
     "chainId": 421614,
     "deploy": ["./deploy/new", "./deploy/verification"]
+  },
+  "agungTestnet": {
+    "url": "https://wss-async.agung.peaq.network",
+    "chainId": 9990,
+    "deploy": ["./deploy/new", "./deploy/verification"],
+    "timeout": 300000,
+    "gasPrice": 30000000000
+  },
+  "peaq": {
+    "url": "https://erpc-mpfn1.peaq.network",
+    "chainId": 3338,
+    "deploy": ["./deploy/new", "./deploy/verification"],
+    "timeout": 300000,
+    "gasPrice": 30000000000
   }
 }

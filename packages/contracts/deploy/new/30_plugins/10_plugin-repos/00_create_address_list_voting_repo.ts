@@ -19,14 +19,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {network} = hre;
 
-  const addresslistReleaseCIDPath = await uploadToIPFS(
+  const addresslistReleaseCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(addresslistReleaseMetadata),
     network.name
   );
-  const addresslistBuildCIDPath = await uploadToIPFS(
+  */
+  const addresslistBuildCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(addresslistBuildMetadata),
     network.name
-  );
+  );*/
 
   const addresslistVotingSetupContract = await getContractAddress(
     'AddresslistVotingSetup',

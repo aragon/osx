@@ -133,8 +133,8 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: 'https://linea-mainnet.g.alchemy.com/v2/FWqy_q0diVe4Nwb7_tOwxRLgjI3rBLFT',
-        blockNumber: 12640744,
+        url: 'https://mpfn1.peaq.network',
+        blockNumber: 3110000,
       },
     },
     // hardhat: {
@@ -212,6 +212,8 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      peaq: process.env.PEAQ_KEY || '',
+      agungTestnet: process.env.PEAQ_KEY || '',
       lineaSepolia: process.env.LINEASCAN_KEY || '',
       linea: process.env.LINEASCAN_KEY || '',
       modeTestnet: 'modeTestnet',
@@ -303,6 +305,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api.lineascan.build/api',
           browserURL: 'https://lineascan.build',
+        },
+      },
+      {
+        network: 'agungTestnet',
+        chainId: networks.agungTestnet.chainId,
+        urls: {
+          apiURL: 'agung-testnet.api.subscan.io',
+          browserURL: 'https://agung-testnet.subscan.io/',
+        },
+      },
+      {
+        network: 'peaq',
+        chainId: networks.peaq.chainId,
+        urls: {
+          apiURL: 'peaq.api.subscan.io',
+          browserURL: 'https://peaq.subscan.io/',
         },
       },
     ],

@@ -78,7 +78,7 @@
     "eslint-plugin-promise": "^5.1.1",
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.7.2",
-    "hardhat": "^2.12.4",
+    "hardhat": "^2.18.1",
     "hardhat-deploy": "0.12.4",
     "hardhat-gas-reporter": "^1.0.4",
     "ipfs-http-client": "51.0.0",

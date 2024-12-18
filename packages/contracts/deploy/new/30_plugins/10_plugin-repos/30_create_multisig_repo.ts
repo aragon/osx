@@ -21,14 +21,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {network} = hre;
 
-  const multisigReleaseCIDPath = await uploadToIPFS(
+  const multisigReleaseCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(multisigReleaseMetadata),
     network.name
-  );
-  const multisigBuildCIDPath = await uploadToIPFS(
+  );*/
+  const multisigBuildCIDPath = 'CID//';
+  /*await uploadToIPFS(
     JSON.stringify(multisigBuildMetadata),
     network.name
-  );
+  );*/
 
   const multisigSetupContract = await getContractAddress('MultisigSetup', hre);
 
