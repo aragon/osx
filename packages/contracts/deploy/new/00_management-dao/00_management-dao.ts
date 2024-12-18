@@ -53,3 +53,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['New', 'ManagementDao'];
 func.dependencies = ['Env'];
+// 1. daoBase
+// 2. ENSSubdomainRegistrar 2 times
+// 3. daoRegistryBase
+// 4. pluginRepoRegistryBase
+// 5.

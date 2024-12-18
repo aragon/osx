@@ -10,6 +10,8 @@ import '@nomicfoundation/hardhat-network-helpers';
 import '@nomicfoundation/hardhat-verify';
 import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';
+import {ethers} from 'hardhat';
+import 'hardhat-contract-sizer';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
@@ -36,8 +38,9 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
   }
+
   hardhatNetworks[network].accounts = accounts;
-  hardhatNetworks[network].deploy = networkExtensions[network].deploy;
+  // hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
 
 // Extend HardhatRuntimeEnvironment
