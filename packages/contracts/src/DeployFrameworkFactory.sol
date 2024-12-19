@@ -61,6 +61,8 @@ contract DeployFrameworkFactory {
         address pluginRepoFactory;
     }
 
+    event DeploymentResults(Deployments deps);
+
     constructor(address _ensRegistry, address _ensResolver, bytes32 _daoNode, bytes32 _pluginNode) {
         ensRegistry = _ensRegistry;
         ensResolver = _ensResolver;
@@ -76,6 +78,8 @@ contract DeployFrameworkFactory {
         pluginRepoRegistryBase = address(new PluginRepoRegistry());
     }
 
+    /// @notice This function can only be called one time. This is because if the function succeeds,
+    ///         it transfers domains to managing dao, meaning that if called again, it won't be able to set owners again.
     function deployFramework(
         DAOSettings calldata _daoSettings,
         string calldata _daoSubdomain,
@@ -98,7 +102,6 @@ contract DeployFrameworkFactory {
         deps.psp = deployWithBytecode(bytecodes.psp);
 
         (deps.pluginRepoFactory, deps.daoFactory) = deployFactories(
-            deps.dao,
             deps.pluginRepoRegistry,
             deps.daoRegistry,
             deps.psp,
@@ -106,8 +109,6 @@ contract DeployFrameworkFactory {
         );
 
         setPermissions(deps, daoPermissionIds);
-
-        // DAO(payable(deps.dao)).grant(deps.dao, address(this), keccak256("SET_METADATA_PERMISSION"));
 
         ENSRegistry(ensRegistry).setApprovalForAll(deps.daoEnsRegistrar, true);
         DAORegistry(deps.daoRegistry).register(IDAO(deps.dao), msg.sender, _daoSubdomain);
@@ -122,24 +123,34 @@ contract DeployFrameworkFactory {
         // When dao was deployed above, `address(this)` became a ROOT, so we revoke now.
         DAO(payable(deps.dao)).revoke(deps.dao, address(this), keccak256("ROOT_PERMISSION"));
 
-        // DAO(payable(deps.dao)).revoke(
-        //     deps.dao,
-        //     address(this),
-        //     keccak256("SET_METADATA_PERMISSION")
-        // );
-
         ENSRegistry(ensRegistry).setOwner(daoNode, deps.dao);
         ENSRegistry(ensRegistry).setOwner(pluginNode, deps.dao);
 
-        console.log("kkkkkk123");
+        emit DeploymentResults(deps);
+
         uint g2 = gasleft();
+        console.log("gas used");
         console.log(g1 - g2);
     }
 
-    // function transferDomainBack() public {
-    //     require(msg.sender == owner, "llll");
-    //     ENSRegistry(ensRegistry).owner()
-    // }
+    /// @dev This function can only have effect if in the deploy script(ts file - hardhat-deploy),
+    ///      transferring domain to this factory succeeded, but `deployFramework` failed due to some r
+    ///      reason(e.x out of gas) or something else after which `deployFramework` can not be called again.
+    ///      If such scenario occurs, sender loses the domains completely as this factory contract will be
+    ///      the owner, So we allow sender to get the domains back.
+    /// @notice This will not have any effect if `deployFramework` succeeded as that function makes
+    ///         managing dao as owner.
+    function transferDomainsBack() public {
+        require(msg.sender == owner, "Sender not an owner");
+
+        if (ENSRegistry(ensRegistry).owner(daoNode) == address(this)) {
+            ENSRegistry(ensRegistry).setOwner(daoNode, msg.sender);
+        }
+
+        if (ENSRegistry(ensRegistry).owner(pluginNode) == address(this)) {
+            ENSRegistry(ensRegistry).setOwner(pluginNode, msg.sender);
+        }
+    }
 
     // ============================== Deploy Helper Functions ================================
 
@@ -198,7 +209,6 @@ contract DeployFrameworkFactory {
     }
 
     function deployFactories(
-        address _dao,
         address _pluginRepoRegistry,
         address _daoRegistry,
         address _psp,

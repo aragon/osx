@@ -104,16 +104,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'management-dao-metadata'
   );
 
-  //   console.log('Uploaded metadata to pinata with cid:', metadataCIDPath);
+  console.log('Uploaded metadata to pinata with cid:', metadataCIDPath);
 
   const initializeParams = {
-    metadata: '0x',
-    trustedForwarder: ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes(metadataCIDPath)
-    ),
+    metadata: ethers.utils.hexlify(ethers.utils.toUtf8Bytes(metadataCIDPath)),
+    trustedForwarder: ethers.constants.AddressZero,
     daoURI: '0x',
   };
 
+  // Note if this failed, you will need to call `transferDomainsBack` to get domains again
+  // and then recall the deploy script again.
   await factory.deployFramework(
     initializeParams,
     daoSubdomain,
