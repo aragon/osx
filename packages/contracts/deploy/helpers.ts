@@ -1,5 +1,6 @@
 import {VersionTag} from '../test/test-utils/psp/types';
 import {
+  ENSRegistry,
   ENSRegistry__factory,
   PluginRepoFactory__factory,
   PluginRepoRegistry__factory,
@@ -203,6 +204,46 @@ export async function isPermissionSetCorrectly(
     return false;
   }
   return true;
+}
+
+export async function registerAndTransferDomain(
+  ensRegistryContract: ENSRegistry,
+  managementDAOAddress: string,
+  domain: string,
+  node: string,
+  deployer: SignerWithAddress,
+  hre: HardhatRuntimeEnvironment,
+  ethers: any
+) {
+  let owner = await ensRegistryContract.owner(node);
+
+  // node hasn't been registered yet
+  if (owner === ethers.constants.AddressZero) {
+    owner = await registerSubnodeRecord(
+      domain,
+      deployer,
+      await getENSAddress(hre),
+      await getPublicResolverAddress(hre)
+    );
+  }
+
+  // if (owner !== managementDAOAddress && owner !== deployer.address) {
+  //   throw new Error(
+  //     `${domain} is not owned either by deployer: ${deployer.address} or management dao: ${managementDAOAddress}.
+  //     Check if the domain is owned by ENS wrapper and if so, unwrap it from the ENS app.`
+  //   );
+  // }
+
+  // // It could be the case that domain is already owned by the management DAO which could happen
+  // // if the script succeeded and is re-run again. So avoid transfer which would fail otherwise.
+  // if (owner === deployer.address) {
+  //   await transferSubnodeChain(
+  //     domain,
+  //     managementDAOAddress,
+  //     deployer.address,
+  //     await getENSAddress(hre)
+  //   );
+  // }
 }
 
 export async function managePermissions(
