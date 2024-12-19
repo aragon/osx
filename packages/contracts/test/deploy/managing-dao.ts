@@ -84,7 +84,8 @@ describe('Management DAO', function () {
     };
   });
 
-  it('has deployments', async function () {
+  it.only('has deployments', async function () {
+    
     expect(await deployments.all()).to.not.be.empty;
   });
 

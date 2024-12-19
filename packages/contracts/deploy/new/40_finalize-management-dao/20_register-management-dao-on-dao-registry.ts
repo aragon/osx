@@ -4,7 +4,9 @@ import {
   daoDomainEnv,
   managementDaoSubdomainEnv,
 } from '../../../utils/environment';
-import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
+import {getContractAddress, getENSAddress} from '../../helpers';
+import {uploadToPinata} from '@aragon/osx-commons-sdk';
+
 import MANAGEMENT_DAO_METADATA from '../../management-dao-metadata.json';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
@@ -76,9 +78,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managementDAOAddress,
     deployer
   );
-  const metadataCIDPath = await uploadToIPFS(
-    JSON.stringify(MANAGEMENT_DAO_METADATA),
-    network.name
+
+  const metadataCIDPath = await uploadToPinata(
+    JSON.stringify(MANAGEMENT_DAO_METADATA, null, 2),
+    `management-dao-metadata`
   );
 
   const hasMetadataPermission = await managementDaoContract.hasPermission(
