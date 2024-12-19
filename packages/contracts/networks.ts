@@ -33,4 +33,16 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   arbitrumSepolia: {
     deploy: ['./deploy/new', './deploy/verification'],
   },
+  devSepolia: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  holesky: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  zksyncSepolia: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  zksyncMainnet: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
 };
