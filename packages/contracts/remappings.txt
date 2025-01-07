@@ -1,0 +1,8 @@
+@aragon/=../../node_modules/@aragon/
+@ensdomains/=../../node_modules/@ensdomains/
+@openzeppelin/=../../node_modules/@openzeppelin/
+eth-gas-reporter/=../../node_modules/eth-gas-reporter/
+forge-std/=../../node_modules/forge-std/src/
+hardhat-deploy/=../../node_modules/hardhat-deploy/
+hardhat/=../../node_modules/hardhat/
+

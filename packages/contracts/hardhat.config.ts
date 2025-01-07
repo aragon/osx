@@ -16,6 +16,7 @@ import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
+import '@nomicfoundation/hardhat-foundry';
 
 dotenv.config();
 

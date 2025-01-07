@@ -45,3 +45,7 @@ schema-introspection.json
 # docs
 packages/subgraph/docs/developer-portal/
 schema-introspection-partial.json
+
+# foundry
+out
+cache_forge
