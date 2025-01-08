@@ -38,29 +38,19 @@ contract Helper is Script {
         pluginDomain = string(res);
     }
 
-    function _getDomainHashes(
-        string memory _daoDomain,
-        string memory _pluginDomain
-    ) internal returns (bytes32 daoDomainHash, bytes32 pluginDomainHash) {
-        // dao domain hash
-        string[] memory inputs = _baseScriptInputs(_daoDomain);
-        inputs[3] = "getDomainHash";
-        bytes memory res = vm.ffi(inputs);
-        daoDomainHash = bytes32(res);
-
-        // plugin domain hash
-        inputs[3] = "getDomainHash";
-        inputs[4] = _pluginDomain;
-        res = vm.ffi(inputs);
-        pluginDomainHash = bytes32(res);
-    }
-
     function _getDomainHash(string memory domain) internal returns (bytes32 domainHash) {
-        // dao domain hash
+        // domain hash
         string[] memory inputs = _baseScriptInputs(domain);
         inputs[3] = "getDomainHash";
         bytes memory res = vm.ffi(inputs);
         domainHash = bytes32(res);
+    }
+
+    function _getLabelHash(string memory label) internal returns (bytes32 labelHash) {
+        string[] memory inputs = _baseScriptInputs(label);
+        inputs[3] = "getLabelHash";
+        bytes memory res = vm.ffi(inputs);
+        labelHash = bytes32(res);
     }
 
     function _getDomainNameReversedAndSubdomains(
@@ -79,6 +69,17 @@ contract Helper is Script {
         inputs[2] = "scripts/upload-to-pinnata.ts";
         bytes memory res = vm.ffi(inputs);
         ipfsCid = string(res);
+    }
+
+    function _getDaoPermissions() internal pure returns (bytes32[] memory permissions) {
+        permissions = new bytes32[](6);
+        permissions[0] = keccak256("ROOT_PERMISSION");
+        permissions[1] = keccak256("UPGRADE_DAO_PERMISSION");
+        permissions[2] = keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
+        permissions[3] = keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
+        permissions[4] = keccak256("SET_METADATA_PERMISSION");
+        permissions[5] = keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
+        return permissions;
     }
 
     // Helper

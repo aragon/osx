@@ -9,6 +9,9 @@ function getDaoDomain(networkName: string): string{
   if (networkName === 'clauSepolia') {
     return 'claudia.eth';
   }
+  if (networkName === 'optimism-sepolia') {
+    return 'aragon.eth';
+  }
 
   const network = getNetworkNameByAlias(networkName);
   if (network === null) {
@@ -22,6 +25,9 @@ function getPluginDomain(networkName: string): string{
   if (networkName === 'clauSepolia') {
     return 'plugin.claudia.eth';
   }
+  if (networkName === 'optimism-sepolia') {
+    return 'plugin.aragon.eth';
+  }
 
   const network = getNetworkNameByAlias(networkName);
   if (network === null) {
@@ -32,8 +38,11 @@ function getPluginDomain(networkName: string): string{
 }
 
 function getDomainHash(domain: string): string{
-  // todo
   return ethers.utils.namehash(domain);
+}
+
+function getLabelHash(label: string): string{
+  return ethers.utils.id(label);
 }
 
 function getEnsRegistry(networkName: string): string{
@@ -97,7 +106,8 @@ function main(){
     'getEnsRegistry': getEnsRegistry,
     'getEnsResolver': getEnsResolver,
     'getDomainHash': getDomainHash,
-    'getDomainNameReversed': getDomainNameReversed
+    'getDomainNameReversed': getDomainNameReversed,
+    'getLabelHash': getLabelHash
   };
 
 const functionName = process.argv[2];
