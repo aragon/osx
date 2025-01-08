@@ -22,4 +22,3 @@ generated
 coverage.json
 package-lock.json
 yarn.lock
-extended-schema.ts

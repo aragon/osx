@@ -82,7 +82,6 @@ If the answer to either of those two questions are "yes", then you're probably d
    [ ] I have updated the `CHANGELOG.md` file in the root folder.
    [ ] I have updated the `DEPLOYMENT_CHECKLIST` file in the root folder.
    [ ] I have updated the `UPDATE_CHECKLIST` file in the root folder.
-   [ ] I have updated the Subgraph and added a QA URL to the description of this PR.
    ```
 
 6. Wait for the pull request to be reviewed by the team.
