@@ -7,3 +7,5 @@ cache_path  = 'cache_forge'
 
 # todo explore why '../../../' is needed to be able to compile when '../../' should be enough
 allow_paths = ['../../node_modules', '../../', '../../../']
+
+ffi = true
