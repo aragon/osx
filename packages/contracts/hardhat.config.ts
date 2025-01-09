@@ -16,7 +16,9 @@ import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
 import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
-import '@nomicfoundation/hardhat-foundry';
+// ! commented because hh compile was failing with HH1001
+// ! check this https://github.com/NomicFoundation/hardhat/issues/4734
+// import '@nomicfoundation/hardhat-foundry';
 
 dotenv.config();
 

@@ -31,17 +31,10 @@ contract Ss is Script, Helper {
     string internal network = vm.envString("NETWORK_NAME");
     address internal deployer = vm.addr(deployerPrivateKey);
 
-    // address public daoBase;
-    // address public ensSubdomainRegistrarBase;
-    // address public daoRegistryBase;
-    // address public pluginRepoRegistryBase;
-
     address public ensRegistry;
     address public ensResolver;
     bytes32 public daoNode;
     bytes32 public pluginNode;
-
-    // address public owner;
 
     struct DAOSettings {
         bytes metadata;
@@ -114,6 +107,7 @@ contract Ss is Script, Helper {
 
         // 7. install multisig on the managing dao
         // todo
+        // ! note: this can not be done at this point because the multisig plugin repo has not been registered yet
 
         // 8. check all went good
         // todo check deployer or other addresses has no longer permissions
