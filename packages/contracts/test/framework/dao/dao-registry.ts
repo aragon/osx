@@ -165,6 +165,27 @@ describe('DAORegistry', function () {
       .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
   });
 
+  it('Should revert if ens is not supported, but subdomain is still non empty', async function () {
+    const Registry = new DAORegistry__factory(signers[0]);
+
+    const daoRegistry = (await deployWithProxy(Registry)) as DAORegistry;
+
+    await daoRegistry.initialize(
+      managingDao.address,
+      ethers.constants.AddressZero
+    );
+
+    await managingDao.grant(
+      daoRegistry.address,
+      ownerAddress,
+      DAO_REGISTRY_PERMISSIONS.REGISTER_DAO_PERMISSION_ID
+    );
+
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, 'some')
+    ).to.be.revertedWithCustomError(daoRegistry, 'ENSNotSupported');
+  });
+
   // without mocking we have to repeat the tests here to make sure the validation is correct
   describe('subdomain validation', () => {
     it('should validate the passed subdomain correctly (< 32 bytes long subdomain)', async () => {

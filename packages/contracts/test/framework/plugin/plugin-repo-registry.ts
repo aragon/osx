@@ -106,6 +106,40 @@ describe('PluginRepoRegistry', function () {
     expect(await pluginRepoRegistry.entries(pluginRepo.address)).to.equal(true);
   });
 
+  it('Should register a new pluginRepo successfully even if subdomain is empty', async function () {
+    const subdomain = '';
+
+    await expect(
+      await pluginRepoRegistry.registerPluginRepo(subdomain, pluginRepo.address)
+    )
+      .to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered)
+      .withArgs(subdomain, pluginRepo.address);
+
+    expect(await pluginRepoRegistry.entries(pluginRepo.address)).to.equal(true);
+  });
+
+  it('Should revert if ens is not supported, but subdomain is still non empty', async function () {
+    const PluginRepoRegistry = new PluginRepoRegistry__factory(signers[0]);
+    pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
+      PluginRepoRegistry
+    );
+
+    await pluginRepoRegistry.initialize(
+      managingDAO.address,
+      ethers.constants.AddressZero
+    );
+
+    await managingDAO.grant(
+      pluginRepoRegistry.address,
+      ownerAddress,
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
+    );
+
+    await expect(
+      pluginRepoRegistry.registerPluginRepo('some', pluginRepo.address)
+    ).to.be.revertedWithCustomError(pluginRepoRegistry, 'ENSNotSupported');
+  });
+
   it('fail to register if the sender lacks the required role', async () => {
     // Register a plugin successfully
     await pluginRepoRegistry.registerPluginRepo(
