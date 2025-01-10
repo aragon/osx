@@ -37,7 +37,7 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
     continue;
   }
   hardhatNetworks[network].accounts = accounts;
-  hardhatNetworks[network].deploy = networkExtensions[network].deploy;
+  // hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
 
 // Extend HardhatRuntimeEnvironment
