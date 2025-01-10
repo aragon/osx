@@ -1,4 +1,3 @@
-import networks from '../../networks';
 import {getNetworkByNameOrAlias} from '@aragon/osx-commons-configs';
 import hre, {network, deployments} from 'hardhat';
 

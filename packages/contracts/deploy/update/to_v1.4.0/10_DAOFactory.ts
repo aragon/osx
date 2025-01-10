@@ -19,6 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginSetupProcessor',
     hre
   );
+
   const daoRegistryAddress = getLatestContractAddress('DAORegistryProxy', hre);
   const previousDAOFactoryAddress = getLatestContractAddress('DAOFactory', hre);
   console.log(`Using managementDAO ${managementDAOAddress}`);

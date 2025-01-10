@@ -1,13 +1,24 @@
 import {getLatestContractAddress} from '../../deploy/helpers';
-import {DAO, DAO__factory} from '../../typechain';
+import {
+  DAO,
+  DAO__factory,
+  DAOFactory__factory,
+  DAORegistry__factory,
+  PluginRepoRegistry__factory,
+} from '../../typechain';
 import {
   initForkForOsxVersion,
   initializeDeploymentFixture,
   initializeFork,
 } from '../test-utils/fixture';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {getContractAddress} from '@openzeppelin/hardhat-upgrades/dist/utils';
 import {expect} from 'chai';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 import hre, {ethers, deployments} from 'hardhat';
+
+const IMPLEMENTATION_ADDRESS_SLOT =
+  '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
 
 async function forkSepolia() {
   hre.network.deploy = ['./deploy/update/to_v1.4.0'];
@@ -22,6 +33,17 @@ async function forkSepolia() {
 
 function getAddress(name: string) {
   return getLatestContractAddress(name, hre);
+}
+
+async function assertImplementation(contract: string, expected: string) {
+  const actual = defaultAbiCoder
+    .decode(
+      ['address'],
+      await ethers.provider.getStorageAt(contract, IMPLEMENTATION_ADDRESS_SLOT)
+    )[0]
+    .toLowerCase();
+
+  expect(actual).to.equal(expected.toLowerCase());
 }
 
 type Permission = {
@@ -76,34 +98,60 @@ describe('Update to 1.4.0', function () {
     [deployer] = await ethers.getSigners();
   });
 
-  it('should update dao and set permissions correctly', async () => {
-    const daoRegistryAddress = getAddress('DAORegistryProxy');
+  it('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {
+    const previousPluginRepoFactory = getAddress('PluginRepoFactory');
     const previousDAOFactoryAddress = getAddress('DAOFactory');
 
-    const pluginRepoRegistry = getAddress('PluginRepoRegistryProxy');
-    const previousPluginRepoFactory = getAddress('PluginRepoFactory');
-
-    const managementDAOAddress = getAddress('ManagementDAOProxy');
-
-    const dao = DAO__factory.connect(managementDAOAddress, deployer);
+    const dao = DAO__factory.connect(
+      getAddress('ManagementDAOProxy'),
+      deployer
+    );
+    const daoRegistry = DAORegistry__factory.connect(
+      getAddress('DAORegistryProxy'),
+      deployer
+    );
+    const pluginRepoRegistry = PluginRepoRegistry__factory.connect(
+      getAddress('PluginRepoRegistryProxy'),
+      deployer
+    );
 
     const multisigAddr = '0xfcead61339e3e73090b587968fce8b090e0600ef';
 
     await validatePermissions(
       dao,
       {
-        where: daoRegistryAddress,
+        where: daoRegistry.address,
         who: previousDAOFactoryAddress,
         isSet: true,
       },
       {
-        where: pluginRepoRegistry,
+        where: pluginRepoRegistry.address,
         who: previousPluginRepoFactory,
         isSet: true,
       }
     );
 
     expect(await dao.protocolVersion()).to.deep.equal([1, 3, 0]);
+    await expect(daoRegistry.protocolVersion()).to.be.reverted;
+    await expect(pluginRepoRegistry.protocolVersion()).to.be.reverted;
+
+    const oldDaoImplementation = await DAOFactory__factory.connect(
+      previousDAOFactoryAddress,
+      hre.ethers.provider
+    ).daoBase();
+
+    await assertImplementation(
+      dao.address,
+      getLatestContractAddress('ManagementDAOImplementation', hre)
+    );
+    await assertImplementation(
+      daoRegistry.address,
+      getLatestContractAddress('DAORegistryImplementation', hre)
+    );
+    await assertImplementation(
+      pluginRepoRegistry.address,
+      getLatestContractAddress('PluginRepoRegistryImplementation', hre)
+    );
 
     await initializeDeploymentFixture('v1.4.0');
 
@@ -120,12 +168,12 @@ describe('Update to 1.4.0', function () {
     await validatePermissions(
       dao,
       {
-        where: daoRegistryAddress,
+        where: daoRegistry.address,
         who: previousDAOFactoryAddress,
         isSet: false,
       },
       {
-        where: pluginRepoRegistry,
+        where: pluginRepoRegistry.address,
         who: previousPluginRepoFactory,
         isSet: false,
       }
@@ -139,17 +187,39 @@ describe('Update to 1.4.0', function () {
     await validatePermissions(
       dao,
       {
-        where: daoRegistryAddress,
+        where: daoRegistry.address,
         who: newDAOFactoryAddress,
         isSet: true,
       },
       {
-        where: pluginRepoRegistry,
+        where: pluginRepoRegistry.address,
         who: newPluginRepoFactoryAddress,
         isSet: true,
       }
     );
 
     expect(await dao.protocolVersion()).to.deep.equal([1, 4, 0]);
+    expect(await daoRegistry.protocolVersion()).to.deep.equal([1, 4, 0]);
+    expect(await pluginRepoRegistry.protocolVersion()).to.deep.equal([1, 4, 0]);
+
+    const daoFactoryAddress = (await deployments.get('DAOFactory')).address;
+    const newDaoImplementation = await DAOFactory__factory.connect(
+      daoFactoryAddress,
+      hre.ethers.provider
+    ).daoBase();
+
+    await assertImplementation(dao.address, newDaoImplementation);
+    await assertImplementation(
+      daoRegistry.address,
+      (
+        await deployments.get('DAORegistryImplementation')
+      ).address
+    );
+    await assertImplementation(
+      pluginRepoRegistry.address,
+      (
+        await deployments.get('PluginRepoRegistryImplementation')
+      ).address
+    );
   });
 });
