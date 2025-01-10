@@ -49,6 +49,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry, ProtocolVersion {
     }
 
     /// @notice Registers a plugin repository with a subdomain and address.
+    /// @dev If subdomain is empty, registration on ENS is skipped.
     /// @param subdomain The subdomain of the PluginRepo.
     /// @param pluginRepo The address of the PluginRepo contract.
     function registerPluginRepo(
