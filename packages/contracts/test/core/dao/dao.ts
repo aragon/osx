@@ -86,7 +86,7 @@ const EVENTS = {
 export const VALID_ERC1271_SIGNATURE = '0x1626ba7e';
 export const INVALID_ERC1271_SIGNATURE = '0xffffffff';
 
-describe.only('DAO', function () {
+describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
@@ -353,7 +353,7 @@ describe.only('DAO', function () {
       };
     });
 
-    it.only('upgrades to a new implementation', async () => {
+    it('upgrades to a new implementation', async () => {
       await deployAndUpgradeSelfCheck(
         0,
         1,

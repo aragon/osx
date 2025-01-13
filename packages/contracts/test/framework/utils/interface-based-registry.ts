@@ -7,10 +7,11 @@ import {
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployWithProxy} from '../../test-utils/proxy';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
 
@@ -33,12 +34,9 @@ describe('InterfaceBasedRegistry', function () {
   });
 
   beforeEach(async () => {
-    const InterfaceBasedRegistryMock = new InterfaceBasedRegistryMock__factory(
-      signers[0]
-    );
-
-    interfaceBasedRegistryMock = await deployWithProxy(
-      InterfaceBasedRegistryMock
+    interfaceBasedRegistryMock = await hre.wrapper.deploy(
+      'InterfaceBasedRegistryMock',
+      {withProxy: true}
     );
 
     // Let the interface registry register `DAO` contracts for testing purposes
@@ -69,8 +67,9 @@ describe('InterfaceBasedRegistry', function () {
 
     it('fail to register if the interface is not supported', async () => {
       // Use the `PluginRepo` contract for testing purposes here, because the interface differs from the `DAO` interface
-      const PluginRepo = new PluginRepo__factory(signers[0]);
-      let contractNotBeingADao = await PluginRepo.deploy();
+      let contractNotBeingADao = await hre.wrapper.deploy(
+        ARTIFACT_SOURCES.PLUGIN_REPO
+      );
 
       await expect(
         interfaceBasedRegistryMock.register(contractNotBeingADao.address)

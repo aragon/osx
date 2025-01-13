@@ -90,7 +90,7 @@ import {MockContract, smock} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {BytesLike} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -109,7 +109,7 @@ const EMPTY_DATA = '0x';
 
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
-describe('PluginSetupProcessor', function () {
+describe.only('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -139,9 +139,9 @@ describe('PluginSetupProcessor', function () {
     PluginUV2 = new PluginUUPSUpgradeableV2Mock__factory(signers[0]);
     PluginUV3 = new PluginUUPSUpgradeableV3Mock__factory(signers[0]);
 
-    const implUV1 = await PluginUV1.deploy();
-    const implUV2 = await PluginUV2.deploy();
-    const implUV3 = await PluginUV3.deploy();
+    const implUV1 = await hre.wrapper.deploy('PluginUUPSUpgradeableV1Mock');
+    const implUV2 = await hre.wrapper.deploy('PluginUUPSUpgradeableV2Mock');
+    const implUV3 = await hre.wrapper.deploy('PluginUUPSUpgradeableV3Mock');
 
     // Deploy PluginUUPSUpgradeableSetupMock
 

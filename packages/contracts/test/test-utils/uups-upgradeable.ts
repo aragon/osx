@@ -62,7 +62,7 @@ export async function deployAndUpgradeSelfCheck(
       .to.be.revertedWithCustomError(proxy, 'DaoUnauthorized')
       .withArgs(managingContract.address, ...grantArgs);
 
-    await managingContract.connect(deployer).grant(...grantArgs);
+    await managingContract.connect(deployerSigner).grant(...grantArgs);
   }
 
   // Deploy a new implementation (the same contract at a different address)

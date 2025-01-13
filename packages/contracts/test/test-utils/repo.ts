@@ -9,19 +9,20 @@ import {
   PluginRepoFactory__factory,
 } from '../../typechain';
 import {deployWithProxy} from '../test-utils/proxy';
+import {ARTIFACT_SOURCES} from './wrapper';
 import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import hre from 'hardhat';
 
 export async function deployMockPluginSetup(
   signer: SignerWithAddress
 ): Promise<PluginUUPSUpgradeableSetupV1Mock> {
-  const implV1 = await new PluginUUPSUpgradeableV1Mock__factory(
-    signer
-  ).deploy();
-  const pluginSetupMockContract =
-    await new PluginUUPSUpgradeableSetupV1Mock__factory(signer).deploy(
-      implV1.address
-    );
+  const implV1 = await hre.wrapper.deploy('PluginUUPSUpgradeableV1Mock');
+
+  const pluginSetupMockContract = await hre.wrapper.deploy(
+    'PluginUUPSUpgradeableSetupV1Mock',
+    {args: [implV1.address]}
+  );
 
   return pluginSetupMockContract;
 }
@@ -29,8 +30,9 @@ export async function deployMockPluginSetup(
 export async function deployNewPluginRepo(
   maintainer: SignerWithAddress
 ): Promise<PluginRepo> {
-  const PluginRepo = new PluginRepo__factory(maintainer);
-  const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
+  const newPluginRepo = await hre.wrapper.deploy(ARTIFACT_SOURCES.PLUGIN_REPO, {
+    withProxy: true,
+  });
   await newPluginRepo.initialize(maintainer.address);
 
   return newPluginRepo;
@@ -41,11 +43,9 @@ export async function deployPluginRepoFactory(
   pluginRepoRegistry: PluginRepoRegistry
 ): Promise<PluginRepoFactory> {
   // PluginRepoFactory
-  const PluginRepoFactory = new PluginRepoFactory__factory(signers[0]);
-
-  const pluginRepoFactory = await PluginRepoFactory.deploy(
-    pluginRepoRegistry.address
-  );
+  const pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {
+    args: [pluginRepoRegistry.address],
+  });
 
   return pluginRepoFactory;
 }
@@ -55,10 +55,9 @@ export async function deployPluginRepoRegistry(
   ensSubdomainRegistrar: any,
   signer: SignerWithAddress
 ): Promise<PluginRepoRegistry> {
-  const PluginRepoRegistry = new PluginRepoRegistry__factory(signer);
-
-  let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
-    PluginRepoRegistry
+  let pluginRepoRegistry = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+    {withProxy: true}
   );
 
   await pluginRepoRegistry.initialize(

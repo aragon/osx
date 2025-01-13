@@ -18,6 +18,7 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../../test-utils/uups-upgradeable';
+import {ARTIFACT_SOURCES} from '../../../test-utils/wrapper';
 import {
   ENS_REGISTRAR_PERMISSIONS,
   getProtocolVersion,
@@ -25,40 +26,37 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 // Setup ENS with signers[0] owning the ENS root node (''), the resolver node ('resolver'), the managing DAO, and the subdomain registrar
 async function setupENS(
   owner: SignerWithAddress
 ): Promise<[ENSRegistry, PublicResolver, DAO, ENSSubdomainRegistrar]> {
-  const ENSRegistry = new ENSRegistry__factory(owner);
-  const PublicResolver = new PublicResolver__factory(owner);
-  const ENSSubdomainRegistrar = new ENSSubdomainRegistrar__factory(owner);
-
   // Deploy the ENSRegistry
-  const ens = await ENSRegistry.deploy();
-  await ens.deployed();
+  const ens = await hre.wrapper.deploy('ENSRegistry');
 
   // Deploy the Resolver
-  const resolver = await PublicResolver.deploy(
-    ens.address,
-    ethers.constants.AddressZero
-  );
-  await resolver.deployed();
+  const resolver = await hre.wrapper.deploy('PublicResolver', {
+    args: [ens.address, ethers.constants.AddressZero],
+  });
+
   await setupResolver(ens, resolver, owner);
 
   // Deploy the managing DAO
   const dao = await deployNewDAO(owner);
 
   // Deploy the registrar
-  const registrar = await deployWithProxy<ENSSubdomainRegistrar>(
-    ENSSubdomainRegistrar
+  const registrar = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
+    {
+      withProxy: true,
+    }
   );
 
   return [ens, resolver, dao, registrar];
 }
 
-describe('ENSSubdomainRegistrar', function () {
+describe.only('ENSSubdomainRegistrar', function () {
   let signers: SignerWithAddress[];
   let managingDao: DAO;
   let ens: ENSRegistry;
@@ -303,29 +301,34 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('upgrades to a new implementation', async () => {
       await deployAndUpgradeSelfCheck(
-        signers[0],
-        signers[1],
-        initArgs,
-        'initialize',
-        currentContractFactory,
+        0,
+        1,
+        {
+          initArgs: initArgs,
+          initializer: 'initialize',
+        },
+        ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
+        ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
         ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
         managingDao
       );
     });
 
-    it('upgrades from v1.0.0', async () => {
+    it.only('upgrades from v1.0.0', async () => {
       legacyContractFactory = new ENSSubdomainRegistrar_V1_0_0__factory(
         signers[0]
       );
 
       const {fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR_V1_0_0,
+          ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
           ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           managingDao
         );
@@ -343,19 +346,21 @@ describe('ENSSubdomainRegistrar', function () {
       expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
-    it('from v1.3.0', async () => {
+    it.only('from v1.3.0', async () => {
       legacyContractFactory = new ENSSubdomainRegistrar_V1_3_0__factory(
         signers[0]
       );
 
       const {fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR_V1_3_0,
+          ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
           ENS_REGISTRAR_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
           managingDao
         );

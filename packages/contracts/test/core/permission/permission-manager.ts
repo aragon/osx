@@ -9,7 +9,7 @@ import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
 const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
@@ -49,8 +49,7 @@ describe('Core: PermissionManager', function () {
   });
 
   beforeEach(async () => {
-    const PM = new PermissionManagerTest__factory(signers[0]);
-    pm = await PM.deploy();
+    pm = await hre.wrapper.deploy('PermissionManagerTest');
     await pm.init(ownerSigner.address);
   });
 
@@ -62,8 +61,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should emit Granted', async () => {
-      const PM = new PermissionManagerTest__factory(ownerSigner);
-      pm = await PM.deploy();
+      pm = await hre.wrapper.deploy('PermissionManagerTest');
       await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
     });
 
@@ -166,9 +164,7 @@ describe('Core: PermissionManager', function () {
 
   describe('grantWithCondition', () => {
     before(async () => {
-      conditionMock = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      conditionMock = await hre.wrapper.deploy('PermissionConditionMock');
     });
 
     it('reverts if the condition address is not a contract', async () => {
@@ -185,8 +181,9 @@ describe('Core: PermissionManager', function () {
     });
 
     it('reverts if the condition contract does not support `IPermissionConditon`', async () => {
-      const nonConditionContract =
-        await new PluginUUPSUpgradeableV1Mock__factory(signers[0]).deploy();
+      const nonConditionContract = await hre.wrapper.deploy(
+        'PluginUUPSUpgradeableV1Mock'
+      );
 
       await expect(
         pm.grantWithCondition(
@@ -271,9 +268,9 @@ describe('Core: PermissionManager', function () {
         conditionMock.address
       );
 
-      const newConditionMock = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const newConditionMock = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
 
       await expect(
         pm.grantWithCondition(
@@ -503,9 +500,7 @@ describe('Core: PermissionManager', function () {
     it('should revert if non-zero condition is used with `grant` operation type', async () => {
       const signers = await ethers.getSigners();
 
-      const conditionMock = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const conditionMock = await hre.wrapper.deploy('PermissionConditionMock');
 
       const bulkItems: MultiTargetPermission[] = [
         {
@@ -522,13 +517,15 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'GrantWithConditionNotSupported');
     });
 
+    // TODO:Claudia see why this fails here and not on develop branch.
     it('should grant with condition', async () => {
       const signers = await ethers.getSigners();
 
-      const conditionMock2 = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const conditionMock2 = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
 
+      console.log(conditionMock, ' gsss');
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
         {
@@ -800,9 +797,8 @@ describe('Core: PermissionManager', function () {
     });
 
     it('returns `true` if a condition is set for a specific caller and target answering `true`', async () => {
-      const condition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const condition = await hre.wrapper.deploy('PermissionConditionMock');
+
       await pm.grantWithCondition(
         pm.address,
         ownerSigner.address,
@@ -822,9 +818,8 @@ describe('Core: PermissionManager', function () {
     });
 
     it('returns `true` if a condition is set for a generic caller answering `true`', async () => {
-      const condition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const condition = await hre.wrapper.deploy('PermissionConditionMock');
+
       await pm.grantWithCondition(
         pm.address,
         ANY_ADDR,
@@ -865,9 +860,8 @@ describe('Core: PermissionManager', function () {
     });
 
     it('returns `true` if a condition is set for a generic target answering `true`', async () => {
-      const condition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const condition = await hre.wrapper.deploy('PermissionConditionMock');
+
       await pm.grantWithCondition(
         ANY_ADDR,
         ownerSigner.address,
@@ -920,15 +914,15 @@ describe('Core: PermissionManager', function () {
     });
 
     it('does not fall back to a generic caller or target condition if a specific condition is set already answering `false`', async () => {
-      const specificCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
-      const genericCallerCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
-      const genericTargetCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const specificCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
+      const genericCallerCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
+      const genericTargetCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
 
       // Grant with a specific condition that will answer false
       await pm.grantWithCondition(
@@ -979,13 +973,12 @@ describe('Core: PermissionManager', function () {
     });
 
     it('does not fall back to a generic target condition if a generic caller condition is set already answering `false`', async () => {
-      const genericCallerCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
-      const genericTargetCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
-
+      const genericCallerCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
+      const genericTargetCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
       // Grant with a generic caller condition that will answer false.
       await pm.grantWithCondition(
         pm.address,
@@ -1044,15 +1037,15 @@ describe('Core: PermissionManager', function () {
     });
 
     it('does not fall back to a generic caller or target condition if a specific condition is set already answering `false`', async () => {
-      const specificCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
-      const genericCallerCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
-      const genericTargetCondition = await new PermissionConditionMock__factory(
-        signers[0]
-      ).deploy();
+      const specificCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
+      const genericCallerCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
+      const genericTargetCondition = await hre.wrapper.deploy(
+        'PermissionConditionMock'
+      );
 
       // Grant with a specific condition that will answer false
       await pm.grantWithCondition(
@@ -1118,9 +1111,7 @@ describe('Core: PermissionManager', function () {
     let permissionCondition: PermissionConditionMock;
 
     beforeEach(async () => {
-      permissionCondition = await new PermissionConditionMock__factory(
-        ownerSigner
-      ).deploy();
+      permissionCondition = await hre.wrapper.deploy('PermissionConditionMock');
     });
 
     it('should call IPermissionCondition.isGranted', async () => {
