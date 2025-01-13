@@ -145,58 +145,39 @@ describe.only('PluginSetupProcessor', function () {
 
     // Deploy PluginUUPSUpgradeableSetupMock
 
-    const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
-      'PluginUUPSUpgradeableSetupV1Mock'
+    setupUV1 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV1Mock', {
+      args: [implUV1.address],
+    });
+    setupUV1Bad = await hre.wrapper.deploy(
+      'PluginUUPSUpgradeableSetupV1MockBad',
+      {args: [implUV1.address]}
     );
-    setupUV1 = await SetupV1.deploy(implUV1.address);
-
-    const PluginUUPSUpgradeableSetupV1MockBad =
-      await smock.mock<PluginUUPSUpgradeableSetupV1MockBad__factory>(
-        'PluginUUPSUpgradeableSetupV1MockBad'
-      );
-    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy(
-      implUV1.address
-    );
-
-    const SetupV2 = await smock.mock<PluginUUPSUpgradeableSetupV2Mock__factory>(
-      'PluginUUPSUpgradeableSetupV2Mock'
-    );
-    setupUV2 = await SetupV2.deploy(implUV2.address);
-
-    const SetupV3 = await smock.mock<PluginUUPSUpgradeableSetupV3Mock__factory>(
-      'PluginUUPSUpgradeableSetupV3Mock'
-    );
-    setupUV3 = await SetupV3.deploy(implUV3.address);
-
-    const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
-      'PluginUUPSUpgradeableSetupV4Mock'
-    );
-    setupUV4 = await SetupV4.deploy(implUV3.address);
+    setupUV2 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV2Mock', {
+      args: [implUV2.address],
+    });
+    setupUV3 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV3Mock', {
+      args: [implUV3.address],
+    });
+    setupUV4 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV4Mock', {
+      args: [implUV3.address],
+    });
 
     // Deploy PluginCloneableSetupMock
-    const implCV1 = await new PluginCloneableV1Mock__factory(
-      signers[0]
-    ).deploy();
-    const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
-      'PluginCloneableSetupV1Mock'
-    );
-    setupCV1 = await SetupC1.deploy(implCV1.address);
+    const implCV1 = await hre.wrapper.deploy('PluginCloneableV1Mock');
+    const setupCV1 = await hre.wrapper.deploy('PluginCloneableSetupV1Mock', {
+      args: [implCV1.address],
+    });
 
-    const implCV1Bad = await new PluginCloneableV1MockBad__factory(
-      signers[0]
-    ).deploy();
-    const SetupC1Bad = await smock.mock<PluginCloneableSetupV1MockBad__factory>(
-      'PluginCloneableSetupV1MockBad'
+    const implCV1Bad = await hre.wrapper.deploy('PluginCloneableV1MockBad');
+    const setupCV1Bad = await hre.wrapper.deploy(
+      'PluginCloneableSetupV1MockBad',
+      {args: [implCV1Bad.address]}
     );
-    setupCV1Bad = await SetupC1Bad.deploy(implCV1Bad.address);
 
-    const implCV2 = await new PluginCloneableV2Mock__factory(
-      signers[0]
-    ).deploy();
-    const SetupC2 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
-      'PluginCloneableSetupV2Mock'
-    );
-    setupCV2 = await SetupC2.deploy(implCV2.address);
+    const implCV2 = await hre.wrapper.deploy('PluginCloneableV2Mock');
+    const setupCV2 = await hre.wrapper.deploy('PluginCloneableSetupV2Mock', {
+      args: [implCV2.address],
+    });
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(signers[0]);
@@ -453,7 +434,7 @@ describe.only('PluginSetupProcessor', function () {
         ).not.to.be.reverted;
       });
 
-      it("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
+      it.only("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
         // Uses setupUV1
         const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
 

@@ -56,7 +56,7 @@ async function setupENS(
   return [ens, resolver, dao, registrar];
 }
 
-describe.only('ENSSubdomainRegistrar', function () {
+describe('ENSSubdomainRegistrar', function () {
   let signers: SignerWithAddress[];
   let managingDao: DAO;
   let ens: ENSRegistry;
@@ -314,7 +314,7 @@ describe.only('ENSSubdomainRegistrar', function () {
       );
     });
 
-    it.only('upgrades from v1.0.0', async () => {
+    it('upgrades from v1.0.0', async () => {
       legacyContractFactory = new ENSSubdomainRegistrar_V1_0_0__factory(
         signers[0]
       );
@@ -346,7 +346,7 @@ describe.only('ENSSubdomainRegistrar', function () {
       expect(toProtocolVersion).to.deep.equal(osxContractsVersion());
     });
 
-    it.only('from v1.3.0', async () => {
+    it('from v1.3.0', async () => {
       legacyContractFactory = new ENSSubdomainRegistrar_V1_3_0__factory(
         signers[0]
       );
