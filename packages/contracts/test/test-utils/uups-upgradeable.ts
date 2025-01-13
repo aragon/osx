@@ -24,17 +24,6 @@ export async function deployAndUpgradeSelfCheck(
   const deployerSigner = (await hre.ethers.getSigners())[deployer];
   const upgraderSigner = (await hre.ethers.getSigners())[upgrader];
 
-  // const proxy = await hre.wrapper.deployProxy(
-  //   factory.connect(deployer),
-  //   Object.values(initArgs),
-  //   {
-  //     kind: 'uups',
-  //     initializer: initializerName,
-  //     unsafeAllow: ['constructor'],
-  //     constructorArgs: [],
-  //   }
-  // );
-
   // Deploy proxy and implementation
   const proxy = await hre.wrapper.deployProxy(deployer, from, {
     args: Object.values(args),
