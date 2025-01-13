@@ -1,5 +1,6 @@
 import {BigNumberish, BytesLike} from 'ethers';
 
+import {Wrapper} from '../test/test-utils/wrapper';
 
 
 export type AragonVerifyEntry = {
@@ -31,6 +32,7 @@ declare module 'hardhat/types/runtime' {
       data: BytesLike;
       description: string; // Description to be included in proposal metadata
     }[];
+    wrapper: Wrapper;
     testingFork: TestingFork;
   }
 }

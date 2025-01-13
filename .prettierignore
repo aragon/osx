@@ -13,6 +13,8 @@ typechain
 types
 imported
 generated
+hardhat-zksync.config.ts
+hardhat.config.ts
 
 # files
 *.env

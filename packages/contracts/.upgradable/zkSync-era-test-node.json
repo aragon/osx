@@ -1,0 +1,624 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x4aeAa0c2b4D4bF47e7aB1BaAa716B4B99c735907",
+      "txHash": "0xbaccb1016ab6a0411208ebb6bb59bd477d6e313297a9ec1947727b4ef07313f9",
+      "kind": "uups"
+    },
+    {
+      "address": "0x98b8222F3400D6f8c247bA991A33Bfd571C4CC3e",
+      "txHash": "0x755e59fdf88307e1679ebd1d5d09b758567b534b77cb9d41acb4c9e699a97e5b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x40B2b0C4cED82dD8C78016d5cE46791F8553793b",
+      "txHash": "0x746a4bef44f6ec92ce9b0fca2eec5ceceb4964efa9db69ee5b7c94576c655ebf",
+      "kind": "uups"
+    },
+    {
+      "address": "0x2e890633F9B0C8cC080BBa2195b814291CF385aE",
+      "txHash": "0x6f0e7fa2d57653e34078416a8a0c7c8cc41a4d47680890251e36ff535defc250",
+      "kind": "uups"
+    },
+    {
+      "address": "0x74573500e32B20537F515D9AEe0fe886437A0522",
+      "txHash": "0xa68d04f74685b95fb551eceb3adda7c9260b6a727b4af6c9ac0282d5b256fceb",
+      "kind": "uups"
+    },
+    {
+      "address": "0x164A6b543DaAB28c8e71959e54B552Ca566Dd63c",
+      "txHash": "0xf4f940e907b5a69305c1d4b288bfb5b1f56ba36491bbe5a800d8ca519947d6b4",
+      "kind": "uups"
+    },
+    {
+      "address": "0x68Bc30F29ff60C4bE773CC3c46804D8D65f72cEa",
+      "txHash": "0x39d1c7b4744aa938f7c25b5d6bbbeba21cb14d28f2685b4f0dcd0f47b8f5bbee",
+      "kind": "uups"
+    },
+    {
+      "address": "0xdAe2BD4F6Ad1d6962Bde592D7e5d724394F0d146",
+      "txHash": "0xf60a0a7b033e9e3f753e074fd0f47ba924b98b5652ebb1ff4ba92f4a4b577c0d",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "023704722ad884b0e0516dfc34bebf44c7e1864c7a99fbdcaf623925b7da4166": {
+      "address": "0x15fA6c8DC69B145fD10352Fb7fAec6ea250e41cd",
+      "txHash": "0xd0182757f43e11a00e6c8acf1e72598aea6efe6d6daf7a5f548901a81ff5a73f",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_supportedInterfaces",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "permissionsHashed",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "PermissionManager",
+            "src": "src/core/permission/PermissionManager.sol:32"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PermissionManager",
+            "src": "src/core/permission/PermissionManager.sol:511"
+          },
+          {
+            "label": "callbackMagicNumbers",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_mapping(t_bytes4,t_bytes4)",
+            "contract": "CallbackHandler",
+            "src": "src/core/utils/CallbackHandler.sol:12"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "CallbackHandler",
+            "src": "src/core/utils/CallbackHandler.sol:55"
+          },
+          {
+            "label": "__removed0",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:82",
+            "renamedFrom": "signatureValidator"
+          },
+          {
+            "label": "trustedForwarder",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:86"
+          },
+          {
+            "label": "_daoURI",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_string_storage",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:90"
+          },
+          {
+            "label": "_reentrancyStatus",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_uint256",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_array(t_uint256)46_storage",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:466"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bytes4)": {
+            "label": "mapping(bytes4 => bytes4)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "38ecb6641c7d058ad2ddd1cffe216aa5df549dcac1b354810fed6baa1d737be1": {
+      "address": "0xa7dF107269F802131a21Bf091a8DE9Cb14D32576",
+      "txHash": "0x87778c10f7a67d5f85cbc947325df8dd1d65ebe719b50bcf629fd5be7ce6a86a",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_supportedInterfaces",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "permissionsHashed",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "PermissionManager",
+            "src": "@aragon/osx-v1.0.1/core/permission/PermissionManager.sol:27"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PermissionManager",
+            "src": "@aragon/osx-v1.0.1/core/permission/PermissionManager.sol:362"
+          },
+          {
+            "label": "callbackMagicNumbers",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_mapping(t_bytes4,t_bytes4)",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.0.1/core/utils/CallbackHandler.sol:11"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.0.1/core/utils/CallbackHandler.sol:53"
+          },
+          {
+            "label": "signatureValidator",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_contract(IERC1271)17087",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:64"
+          },
+          {
+            "label": "trustedForwarder",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:67"
+          },
+          {
+            "label": "_daoURI",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_string_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:70"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:339"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_contract(IERC1271)17087": {
+            "label": "contract IERC1271",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bytes4)": {
+            "label": "mapping(bytes4 => bytes4)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "bdbb9b87c6e3ff6a2cb0dd950004d32e96611070dcfaeb5b8719e7ce1950e05e": {
+      "address": "0x7eFC86f25701B779949B02EBEBEb8cd9A4E46Bab",
+      "txHash": "0xcf3420bbba8c47e5c327880f4679ea45d89d5ab3230a1fb1fc84b2553ff3b422",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_supportedInterfaces",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "permissionsHashed",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "PermissionManager",
+            "src": "@aragon/osx-v1.3.0/core/permission/PermissionManager.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PermissionManager",
+            "src": "@aragon/osx-v1.3.0/core/permission/PermissionManager.sol:402"
+          },
+          {
+            "label": "callbackMagicNumbers",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_mapping(t_bytes4,t_bytes4)",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.3.0/core/utils/CallbackHandler.sol:11"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.3.0/core/utils/CallbackHandler.sol:54"
+          },
+          {
+            "label": "signatureValidator",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_contract(IERC1271)17087",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:74"
+          },
+          {
+            "label": "trustedForwarder",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:78"
+          },
+          {
+            "label": "_daoURI",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_string_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:82"
+          },
+          {
+            "label": "_reentrancyStatus",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_uint256",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:86"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_array(t_uint256)46_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:422"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_contract(IERC1271)17087": {
+            "label": "contract IERC1271",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bytes4)": {
+            "label": "mapping(bytes4 => bytes4)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}
