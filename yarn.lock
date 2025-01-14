@@ -1899,24 +1899,7 @@
     sinon-chai "^3.7.0"
     undici "^5.14.0"
 
-"@matterlabs/hardhat-zksync-solc@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-solc/-/hardhat-zksync-solc-1.1.4.tgz#04a2fad6fb6b6944c64ad969080ee65b9af3f617"
-  integrity sha512-4/usbogh9neewR2/v8Dn2OzqVblZMUuT/iH2MyPZgPRZYQlL4SlZtMvokU9UQjZT6iSoaKCbbdWESHDHSzfUjA==
-  dependencies:
-    "@nomiclabs/hardhat-docker" "^2.0.0"
-    chai "^4.3.6"
-    chalk "4.1.2"
-    debug "^4.3.4"
-    dockerode "^4.0.2"
-    fs-extra "^11.1.1"
-    proper-lockfile "^4.1.2"
-    semver "^7.5.1"
-    sinon "^17.0.1"
-    sinon-chai "^3.7.0"
-    undici "^5.14.0"
-
-"@matterlabs/hardhat-zksync-solc@^1.0.5", "@matterlabs/hardhat-zksync-solc@^1.1.4":
+"@matterlabs/hardhat-zksync-solc@1.2.5", "@matterlabs/hardhat-zksync-solc@^1.0.5", "@matterlabs/hardhat-zksync-solc@^1.1.4":
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-solc/-/hardhat-zksync-solc-1.2.5.tgz#fbeeabc3fea0dd232fa3c8cb31bd93c103eba11a"
   integrity sha512-iZyznWl1Hoe/Z46hnUe1s2drBZBjJOS/eN+Ql2lIBX9B6NevBl9DYzkKzH5HEIMCLGnX9sWpRAJqUQJWy9UB6w==
@@ -2213,7 +2196,7 @@
     "@nomicfoundation/solidity-analyzer-linux-x64-musl" "0.1.2"
     "@nomicfoundation/solidity-analyzer-win32-x64-msvc" "0.1.2"
 
-"@nomiclabs/hardhat-docker@^2.0.0", "@nomiclabs/hardhat-docker@^2.0.2":
+"@nomiclabs/hardhat-docker@^2.0.2":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-docker/-/hardhat-docker-2.0.2.tgz#ae964be17951275a55859ff7358e9e7c77448846"
   integrity sha512-XgGEpRT3wlA1VslyB57zyAHV+oll8KnV1TjwnxxC1tpAL04/lbdwpdO5KxInVN8irMSepqFpsiSkqlcnvbE7Ng==
@@ -2834,10 +2817,18 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.4.tgz#0b92dcc0cc1c81f6f306a381f28e31b1a56536e9"
   integrity sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==
 
-"@typechain/ethers-v5@^7.2.0":
+"@typechain/ethers-v5@7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@typechain/ethers-v5/-/ethers-v5-7.2.0.tgz#d559cffe0efe6bdbc20e644b817f6fa8add5e8f8"
   integrity sha512-jfcmlTvaaJjng63QsT49MT6R1HFhtO/TBMWbyzPFSzMmVIqb2tL6prnKBs4ZJrSvmgIXWy+ttSjpaxCTq8D/Tw==
+  dependencies:
+    lodash "^4.17.15"
+    ts-essentials "^7.0.1"
+
+"@typechain/ethers-v5@^10.0.0":
+  version "10.2.1"
+  resolved "https://registry.yarnpkg.com/@typechain/ethers-v5/-/ethers-v5-10.2.1.tgz#50241e6957683281ecfa03fb5a6724d8a3ce2391"
+  integrity sha512-n3tQmCZjRE6IU4h6lqUGiQ1j866n5MTCBJreNEHHVWXa2u9GJTaeYyU1/k+1qLutkyw+sS6VAN+AbeiTqsxd/A==
   dependencies:
     lodash "^4.17.15"
     ts-essentials "^7.0.1"
@@ -10874,7 +10865,7 @@ semver@^6.1.0, semver@^6.3.0, semver@^6.3.1:
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.1.tgz#556d2ef8689146e46dcea4bfdd095f3434dffcb4"
   integrity sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==
 
-semver@^7.2.1, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.1, semver@^7.5.2, semver@^7.5.4, semver@^7.6.2, semver@^7.6.3:
+semver@^7.2.1, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.2, semver@^7.5.4, semver@^7.6.2, semver@^7.6.3:
   version "7.6.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.3.tgz#980f7b5550bc175fb4dc09403085627f9eb33143"
   integrity sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==

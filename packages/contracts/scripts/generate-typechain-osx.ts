@@ -38,9 +38,8 @@ async function generateTypechain(): Promise<void> {
   const filesArg = jsonFiles.join(' ');
 
   if (filesArg) {
-    // TODO:Claudia (it should work without `npx`, but if you remove `npx`, you will see an error.)
     await execPromise(
-      `npx typechain --target ethers-v5 --out-dir ./typechain ${filesArg}`
+      `typechain --target ethers-v5 --out-dir ./typechain ${filesArg}`
     );
   }
 

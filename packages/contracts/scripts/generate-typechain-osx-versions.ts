@@ -16,9 +16,9 @@ async function generateTypechain(src: string, dest: string): Promise<void> {
     const relativePath = path.relative(src, path.dirname(file));
     const outputDir = path.join(dest, relativePath);
     fs.mkdirSync(outputDir, {recursive: true});
-    // TODO:Claudia (it should work without `npx`, but if you remove `npx`, you will see an error.)
+
     await execPromise(
-      `npx typechain --target ethers-v5 --out-dir "${outputDir}" "${file}"`
+      `typechain --target ethers-v5 --out-dir "${outputDir}" "${file}"`
     );
   }
 }
