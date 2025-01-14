@@ -11,6 +11,7 @@ import {UpgradedEvent} from '../../typechain/DAO';
 import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
+import {ARTIFACT_SOURCES} from '../test-utils/wrapper';
 import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,
   findEventTopicLog,
@@ -19,7 +20,7 @@ import {DAO_PERMISSIONS} from '@aragon/osx-commons-sdk';
 import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 let signers: SignerWithAddress[];
 
@@ -41,15 +42,18 @@ describe('DAO Upgrade', function () {
     signers = await ethers.getSigners();
 
     // Deploy the v1.3.0 implementation
-    daoV130Implementation = await new DAO_V1_3_0__factory(signers[0]).deploy();
+    daoV130Implementation = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.DAO_V1_3_0
+    );
   });
 
   context(`Re-entrancy`, function () {
     context(`v1.0.0 to v1.3.0`, function () {
       beforeEach(async function () {
-        daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(
-          new DAO_V1_0_0__factory(signers[0])
-        );
+        daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
+          withProxy: true,
+        });
+
         await daoV100Proxy.initialize(
           DUMMY_METADATA,
           signers[0].address,
@@ -270,9 +274,10 @@ describe('DAO Upgrade', function () {
   context(`Protocol Version`, function () {
     beforeEach(async function () {
       // prepare v1.0.0
-      daoV100Proxy = await deployWithProxy<DAO_V1_0_0>(
-        new DAO_V1_0_0__factory(signers[0])
-      );
+      daoV100Proxy = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_V1_0_0, {
+        withProxy: true,
+      });
+
       await daoV100Proxy.initialize(
         DUMMY_METADATA,
         signers[0].address,
@@ -290,8 +295,11 @@ describe('DAO Upgrade', function () {
 
     it('fails to call protocolVersion on versions prior to v1.3.0 and succeeds from v1.3.0 onwards', async () => {
       // deploy the different versions
-      const daoCurrentProxy = await deployWithProxy<DAO>(
-        new DAO_V1_3_0__factory(signers[0])
+      const daoCurrentProxy = await hre.wrapper.deploy(
+        ARTIFACT_SOURCES.DAO_V1_3_0,
+        {
+          withProxy: true,
+        }
       );
       await daoCurrentProxy.initialize(
         DUMMY_METADATA,

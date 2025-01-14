@@ -4,7 +4,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import hre, {ethers} from 'hardhat';
 
-describe.only('ProtocolVersion', function () {
+describe('ProtocolVersion', function () {
   let signers: SignerWithAddress[];
   before(async () => {
     signers = await ethers.getSigners();

@@ -434,27 +434,20 @@ describe.only('PluginSetupProcessor', function () {
         ).not.to.be.reverted;
       });
 
-      it.only("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
+      it("successfully calls plugin setup's prepareInstallation with correct arguments", async () => {
         // Uses setupUV1
         const pluginRepoPointer: PluginRepoPointer = [repoU.address, 1, 1];
 
         const data = '0x11';
 
-        // Reset the cache so previus tests don't trick this test that
-        // the function was really called, even though it mightn't have been.
-        // This is needed because smock contracts are not deployed in beforeEach,
-        // but in before, so there's only one instance of them for all tests.
-        setupUV1.prepareInstallation.reset();
-
-        await psp.prepareInstallation(
-          targetDao.address,
-          createPrepareInstallationParams(pluginRepoPointer, data)
-        );
-
-        expect(setupUV1.prepareInstallation).to.have.been.calledWith(
-          targetDao.address,
-          data
-        );
+        await expect(
+          psp.prepareInstallation(
+            targetDao.address,
+            createPrepareInstallationParams(pluginRepoPointer, data)
+          )
+        )
+          .to.emit(setupUV1, 'InstallationPrepared')
+          .withArgs(targetDao.address, data);
       });
 
       it('successfully prepares a plugin installation with the correct event arguments', async () => {
@@ -678,12 +671,7 @@ describe.only('PluginSetupProcessor', function () {
           EMPTY_DATA
         );
 
-        setupUV1Bad.prepareInstallation.returns([
-          // Must be the same plugin address that gets returned from pluginRepoPointer's prepareInstallation
-          ethers.constants.AddressZero,
-          // modify so it generates different setup id.
-          [mockHelpers(1), mockPermissionsOperations(0, 2, Operation.Grant)],
-        ]);
+        await setupUV1Bad.mockPermissionIndexes(0, 2);
 
         const {
           preparedSetupData: {
@@ -786,7 +774,7 @@ describe.only('PluginSetupProcessor', function () {
         ).to.be.revertedWithCustomError(psp, 'PluginAlreadyInstalled');
 
         // Clean up
-        setupUV1Bad.prepareInstallation.reset();
+        await setupUV1Bad.reset();
       });
     });
   });
@@ -1006,9 +994,7 @@ describe.only('PluginSetupProcessor', function () {
         // Mock the contract call so it returns different
         // permissions than the above `prepareUninstallation` by default.
         // Needed to generate different setup.
-        setupUV1.prepareUninstallation.returns(
-          mockPermissionsOperations(0, 2, Operation.Revoke)
-        );
+        await setupUV1.mockPermissionIndexes(0, 2);
 
         await prepareUninstallation(
           psp,
@@ -1020,31 +1006,27 @@ describe.only('PluginSetupProcessor', function () {
         );
 
         // Clean up
-        setupUV1.prepareUninstallation.reset();
+        await setupUV1.reset();
       });
 
       it("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
         const data = '0x11';
 
-        // Reset the cache so previus tests don't trick this test that
-        // the function was really called, even though it mightn't have been.
-        // This is needed because smock contracts are not deployed in beforeEach,
-        // but in before, so there's only one instance of them for all tests.
-        setupUV1.prepareUninstallation.reset();
-
-        await prepareUninstallation(
-          psp,
-          targetDao.address,
-          proxy,
-          pluginRepoPointer,
-          helpersUV1,
-          data
-        );
-
-        expect(setupUV1.prepareUninstallation).to.have.been.calledWith(
-          targetDao.address,
-          [proxy, helpersUV1, data]
-        );
+        await expect(
+          psp.prepareUninstallation(
+            targetDao.address,
+            createPrepareUninstallationParams(
+              proxy,
+              pluginRepoPointer,
+              helpersUV1,
+              data
+            )
+          )
+        )
+          .to.emit(setupUV1, 'UninstallationPrepared')
+          .withArgs(targetDao.address, (val: any) =>
+            expect(val).to.deep.equal([proxy, helpersUV1, data])
+          );
       });
 
       it('successfully prepares a plugin uninstallation with the correct event arguments', async () => {
@@ -1198,9 +1180,7 @@ describe.only('PluginSetupProcessor', function () {
 
         // mock the function so it returns different permissions
         // Needed to make sure second preparation results in different setup id and not reverts.
-        setupUV1.prepareUninstallation.returns(
-          mockPermissionsOperations(0, 2, Operation.Grant)
-        );
+        await setupUV1.mockPermissionIndexes(0, 2);
 
         // Second Preparation
         const {permissions: secondPreparePermissions} =
@@ -1256,6 +1236,8 @@ describe.only('PluginSetupProcessor', function () {
             )
           )
         ).to.be.revertedWithCustomError(psp, 'SetupNotApplicable');
+
+        await setupUV1.reset();
       });
 
       it('successfully uninstalls the plugin and emits the correct event', async () => {
@@ -1512,7 +1494,7 @@ describe.only('PluginSetupProcessor', function () {
         }
       });
 
-      it('reverts if same setup is already prepared', async () => {
+      it.only('reverts if same setup is already prepared', async () => {
         const {preparedSetupId} = await prepareUpdate(
           psp,
           targetDao.address,
