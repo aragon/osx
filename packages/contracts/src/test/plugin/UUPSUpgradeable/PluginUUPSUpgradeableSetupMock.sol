@@ -24,15 +24,13 @@ abstract contract MockedHelper is IPluginSetup {
     event UninstallationPrepared(address dao, SetupPayload payload);
     event UpdatePrepared(address dao, uint16 build, SetupPayload payload);
 
-    // event amazing(uint k);
-
     // helper functions to help with testing
     function emitInstallationPrepared(address dao, bytes memory data) internal {
         emit InstallationPrepared(dao, data);
     }
 
     function emitUpdatePrepared(address dao, uint16 build, SetupPayload memory payload) internal {
-        // emit amazing(10);
+        emit UpdatePrepared(dao, build, payload);
     }
 
     function emitUninstallationPrepared(address dao, SetupPayload memory payload) internal {
@@ -167,12 +165,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
             );
         }
 
-        console.log("giorgi123123123123123");
-        console.log(gasleft());
-
-        emit amazing(10);
-
-        console.log("blaxblux");
+        emitUpdatePrepared(_dao, _currentBuild, _payload);
     }
 }
 
