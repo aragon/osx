@@ -90,7 +90,7 @@ const EVENTS = {
 export const VALID_ERC1271_SIGNATURE = '0x1626ba7e';
 export const INVALID_ERC1271_SIGNATURE = '0xffffffff';
 
-describe.only('DAO', function () {
+describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
@@ -139,7 +139,7 @@ describe.only('DAO', function () {
   });
 
   describe('initialize', async () => {
-    it.only('reverts if trying to re-initialize', async () => {
+    it('reverts if trying to re-initialize', async () => {
       await expect(
         dao.initialize(
           dummyMetadata1,
@@ -765,7 +765,7 @@ describe.only('DAO', function () {
       }
     );
 
-    skipTestSuiteIfNetworkIsZkSync(
+    skipTestIfNetworkIsZkSync(
       'reverts if failure is allowed but not enough gas is provided (one action)',
       async () => {
         const gasConsumer = await hre.wrapper.deploy('GasConsumer');

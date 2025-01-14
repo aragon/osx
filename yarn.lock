@@ -1884,22 +1884,22 @@
   dependencies:
     chalk "5.3.0"
 
-"@matterlabs/hardhat-zksync-node@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-node/-/hardhat-zksync-node-0.1.0.tgz#de9b6b277727457ee981208030f33d06537db5d7"
-  integrity sha512-P3QZkcajplkQZg4Mj7soAlvH7JZObn853GtsD6NRCcjnwn3Id2yV1B5Iokg/BACRAwXCSLHRTn4nc2B/xkyqfg==
+"@matterlabs/hardhat-zksync-node@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-node/-/hardhat-zksync-node-0.2.0.tgz#ffcfb854b632f58c3af6ac027303ac5b30b37634"
+  integrity sha512-3zra0GedAf5TAibaFKVyTK/ze36Lp1+Z1v1ELwmPSkLMPXifBI4p3BN3rAUJ2MDg+Gl7HFle7BYO7F6VFtnkJg==
   dependencies:
-    "@matterlabs/hardhat-zksync-solc" "^1.1.4"
-    axios "^1.4.0"
-    chai "^4.3.6"
-    chalk "4.1.2"
-    fs-extra "^11.1.1"
+    "@matterlabs/hardhat-zksync-solc" "^1.2.0"
+    axios "^1.7.2"
+    chai "^4.3.4"
+    chalk "^4.1.2"
+    fs-extra "^11.2.0"
     proxyquire "^2.1.3"
-    sinon "^17.0.1"
+    sinon "^18.0.0"
     sinon-chai "^3.7.0"
-    undici "^5.14.0"
+    undici "^6.18.2"
 
-"@matterlabs/hardhat-zksync-solc@1.2.5", "@matterlabs/hardhat-zksync-solc@^1.0.5", "@matterlabs/hardhat-zksync-solc@^1.1.4":
+"@matterlabs/hardhat-zksync-solc@1.2.5", "@matterlabs/hardhat-zksync-solc@^1.0.5", "@matterlabs/hardhat-zksync-solc@^1.1.4", "@matterlabs/hardhat-zksync-solc@^1.2.0":
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-solc/-/hardhat-zksync-solc-1.2.5.tgz#fbeeabc3fea0dd232fa3c8cb31bd93c103eba11a"
   integrity sha512-iZyznWl1Hoe/Z46hnUe1s2drBZBjJOS/eN+Ql2lIBX9B6NevBl9DYzkKzH5HEIMCLGnX9sWpRAJqUQJWy9UB6w==
@@ -3776,7 +3776,7 @@ axios@^0.21.1, axios@^0.21.2, axios@^0.21.4:
   dependencies:
     follow-redirects "^1.14.0"
 
-axios@^1.4.0, axios@^1.5.1, axios@^1.6.2:
+axios@^1.4.0, axios@^1.5.1, axios@^1.6.2, axios@^1.7.2:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==

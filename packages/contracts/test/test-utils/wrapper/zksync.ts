@@ -13,10 +13,9 @@ export class ZkSync implements NetworkDeployment {
 
   async deploy(artifactName: string, args: any[] = []) {
     const {deployer} = hre;
+
     const artifact = await deployer.loadArtifact(artifactName);
     const contract = await deployer.deploy(artifact, args);
-    // TODO:Claudia this seems to be printed twice..
-    // console.log('movida good');
 
     return {artifact, contract};
   }

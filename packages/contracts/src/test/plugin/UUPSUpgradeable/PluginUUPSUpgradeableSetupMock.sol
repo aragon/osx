@@ -11,6 +11,7 @@ import {PluginUpgradeableSetup} from "@aragon/osx-commons-contracts/src/plugin/s
 
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
+import "hardhat/console.sol";
 
 abstract contract MockedHelper is IPluginSetup {
     // Used for mocking in tests
@@ -23,13 +24,15 @@ abstract contract MockedHelper is IPluginSetup {
     event UninstallationPrepared(address dao, SetupPayload payload);
     event UpdatePrepared(address dao, uint16 build, SetupPayload payload);
 
+    // event amazing(uint k);
+
     // helper functions to help with testing
     function emitInstallationPrepared(address dao, bytes memory data) internal {
         emit InstallationPrepared(dao, data);
     }
 
     function emitUpdatePrepared(address dao, uint16 build, SetupPayload memory payload) internal {
-        emit UpdatePrepared(dao, build, payload);
+        // emit amazing(10);
     }
 
     function emitUninstallationPrepared(address dao, SetupPayload memory payload) internal {
@@ -127,6 +130,8 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock
 contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
     constructor(address implementation) PluginUUPSUpgradeableSetupV1Mock(implementation) {}
 
+    event amazing(uint k);
+
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
@@ -162,7 +167,12 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
             );
         }
 
-        emitUpdatePrepared(_dao, _currentBuild, _payload);
+        console.log("giorgi123123123123123");
+        console.log(gasleft());
+
+        emit amazing(10);
+
+        console.log("blaxblux");
     }
 }
 

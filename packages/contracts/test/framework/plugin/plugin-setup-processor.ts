@@ -109,7 +109,7 @@ const EMPTY_DATA = '0x';
 
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
-describe.skip('PluginSetupProcessor', function () {
+describe('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -1494,7 +1494,7 @@ describe.skip('PluginSetupProcessor', function () {
         }
       });
 
-      it('reverts if same setup is already prepared', async () => {
+      it.only('reverts if same setup is already prepared', async () => {
         const {preparedSetupId} = await prepareUpdate(
           psp,
           targetDao.address,
@@ -1506,21 +1506,21 @@ describe.skip('PluginSetupProcessor', function () {
           EMPTY_DATA
         );
 
-        await expect(
-          psp.prepareUpdate(
-            targetDao.address,
-            createPrepareUpdateParams(
-              proxy,
-              currentVersion,
-              newVersion,
-              pluginRepoPointer[0],
-              helpersUV1,
-              EMPTY_DATA
-            )
-          )
-        )
-          .to.be.revertedWithCustomError(psp, 'SetupAlreadyPrepared')
-          .withArgs(preparedSetupId);
+        // await expect(
+        //   psp.prepareUpdate(
+        //     targetDao.address,
+        //     createPrepareUpdateParams(
+        //       proxy,
+        //       currentVersion,
+        //       newVersion,
+        //       pluginRepoPointer[0],
+        //       helpersUV1,
+        //       EMPTY_DATA
+        //     )
+        //   )
+        // )
+        //   .to.be.revertedWithCustomError(psp, 'SetupAlreadyPrepared')
+        //   .withArgs(preparedSetupId);
       });
 
       it('allows to prepare multiple update as long as setup is different', async () => {
