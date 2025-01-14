@@ -525,7 +525,6 @@ describe('Core: PermissionManager', function () {
         'PermissionConditionMock'
       );
 
-      console.log(conditionMock, ' gsss');
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
       const bulkItems: MultiTargetPermission[] = [
         {

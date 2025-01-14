@@ -1,6 +1,7 @@
 import {BigNumberish, BytesLike} from 'ethers';
 
 import {Wrapper} from '../test/test-utils/wrapper';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 
 export type AragonVerifyEntry = {

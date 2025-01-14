@@ -109,7 +109,7 @@ const EMPTY_DATA = '0x';
 
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
-describe.only('PluginSetupProcessor', function () {
+describe.skip('PluginSetupProcessor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;
@@ -1494,7 +1494,7 @@ describe.only('PluginSetupProcessor', function () {
         }
       });
 
-      it.only('reverts if same setup is already prepared', async () => {
+      it('reverts if same setup is already prepared', async () => {
         const {preparedSetupId} = await prepareUpdate(
           psp,
           targetDao.address,

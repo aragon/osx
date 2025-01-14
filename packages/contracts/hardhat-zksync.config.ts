@@ -1,34 +1,19 @@
-import fs from 'fs';
-
-import {networkExtensions} from './networks';
-
 import {TestingFork} from './types/hardhat';
 import RichAccounts from './utils/zksync-rich-accounts';
-import {
-  networks as commonNetworkConfigs,
-  SupportedNetworks,
-  addRpcUrlToNetwork,
-} from '@aragon/osx-commons-configs';
-
-import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
-import type {NetworkUserConfig} from 'hardhat/types';
-
-import '@nomicfoundation/hardhat-chai-matchers';
-
+import {addRpcUrlToNetwork} from '@aragon/osx-commons-configs';
 import '@matterlabs/hardhat-zksync-deploy';
-import '@matterlabs/hardhat-zksync-solc';
+import '@matterlabs/hardhat-zksync-ethers';
 import '@matterlabs/hardhat-zksync-node';
-
+import '@matterlabs/hardhat-zksync-solc';
+import '@matterlabs/hardhat-zksync-upgradable';
+import '@matterlabs/hardhat-zksync-verify';
+import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomicfoundation/hardhat-network-helpers';
 import * as dotenv from 'dotenv';
+import fs from 'fs';
 import 'hardhat-deploy';
-import 'hardhat-gas-reporter';
+import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import 'solidity-coverage';
-import 'solidity-docgen';
-
-import '@matterlabs/hardhat-zksync-upgradable';
-import '@matterlabs/hardhat-zksync-ethers';
-import '@matterlabs/hardhat-zksync-verify';
 
 dotenv.config();
 
@@ -40,17 +25,6 @@ if (process.env.ALCHEMY_API_KEY) {
   addRpcUrlToNetwork(process.env.ALCHEMY_API_KEY);
 } else {
   throw new Error('ALCHEMY_API_KEY in .env not set');
-}
-
-// add accounts to network configs
-const hardhatNetworks: {[index: string]: NetworkUserConfig} =
-  commonNetworkConfigs;
-for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
-  if (network === SupportedNetworks.LOCAL) {
-    continue;
-  }
-  hardhatNetworks[network].accounts = accounts;
-  // hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
 
 // Extend HardhatRuntimeEnvironment
@@ -98,7 +72,7 @@ task('deploy-contracts').setAction(async (args, hre) => {
 task('test-contracts').setAction(async (args, hre) => {
   await hre.run('build-contracts');
   const imp = await import('./test/test-utils/wrapper');
-  
+
   const wrapper = await imp.Wrapper.create(
     hre.network.name,
     hre.ethers.provider
@@ -140,12 +114,26 @@ const config: HardhatUserConfig = {
       blockGasLimit: 30000000,
       accounts: RichAccounts,
     },
-    ...hardhatNetworks,
-  },
-  gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
-    currency: 'USD',
+    zkTestnet: {
+      url: 'https://sepolia.era.zksync.dev',
+      ethNetwork: 'sepolia',
+      zksync: true,
+      verifyURL:
+        'https://explorer.sepolia.era.zksync.dev/contract_verification',
+      deploy: ['./deploy/new', './deploy/verification'],
+      accounts: accounts,
+      forceDeploy: true,
+    },
+    zkMainnet: {
+      url: 'https://mainnet.era.zksync.io',
+      ethNetwork: 'mainnet',
+      zksync: true,
+      verifyURL:
+        'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
+      deploy: ['./deploy/new', './deploy/verification'],
+      accounts: accounts,
+      forceDeploy: true,
+    },
   },
   namedAccounts: {
     deployer: 0,
@@ -156,14 +144,6 @@ const config: HardhatUserConfig = {
     cache: './build/cache',
     artifacts: './build/artifacts',
     deploy: './deploy',
-  },
-  docgen: {
-    outputDir: 'docs/developer-portal/03-reference-guide',
-    theme: 'markdown',
-    pages: 'files',
-    templates: 'docs/templates',
-    collapseNewlines: true,
-    exclude: ['test'],
   },
   mocha: {
     timeout: 90_000, // 90 seconds // increase the timeout for subdomain validation tests
