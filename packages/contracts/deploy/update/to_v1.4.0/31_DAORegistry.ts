@@ -38,6 +38,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error(`Failed to populate upgradeToAndCall transaction`);
   }
 
+  hre.aragonToVerifyContracts.push({
+    address: result.address,
+    args: [],
+  });
+
   hre.managementDAOActions.push({
     to: upgradeTX.to,
     data: upgradeTX.data,
