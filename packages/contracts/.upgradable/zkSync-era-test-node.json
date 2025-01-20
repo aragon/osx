@@ -75,6 +75,56 @@
       "address": "0x8081c05238CD3e65579b849BAAFd1d8b271d1495",
       "txHash": "0x5d14c8cfb742f9427ae7eba1876b24facc965cde07fd07ecd2af4c28e0e058f4",
       "kind": "uups"
+    },
+    {
+      "address": "0xb476c829eA6E504314f7A917D9e8fC138279C35f",
+      "txHash": "0x8b8c7927d6223904bc7180a02b770d318045cf659285bceea1feadf5990db805",
+      "kind": "uups"
+    },
+    {
+      "address": "0x5C0374fe03A79A43fa40294f21519f6FCDf12852",
+      "txHash": "0x909e344731eb80916963a168268ee6331f54da55e14149e16c862bdef16aa600",
+      "kind": "uups"
+    },
+    {
+      "address": "0x224aBAd264fccb5D891d7C45220813f8F972040b",
+      "txHash": "0x093c7933ef74f684537d26838b11f79875143fe6eefdc39d5dfcc50cf9053262",
+      "kind": "uups"
+    },
+    {
+      "address": "0xEe043059EA87E83a20265836891B20EE256FeD16",
+      "txHash": "0x8d0673e68ddf3cab0f2c69dba03f4a88985fb94129e381c4d4913122def4aef8",
+      "kind": "uups"
+    },
+    {
+      "address": "0x829a532911c07915ACfE427343a9E089467A93ed",
+      "txHash": "0x3181579b15e58db71050c1631a5088029061aa6f3a90c03ab8ee5301cfcc2c8a",
+      "kind": "uups"
+    },
+    {
+      "address": "0x63363A73E5f2Cca3505DFAB33c79F072f03F98f7",
+      "txHash": "0x81c63fe307e1c81df2cc9da9c28f5cc6df4081473f1c16ea9eb584c85e7e6dce",
+      "kind": "uups"
+    },
+    {
+      "address": "0x5da19D527bd7A0AaC5b37e7DD858623a5D64dDdD",
+      "txHash": "0xa56929cc0b627be757bd817344edc6fd78bc3968bc504d6df26dce5441660451",
+      "kind": "uups"
+    },
+    {
+      "address": "0x9857189910ad76EbB05c5071405f4F53a68F9D3D",
+      "txHash": "0xf40596b4715ed681f42f00cf6e4d21babc1a2fb9748f8682d1bdf183af98a86e",
+      "kind": "uups"
+    },
+    {
+      "address": "0xE28F19C920Bb0204C6ea392fbBbEA1AFfE461551",
+      "txHash": "0x0cccc833f489fca20e19270cae2362f9efbe5d35ef32cdeed49aa4797af2a75e",
+      "kind": "uups"
+    },
+    {
+      "address": "0xb2Df353E2BAC34128BDB9218EB36fEfA60F40EeC",
+      "txHash": "0x32abffb5a50f0950a799fa07ec91771cdd1f3aaec4fbedd7a2ee273a3df38520",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -230,310 +280,6 @@
         }
       }
     },
-    "3e322e49f56533cddc3c433b8aa987b3271a066f6f2c2bc5f32724559973499b": {
-      "address": "0xA16aB43b40BdA5935275ad84f95aBE21506108e1",
-      "txHash": "0x35f7100e9f3cbdec4d445d41365aac401732971baa18fb2828e91d39803a11fa",
-      "layout": {
-        "solcVersion": "0.8.17",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
-          },
-          {
-            "label": "dao_",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_contract(IDAO)3552",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.0.1/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:16"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.0.1/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:38"
-          },
-          {
-            "label": "targetInterfaceId",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_bytes4",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:22"
-          },
-          {
-            "label": "entries",
-            "offset": 0,
-            "slot": "202",
-            "type": "t_mapping(t_address,t_bool)",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:25"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_array(t_uint256)48_storage",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:75"
-          },
-          {
-            "label": "subdomainRegistrar",
-            "offset": 0,
-            "slot": "251",
-            "type": "t_contract(ENSSubdomainRegistrar)5973",
-            "contract": "DAORegistry",
-            "src": "@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol:18"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "252",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DAORegistry",
-            "src": "@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol:73"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_uint256)48_storage": {
-            "label": "uint256[48]",
-            "numberOfBytes": "1536"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes4": {
-            "label": "bytes4",
-            "numberOfBytes": "4"
-          },
-          "t_contract(ENSSubdomainRegistrar)5973": {
-            "label": "contract ENSSubdomainRegistrar",
-            "numberOfBytes": "20"
-          },
-          "t_contract(IDAO)3552": {
-            "label": "contract IDAO",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
-    "2eca9b4c98128bf98ea41ebde81f58a22cf978e5434edf9c4e17d98f7560254e": {
-      "address": "0x5dbDB01c0569Af103fABEb8d3d41e811d51FaEe0",
-      "txHash": "0x06fa02b4edf831fcd2a97807c31ebaeb687bef6daf9f985f8e7989dc2fd2b62a",
-      "layout": {
-        "solcVersion": "0.8.17",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
-          },
-          {
-            "label": "dao_",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_contract(IDAO)7011",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.3.0/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:16"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.3.0/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:38"
-          },
-          {
-            "label": "targetInterfaceId",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_bytes4",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/utils/InterfaceBasedRegistry.sol:22"
-          },
-          {
-            "label": "entries",
-            "offset": 0,
-            "slot": "202",
-            "type": "t_mapping(t_address,t_bool)",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/utils/InterfaceBasedRegistry.sol:25"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_array(t_uint256)48_storage",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/utils/InterfaceBasedRegistry.sol:75"
-          },
-          {
-            "label": "subdomainRegistrar",
-            "offset": 0,
-            "slot": "251",
-            "type": "t_contract(ENSSubdomainRegistrar)9549",
-            "contract": "DAORegistry",
-            "src": "@aragon/osx-v1.3.0/framework/dao/DAORegistry.sol:18"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "252",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DAORegistry",
-            "src": "@aragon/osx-v1.3.0/framework/dao/DAORegistry.sol:73"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_uint256)48_storage": {
-            "label": "uint256[48]",
-            "numberOfBytes": "1536"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes4": {
-            "label": "bytes4",
-            "numberOfBytes": "4"
-          },
-          "t_contract(ENSSubdomainRegistrar)9549": {
-            "label": "contract ENSSubdomainRegistrar",
-            "numberOfBytes": "20"
-          },
-          "t_contract(IDAO)7011": {
-            "label": "contract IDAO",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
     "558052d5894e36b683c14849f3cee9907ea64c810bb3de782cc686aec3bd5147": {
       "address": "0x36Fd6e32944B0aCd4b64DEEBcdd2Ab79D6c539EE",
       "txHash": "0x1a2b2fbdfd69d93b9cf439932abbf24828d39a1b6a4da8f1af0518227b141ee2",
@@ -668,310 +414,6 @@
             "numberOfBytes": "20"
           },
           "t_contract(IDAO)108": {
-            "label": "contract IDAO",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
-    "57173a5032a118c6f3b30c26757c2632bf1aea5dc0ac22d77a627e6a812a83a0": {
-      "address": "0x3f1B05fB4a9a0DC3fe7A4b1a6945ABB13fBF8856",
-      "txHash": "0x36e2f1615b852dee637cfaac17b7c3a0ad554918c919f8ab85cba226eff344e6",
-      "layout": {
-        "solcVersion": "0.8.17",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
-          },
-          {
-            "label": "dao_",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_contract(IDAO)3552",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.0.1/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:16"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.0.1/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:38"
-          },
-          {
-            "label": "targetInterfaceId",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_bytes4",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:22"
-          },
-          {
-            "label": "entries",
-            "offset": 0,
-            "slot": "202",
-            "type": "t_mapping(t_address,t_bool)",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:25"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_array(t_uint256)48_storage",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:75"
-          },
-          {
-            "label": "subdomainRegistrar",
-            "offset": 0,
-            "slot": "251",
-            "type": "t_contract(ENSSubdomainRegistrar)5973",
-            "contract": "PluginRepoRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol:20"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "252",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "PluginRepoRegistry",
-            "src": "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepoRegistry.sol:72"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_uint256)48_storage": {
-            "label": "uint256[48]",
-            "numberOfBytes": "1536"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes4": {
-            "label": "bytes4",
-            "numberOfBytes": "4"
-          },
-          "t_contract(ENSSubdomainRegistrar)5973": {
-            "label": "contract ENSSubdomainRegistrar",
-            "numberOfBytes": "20"
-          },
-          "t_contract(IDAO)3552": {
-            "label": "contract IDAO",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
-    "b59e1eff12ea85f9e4410300bad50738ca1a03386bde3dd3d8fc72de261f986c": {
-      "address": "0xC7ad76a1898b047917Eb0699Fb5AD7B7C1e89cf7",
-      "txHash": "0xfb2eec3eb85ab0497cc774c4841bc0d587a8cd800fe57c8e4532d4d1dd6dfe88",
-      "layout": {
-        "solcVersion": "0.8.17",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
-          },
-          {
-            "label": "dao_",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_contract(IDAO)7011",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.3.0/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:16"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.3.0/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:38"
-          },
-          {
-            "label": "targetInterfaceId",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_bytes4",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/utils/InterfaceBasedRegistry.sol:22"
-          },
-          {
-            "label": "entries",
-            "offset": 0,
-            "slot": "202",
-            "type": "t_mapping(t_address,t_bool)",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/utils/InterfaceBasedRegistry.sol:25"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_array(t_uint256)48_storage",
-            "contract": "InterfaceBasedRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/utils/InterfaceBasedRegistry.sol:75"
-          },
-          {
-            "label": "subdomainRegistrar",
-            "offset": 0,
-            "slot": "251",
-            "type": "t_contract(ENSSubdomainRegistrar)9549",
-            "contract": "PluginRepoRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepoRegistry.sol:20"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "252",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "PluginRepoRegistry",
-            "src": "@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepoRegistry.sol:72"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_uint256)48_storage": {
-            "label": "uint256[48]",
-            "numberOfBytes": "1536"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes4": {
-            "label": "bytes4",
-            "numberOfBytes": "4"
-          },
-          "t_contract(ENSSubdomainRegistrar)9549": {
-            "label": "contract ENSSubdomainRegistrar",
-            "numberOfBytes": "20"
-          },
-          "t_contract(IDAO)7011": {
             "label": "contract IDAO",
             "numberOfBytes": "20"
           },
@@ -1196,9 +638,9 @@
         }
       }
     },
-    "062863b12e708fff15c6227b67329fe1e95274f658f9d07825e38f985e1d4e3d": {
-      "address": "0x8D1D71DaA2c2E37C53383965A79EdBCE5EFc5528",
-      "txHash": "0x21845024238ee28accee8e665d8da3e4637b4a9a55fcd9fd26b146149aca6bbd",
+    "023704722ad884b0e0516dfc34bebf44c7e1864c7a99fbdcaf623925b7da4166": {
+      "address": "0xDa4A7ff35aFAE0cdbEB8172A29B8A4F72536cbe9",
+      "txHash": "0x80aba307707b56f2754c0d4d6579b2289ea87c67543d999aca8da826816301ce",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -1228,9 +670,25 @@
             "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
           },
           {
-            "label": "__gap",
+            "label": "_supportedInterfaces",
             "offset": 0,
             "slot": "51",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
             "type": "t_array(t_uint256)50_storage",
             "contract": "ERC1967UpgradeUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
@@ -1238,7 +696,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "101",
+            "slot": "151",
             "type": "t_array(t_uint256)50_storage",
             "contract": "UUPSUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
@@ -1246,7 +704,200 @@
           {
             "label": "permissionsHashed",
             "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "PermissionManager",
+            "src": "src/core/permission/PermissionManager.sol:32"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PermissionManager",
+            "src": "src/core/permission/PermissionManager.sol:511"
+          },
+          {
+            "label": "callbackMagicNumbers",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_mapping(t_bytes4,t_bytes4)",
+            "contract": "CallbackHandler",
+            "src": "src/core/utils/CallbackHandler.sol:12"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "CallbackHandler",
+            "src": "src/core/utils/CallbackHandler.sol:55"
+          },
+          {
+            "label": "__removed0",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:82",
+            "renamedFrom": "signatureValidator"
+          },
+          {
+            "label": "trustedForwarder",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:86"
+          },
+          {
+            "label": "_daoURI",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_string_storage",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:90"
+          },
+          {
+            "label": "_reentrancyStatus",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_uint256",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_array(t_uint256)46_storage",
+            "contract": "DAO",
+            "src": "src/core/dao/DAO.sol:466"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_bytes4)": {
+            "label": "mapping(bytes4 => bytes4)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "38ecb6641c7d058ad2ddd1cffe216aa5df549dcac1b354810fed6baa1d737be1": {
+      "address": "0x3398FCaA32770A1019509A0B37D0202D360751d4",
+      "txHash": "0xe8139db29b7579c22cddfddef1c3a72da57b152ede22a0c67c44b21cbe0e98a7",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_supportedInterfaces",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
             "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "permissionsHashed",
+            "offset": 0,
+            "slot": "201",
             "type": "t_mapping(t_bytes32,t_address)",
             "contract": "PermissionManager",
             "src": "@aragon/osx-v1.0.1/core/permission/PermissionManager.sol:27"
@@ -1254,48 +905,68 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "152",
+            "slot": "202",
             "type": "t_array(t_uint256)49_storage",
             "contract": "PermissionManager",
             "src": "@aragon/osx-v1.0.1/core/permission/PermissionManager.sol:362"
           },
           {
-            "label": "buildsPerRelease",
+            "label": "callbackMagicNumbers",
             "offset": 0,
-            "slot": "201",
-            "type": "t_mapping(t_uint8,t_uint16)",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol:55"
+            "slot": "251",
+            "type": "t_mapping(t_bytes4,t_bytes4)",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.0.1/core/utils/CallbackHandler.sol:11"
           },
           {
-            "label": "versions",
+            "label": "__gap",
             "offset": 0,
-            "slot": "202",
-            "type": "t_mapping(t_bytes32,t_struct(Version)4787_storage)",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol:58"
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.0.1/core/utils/CallbackHandler.sol:53"
           },
           {
-            "label": "latestTagHashForPluginSetup",
+            "label": "signatureValidator",
             "offset": 0,
-            "slot": "203",
-            "type": "t_mapping(t_address,t_bytes32)",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol:61"
+            "slot": "301",
+            "type": "t_contract(IERC1271)16974",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:64"
           },
           {
-            "label": "latestRelease",
+            "label": "trustedForwarder",
             "offset": 0,
-            "slot": "204",
-            "type": "t_uint8",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.0.1/framework/plugin/repo/PluginRepo.sol:65"
+            "slot": "302",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:67"
+          },
+          {
+            "label": "_daoURI",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_string_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:70"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.0.1/core/dao/DAO.sol:339"
           }
         ],
         "types": {
           "t_address": {
             "label": "address",
             "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]",
@@ -1313,71 +984,29 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_bytes_storage": {
-            "label": "bytes",
-            "numberOfBytes": "32"
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
           },
-          "t_mapping(t_address,t_bytes32)": {
-            "label": "mapping(address => bytes32)",
-            "numberOfBytes": "32"
+          "t_contract(IERC1271)16974": {
+            "label": "contract IERC1271",
+            "numberOfBytes": "20"
           },
           "t_mapping(t_bytes32,t_address)": {
             "label": "mapping(bytes32 => address)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(Version)4787_storage)": {
-            "label": "mapping(bytes32 => struct PluginRepo.Version)",
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint8,t_uint16)": {
-            "label": "mapping(uint8 => uint16)",
+          "t_mapping(t_bytes4,t_bytes4)": {
+            "label": "mapping(bytes4 => bytes4)",
             "numberOfBytes": "32"
           },
-          "t_struct(Tag)4779_storage": {
-            "label": "struct PluginRepo.Tag",
-            "members": [
-              {
-                "label": "release",
-                "type": "t_uint8",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "build",
-                "type": "t_uint16",
-                "offset": 1,
-                "slot": "0"
-              }
-            ],
+          "t_string_storage": {
+            "label": "string",
             "numberOfBytes": "32"
-          },
-          "t_struct(Version)4787_storage": {
-            "label": "struct PluginRepo.Version",
-            "members": [
-              {
-                "label": "tag",
-                "type": "t_struct(Tag)4779_storage",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "pluginSetup",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "buildMetadata",
-                "type": "t_bytes_storage",
-                "offset": 0,
-                "slot": "2"
-              }
-            ],
-            "numberOfBytes": "96"
-          },
-          "t_uint16": {
-            "label": "uint16",
-            "numberOfBytes": "2"
           },
           "t_uint256": {
             "label": "uint256",
@@ -1390,9 +1019,9 @@
         }
       }
     },
-    "2ceedaa172d7e26a9dae24fc26f6858a831f7a9fed047e971722d8b13f870899": {
-      "address": "0x7Dff4148ffD02257324F42D0AAee50B1e54fF1Dd",
-      "txHash": "0xbea9dc703581ab7c2619fff0e8f24469d9537c923fdcb174d2f8b5040f2c8627",
+    "bdbb9b87c6e3ff6a2cb0dd950004d32e96611070dcfaeb5b8719e7ce1950e05e": {
+      "address": "0x5A8679f1Ccb9ddEcC601Dd2710350e13Fd59a3cc",
+      "txHash": "0xabd8526118ffe27bb6c43304a118b21a68ba4bf55beb1c23e82ed9e5499e065f",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -1422,9 +1051,25 @@
             "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
           },
           {
-            "label": "__gap",
+            "label": "_supportedInterfaces",
             "offset": 0,
             "slot": "51",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ERC165StorageUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
             "type": "t_array(t_uint256)50_storage",
             "contract": "ERC1967UpgradeUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
@@ -1432,7 +1077,7 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "101",
+            "slot": "151",
             "type": "t_array(t_uint256)50_storage",
             "contract": "UUPSUpgradeable",
             "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
@@ -1440,7 +1085,7 @@
           {
             "label": "permissionsHashed",
             "offset": 0,
-            "slot": "151",
+            "slot": "201",
             "type": "t_mapping(t_bytes32,t_address)",
             "contract": "PermissionManager",
             "src": "@aragon/osx-v1.3.0/core/permission/PermissionManager.sol:31"
@@ -1448,48 +1093,76 @@
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "152",
+            "slot": "202",
             "type": "t_array(t_uint256)49_storage",
             "contract": "PermissionManager",
             "src": "@aragon/osx-v1.3.0/core/permission/PermissionManager.sol:402"
           },
           {
-            "label": "buildsPerRelease",
+            "label": "callbackMagicNumbers",
             "offset": 0,
-            "slot": "201",
-            "type": "t_mapping(t_uint8,t_uint16)",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol:58"
+            "slot": "251",
+            "type": "t_mapping(t_bytes4,t_bytes4)",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.3.0/core/utils/CallbackHandler.sol:11"
           },
           {
-            "label": "versions",
+            "label": "__gap",
             "offset": 0,
-            "slot": "202",
-            "type": "t_mapping(t_bytes32,t_struct(Version)8363_storage)",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol:61"
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "CallbackHandler",
+            "src": "@aragon/osx-v1.3.0/core/utils/CallbackHandler.sol:54"
           },
           {
-            "label": "latestTagHashForPluginSetup",
+            "label": "signatureValidator",
             "offset": 0,
-            "slot": "203",
-            "type": "t_mapping(t_address,t_bytes32)",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol:64"
+            "slot": "301",
+            "type": "t_contract(IERC1271)16974",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:74"
           },
           {
-            "label": "latestRelease",
+            "label": "trustedForwarder",
             "offset": 0,
-            "slot": "204",
-            "type": "t_uint8",
-            "contract": "PluginRepo",
-            "src": "@aragon/osx-v1.3.0/framework/plugin/repo/PluginRepo.sol:68"
+            "slot": "302",
+            "type": "t_address",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:78"
+          },
+          {
+            "label": "_daoURI",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_string_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:82"
+          },
+          {
+            "label": "_reentrancyStatus",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_uint256",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:86"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_array(t_uint256)46_storage",
+            "contract": "DAO",
+            "src": "@aragon/osx-v1.3.0/core/dao/DAO.sol:422"
           }
         ],
         "types": {
           "t_address": {
             "label": "address",
             "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]",
@@ -1507,71 +1180,29 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_bytes_storage": {
-            "label": "bytes",
-            "numberOfBytes": "32"
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
           },
-          "t_mapping(t_address,t_bytes32)": {
-            "label": "mapping(address => bytes32)",
-            "numberOfBytes": "32"
+          "t_contract(IERC1271)16974": {
+            "label": "contract IERC1271",
+            "numberOfBytes": "20"
           },
           "t_mapping(t_bytes32,t_address)": {
             "label": "mapping(bytes32 => address)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(Version)8363_storage)": {
-            "label": "mapping(bytes32 => struct PluginRepo.Version)",
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint8,t_uint16)": {
-            "label": "mapping(uint8 => uint16)",
+          "t_mapping(t_bytes4,t_bytes4)": {
+            "label": "mapping(bytes4 => bytes4)",
             "numberOfBytes": "32"
           },
-          "t_struct(Tag)8355_storage": {
-            "label": "struct PluginRepo.Tag",
-            "members": [
-              {
-                "label": "release",
-                "type": "t_uint8",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "build",
-                "type": "t_uint16",
-                "offset": 1,
-                "slot": "0"
-              }
-            ],
+          "t_string_storage": {
+            "label": "string",
             "numberOfBytes": "32"
-          },
-          "t_struct(Version)8363_storage": {
-            "label": "struct PluginRepo.Version",
-            "members": [
-              {
-                "label": "tag",
-                "type": "t_struct(Tag)8355_storage",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "pluginSetup",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "buildMetadata",
-                "type": "t_bytes_storage",
-                "offset": 0,
-                "slot": "2"
-              }
-            ],
-            "numberOfBytes": "96"
-          },
-          "t_uint16": {
-            "label": "uint16",
-            "numberOfBytes": "2"
           },
           "t_uint256": {
             "label": "uint256",
@@ -1584,9 +1215,9 @@
         }
       }
     },
-    "38096cc32b4f1be46551347c4be2ecc1e04bab5b5ff04bf5d345db0293162651": {
-      "address": "0x0177033E258697183AEDa56FA117EB22bB50e1Fd",
-      "txHash": "0x708ea18d7ec7910d0bff4496ecaa61ee0c624adee31be7141089f3ec57bf3db3",
+    "542aa80ef4117579ad47fe1ccbadc557869c1acf7985f85a77ccf1adcc3754aa": {
+      "address": "0x21448eD6536DAFd049fA11CEb153e1B91Bc403b3",
+      "txHash": "0x6d0754e3560435231dddd0bd10f2a9a6f8a0dbb7007606fa86c6fa51ecf31910",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -1648,36 +1279,44 @@
             "src": "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol:40"
           },
           {
-            "label": "ens",
+            "label": "targetInterfaceId",
             "offset": 0,
             "slot": "201",
-            "type": "t_contract(ENS)12342",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "src/framework/utils/ens/ENSSubdomainRegistrar.sol:28"
+            "type": "t_bytes4",
+            "contract": "InterfaceBasedRegistry",
+            "src": "src/framework/utils/InterfaceBasedRegistry.sol:23"
           },
           {
-            "label": "node",
+            "label": "entries",
             "offset": 0,
             "slot": "202",
-            "type": "t_bytes32",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "src/framework/utils/ens/ENSSubdomainRegistrar.sol:31"
-          },
-          {
-            "label": "resolver",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_address",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "src/framework/utils/ens/ENSSubdomainRegistrar.sol:34"
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "InterfaceBasedRegistry",
+            "src": "src/framework/utils/InterfaceBasedRegistry.sol:26"
           },
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "204",
-            "type": "t_array(t_uint256)47_storage",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "src/framework/utils/ens/ENSSubdomainRegistrar.sol:114"
+            "slot": "203",
+            "type": "t_array(t_uint256)48_storage",
+            "contract": "InterfaceBasedRegistry",
+            "src": "src/framework/utils/InterfaceBasedRegistry.sol:76"
+          },
+          {
+            "label": "subdomainRegistrar",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_contract(ENSSubdomainRegistrar)36294",
+            "contract": "DAORegistry",
+            "src": "src/framework/dao/DAORegistry.sol:21"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "DAORegistry",
+            "src": "src/framework/dao/DAORegistry.sol:84"
           }
         ],
         "types": {
@@ -1685,9 +1324,313 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_uint256)47_storage": {
-            "label": "uint256[47]",
-            "numberOfBytes": "1504"
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_contract(ENSSubdomainRegistrar)36294": {
+            "label": "contract ENSSubdomainRegistrar",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDAO)108": {
+            "label": "contract IDAO",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "eb2ef7e51fe1f7fabcd2d339bfeb0ee75161c946033427e430ec3bacb595f61a": {
+      "address": "0xe9f92a16c12698F4d7A770493f69a98A73c95aEB",
+      "txHash": "0x246e22fb4a00b1f613cfc5d619e709cd337508b762cc2c7b3f03823393988cd4",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
+          },
+          {
+            "label": "dao_",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_contract(IDAO)108",
+            "contract": "DaoAuthorizableUpgradeable",
+            "src": "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol:17"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "DaoAuthorizableUpgradeable",
+            "src": "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol:40"
+          },
+          {
+            "label": "targetInterfaceId",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_bytes4",
+            "contract": "InterfaceBasedRegistry",
+            "src": "src/framework/utils/InterfaceBasedRegistry.sol:23"
+          },
+          {
+            "label": "entries",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "InterfaceBasedRegistry",
+            "src": "src/framework/utils/InterfaceBasedRegistry.sol:26"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_array(t_uint256)48_storage",
+            "contract": "InterfaceBasedRegistry",
+            "src": "src/framework/utils/InterfaceBasedRegistry.sol:76"
+          },
+          {
+            "label": "subdomainRegistrar",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_contract(ENSSubdomainRegistrar)36294",
+            "contract": "PluginRepoRegistry",
+            "src": "src/framework/plugin/repo/PluginRepoRegistry.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PluginRepoRegistry",
+            "src": "src/framework/plugin/repo/PluginRepoRegistry.sol:78"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_contract(ENSSubdomainRegistrar)36294": {
+            "label": "contract ENSSubdomainRegistrar",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDAO)108": {
+            "label": "contract IDAO",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "6322b4fdcd6dfcc59326af578deb993a5e226252580c8dbaa1b3b50a3eec7fa4": {
+      "address": "0xA02eEb0d21D0e85B7AB6AcDf63b93cAf8090989a",
+      "txHash": "0x23b3c51ce6a615e524fb227e4d50fa5bab48a51fb504cad291dd2b6b486ede30",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "permissionsHashed",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "PermissionManager",
+            "src": "src/core/permission/PermissionManager.sol:32"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PermissionManager",
+            "src": "src/core/permission/PermissionManager.sol:511"
+          },
+          {
+            "label": "buildsPerRelease",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_uint8,t_uint16)",
+            "contract": "PluginRepo",
+            "src": "src/framework/plugin/repo/PluginRepo.sol:60"
+          },
+          {
+            "label": "versions",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_mapping(t_bytes32,t_struct(Version)33323_storage)",
+            "contract": "PluginRepo",
+            "src": "src/framework/plugin/repo/PluginRepo.sol:63"
+          },
+          {
+            "label": "latestTagHashForPluginSetup",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_mapping(t_address,t_bytes32)",
+            "contract": "PluginRepo",
+            "src": "src/framework/plugin/repo/PluginRepo.sol:66"
+          },
+          {
+            "label": "latestRelease",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_uint8",
+            "contract": "PluginRepo",
+            "src": "src/framework/plugin/repo/PluginRepo.sol:70"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_array(t_uint256)46_storage",
+            "contract": "PluginRepo",
+            "src": "src/framework/plugin/repo/PluginRepo.sol:276"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)46_storage": {
+            "label": "uint256[46]",
+            "numberOfBytes": "1472"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]",
@@ -1705,13 +1648,71 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(ENS)12342": {
-            "label": "contract ENS",
-            "numberOfBytes": "20"
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
           },
-          "t_contract(IDAO)108": {
-            "label": "contract IDAO",
-            "numberOfBytes": "20"
+          "t_mapping(t_address,t_bytes32)": {
+            "label": "mapping(address => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Version)33323_storage)": {
+            "label": "mapping(bytes32 => struct PluginRepo.Version)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint8,t_uint16)": {
+            "label": "mapping(uint8 => uint16)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Tag)33315_storage": {
+            "label": "struct PluginRepo.Tag",
+            "members": [
+              {
+                "label": "release",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "build",
+                "type": "t_uint16",
+                "offset": 1,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Version)33323_storage": {
+            "label": "struct PluginRepo.Version",
+            "members": [
+              {
+                "label": "tag",
+                "type": "t_struct(Tag)33315_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "pluginSetup",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "buildMetadata",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
           },
           "t_uint256": {
             "label": "uint256",
@@ -1724,9 +1725,9 @@
         }
       }
     },
-    "aacf5c5725ae9d870415c3ea16a21c40750d4c69e644423e5507014b5e17aa0c": {
-      "address": "0xC7Cb1b0070c0AE511dA17d825252b574ada4DbBc",
-      "txHash": "0xb45ee3511af07c7dc48f2bd8f7e245fbc6c5e6d47879d69b31d4e66e1532cb59",
+    "3e322e49f56533cddc3c433b8aa987b3271a066f6f2c2bc5f32724559973499b": {
+      "address": "0x13F112ceF2E29b657E9F5461F08b7EcB0D2C5eF0",
+      "txHash": "0x96def26e5f0be46d09df1e7e3c644f60089661cac34192318bf50a7e7cb38de6",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -1788,36 +1789,44 @@
             "src": "@aragon/osx-v1.0.1/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:38"
           },
           {
-            "label": "ens",
+            "label": "targetInterfaceId",
             "offset": 0,
             "slot": "201",
-            "type": "t_contract(ENS)12342",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol:26"
+            "type": "t_bytes4",
+            "contract": "InterfaceBasedRegistry",
+            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:22"
           },
           {
-            "label": "node",
+            "label": "entries",
             "offset": 0,
             "slot": "202",
-            "type": "t_bytes32",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol:29"
-          },
-          {
-            "label": "resolver",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_address",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol:32"
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "InterfaceBasedRegistry",
+            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:25"
           },
           {
             "label": "__gap",
             "offset": 0,
-            "slot": "204",
-            "type": "t_array(t_uint256)47_storage",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol:111"
+            "slot": "203",
+            "type": "t_array(t_uint256)48_storage",
+            "contract": "InterfaceBasedRegistry",
+            "src": "@aragon/osx-v1.0.1/framework/utils/InterfaceBasedRegistry.sol:75"
+          },
+          {
+            "label": "subdomainRegistrar",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_contract(ENSSubdomainRegistrar)5973",
+            "contract": "DAORegistry",
+            "src": "@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol:18"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "252",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "DAORegistry",
+            "src": "@aragon/osx-v1.0.1/framework/dao/DAORegistry.sol:73"
           }
         ],
         "types": {
@@ -1825,9 +1834,9 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_uint256)47_storage": {
-            "label": "uint256[47]",
-            "numberOfBytes": "1504"
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]",
@@ -1841,157 +1850,21 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_bytes32": {
-            "label": "bytes32",
-            "numberOfBytes": "32"
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
           },
-          "t_contract(ENS)12342": {
-            "label": "contract ENS",
+          "t_contract(ENSSubdomainRegistrar)5973": {
+            "label": "contract ENSSubdomainRegistrar",
             "numberOfBytes": "20"
           },
           "t_contract(IDAO)3552": {
             "label": "contract IDAO",
             "numberOfBytes": "20"
           },
-          "t_uint256": {
-            "label": "uint256",
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
             "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
-    "30bfac48df2ef0413de1adce4892b73b5abd8b2660b8e1400044d7a0b5a305d7": {
-      "address": "0x1885E27f520aBA46285814e765D27C54F80bFD3C",
-      "txHash": "0x15d32b1dd7fc6821764b512a11270bc0665565d5d3da5dcea0ca07759df38221",
-      "layout": {
-        "solcVersion": "0.8.17",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:40"
-          },
-          {
-            "label": "dao_",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_contract(IDAO)7011",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.3.0/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:16"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_array(t_uint256)49_storage",
-            "contract": "DaoAuthorizableUpgradeable",
-            "src": "@aragon/osx-v1.3.0/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol:38"
-          },
-          {
-            "label": "ens",
-            "offset": 0,
-            "slot": "201",
-            "type": "t_contract(ENS)12342",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.3.0/framework/utils/ens/ENSSubdomainRegistrar.sol:26"
-          },
-          {
-            "label": "node",
-            "offset": 0,
-            "slot": "202",
-            "type": "t_bytes32",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.3.0/framework/utils/ens/ENSSubdomainRegistrar.sol:29"
-          },
-          {
-            "label": "resolver",
-            "offset": 0,
-            "slot": "203",
-            "type": "t_address",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.3.0/framework/utils/ens/ENSSubdomainRegistrar.sol:32"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "204",
-            "type": "t_array(t_uint256)47_storage",
-            "contract": "ENSSubdomainRegistrar",
-            "src": "@aragon/osx-v1.3.0/framework/utils/ens/ENSSubdomainRegistrar.sol:111"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_uint256)47_storage": {
-            "label": "uint256[47]",
-            "numberOfBytes": "1504"
-          },
-          "t_array(t_uint256)49_storage": {
-            "label": "uint256[49]",
-            "numberOfBytes": "1568"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes32": {
-            "label": "bytes32",
-            "numberOfBytes": "32"
-          },
-          "t_contract(ENS)12342": {
-            "label": "contract ENS",
-            "numberOfBytes": "20"
-          },
-          "t_contract(IDAO)7011": {
-            "label": "contract IDAO",
-            "numberOfBytes": "20"
           },
           "t_uint256": {
             "label": "uint256",

@@ -11,7 +11,6 @@ import {ensDomainHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
   deployAndUpgradeFromToCheck,
@@ -105,6 +104,40 @@ describe('PluginRepoRegistry', function () {
       .withArgs(pluginRepoSubdomain, pluginRepo.address);
 
     expect(await pluginRepoRegistry.entries(pluginRepo.address)).to.equal(true);
+  });
+
+  it('Should register a new pluginRepo successfully even if subdomain is empty', async function () {
+    const subdomain = '';
+
+    await expect(
+      await pluginRepoRegistry.registerPluginRepo(subdomain, pluginRepo.address)
+    )
+      .to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered)
+      .withArgs(subdomain, pluginRepo.address);
+
+    expect(await pluginRepoRegistry.entries(pluginRepo.address)).to.equal(true);
+  });
+
+  it('Should revert if ens is not supported, but subdomain is still non empty', async function () {
+    pluginRepoRegistry = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+      {withProxy: true}
+    );
+
+    await pluginRepoRegistry.initialize(
+      managingDAO.address,
+      ethers.constants.AddressZero
+    );
+
+    await managingDAO.grant(
+      pluginRepoRegistry.address,
+      ownerAddress,
+      PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
+    );
+
+    await expect(
+      pluginRepoRegistry.registerPluginRepo('some', pluginRepo.address)
+    ).to.be.revertedWithCustomError(pluginRepoRegistry, 'ENSNotSupported');
   });
 
   it('fail to register if the sender lacks the required role', async () => {

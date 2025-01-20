@@ -10,7 +10,6 @@ import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
@@ -24,7 +23,7 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
-import hre, {ethers} from 'hardhat';
+import hre, {artifacts, ethers} from 'hardhat';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -164,6 +163,30 @@ describe('DAORegistry', function () {
     )
       .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
       .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
+  });
+
+  it('Should revert if ens is not supported, but subdomain is still non empty', async function () {
+    const daoRegistry = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.DAO_REGISTRY,
+      {
+        withProxy: true,
+      }
+    );
+
+    await daoRegistry.initialize(
+      managingDao.address,
+      ethers.constants.AddressZero
+    );
+
+    await managingDao.grant(
+      daoRegistry.address,
+      ownerAddress,
+      DAO_REGISTRY_PERMISSIONS.REGISTER_DAO_PERMISSION_ID
+    );
+
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, 'some')
+    ).to.be.revertedWithCustomError(daoRegistry, 'ENSNotSupported');
   });
 
   // without mocking we have to repeat the tests here to make sure the validation is correct

@@ -23,6 +23,9 @@ contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
     /// @notice Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
     error InvalidDaoSubdomain(string subdomain);
 
+    /// @notice Thrown if the subdomain is present, but registrar is address(0).
+    error ENSNotSupported();
+
     /// @notice Emitted when a new DAO is registered.
     /// @param dao The address of the DAO contract.
     /// @param creator The address of the creator.
@@ -61,6 +64,10 @@ contract DAORegistry is InterfaceBasedRegistry, ProtocolVersion {
         _register(daoAddr);
 
         if ((bytes(subdomain).length > 0)) {
+            if (address(subdomainRegistrar) == address(0)) {
+                revert ENSNotSupported();
+            }
+
             if (!isSubdomainValid(subdomain)) {
                 revert InvalidDaoSubdomain({subdomain: subdomain});
             }

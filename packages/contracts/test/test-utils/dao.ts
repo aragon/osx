@@ -6,7 +6,6 @@ import {
   ERC1155Mock__factory,
   DAO__factory,
 } from '../../typechain';
-import {deployWithProxy} from './proxy';
 import {ARTIFACT_SOURCES} from './wrapper';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {BigNumber} from 'ethers';

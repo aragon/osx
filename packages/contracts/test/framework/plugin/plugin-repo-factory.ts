@@ -133,17 +133,6 @@ describe('PluginRepoFactory: ', function () {
         );
     });
 
-    it('fail to create new pluginRepo with empty subdomain', async () => {
-      const pluginRepoSubdomain = '';
-
-      await expect(
-        pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
-      ).to.be.revertedWithCustomError(
-        pluginRepoRegistry,
-        'EmptyPluginRepoSubdomain'
-      );
-    });
-
     it('creates new pluginRepo and sets up correct permissions', async () => {
       const pluginRepoSubdomain = 'my-plugin-repo';
       const expectedRepoAddress = await getExpectedRepoAddress(
@@ -215,23 +204,6 @@ describe('PluginRepoFactory: ', function () {
           pluginRepoFactory.address,
           PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
         );
-    });
-
-    it('fail to create new pluginRepo with empty subdomain', async () => {
-      const pluginRepoSubdomain = '';
-
-      await expect(
-        pluginRepoFactory.createPluginRepoWithFirstVersion(
-          pluginRepoSubdomain,
-          ownerAddress,
-          ownerAddress,
-          '0x',
-          '0x'
-        )
-      ).to.be.revertedWithCustomError(
-        pluginRepoRegistry,
-        'EmptyPluginRepoSubdomain'
-      );
     });
 
     it('creates new pluginRepo with correct permissions', async () => {

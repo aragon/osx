@@ -8,9 +8,7 @@ import {
   PluginRepoRegistry__factory,
   PluginRepoFactory__factory,
 } from '../../typechain';
-import {deployWithProxy} from '../test-utils/proxy';
 import {ARTIFACT_SOURCES} from './wrapper';
-import {PluginUUPSUpgradeableV1Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import hre from 'hardhat';
 

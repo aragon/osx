@@ -13,7 +13,6 @@ import {ensDomainHash, ensLabelHash} from '../../../../utils/ens';
 import {deployNewDAO} from '../../../test-utils/dao';
 import {setupResolver} from '../../../test-utils/ens';
 import {osxContractsVersion} from '../../../test-utils/protocol-version';
-import {deployWithProxy} from '../../../test-utils/proxy';
 import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,

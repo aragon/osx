@@ -25,7 +25,6 @@ import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {createPrepareInstallationParams} from '../../test-utils/psp/create-params';
 import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
 import {PluginRepoPointer} from '../../test-utils/psp/types';

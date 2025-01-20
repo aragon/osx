@@ -10,7 +10,6 @@ import {
 import {UpgradedEvent} from '../../typechain/DAO';
 import {readStorage, ERC1967_IMPLEMENTATION_SLOT} from '../../utils/storage';
 import {daoExampleURI, ZERO_BYTES32} from '../test-utils/dao';
-import {deployWithProxy} from '../test-utils/proxy';
 import {ARTIFACT_SOURCES} from '../test-utils/wrapper';
 import {
   IMPLICIT_INITIAL_PROTOCOL_VERSION,

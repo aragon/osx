@@ -6,7 +6,6 @@ import {
   PluginRepo__factory,
 } from '../../../typechain';
 import {deployNewDAO} from '../../test-utils/dao';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

@@ -2,7 +2,9 @@ import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
 import {Network} from 'hardhat/types';
 
 export const isLocal = (network: Network): boolean =>
-  [HARDHAT_NETWORK_NAME, 'localhost', 'coverage'].includes(network.name);
+  [HARDHAT_NETWORK_NAME, 'localhost', 'coverage', 'zkLocalTestnet'].includes(
+    network.name
+  );
 
 // known hardhat accounts and private keys unlocked by default in the HH node
 export const HARDHAT_ACCOUNTS: Array<{KEY: string; ADDRESS: string}> = [

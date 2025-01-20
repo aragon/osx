@@ -33,11 +33,7 @@ import {
 } from '../../test-utils/dao';
 import {ZERO_BYTES32, daoExampleURI} from '../../test-utils/dao';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
-import {
-  skipTestIfNetworkIsZkSync,
-  skipTestSuiteIfNetworkIsZkSync,
-} from '../../test-utils/skip-functions';
+import {skipTestIfNetworkIsZkSync} from '../../test-utils/skip-functions';
 import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
