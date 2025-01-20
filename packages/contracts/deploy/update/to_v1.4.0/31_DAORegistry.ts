@@ -38,7 +38,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error(`Failed to populate upgradeToAndCall transaction`);
   }
 
-  console.log(result.address, ' fuck 2');
   hre.managementDAOActions.push({
     to: upgradeTX.to,
     data: upgradeTX.data,
