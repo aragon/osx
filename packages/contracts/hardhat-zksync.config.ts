@@ -1,4 +1,5 @@
 import {TestingFork} from './types/hardhat';
+import {ZK_SYNC_NETWORKS} from './utils/zkSync';
 import RichAccounts from './utils/zksync-rich-accounts';
 import {addRpcUrlToNetwork} from '@aragon/osx-commons-configs';
 import '@matterlabs/hardhat-zksync-deploy';
@@ -42,13 +43,8 @@ extendEnvironment(hre => {
 
 task('build-contracts').setAction(async (args, hre) => {
   await hre.run('compile');
-  // TODO:Claudia (Is there a way without copying/pasting manually ? `paths` object below in the config
-  // creates `build` folder correctly, but it always appends `zk` in the end.
-  if (
-    hre.network.name === 'zkTestnet' ||
-    hre.network.name === 'zkLocalTestnet' ||
-    hre.network.name === 'zkMainnet'
-  ) {
+
+  if (ZK_SYNC_NETWORKS.includes(hre.network.name)) {
     // Copy zkSync specific build artifacts and cache to the default directories.
     // This ensures that we don't need to change import paths for artifacts in the project.
     fs.cpSync('./build/artifacts-zk', './artifacts', {
@@ -64,10 +60,14 @@ task('build-contracts').setAction(async (args, hre) => {
   fs.cpSync('./build/cache', './cache', {recursive: true, force: true});
 });
 
-task('deploy-contracts').setAction(async (args, hre) => {
-  await hre.run('build-contracts');
-  await hre.run('deploy');
-});
+task('deploy-contracts')
+  .addOptionalParam('tags', 'Specify which tags to deploy')
+  .setAction(async (args, hre) => {
+    await hre.run('build-contracts');
+    await hre.run('deploy', {
+      tags: args.tags,
+    });
+  });
 
 task('test-contracts').setAction(async (args, hre) => {
   await hre.run('build-contracts');
@@ -114,7 +114,7 @@ const config: HardhatUserConfig = {
       blockGasLimit: 30000000,
       accounts: RichAccounts,
     },
-    zkTestnet: {
+    zksyncSepolia: {
       url: 'https://sepolia.era.zksync.dev',
       ethNetwork: 'sepolia',
       zksync: true,
@@ -124,7 +124,7 @@ const config: HardhatUserConfig = {
       accounts: accounts,
       forceDeploy: true,
     },
-    zkMainnet: {
+    zksyncMainnet: {
       url: 'https://mainnet.era.zksync.io',
       ethNetwork: 'mainnet',
       zksync: true,

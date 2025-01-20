@@ -1,1 +1,5 @@
-export const ZK_SYNC_NETWORKS = ['zkMainnet', 'zkLocalTestnet', 'zkTestnet'];
+export const ZK_SYNC_NETWORKS = [
+  'zksyncMainnet',
+  'zkLocalTestnet',
+  'zksyncSepolia',
+];
