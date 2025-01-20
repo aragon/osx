@@ -30,6 +30,13 @@ export async function initializeFork(
   });
 }
 
+export async function closeFork() {
+  await network.provider.request({
+    method: 'hardhat_reset',
+    params: [],
+  });
+}
+
 export async function initializeDeploymentFixture(tag: string | string[]) {
   const fixture = deployments.createFixture(async () => {
     await deployments.fixture(tag); // ensure you start from a fresh deployments

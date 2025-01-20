@@ -7,6 +7,7 @@ import {
   PluginRepoRegistry__factory,
 } from '../../typechain';
 import {
+  closeFork,
   initForkForOsxVersion,
   initializeDeploymentFixture,
 } from '../test-utils/fixture';
@@ -95,6 +96,12 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
     await forkSepolia();
 
     [deployer] = await ethers.getSigners();
+  });
+
+  // Close fork so that other tests(not related to this file) are
+  // not run in forked network.
+  after(async () => {
+    closeFork();
   });
 
   it('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {
