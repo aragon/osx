@@ -36,6 +36,12 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
   }
+
+  if (networkExtensions[network] == undefined) {
+    console.log(`WARNING: newtork ${network} is not found in networks.ts file`);
+    continue;
+  }
+
   hardhatNetworks[network].accounts = accounts;
   hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
