@@ -6,10 +6,10 @@ import {
   ERC1155Mock__factory,
   DAO__factory,
 } from '../../typechain';
-import {deployWithProxy} from './proxy';
+import {ARTIFACT_SOURCES} from './wrapper';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {BigNumber} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -24,7 +24,7 @@ export const TOKEN_INTERFACE_IDS = {
 };
 
 export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
-  const dao = await deployWithProxy<DAO>(new DAO__factory(signer));
+  const dao = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO, {withProxy: true});
 
   await dao.initialize(
     '0x00',
@@ -38,8 +38,7 @@ export async function deployNewDAO(signer: SignerWithAddress): Promise<DAO> {
 
 export async function getActions() {
   const signers = await ethers.getSigners();
-  const ActionExecuteFactory = new ActionExecute__factory(signers[0]);
-  let ActionExecute = await ActionExecuteFactory.deploy();
+  let ActionExecute = await hre.wrapper.deploy('ActionExecute');
   const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
 
   const num = 20;

@@ -10,11 +10,11 @@ import {ensDomainHash, ensLabelHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import {
   DAO_REGISTRY_PERMISSIONS,
   ENS_REGISTRAR_PERMISSIONS,
@@ -23,7 +23,7 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {artifacts, ethers} from 'hardhat';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -62,9 +62,9 @@ describe('DAORegistry', function () {
     targetDao = await deployNewDAO(signers[0]);
 
     // DAO Registry
-    const Registry = new DAORegistry__factory(signers[0]);
-
-    daoRegistry = await deployWithProxy(Registry);
+    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {
+      withProxy: true,
+    });
 
     await daoRegistry.initialize(
       managingDao.address,
@@ -166,9 +166,12 @@ describe('DAORegistry', function () {
   });
 
   it('Should revert if ens is not supported, but subdomain is still non empty', async function () {
-    const Registry = new DAORegistry__factory(signers[0]);
-
-    const daoRegistry = (await deployWithProxy(Registry)) as DAORegistry;
+    const daoRegistry = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.DAO_REGISTRY,
+      {
+        withProxy: true,
+      }
+    );
 
     await daoRegistry.initialize(
       managingDao.address,
@@ -294,11 +297,14 @@ describe('DAORegistry', function () {
 
     it('upgrades to a new implementation', async () => {
       await deployAndUpgradeSelfCheck(
-        signers[0],
-        signers[1],
-        initArgs,
-        'initialize',
-        currentContractFactory,
+        0,
+        1,
+        {
+          initArgs: initArgs,
+          initializer: 'initialize',
+        },
+        ARTIFACT_SOURCES.DAO_REGISTRY,
+        ARTIFACT_SOURCES.DAO_REGISTRY,
         DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
         managingDao
       );
@@ -309,12 +315,14 @@ describe('DAORegistry', function () {
 
       const {fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.DAO_REGISTRY_V1_0_0,
+          ARTIFACT_SOURCES.DAO_REGISTRY,
           DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDao
         );
@@ -337,12 +345,14 @@ describe('DAORegistry', function () {
 
       const {fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.DAO_REGISTRY_V1_3_0,
+          ARTIFACT_SOURCES.DAO_REGISTRY,
           DAO_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDao
         );

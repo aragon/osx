@@ -24,6 +24,7 @@ import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import {
   PLUGIN_REPO_PERMISSIONS,
   getInterfaceId,
@@ -32,7 +33,7 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const emptyBytes = '0x00';
 const BUILD_METADATA = '0x11';
@@ -93,11 +94,14 @@ describe('PluginRepo', function () {
 
       it('upgrades to a new implementation', async () => {
         await deployAndUpgradeSelfCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.PLUGIN_REPO,
+          ARTIFACT_SOURCES.PLUGIN_REPO,
           PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
         );
       });
@@ -107,12 +111,14 @@ describe('PluginRepo', function () {
 
         const {fromImplementation, toImplementation} =
           await deployAndUpgradeFromToCheck(
-            signers[0],
-            signers[1],
-            initArgs,
-            'initialize',
-            legacyContractFactory,
-            currentContractFactory,
+            0,
+            1,
+            {
+              initArgs: initArgs,
+              initializer: 'initialize',
+            },
+            ARTIFACT_SOURCES.PLUGIN_REPO_V1_0_0,
+            ARTIFACT_SOURCES.PLUGIN_REPO,
             PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
         expect(toImplementation).to.not.equal(fromImplementation);
@@ -134,12 +140,14 @@ describe('PluginRepo', function () {
 
         const {fromImplementation, toImplementation} =
           await deployAndUpgradeFromToCheck(
-            signers[0],
-            signers[1],
-            initArgs,
-            'initialize',
-            legacyContractFactory,
-            currentContractFactory,
+            0,
+            1,
+            {
+              initArgs: initArgs,
+              initializer: 'initialize',
+            },
+            ARTIFACT_SOURCES.PLUGIN_REPO_V1_3_0,
+            ARTIFACT_SOURCES.PLUGIN_REPO,
             PLUGIN_REPO_PERMISSIONS.UPGRADE_REPO_PERMISSION_ID
           );
         expect(toImplementation).to.not.equal(fromImplementation);
@@ -235,9 +243,9 @@ describe('PluginRepo', function () {
         );
 
         // If a contract is passed, but doesn't have `supportsInterface` signature described in the contract.
-        const randomContract = await new PluginUUPSUpgradeableV1Mock__factory(
-          signers[0]
-        ).deploy();
+        const randomContract = await hre.wrapper.deploy(
+          'PluginUUPSUpgradeableV1Mock'
+        );
         await expect(
           pluginRepo.createVersion(
             1,
@@ -436,9 +444,8 @@ describe('PluginRepo', function () {
       });
 
       it('allows to create placeholder builds for the same release', async () => {
-        const PlaceholderSetup = new PlaceholderSetup__factory(signers[0]);
-        const placeholder1 = await PlaceholderSetup.deploy();
-        const placeholder2 = await PlaceholderSetup.deploy();
+        const placeholder1 = await hre.wrapper.deploy('PlaceholderSetup');
+        const placeholder2 = await hre.wrapper.deploy('PlaceholderSetup');
 
         // Release 1
         await expect(

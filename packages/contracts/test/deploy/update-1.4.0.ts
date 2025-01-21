@@ -7,12 +7,12 @@ import {
   PluginRepoRegistry__factory,
 } from '../../typechain';
 import {
+  closeFork,
   initForkForOsxVersion,
   initializeDeploymentFixture,
-  initializeFork,
 } from '../test-utils/fixture';
+import {skipTestSuiteIfNetworkIsZkSync} from '../test-utils/skip-functions';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {getContractAddress} from '@openzeppelin/hardhat-upgrades/dist/utils';
 import {expect} from 'chai';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 import hre, {ethers, deployments} from 'hardhat';
@@ -89,13 +89,19 @@ async function impersonateAccount(addr: string) {
 // and addresses are added in osx-commons. This is because update script and the below tests
 // use `getLatestContractAddress` which is currently 1.3.0, but once update to 1.4.0 happens,
 // getLatestContractAddress then will return 1.4.0 addresses.
-describe('Update to 1.4.0', function () {
+skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
   let deployer: SignerWithAddress;
 
   before(async () => {
     await forkSepolia();
 
     [deployer] = await ethers.getSigners();
+  });
+
+  // Close fork so that other tests(not related to this file) are
+  // not run in forked network.
+  after(async () => {
+    closeFork();
   });
 
   it('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {

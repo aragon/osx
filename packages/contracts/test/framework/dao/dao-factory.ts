@@ -25,7 +25,6 @@ import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {createPrepareInstallationParams} from '../../test-utils/psp/create-params';
 import {getAppliedSetupId} from '../../test-utils/psp/hash-helpers';
 import {PluginRepoPointer} from '../../test-utils/psp/types';
@@ -33,6 +32,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../test-utils/repo';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import {
   findEventTopicLog,
   DAO_PERMISSIONS,
@@ -45,7 +45,7 @@ import {PluginUUPSUpgradeableV2Mock__factory} from '@aragon/osx-ethers-v1.2.0';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -99,12 +99,10 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   };
 }
 
-async function getAnticipatedAddress(from: string, offset = 0) {
-  let nonce = await ethers.provider.getTransactionCount(from);
-  const anticipatedAddress = ethers.utils.getContractAddress({
-    from: from,
-    nonce: nonce + offset,
-  });
+async function getAnticipatedAddress(from: string, offset: number = 0) {
+  const nonce = await hre.wrapper.getNonce(from);
+  const anticipatedAddress = hre.wrapper.getCreateAddress(from, nonce + offset);
+
   return anticipatedAddress;
 }
 
@@ -196,8 +194,11 @@ describe('DAOFactory: ', function () {
     );
 
     // DAO Registry
-    const DAORegistry = new DAORegistry__factory(signers[0]);
-    daoRegistry = await deployWithProxy(DAORegistry);
+    // DAO Registry
+    daoRegistry = await hre.wrapper.deploy(ARTIFACT_SOURCES.DAO_REGISTRY, {
+      withProxy: true,
+    });
+
     await daoRegistry.initialize(
       managingDao.address,
       ensSubdomainRegistrar.address
@@ -220,8 +221,9 @@ describe('DAOFactory: ', function () {
     );
 
     // Deploy DAO Factory
-    const DAOFactory = new DAOFactory__factory(signers[0]);
-    daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
+    daoFactory = await hre.wrapper.deploy('DAOFactory', {
+      args: [daoRegistry.address, psp.address],
+    });
 
     // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
     await managingDao.grant(
@@ -255,14 +257,11 @@ describe('DAOFactory: ', function () {
 
     // Create and register a plugin on the `PluginRepoRegistry`.
     // PluginSetupV1
-    const PluginUUPSUpgradeableSetupV1Mock =
-      new PluginUUPSUpgradeableSetupV1Mock__factory(signers[0]);
 
-    const implV1 = await new PluginUUPSUpgradeableV1Mock__factory(
-      signers[0]
-    ).deploy();
-    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy(
-      implV1.address
+    const implV1 = await hre.wrapper.deploy('PluginUUPSUpgradeableV1Mock');
+    pluginSetupV1Mock = await hre.wrapper.deploy(
+      'PluginUUPSUpgradeableSetupV1Mock',
+      {args: [implV1.address]}
     );
 
     const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(

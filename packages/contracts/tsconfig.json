@@ -10,7 +10,7 @@
     "resolveJsonModule": true
   },
   "include": [
-    "./hardhat.config.ts",
+    "hardhat-zksync.config.ts",
     "./scripts",
     "./test",
     "./typechain",

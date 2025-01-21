@@ -2,10 +2,12 @@ import {DAO__factory, DAORegistry__factory} from '../../../typechain';
 import {ENSRegistry__factory} from '../../../typechain/factories/ENSRegistry__factory';
 import {
   daoDomainEnv,
+  isLocal,
   managementDaoSubdomainEnv,
 } from '../../../utils/environment';
 import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
 import MANAGEMENT_DAO_METADATA from '../../management-dao-metadata.json';
+import {uploadToPinata} from '@aragon/osx-commons-sdk';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -76,10 +78,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managementDAOAddress,
     deployer
   );
-  const metadataCIDPath = await uploadToIPFS(
-    JSON.stringify(MANAGEMENT_DAO_METADATA),
-    network.name
-  );
+
+  let metadataCIDPath = '0x';
+
+  if (!isLocal(hre.network)) {
+    // Upload the metadata to IPFS
+    metadataCIDPath = await uploadToPinata(
+      JSON.stringify(MANAGEMENT_DAO_METADATA, null, 2),
+      `management-dao-metadata`
+    );
+  }
 
   const hasMetadataPermission = await managementDaoContract.hasPermission(
     managementDaoContract.address,
@@ -90,9 +98,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (hasMetadataPermission) {
     const setMetadataTX = await managementDaoContract.setMetadata(
-      ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`)
-      )
+      ethers.utils.hexlify(ethers.utils.toUtf8Bytes(metadataCIDPath))
     );
     await setMetadataTX.wait();
   }

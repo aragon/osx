@@ -9,19 +9,18 @@ import {
 import {osxContractsVersion} from '../../test-utils/protocol-version';
 import {getInterfaceId} from '@aragon/osx-commons-sdk';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 describe('PluginSetup', function () {
   let setupMock: PluginCloneableSetupV1Mock;
 
   before(async () => {
-    const signers = await ethers.getSigners();
-    const pluginImplementation = await new PluginCloneableV1Mock__factory(
-      signers[0]
-    ).deploy();
-    setupMock = await new PluginCloneableSetupV1Mock__factory(
-      signers[0]
-    ).deploy(pluginImplementation.address);
+    const pluginImplementation = await hre.wrapper.deploy(
+      'PluginCloneableV1Mock'
+    );
+    setupMock = await hre.wrapper.deploy('PluginCloneableSetupV1Mock', {
+      args: [pluginImplementation.address],
+    });
   });
 
   describe('ERC-165', async () => {

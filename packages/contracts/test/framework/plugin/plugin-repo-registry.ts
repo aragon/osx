@@ -11,12 +11,12 @@ import {ensDomainHash} from '../../../utils/ens';
 import {deployNewDAO} from '../../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 import {osxContractsVersion} from '../../test-utils/protocol-version';
-import {deployWithProxy} from '../../test-utils/proxy';
 import {deployNewPluginRepo} from '../../test-utils/repo';
 import {
   deployAndUpgradeFromToCheck,
   deployAndUpgradeSelfCheck,
 } from '../../test-utils/uups-upgradeable';
+import {ARTIFACT_SOURCES} from '../../test-utils/wrapper';
 import {
   PLUGIN_REGISTRY_PERMISSIONS,
   getProtocolVersion,
@@ -24,7 +24,7 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ContractFactory} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {artifacts, ethers} from 'hardhat';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -58,9 +58,9 @@ describe('PluginRepoRegistry', function () {
     );
 
     // deploy and initialize PluginRepoRegistry
-    const PluginRepoRegistry = new PluginRepoRegistry__factory(signers[0]);
-    pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
-      PluginRepoRegistry
+    pluginRepoRegistry = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+      {withProxy: true}
     );
 
     await pluginRepoRegistry.initialize(
@@ -119,9 +119,9 @@ describe('PluginRepoRegistry', function () {
   });
 
   it('Should revert if ens is not supported, but subdomain is still non empty', async function () {
-    const PluginRepoRegistry = new PluginRepoRegistry__factory(signers[0]);
-    pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(
-      PluginRepoRegistry
+    pluginRepoRegistry = await hre.wrapper.deploy(
+      ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+      {withProxy: true}
     );
 
     await pluginRepoRegistry.initialize(
@@ -313,11 +313,14 @@ describe('PluginRepoRegistry', function () {
 
     it('upgrades to a new implementation', async () => {
       await deployAndUpgradeSelfCheck(
-        signers[0],
-        signers[1],
-        initArgs,
-        'initialize',
-        currentContractFactory,
+        0,
+        1,
+        {
+          initArgs: initArgs,
+          initializer: 'initialize',
+        },
+        ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
+        ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
         PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
         managingDAO
       );
@@ -330,12 +333,14 @@ describe('PluginRepoRegistry', function () {
 
       const {fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY_V1_0_0,
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
           PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDAO
         );
@@ -360,12 +365,14 @@ describe('PluginRepoRegistry', function () {
 
       const {fromImplementation, toImplementation} =
         await deployAndUpgradeFromToCheck(
-          signers[0],
-          signers[1],
-          initArgs,
-          'initialize',
-          legacyContractFactory,
-          currentContractFactory,
+          0,
+          1,
+          {
+            initArgs: initArgs,
+            initializer: 'initialize',
+          },
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY_V1_3_0,
+          ARTIFACT_SOURCES.PLUGIN_REPO_REGISTRY,
           PLUGIN_REGISTRY_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
           managingDAO
         );
