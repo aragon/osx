@@ -1,11 +1,11 @@
 import {
   getNetworkNameByAlias,
   getDaoEnsDomain,
-  getPluginEnsDomain
+  getPluginEnsDomain,
 } from '@aragon/osx-commons-configs';
 import {ethers} from 'ethers';
 
-function getDaoDomain(networkName: string): string{
+function getDaoDomain(networkName: string): string {
   if (networkName === 'clauSepolia') {
     return 'claudia.eth';
   }
@@ -21,7 +21,7 @@ function getDaoDomain(networkName: string): string{
   return getDaoEnsDomain(network) ?? '';
 }
 
-function getPluginDomain(networkName: string): string{
+function getPluginDomain(networkName: string): string {
   if (networkName === 'clauSepolia') {
     return 'plugin.claudia.eth';
   }
@@ -37,23 +37,21 @@ function getPluginDomain(networkName: string): string{
   return getPluginEnsDomain(network) ?? '';
 }
 
-function getDomainHash(domain: string): string{
+function getDomainHash(domain: string): string {
   return ethers.utils.namehash(domain);
 }
 
-function getLabelHash(label: string): string{
+function getLabelHash(label: string): string {
   return ethers.utils.id(label);
 }
 
-function getEnsRegistry(networkName: string): string{
-
-   const ensRegistryAddresses: {[key: string]: string} = {
+function getEnsRegistry(networkName: string): string {
+  const ensRegistryAddresses: {[key: string]: string} = {
     mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     sepolia: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     clauSepolia: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     holesky: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-
   };
 
   if (!(networkName in ensRegistryAddresses)) {
@@ -63,7 +61,7 @@ function getEnsRegistry(networkName: string): string{
   return ensRegistryAddresses[networkName];
 }
 
-function  getEnsResolver(networkName: string): string{
+function getEnsResolver(networkName: string): string {
   const ensPublicResolvers: {[key: string]: string} = {
     goerli: '0x19c2d5d0f035563344dbb7be5fd09c8dad62b001',
     mainnet: '0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41',
@@ -74,7 +72,7 @@ function  getEnsResolver(networkName: string): string{
 
   if (!(networkName in ensPublicResolvers)) {
     return '';
-  } 
+  }
 
   return ensPublicResolvers[networkName];
 }
@@ -96,29 +94,31 @@ function getDomainNameReversed(domain: string): string {
     domainSubdomains.push(domain);
   }
 
-  return ethers.utils.defaultAbiCoder.encode(['string[]', 'string[]'], [domainNamesReversed, domainSubdomains]);
+  return ethers.utils.defaultAbiCoder.encode(
+    ['string[]', 'string[]'],
+    [domainNamesReversed, domainSubdomains]
+  );
 }
 
-function main(){
-  const functions: { [key: string]: (networkName: string) => string } = {
-    'getDaoDomain': getDaoDomain,
-    'getPluginDomain': getPluginDomain,
-    'getEnsRegistry': getEnsRegistry,
-    'getEnsResolver': getEnsResolver,
-    'getDomainHash': getDomainHash,
-    'getDomainNameReversed': getDomainNameReversed,
-    'getLabelHash': getLabelHash
+function main() {
+  const functions: {[key: string]: (networkName: string) => string} = {
+    getDaoDomain: getDaoDomain,
+    getPluginDomain: getPluginDomain,
+    getEnsRegistry: getEnsRegistry,
+    getEnsResolver: getEnsResolver,
+    getDomainHash: getDomainHash,
+    getDomainNameReversed: getDomainNameReversed,
+    getLabelHash: getLabelHash,
   };
 
-const functionName = process.argv[2];
-const networkName = process.argv[3];
+  const functionName = process.argv[2];
+  const networkName = process.argv[3];
 
-
-// Check if the operation exists in our function map
-if (functionName in functions) {
-  const result = functions[functionName](networkName);
-  console.log(result);
-} else {
+  // Check if the operation exists in our function map
+  if (functionName in functions) {
+    const result = functions[functionName](networkName);
+    console.log(result);
+  } else {
     throw new Error(`Unknown function: ${functionName}`);
   }
 }
