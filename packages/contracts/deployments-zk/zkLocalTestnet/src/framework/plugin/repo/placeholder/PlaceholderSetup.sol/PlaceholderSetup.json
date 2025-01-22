@@ -1,0 +1,303 @@
+{
+  "sourceName": "src/framework/plugin/repo/placeholder/PlaceholderSetup.sol",
+  "contractName": "PlaceholderSetup",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "NonUpgradeablePlugin",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PlaceholderSetupCannotBeUsed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "implementation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "prepareInstallation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address[]",
+              "name": "helpers",
+              "type": "address[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum PermissionLib.Operation",
+                  "name": "operation",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "where",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "who",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "condition",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "permissionId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct PermissionLib.MultiTargetPermission[]",
+              "name": "permissions",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct IPluginSetup.PreparedSetupData",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "plugin",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "currentHelpers",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IPluginSetup.SetupPayload",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "name": "prepareUninstallation",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum PermissionLib.Operation",
+              "name": "operation",
+              "type": "uint8"
+            },
+            {
+              "internalType": "address",
+              "name": "where",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "who",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "condition",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "permissionId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct PermissionLib.MultiTargetPermission[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_dao",
+          "type": "address"
+        },
+        {
+          "internalType": "uint16",
+          "name": "_fromBuild",
+          "type": "uint16"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "plugin",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "currentHelpers",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IPluginSetup.SetupPayload",
+          "name": "_payload",
+          "type": "tuple"
+        }
+      ],
+      "name": "prepareUpdate",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address[]",
+              "name": "helpers",
+              "type": "address[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum PermissionLib.Operation",
+                  "name": "operation",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "where",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "who",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "condition",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "permissionId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct PermissionLib.MultiTargetPermission[]",
+              "name": "permissions",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct IPluginSetup.PreparedSetupData",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint8[3]",
+          "name": "",
+          "type": "uint8[3]"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x00020000000000020000000003010019000000600330027000000038033001970000000102200190000000220000c13d0000008002000039000000400020043f000000040430008c000000b50000413d000000000401043b000000e0044002700000003a0540009c000000300000213d0000003e0540009c000000560000613d0000003f0540009c000000690000613d000000400140009c000000b50000c13d0000000001000416000000000101004b000000b50000c13d0000000001000412000200000001001d000100000000001d0000000001000415000000020110008a000000050110021000dc00c40000040f0000004101100197000000800010043f0000004801000041000000dd0001042e000000a001000039000000400010043f0000000001000416000000000101004b000000b50000c13d000000800000043f0000014000000443000001600000044300000020010000390000010000100443000000010100003900000120001004430000003901000041000000dd0001042e0000003b0240009c0000007d0000613d0000003c0240009c000000930000613d0000003d0240009c000000b50000c13d000000440230008c000000b50000413d0000000002000416000000000202004b000000b50000c13d0000000402100370000000000202043b000000410220009c000000b50000213d0000002402100370000000000202043b000000420420009c000000b50000213d0000002304200039000000000434004b000000b50000813d0000000404200039000000000141034f000000000101043b000000420410009c000000b50000213d00000000011200190000002401100039000000000131004b000000b50000213d00dc00b70000040f000000600200003900000000012104360000000000210435000000400100043d0000004302000041000000af0000013d000000240230008c000000b50000413d0000000002000416000000000202004b000000b50000c13d0000000401100370000000000201043b0000004a01200198000000b50000c13d00000001010000390000004b0320009c000000660000613d0000004c0320009c000000660000613d0000004d0220009c000000000100c019000000800010043f0000004801000041000000dd0001042e0000000004000416000000000404004b000000b50000c13d000000000131034f000000001301043c0000000002320436000000e00320008c0000006d0000c13d0000014001000039000000400010043f0000000101000039000000e00010043f0000000402000039000001000020043f000001200000043f000001400010043f000001600020043f000001800000043f0000004901000041000000dd0001042e000000440230008c000000b50000413d0000000002000416000000000202004b000000b50000c13d0000000402100370000000000202043b000000410220009c000000b50000213d0000002401100370000000000101043b000000420210009c000000b50000213d0000000001130049000000450210009c000000b50000213d000000640110008c000000b50000413d0000004301000041000000800010043f0000004701000041000000de00010430000000640230008c000000b50000413d0000000002000416000000000202004b000000b50000c13d0000000402100370000000000202043b000000410220009c000000b50000213d0000002402100370000000000202043b0000ffff0220008c000000b50000213d0000004401100370000000000101043b000000420210009c000000b50000213d0000000001130049000000450210009c000000b50000213d000000640110008c000000b50000413d00dc00b70000040f000000600200003900000000012104360000000000210435000000400100043d00000046020000410000000000210435000000380210009c0000003801008041000000400110021000000044011001c7000000de000104300000000001000019000000de00010430000000400100043d0000004e0210009c000000bd0000813d0000004002100039000000400020043f000000000001042d0000004f0100004100000000001004350000004101000039000000040010043f0000005001000041000000de00010430000000000001042f00000051020000410000000000200439000000050110027000000000020100310000000400200443000000010101003100000024001004430000000001000414000000380210009c0000003801008041000000c00110021000000052011001c7000080050200003900dc00d70000040f0000000102200190000000d60000613d000000000101043b000000000001042d000000000001042f000000da002104230000000102000039000000000001042d0000000002000019000000000001042d000000dc00000432000000dd0001042e000000de00010430000000000000000000000000000000000000000000000000000000000000000000000000ffffffff0000000200000000000000000000000000000080000001000000000000000000000000000000000000000000000000000000000000000000000000009cb0a123000000000000000000000000000000000000000000000000000000009cb0a12400000000000000000000000000000000000000000000000000000000a8a9c29e00000000000000000000000000000000000000000000000000000000f10832f10000000000000000000000000000000000000000000000000000000001ffc9a7000000000000000000000000000000000000000000000000000000002ae9c600000000000000000000000000000000000000000000000000000000005c60da1b000000000000000000000000ffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000ffffffffffffffffa8a9f28c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa11281010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000008000000000000000000000000000000000000000000000000000000020000000800000000000000000000000000000000000000000000000000000006000000140000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff01ffc9a7000000000000000000000000000000000000000000000000000000002ae9c6000000000000000000000000000000000000000000000000000000000099718b5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffc04e487b71000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024000000000000000000000000310ab089e4439a4c15d089f94afb7896ff553aecb10793d0ab882de59d99a32e0200000200000000000000000000000000000044000000000000000000000000000000000000000000000000000000000000000000000000000000000000000022ea768a5ee26f409110d24ded3a2ad4f754d12c084917014deed8469db982f0",
+  "entries": [
+    {
+      "constructorArgs": [],
+      "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "deploymentType": "create",
+      "factoryDeps": [],
+      "address": "0xB5B5E332668169c7DD69A21958a9b99020d3c8F6",
+      "txHash": "0x195b3e92e2c9f9bcb996d39744cb17a23820b9066cdb692b3617b313726ba5f8"
+    }
+  ]
+}

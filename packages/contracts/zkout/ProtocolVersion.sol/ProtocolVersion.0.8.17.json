@@ -1,0 +1,1 @@
+{"abi":[{"type":"function","name":"protocolVersion","inputs":[],"outputs":[{"name":"","type":"uint8[3]","internalType":"uint8[3]"}],"stateMutability":"pure"}],"storageLayout":{"storage":[],"types":{}},"userdoc":{},"devdoc":{},"factoryDependencies":{},"id":135}

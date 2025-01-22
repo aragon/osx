@@ -1,0 +1,1 @@
+{"abi":[{"type":"function","name":"pluginType","inputs":[],"outputs":[{"name":"","type":"uint8","internalType":"enum IPlugin.PluginType"}],"stateMutability":"view"}],"storageLayout":{"storage":[],"types":{}},"userdoc":{},"devdoc":{},"factoryDependencies":{},"id":131}

@@ -3,7 +3,7 @@
 include .env
 
 t:
-	forge script Ss --chain $(CHAIN) --rpc-url $(NETWORK_RPC_URL) -vvvv
+	forge script Ss --chain $(CHAIN) --rpc-url $(NETWORK_RPC_URL) --broadcast --zksync -vvvv
 
 
 h:

@@ -65,22 +65,22 @@ contract Ss is Script, Helper {
 
     function run() external {
         // dao domain and
-        (string memory daoDomain, string memory pluginDomain) = _getDomains(network);
+        // (string memory daoDomain, string memory pluginDomain) = _getDomains(network);
 
         vm.startBroadcast(deployerPrivateKey);
-
+        uint g1 = gasleft();
         // 1. config ens
         // 1.1 set the domain hash to the nodes
-        daoNode = _getDomainHash(daoDomain);
-        pluginNode = _getDomainHash(pluginDomain);
+        daoNode = _getDomainHash("oeee.eth");
+        pluginNode = _getDomainHash("plugin.oeee.eth");
 
-        // 1.2 config ens
-        (ensRegistry, ensResolver) = _configureENS(daoDomain, pluginDomain);
+        // // 1.2 config ens
+        (ensRegistry, ensResolver) = _configureENS("oeee.eth", "plugin.oeee.eth");
 
-        // 2. deploy to pinnata the managing dao metadata
+        // // 2. deploy to pinnata the managing dao metadata
         string memory ipfsCid = _uploadToIPFS();
 
-        // 3. deploy manging dao
+        // // 3. deploy manging dao
         address managingDao = _deployDAO(
             DAOSettings({
                 metadata: bytes(ipfsCid), // todo double check this is correct
@@ -89,7 +89,7 @@ contract Ss is Script, Helper {
             })
         );
 
-        // 4. deploy the framework
+        // // 4. deploy the framework
         Deployments memory deps = _deployFramework(
             managingDao,
             Bytecodes({
@@ -99,19 +99,22 @@ contract Ss is Script, Helper {
             })
         );
 
-        // 5. set permissions
+        // // 5. set permissions
         _setPermissions(deps, _getDaoPermissions());
 
-        // 6. final configurations
+        // // 6. final configurations
         _finalConfigurations(deps, managementDaoSubdomain);
 
-        // 7. install multisig on the managing dao
-        // todo
-        // ! note: this can not be done at this point because the multisig plugin repo has not been registered yet
+        // uint g2 = gasleft();
+        // console.log("fuckme");
+        // console.log(g1 - g2);
+        // // 7. install multisig on the managing dao
+        // // todo
+        // // ! note: this can not be done at this point because the multisig plugin repo has not been registered yet
 
-        // 8. check all went good
-        // todo check deployer or other addresses has no longer permissions
-        // todo check the domains owners etc are correct
+        // // 8. check all went good
+        // // todo check deployer or other addresses has no longer permissions
+        // // todo check the domains owners etc are correct
 
         vm.stopBroadcast();
     }
@@ -148,6 +151,9 @@ contract Ss is Script, Helper {
         Bytecodes memory bytecodes
     ) private returns (Deployments memory deps) {
         deps.dao = _managingDao;
+
+        console.log("giorgi ffff");
+        console.log(ensRegistry);
 
         // 1. deploy registrars
         (deps.daoEnsRegistrar, deps.pluginEnsRegistrar) = _deployRegistrars(deps.dao);
