@@ -86,11 +86,11 @@ import {
   PLUGIN_SETUP_PROCESSOR_PERMISSIONS,
   PLUGIN_UUPS_UPGRADEABLE_PERMISSIONS,
 } from '@aragon/osx-commons-sdk';
-import {MockContract, smock} from '@defi-wonderland/smock';
+import {MockContract} from '@defi-wonderland/smock';
 import {anyValue} from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {BytesLike} from 'ethers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -116,15 +116,15 @@ describe('PluginSetupProcessor', function () {
   let PluginUV1: PluginUUPSUpgradeableV1Mock__factory;
   let PluginUV2: PluginUUPSUpgradeableV2Mock__factory;
   let PluginUV3: PluginUUPSUpgradeableV3Mock__factory;
-  let setupUV1: MockContract<PluginUUPSUpgradeableSetupV1Mock>;
-  let setupUV2: MockContract<PluginUUPSUpgradeableSetupV2Mock>;
-  let setupUV3: MockContract<PluginUUPSUpgradeableSetupV3Mock>;
-  let setupUV4: MockContract<PluginUUPSUpgradeableSetupV4Mock>;
-  let setupUV1Bad: MockContract<PluginUUPSUpgradeableSetupV1MockBad>;
+  let setupUV1: PluginUUPSUpgradeableSetupV1Mock;
+  let setupUV2: PluginUUPSUpgradeableSetupV2Mock;
+  let setupUV3: PluginUUPSUpgradeableSetupV3Mock;
+  let setupUV4: PluginUUPSUpgradeableSetupV4Mock;
+  let setupUV1Bad: PluginUUPSUpgradeableSetupV1MockBad;
   let repoC: PluginRepo;
-  let setupCV1: MockContract<PluginCloneableSetupV1Mock>;
-  let setupCV1Bad: MockContract<PluginCloneableSetupV1MockBad>;
-  let setupCV2: MockContract<PluginCloneableSetupV2Mock>;
+  let setupCV1: PluginCloneableSetupV1Mock;
+  let setupCV1Bad: PluginCloneableSetupV1MockBad;
+  let setupCV2: PluginCloneableSetupV2Mock;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -139,64 +139,44 @@ describe('PluginSetupProcessor', function () {
     PluginUV2 = new PluginUUPSUpgradeableV2Mock__factory(signers[0]);
     PluginUV3 = new PluginUUPSUpgradeableV3Mock__factory(signers[0]);
 
-    const implUV1 = await PluginUV1.deploy();
-    const implUV2 = await PluginUV2.deploy();
-    const implUV3 = await PluginUV3.deploy();
+    const implUV1 = await hre.wrapper.deploy('PluginUUPSUpgradeableV1Mock');
+    const implUV2 = await hre.wrapper.deploy('PluginUUPSUpgradeableV2Mock');
+    const implUV3 = await hre.wrapper.deploy('PluginUUPSUpgradeableV3Mock');
 
     // Deploy PluginUUPSUpgradeableSetupMock
 
-    const SetupV1 = await smock.mock<PluginUUPSUpgradeableSetupV1Mock__factory>(
-      'PluginUUPSUpgradeableSetupV1Mock'
+    setupUV1 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV1Mock', {
+      args: [implUV1.address],
+    });
+    setupUV1Bad = await hre.wrapper.deploy(
+      'PluginUUPSUpgradeableSetupV1MockBad',
+      {args: [implUV1.address]}
     );
-    setupUV1 = await SetupV1.deploy(implUV1.address);
-
-    const PluginUUPSUpgradeableSetupV1MockBad =
-      await smock.mock<PluginUUPSUpgradeableSetupV1MockBad__factory>(
-        'PluginUUPSUpgradeableSetupV1MockBad'
-      );
-    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy(
-      implUV1.address
-    );
-
-    const SetupV2 = await smock.mock<PluginUUPSUpgradeableSetupV2Mock__factory>(
-      'PluginUUPSUpgradeableSetupV2Mock'
-    );
-    setupUV2 = await SetupV2.deploy(implUV2.address);
-
-    const SetupV3 = await smock.mock<PluginUUPSUpgradeableSetupV3Mock__factory>(
-      'PluginUUPSUpgradeableSetupV3Mock'
-    );
-    setupUV3 = await SetupV3.deploy(implUV3.address);
-
-    const SetupV4 = await smock.mock<PluginUUPSUpgradeableSetupV4Mock__factory>(
-      'PluginUUPSUpgradeableSetupV4Mock'
-    );
-    setupUV4 = await SetupV4.deploy(implUV3.address);
+    setupUV2 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV2Mock', {
+      args: [implUV2.address],
+    });
+    setupUV3 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV3Mock', {
+      args: [implUV3.address],
+    });
+    setupUV4 = await hre.wrapper.deploy('PluginUUPSUpgradeableSetupV4Mock', {
+      args: [implUV3.address],
+    });
 
     // Deploy PluginCloneableSetupMock
-    const implCV1 = await new PluginCloneableV1Mock__factory(
-      signers[0]
-    ).deploy();
-    const SetupC1 = await smock.mock<PluginCloneableSetupV1Mock__factory>(
-      'PluginCloneableSetupV1Mock'
-    );
-    setupCV1 = await SetupC1.deploy(implCV1.address);
+    const implCV1 = await hre.wrapper.deploy('PluginCloneableV1Mock');
+    setupCV1 = await hre.wrapper.deploy('PluginCloneableSetupV1Mock', {
+      args: [implCV1.address],
+    });
 
-    const implCV1Bad = await new PluginCloneableV1MockBad__factory(
-      signers[0]
-    ).deploy();
-    const SetupC1Bad = await smock.mock<PluginCloneableSetupV1MockBad__factory>(
-      'PluginCloneableSetupV1MockBad'
-    );
-    setupCV1Bad = await SetupC1Bad.deploy(implCV1Bad.address);
+    const implCV1Bad = await hre.wrapper.deploy('PluginCloneableV1MockBad');
+    setupCV1Bad = await hre.wrapper.deploy('PluginCloneableSetupV1MockBad', {
+      args: [implCV1Bad.address],
+    });
 
-    const implCV2 = await new PluginCloneableV2Mock__factory(
-      signers[0]
-    ).deploy();
-    const SetupC2 = await smock.mock<PluginCloneableSetupV2Mock__factory>(
-      'PluginCloneableSetupV2Mock'
-    );
-    setupCV2 = await SetupC2.deploy(implCV2.address);
+    const implCV2 = await hre.wrapper.deploy('PluginCloneableV2Mock');
+    setupCV2 = await hre.wrapper.deploy('PluginCloneableSetupV2Mock', {
+      args: [implCV2.address],
+    });
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(signers[0]);
@@ -459,21 +439,14 @@ describe('PluginSetupProcessor', function () {
 
         const data = '0x11';
 
-        // Reset the cache so previus tests don't trick this test that
-        // the function was really called, even though it mightn't have been.
-        // This is needed because smock contracts are not deployed in beforeEach,
-        // but in before, so there's only one instance of them for all tests.
-        setupUV1.prepareInstallation.reset();
-
-        await psp.prepareInstallation(
-          targetDao.address,
-          createPrepareInstallationParams(pluginRepoPointer, data)
-        );
-
-        expect(setupUV1.prepareInstallation).to.have.been.calledWith(
-          targetDao.address,
-          data
-        );
+        await expect(
+          psp.prepareInstallation(
+            targetDao.address,
+            createPrepareInstallationParams(pluginRepoPointer, data)
+          )
+        )
+          .to.emit(setupUV1, 'InstallationPrepared')
+          .withArgs(targetDao.address, data);
       });
 
       it('successfully prepares a plugin installation with the correct event arguments', async () => {
@@ -697,12 +670,7 @@ describe('PluginSetupProcessor', function () {
           EMPTY_DATA
         );
 
-        setupUV1Bad.prepareInstallation.returns([
-          // Must be the same plugin address that gets returned from pluginRepoPointer's prepareInstallation
-          ethers.constants.AddressZero,
-          // modify so it generates different setup id.
-          [mockHelpers(1), mockPermissionsOperations(0, 2, Operation.Grant)],
-        ]);
+        await setupUV1Bad.mockPermissionIndexes(0, 2);
 
         const {
           preparedSetupData: {
@@ -805,7 +773,7 @@ describe('PluginSetupProcessor', function () {
         ).to.be.revertedWithCustomError(psp, 'PluginAlreadyInstalled');
 
         // Clean up
-        setupUV1Bad.prepareInstallation.reset();
+        await setupUV1Bad.reset();
       });
     });
   });
@@ -1025,9 +993,7 @@ describe('PluginSetupProcessor', function () {
         // Mock the contract call so it returns different
         // permissions than the above `prepareUninstallation` by default.
         // Needed to generate different setup.
-        setupUV1.prepareUninstallation.returns(
-          mockPermissionsOperations(0, 2, Operation.Revoke)
-        );
+        await setupUV1.mockPermissionIndexes(0, 2);
 
         await prepareUninstallation(
           psp,
@@ -1039,31 +1005,27 @@ describe('PluginSetupProcessor', function () {
         );
 
         // Clean up
-        setupUV1.prepareUninstallation.reset();
+        await setupUV1.reset();
       });
 
       it("successfully calls plugin setup's prepareUninstallation with correct arguments", async () => {
         const data = '0x11';
 
-        // Reset the cache so previus tests don't trick this test that
-        // the function was really called, even though it mightn't have been.
-        // This is needed because smock contracts are not deployed in beforeEach,
-        // but in before, so there's only one instance of them for all tests.
-        setupUV1.prepareUninstallation.reset();
-
-        await prepareUninstallation(
-          psp,
-          targetDao.address,
-          proxy,
-          pluginRepoPointer,
-          helpersUV1,
-          data
-        );
-
-        expect(setupUV1.prepareUninstallation).to.have.been.calledWith(
-          targetDao.address,
-          [proxy, helpersUV1, data]
-        );
+        await expect(
+          psp.prepareUninstallation(
+            targetDao.address,
+            createPrepareUninstallationParams(
+              proxy,
+              pluginRepoPointer,
+              helpersUV1,
+              data
+            )
+          )
+        )
+          .to.emit(setupUV1, 'UninstallationPrepared')
+          .withArgs(targetDao.address, (val: any) =>
+            expect(val).to.deep.equal([proxy, helpersUV1, data])
+          );
       });
 
       it('successfully prepares a plugin uninstallation with the correct event arguments', async () => {
@@ -1217,9 +1179,7 @@ describe('PluginSetupProcessor', function () {
 
         // mock the function so it returns different permissions
         // Needed to make sure second preparation results in different setup id and not reverts.
-        setupUV1.prepareUninstallation.returns(
-          mockPermissionsOperations(0, 2, Operation.Grant)
-        );
+        await setupUV1.mockPermissionIndexes(0, 2);
 
         // Second Preparation
         const {permissions: secondPreparePermissions} =
@@ -1275,6 +1235,8 @@ describe('PluginSetupProcessor', function () {
             )
           )
         ).to.be.revertedWithCustomError(psp, 'SetupNotApplicable');
+
+        await setupUV1.reset();
       });
 
       it('successfully uninstalls the plugin and emits the correct event', async () => {
@@ -1574,10 +1536,7 @@ describe('PluginSetupProcessor', function () {
 
         // change prepare update of plugin setup so it returns different struct
         // to make sure different setup id is generated.
-        setupUV2.prepareUpdate.returns([
-          EMPTY_DATA,
-          [mockHelpers(1), mockPermissionsOperations(0, 2, Operation.Grant)], // changed
-        ]);
+        await setupUV2.mockHelperCount(1);
 
         await prepareUpdate(
           psp,
@@ -1591,7 +1550,7 @@ describe('PluginSetupProcessor', function () {
         );
 
         // clean up
-        setupUV2.prepareUpdate.reset();
+        await setupUV2.reset();
       });
 
       it('correctly prepares updates when plugin setups are same, but UI different', async () => {
@@ -1622,49 +1581,53 @@ describe('PluginSetupProcessor', function () {
           PreparationType.Update
         );
 
-        const event = await prepareUpdate(
-          psp,
-          targetDao.address,
-          proxy,
-          currentVersion,
-          newVersion,
-          currentPluginRepoPointer[0],
-          helpers,
-          EMPTY_DATA
-        );
-
-        // Makes sure it correctly generated setup id.
-        expect(event.preparedSetupId).to.equal(preparedSetupId);
-
-        // When there's UI update, prepareUpdate of plugin setup must not be called.
-        expect(setupUV4.prepareUpdate).to.have.callCount(0);
+        await expect(
+          psp.prepareUpdate(
+            targetDao.address,
+            createPrepareUpdateParams(
+              proxy,
+              currentVersion,
+              newVersion,
+              currentPluginRepoPointer[0],
+              helpers,
+              EMPTY_DATA
+            )
+          )
+        )
+          .to.emit(psp, 'UpdatePrepared')
+          .withArgs(
+            anyValue,
+            anyValue,
+            preparedSetupId,
+            anyValue,
+            anyValue,
+            anyValue,
+            anyValue,
+            anyValue
+          )
+          .to.not.emit(setupUV4, 'UpdatePrepared');
       });
 
       it("successfully calls plugin setup's prepareUpdate with correct arguments", async () => {
         const data = '0x11';
 
-        // Reset the cache so previus tests don't trick this test that
-        // the function was really called, even though it mightn't have been.
-        // This is needed because smock contracts are not deployed in beforeEach,
-        // but in before, so there's only one instance of them for all tests.
-        setupUV2.prepareUpdate.reset();
-
-        await prepareUpdate(
-          psp,
-          targetDao.address,
-          proxy,
-          currentVersion,
-          newVersion,
-          pluginRepoPointer[0],
-          helpersUV1,
-          data
-        );
-
-        expect(setupUV2.prepareUpdate).to.have.been.calledWith(
-          targetDao.address,
-          1, // build
-          [proxy, helpersUV1, data]
-        );
+        await expect(
+          psp.prepareUpdate(
+            targetDao.address,
+            createPrepareUpdateParams(
+              proxy,
+              currentVersion,
+              newVersion,
+              pluginRepoPointer[0],
+              helpersUV1,
+              data
+            )
+          )
+        )
+          .to.emit(setupUV2, 'UpdatePrepared')
+          .withArgs(targetDao.address, 1, (val: any) =>
+            expect(val).to.deep.equal([proxy, helpersUV1, data])
+          );
       });
 
       it('successfully prepares update and emits the correct arguments', async () => {
@@ -2012,23 +1975,6 @@ describe('PluginSetupProcessor', function () {
     });
 
     describe('Whether upgrade functions of proxy get called the right way', async () => {
-      let fake: any;
-
-      beforeEach(async () => {
-        // create a fake on the same plugin(proxy) address.
-        fake = await smock.fake(pluginUUPSUpgradeableArtifact, {
-          address: proxy,
-        });
-
-        // Since smock fake will end up having functions that always returns
-        // Solidity default values, the below overrides them with the correct data
-        // So when PSP calls it, it can expect the same information as if it would call
-        // the normal/original `proxy/plugin`.
-        fake.supportsInterface.whenCalledWith('0xffffffff').returns(false);
-        fake.supportsInterface.whenCalledWith('0x01ffc9a7').returns(true);
-        fake.supportsInterface.whenCalledWith('0x41de6830').returns(true);
-      });
-
       it('correctly applies updates when plugin setups are same, but UI different', async () => {
         // plugin setup addresses are the same, so it treats it as UIs are different.
         const currentV: VersionTag = [1, 5];
@@ -2045,7 +1991,10 @@ describe('PluginSetupProcessor', function () {
           currentPluginRepoPointer
         );
 
-        await updatePlugin(
+        const {
+          initData,
+          preparedSetupData: {permissions, helpers: helpersUpdate},
+        } = await prepareUpdate(
           psp,
           targetDao.address,
           plugin,
@@ -2056,51 +2005,60 @@ describe('PluginSetupProcessor', function () {
           EMPTY_DATA
         );
 
-        expect(fake.upgradeTo).to.have.callCount(0);
-        expect(fake.upgradeToAndCall).to.have.callCount(0);
+        const pluginInstance = PluginUUPSUpgradeable__factory.connect(
+          plugin,
+          signers[0]
+        );
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            createApplyUpdateParams(
+              plugin,
+              [repoU.address, ...newV],
+              initData,
+              permissions,
+              helpersUpdate
+            )
+          )
+        ).to.not.emit(pluginInstance, 'Upgraded');
       });
 
       it('successfully calls `upgradeToAndCall` on plugin if initData was provided by pluginSetup', async () => {
-        const {initData} = await updatePlugin(
+        const {
+          initData,
+          preparedSetupData: {permissions, helpers: helpersUpdate},
+        } = await prepareUpdate(
           psp,
           targetDao.address,
           proxy,
           currentVersion,
-          newVersion, // uses setupUV2
+          newVersion,
           repoU.address,
           helpersUV1,
           EMPTY_DATA
         );
 
-        const newImpl = await setupUV2.implementation();
-        expect(fake.upgradeToAndCall).to.have.been.calledWith(
-          newImpl,
-          initData
-        );
-      });
-
-      it('successfully calls `upgradeTo` on plugin if no initData was provided', async () => {
-        setupUV2.prepareUpdate.returns([
-          EMPTY_DATA,
-          [mockHelpers(1), mockPermissionsOperations(0, 1, Operation.Grant)],
-        ]);
-
-        const {initData} = await updatePlugin(
-          psp,
-          targetDao.address,
+        const pluginInstance = PluginUUPSUpgradeable__factory.connect(
           proxy,
-          currentVersion,
-          newVersion, // uses setupUV2
-          repoU.address,
-          helpersUV1,
-          EMPTY_DATA
+          signers[0]
         );
-
-        // Reset so other tests continue using the default/original data
-        setupUV2.prepareUpdate.reset();
-
         const newImpl = await setupUV2.implementation();
-        expect(fake.upgradeTo).to.have.been.calledWith(newImpl);
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            createApplyUpdateParams(
+              proxy,
+              [repoU.address, ...newVersion],
+              initData,
+              permissions,
+              helpersUpdate
+            )
+          )
+        )
+          .to.emit(pluginInstance, 'Upgraded')
+          .withArgs(newImpl);
       });
     });
 

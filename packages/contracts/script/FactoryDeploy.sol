@@ -31,7 +31,8 @@ contract blax is Script, Helper {
     string internal network = vm.envString("NETWORK_NAME");
     address internal deployer = vm.addr(deployerPrivateKey);
 
-    bool internal useENS = vm.envBool("USE_ENS");
+    bool internal useENSForPlugin = vm.envBool("USE_ENS_FOR_PLUGIN");
+    bool internal useENSForDAO = vm.envBool("USE_ENS_FOR_DAO");
     string internal managementDaoSubdomain = vm.envString("MANAGEMENT_DAO_SUBDOMAIN");
 
     address public ensRegistry;
@@ -69,126 +70,107 @@ contract blax is Script, Helper {
     function run() external {
         vm.startBroadcast(deployerPrivateKey);
 
-        if (useENS) {
-            if (
-                keccak256(abi.encodePacked(managementDaoSubdomain)) ==
-                keccak256(abi.encodePacked(""))
-            ) {
-                revert("provide dao subdomain");
-            }
-
-            (string memory daoDomain, string memory pluginDomain) = ("ss.eth", "oe.blax.eth");
-
-            (ensRegistry, ensResolver) = _configureENS(daoDomain, pluginDomain);
-
-            daoNode = _getDomainHash(daoDomain);
-            pluginNode = _getDomainHash(pluginDomain);
+        if (!useENSForDAO && !subdomainNull(managementDaoSubdomain)) {
+            revert("Subdomain can not be non-empty if ens is not requested");
         }
 
+        // If either is true, then:
+        //   a. if ens registry not found on a network, deploy it.
+        //   b. if ens registry found, use it. Deployer must be the owner of the domains.
+        if (useENSForDAO || useENSForPlugin) {
+            (ensRegistry, ensResolver) = _getENSRegistry(network);
+
+            if (ensRegistry == address(0)) {
+                ensRegistry = address(new ENSRegistry());
+
+                ensResolver = address(
+                    new PublicResolver(ENS(address(ensRegistry)), INameWrapper(address(0)))
+                );
+            }
+
+            (string memory daoDomain, string memory pluginDomain) = ("fdasd.eth", "kk.eth");
+            daoNode = _getDomainHash(daoDomain);
+            pluginNode = _getDomainHash(pluginDomain);
+
+            if (useENSForDAO) _setupENS(daoDomain);
+            if (useENSForPlugin) _setupENS(pluginDomain);
+        }
+
+        uint256 g3 = gasleft();
         DeployFrameworkFactory factory = new DeployFrameworkFactory(
             ensRegistry,
             ensResolver,
             daoNode,
             pluginNode
         );
-        factory.deployFramework(
-            DeployFrameworkFactory.DAOSettings({
-                metadata: bytes("0x"), // todo double check this is correct
-                trustedForwarder: address(0),
-                daoURI: "good"
-            }),
-            managementDaoSubdomain,
-            _getDaoPermissions(),
-            DeployFrameworkFactory.Bytecodes({
-                daoFactory: type(DAOFactory).creationCode,
-                pluginRepoFactory: type(PluginRepoFactory).creationCode,
-                psp: type(PluginSetupProcessor).creationCode
-            })
-        );
+        uint256 g4 = gasleft();
+        console.log("Factory deployment gas 1: ", g3 - g4);
+
+        // if (ensRegistry != address(0)) {
+        //     ENS(ensRegistry).setOwner(daoNode, address(factory));
+        //     ENS(ensRegistry).setOwner(pluginNode, address(factory));
+        // }
+
+        // uint256 g1 = gasleft();
+        // factory.deployFramework(
+        //     DeployFrameworkFactory.DAOSettings({
+        //         metadata: bytes("0x"), // todo double check this is correct
+        //         trustedForwarder: address(0),
+        //         daoURI: "good"
+        //     }),
+        //     managementDaoSubdomain,
+        //     _getDaoPermissions(),
+        //     DeployFrameworkFactory.Bytecodes({
+        //         daoFactory: type(DAOFactory).creationCode,
+        //         pluginRepoFactory: type(PluginRepoFactory).creationCode,
+        //         psp: type(PluginSetupProcessor).creationCode
+        //     })
+        // );
+        // uint256 g2 = gasleft();
+        // console.log("deployFramework function gas 1: ", g1 - g2);
 
         vm.stopBroadcast();
     }
 
-    function _configureENS(
-        string memory daoDomain,
-        string memory pluginDomain
-    ) private returns (address ensRegistry_, address ensResolver_) {
-        // 1. get the ens registry address
-        (ensRegistry_, ensResolver_) = _getENSRegistry(network);
-
-        // if there is not official ens registry address, deploy it
-        if (ensRegistry_ == address(0)) {
-            // setup ens (deploy ens registry, ens resolver, set resolver to ens registry, register domains, ...)
-            (ensRegistry_, ensResolver_) = _setupENS(daoDomain, pluginDomain);
+    function _setupENS(string memory _domain) private {
+        if (ENSRegistry(ensRegistry).resolver(_getDomainHash(_domain)) == address(ensResolver)) {
+            // skip if already registered
+            return;
         }
 
-        // Check that deployer is the owner of the domains
-        if (
-            ENS(ensRegistry_).owner(_getDomainHash(daoDomain)) != deployer ||
-            ENS(ensRegistry_).owner(_getDomainHash(pluginDomain)) != deployer
-        ) {
-            // note: if it reverts and you bought the domains try unwrapping them
-            revert("domains are not owned by deployer");
-        }
-    }
+        // check reverse
+        (
+            string[] memory domainNamesReversed,
+            string[] memory domainSubdomains
+        ) = _getDomainNameReversedAndSubdomains(_domain);
 
-    function _setupENS(
-        string memory _daoDomain,
-        string memory _pluginDomain
-    ) private returns (address, address) {
-        string[] memory domains = new string[](2);
-        domains[0] = _daoDomain;
-        domains[1] = _pluginDomain;
+        for (uint256 j = 0; j < domainNamesReversed.length - 1; j++) {
+            string memory domain = domainSubdomains[j];
 
-        // 1. deploy ens registry
-        ENSRegistry ensRegistry_ = new ENSRegistry();
+            // skip if already set
+            string memory domainWithSubdomain = string.concat(
+                domainNamesReversed[j + 1],
+                bytes(domain).length > 0 ? string.concat(".", domain) : ""
+            );
 
-        // 2. deploy ens resolver
-        PublicResolver ensResolver_ = new PublicResolver(
-            ENS(address(ensRegistry_)),
-            INameWrapper(address(0))
-        );
-
-        // register domains
-        for (uint256 i = 0; i < domains.length; i++) {
-            if (ensRegistry_.resolver(_getDomainHash(domains[i])) == address(ensResolver_)) {
-                // skip if already registered
+            if (
+                ENSRegistry(ensRegistry).resolver(_getDomainHash(domainWithSubdomain)) != address(0)
+            ) {
                 continue;
             }
 
-            // check reverse
-            (
-                string[] memory domainNamesReversed,
-                string[] memory domainSubdomains
-            ) = _getDomainNameReversedAndSubdomains(domains[i]);
-
-            for (uint256 j = 0; j < domainNamesReversed.length - 1; j++) {
-                string memory domain = domainSubdomains[j];
-
-                // skip if already set
-                string memory domainWithSubdomain = string.concat(
-                    domainNamesReversed[j + 1],
-                    bytes(domain).length > 0 ? string.concat(".", domain) : ""
-                );
-
-                if (ensRegistry_.resolver(_getDomainHash(domainWithSubdomain)) != address(0)) {
-                    continue;
-                }
-
-                // set subnode
-                ensRegistry_.setSubnodeRecord(
-                    _getDomainHash(domain),
-                    _getLabelHash(domainNamesReversed[j + 1]),
-                    deployer,
-                    address(ensResolver_),
-                    0
-                );
-            }
+            // set subnode
+            ENSRegistry(ensRegistry).setSubnodeRecord(
+                _getDomainHash(domain),
+                _getLabelHash(domainNamesReversed[j + 1]),
+                deployer,
+                address(ensResolver),
+                0
+            );
         }
+    }
 
-        vm.label({account: address(ensRegistry_), newLabel: "ENSRegistry"});
-        vm.label({account: address(ensResolver_), newLabel: "ENSResolver"});
-
-        return (address(ensRegistry_), address(ensResolver_));
+    function subdomainNull(string memory _subdomain) private pure returns (bool) {
+        return keccak256(abi.encodePacked(_subdomain)) == keccak256(abi.encodePacked(""));
     }
 }

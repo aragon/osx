@@ -16,6 +16,7 @@ async function generateTypechain(src: string, dest: string): Promise<void> {
     const relativePath = path.relative(src, path.dirname(file));
     const outputDir = path.join(dest, relativePath);
     fs.mkdirSync(outputDir, {recursive: true});
+
     await execPromise(
       `typechain --target ethers-v5 --out-dir "${outputDir}" "${file}"`
     );

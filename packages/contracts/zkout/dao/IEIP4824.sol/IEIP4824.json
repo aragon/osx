@@ -1,1 +1,0 @@
-{"abi":[{"type":"function","name":"daoURI","inputs":[],"outputs":[{"name":"_daoURI","type":"string","internalType":"string"}],"stateMutability":"view"}],"storageLayout":{"storage":[],"types":{}},"userdoc":{},"devdoc":{},"factoryDependencies":{},"id":153}

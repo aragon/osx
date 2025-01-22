@@ -10,23 +10,19 @@ import {
   PublicResolver__factory,
 } from '../../typechain';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
-import {deployWithProxy} from '../test-utils/proxy';
+import {ARTIFACT_SOURCES} from './wrapper';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 export async function deployENSSubdomainRegistrar(
   owner: SignerWithAddress,
   managingDao: DAO,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
-  const ENSRegistryFactory = new ENSRegistry__factory(owner);
-  const ensRegistry = await ENSRegistryFactory.connect(owner).deploy();
-
-  const PublicResolverFactory = new PublicResolver__factory(owner);
-  const publicResolver = await PublicResolverFactory.connect(owner).deploy(
-    ensRegistry.address,
-    owner.address
-  );
+  const ensRegistry = await hre.wrapper.deploy('ENSRegistry');
+  const publicResolver = await hre.wrapper.deploy('PublicResolver', {
+    args: [ensRegistry.address, owner.address],
+  });
 
   // Register subdomains in the reverse order
   let domainNamesReversed = domain.split('.');
@@ -49,12 +45,11 @@ export async function deployENSSubdomainRegistrar(
     );
   }
 
-  const ENSSubdomainRegistrar = new ENSSubdomainRegistrar__factory(owner);
-
-  // Deploy the ENS and approve the subdomain registrar
-  const ensSubdomainRegistrar = await deployWithProxy<ENSSubdomainRegistrar>(
-    ENSSubdomainRegistrar
+  const ensSubdomainRegistrar = await hre.wrapper.deploy(
+    ARTIFACT_SOURCES.ENS_SUBDOMAIN_REGISTRAR,
+    {withProxy: true}
   );
+
   await ensRegistry
     .connect(owner)
     .setApprovalForAll(ensSubdomainRegistrar.address, true);
