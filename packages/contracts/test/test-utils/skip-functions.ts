@@ -1,4 +1,4 @@
-import {ZK_SYNC_NETWORKS} from '../../utils/zkSync';
+import {ZK_SYNC_NETWORKS} from '../../utils/zksync';
 import hre from 'hardhat';
 
 // ANSI escape codes for colored terminal output

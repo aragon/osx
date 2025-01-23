@@ -6,12 +6,19 @@ import {
   DAORegistry__factory,
   PluginRepoRegistry__factory,
 } from '../../typechain';
+import {PluginRepoRegisteredEvent} from '../../typechain/PluginRepoRegistry';
+import {getAnticipatedAddress} from '../framework/dao/dao-factory';
+import {daoExampleURI} from '../test-utils/dao';
 import {
   closeFork,
   initForkForOsxVersion,
   initializeDeploymentFixture,
 } from '../test-utils/fixture';
+import {createPrepareInstallationParams} from '../test-utils/psp/create-params';
+import {PluginRepoPointer} from '../test-utils/psp/types';
 import {skipTestSuiteIfNetworkIsZkSync} from '../test-utils/skip-functions';
+import {findEventTopicLog} from '@aragon/osx-commons-sdk';
+import {PluginRepoFactory__factory} from '@aragon/osx-ethers-v1.2.0';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {defaultAbiCoder} from 'ethers/lib/utils';
@@ -19,6 +26,27 @@ import hre, {ethers, deployments} from 'hardhat';
 
 const IMPLEMENTATION_ADDRESS_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
+
+const daoSettings = {
+  trustedForwarder: ethers.constants.AddressZero,
+  subdomain: 'dao1',
+  metadata: '0x0000',
+  daoURI: daoExampleURI,
+};
+
+const EVENTS = {
+  PluginRepoRegistered: 'PluginRepoRegistered',
+  DAORegistered: 'DAORegistered',
+  InstallationPrepared: 'InstallationPrepared',
+  InstallationApplied: 'InstallationApplied',
+  UpdateApplied: 'UpdateApplied',
+  UninstallationApplied: 'UninstallationApplied',
+  MetadataSet: 'MetadataSet',
+  TrustedForwarderSet: 'TrustedForwarderSet',
+  NewURI: 'NewURI',
+  Revoked: 'Revoked',
+  Granted: 'Granted',
+};
 
 async function forkSepolia() {
   hre.network.deploy = ['./deploy/update/to_v1.4.0'];
@@ -104,7 +132,7 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
     closeFork();
   });
 
-  it('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {
+  it.only('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {
     const previousPluginRepoFactory = getAddress('PluginRepoFactory');
     const previousDAOFactoryAddress = getAddress('DAOFactory');
 
@@ -176,7 +204,7 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
       {
         where: daoRegistry.address,
         who: previousDAOFactoryAddress,
-        isSet: false,
+        isSet: true, // Makes sure we keep the the permission of the previouse DAO factory
       },
       {
         where: pluginRepoRegistry.address,
@@ -227,5 +255,59 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
         await deployments.get('PluginRepoRegistryImplementation')
       ).address
     );
+  });
+
+  it.only('Previouse (v1.3) DAO Factory can still register DAOs', async () => {
+    const previousDAOFactoryAddress = getAddress('DAOFactory');
+    const dao = await getAnticipatedAddress(previousDAOFactoryAddress);
+    const daoContract = new DAO__factory(deployer).attach(dao);
+
+    const daoFactory = new DAOFactory__factory(deployer).attach(
+      previousDAOFactoryAddress
+    );
+
+    const pluginImp = await hre.wrapper.deploy('PluginUUPSUpgradeableV1Mock');
+    const pluginSetupMock = await hre.wrapper.deploy(
+      'PluginUUPSUpgradeableSetupV1Mock',
+      {args: [pluginImp.address]}
+    );
+
+    const newPluginRepoFactoryAddress = (
+      await deployments.get('PluginRepoFactory')
+    ).address;
+
+    const pluginRepoFactory = new PluginRepoFactory__factory(deployer).attach(
+      newPluginRepoFactoryAddress
+    );
+
+    const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
+      'plugin-uupsupgradeable-setup-v1-mock',
+      pluginSetupMock.address,
+      deployer.address,
+      '0x00',
+      '0x00'
+    );
+
+    const event = findEventTopicLog<PluginRepoRegisteredEvent>(
+      await tx.wait(),
+      PluginRepoRegistry__factory.createInterface(),
+      EVENTS.PluginRepoRegistered
+    );
+
+    const pluginSetupMockRepoAddress = event.args.pluginRepo;
+
+    const pluginRepoPointer: PluginRepoPointer = [
+      pluginSetupMockRepoAddress,
+      1,
+      1,
+    ];
+
+    expect(
+      await daoFactory.createDao(daoSettings, [
+        createPrepareInstallationParams(pluginRepoPointer, '0x'),
+      ])
+    )
+      .to.emit(daoContract, EVENTS.MetadataSet)
+      .withArgs(daoSettings.metadata);
   });
 });
