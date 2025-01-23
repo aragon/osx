@@ -23,7 +23,7 @@ pragma solidity ^0.8.8;
 /* solhint-disable no-unused-import */
 
 // Deploy Script
-// import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 // Regression Testing
 import {DAO as DAO_v1_0_0} from "@aragon/osx-v1.0.1/core/dao/DAO.sol";

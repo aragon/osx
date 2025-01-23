@@ -16,6 +16,7 @@ contract Factory {
 
         bytes memory initData = abi.encodeCall(Blax.init, (5));
 
+        revert("fuck");
         b.deployUUPSProxy(initData);
     }
 }

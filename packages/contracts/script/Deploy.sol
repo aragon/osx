@@ -15,6 +15,7 @@ contract DeployHere is Script {
 
         Factory g = new Factory();
 
+        revert("oe");
         g.deployAnother();
 
         vm.stopBroadcast();

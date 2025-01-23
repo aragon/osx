@@ -4,6 +4,7 @@ out = 'out'
 libs = ['node_modules']
 test = 'test'
 cache_path  = 'cache_forge'
+solc_version="0.8.17"
 
 # todo explore why '../../../' is needed to be able to compile when '../../' should be enough
 allow_paths = ['../../node_modules', '../../', '../../../']

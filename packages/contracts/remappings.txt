@@ -5,4 +5,3 @@ eth-gas-reporter/=../../node_modules/eth-gas-reporter/
 forge-std/=../../node_modules/forge-std/src/
 hardhat-deploy/=../../node_modules/hardhat-deploy/
 hardhat/=../../node_modules/hardhat/
-@aragon/osx-commons-contracts/=node_modules/@aragon/osx-commons-contracts/
