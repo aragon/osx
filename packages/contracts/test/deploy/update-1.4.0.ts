@@ -37,15 +37,6 @@ const daoSettings = {
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
   DAORegistered: 'DAORegistered',
-  InstallationPrepared: 'InstallationPrepared',
-  InstallationApplied: 'InstallationApplied',
-  UpdateApplied: 'UpdateApplied',
-  UninstallationApplied: 'UninstallationApplied',
-  MetadataSet: 'MetadataSet',
-  TrustedForwarderSet: 'TrustedForwarderSet',
-  NewURI: 'NewURI',
-  Revoked: 'Revoked',
-  Granted: 'Granted',
 };
 
 async function forkSepolia() {
@@ -257,15 +248,14 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
     );
   });
 
-  it.only('Previouse (v1.3) DAO Factory can still register DAOs', async () => {
+  it.only('Previous (v1.3) DAO Factory can still register DAOs', async () => {
+    // get previouse DAO factory from OSx 1.4
     const previousDAOFactoryAddress = getAddress('DAOFactory');
-    const dao = await getAnticipatedAddress(previousDAOFactoryAddress);
-    const daoContract = new DAO__factory(deployer).attach(dao);
-
     const daoFactory = new DAOFactory__factory(deployer).attach(
       previousDAOFactoryAddress
     );
 
+    // publish a plugin based on OSx 1.4
     const pluginImp = await hre.wrapper.deploy('PluginUUPSUpgradeableV1Mock');
     const pluginSetupMock = await hre.wrapper.deploy(
       'PluginUUPSUpgradeableSetupV1Mock',
@@ -302,12 +292,21 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
       1,
     ];
 
+    // Get anticipated DAO contract
+    const dao = await getAnticipatedAddress(previousDAOFactoryAddress);
+
+    // Get dao registry
+    const daoRegistryAddress = getAddress('DAORegistryProxy');
+    const daoRegistryContract = new DAOFactory__factory(deployer).attach(
+      daoRegistryAddress
+    );
+
     expect(
       await daoFactory.createDao(daoSettings, [
         createPrepareInstallationParams(pluginRepoPointer, '0x'),
       ])
     )
-      .to.emit(daoContract, EVENTS.MetadataSet)
-      .withArgs(daoSettings.metadata);
+      .to.emit(daoRegistryContract, EVENTS.DAORegistered)
+      .withArgs(dao, deployer.address, daoSettings.subdomain);
   });
 });
