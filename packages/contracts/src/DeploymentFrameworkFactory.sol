@@ -81,8 +81,8 @@ contract DeployFrameworkFactory {
         address _frameworkOwner,
         DAOSettings calldata _daoSettings,
         string calldata _daoSubdomain,
-        bytes32[] memory daoPermissionIds,
-        Bytecodes memory bytecodes
+        bytes32[] memory _daoPermissionIds,
+        Bytecodes memory _bytecodes
     ) external returns (Deployments memory deps) {
         deps.dao = deployDAO(_daoSettings);
 
@@ -100,17 +100,17 @@ contract DeployFrameworkFactory {
             deps.pluginEnsRegistrar
         );
 
-        bytecodes.psp = abi.encodePacked(bytecodes.psp, abi.encode(deps.pluginRepoRegistry));
-        deps.psp = deployWithBytecode(bytecodes.psp);
+        _bytecodes.psp = abi.encodePacked(_bytecodes.psp, abi.encode(deps.pluginRepoRegistry));
+        deps.psp = deployWithBytecode(_bytecodes.psp);
 
         (deps.pluginRepoFactory, deps.daoFactory) = deployFactories(
             deps.pluginRepoRegistry,
             deps.daoRegistry,
             deps.psp,
-            bytecodes
+            _bytecodes
         );
 
-        setPermissions(deps, daoPermissionIds);
+        setPermissions(deps, _daoPermissionIds);
 
         if (daoNode != bytes32(0)) {
             ENSRegistry(ensRegistry).setApprovalForAll(deps.daoEnsRegistrar, true);
@@ -256,6 +256,14 @@ contract DeployFrameworkFactory {
                 condition: PermissionLib.NO_CONDITION,
                 permissionId: keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION")
             });
+
+            items[count++] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Grant,
+                where: _deps.daoEnsRegistrar,
+                who: _deps.dao,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: keccak256("UPGRADE_REGISTRAR_PERMISSION")
+            });
         }
 
         if (_deps.pluginEnsRegistrar != address(0)) {
@@ -266,23 +274,15 @@ contract DeployFrameworkFactory {
                 condition: PermissionLib.NO_CONDITION,
                 permissionId: keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION")
             });
+
+            items[count++] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Grant,
+                where: _deps.pluginEnsRegistrar,
+                who: _deps.dao,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: keccak256("UPGRADE_REGISTRAR_PERMISSION")
+            });
         }
-
-        items[count++] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: _deps.daoEnsRegistrar,
-            who: _deps.dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("UPGRADE_REGISTRAR_PERMISSION")
-        });
-
-        items[count++] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: _deps.pluginEnsRegistrar,
-            who: _deps.dao,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("UPGRADE_REGISTRAR_PERMISSION")
-        });
 
         items[count++] = PermissionLib.MultiTargetPermission({
             operation: PermissionLib.Operation.Grant,

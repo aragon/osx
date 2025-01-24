@@ -62,13 +62,12 @@ contract Helper is Script {
         (domainNamesReversed, domainSubdomains) = abi.decode(res, (string[], string[]));
     }
 
-    function _uploadToIPFS() internal returns (string memory ipfsCid) {
+    function _uploadToIPFS() internal returns (bytes memory ipfsCid) {
         string[] memory inputs = new string[](5);
         inputs[0] = "npx";
         inputs[1] = "ts-node";
         inputs[2] = "scripts/upload-to-pinnata.ts";
-        bytes memory res = vm.ffi(inputs);
-        ipfsCid = string(res);
+        return vm.ffi(inputs);
     }
 
     function _getDaoPermissions() internal pure returns (bytes32[] memory permissions) {
@@ -79,6 +78,17 @@ contract Helper is Script {
         permissions[3] = keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
         permissions[4] = keccak256("SET_METADATA_PERMISSION");
         permissions[5] = keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
+        return permissions;
+    }
+
+    function _getFrameworkPermissions() internal pure returns (bytes32[] memory permissions) {
+        permissions = new bytes32[](6);
+        permissions[0] = keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION");
+        permissions[1] = keccak256("UPGRADE_REGISTRAR_PERMISSION");
+        permissions[2] = keccak256("UPGRADE_REGISTRY_PERMISSION");
+        permissions[3] = keccak256("REGISTER_DAO_PERMISSION");
+        permissions[4] = keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
+        permissions[5] = keccak256("EXECUTE_PERMISSION");
         return permissions;
     }
 

@@ -4,21 +4,35 @@ pragma solidity ^0.8.8;
 import {Script} from "forge-std/Script.sol";
 
 import {Factory} from "../src/Giorgi.sol";
+import {console} from "forge-std/console.sol";
 
 contract DeployHere is Script {
     function setUp() public {}
 
-    uint256 internal deployerPrivateKey = vm.envUint("DEPLOYER_KEY");
+    uint256 internal deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
     function run() public {
         vm.startBroadcast(deployerPrivateKey);
 
-        Factory g = new Factory();
+        string memory bytecode = vm.readFile(
+            "./repos/compiled/multisig/src_MultisigSetup_sol_MultisigSetup.bin"
+        );
 
-        revert("oe");
-        g.deployAnother();
+        address deployedAddress = deployContract(bytecode);
+
+        console.log("Deployed Contract Address:", deployedAddress);
 
         vm.stopBroadcast();
+    }
+
+    function deployContract(string memory bytecode) internal returns (address) {
+        bytes memory bytecodeBytes = bytes(vm.parseBytes(bytecode));
+        address addr;
+        assembly {
+            addr := create(0, add(bytecodeBytes, 0x20), mload(bytecodeBytes))
+        }
+        require(addr != address(0), "Deployment failed");
+        return addr;
     }
 }
 

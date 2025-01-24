@@ -27,7 +27,7 @@ contract Ss is Script, Helper {
 
     string constant managementDaoSubdomain = "management";
 
-    uint256 internal deployerPrivateKey = vm.envUint("DEPLOYER_KEY");
+    uint256 internal deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     string internal network = vm.envString("NETWORK_NAME");
     address internal deployer = vm.addr(deployerPrivateKey);
 

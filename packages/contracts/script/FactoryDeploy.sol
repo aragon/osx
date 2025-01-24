@@ -8,10 +8,6 @@ import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENSRegistry.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/PublicResolver.sol";
 
-import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
-import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
-import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
-
 import {Helper} from "./Helper.sol";
 
 import {DAO} from "../src/core/dao/DAO.sol";
@@ -29,9 +25,7 @@ import {DeployFrameworkFactory} from "../src/DeploymentFrameworkFactory.sol";
 import {DaoAuthorizable} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizable.sol";
 
 contract FactoryDeploy is Script, Helper {
-    using ProxyLib for address;
-
-    uint256 internal deployerPrivateKey = vm.envUint("DEPLOYER_KEY");
+    uint256 internal deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     string internal network = vm.envString("NETWORK_NAME");
     address internal deployer = vm.addr(deployerPrivateKey);
 
@@ -39,40 +33,15 @@ contract FactoryDeploy is Script, Helper {
     bool internal useENSForDAO = vm.envBool("USE_ENS_FOR_DAO");
     string internal managementDaoSubdomain = vm.envString("MANAGEMENT_DAO_SUBDOMAIN");
 
-    address internal PLUGIN_REPO_ADDRESS = vm.addr(vm.envUint("PLUGIN_REPO_ADDRESS"));
-    uint256 internal PLUGIN_REPO_RELEASE_NUMBER = vm.envUint("PLUGIN_REPO_RELEASE_NUMBER");
-    uint256 internal PLUGIN_REPO_BUILD_NUMBER = vm.envUint("PLUGIN_REPO_BUILD_NUMBER");
-    bytes internal PLUGIN_DATA = vm.envBytes("PLUGIN_DATA");
+    // address internal PLUGIN_REPO_ADDRESS = vm.addr(vm.envUint("PLUGIN_REPO_ADDRESS"));
+    // uint256 internal PLUGIN_REPO_RELEASE_NUMBER = vm.envUint("PLUGIN_REPO_RELEASE_NUMBER");
+    // uint256 internal PLUGIN_REPO_BUILD_NUMBER = vm.envUint("PLUGIN_REPO_BUILD_NUMBER");
+    // bytes internal PLUGIN_DATA = vm.envBytes("PLUGIN_DATA");
 
     address public ensRegistry;
     address public ensResolver;
     bytes32 public daoNode;
     bytes32 public pluginNode;
-
-    struct DAOSettings {
-        bytes metadata;
-        address trustedForwarder;
-        string daoURI;
-    }
-
-    struct Bytecodes {
-        bytes daoFactory;
-        bytes pluginRepoFactory;
-        bytes psp;
-    }
-
-    struct Deployments {
-        address dao;
-        address daoEnsRegistrar;
-        address pluginEnsRegistrar;
-        address daoRegistry;
-        address pluginRepoRegistry;
-        address psp;
-        address daoFactory;
-        address pluginRepoFactory;
-    }
-
-    event DeploymentResults(Deployments deps);
 
     function setUp() public {}
 
@@ -84,8 +53,9 @@ contract FactoryDeploy is Script, Helper {
         }
 
         // If either is true, then:
-        //   a. if ens registry not found on a network, deploy it.
+        //   a. if ens registry address not found inside scripts/getter.ts, deploy it.
         //   b. if ens registry found, use it. Deployer must be the owner of the domains.
+        uint256 g1 = gasleft();
         if (useENSForDAO || useENSForPlugin) {
             (ensRegistry, ensResolver) = _getENSRegistry(network);
 
@@ -97,15 +67,25 @@ contract FactoryDeploy is Script, Helper {
                 );
             }
 
-            (string memory daoDomain, string memory pluginDomain) = ("fdasd.eth", "kk.eth");
-            daoNode = _getDomainHash(daoDomain);
-            pluginNode = _getDomainHash(pluginDomain);
+            // 1. Makes a request to osx-commons-sdk.
+            // 2. If the `network` is added in `exceptionalDomains`
+            // inside `osx-commons`, it uses those domains. If not,
+            // It uses `dao.eth` and `plugin.dao.eth`.
+            (string memory daoDomain, string memory pluginDomain) = _getDomains(network);
 
-            if (useENSForDAO) _setupENS(daoDomain);
-            if (useENSForPlugin) _setupENS(pluginDomain);
+            if (useENSForDAO) {
+                daoNode = _getDomainHash(daoDomain);
+                _setupENS(daoDomain);
+            }
+
+            if (useENSForPlugin) {
+                pluginNode = _getDomainHash(pluginDomain);
+                _setupENS(pluginDomain);
+            }
         }
+        uint256 g2 = gasleft();
 
-        uint256 g1 = gasleft();
+        uint256 g3 = gasleft();
 
         DeployFrameworkFactory factory = new DeployFrameworkFactory(
             ensRegistry,
@@ -114,22 +94,30 @@ contract FactoryDeploy is Script, Helper {
             pluginNode
         );
 
-        uint256 g2 = gasleft();
+        uint256 g4 = gasleft();
 
+        // Factory must become a temporary owner so that
+        // it can register managing dao on the dao registry.
         if (useENSForDAO) {
             ENS(ensRegistry).setOwner(daoNode, address(factory));
         }
 
+        // We also make factory temporary owner so that
+        // it can transfer it to managing dao in the end.
         if (useENSForPlugin) {
             ENS(ensRegistry).setOwner(pluginNode, address(factory));
         }
 
-        uint256 g3 = gasleft();
+        uint256 g5 = gasleft();
 
+        // deploy the managing dao metadata to ipfs. (uses pinata)
+        bytes memory ipfsCid = _uploadToIPFS();
+
+        // The final function that deploys the whole framework(excluding plugin repos)
         DeployFrameworkFactory.Deployments memory deps = factory.deployFramework(
             deployer,
             DeployFrameworkFactory.DAOSettings({
-                metadata: bytes("0x"), // this needs to be managing-dao-metadata.json's ipfs
+                metadata: ipfsCid, // this needs to be managing-dao-metadata.json's ipfs
                 trustedForwarder: address(0),
                 daoURI: ""
             }),
@@ -142,45 +130,48 @@ contract FactoryDeploy is Script, Helper {
             })
         );
 
-        uint256 g4 = gasleft();
-        console.log("Factory deployment gas 1: ", g1 - g2);
-        console.log("deployFramework function gas 1: ", g3 - g4);
+        uint256 g6 = gasleft();
+        console.log("ENS Deployment cost: ", g1 - g2);
+        console.log("Factory deployment cost: ", g3 - g4);
+        console.log("deployFramework function cost: ", g5 - g6);
 
-        validatePermissions(address(factory), deployer, deps);
+        validateDeployment(address(factory), deployer, deps);
 
-        if (PLUGIN_REPO_ADDRESS != address(0)) {
-            // Prepare plugin.
-            PluginSetupRef memory ref = PluginSetupRef(
-                PluginRepo.Tag({
-                    release: uint8(PLUGIN_REPO_RELEASE_NUMBER),
-                    build: uint16(PLUGIN_REPO_BUILD_NUMBER)
-                }),
-                PluginRepo(PLUGIN_REPO_ADDRESS)
-            );
+        // Deploy Repos...
 
-            DAO(payable(deps.dao)).grant(deps.dao, deps.psp, keccak256("ROOT_PERMISSION"));
+        // if (PLUGIN_REPO_ADDRESS != address(0)) {
+        //     // Prepare plugin.
+        //     PluginSetupRef memory ref = PluginSetupRef(
+        //         PluginRepo.Tag({
+        //             release: uint8(PLUGIN_REPO_RELEASE_NUMBER),
+        //             build: uint16(PLUGIN_REPO_BUILD_NUMBER)
+        //         }),
+        //         PluginRepo(PLUGIN_REPO_ADDRESS)
+        //     );
 
-            (
-                address plugin,
-                IPluginSetup.PreparedSetupData memory preparedSetupData
-            ) = PluginSetupProcessor(deps.psp).prepareInstallation(
-                    deps.dao,
-                    PluginSetupProcessor.PrepareInstallationParams(ref, PLUGIN_DATA)
-                );
+        //     DAO(payable(deps.dao)).grant(deps.dao, deps.psp, keccak256("ROOT_PERMISSION"));
 
-            // Apply plugin.
-            PluginSetupProcessor(deps.psp).applyInstallation(
-                deps.dao,
-                PluginSetupProcessor.ApplyInstallationParams(
-                    ref,
-                    plugin,
-                    preparedSetupData.permissions,
-                    hashHelpers(preparedSetupData.helpers)
-                )
-            );
+        //     (
+        //         address plugin,
+        //         IPluginSetup.PreparedSetupData memory preparedSetupData
+        //     ) = PluginSetupProcessor(deps.psp).prepareInstallation(
+        //             deps.dao,
+        //             PluginSetupProcessor.PrepareInstallationParams(ref, PLUGIN_DATA)
+        //         );
 
-            DAO(payable(deps.dao)).revoke(deps.dao, deps.psp, keccak256("ROOT_PERMISSION"));
-        }
+        //     // Apply plugin.
+        //     PluginSetupProcessor(deps.psp).applyInstallation(
+        //         deps.dao,
+        //         PluginSetupProcessor.ApplyInstallationParams(
+        //             ref,
+        //             plugin,
+        //             preparedSetupData.permissions,
+        //             hashHelpers(preparedSetupData.helpers)
+        //         )
+        //     );
+
+        //     DAO(payable(deps.dao)).revoke(deps.dao, deps.psp, keccak256("ROOT_PERMISSION"));
+        // }
 
         vm.stopBroadcast();
     }
@@ -223,158 +214,63 @@ contract FactoryDeploy is Script, Helper {
         }
     }
 
-    function subdomainNull(string memory _subdomain) private pure returns (bool) {
-        return keccak256(abi.encodePacked(_subdomain)) == keccak256(abi.encodePacked(""));
-    }
-
-    function validatePermissions(
+    function validateDeployment(
         address _factory,
         address _frameworkOwner,
         DeployFrameworkFactory.Deployments memory _deps
     ) private {
-        bytes32[] memory daoPermissionIds = _getDaoPermissions();
-        uint256 count = daoPermissionIds.length;
-
-        for (uint256 i = 0; i < count; i++) {
-            bool hasP = DAO(payable(_deps.dao)).hasPermission(
-                _deps.dao,
-                _deps.dao,
-                daoPermissionIds[i],
-                bytes("")
-            );
-            vm.assertTrue(hasP);
-        }
-
         DAO _dao = DAO(payable(_deps.dao));
 
-        if (_deps.daoEnsRegistrar != address(0)) {
-            vm.assertTrue(
-                _dao.hasPermission(
-                    _deps.daoEnsRegistrar,
-                    _deps.daoRegistry,
-                    keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION"),
-                    bytes("")
-                )
-            );
+        bytes32[] memory daoPermissions = _getDaoPermissions();
+        bytes32[] memory frameworkPermissions = _getFrameworkPermissions();
+
+        uint256 count = daoPermissions.length;
+
+        for (uint256 i = 0; i < count; i++) {
+            assertPermission(_dao, _deps.dao, _deps.dao, daoPermissions[i], true);
         }
 
-        if (_deps.pluginEnsRegistrar != address(0)) {
-            vm.assertTrue(
-                _dao.hasPermission(
-                    _deps.pluginEnsRegistrar,
-                    _deps.pluginRepoRegistry,
-                    keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION"),
-                    bytes("")
-                )
-            );
-        }
-
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.dao,
-                _frameworkOwner,
-                keccak256("EXECUTE_PERMISSION"),
-                bytes("")
-            )
+        // 1. Validate ens related settings after deployment.
+        // ==========================================================================
+        _validateENS(useENSForDAO, _deps.dao, _deps.daoEnsRegistrar, _deps.daoRegistry, daoNode);
+        _validateENS(
+            useENSForPlugin,
+            _deps.dao,
+            _deps.pluginEnsRegistrar,
+            _deps.pluginRepoRegistry,
+            pluginNode
         );
 
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.daoEnsRegistrar,
-                _deps.dao,
-                keccak256("UPGRADE_REGISTRAR_PERMISSION"),
-                bytes("")
-            )
+        // 2. Validate other framework permissions.
+        // ==========================================================================
+        // dao must have `UPGRADE_REGISTRY_PERMISSION` on registries
+        assertPermission(_dao, _deps.daoRegistry, _deps.dao, frameworkPermissions[2], true);
+        assertPermission(_dao, _deps.pluginRepoRegistry, _deps.dao, frameworkPermissions[2], true);
+
+        // daofactory must have `REGISTER_DAO_PERMISSION` on daoregistry.
+        assertPermission(_dao, _deps.daoRegistry, _deps.daoFactory, frameworkPermissions[3], true);
+
+        // our deployment factory must NOT have `REGISTER_DAO_PERMISSION`.
+        // During the deployment, it gets this permission to register
+        // managing dao, so we check that it was revoked correctly.
+        assertPermission(_dao, _deps.daoRegistry, _factory, frameworkPermissions[3], false);
+
+        // pluginrepofactory must have `REGISTER_PLUGIN_REPO_PERMISSION` on pluginRepoRegistry
+        assertPermission(
+            _dao,
+            _deps.pluginRepoRegistry,
+            _deps.pluginRepoFactory,
+            frameworkPermissions[4],
+            true
         );
 
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.pluginEnsRegistrar,
-                _deps.dao,
-                keccak256("UPGRADE_REGISTRAR_PERMISSION"),
-                bytes("")
-            )
-        );
+        // deployer must have `EXECUTE_PERMISSION` on the dao.
+        assertPermission(_dao, _deps.dao, _frameworkOwner, frameworkPermissions[5], true);
 
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.daoRegistry,
-                _deps.daoFactory,
-                keccak256("REGISTER_DAO_PERMISSION"),
-                bytes("")
-            )
-        );
-
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.daoRegistry,
-                _deps.dao,
-                keccak256("UPGRADE_REGISTRY_PERMISSION"),
-                bytes("")
-            )
-        );
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.pluginRepoRegistry,
-                _deps.pluginRepoFactory,
-                keccak256("REGISTER_PLUGIN_REPO_PERMISSION"),
-                bytes("")
-            )
-        );
-
-        vm.assertTrue(
-            _dao.hasPermission(
-                _deps.pluginRepoRegistry,
-                _deps.dao,
-                keccak256("UPGRADE_REGISTRY_PERMISSION"),
-                bytes("")
-            )
-        );
-
-        vm.assertFalse(
-            _dao.hasPermission(
-                _deps.daoRegistry,
-                _factory,
-                keccak256("REGISTER_DAO_PERMISSION"),
-                bytes("")
-            )
-        );
-
-        // Check that managing dao address is correctly set on the framework contracts.
+        // 3. Check that managing dao address is correctly set on the framework contracts.
+        // ==========================================================================
         vm.assertEq(address(DaoAuthorizable(_deps.daoRegistry).dao()), _deps.dao);
         vm.assertEq(address(DaoAuthorizable(_deps.pluginRepoRegistry).dao()), _deps.dao);
-
-        if (useENSForDAO) {
-            vm.assertEq(address(DaoAuthorizable(_deps.daoEnsRegistrar).dao()), _deps.dao);
-            vm.assertEq(ENSSubdomainRegistrar(_deps.daoEnsRegistrar).node(), daoNode);
-            // vm.assertTrue(
-            //     ENSRegistry(ensRegistry).isApprovedForAll(_deps.dao, _deps.daoEnsRegistrar)
-            // );
-            vm.assertEq(
-                address(DAORegistry(_deps.daoRegistry).subdomainRegistrar()),
-                _deps.daoEnsRegistrar
-            );
-        } else {
-            vm.assertEq(address(DAORegistry(_deps.daoRegistry).subdomainRegistrar()), address(0));
-        }
-
-        if (useENSForPlugin) {
-            vm.assertEq(address(DaoAuthorizable(_deps.pluginEnsRegistrar).dao()), _deps.dao);
-            vm.assertEq(ENSSubdomainRegistrar(_deps.pluginEnsRegistrar).node(), pluginNode);
-            // vm.assertTrue(
-            //     ENSRegistry(ensRegistry).isApprovedForAll(_deps.dao, _deps.pluginEnsRegistrar)
-            // );
-
-            vm.assertEq(
-                address(PluginRepoRegistry(_deps.pluginRepoRegistry).subdomainRegistrar()),
-                _deps.pluginEnsRegistrar
-            );
-        } else {
-            vm.assertEq(
-                address(PluginRepoRegistry(_deps.daoRegistry).subdomainRegistrar()),
-                address(0)
-            );
-        }
 
         vm.assertEq(
             address(PluginRepoFactory(_deps.pluginRepoFactory).pluginRepoRegistry()),
@@ -389,7 +285,53 @@ contract FactoryDeploy is Script, Helper {
         vm.assertEq(address(DAOFactory(_deps.daoFactory).daoRegistry()), _deps.daoRegistry);
         vm.assertEq(address(DAOFactory(_deps.daoFactory).pluginSetupProcessor()), _deps.psp);
 
-        // TODO: check if metadata was set correctly on managing dao
-        // dao.getMetadata()
+        // TODO: GIORGI check if metadata was set correctly on managing dao.
+        // will need to check this in events..
+    }
+
+    function _validateENS(
+        bool ensSet,
+        address _dao,
+        address _registrar,
+        address _registry,
+        bytes32 _node
+    ) private {
+        bytes32[] memory frameworkPermissions = _getFrameworkPermissions();
+        DAO dao_ = DAO(payable(_dao));
+
+        if (!ensSet) {
+            vm.assertEq(_registrar, address(0));
+            vm.assertEq(address(DAORegistry(_registry).subdomainRegistrar()), address(0));
+        } else {
+            vm.assertNotEq(_registrar, address(0));
+
+            // registry must have `REGISTER_ENS_SUBDOMAIN_PERMISSION` on registrar
+            assertPermission(dao_, _registrar, _registry, frameworkPermissions[0], true);
+
+            // dao must have `UPGRADE_REGISTRAR_PERMISSION` on registrar
+            assertPermission(dao_, _registrar, _dao, frameworkPermissions[1], true);
+
+            vm.assertEq(address(DaoAuthorizable(_registrar).dao()), _dao);
+            vm.assertEq(ENSSubdomainRegistrar(_registrar).node(), _node);
+            // vm.assertTrue(
+            //     ENSRegistry(ensRegistry).isApprovedForAll(_deps.dao, _deps.daoEnsRegistrar)
+            // );
+            vm.assertEq(address(DAORegistry(_registry).subdomainRegistrar()), _registrar);
+        }
+    }
+
+    function subdomainNull(string memory _subdomain) private pure returns (bool) {
+        return keccak256(abi.encodePacked(_subdomain)) == keccak256(abi.encodePacked(""));
+    }
+
+    function assertPermission(
+        DAO _dao,
+        address _where,
+        address _who,
+        bytes32 permissionId,
+        bool status
+    ) private pure {
+        bool has = _dao.hasPermission(_where, _who, permissionId, bytes(""));
+        status ? vm.assertTrue(has) : vm.assertFalse(has);
     }
 }

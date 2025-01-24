@@ -1,0 +1,38 @@
+repos:
+  - name: Multisig Plugin
+    project_type: hardhat
+    turned_on: false
+    id: multisig-plugin
+    github_repo_uri: https://github.com/aragon/multisig-plugin
+    branch: develop
+    root_path: packages/contracts
+    build_command: 'build'
+    deploy_command: 'deploy'
+    private_key_name: 'PRIVATE_KEY'
+    env_location: .
+    deploy_tags: CreateRepo
+
+  - name: TokenVoting Plugin
+    project_type: hardhat
+    turned_on: true
+    id: token-voting-plugin
+    github_repo_uri: https://github.com/aragon/token-voting-plugin
+    branch: develop
+    root_path: packages/contracts
+    build_command: 'build'
+    deploy_command: 'deploy'
+    private_key_name: 'PRIVATE_KEY'
+    env_location: .
+    deploy_tags: CreateRepo
+
+  - name: Staged Proposal Processor
+    project_type: foundry
+    turned_on: false
+    id: staged-proposal-processor-plugin
+    github_repo_uri: https://github.com/aragon/staged-proposal-processor-plugin
+    branch: foundry-upgrade-package-fix
+    root_path: .
+    build_command: 'build'
+    deploy_command: 'deploy'
+    private_key_name: 'DEPLOYER_KEY'
+    env_location: .

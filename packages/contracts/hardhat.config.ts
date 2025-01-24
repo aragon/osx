@@ -23,8 +23,8 @@ import 'solidity-docgen';
 
 dotenv.config();
 
-const ETH_KEY = process.env.ETH_KEY;
-const accounts = ETH_KEY ? ETH_KEY.split(',') : [];
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const accounts = PRIVATE_KEY ? PRIVATE_KEY.split(',') : [];
 
 // check alchemy Api key existence
 if (process.env.ALCHEMY_API_KEY) {
