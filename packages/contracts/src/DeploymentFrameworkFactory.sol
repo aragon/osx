@@ -99,6 +99,8 @@ contract DeployFrameworkFactory {
         bytes32[] memory _daoPermissionIds,
         Bytecodes memory _bytecodes
     ) external returns (Deployments memory deps) {
+        require(owner == msg.sender, "sender is not an owner");
+
         deps.dao = deployDAO(_daoSettings);
 
         if (daoNode != bytes32(0)) {

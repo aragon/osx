@@ -111,6 +111,8 @@ contract FactoryDeploy is Script, Helper {
             ENS(ensRegistry).setOwner(pluginNode, address(factory));
         }
 
+        return;
+
         uint256 g5 = gasleft();
 
         // deploy the managing dao metadata to ipfs. (uses pinata)
@@ -120,7 +122,7 @@ contract FactoryDeploy is Script, Helper {
         DeployFrameworkFactory.Deployments memory deps = factory.deployFramework(
             deployer,
             DeployFrameworkFactory.DAOSettings({
-                metadata: ipfsCid, // this needs to be managing-dao-metadata.json's ipfs
+                metadata: ipfsCid,
                 trustedForwarder: address(0),
                 daoURI: ""
             }),

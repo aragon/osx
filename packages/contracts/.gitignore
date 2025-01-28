@@ -12,6 +12,9 @@ docs/developer-portal/03-reference-guide/*
 cache
 artifacts
 
+broadcast
+repos
+
 artifacts-zk
 cache-zk
 deployments-zk
