@@ -9,7 +9,7 @@ solc_version="0.8.17"
 # todo explore why '../../../' is needed to be able to compile when '../../' should be enough
 allow_paths = ['../../node_modules', '../../', '../../../']
 
-fs_permissions = [{ access = "read", path = "./repos/compiled/multisig"}]
+fs_permissions = [{ access = "read", path = "./repos/compiled/multisig"}, { access = "write", path = "."}]
 
 
 ffi = true

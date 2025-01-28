@@ -23,6 +23,7 @@ import {PluginRepo} from "../src/framework/plugin/repo/PluginRepo.sol";
 
 import {DeployFrameworkFactory} from "../src/DeploymentFrameworkFactory.sol";
 import {DaoAuthorizable} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizable.sol";
+import {PlaceholderSetup} from "../src/framework/plugin/repo/placeholder/PlaceholderSetup.sol";
 
 contract FactoryDeploy is Script, Helper {
     uint256 internal deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -47,6 +48,8 @@ contract FactoryDeploy is Script, Helper {
 
     function run() external {
         vm.startBroadcast(deployerPrivateKey);
+
+        address setup = address(new PlaceholderSetup());
 
         if (!useENSForDAO && !subdomainNull(managementDaoSubdomain)) {
             revert("Management dao Subdomain can not be non-empty if ens is not requested");
@@ -86,7 +89,7 @@ contract FactoryDeploy is Script, Helper {
         uint256 g2 = gasleft();
 
         uint256 g3 = gasleft();
-
+        // TODO: msg.sender in constructor wrong. it should be deployer.
         DeployFrameworkFactory factory = new DeployFrameworkFactory(
             ensRegistry,
             ensResolver,
@@ -137,41 +140,29 @@ contract FactoryDeploy is Script, Helper {
 
         validateDeployment(address(factory), deployer, deps);
 
-        // Deploy Repos...
+        address[] memory addresses = new address[](16);
+        addresses[0] = factory.daoRegistryBase();
+        addresses[1] = factory.pluginRepoRegistryBase();
+        addresses[2] = factory.ensSubdomainRegistrarBase();
+        addresses[3] = factory.ensSubdomainRegistrarBase();
+        addresses[4] = factory.daoBase();
+        addresses[5] = deps.dao;
+        addresses[6] = deps.daoEnsRegistrar;
+        addresses[7] = deps.pluginEnsRegistrar;
+        addresses[8] = deps.daoRegistry;
+        addresses[9] = deps.pluginRepoRegistry;
+        addresses[10] = deps.psp;
+        addresses[11] = deps.daoFactory;
+        addresses[12] = deps.pluginRepoFactory;
+        addresses[13] = setup;
+        addresses[14] = ensRegistry;
+        addresses[15] = ensResolver;
 
-        // if (PLUGIN_REPO_ADDRESS != address(0)) {
-        //     // Prepare plugin.
-        //     PluginSetupRef memory ref = PluginSetupRef(
-        //         PluginRepo.Tag({
-        //             release: uint8(PLUGIN_REPO_RELEASE_NUMBER),
-        //             build: uint16(PLUGIN_REPO_BUILD_NUMBER)
-        //         }),
-        //         PluginRepo(PLUGIN_REPO_ADDRESS)
-        //     );
+        // store this in a temp file just in case
+        // `_storeDeploymentJSON` fails, so we can recover.
+        vm.writeJson(vm.toString(abi.encode(addresses)), "./deployed_contracts_temp.json");
 
-        //     DAO(payable(deps.dao)).grant(deps.dao, deps.psp, keccak256("ROOT_PERMISSION"));
-
-        //     (
-        //         address plugin,
-        //         IPluginSetup.PreparedSetupData memory preparedSetupData
-        //     ) = PluginSetupProcessor(deps.psp).prepareInstallation(
-        //             deps.dao,
-        //             PluginSetupProcessor.PrepareInstallationParams(ref, PLUGIN_DATA)
-        //         );
-
-        //     // Apply plugin.
-        //     PluginSetupProcessor(deps.psp).applyInstallation(
-        //         deps.dao,
-        //         PluginSetupProcessor.ApplyInstallationParams(
-        //             ref,
-        //             plugin,
-        //             preparedSetupData.permissions,
-        //             hashHelpers(preparedSetupData.helpers)
-        //         )
-        //     );
-
-        //     DAO(payable(deps.dao)).revoke(deps.dao, deps.psp, keccak256("ROOT_PERMISSION"));
-        // }
+        _storeDeploymentJSON(block.chainid, addresses);
 
         vm.stopBroadcast();
     }
@@ -313,9 +304,7 @@ contract FactoryDeploy is Script, Helper {
 
             vm.assertEq(address(DaoAuthorizable(_registrar).dao()), _dao);
             vm.assertEq(ENSSubdomainRegistrar(_registrar).node(), _node);
-            // vm.assertTrue(
-            //     ENSRegistry(ensRegistry).isApprovedForAll(_deps.dao, _deps.daoEnsRegistrar)
-            // );
+            vm.assertTrue(ENSRegistry(ensRegistry).isApprovedForAll(_dao, _registrar));
             vm.assertEq(address(DAORegistry(_registry).subdomainRegistrar()), _registrar);
         }
     }
@@ -330,7 +319,7 @@ contract FactoryDeploy is Script, Helper {
         address _who,
         bytes32 permissionId,
         bool status
-    ) private pure {
+    ) private view {
         bool has = _dao.hasPermission(_where, _who, permissionId, bytes(""));
         status ? vm.assertTrue(has) : vm.assertFalse(has);
     }

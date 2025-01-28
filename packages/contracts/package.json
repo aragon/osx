@@ -88,7 +88,7 @@
     "eslint-plugin-promise": "^5.1.1",
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.7.2",
-    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.5",
     "hardhat": "^2.14.0",
     "hardhat-deploy": "0.12.4",
     "hardhat-gas-reporter": "^1.0.4",

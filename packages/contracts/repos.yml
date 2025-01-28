@@ -14,7 +14,7 @@ repos:
 
   - name: TokenVoting Plugin
     project_type: hardhat
-    turned_on: true
+    turned_on: false
     id: token-voting-plugin
     github_repo_uri: https://github.com/aragon/token-voting-plugin
     branch: develop
@@ -36,3 +36,16 @@ repos:
     deploy_command: 'deploy'
     private_key_name: 'DEPLOYER_KEY'
     env_location: .
+
+  - name: Admin Plugin
+    project_type: hardhat
+    turned_on: true
+    id: admin-plugin
+    github_repo_uri: https://github.com/aragon/admin-plugin
+    branch: feat/update-deploy-script
+    root_path: packages/contracts
+    build_command: 'build'
+    deploy_command: 'deploy'
+    private_key_name: 'PRIVATE_KEY'
+    env_location: .
+    deploy_tags: CreateRepo

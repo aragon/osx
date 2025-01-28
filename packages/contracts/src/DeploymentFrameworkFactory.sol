@@ -13,6 +13,8 @@ import {DAO} from "./core/dao/DAO.sol";
 import {ENSSubdomainRegistrar} from "./framework/utils/ens/ENSSubdomainRegistrar.sol";
 import {PluginRepoRegistry} from "./framework/plugin/repo/PluginRepoRegistry.sol";
 import {PluginRepoFactory} from "./framework/plugin/repo/PluginRepoFactory.sol";
+import {Action} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
+import {PermissionManager} from "./core/permission/PermissionManager.sol";
 
 import "hardhat/console.sol";
 
@@ -23,17 +25,30 @@ import "hardhat/console.sol";
 contract DeployFrameworkFactory {
     using ProxyLib for address;
 
+    /// Base contracts, deployed within a constructor...
     address public immutable daoBase;
     address public immutable ensSubdomainRegistrarBase;
     address public immutable daoRegistryBase;
     address public immutable pluginRepoRegistryBase;
 
+    /// The ENS Settings...
     address public immutable ensRegistry;
     address public immutable ensResolver;
     bytes32 public immutable daoNode;
     bytes32 public immutable pluginNode;
 
     address public owner;
+
+    // Framework permissions...
+    bytes32 public constant REGISTER_DAO_PERMISSION = keccak256("REGISTER_DAO_PERMISSION");
+    bytes32 public constant EXECUTE_PERMISSION = keccak256("EXECUTE_PERMISSION");
+    bytes32 public constant UPGRADE_REGISTRY_PERMISSION = keccak256("UPGRADE_REGISTRY_PERMISSION");
+    bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION =
+        keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
+    bytes32 public constant UPGRADE_REGISTRAR_PERMISSION =
+        keccak256("UPGRADE_REGISTRAR_PERMISSION");
+    bytes32 public constant REGISTER_ENS_SUBDOMAIN_PERMISSION =
+        keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION");
 
     struct DAOSettings {
         bytes metadata;
@@ -112,31 +127,74 @@ contract DeployFrameworkFactory {
 
         setPermissions(deps, _daoPermissionIds);
 
-        if (daoNode != bytes32(0)) {
-            ENSRegistry(ensRegistry).setApprovalForAll(deps.daoEnsRegistrar, true);
-            DAORegistry(deps.daoRegistry).register(IDAO(deps.dao), msg.sender, _daoSubdomain);
-            ENSRegistry(ensRegistry).setApprovalForAll(deps.daoEnsRegistrar, false);
-        }
+        uint256 actionsCount = 0;
+        uint256 count = 0;
 
-        DAO(payable(deps.dao)).revoke(
-            deps.daoRegistry,
-            address(this),
-            keccak256("REGISTER_DAO_PERMISSION")
-        );
-
-        DAO(payable(deps.dao)).grant(deps.dao, _frameworkOwner, keccak256("EXECUTE_PERMISSION"));
-        DAO(payable(deps.dao)).grant(deps.dao, _frameworkOwner, keccak256("ROOT_PERMISSION"));
-
-        // When dao was deployed above, `address(this)` became a ROOT, so we revoke now.
-        DAO(payable(deps.dao)).revoke(deps.dao, address(this), keccak256("ROOT_PERMISSION"));
+        Action memory daoEnsApprovalAction;
+        Action memory pluginEnsApprovalAction;
 
         if (daoNode != bytes32(0)) {
             ENSRegistry(ensRegistry).setOwner(daoNode, deps.dao);
+            actionsCount++;
         }
 
         if (pluginNode != bytes32(0)) {
             ENSRegistry(ensRegistry).setOwner(pluginNode, deps.dao);
+            actionsCount++;
         }
+
+        Action[] memory actions = new Action[](actionsCount + 4);
+
+        if (daoNode != bytes32(0)) {
+            actions[count++] = Action({
+                to: ensRegistry,
+                value: 0,
+                data: abi.encodeCall(ENSRegistry.setApprovalForAll, (deps.daoEnsRegistrar, true))
+            });
+        }
+
+        if (pluginNode != bytes32(0)) {
+            actions[count++] = Action({
+                to: ensRegistry,
+                value: 0,
+                data: abi.encodeCall(ENSRegistry.setApprovalForAll, (deps.pluginEnsRegistrar, true))
+            });
+        }
+
+        actions[count++] = Action({
+            to: deps.daoRegistry,
+            value: 0,
+            data: abi.encodeCall(DAORegistry.register, (IDAO(deps.dao), msg.sender, _daoSubdomain))
+        });
+
+        actions[count++] = Action({
+            to: deps.dao,
+            value: 0,
+            data: abi.encodeCall(
+                PermissionManager.revoke,
+                (deps.daoRegistry, deps.dao, REGISTER_DAO_PERMISSION)
+            )
+        });
+
+        actions[count++] = Action({
+            to: deps.dao,
+            value: 0,
+            data: abi.encodeCall(
+                PermissionManager.revoke,
+                (deps.dao, address(this), EXECUTE_PERMISSION)
+            )
+        });
+
+        actions[count++] = Action({
+            to: deps.dao,
+            value: 0,
+            data: abi.encodeCall(
+                PermissionManager.revoke,
+                (deps.dao, address(this), keccak256("ROOT_PERMISSION"))
+            )
+        });
+
+        DAO(payable(deps.dao)).execute(bytes32(0), actions, 0);
 
         emit DeploymentResults(deps);
     }
@@ -233,10 +291,19 @@ contract DeployFrameworkFactory {
     }
 
     function setPermissions(Deployments memory _deps, bytes32[] memory daoPermissionIds) private {
-        PermissionLib.MultiTargetPermission[]
-            memory items = new PermissionLib.MultiTargetPermission[](daoPermissionIds.length + 10);
-
         uint count = daoPermissionIds.length;
+        uint permissionCount = count;
+
+        if (_deps.daoEnsRegistrar != address(0)) {
+            permissionCount += 2;
+        }
+
+        if (_deps.pluginEnsRegistrar != address(0)) {
+            permissionCount += 2;
+        }
+
+        PermissionLib.MultiTargetPermission[]
+            memory items = new PermissionLib.MultiTargetPermission[](permissionCount + 7);
 
         for (uint256 i = 0; i < count; i++) {
             items[i] = PermissionLib.MultiTargetPermission({
@@ -254,7 +321,7 @@ contract DeployFrameworkFactory {
                 where: _deps.daoEnsRegistrar,
                 who: _deps.daoRegistry,
                 condition: PermissionLib.NO_CONDITION,
-                permissionId: keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION")
+                permissionId: REGISTER_ENS_SUBDOMAIN_PERMISSION
             });
 
             items[count++] = PermissionLib.MultiTargetPermission({
@@ -262,7 +329,7 @@ contract DeployFrameworkFactory {
                 where: _deps.daoEnsRegistrar,
                 who: _deps.dao,
                 condition: PermissionLib.NO_CONDITION,
-                permissionId: keccak256("UPGRADE_REGISTRAR_PERMISSION")
+                permissionId: UPGRADE_REGISTRAR_PERMISSION
             });
         }
 
@@ -272,7 +339,7 @@ contract DeployFrameworkFactory {
                 where: _deps.pluginEnsRegistrar,
                 who: _deps.pluginRepoRegistry,
                 condition: PermissionLib.NO_CONDITION,
-                permissionId: keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION")
+                permissionId: REGISTER_ENS_SUBDOMAIN_PERMISSION
             });
 
             items[count++] = PermissionLib.MultiTargetPermission({
@@ -280,7 +347,7 @@ contract DeployFrameworkFactory {
                 where: _deps.pluginEnsRegistrar,
                 who: _deps.dao,
                 condition: PermissionLib.NO_CONDITION,
-                permissionId: keccak256("UPGRADE_REGISTRAR_PERMISSION")
+                permissionId: UPGRADE_REGISTRAR_PERMISSION
             });
         }
 
@@ -289,7 +356,7 @@ contract DeployFrameworkFactory {
             where: _deps.daoRegistry,
             who: _deps.daoFactory,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("REGISTER_DAO_PERMISSION")
+            permissionId: REGISTER_DAO_PERMISSION
         });
 
         items[count++] = PermissionLib.MultiTargetPermission({
@@ -297,7 +364,7 @@ contract DeployFrameworkFactory {
             where: _deps.daoRegistry,
             who: _deps.dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("UPGRADE_REGISTRY_PERMISSION")
+            permissionId: UPGRADE_REGISTRY_PERMISSION
         });
 
         items[count++] = PermissionLib.MultiTargetPermission({
@@ -305,7 +372,7 @@ contract DeployFrameworkFactory {
             where: _deps.pluginRepoRegistry,
             who: _deps.pluginRepoFactory,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("REGISTER_PLUGIN_REPO_PERMISSION")
+            permissionId: REGISTER_PLUGIN_REPO_PERMISSION
         });
 
         items[count++] = PermissionLib.MultiTargetPermission({
@@ -313,16 +380,32 @@ contract DeployFrameworkFactory {
             where: _deps.pluginRepoRegistry,
             who: _deps.dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("UPGRADE_REGISTRY_PERMISSION")
+            permissionId: UPGRADE_REGISTRY_PERMISSION
         });
 
-        // This must be revoked in the end of `deployFramework` transaction.
+        items[count++] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: _deps.dao,
+            who: msg.sender,
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: EXECUTE_PERMISSION
+        });
+
+        // These must be revoked in the end of `deployFramework` transaction.
+        items[count++] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: _deps.dao,
+            who: address(this),
+            condition: PermissionLib.NO_CONDITION,
+            permissionId: EXECUTE_PERMISSION
+        });
+
         items[count++] = PermissionLib.MultiTargetPermission({
             operation: PermissionLib.Operation.Grant,
             where: _deps.daoRegistry,
-            who: address(this),
+            who: _deps.dao,
             condition: PermissionLib.NO_CONDITION,
-            permissionId: keccak256("REGISTER_DAO_PERMISSION")
+            permissionId: REGISTER_DAO_PERMISSION
         });
 
         DAO(payable(_deps.dao)).applyMultiTargetPermissions(items);

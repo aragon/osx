@@ -186,3 +186,54 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 # Releases
 
 Contract releases are tracked in [Releases.md](Releases.md)
+
+### Deployment
+
+The Aragon consists of the framework contracts(main building blocks of the infrastructure) and plugin architectures separately. This guide will show how to deploy the framework contracts on a new chain and then deploy plugin repositories after that.
+
+Before actually trying to deploy osx on the actual testnet or mainnet chains, it's adviseable to test deploying locally. For this, we will use hardhat node's feature. In the separate terminal, run:
+
+```js
+npx hardhat node --fork FORK_URL_NETWORK_YOU_ARE_DEPLOYING_TO --no-deploy
+```
+
+Make sure that this spins up blockchain on 8545 port. This is important as if it runs on another port, the deployment will not work.
+
+Once you're done with this, go to packages/contracts. Create an `.env` file with the following variables. It's important that `NETWORK_NAME` and `NETWORK_RPC_URL` is set as exactly below.
+
+```js
+NETWORK_NAME=local
+CHAIN="sepolia" # for now, `sepolia` is fine. TODO:
+PRIVATE_KEY=YOUR_PRIVATE_KEY_ON_THE_FORKED_CHAIN_OF_8545_PORT
+NETWORK_RPC_URL=http://127.0.0.1:8545
+
+USE_ENS_FOR_PLUGIN=true
+USE_ENS_FOR_DAO=true
+MANAGEMENT_DAO_SUBDOMAIN=
+
+PROTOCOL_VERSION="v1.3.0"
+ALCHEMY_API_KEY=
+PUB_PINATA_JWT=
+ETHERSCAN_API_KEY=
+VERIFIER='etherscan'
+```
+
+After this, run `make deploy-framework` which will deploy the framework on the forked/local chain and if successful, it will produce `deployed_contracts.json` file in the `packages/contracts` directory. You will need the address of `PluginRepoFactory` contract, so copy it from there. Now, we're ready to also deploy the repository contracts(i.e plugin repos).
+
+You can now run `make pluginrepofactory=ADDRESS_THAT_YOU_JUST_COPIED broadcast=false deploy-repos`. This will go through all the repositories, pull them in this local repository, compile each repo separately, build them and then deploy them. The settings of how this happen is inside `repos.yml` and `bash.sh` files...
+
+If all these succeeded, now it's time to actually deploy on the testnet. For this, let's choose `sepolia`.
+
+All we have to do is change `NETWORK_NAME` to `sepolia` and `NETWORK_RPC_URL` to the sepolia's RPC URL. After this, we can run:
+
+```js
+make simulate-deploy-framework
+```
+
+just to be sure that we don't broadcast the transactions in case something goes wrong. If this ends up successful, we can run `make deploy-framework` to actually deploy. You can again copy the plugin repo factory address from the `deployed_contracts.json`...
+
+Now, run:
+
+```js
+make pluginrepofactory=ADDRESS_THAT_YOU_JUST_COPIED broadcast=false deploy-repos
+```

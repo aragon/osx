@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
+import {DeployFrameworkFactory} from "../src/DeploymentFrameworkFactory.sol";
 
 contract Helper is Script {
     function _getENSRegistry(
@@ -68,6 +69,20 @@ contract Helper is Script {
         inputs[1] = "ts-node";
         inputs[2] = "scripts/upload-to-pinnata.ts";
         return vm.ffi(inputs);
+    }
+
+    function _storeDeploymentJSON(
+        uint256 _chainId,
+        address[] memory _addresses
+    ) internal returns (bytes memory kk) {
+        string[] memory inputs = new string[](6);
+        inputs[0] = "npx";
+        inputs[1] = "ts-node";
+        inputs[2] = "scripts/store-deployments.ts";
+        inputs[3] = vm.toString(block.chainid); //
+        inputs[4] = vm.toString(abi.encode(_addresses));
+
+        vm.ffi(inputs);
     }
 
     function _getDaoPermissions() internal pure returns (bytes32[] memory permissions) {
