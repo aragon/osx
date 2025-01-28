@@ -49,8 +49,6 @@ contract FactoryDeploy is Script, Helper {
 
         address setup = address(new PlaceholderSetup());
 
-        console.log("fuck yeah 202020");
-        console.log(deploymentFrameworkFactoryAddr);
         if (!useENSForDAO && !subdomainNull(managementDaoSubdomain)) {
             revert("Management dao Subdomain can not be non-empty if ens is not requested");
         }
