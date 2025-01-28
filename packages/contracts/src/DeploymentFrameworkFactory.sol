@@ -201,25 +201,6 @@ contract DeployFrameworkFactory {
         emit DeploymentResults(deps);
     }
 
-    /// @dev This function can only have effect if in the deploy script(ts file - hardhat-deploy),
-    ///      transferring domain to this factory succeeded, but `deployFramework` failed due to some r
-    ///      reason(e.x out of gas) or something else after which `deployFramework` can not be called again.
-    ///      If such scenario occurs, sender loses the domains completely as this factory contract will be
-    ///      the owner, So we allow sender to get the domains back.
-    /// @notice This will not have any effect if `deployFramework` succeeded as that function makes
-    ///         managing dao as owner.
-    function transferDomainsBack() public {
-        require(msg.sender == owner, "Sender not an owner");
-
-        if (ENSRegistry(ensRegistry).owner(daoNode) == address(this)) {
-            ENSRegistry(ensRegistry).setOwner(daoNode, msg.sender);
-        }
-
-        if (ENSRegistry(ensRegistry).owner(pluginNode) == address(this)) {
-            ENSRegistry(ensRegistry).setOwner(pluginNode, msg.sender);
-        }
-    }
-
     // ============================== Deploy Helper Functions ================================
 
     function deployDAO(DAOSettings memory _daoSettings) private returns (address) {
