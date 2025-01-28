@@ -34,10 +34,8 @@ contract FactoryDeploy is Script, Helper {
     bool internal useENSForDAO = vm.envBool("USE_ENS_FOR_DAO");
     string internal managementDaoSubdomain = vm.envString("MANAGEMENT_DAO_SUBDOMAIN");
 
-    // address internal PLUGIN_REPO_ADDRESS = vm.addr(vm.envUint("PLUGIN_REPO_ADDRESS"));
-    // uint256 internal PLUGIN_REPO_RELEASE_NUMBER = vm.envUint("PLUGIN_REPO_RELEASE_NUMBER");
-    // uint256 internal PLUGIN_REPO_BUILD_NUMBER = vm.envUint("PLUGIN_REPO_BUILD_NUMBER");
-    // bytes internal PLUGIN_DATA = vm.envBytes("PLUGIN_DATA");
+    address internal deploymentFrameworkFactoryAddr =
+        vm.envOr("DEPLOYMENT_FRAMEWORK_FACTORY", address(0));
 
     address public ensRegistry;
     address public ensResolver;
@@ -51,6 +49,8 @@ contract FactoryDeploy is Script, Helper {
 
         address setup = address(new PlaceholderSetup());
 
+        console.log("fuck yeah 202020");
+        console.log(deploymentFrameworkFactoryAddr);
         if (!useENSForDAO && !subdomainNull(managementDaoSubdomain)) {
             revert("Management dao Subdomain can not be non-empty if ens is not requested");
         }
@@ -60,6 +60,12 @@ contract FactoryDeploy is Script, Helper {
         //   b. if ens registry found, use it. Deployer must be the owner of the domains.
         uint256 g1 = gasleft();
         if (useENSForDAO || useENSForPlugin) {
+            // 1. Makes a request to osx-commons-sdk.
+            // 2. If the `network` is added in `exceptionalDomains`
+            // inside `osx-commons`, it uses those domains. If not,
+            // It uses `dao.eth` and `plugin.dao.eth`.
+            (string memory daoDomain, string memory pluginDomain) = _getDomains(network);
+
             (ensRegistry, ensResolver) = _getENSRegistry(network);
 
             if (ensRegistry == address(0)) {
@@ -68,55 +74,50 @@ contract FactoryDeploy is Script, Helper {
                 ensResolver = address(
                     new PublicResolver(ENS(address(ensRegistry)), INameWrapper(address(0)))
                 );
+
+                // We only need to setup in case of new ens deployment.
+                // If already existing, deployer must already be owning the domain.
+                if (useENSForDAO) _setupENS(daoDomain);
+                if (useENSForPlugin) _setupENS(pluginDomain);
             }
 
-            // 1. Makes a request to osx-commons-sdk.
-            // 2. If the `network` is added in `exceptionalDomains`
-            // inside `osx-commons`, it uses those domains. If not,
-            // It uses `dao.eth` and `plugin.dao.eth`.
-            (string memory daoDomain, string memory pluginDomain) = _getDomains(network);
+            // In the factory, we use daoNode and pluginNode comparison with bytes32(0)
+            // To determine whether ENS must be used or not, hence below 2 lines.
+            if (useENSForDAO) daoNode = _getDomainHash(daoDomain);
+            if (useENSForPlugin) pluginNode = _getDomainHash(pluginDomain);
 
-            if (useENSForDAO) {
-                daoNode = _getDomainHash(daoDomain);
-                _setupENS(daoDomain);
-            }
+            // Sanity check to make sure deployer owns the domain
+            // at this step As it's crucial for the next steps.
+            require(
+                ENSRegistry(ensRegistry).owner(daoNode) == deployer,
+                "dao node domain is not owned by the private key provided in .env"
+            );
 
-            if (useENSForPlugin) {
-                pluginNode = _getDomainHash(pluginDomain);
-                _setupENS(pluginDomain);
-            }
+            require(
+                ENSRegistry(ensRegistry).owner(pluginNode) == deployer,
+                "plugin node domain is not owned by the private key provided in .env"
+            );
         }
         uint256 g2 = gasleft();
 
-        uint256 g3 = gasleft();
-        // TODO: msg.sender in constructor wrong. it should be deployer.
-        DeployFrameworkFactory factory = new DeployFrameworkFactory(
-            ensRegistry,
-            ensResolver,
-            daoNode,
-            pluginNode
-        );
+        // If address found it .env, use it, otherwise deploy it.
+        DeployFrameworkFactory factory = deploymentFrameworkFactoryAddr == address(0)
+            ? new DeployFrameworkFactory(ensRegistry, ensResolver, daoNode, pluginNode)
+            : DeployFrameworkFactory(deploymentFrameworkFactoryAddr);
 
         uint256 g4 = gasleft();
 
-        // Factory must become a temporary owner so that
-        // it can register managing dao on the dao registry.
-        if (useENSForDAO) {
-            ENS(ensRegistry).setOwner(daoNode, address(factory));
+        // Factory must become a temporary approved operator so that
+        // 1. It can register managing dao on the daoRegistry.
+        // 2. make the managing dao as the owner.
+        if (useENSForDAO || useENSForPlugin) {
+            ENS(ensRegistry).setApprovalForAll(address(factory), true); // TODO: shall we call it again to set it to false in the end ?
         }
-
-        // We also make factory temporary owner so that
-        // it can transfer it to managing dao in the end.
-        if (useENSForPlugin) {
-            ENS(ensRegistry).setOwner(pluginNode, address(factory));
-        }
-
-        return;
-
-        uint256 g5 = gasleft();
 
         // deploy the managing dao metadata to ipfs. (uses pinata)
         bytes memory ipfsCid = _uploadToIPFS();
+
+        uint256 g5 = gasleft();
 
         // The final function that deploys the whole framework(excluding plugin repos)
         DeployFrameworkFactory.Deployments memory deps = factory.deployFramework(
@@ -137,7 +138,7 @@ contract FactoryDeploy is Script, Helper {
 
         uint256 g6 = gasleft();
         console.log("ENS Deployment cost: ", g1 - g2);
-        console.log("Factory deployment cost: ", g3 - g4);
+        console.log("Factory deployment cost: ", g2 - g4);
         console.log("deployFramework function cost: ", g5 - g6);
 
         validateDeployment(address(factory), deployer, deps);

@@ -260,3 +260,13 @@ If this also succeeds, we're finally ready to finish the deployment with:
 ```sh
 make pluginrepofactory=ADDRESS_THAT_YOU_JUST_COPIED deploy-repos
 ```
+
+// TODO: Better message ...
+
+**Important:** Deployment uses couple of txs that must happen and succeed one after another. Even if tx `x` fails, `x-1, x-2, e.t.c` txs could succeed. As a recommendation, it's adviseable to note in the terminal which tx failed. If the failing tx is `factory.deployFramework`, that means ENS setups + factory deployment tx succeeded. In such case, if you re-run the script, it will still deploy this deployment factory contract which is cumbersome and costly. So as a guide, here is the steps to follow:
+
+1. If all txs succeed, nothing to be done.
+2. If ens related tx fails, you can re-run the script.
+   3.a - If `factory.deployFramework` fails and if you didn't have official ens and resolver addresses specified in `getEnsRegistry` and `getEnsResolver` functions, you can copy the ens deployment addresses from the current terminal, paste them in those functions with the correct network name. Not only that,
+   you should also copy the deployment framework factory address and put it in `.env` with the key: `DEPLOYMENT_FRAMEWORK_FACTORY`. Then, you can re-run the script..
+   3.b - If `factory.deployFramework` fails and you had the official ens and resolver addresses specified in `getEnsRegistry` and `getEnsResolver` functions, then, only thing you should copy is the deployment framework factory address and put it in `.env` with the key: `DEPLOYMENT_FRAMEWORK_FACTORY`. Then, you can re-run the script..
