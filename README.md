@@ -126,7 +126,7 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
 
 The following graphic shows an exemplary DAO setup:
 
-![An examplary DAO setup](https://devs.aragon.org/assets/images/dao-plugin.drawio-7086d0911d25218097dae94665b1a7b1.svg)
+![A potential DAO setup](./images/dao-plugin.svg)
 
 An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
 
