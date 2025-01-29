@@ -1,10 +1,9 @@
 repos:
   - name: Multisig Plugin
     project_type: hardhat
-    turned_on: false
-    id: multisig-plugin
+    turned_on: true
     github_repo_uri: https://github.com/aragon/multisig-plugin
-    branch: develop
+    branch: feat/update-deploy-script
     root_path: packages/contracts
     build_command: 'build'
     deploy_command: 'deploy'
@@ -14,10 +13,9 @@ repos:
 
   - name: TokenVoting Plugin
     project_type: hardhat
-    turned_on: false
-    id: token-voting-plugin
+    turned_on: true
     github_repo_uri: https://github.com/aragon/token-voting-plugin
-    branch: develop
+    branch: feat/update-deploy-scripts
     root_path: packages/contracts
     build_command: 'build'
     deploy_command: 'deploy'
@@ -28,7 +26,6 @@ repos:
   - name: Staged Proposal Processor
     project_type: foundry
     turned_on: false
-    id: staged-proposal-processor-plugin
     github_repo_uri: https://github.com/aragon/staged-proposal-processor-plugin
     branch: foundry-upgrade-package-fix
     root_path: .
@@ -40,7 +37,6 @@ repos:
   - name: Admin Plugin
     project_type: hardhat
     turned_on: true
-    id: admin-plugin
     github_repo_uri: https://github.com/aragon/admin-plugin
     branch: feat/update-deploy-script
     root_path: packages/contracts

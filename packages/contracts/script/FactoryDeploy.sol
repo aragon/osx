@@ -141,6 +141,8 @@ contract FactoryDeploy is Script, Helper {
 
         validateDeployment(address(factory), deployer, deps);
 
+        vm.stopBroadcast();
+
         address[] memory addresses = new address[](16);
         addresses[0] = factory.daoRegistryBase();
         addresses[1] = factory.pluginRepoRegistryBase();
@@ -164,8 +166,6 @@ contract FactoryDeploy is Script, Helper {
         vm.writeJson(vm.toString(abi.encode(addresses)), "./deployed_contracts_temp.json");
 
         _storeDeploymentJSON(block.chainid, addresses);
-
-        vm.stopBroadcast();
     }
 
     function _setupENS(string memory _domain) private {

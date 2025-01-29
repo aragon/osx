@@ -12,9 +12,9 @@ VERIFIER := $(shell echo $(VERIFIER) | sed "s/'//g")
 ### 2. To deploy the framework without simulation, run "make broadcast=true deploy-framework".
 ###	   Etherscan verification only occurs if the network name is not local.
 deploy-framework:
-	@command="forge script FactoryDeploy --chain $(CHAIN) --rpc-url $(NETWORK_RPC_URL) --slow -vvvv"; \
+	@command="forge script FactoryDeploy --rpc-url $(NETWORK_RPC_URL) --slow -vvvv"; \
 	[ "$(broadcast)" = "true" ] && command="$$command --broadcast"; \
-	[ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ] && command="$$command --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
+	[ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ] && command="$$command --chain $(CHAIN) --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
 	echo "Running: $$command"; \
 	$$command
 

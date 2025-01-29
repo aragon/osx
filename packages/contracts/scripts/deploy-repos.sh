@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 PLUGIN_REPO_FACTORY_ADDRESS=$1
 broadcast=$2
@@ -41,9 +42,10 @@ done
 
 # Read the entire YAML file into a variable
 content=$(yq '.repos' repos.yml)
-mkdir repos
+mkdir repos || true
 cd repos
 
+repos_dir=$(pwd)
 
 # Loop through each item in the 'repos' array
 for index in $(echo "$content" | yq 'keys | .[]'); do
@@ -52,6 +54,8 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
     if [ "$isTurnedOn" = false ] ; then
         continue
     fi
+
+    cd $repos_dir
 
     # Extract fields for the current item from the in-memory content
     name=$(echo "$content" | yq ".[$index].name")
@@ -72,8 +76,12 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
     ### 4. fill .env file with the values above + any other .env values provided in repo.yml
     ### 5. compile the contracts
     ### 6. deploy the contracts
-    git clone --branch $branch $github_repo_uri
-    cd $id 
+    git clone --branch $branch $github_repo_uri || true
+    cd ${github_repo_uri##*/}
+
+    ## If any updates occured on the branch... 
+    git fetch origin $branch
+    git reset --hard origin/$branch
 
     env_location=$(pwd)/$(echo "$content" | yq ".[$index].env_location")/.env
     echo "# Generated .env file " > "$env_location"
@@ -103,7 +111,6 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
     ### If the plugin is written on foundry, we need to remap.
     if [[ "$project_type" = "foundry" ]] ; then
         forge remappings
-        yarn link @aragon/osx
     fi
 
     ### build
