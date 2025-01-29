@@ -1,17 +1,44 @@
 #!/bin/bash
 set -e
 
-PLUGIN_REPO_FACTORY_ADDRESS=$1
-broadcast=$2
+fork=$1
 
-if [ -z "$PLUGIN_REPO_FACTORY_ADDRESS" ]; then
-    echo "You must pass plugin repo factory address as the first argument"
-    exit 1
+echo 
+echo "📝 Reading deployed_contracts.json to fetch plugin repo factory address and placeholder setup.."
+echo 
+
+PLUGIN_REPO_FACTORY_ADDRESS=$(jq -r '.PluginRepoFactory.address' deployed_contracts.json)
+PLACEHOLDER_SETUP=$(jq -r '.PlaceholderSetup.address' deployed_contracts.json)
+
+
+echo
+echo "🔹 PluginRepoFactory Address:"
+echo "   ➤ $PLUGIN_REPO_FACTORY_ADDRESS"
+echo "🔹 PlaceholderSetup Address:"
+echo "   ➤ $PLACEHOLDER_SETUP"
+echo "⚠️  Make sure it corresponds to the correct chain and deployment."
+echo
+
+# Ask for confirmation
+read -p "❓ Do you want to continue? (Y/n) " choice
+
+# Normalize input to lowercase
+choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+
+if [[ "$choice" != "y" || -z "$choice" ]]; then
+  echo "Aborted."
+  exit 0
 fi
 
-# Validate if the argument is a valid Ethereum address
+# Sanity check: Validate if the argument is a valid Ethereum address
 if ! [[ "$PLUGIN_REPO_FACTORY_ADDRESS" =~ ^0x[0-9a-fA-F]{40}$ ]]; then
-  echo "Error: The provided argument is not a valid Ethereum address."
+  echo "Error: The plugin repo factory is not a valid Ethereum address."
+  exit 1
+fi
+
+# Sanity check: Validate if the argument is a valid Ethereum address
+if ! [[ "$PLACEHOLDER_SETUP" =~ ^0x[0-9a-fA-F]{40}$ ]]; then
+  echo "Error: The placeholder setup is not a valid Ethereum address."
   exit 1
 fi
 
@@ -97,6 +124,7 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
 
     echo "$private_key_name=$PRIVATE_KEY" >> "$env_location"
     echo "PLUGIN_REPO_FACTORY_ADDRESS=$PLUGIN_REPO_FACTORY_ADDRESS" >> "$env_location"
+    echo "PLACEHOLDER_SETUP=$PLACEHOLDER_SETUP" >> "$env_location"
 
     if [ "$fork" == true ] ; then
        echo "FORKING_RPC_URL=$NETWORK_RPC_URL" >> "$env_location"

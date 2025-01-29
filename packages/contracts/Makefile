@@ -12,6 +12,8 @@ VERIFIER := $(shell echo $(VERIFIER) | sed "s/'//g")
 ### 2. To deploy the framework without simulation, run "make broadcast=true deploy-framework".
 ###	   Etherscan verification only occurs if the network name is not local.
 deploy-framework:
+	rm -rf deployed_contracts.json
+	rm -rf deployed_contracts_temp.json
 	@command="forge script FactoryDeploy --rpc-url $(NETWORK_RPC_URL) --slow -vvvv"; \
 	[ "$(broadcast)" = "true" ] && command="$$command --broadcast"; \
 	[ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ] && command="$$command --chain $(CHAIN) --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
@@ -28,9 +30,4 @@ framework-store-json:
 	npx ts-node scripts/store-deployments.ts $(chain-id) $$(cat deployed_contracts_temp.json)
 
 deploy-repos:
-	@if [ -z "$(pluginrepofactory)" ]; then \
-		echo "Error: pluginrepofactory is not set. Please pass it as 'make pluginrepofactory=<value> ReposDeployment'."; \
-		exit 1; \
-	fi
-	
-	@bash scripts/deploy-repos.sh $(pluginrepofactory) $(fork)
+	@bash scripts/deploy-repos.sh $(fork)

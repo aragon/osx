@@ -1,14 +1,14 @@
 repos:
-  - name: Multisig Plugin
-    project_type: hardhat
-    github_repo_uri: https://github.com/aragon/multisig-plugin
-    branch: feat/update-deploy-script
-    root_path: packages/contracts
-    build_command: 'build'
-    deploy_command: 'deploy'
-    private_key_name: 'PRIVATE_KEY'
-    env_location: .
-    deploy_tags: CreateRepo
+  # - name: Multisig Plugin
+  #   project_type: hardhat
+  #   github_repo_uri: https://github.com/aragon/multisig-plugin
+  #   branch: feat/update-deploy-script
+  #   root_path: packages/contracts
+  #   build_command: 'build'
+  #   deploy_command: 'deploy'
+  #   private_key_name: 'PRIVATE_KEY'
+  #   env_location: .
+  #   deploy_tags: CreateRepo
 
   - name: TokenVoting Plugin
     project_type: hardhat
