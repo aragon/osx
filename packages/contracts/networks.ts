@@ -7,7 +7,7 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
     deploy: ['./deploy'],
   },
   sepolia: {
-    deploy: ['./deploy'],
+    deploy: ['./deploy/new'],
   },
   polygon: {
     deploy: ['./deploy'],
