@@ -49,12 +49,6 @@ repos_dir=$(pwd)
 
 # Loop through each item in the 'repos' array
 for index in $(echo "$content" | yq 'keys | .[]'); do
-    isTurnedOn=$(echo "$content" | yq ".[$index].turned_on")
-
-    if [ "$isTurnedOn" = false ] ; then
-        continue
-    fi
-
     cd $repos_dir
 
     # Extract fields for the current item from the in-memory content

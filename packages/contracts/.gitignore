@@ -14,8 +14,6 @@ artifacts
 
 broadcast
 repos
-deployed_contracts_temp.json
-deployed_contracts
 
 artifacts-zk
 cache-zk

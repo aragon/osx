@@ -33,4 +33,4 @@ deploy-repos:
 		exit 1; \
 	fi
 	
-	@bash bash.sh $(pluginrepofactory) $(fork)
+	@bash scripts/deploy-repos.sh $(pluginrepofactory) $(fork)

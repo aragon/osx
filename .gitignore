@@ -32,7 +32,8 @@ yarn-error.log*
 
 # deployments
 deployments
-deployed_contracts.json
+packages/contracts/deployed_contracts.json
+packages/contracts/deployed_contracts_temp.json
 managementDAOTX.json
 
 # generated
