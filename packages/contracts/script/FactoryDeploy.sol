@@ -119,7 +119,6 @@ contract FactoryDeploy is Script, Helper {
 
         // The final function that deploys the whole framework(excluding plugin repos)
         DeployFrameworkFactory.Deployments memory deps = factory.deployFramework(
-            deployer,
             DeployFrameworkFactory.DAOSettings({
                 metadata: ipfsCid,
                 trustedForwarder: address(0),
@@ -139,7 +138,7 @@ contract FactoryDeploy is Script, Helper {
         console.log("Factory deployment cost: ", g2 - g4);
         console.log("deployFramework function cost: ", g5 - g6);
 
-        validateDeployment(address(factory), deployer, deps);
+        validateDeployment(address(factory), deps);
 
         vm.stopBroadcast();
 
@@ -163,7 +162,7 @@ contract FactoryDeploy is Script, Helper {
 
         // store this in a temp file just in case
         // `_storeDeploymentJSON` fails, so we can recover.
-        vm.writeJson(vm.toString(abi.encode(addresses)), "./deployed-contracts_temp.json");
+        vm.writeJson(vm.toString(abi.encode(addresses)), "./deployed-contracts-temp.json");
 
         _storeDeploymentJSON(block.chainid, addresses);
     }
@@ -208,7 +207,6 @@ contract FactoryDeploy is Script, Helper {
 
     function validateDeployment(
         address _factory,
-        address _frameworkOwner,
         DeployFrameworkFactory.Deployments memory _deps
     ) private view {
         DAO _dao = DAO(payable(_deps.dao));
@@ -257,7 +255,7 @@ contract FactoryDeploy is Script, Helper {
         );
 
         // deployer must have `EXECUTE_PERMISSION` on the dao.
-        assertPermission(_dao, _deps.dao, _frameworkOwner, frameworkPermissions[5], true);
+        assertPermission(_dao, _deps.dao, deployer, frameworkPermissions[5], true);
 
         // 3. Check that managing dao address is correctly set on the framework contracts.
         // ==========================================================================

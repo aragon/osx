@@ -93,7 +93,6 @@ contract DeployFrameworkFactory {
     /// @notice This function can only be called one time. This is because if the function succeeds,
     ///         it transfers domains to managing dao, meaning that if called again, it won't be able to set owners again.
     function deployFramework(
-        address _frameworkOwner,
         DAOSettings calldata _daoSettings,
         string calldata _daoSubdomain,
         bytes32[] memory _daoPermissionIds,
