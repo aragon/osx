@@ -13,7 +13,7 @@ VERIFIER := $(shell echo $(VERIFIER) | sed "s/'//g")
 ###	   Etherscan verification only occurs if the network name is not local.
 deploy-framework:
 	rm -rf deployed-contracts.json
-	rm -rf deployed-contracts_temp.json
+	rm -rf deployed-contracts-temp.json
 	@command="forge script FactoryDeploy --rpc-url $(NETWORK_RPC_URL) --slow -vvvv"; \
 	[ "$(broadcast)" = "true" ] && command="$$command --broadcast"; \
 	[ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ] && command="$$command --chain $(CHAIN) --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
@@ -27,7 +27,7 @@ framework-store-json:
 		echo "Error: chain id is not set. Please pass it as 'make chain-id=<value> framework-store-json'."; \
 		exit 1; \
 	fi
-	npx ts-node scripts/store-deployments.ts $(chain-id) $$(cat deployed-contracts_temp.json)
+	npx ts-node scripts/store-deployments.ts $(chain-id) $$(cat deployed-contracts-temp.json)
 
 deploy-repos:
 	@bash scripts/deploy-repos.sh $(fork)
