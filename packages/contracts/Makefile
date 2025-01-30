@@ -19,6 +19,9 @@ deploy-framework:
 	[ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ] && command="$$command --chain $(CHAIN) --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
 	echo "Running: $$command"; \
 	$$command
+	@CHAIN_ID=$(shell cast chain-id --rpc-url $(NETWORK_RPC_URL)); \
+	echo "Chain ID is $$CHAIN_ID"; \
+	npx ts-node scripts/store-deployments.ts $$CHAIN_ID $$(cat deployed-contracts-temp.json)
 
 ### In case the deployment worked, but store-deployments.ts failed for some reason:
 ### run `make chain-id=CHAIN_ID framework-store-json` which will create deployed-contracts.json with all the information.
