@@ -10,28 +10,28 @@ repos:
   #   env_location: .
   #   deploy_tags: CreateRepo
 
-  - name: TokenVoting Plugin
-    project_type: hardhat
-    github_repo_uri: https://github.com/aragon/token-voting-plugin
-    branch: feat/update-deploy-scripts
-    root_path: packages/contracts
-    build_command: 'build'
-    deploy_command: 'deploy'
-    private_key_name: 'PRIVATE_KEY'
-    env_location: .
-    deploy_tags: CreateRepo
+  # - name: TokenVoting Plugin
+  #   project_type: hardhat
+  #   github_repo_uri: https://github.com/aragon/token-voting-plugin
+  #   branch: feat/update-deploy-scripts
+  #   root_path: packages/contracts
+  #   build_command: 'build'
+  #   deploy_command: 'deploy'
+  #   private_key_name: 'PRIVATE_KEY'
+  #   env_location: .
+  #   deploy_tags: CreateRepo
 
-  - name: Staged Proposal Processor
-    project_type: foundry
-    github_repo_uri: https://github.com/aragon/staged-proposal-processor-plugin
-    branch: foundry-upgrade-package-fix
-    root_path: .
-    build_command: 'build'
-    deploy_command: 'deploy'
-    private_key_name: 'DEPLOYER_KEY'
-    env_location: .
+  # - name: Staged Proposal Processor
+  #   project_type: foundry
+  #   github_repo_uri: https://github.com/aragon/staged-proposal-processor-plugin
+  #   branch: foundry-upgrade-package-fix
+  #   root_path: .
+  #   build_command: 'build'
+  #   deploy_command: 'deploy'
+  #   private_key_name: 'DEPLOYER_KEY'
+  #   env_location: .
 
-  - name: Admin Plugin
+  - name: AdminPluginRepoProxy
     project_type: hardhat
     github_repo_uri: https://github.com/aragon/admin-plugin
     branch: feat/update-deploy-script
@@ -40,4 +40,4 @@ repos:
     deploy_command: 'deploy'
     private_key_name: 'PRIVATE_KEY'
     env_location: .
-    deploy_tags: CreateRepo
+    deploy_tags: CreateRepo,NewVersion,Publication

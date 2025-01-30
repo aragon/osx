@@ -66,18 +66,20 @@ async function decodeAndFillJson(chainId: string, encoded: string) {
     process.env.NETWORK_RPC_URL
   );
 
-  const content = JSON.parse(
-    await fs.readFile(
-      `broadcast/FactoryDeploy.sol/${chainId}/dry-run/run-latest.json`,
-      'utf8'
-    )
-  );
+  let transactions: unknown = [];
+
+  let fileName = `broadcast/FactoryDeploy.sol/${chainId}/run-latest.json`;
+  try {
+    transactions = JSON.parse(await fs.readFile(fileName, 'utf8')).transactions;
+  } catch {
+    console.log(`File ${fileName} can not be found`);
+  }
 
   const promises = keys.map(async (key, index) => {
     const addr = arrayAddr[index];
 
     // Find the transaction hash
-    const hash = findObject(content.transactions, addr);
+    const hash = findObject(transactions, addr);
 
     let data = {
       address: addr,
@@ -124,8 +126,8 @@ async function storeDeployments() {
 
   const json = await decodeAndFillJson(chainId, addresses);
 
-  await fs.writeFile('deployed_contracts.json', JSON.stringify(json, null, 2));
+  await fs.writeFile('deployed-contracts.json', JSON.stringify(json, null, 2));
 }
 (async () => {
-  console.log(await storeDeployments());
+  await storeDeployments();
 })();

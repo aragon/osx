@@ -47,7 +47,7 @@ contract FactoryDeploy is Script, Helper {
     function run() external {
         vm.startBroadcast(deployerPrivateKey);
 
-        address setup = address(new PlaceholderSetup());
+        address placeholderSetup = address(new PlaceholderSetup());
 
         if (!useENSForDAO && !subdomainNull(managementDaoSubdomain)) {
             revert("Management dao Subdomain can not be non-empty if ens is not requested");
@@ -157,13 +157,13 @@ contract FactoryDeploy is Script, Helper {
         addresses[10] = deps.psp;
         addresses[11] = deps.daoFactory;
         addresses[12] = deps.pluginRepoFactory;
-        addresses[13] = setup;
+        addresses[13] = placeholderSetup;
         addresses[14] = ensRegistry;
         addresses[15] = ensResolver;
 
         // store this in a temp file just in case
         // `_storeDeploymentJSON` fails, so we can recover.
-        vm.writeJson(vm.toString(abi.encode(addresses)), "./deployed_contracts_temp.json");
+        vm.writeJson(vm.toString(abi.encode(addresses)), "./deployed-contracts_temp.json");
 
         _storeDeploymentJSON(block.chainid, addresses);
     }
@@ -210,7 +210,7 @@ contract FactoryDeploy is Script, Helper {
         address _factory,
         address _frameworkOwner,
         DeployFrameworkFactory.Deployments memory _deps
-    ) private {
+    ) private view {
         DAO _dao = DAO(payable(_deps.dao));
 
         bytes32[] memory daoPermissions = _getDaoPermissions();
@@ -287,7 +287,7 @@ contract FactoryDeploy is Script, Helper {
         address _registrar,
         address _registry,
         bytes32 _node
-    ) private {
+    ) private view {
         bytes32[] memory frameworkPermissions = _getFrameworkPermissions();
         DAO dao_ = DAO(payable(_dao));
 

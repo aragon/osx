@@ -132,9 +132,6 @@ contract DeployFrameworkFactory {
         uint256 actionsCount = 0;
         uint256 count = 0;
 
-        Action memory daoEnsApprovalAction;
-        Action memory pluginEnsApprovalAction;
-
         if (daoNode != bytes32(0)) {
             ENSRegistry(ensRegistry).setOwner(daoNode, deps.dao);
             actionsCount++;

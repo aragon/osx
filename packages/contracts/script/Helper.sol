@@ -74,7 +74,7 @@ contract Helper is Script {
     function _storeDeploymentJSON(
         uint256 _chainId,
         address[] memory _addresses
-    ) internal returns (bytes memory kk) {
+    ) internal returns (bytes memory) {
         string[] memory inputs = new string[](6);
         inputs[0] = "npx";
         inputs[1] = "ts-node";

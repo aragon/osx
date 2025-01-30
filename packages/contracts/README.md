@@ -220,13 +220,13 @@ VERIFIER='etherscan'
 
 ```sh
 make deploy-framework # runs the simulation(doesn't broadcast the transactions).
-make broadcast=true deploy-framework # Broadcasts the transactions. If succeeds, this will also create deployed_contracts.json file with all information about the deployed contracts.
+make broadcast=true deploy-framework # Broadcasts the transactions. If succeeds, this will also create deployed-contracts.json file with all information about the deployed contracts.
 ```
 
 Once we deploy the framework, we're ready to move to plugin repository deployments. Which plugin repos will be deployed, are described inside `repos.yml` file.
 
 ```sh
-# You can get `pluginrepofactory` address from deployed_contracts.json
+# You can get `pluginrepofactory` address from deployed-contracts.json
 # This will go through all the repositories, pull them, compile and build them
 # and then deploy each one of them on the same `NETWORK_RPC_URL` provided in .env file.
 make pluginrepofactory=ADDRESS deploy-repos
@@ -246,7 +246,7 @@ Then, we actually broadcast it:
 make broadcast=true deploy-framework
 ```
 
-You can again copy the plugin repo factory address from the `deployed_contracts.json`. Now, it's time to deploy the plugin repos on the sepolia. What would be adviseable here is to ensure one more time that plugin repos can also be deployed successfully. For this, it's adviseable to deploy them in a forked environment..
+You can again copy the plugin repo factory address from the `deployed-contracts.json`. Now, it's time to deploy the plugin repos on the sepolia. What would be adviseable here is to ensure one more time that plugin repos can also be deployed successfully. For this, it's adviseable to deploy them in a forked environment..
 
 Now, run:
 

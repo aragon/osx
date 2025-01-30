@@ -1,15 +1,15 @@
 #!/bin/bash
 set -e
 
+root_dir=$(pwd)
 fork=$1
 
 echo 
-echo "📝 Reading deployed_contracts.json to fetch plugin repo factory address and placeholder setup.."
+echo "📝 Reading deployed-contracts.json to fetch plugin repo factory address and placeholder setup.."
 echo 
 
-PLUGIN_REPO_FACTORY_ADDRESS=$(jq -r '.PluginRepoFactory.address' deployed_contracts.json)
-PLACEHOLDER_SETUP=$(jq -r '.PlaceholderSetup.address' deployed_contracts.json)
-
+PLUGIN_REPO_FACTORY_ADDRESS=$(jq -r '.PluginRepoFactory.address' deployed-contracts.json)
+PLACEHOLDER_SETUP=$(jq -r '.PlaceholderSetup.address' deployed-contracts.json)
 
 echo
 echo "🔹 PluginRepoFactory Address:"
@@ -52,6 +52,7 @@ required_vars=(
     "VERIFIER" 
     "NETWORK_NAME" 
     "PROTOCOL_VERSION"
+    "PUB_PINATA_JWT"
 )
 
 ### Fail if one of the .env is not present
@@ -66,6 +67,16 @@ for var in "${required_vars[@]}"; do
   fi
 done
 
+merge_json() {
+    local target=$1
+    local src=$2
+
+    ### Merge deployed_contract.json's content that is 
+    ### inside the specific plugin repository into
+    ### main deployed-contracts.json
+    jq -s '.[0] + .[1]' "$target" $src > "$target.tmp" && \
+    mv "$target.tmp" "$target"
+}
 
 # Read the entire YAML file into a variable
 content=$(yq '.repos' repos.yml)
@@ -112,6 +123,7 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
     yarn
     yarn link @aragon/osx-commons-contracts
     yarn link @aragon/osx
+    yarn link @aragon/osx-commons-sdk
     
     if [ "$env" != null ] ; then
         echo "$env" | yq 'to_entries | .[] | "\(.key)=\(.value)"' -r >> "$env_location"
@@ -143,22 +155,17 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
         exit 
     fi
 
-
     ### Deploy
-    if [[ "$project_type" = "hardhat" ]] ; then 
-        if yarn $deploy_command --network $NETWORK_NAME --tags $deploy_tags ; then
-            echo "Deploy command succeeded"
-        else 
-            exit
-        fi
+    if [[ "$project_type" = "hardhat" ]]; then
+        yarn $deploy_command --network $NETWORK_NAME --tags $deploy_tags || exit
     fi
 
-    if [[ "$project_type" = "foundry" ]] ; then 
-        if yarn $deploy_command ; then
-            echo "Deploy command succeeded"
-        else 
-            exit
-        fi
+    if [[ "$project_type" = "foundry" ]]; then 
+       yarn $deploy_command || exit
     fi
+
+    echo "Deploy command succeeded"
+    ### see merge_json's description
+    merge_json $root_dir/deployed-contracts.json deployed-contracts.json
 
 done
