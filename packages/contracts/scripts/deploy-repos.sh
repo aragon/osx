@@ -10,12 +10,15 @@ echo
 
 PLUGIN_REPO_FACTORY_ADDRESS=$(jq -r '.PluginRepoFactory.address' deployed-contracts.json)
 PLACEHOLDER_SETUP=$(jq -r '.PlaceholderSetup.address' deployed-contracts.json)
+MANAGEMENT_DAO=$(jq -r '.ManagementDAOProxy.address' deployed-contracts.json)
 
 echo
 echo "🔹 PluginRepoFactory Address:"
 echo "   ➤ $PLUGIN_REPO_FACTORY_ADDRESS"
 echo "🔹 PlaceholderSetup Address:"
 echo "   ➤ $PLACEHOLDER_SETUP"
+echo "🔹 Management DAO Address:"
+echo "   ➤ $MANAGEMENT_DAO"
 echo "⚠️  Make sure it corresponds to the correct chain and deployment."
 echo
 
@@ -137,6 +140,7 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
     echo "$private_key_name=$PRIVATE_KEY" >> "$env_location"
     echo "PLUGIN_REPO_FACTORY_ADDRESS=$PLUGIN_REPO_FACTORY_ADDRESS" >> "$env_location"
     echo "PLACEHOLDER_SETUP=$PLACEHOLDER_SETUP" >> "$env_location"
+    echo "MANAGEMENT_DAO_ADDRESS=$MANAGEMENT_DAO" >> "$env_location"
 
     if [ "$fork" == true ] ; then
        echo "FORKING_RPC_URL=$NETWORK_RPC_URL" >> "$env_location"
@@ -161,7 +165,7 @@ for index in $(echo "$content" | yq 'keys | .[]'); do
     fi
 
     if [[ "$project_type" = "foundry" ]]; then 
-       yarn $deploy_command || exit
+       broadcast=true yarn $deploy_command || exit
     fi
 
     echo "Deploy command succeeded"

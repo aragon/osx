@@ -79,7 +79,7 @@ contract Helper is Script {
         inputs[0] = "npx";
         inputs[1] = "ts-node";
         inputs[2] = "scripts/store-deployments.ts";
-        inputs[3] = vm.toString(_chainId); //
+        inputs[3] = vm.toString(_chainId);
         inputs[4] = vm.toString(abi.encode(_addresses));
 
         vm.ffi(inputs);

@@ -24,7 +24,7 @@ repos:
   - name: Staged Proposal Processor
     project_type: foundry
     github_repo_uri: https://github.com/aragon/staged-proposal-processor-plugin
-    branch: foundry-upgrade-package-fix
+    branch: feat/update-script
     root_path: .
     build_command: 'build'
     deploy_command: 'deploy'

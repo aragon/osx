@@ -108,7 +108,6 @@ async function main() {
     `Latest build is: ${version[0][1]}, click enter to use it or provide a number: `
   );
 
-  //   0x56e2c7E24714A2648B66De331F0cBd83dA5D4c35
   if (providedBuild) {
     if (parseInt(providedBuild) > build) {
       throw new Error("build number you provided doesn't exist...");
@@ -132,9 +131,6 @@ async function main() {
 
   const daoAddr: string = addresses['ManagementDAOProxy'].address;
   const pspAddr: string = addresses['PluginSetupProcessor'].address;
-
-  console.log('blax dao', daoAddr);
-  console.log('blax psp', pspAddr);
 
   const buildMetadata = version[2];
   const cid = ethers.utils.toUtf8String(buildMetadata).replace('ipfs://', '');
