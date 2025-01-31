@@ -6,6 +6,8 @@ import {console} from "forge-std/console.sol";
 import {DeployFrameworkFactory} from "../src/DeploymentFrameworkFactory.sol";
 
 contract Helper is Script {
+    error FailedToUploadToIPFS(string errorMsg);
+
     function _getENSRegistry(
         string memory _network
     ) internal returns (address ensRegistry, address ensResolver) {
@@ -68,7 +70,15 @@ contract Helper is Script {
         inputs[0] = "npx";
         inputs[1] = "ts-node";
         inputs[2] = "scripts/upload-to-pinnata.ts";
-        return vm.ffi(inputs);
+
+        bytes memory res = vm.ffi(inputs);
+
+        string memory errorMsg;
+        (errorMsg, ipfsCid) = abi.decode(res, (string, bytes));
+
+        if (bytes(errorMsg).length > 0) {
+            revert FailedToUploadToIPFS(errorMsg);
+        }
     }
 
     function _storeDeploymentJSON(
