@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
+import {Vm} from "forge-std/Vm.sol";
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {DeployFrameworkFactory} from "../src/DeploymentFrameworkFactory.sol";
@@ -13,12 +14,12 @@ contract Helper is Script {
 
         // get ens registry
         inputs[3] = "getEnsRegistry";
-        bytes memory res = vm.ffi(inputs);
+        bytes memory res = _executeScriptAndHandleError(inputs);
         ensRegistry = address(bytes20(res));
 
         // get ens resolver
         inputs[3] = "getEnsResolver";
-        res = vm.ffi(inputs);
+        res = _executeScriptAndHandleError(inputs);
         ensResolver = address(bytes20(res));
     }
 
@@ -29,12 +30,12 @@ contract Helper is Script {
 
         // get dao domain
         inputs[3] = "getDaoDomain";
-        bytes memory res = vm.ffi(inputs);
+        bytes memory res = _executeScriptAndHandleError(inputs);
         daoDomain = string(res);
 
         // get plugin domain
         inputs[3] = "getPluginDomain";
-        res = vm.ffi(inputs);
+        res = _executeScriptAndHandleError(inputs);
 
         pluginDomain = string(res);
     }
@@ -43,14 +44,14 @@ contract Helper is Script {
         // domain hash
         string[] memory inputs = _baseScriptInputs(domain);
         inputs[3] = "getDomainHash";
-        bytes memory res = vm.ffi(inputs);
+        bytes memory res = _executeScriptAndHandleError(inputs);
         domainHash = bytes32(res);
     }
 
     function _getLabelHash(string memory label) internal returns (bytes32 labelHash) {
         string[] memory inputs = _baseScriptInputs(label);
         inputs[3] = "getLabelHash";
-        bytes memory res = vm.ffi(inputs);
+        bytes memory res = _executeScriptAndHandleError(inputs);
         labelHash = bytes32(res);
     }
 
@@ -59,7 +60,7 @@ contract Helper is Script {
     ) internal returns (string[] memory domainNamesReversed, string[] memory domainSubdomains) {
         string[] memory inputs = _baseScriptInputs(_domain);
         inputs[3] = "getDomainNameReversed";
-        bytes memory res = vm.ffi(inputs);
+        bytes memory res = _executeScriptAndHandleError(inputs);
         (domainNamesReversed, domainSubdomains) = abi.decode(res, (string[], string[]));
     }
 
@@ -68,7 +69,8 @@ contract Helper is Script {
         inputs[0] = "npx";
         inputs[1] = "ts-node";
         inputs[2] = "scripts/upload-to-pinnata.ts";
-        return vm.ffi(inputs);
+
+        return _executeScriptAndHandleError(inputs);
     }
 
     function _storeDeploymentJSON(
@@ -82,7 +84,7 @@ contract Helper is Script {
         inputs[3] = vm.toString(_chainId);
         inputs[4] = vm.toString(abi.encode(_addresses));
 
-        vm.ffi(inputs);
+        _executeScriptAndHandleError(inputs);
     }
 
     function _getDaoPermissions() internal pure returns (bytes32[] memory permissions) {
@@ -118,5 +120,17 @@ contract Helper is Script {
         inputs[2] = "scripts/getter.ts";
         // inputs[3] =  fill this with the operation
         inputs[4] = _networkName;
+    }
+
+    function _executeScriptAndHandleError(
+        string[] memory inputs
+    ) internal returns (bytes memory output) {
+        Vm.FfiResult memory res = vm.tryFfi(inputs);
+
+        if (res.exitCode != 0) {
+            revert(string(res.stderr));
+        }
+
+        return res.stdout;
     }
 }
