@@ -2,11 +2,13 @@
 
 include .env
 
-### Some values in .env might be with quotes, so we strip them off.
-CHAIN := $(shell echo $(CHAIN) | sed "s/'//g")
-NETWORK_RPC_URL := $(shell echo $(NETWORK_RPC_URL) | sed "s/'//g")
-ETHERSCAN_API_KEY := $(shell echo $(ETHERSCAN_API_KEY) | sed "s/'//g")
-VERIFIER := $(shell echo $(VERIFIER) | sed "s/'//g")
+### Some values in .env might be with quotes, so we strip them off 
+### to make it work with forge commands.
+CHAIN := $(shell echo $(CHAIN) | sed "s/[\"']//g")
+NETWORK_RPC_URL := $(shell echo $(NETWORK_RPC_URL) | sed "s/[\"']//g")
+ETHERSCAN_API_KEY := $(shell echo $(ETHERSCAN_API_KEY) | sed "s/[\"']//g")
+VERIFIER := $(shell echo $(VERIFIER) | sed "s/[\"']//g")
+VERIFIER_URL := $(shell echo $(VERIFIER_URL) | sed "s/[\"']//g")
 
 ### 1. To deploy the framework with simulation, run "make deploy-framework".
 ### 2. To deploy the framework without simulation, run "make broadcast=true deploy-framework".
@@ -15,8 +17,15 @@ deploy-framework:
 	rm -rf deployed-contracts.json
 	rm -rf deployed-contracts-temp.json
 	@command="forge script FactoryDeploy --rpc-url $(NETWORK_RPC_URL) --slow -vvvv"; \
-	[ "$(broadcast)" = "true" ] && command="$$command --broadcast"; \
-	[ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ] && command="$$command --chain $(CHAIN) --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
+	if [ "$(broadcast)" = "true" ]; then \
+		command="$$command --broadcast"; \
+	fi; \
+	if [ "$(NETWORK_NAME)" != "local" ] && [ "$(broadcast)" = "true" ]; then \
+		command="$$command --chain $(CHAIN) --verify --etherscan-api-key $(ETHERSCAN_API_KEY) --verifier $(VERIFIER)"; \
+		if [ -n "$(VERIFIER_URL)" ]; then \
+			command="$$command --verifier-url $(VERIFIER_URL)"; \
+		fi; \
+	fi; \
 	echo "Running: $$command"; \
 	$$command
 	@CHAIN_ID=$(shell cast chain-id --rpc-url $(NETWORK_RPC_URL)); \

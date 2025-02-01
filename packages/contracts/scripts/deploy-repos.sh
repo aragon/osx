@@ -56,12 +56,14 @@ required_vars=(
     "NETWORK_NAME" 
     "PROTOCOL_VERSION"
     "PUB_PINATA_JWT"
+    "VERIFIER_URL"
 )
 
 ### Fail if one of the .env is not present
 for var in "${required_vars[@]}"; do
   # Dynamically assign the value from .env to the variable
-  declare "$var=$(grep "^$var=" .env | cut -d '=' -f2)"
+  # Strip the single/double quotes.
+  declare "$var=$(grep "^$var=" .env | cut -d '=' -f2 | sed "s/[\"']//g")"
 
   # Check if the variable is empty
   if [ -z "${!var}" ]; then
