@@ -2,7 +2,7 @@ import {ProtocolVersionMock__factory} from '../typechain';
 import {osxContractsVersion} from './test-utils/protocol-version';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 describe('ProtocolVersion', function () {
   let signers: SignerWithAddress[];
@@ -11,9 +11,8 @@ describe('ProtocolVersion', function () {
   });
 
   it('returns the current protocol version that must match the semantic version of the `osx-contracts` package', async () => {
-    const versionedContract = await new ProtocolVersionMock__factory(
-      signers[0]
-    ).deploy();
+    const versionedContract = await hre.wrapper.deploy('ProtocolVersionMock');
+
     expect(await versionedContract.protocolVersion()).to.deep.equal(
       osxContractsVersion()
     );

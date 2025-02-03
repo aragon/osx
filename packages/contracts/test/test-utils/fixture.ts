@@ -1,4 +1,3 @@
-import networks from '../../networks';
 import {getNetworkByNameOrAlias} from '@aragon/osx-commons-configs';
 import hre, {network, deployments} from 'hardhat';
 
@@ -12,7 +11,9 @@ export async function initializeFork(
   forkNetwork: string,
   blockNumber: number
 ): Promise<void> {
-  if (getNetworkByNameOrAlias(forkNetwork) === null) {
+  const networkSettings = getNetworkByNameOrAlias(forkNetwork);
+
+  if (networkSettings === null) {
     throw new Error(`No info found for network '${forkNetwork}'.`);
   }
 
@@ -21,11 +22,18 @@ export async function initializeFork(
     params: [
       {
         forking: {
-          jsonRpcUrl: `${(networks as any)[forkNetwork].url}`,
+          jsonRpcUrl: networkSettings.url,
           blockNumber: blockNumber,
         },
       },
     ],
+  });
+}
+
+export async function closeFork() {
+  await network.provider.request({
+    method: 'hardhat_reset',
+    params: [],
   });
 }
 

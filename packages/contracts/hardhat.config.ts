@@ -12,7 +12,7 @@ import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
@@ -37,7 +37,8 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
     continue;
   }
 
-  if (typeof networkExtensions[network] == 'undefined') {
+  if (networkExtensions[network] == undefined) {
+    console.log(`WARNING: newtork ${network} is not found in networks.ts file`);
     continue;
   }
 
@@ -61,6 +62,19 @@ extendEnvironment(hre => {
 const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 
 console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
+
+task('test-contracts').setAction(async (args, hre) => {
+  await hre.run('compile');
+  const imp = await import('./test/test-utils/wrapper');
+
+  const wrapper = await imp.Wrapper.create(
+    hre.network.name,
+    hre.ethers.provider
+  );
+  hre.wrapper = wrapper;
+
+  await hre.run('test');
+});
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more

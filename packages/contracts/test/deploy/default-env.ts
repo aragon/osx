@@ -9,11 +9,12 @@ import {
   managementDaoSubdomainEnv,
   pluginDomainEnv,
 } from '../../utils/environment';
+import {skipTestSuiteIfNetworkIsZkSync} from '../test-utils/skip-functions';
 import {expect} from 'chai';
 import {network} from 'hardhat';
 import {Network} from 'hardhat/types';
 
-describe('detect network', () => {
+skipTestSuiteIfNetworkIsZkSync('detect network', () => {
   beforeEach(() => {
     process.env = {};
   });

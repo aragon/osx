@@ -20,7 +20,7 @@ import {
 } from '@aragon/osx-commons-sdk';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -29,11 +29,8 @@ const EVENTS = {
 };
 
 async function getExpectedRepoAddress(from: string) {
-  const nonce = await ethers.provider.getTransactionCount(from);
-  const expectedAddress = ethers.utils.getContractAddress({
-    from: from,
-    nonce,
-  });
+  const nonce = await hre.wrapper.getNonce(from, 'Deployment');
+  const expectedAddress = hre.wrapper.getCreateAddress(from, nonce);
 
   return expectedAddress;
 }
@@ -69,13 +66,9 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // deploy PluginRepoFactory
-    const PluginRepoFactory = new PluginRepoFactory__factory(
-      signers[0]
-    ) as PluginRepoFactory__factory;
-
-    pluginRepoFactory = await PluginRepoFactory.deploy(
-      pluginRepoRegistry.address
-    );
+    pluginRepoFactory = await hre.wrapper.deploy('PluginRepoFactory', {
+      args: [pluginRepoRegistry.address],
+    });
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     await managingDao.grant(
@@ -138,17 +131,6 @@ describe('PluginRepoFactory: ', function () {
           pluginRepoFactory.address,
           PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
         );
-    });
-
-    it('fail to create new pluginRepo with empty subdomain', async () => {
-      const pluginRepoSubdomain = '';
-
-      await expect(
-        pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
-      ).to.be.revertedWithCustomError(
-        pluginRepoRegistry,
-        'EmptyPluginRepoSubdomain'
-      );
     });
 
     it('creates new pluginRepo and sets up correct permissions', async () => {
@@ -222,23 +204,6 @@ describe('PluginRepoFactory: ', function () {
           pluginRepoFactory.address,
           PLUGIN_REGISTRY_PERMISSIONS.REGISTER_PLUGIN_REPO_PERMISSION_ID
         );
-    });
-
-    it('fail to create new pluginRepo with empty subdomain', async () => {
-      const pluginRepoSubdomain = '';
-
-      await expect(
-        pluginRepoFactory.createPluginRepoWithFirstVersion(
-          pluginRepoSubdomain,
-          ownerAddress,
-          ownerAddress,
-          '0x',
-          '0x'
-        )
-      ).to.be.revertedWithCustomError(
-        pluginRepoRegistry,
-        'EmptyPluginRepoSubdomain'
-      );
     });
 
     it('creates new pluginRepo with correct permissions', async () => {

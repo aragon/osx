@@ -29,8 +29,8 @@ contract PluginRepoRegistry is InterfaceBasedRegistry, ProtocolVersion {
     /// @notice Thrown if the plugin subdomain doesn't match the regex `[0-9a-z\-]`
     error InvalidPluginSubdomain(string subdomain);
 
-    /// @notice Thrown if the plugin repository subdomain is empty.
-    error EmptyPluginRepoSubdomain();
+    /// @notice Thrown if the subdomain is present, but registrar is address(0).
+    error ENSNotSupported();
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -49,22 +49,25 @@ contract PluginRepoRegistry is InterfaceBasedRegistry, ProtocolVersion {
     }
 
     /// @notice Registers a plugin repository with a subdomain and address.
+    /// @dev If subdomain is empty, registration on ENS is skipped.
     /// @param subdomain The subdomain of the PluginRepo.
     /// @param pluginRepo The address of the PluginRepo contract.
     function registerPluginRepo(
         string calldata subdomain,
         address pluginRepo
     ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
-        if (!(bytes(subdomain).length > 0)) {
-            revert EmptyPluginRepoSubdomain();
-        }
+        if (bytes(subdomain).length > 0) {
+            if (address(subdomainRegistrar) == address(0)) {
+                revert ENSNotSupported();
+            }
 
-        if (!isSubdomainValid(subdomain)) {
-            revert InvalidPluginSubdomain({subdomain: subdomain});
-        }
+            if (!isSubdomainValid(subdomain)) {
+                revert InvalidPluginSubdomain({subdomain: subdomain});
+            }
 
-        bytes32 labelhash = keccak256(bytes(subdomain));
-        subdomainRegistrar.registerSubnode(labelhash, pluginRepo);
+            bytes32 labelhash = keccak256(bytes(subdomain));
+            subdomainRegistrar.registerSubnode(labelhash, pluginRepo);
+        }
 
         _register(pluginRepo);
 
