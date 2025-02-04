@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Aligned contract names during deployment with the names given in `@aragon/osx-commons-configs`.
 - Move events `ReleaseMetadataUpdated`and `VersionCreated` from `PluginRepo` to `IPluginRepo`.
 - Allow granting permission to `_who: ANY_ADDR`.
+- Made ENS registration optional: DAOs and PluginRepos can be registered without a subdomain, but providing subdomain when the protocol doesn't support ENS, will revert with `ENSNotSupported`.
 
 ### Removed
 

@@ -16,11 +16,11 @@
     "typechain:osx-versions": "ts-node scripts/generate-typechain-osx-versions.ts",
     "typechain": "yarn typechain:osx && yarn typechain:osx-versions",
     "test:parallel": "hardhat test --parallel",
-    "test": "hardhat test-contracts",
+    "test": "hardhat test",
     "test:report-gas": "REPORT_GAS=true hardhat test",
-    "test:zksync": "hardhat test-contracts --config hardhat-zksync.config.ts",
+    "test:zksync": "hardhat test --config hardhat-zksync.config.ts",
     "build": "hardhat compile && yarn typechain",
-    "build:zksync": "hardhat build-contracts --config hardhat-zksync.config.ts && yarn typechain",
+    "build:zksync": "hardhat compile --config hardhat-zksync.config.ts && yarn typechain",
     "build:npm": "rollup --config rollup.config.ts",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
@@ -31,11 +31,12 @@
     "dev": "yarn hardhat node --hostname 0.0.0.0",
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
+    "docs": "DOCS=true scripts/prepare-docs.sh",
     "clean": "rm -rf artifacts cache deployments typechain"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aragon/osx.git"
+    "url": "https://github.com/aragon/osx"
   },
   "author": "",
   "license": "AGPL-3.0-or-later",
@@ -44,14 +45,14 @@
   },
   "homepage": "https://github.com/aragon/osx#readme",
   "dependencies": {
-    "@aragon/osx-commons-contracts": "1.4.0-alpha.5",
+    "@aragon/osx-commons-contracts": "1.4.0",
     "@ensdomains/ens-contracts": "0.0.11",
     "@openzeppelin/contracts": "4.9.6",
     "@openzeppelin/contracts-upgradeable": "4.9.6"
   },
   "devDependencies": {
-    "@aragon/osx-commons-configs": "^0.4.0",
-    "@aragon/osx-commons-sdk": "0.0.1-alpha.11",
+    "@aragon/osx-commons-configs": "^0.8.0",
+    "@aragon/osx-commons-sdk": "^0.1.0",
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
     "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
     "@aragon/osx-v1.3.0": "npm:@aragon/osx@1.3.0",
@@ -87,7 +88,7 @@
     "eslint-plugin-promise": "^5.1.1",
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.7.2",
-    "hardhat": "^2.14.0",
+    "hardhat": "^2.22.15",
     "hardhat-deploy": "0.12.4",
     "hardhat-gas-reporter": "^1.0.4",
     "ipfs-http-client": "51.0.0",
@@ -99,6 +100,7 @@
     "tmp-promise": "^3.0.3",
     "ts-node": "^8.1.0",
     "typechain": "^5.2.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "lodash.startcase": "^4.4.0"
   }
 }

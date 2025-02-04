@@ -1,5 +1,5 @@
 import {TestingFork} from './types/hardhat';
-import {ZK_SYNC_NETWORKS} from './utils/zkSync';
+import {ZK_SYNC_NETWORKS} from './utils/zksync';
 import RichAccounts from './utils/zksync-rich-accounts';
 import {addRpcUrlToNetwork} from '@aragon/osx-commons-configs';
 import '@matterlabs/hardhat-zksync-deploy';
@@ -41,8 +41,8 @@ extendEnvironment(hre => {
   hre.testingFork = testingFork;
 });
 
-task('build-contracts').setAction(async (args, hre) => {
-  await hre.run('compile');
+task('compile').setAction(async (args, hre, runSuper) => {
+  await runSuper(args);
 
   if (ZK_SYNC_NETWORKS.includes(hre.network.name)) {
     // Copy zkSync specific build artifacts and cache to the default directories.
@@ -63,14 +63,14 @@ task('build-contracts').setAction(async (args, hre) => {
 task('deploy-contracts')
   .addOptionalParam('tags', 'Specify which tags to deploy')
   .setAction(async (args, hre) => {
-    await hre.run('build-contracts');
+    await hre.run('compile');
     await hre.run('deploy', {
       tags: args.tags,
     });
   });
 
-task('test-contracts').setAction(async (args, hre) => {
-  await hre.run('build-contracts');
+task('test').setAction(async (args, hre, runSuper) => {
+  await hre.run('compile');
   const imp = await import('./test/test-utils/wrapper');
 
   const wrapper = await imp.Wrapper.create(
@@ -79,7 +79,7 @@ task('test-contracts').setAction(async (args, hre) => {
   );
   hre.wrapper = wrapper;
 
-  await hre.run('test');
+  await runSuper(args);
 });
 
 // You need to export an object to set up your config

@@ -1,0 +1,300 @@
+= Designing your plugin
+
+This guide explains how to design plugins for Aragon OSx, covering governance plugins, membership management, and upgradeability patterns. You'll learn about the core interfaces, implementation patterns, and how to choose the right base contract for your specific use case.
+
+== Governance Plugins
+
+One of the most common use cases for plugins are governance plugins. Governance plugins are plugins DAOs install to help them make decisions.
+
+=== What are Governance Plugins
+
+Governance plugins are characterized by the **ability to execute actions in the DAO** they have been installed to. Accordingly, the `EXECUTE_PERMISSION_ID` is granted on installation on the installing DAO to the governance plugin contract.
+
+```solidity
+grant({
+    where: installingDao,
+    who: governancePlugin,
+    permissionId: EXECUTE_PERMISSION_ID
+});
+```
+
+Beyond this fundamental ability, governance plugins usually implement two interfaces:
+
+- xref:guide-develop-plugin/design-your-plugin#proposals[The `IProposal` interface] introducing the **notion of proposals** and how they are created and executed.
+- xref:guide-develop-plugin/design-your-plugin#membership[The `IMembership` interface] introducing the **notion of membership** to the DAO.
+
+=== Examples of Governance Plugins
+
+Some examples of governance plugins are:
+
+- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/majority-voting/token[A token-voting plugin]: Results are based on what the majority votes and the vote's weight is determined by how many tokens an account holds. Ex: Alice has 10 tokens, Bob 2, and Alice votes yes, the yes wins.
+- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/multisig[Multisig plugin]: A determined set of addresses is able to approve. Once `x` amount of addresses approve (as determined by the plugin settings), then the proposal automatically succeeds.
+- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/admin[Admin plugin]: One address can create and immediately execute proposals on the DAO (full control).
+- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/majority-voting/addresslist[Addresslist plugin]: Majority-based voting, where list of addresses are able to vote in decision-making for the organization. Unlike a multisig, everybody here is expected to vote yes/no/abstain within a certain time frame.
+
+// <!-- Add a graphic -->
+
+// <!-- Add a code example -->
+
+=== The `IProposal` Interface
+
+The `IProposal` interface is used to create and execute proposals containing actions and a description.
+
+The interface is defined as follows:
+
+```solidity
+interface IProposal {
+  /// @notice Emitted when a proposal is created.
+  /// @param proposalId The ID of the proposal.
+  /// @param creator  The creator of the proposal.
+  /// @param startDate The start date of the proposal in seconds.
+  /// @param endDate The end date of the proposal in seconds.
+  /// @param metadata The metadata of the proposal.
+  /// @param actions The actions that will be executed if the proposal passes.
+  /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
+  event ProposalCreated(
+    uint256 indexed proposalId,
+    address indexed creator,
+    uint64 startDate,
+    uint64 endDate,
+    bytes metadata,
+    IDAO.Action[] actions,
+    uint256 allowFailureMap
+  );
+
+  /// @notice Emitted when a proposal is executed.
+  /// @param proposalId The ID of the proposal.
+  event ProposalExecuted(uint256 indexed proposalId);
+
+  /// @notice Returns the proposal count determining the next proposal ID.
+  /// @return The proposal count.
+  function proposalCount() external view returns (uint256);
+}
+```
+
+This interface contains two events and one function
+
+==== `ProposalCreated` event
+
+This event should be emitted when a proposal is created. It contains the following parameters:
+
+- `proposalId`: The ID of the proposal.
+- `creator`: The creator of the proposal.
+- `startDate`: The start block number of the proposal.
+- `endDate`: The end block number of the proposal.
+- `metadata`: This should contain a metadata ipfs hash or any other type of link to the metadata of the proposal.
+- `actions`: The actions that will be executed if the proposal passes.
+- `allowFailureMap`: A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
+
+==== `ProposalExecuted` event
+
+This event should be emitted when a proposal is executed. It contains the proposal ID as a parameter.
+
+==== `proposalCount` function
+
+This function should return the proposal count determining the next proposal ID.
+
+==== Usage
+
+```solidity
+contract MyPlugin is IProposal {
+  uint256 public proposalCount;
+
+  function createProposal(
+    uint64 _startDate,
+    uint64 _endDate,
+    bytes calldata _metadata,
+    IDAO.Action[] calldata _actions,
+    uint256 _allowFailureMap
+  ) external {
+    proposalCount++;
+    emit ProposalCreated(
+      proposalCount,
+      msg.sender,
+      _startDate,
+      _endDate,
+      _metadata,
+      _actions,
+      _allowFailureMap
+    );
+  }
+
+  function proposalCount() external view returns (uint256) {
+    return proposalCount;
+  }
+
+  function executeProposal(uint256 _proposalId) external {
+    // Execute the proposal
+    emit ProposalExecuted(_proposalId);
+  }
+}
+```
+
+
+
+=== The `IMembership` Interface
+
+The `IMembership` interface defines common functions and events for for plugins that keep track of membership in a DAO. This plugins can be used to define who can vote on proposals, who can create proposals, etc. The list of members can be defined in the plugin itself or by a contract that defines the membership like an ERC20 or ERC721 token.
+
+The interface is defined as follows:
+
+```solidity title=
+/// @notice An interface to be implemented by DAO plugins that define membership.
+interface IMembership {
+  /// @notice Emitted when members are added to the DAO plugin.
+  /// @param members The list of new members being added.
+  event MembersAdded(address[] members);
+
+  /// @notice Emitted when members are removed from the DAO plugin.
+  /// @param members The list of existing members being removed.
+  event MembersRemoved(address[] members);
+
+  /// @notice Emitted to announce the membership being defined by a contract.
+  /// @param definingContract The contract defining the membership.
+  event MembershipContractAnnounced(address indexed definingContract);
+
+  /// @notice Checks if an account is a member of the DAO.
+  /// @param _account The address of the account to be checked.
+  /// @return Whether the account is a member or not.
+  /// @dev This function must be implemented in the plugin contract that introduces the members to the DAO.
+  function isMember(address _account) external view returns (bool);
+}
+```
+
+The interface contains three events and one function.
+
+==== `MembersAdded` event
+
+The members added event should be emitted when members are added to the DAO plugin. It only contains one `address[] members` parameter that references the list of new members being added.
+
+- `members`: The list of new members being added.
+
+==== `MembersRemoved` event
+
+The members added event should be emitted when members are removed from the DAO plugin. It only contains one `address[] members` parameter that references the list of members being removed.
+
+==== `MembershipContractAnnounced` event
+
+This event should be emitted during the initialization of the membership plugin to announce the membership being defined by a contract. It contains the defining contract as a parameter.
+
+==== `isMember` function
+
+This is a simple function that should be implemented in the plugin contract that introduces the members to the DAO. It checks if an account is a member of the DAO and returns a boolean value.
+
+==== Usage
+
+```solidity
+
+contract MyPlugin is IMembership {
+  address public membershipContract;
+
+  constructor(address tokenAddress) {
+    // Initialize the membership contract
+    // ...
+    membershipContract = tokenAddress;
+    emit MembershipContractAnnounced(tokenAddress);
+  }
+
+  function isMember(address _account) external view returns (bool) {
+    // Check if the account is a member of the DAO
+    // ...
+  }
+
+  // Other plugin functions
+  function addMembers(address[] memory _members) external {
+    // Add members to the DAO
+    // ...
+    emit MembersAdded(_members);
+  }
+
+  function removeMembers(address[] memory _members) external {
+    // Remove members from the DAO
+    // ...
+    emit MembersRemoved(_members);
+  }
+}
+
+```
+
+== Choosing the Plugin Upgradeability
+
+=== How to Choose your Plugin Upgradeability
+
+Although it is not mandatory to choose one of our interfaces as the base contracts for your plugins, we do offer some options for you to inherit from and speed up development.
+
+The needs of your plugin determine the type of plugin you may want to choose. This is based on:
+
+- the need for a plugin's upgradeability
+- whether you need it deployed by a specific deployment method
+- whether you need it to be compatible with meta transactions
+
+In this regard, we provide 3 options for base contracts you can choose from:
+
+- `Plugin` for instantiation via `new`
+- `PluginClones` for [minimal proxy pattern link:https://eips.ethereum.org/EIPS/eip-1167[ERC-1167]] deployment
+- `PluginUUPSUpgradeable` for [UUPS pattern link:https://eips.ethereum.org/EIPS/eip-1822[ERC-1822]] deployment
+
+Let's take a look at what this means for you.
+
+=== Upgradeability & Deployment
+
+Upgradeability and the deployment method of a plugin contract go hand in hand. The motivation behind upgrading smart contracts is nicely summarized by OpenZeppelin:
+
+> Smart contracts in Ethereum are immutable by default. Once you create them there is no way to alter them, effectively acting as an unbreakable contract among participants.
+>
+> However, for some scenarios, it is desirable to be able to modify them [...]
+>
+> - to fix a bug [...],
+> - to add additional features, or simply to
+> - change the rules enforced by it.
+>
+> Here’s what you’d need to do to fix a bug in a contract you cannot upgrade:
+>
+> 1. Deploy a new version of the contract
+> 2. Manually migrate all state from the old one contract to the new one (which can be very expensive in terms of gas fees!)
+> 3. Update all contracts that interacted with the old contract to use the address of the new one
+> 4. Reach out to all your users and convince them to start using the new deployment (and handle both contracts being used simultaneously, as users are slow to migrate
+>
+> _source: link:https://docs.openzeppelin.com/learn/upgrading-smart-contracts#whats-in-an-upgrade[OpenZeppelin: What's in an upgrade]_
+
+Some key things to keep in mind:
+
+- With upgradeable smart contracts, you can modify their code while keep using or even extending the storage (see the guide link:https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable[Writing Upgradeable Contracts] by OpenZeppelin).
+- To enable upgradeable smart contracts (as well as cheap contract clones), the proxy pattern is used.
+- Depending on your upgradeability requirements and the deployment method you choose, you can also greatly reduce the gas costs to distribute your plugin. However, the upgradeability and deployment method can introduce caveats during xref:framework/plugin-setup-processor.adoc[the plugin setup], especially when updating from an older version to a new one.
+
+// TODO:CLAUDIA add table cells style
+|===
+| |`new` Instantiation | Minimal Proxy (Clones)| Transparent Proxy| UUPS Proxy
+
+| upgradeability 
+| [.no-cell]#no#
+| no       
+| yes  
+| yes
+| gas costs      
+| high 
+| very low 
+| moderate 
+| low  
+| difficulty     
+| low  
+| low      
+| high    
+| high 
+|===
+
+Accordingly, we recommend to use link:https://eips.ethereum.org/EIPS/eip-1167[minimal proxies (ERC-1167)] for non-upgradeable and link:https://eips.ethereum.org/EIPS/eip-1822[UUPS proxies (ERC-1822)] for upgradeable plugins.
+To help you with developing and deploying your plugin within the Aragon infrastructure, we provide the following implementation that you can inherit from:
+
+- `Plugin` for instantiation via `new`
+- `PluginClones` for link:https://eips.ethereum.org/EIPS/eip-1167[minimal proxy pattern ERC-1167] deployment
+- `PluginUUPSUpgradeable` for link:https://eips.ethereum.org/EIPS/eip-1822[UUPS pattern ERC-1822] deployment
+
+=== Caveats of Non-upgradeable Plugins
+
+Aragon plugins using the non-upgradeable smart contracts bases (`Plugin`, `PluginCloneable`) can be cheap to deploy (i.e., using clones) but **cannot be updated**.
+
+Updating, in distinction from upgrading, will call Aragon OSx' internal process for switching from an older plugin version to a newer one.
+
+WARNING: To switch from an older version of a non-upgradeable contract to a newer one, the underlying contract has to be replaced. In consequence, the state of the older version is not available in the new version anymore, unless it is migrated or has been made publicly accessible in the old version through getter functions.
