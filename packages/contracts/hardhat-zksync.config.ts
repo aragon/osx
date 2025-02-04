@@ -1,5 +1,5 @@
 import {TestingFork} from './types/hardhat';
-import {ZK_SYNC_NETWORKS} from './utils/zkSync';
+import {ZK_SYNC_NETWORKS} from './utils/zksync';
 import RichAccounts from './utils/zksync-rich-accounts';
 import {addRpcUrlToNetwork} from '@aragon/osx-commons-configs';
 import '@matterlabs/hardhat-zksync-deploy';
