@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx",
-  "version": "1.4.0-rc0",
+  "version": "1.4.0",
   "description": "The Aragon OSx Solidity contracts",
   "publishConfig": {
     "access": "public"
@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/aragon/osx#readme",
   "dependencies": {
-    "@aragon/osx-commons-contracts": "1.4.0-alpha.5",
+    "@aragon/osx-commons-contracts": "1.4.0",
     "@ensdomains/ens-contracts": "0.0.11",
     "@openzeppelin/contracts": "4.9.6",
     "@openzeppelin/contracts-upgradeable": "4.9.6"
