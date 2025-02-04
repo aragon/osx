@@ -123,7 +123,7 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
     closeFork();
   });
 
-  it.only('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {
+  it('should update dao, daoRegistry, PluginRepoRegistry and set permissions correctly', async () => {
     const previousPluginRepoFactory = getAddress('PluginRepoFactory');
     const previousDAOFactoryAddress = getAddress('DAOFactory');
 
@@ -248,7 +248,7 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
     );
   });
 
-  it.only('Previous (v1.3) DAO Factory can still register DAOs', async () => {
+  it('Previous (v1.3) DAO Factory can still register DAOs', async () => {
     // get previouse DAO factory from OSx 1.4
     const previousDAOFactoryAddress = getAddress('DAOFactory');
     const daoFactory = new DAOFactory__factory(deployer).attach(
