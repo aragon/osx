@@ -104,7 +104,12 @@ const config: HardhatUserConfig = {
       gasPrice: 80000000000,
       deploy: ENABLE_DEPLOY_TEST
         ? ['./deploy']
-        : ['./deploy/env', './deploy/new', './deploy/verification'],
+        : [
+            './deploy/env',
+            './deploy/new',
+            './deploy/verification',
+            './deploy/update',
+          ],
     },
     localhost: {
       deploy: ENABLE_DEPLOY_TEST
