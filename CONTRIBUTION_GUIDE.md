@@ -2,6 +2,8 @@
 
 ---
 
+lala
+
 Thank you for being interested in contributing to Aragon! 🎉  We’re excited to have you building this vision with us.
 
 There are many ways to contribute! Some ideas are:
