@@ -43,6 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const storeInfo = {
+    proposalInfo: hre.proposalInfo,
     deployedContractAddresses,
     managementDAOActions: hre.managementDAOActions,
   };
