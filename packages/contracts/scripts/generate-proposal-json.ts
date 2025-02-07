@@ -134,27 +134,26 @@ function main() {
   );
 
   let args = [];
-  // push the metadata
-  if (!jsonFile.metadata) {
-    console.error('No metadata found in merged-proposals.json');
-    return 1;
-  }
-  args.push(ethers.utils.hexlify(ethers.utils.toUtf8Bytes(jsonFile.metadata)));
 
-  // push the actions
   if (!jsonFile.managementDAOActions) {
     console.error('No actions found in merged-proposals.json');
     return 1;
   }
   // remove the description from the actions
   let proposalActions: ProposalAction[] = [];
+  let proposalMetadata: string = '';
   jsonFile.managementDAOActions.forEach((action: Action) => {
     proposalActions.push({
       to: action.to,
       value: action.value,
       data: action.data,
     });
+    proposalMetadata += action.description;
   });
+
+  // push the metadata
+  args.push(ethers.utils.hexlify(ethers.utils.toUtf8Bytes(proposalMetadata)));
+  // push the actions
   args.push(proposalActions);
 
   // push allow failure map
