@@ -1,16 +1,8 @@
 {
-  "name": "@aragon/osx-artifacts",
+  "name": "@aragon/osx",
   "version": "1.4.0-rc0",
-  "description": "The Aragon OSx Solidity contracts",
-  "main": "dist/bundle-cjs.js",
-  "module": "dist/bundle-esm.js",
-  "types": "dist/bundle.d.ts",
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "dist"
-  ],
+  "description": "The Aragon OSx source code",
+  "private": true,
   "scripts": {
     "typechain:osx": "ts-node scripts/generate-typechain-osx.ts",
     "typechain:osx-versions": "ts-node scripts/generate-typechain-osx-versions.ts",
@@ -38,7 +30,7 @@
     "type": "git",
     "url": "https://github.com/aragon/osx"
   },
-  "author": "",
+  "author": "Aragon X",
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/aragon/osx/issues"

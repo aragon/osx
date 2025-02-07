@@ -1,0 +1,32 @@
+{
+  "name": "@aragon/osx-artifacts",
+  "version": "1.4.0-rc0",
+  "description": "The ABI definitions and addresses for Aragon OSx",
+  "main": "dist/bundle-cjs.js",
+  "module": "dist/bundle-esm.js",
+  "types": "dist/bundle.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn prepare-abi && rm -Rf dist && tsc -p tsconfig.json",
+    "prepare-abi": "bash prepare-abi.sh",
+    "prepublishOnly": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aragon/osx"
+  },
+  "author": "Aragon X",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/aragon/osx/issues"
+  },
+  "homepage": "https://github.com/aragon/osx#readme",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
