@@ -153,17 +153,16 @@ async function main() {
   });
 
   // this should be adjusted based on the actual proposal
+  if (!jsonFile.proposalInfo) {
+    console.error('No proposal info found in merged-proposals.json');
+    return 1;
+  }
+
   const metadatata = {
-    title: 'Upgrade OSx Protocol to version 1.4.0',
-    summary:
-      'Upgrade OSx Protocol to version 1.4.0, and release Admin Plugin v1.2, Multisig v1.3 and TokenVoting v1.3',
+    title: jsonFile.proposalInfo.proposalTitle,
+    summary: jsonFile.proposalInfo.proposalSummary,
     description: proposalMetadataFullDescription,
-    resources: [
-      {
-        name: 'audit report',
-        url: 'https://github.com/aragon/osx/tree/main/audits',
-      },
-    ],
+    resources: jsonFile.proposalInfo.proposalResources,
   };
 
   const metadataCIDPath = await uploadToPinata(
@@ -176,40 +175,18 @@ async function main() {
   // push the actions
   args.push(proposalActions);
 
-  // push allow failure map
-  if (
-    jsonFile.allowFailureMap === null ||
-    jsonFile.allowFailureMap === undefined
-  ) {
-    console.error('No allow failure map found in merged-proposals.json');
-    return 1;
-  }
-  args.push(jsonFile.allowFailureMap);
+  // push allow failure map => to zero
+  args.push(0);
 
-  // push approve proposal
-  if (
-    jsonFile.approveProposal === null ||
-    jsonFile.approveProposal === undefined
-  ) {
-    console.error('No approve proposal found in merged-proposals.json');
-    return 1;
-  }
-  args.push(jsonFile.approveProposal);
+  // push approve proposal => to false
+  args.push(false);
 
-  // push try execution
-  if (jsonFile.tryExecution === null || jsonFile.tryExecution === undefined) {
-    console.error('No try execution found in merged-proposals.json');
-    return 1;
-  }
-  args.push(jsonFile.tryExecution);
+  // push try execution => to false
+  args.push(false);
 
   // push the start and end dates
-  if (!jsonFile.startDate || !jsonFile.endDate) {
-    console.error('No start or end date found in merged-proposals.json');
-    return 1;
-  }
-  args.push(jsonFile.startDate);
-  args.push(jsonFile.endDate);
+  args.push(jsonFile.proposalInfo.proposalStartDate);
+  args.push(jsonFile.proposalInfo.proposalEndDate);
 
   // generate the calldata in a json file
   generateHexCalldataInJson(args);
