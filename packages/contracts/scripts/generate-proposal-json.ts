@@ -1,5 +1,6 @@
 // note using version 1.3.0 due to is the one currently installed on the managing dao change it once it's upgraded
 import {Multisig__factory as Multisig_v1_3_0__factory} from '../typechain/@aragon/osx-v1.3.0/plugins/governance/multisig/Multisig.sol';
+import {uploadToPinata} from '@aragon/osx-commons-sdk';
 import {ethers} from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -125,7 +126,7 @@ export function generateHexCalldataInJson(functionArgs: any[]) {
   }
 }
 
-function main() {
+async function main() {
   generateProposalJson();
 
   // get the actions to send it to the createHexCalldata function
@@ -141,18 +142,37 @@ function main() {
   }
   // remove the description from the actions
   let proposalActions: ProposalAction[] = [];
-  let proposalMetadata: string = '';
+  let proposalMetadataFullDescription: string = '';
   jsonFile.managementDAOActions.forEach((action: Action) => {
     proposalActions.push({
       to: action.to,
       value: action.value,
       data: action.data,
     });
-    proposalMetadata += action.description;
+    proposalMetadataFullDescription += action.description + ' ';
   });
 
+  // this should be adjusted based on the actual proposal
+  const metadatata = {
+    title: 'Upgrade OSx Protocol to version 1.4.0',
+    summary:
+      'Upgrade OSx Protocol to version 1.4.0, and release Admin Plugin v1.2, Multisig v1.3 and TokenVoting v1.3',
+    description: proposalMetadataFullDescription,
+    resources: [
+      {
+        name: 'audit report',
+        url: 'https://github.com/aragon/osx/tree/main/audits',
+      },
+    ],
+  };
+
+  const metadataCIDPath = await uploadToPinata(
+    JSON.stringify(metadatata, null, 2),
+    `management-dao-proposal-update-v1.4.0-metadata`
+  );
+
   // push the metadata
-  args.push(ethers.utils.hexlify(ethers.utils.toUtf8Bytes(proposalMetadata)));
+  args.push(ethers.utils.hexlify(ethers.utils.toUtf8Bytes(metadataCIDPath)));
   // push the actions
   args.push(proposalActions);
 
@@ -195,4 +215,11 @@ function main() {
   generateHexCalldataInJson(args);
 }
 
-main();
+main()
+  .then(() => {
+    console.log('done!');
+  })
+  .catch(error => {
+    console.error('Error in main:', error);
+    process.exit(1);
+  });
