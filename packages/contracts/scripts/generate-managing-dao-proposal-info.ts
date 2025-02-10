@@ -179,8 +179,7 @@ async function main() {
 
   // this should be adjusted based on the actual proposal
   if (!jsonFile.proposalInfo) {
-    console.error('No proposal info found in merged-proposals.json');
-    return 1;
+    throw new Error('No proposal info found in merged-proposals.json');
   }
 
   const metadatata = {
