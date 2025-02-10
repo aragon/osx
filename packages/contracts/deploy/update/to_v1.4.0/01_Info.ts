@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
     // todo either adjust this values or configure them to get the correct ones from env or json
     proposalStartDate: 0,
-    proposalEndDate: 1739096365,
+    proposalEndDate: 1739802134,
   };
 };
 export default func;
