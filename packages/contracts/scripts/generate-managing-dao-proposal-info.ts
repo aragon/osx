@@ -42,7 +42,7 @@ const mergedProposalActionsPath = path.join(
 
 const calldataPath = path.join(__dirname, './calldata.json');
 
-async function generateProposalJson() {
+function generateProposalJson() {
   try {
     // check if the file exists
     if (!fs.existsSync(deployedContractsPath)) {
@@ -109,7 +109,7 @@ async function generateProposalJson() {
   }
 }
 
-export function generateHexCalldataInJson(functionArgs: any[]) {
+function generateHexCalldataInJson(functionArgs: any[]) {
   try {
     const abi = Multisig_v1_3_0__factory.abi;
     const iface = new ethers.utils.Interface(abi);
