@@ -104,8 +104,7 @@ function generateProposalJson() {
       `Successfully created merged-proposals.json with all proposal actions in ${mergedProposalActionsPath}!`
     );
   } catch (error) {
-    console.error('Error generating proposal JSON:', error);
-    return;
+    throw `Error generating proposal JSON: ${error}`;
   }
 }
 
