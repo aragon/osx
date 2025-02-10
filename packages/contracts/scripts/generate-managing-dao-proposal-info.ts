@@ -11,7 +11,7 @@ import * as path from 'path';
  *
  * Steps
  * 1- deploy all needed plugins
- * 2- copy their deployment script to the `scripts/plugin-proposals-data` folder
+ * 2- copy their deployment json files to the `scripts/plugin-proposals-data` folder
  * 3- deploy the new osx version (this can be done before deploy the plugins) => this will create a `deployed_contracts.json` file
  * 4- run this script to merge the calldata from each plugin and the framework deployment into a single file
  */
