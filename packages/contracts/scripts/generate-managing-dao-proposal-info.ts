@@ -148,8 +148,7 @@ function generateHexCalldataInJson(functionArgs: any[]) {
       `Successfully created calldata.json with the function call information in ${calldataPath}!`
     );
   } catch (error) {
-    console.error('Error encoding function data:', error);
-    throw error;
+    throw `Error encoding function data: ${error}`;
   }
 }
 
