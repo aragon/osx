@@ -83,10 +83,27 @@ function generateProposalJson() {
       const dataRaw = fs.readFileSync(filePath, 'utf-8');
       const data = JSON.parse(dataRaw);
 
+      console.log(data.actions[0].value === undefined);
+      // Validate that the JSON has both 'actions' and 'proposalDescription'
+      if (
+        !data.actions ||
+        !Array.isArray(data.actions) ||
+        data.actions.length === 0 ||
+        !data.proposalDescription ||
+        !data.actions[0].to ||
+        data.actions[0].value === undefined ||
+        !data.actions[0].data
+      ) {
+        console.error(
+          `File ${file} is missing required fields ('actions' and/or 'proposalDescription'). Skipping.`
+        );
+        continue;
+      }
+
       tmpAction = {
-        to: data.actions[0].to,
-        value: data.actions[0].value,
-        data: data.actions[0].data,
+        to: data.actions[0]?.to,
+        value: data.actions[0]?.value,
+        data: data.actions[0]?.data,
         description: data.proposalDescription,
       };
 
@@ -147,8 +164,7 @@ async function main() {
   let args = [];
 
   if (!jsonFile.managementDAOActions) {
-    console.error('No actions found in merged-proposals.json');
-    return 1;
+    throw new Error('No actions found in merged-proposals.json');
   }
   // remove the description from the actions
   let proposalActions: ProposalAction[] = [];
