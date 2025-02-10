@@ -5,6 +5,17 @@ import {ethers} from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * This script merges the plugin proposals actions inside the `proposalActionsPath` (./plugin-proposals-data) folder
+ * into the `mergedProposalActionsPath` (./merged-proposals.json) file.
+ *
+ * Steps
+ * 1- deploy all needed plugins
+ * 2- copy their deployment script to the `scripts/plugin-proposals-data` folder
+ * 3- deploy the new osx version (this can be done before deploy the plugins) => this will create a `deployed_contracts.json` file
+ * 4- run this script to merge the calldata from each plugin and the framework deployment into a single file
+ */
+
 interface Action {
   to: string;
   value: number;
@@ -90,7 +101,7 @@ async function generateProposalJson() {
     );
 
     console.log(
-      'Successfully created merged-proposals.json with all proposal actions!'
+      `Successfully created merged-proposals.json with all proposal actions in ${mergedProposalActionsPath}!`
     );
   } catch (error) {
     console.error('Error generating proposal JSON:', error);
@@ -118,7 +129,7 @@ export function generateHexCalldataInJson(functionArgs: any[]) {
       'utf-8'
     );
     console.log(
-      'Successfully created calldata.json with the function call information!'
+      `Successfully created calldata.json with the function call information in ${calldataPath}!`
     );
   } catch (error) {
     console.error('Error encoding function data:', error);

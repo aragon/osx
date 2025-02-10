@@ -32,7 +32,8 @@
     "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "docs": "DOCS=true scripts/prepare-docs.sh",
-    "clean": "rm -rf artifacts cache deployments typechain"
+    "clean": "rm -rf artifacts cache deployments typechain",
+    "generate-proposal": "ts-node scripts/generate-manaign-dao-proposal-info.ts"
   },
   "repository": {
     "type": "git",
