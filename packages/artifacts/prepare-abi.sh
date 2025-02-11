@@ -35,13 +35,30 @@ do
     BYTECODE=$(node -e "console.log(JSON.parse(fs.readFileSync('$FILE').toString()).bytecode || '')")
     CONTRACT_NAME=${SRC_FILE_NAME%".json"}
 
-    echo "const ${CONTRACT_NAME}ABI = $ABI as const;" >> $TARGET_ABI_FILE
+    echo "export const ${CONTRACT_NAME}ABI = $ABI as const;" >> $TARGET_ABI_FILE
+
     if [ "$BYTECODE" == "0x" -o "$BYTECODE" == "" ]; then
-        echo "export const $CONTRACT_NAME = { abi: ${CONTRACT_NAME}ABI, bytecode: null };" >> $TARGET_ABI_FILE
+        echo "const ${CONTRACT_NAME}Bytecode = null;" >> $TARGET_ABI_FILE
     else
         echo "const ${CONTRACT_NAME}Bytecode = \"$BYTECODE\";" >> $TARGET_ABI_FILE
-        echo "export const $CONTRACT_NAME = { abi: ${CONTRACT_NAME}ABI, bytecode: ${CONTRACT_NAME}Bytecode };" >> $TARGET_ABI_FILE
     fi
+
+    echo "
+export class ${CONTRACT_NAME} {
+  /** @deprecated Use \`${CONTRACT_NAME}ABI\` instead. */
+  static get abi() {
+    console.warn('Warning: \`${CONTRACT_NAME}.abi\` is deprecated. Use \`${CONTRACT_NAME}ABI\` instead.');
+    return ${CONTRACT_NAME}ABI;
+  }
+
+  /** @deprecated Use the bytecode deployed on the target network. See addresses.json */
+  static get bytecode(): \`0x\${string}\` | null {
+    console.warn('Warning: \`${CONTRACT_NAME}.bytecode\` is deprecated and may be removed in future versions.');
+    return ${CONTRACT_NAME}Bytecode;
+  }
+}
+
+" >> $TARGET_ABI_FILE
 
     echo "" >> $TARGET_ABI_FILE
 done
@@ -66,13 +83,30 @@ do
     BYTECODE=$(node -e "console.log(JSON.parse(fs.readFileSync('$FILE').toString()).bytecode || '')")
     CONTRACT_NAME=${SRC_FILE_NAME%".json"}
 
-    echo "const ${CONTRACT_NAME}ABI = $ABI as const;" >> $TARGET_ABI_FILE
+    echo "export const ${CONTRACT_NAME}ABI = $ABI as const;" >> $TARGET_ABI_FILE
+
     if [ "$BYTECODE" == "0x" -o "$BYTECODE" == "" ]; then
-        echo "export const $CONTRACT_NAME = { abi: ${CONTRACT_NAME}ABI, bytecode: null };" >> $TARGET_ABI_FILE
+        echo "const ${CONTRACT_NAME}Bytecode = null;" >> $TARGET_ABI_FILE
     else
         echo "const ${CONTRACT_NAME}Bytecode = \"$BYTECODE\";" >> $TARGET_ABI_FILE
-        echo "export const $CONTRACT_NAME = { abi: ${CONTRACT_NAME}ABI, bytecode: ${CONTRACT_NAME}Bytecode };" >> $TARGET_ABI_FILE
     fi
+
+    echo "
+export class ${CONTRACT_NAME} {
+  /** @deprecated Use \`${CONTRACT_NAME}ABI\` instead. */
+  static get abi() {
+    console.warn('Warning: \`${CONTRACT_NAME}.abi\` is deprecated. Use \`${CONTRACT_NAME}ABI\` instead.');
+    return ${CONTRACT_NAME}ABI;
+  }
+
+  /** @deprecated Use the bytecode deployed on the target network. See addresses.json */
+  static get bytecode(): \`0x\${string}\` | null {
+    console.warn('Warning: \`${CONTRACT_NAME}.bytecode\` is deprecated and may be removed in future versions.');
+    return ${CONTRACT_NAME}Bytecode;
+  }
+}
+
+" >> $TARGET_ABI_FILE
 
     echo "" >> $TARGET_ABI_FILE
 done
