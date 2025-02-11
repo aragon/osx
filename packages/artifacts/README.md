@@ -11,26 +11,23 @@ yarn add @aragon/osx-artifacts
 ```typescript
 // ABI definitions
 import {
-    DAO,
-    IDAO,
-    DAOFactory,
-    DAORegistry,
-    PluginRepo,
-    PluginRepoFactory,
-    PluginRepoRegistry,
-    PluginSetupProcessor,
-    PermissionManager
+    DAOABI,
+    IDAOABI,
+    DAOFactoryABI,
+    DAORegistryABI,
+    PluginRepoABI,
+    PluginRepoFactoryABI,
+    PluginRepoRegistryABI,
+    PluginSetupProcessorABI,
+    PermissionManagerABI
 } from "@aragon/osx-artifacts";
 
-console.log("DAO ABI", DAO.abi);
-console.log("DAO bytecode", DAO.bytecode);
-
-console.log("IDAO ABI", IDAO.abi);
+console.log("DAO ABI", DAOABI);
 
 // Protocol addresses per-network
 import { addresses } from "@aragon/osx-artifacts";
 
-console.log(addresses.daoFactory);
+console.log(addresses.daoFactory.mainnet);
 ```
 
 You can also open [addresses.json](./src/addresses.json) directly.
