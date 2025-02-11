@@ -50,20 +50,6 @@ The `build` script will:
 4. Generate their ABI.
 5. Extract their ABI and embed it into on `src/abi.ts`.
 
-### Publish to NPM
-
-Ensure the package `version` is up to date within `package.json` before publishing.
-
-Check that only the intended files will be published:
-```sh
-yarn publish --dry-run
-```
-
-To publish the package to NPM, run:
-```sh
-yarn publish --access public
-```
-
 ## Documentation
 
 You can find all documentation regarding how to use this plugin in [Aragon's documentation here](https://docs.aragon.org/osx-contracts/1.x/index.html).
