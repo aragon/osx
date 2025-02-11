@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx",
-  "version": "1.4.0-rc0",
+  "version": "1.4.0",
   "description": "The Aragon OSx source code",
   "private": true,
   "scripts": {
