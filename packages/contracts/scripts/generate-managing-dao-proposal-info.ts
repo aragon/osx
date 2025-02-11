@@ -43,113 +43,93 @@ const mergedProposalActionsPath = path.join(
 const calldataPath = path.join(__dirname, './calldata.json');
 
 function generateProposalJson() {
-  try {
-    // check if the file exists
-    if (!fs.existsSync(deployedContractsPath)) {
-      console.error('deployed_contracts.json file not found');
-      return;
-    }
-
-    const deployedContractsRaw = fs.readFileSync(
-      deployedContractsPath,
-      'utf-8'
-    );
-    // load the osx deployed contracts
-    const deployedContracts = JSON.parse(deployedContractsRaw);
-
-    // creates the folder if it doesn't exist
-    if (!fs.existsSync(proposalActionsPath)) {
-      fs.mkdirSync(proposalActionsPath, {recursive: true});
-      console.error(
-        'plugin-proposals-data folder created, add plugin proposals json to merge them'
-      );
-      return;
-    }
-
-    // read the plugin proposals data
-    const proposalFiles = fs
-      .readdirSync(proposalActionsPath)
-      .filter(file => file.endsWith('.json'));
-
-    if (proposalFiles.length === 0) {
-      console.error('No plugin proposals found in plugin-proposals-data');
-      return;
-    }
-
-    // store each plugin action
-    let tmpAction: Action;
-    for (const file of proposalFiles) {
-      const filePath = path.join(proposalActionsPath, file);
-      const dataRaw = fs.readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(dataRaw);
-
-      console.log(data.actions[0].value === undefined);
-      // Validate that the JSON has both 'actions' and 'proposalDescription'
-      if (
-        !data.actions ||
-        !Array.isArray(data.actions) ||
-        data.actions.length === 0 ||
-        !data.proposalDescription ||
-        !data.actions[0].to ||
-        data.actions[0].value === undefined ||
-        !data.actions[0].data
-      ) {
-        console.error(
-          `File ${file} is missing required fields ('actions' and/or 'proposalDescription'). Skipping.`
-        );
-        continue;
-      }
-
-      tmpAction = {
-        to: data.actions[0]?.to,
-        value: data.actions[0]?.value,
-        data: data.actions[0]?.data,
-        description: data.proposalDescription,
-      };
-
-      deployedContracts.managementDAOActions.push(tmpAction);
-    }
-
-    // write the updated JSON back to a new file
-    fs.writeFileSync(
-      mergedProposalActionsPath,
-      JSON.stringify(deployedContracts, null, 2),
-      'utf-8'
-    );
-
-    console.log(
-      `Successfully created merged-proposals.json with all proposal actions in ${mergedProposalActionsPath}!`
-    );
-  } catch (error) {
-    throw `Error generating proposal JSON: ${error}`;
+  // check if the file exists
+  if (!fs.existsSync(deployedContractsPath)) {
+    throw new Error('deployed_contracts.json file not found');
   }
+
+  const deployedContractsRaw = fs.readFileSync(deployedContractsPath, 'utf-8');
+  // load the osx deployed contracts
+  const deployedContracts = JSON.parse(deployedContractsRaw);
+
+  // creates the folder if it doesn't exist
+  if (!fs.existsSync(proposalActionsPath)) {
+    fs.mkdirSync(proposalActionsPath, {recursive: true});
+
+    throw new Error('No plugin proposals found in plugin-proposals-data');
+  }
+
+  // read the plugin proposals data
+  const proposalFiles = fs
+    .readdirSync(proposalActionsPath)
+    .filter(file => file.endsWith('.json'));
+
+  if (proposalFiles.length === 0) {
+    throw new Error('No plugin proposals found in plugin-proposals-data');
+  }
+
+  // store each plugin action
+  let tmpAction: Action;
+  for (const file of proposalFiles) {
+    const filePath = path.join(proposalActionsPath, file);
+    const dataRaw = fs.readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(dataRaw);
+
+    // Validate that the JSON has both 'actions' and 'proposalDescription'
+    if (
+      !data.actions ||
+      !Array.isArray(data.actions) ||
+      data.actions.length === 0 ||
+      !data.proposalDescription ||
+      !data.actions[0].to ||
+      data.actions[0].value === undefined ||
+      !data.actions[0].data
+    ) {
+      console.error(
+        `File ${file} is missing required fields ('actions' and/or 'proposalDescription'). Skipping.`
+      );
+      continue;
+    }
+
+    tmpAction = {
+      to: data.actions[0]?.to,
+      value: data.actions[0]?.value,
+      data: data.actions[0]?.data,
+      description: data.proposalDescription,
+    };
+
+    deployedContracts.managementDAOActions.push(tmpAction);
+  }
+
+  // write the updated JSON back to a new file
+  fs.writeFileSync(
+    mergedProposalActionsPath,
+    JSON.stringify(deployedContracts, null, 2),
+    'utf-8'
+  );
+
+  console.log(
+    `Successfully created merged-proposals.json with all proposal actions in ${mergedProposalActionsPath}!`
+  );
 }
 
 function generateHexCalldataInJson(functionArgs: any[]) {
-  try {
-    const abi = Multisig_v1_3_0__factory.abi;
-    const iface = new ethers.utils.Interface(abi);
+  const abi = Multisig_v1_3_0__factory.abi;
+  const iface = new ethers.utils.Interface(abi);
 
-    const calldata = iface.encodeFunctionData('createProposal', functionArgs);
+  const calldata = iface.encodeFunctionData('createProposal', functionArgs);
 
-    const jsonOutput = {
-      functionName: 'createProposal',
-      functionArgs: functionArgs,
-      calldata: calldata,
-    };
+  const jsonOutput = {
+    functionName: 'createProposal',
+    functionArgs: functionArgs,
+    calldata: calldata,
+  };
 
-    // write the call information in the json file
-    fs.writeFileSync(
-      calldataPath,
-      JSON.stringify(jsonOutput, null, 2),
-      'utf-8'
-    );
-    console.log(
-      `Successfully created calldata.json with the function call information in ${calldataPath}!`
-    );
-  } catch (error) {
-    throw `Error encoding function data: ${error}`;
-  }
+  // write the call information in the json file
+  fs.writeFileSync(calldataPath, JSON.stringify(jsonOutput, null, 2), 'utf-8');
+  console.log(
+    `Successfully created calldata.json with the function call information in ${calldataPath}!`
+  );
 }
 
 async function main() {
