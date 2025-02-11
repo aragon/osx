@@ -80,19 +80,19 @@
       "zksyncSepolia": "0x22eE909B94c5FAeee67B7e187ca81E5A291A9EC0"
     },
     "pluginSetupProcessor": {
-      "mainnet": "",
-      "sepolia": "",
-      "holesky": "",
-      "devSepolia": "",
-      "polygon": "",
-      "mumbai": "",
-      "base": "",
-      "baseSepolia": "",
-      "arbitrum": "",
-      "arbitrumSepolia": "",
-      "linea": "",
-      "lineaSepolia": "",
-      "zksync": "",
-      "zksyncSepolia": ""
+      "mainnet": "0xE978942c691e43f65c1B7c7F8f1dc8cDF061B13f",
+      "sepolia": "0xC24188a73dc09aA7C721f96Ad8857B469C01dC9f",
+      "holesky": "0xCe0B4124dea6105bfB85fB4461c4D39f360E9ef3",
+      "devSepolia": "0x9e99D11b513dD2cc5e117a5793412106502FF04B",
+      "polygon": "0x879D9dfe3F36d7684BeC1a2bB4Aa8E8871A7245B",
+      "mumbai": "0x9227b311C5cecB416707F1C8B7Ca1b52649AabEc",
+      "base": "0x91a851E9Ed7F2c6d41b15F76e4a88f5A37067cC9",
+      "baseSepolia": "0xC24188a73dc09aA7C721f96Ad8857B469C01dC9f",
+      "arbitrum": "0x308a1DC5020c4B5d992F5543a7236c465997fecB",
+      "arbitrumSepolia": "0xC24188a73dc09aA7C721f96Ad8857B469C01dC9f",
+      "linea": "0x8d6726Fe85Caa585d88FD8342ebEEE88d703E754",
+      "lineaSepolia": "0x74a4b164008381637927282EAd471E73e6853Cac",
+      "zksync": "0x8E3e98ECF5CdBF2bEcCD91d3BA580D472df5A0cB",
+      "zksyncSepolia": "0xe2Ef39f1be2269644cBfa9b70003A143bF1fdf4d"
     }
 }
