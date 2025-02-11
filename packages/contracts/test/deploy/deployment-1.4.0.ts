@@ -73,8 +73,24 @@ function getMultisigEvents(
   return event;
 }
 
+// this function is deployment 1.4.0 specific adjust it for future deployments
+function checkStatusAfterProposal(proposal: any) {
+  // check permissions are correct
+
+  // new dao factory has REGISTER_DAO_PERMISSION_ID on the DAORegistry
+  // old dao factory has REGISTER_DAO_PERMISSION_ID on the DAORegistry
+
+  // new repo factory has REGISTER_PLUGIN_REPO_PERMISSION on the PluginRepoRegistry
+  // old repo factory has not REGISTER_PLUGIN_REPO_PERMISSION on the PluginRepoRegistry
+
+  // check the dao registry implementation has changed
+
+  // check the plugin repo registry implementation has changed
+
+  expect(proposal.executed).to.be.true;
+}
+
 describe.only('1.4.0 Deployment', function () {
-  let deployer: SignerWithAddress;
   let calldataJson: any;
 
   beforeEach(async () => {
@@ -136,7 +152,7 @@ describe.only('1.4.0 Deployment', function () {
     );
 
     // get proposal and check the info
-    const proposal = await multisig.getProposal(proposalId);
+    let proposal = await multisig.getProposal(proposalId);
 
     expect(proposal.executed).to.be.false;
     expect(proposal.approvals).to.equal(0);
@@ -148,7 +164,6 @@ describe.only('1.4.0 Deployment', function () {
     const member1 = await impersonateAccount(daoMultisigMembers[1]);
     const member2 = await impersonateAccount(daoMultisigMembers[2]);
     const member3 = await impersonateAccount(daoMultisigMembers[3]);
-    const member4 = await impersonateAccount(daoMultisigMembers[4]);
 
     const multisigAsMember1 = Multisig_v1_3_0__factory.connect(
       daoMultisigAddr,
@@ -182,14 +197,15 @@ describe.only('1.4.0 Deployment', function () {
     receipt = await tx.wait();
 
     // todo think on a way to parse all events
-    // check the proposal is executed event
-    // let proposalExecutedEvent = getMultisigEvents(
-    //   receipt,
-    //   'ProposalExecuted',
-    //   multisig
-    // );
 
-    // expect(proposalExecutedEvent).to.not.be.undefined;
+    // check the proposal is executed
+    proposal = await multisig.getProposal(proposalId);
+    expect(proposal.executed).to.be.true;
+
+    // todo add check for
+    // 1- permissions are correct
+    // 1.1- new factories and old factories have permission
+    // 2- all plugins new versions are created
   });
 
   it('execute all the proposal actions one by one', async () => {
