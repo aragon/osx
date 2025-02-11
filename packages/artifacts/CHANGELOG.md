@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Shipping the ABI and addresses for OSx v1.4
-- Exporting a lighter package
-- Note: certain contracts that were previously exported and were not really related to OSx will are no longer being shipped. 
+- Marking `ContractName.abi` and `ContractName.bytecode` as deprecated
+- Note: certain contracts that were previously exported and were not really related to OSx are no longer present. 
 
 ## v1.3
 
