@@ -87,7 +87,7 @@ jobs:
           cache: 'yarn'
           node-version: 18
       - name: Install dependencies
-        run: yarn install --pure-lockfile
+        run: yarn install --pure-lockfile --ignore-scripts
       - name: Build Contracts
         run: cd ./packages/contracts/ && yarn run build
       - name: Deploy Subgraph

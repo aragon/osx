@@ -38,7 +38,7 @@ ALCHEMY_API_KEY="zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 Once the `.env` file is created, you can run the following command to install the dependencies:
 
 ```bash
-yarn install && cd packages/contracts && yarn install && yarn build && yarn typechain
+yarn install --ignore-scripts && cd packages/contracts && yarn install --ignore-scripts && yarn build && yarn typechain
 ```
 
 Now you are ready to start developing your plugin. You should have two files called `MyPlugin.sol` and `MyPluginSetup.sol` inside 

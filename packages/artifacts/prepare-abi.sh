@@ -10,7 +10,7 @@ TARGET_ABI_FILE="./src/abi.ts"
 # Move into contracts package and install dependencies
 cd $CONTRACTS_FOLDER
 
-yarn install && yarn build
+yarn --ignore-scripts && yarn build
 
 # Move back to artifacts package
 cd - > /dev/null

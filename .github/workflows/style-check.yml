@@ -17,6 +17,6 @@ jobs:
           cache: 'yarn'
           node-version: 18
       - name: Install dependencies
-        run: yarn install --pure-lockfile
+        run: yarn install --pure-lockfile --ignore-scripts
       - name: Check with prettier
         run: yarn run prettier:check
