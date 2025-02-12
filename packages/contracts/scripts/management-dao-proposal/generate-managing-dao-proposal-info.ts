@@ -136,7 +136,7 @@ function generateHexCalldataInJson(functionArgs: any[]) {
 }
 
 async function main() {
-  // generateProposalJson();
+  generateProposalJson();
 
   // Check if merged proposals file exists
   if (!fs.existsSync(mergedProposalActionsPath)) {
