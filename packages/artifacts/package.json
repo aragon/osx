@@ -12,8 +12,7 @@
   ],
   "scripts": {
     "build": "yarn prepare-abi && rm -Rf dist && tsc -p tsconfig.json",
-    "prepare-abi": "bash prepare-abi.sh",
-    "prepublishOnly": "yarn build"
+    "prepare-abi": "bash prepare-abi.sh"
   },
   "repository": {
     "type": "git",
