@@ -17,10 +17,13 @@ const NETWORK = 'sepolia';
 
 const mergedProposalActionsPath = path.join(
   __dirname,
-  '../../scripts/merged-proposals.json'
+  '../../scripts/management-dao-proposal/generated/merged-proposals.json'
 );
 
-const calldataPath = path.join(__dirname, '../../scripts/calldata.json');
+const calldataPath = path.join(
+  __dirname,
+  '../../scripts/management-dao-proposal/generated/calldata.json'
+);
 
 const daoAddress = '0xca834b3f404c97273f34e108029eed776144d324';
 const daoMultisigAddr = '0xfcead61339e3e73090b587968fce8b090e0600ef';
@@ -72,6 +75,7 @@ function getCalldataJson() {
 
   return calldataJson;
 }
+
 function getAddressFromDescription(description: string): string {
   const address = description.split("at '")[1].split("' \n")[0];
   return address;
@@ -99,6 +103,24 @@ function getAddresses(): Addresses {
     fs.readFileSync(mergedProposalActionsPath, 'utf8')
   );
 
+  // Find Admin plugin setup address from managementDAOActions
+  let adminIdx = -1;
+  let multisigIdx = -1;
+  let tokenVotingIdx = -1;
+  for (let i = 0; i < addresses.managementDAOActions.length; i++) {
+    const action = addresses.managementDAOActions[i];
+    if (action.description.includes('AdminSetup')) {
+      adminIdx = i;
+    } else if (action.description.includes('TokenVotingSetup')) {
+      tokenVotingIdx = i;
+    } else if (action.description.includes('MultisigSetup')) {
+      multisigIdx = i;
+    }
+  }
+  if (adminIdx === -1 || multisigIdx === -1 || tokenVotingIdx === -1) {
+    throw new Error('Admin, Multisig, or TokenVotingSetup not found');
+  }
+
   return {
     daoFactory: addresses.deployedContractAddresses.DAOFactory,
     pluginRepoFactory: addresses.deployedContractAddresses.PluginRepoFactory,
@@ -106,17 +128,17 @@ function getAddresses(): Addresses {
       addresses.deployedContractAddresses.DAORegistryImplementation,
     pluginRepoRegistryImplementation:
       addresses.deployedContractAddresses.PluginRepoRegistryImplementation,
-    adminRepo: addresses.managementDAOActions[5].to,
-    tokenVotingRepo: addresses.managementDAOActions[6].to,
-    multisigRepo: addresses.managementDAOActions[7].to,
+    adminRepo: addresses.managementDAOActions[adminIdx].to,
+    tokenVotingRepo: addresses.managementDAOActions[tokenVotingIdx].to,
+    multisigRepo: addresses.managementDAOActions[multisigIdx].to,
     adminPluginSetup: getAddressFromDescription(
-      addresses.managementDAOActions[5].description
+      addresses.managementDAOActions[adminIdx].description
     ),
     tokenVotingPluginSetup: getAddressFromDescription(
-      addresses.managementDAOActions[6].description
+      addresses.managementDAOActions[tokenVotingIdx].description
     ),
     multisigPluginSetup: getAddressFromDescription(
-      addresses.managementDAOActions[7].description
+      addresses.managementDAOActions[multisigIdx].description
     ),
   };
 }

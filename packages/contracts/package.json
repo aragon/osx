@@ -33,7 +33,7 @@
     "docgen": "hardhat docgen",
     "docs": "DOCS=true scripts/prepare-docs.sh",
     "clean": "rm -rf artifacts cache deployments typechain",
-    "generate-proposal": "ts-node scripts/generate-managing-dao-proposal-info.ts"
+    "generate-proposal": "ts-node scripts/management-dao-proposal/generate-managing-dao-proposal-info.ts"
   },
   "repository": {
     "type": "git",
