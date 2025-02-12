@@ -1,9 +1,12 @@
 // note using version 1.3.0 due to is the one currently installed on the managing dao change it once it's upgraded
-import {Multisig__factory as Multisig_v1_3_0__factory} from '../typechain/@aragon/osx-v1.3.0/plugins/governance/multisig/Multisig.sol';
+import {Multisig__factory as Multisig_v1_3_0__factory} from '../../typechain/@aragon/osx-v1.3.0/plugins/governance/multisig/Multisig.sol';
 import {uploadToPinata} from '@aragon/osx-commons-sdk';
+import dotenv from 'dotenv';
 import {ethers} from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
+
+dotenv.config({path: path.resolve(__dirname, '../../.env')});
 
 /**
  * This script merges the plugin proposals actions inside the `proposalActionsPath` (./plugin-proposals-data) folder
@@ -31,16 +34,16 @@ interface ProposalAction {
 
 const deployedContractsPath = path.join(
   __dirname,
-  '../deployed_contracts.json'
+  '../../deployed_contracts.json'
 );
-const proposalActionsPath = path.join(__dirname, './plugin-proposals-data');
+const proposalActionsPath = path.join(__dirname, './files-to-merge');
 
 const mergedProposalActionsPath = path.join(
   __dirname,
-  './merged-proposals.json'
+  './generated/merged-proposals.json'
 );
 
-const calldataPath = path.join(__dirname, './calldata.json');
+const calldataPath = path.join(__dirname, './generated/calldata.json');
 
 function generateProposalJson() {
   // check if the file exists
@@ -133,7 +136,12 @@ function generateHexCalldataInJson(functionArgs: any[]) {
 }
 
 async function main() {
-  generateProposalJson();
+  // generateProposalJson();
+
+  // Check if merged proposals file exists
+  if (!fs.existsSync(mergedProposalActionsPath)) {
+    throw new Error(`File not found: ${mergedProposalActionsPath}`);
+  }
 
   // get the actions to send it to the createHexCalldata function
   const jsonFile = JSON.parse(
@@ -162,16 +170,21 @@ async function main() {
     throw new Error('No proposal info found in merged-proposals.json');
   }
 
-  const metadatata = {
+  const metadata = {
     title: jsonFile.proposalInfo.proposalTitle,
     summary: jsonFile.proposalInfo.proposalSummary,
     description: proposalMetadataFullDescription,
     resources: jsonFile.proposalInfo.proposalResources,
   };
 
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
+
   const metadataCIDPath = await uploadToPinata(
-    JSON.stringify(metadatata, null, 2),
-    `management-dao-proposal-update-v1.4.0-metadata`
+    metadata,
+    `management-dao-proposal-update-v1.4.0-metadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   // push the metadata
