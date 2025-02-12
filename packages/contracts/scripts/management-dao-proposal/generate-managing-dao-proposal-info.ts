@@ -59,7 +59,7 @@ function generateProposalJson() {
   if (!fs.existsSync(proposalActionsPath)) {
     fs.mkdirSync(proposalActionsPath, {recursive: true});
 
-    throw new Error('No plugin proposals found in plugin-proposals-data');
+    throw new Error('No plugin proposals found in files-to-merge');
   }
 
   // read the plugin proposals data
@@ -68,7 +68,7 @@ function generateProposalJson() {
     .filter(file => file.endsWith('.json'));
 
   if (proposalFiles.length === 0) {
-    throw new Error('No plugin proposals found in plugin-proposals-data');
+    throw new Error('No plugin proposals found in files-to-merge');
   }
 
   // store each plugin action
@@ -102,6 +102,12 @@ function generateProposalJson() {
     };
 
     deployedContracts.managementDAOActions.push(tmpAction);
+  }
+
+  // Create directory if it doesn't exist
+  const mergedProposalDir = path.dirname(mergedProposalActionsPath);
+  if (!fs.existsSync(mergedProposalDir)) {
+    fs.mkdirSync(mergedProposalDir, {recursive: true});
   }
 
   // write the updated JSON back to a new file
