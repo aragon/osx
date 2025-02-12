@@ -34,7 +34,7 @@ yarn-error.log*
 deployments
 deployed_contracts.json
 managementDAOTX.json
-packages/contracts/scripts/plugin-proposals-data/
+packages/contracts/scripts/management-dao-proposal/files-to-merge/
 
 # generated
 generated
