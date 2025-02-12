@@ -10,13 +10,6 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.24"
 
-"@aragon/osx-commons-configs@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.4.0.tgz#5b6ae025de1ccf7f9a135bfbcb0aa822c774acf9"
-  integrity sha512-/2wIQCbv/spMRdOjRXK0RrXG1TK5aMcbD73RvMgMwQwSrKcA1dCntUuSxmTm2W8eEtOzs8E1VPjqZk0cXL4SSQ==
-  dependencies:
-    tslib "^2.6.2"
-
 "@aragon/osx-commons-configs@^0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.8.0.tgz#71e27c7063c3ca7a26a2c5ae12594063800bd9db"
@@ -32,20 +25,18 @@
     "@openzeppelin/contracts" "4.9.6"
     "@openzeppelin/contracts-upgradeable" "4.9.6"
 
-"@aragon/osx-commons-sdk@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.1.0.tgz#ec027744e2d9275d1c5535e356fc3607339c44c9"
-  integrity sha512-T7svAQsfMIpADvAKLnicS7bNV54EE9q8vFUOZy1hh5oF9N/07qD2eeXqXZ9W0uWEKfgpbIyZKV6k+X5kt2kklQ==
+"@aragon/osx-commons-sdk@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.2.0.tgz#e5ca5db172866775a02337c22af3a05ac16541fa"
+  integrity sha512-bxzvIbxdQtObqLPrJlJcPuy2cMzrE9TI7zlNMcbKnyr4swp44ZHZi5NKcwX1eFAf+oZc1aFlehb1gPwPMvaT8Q==
   dependencies:
-    "@aragon/osx-commons-configs" "^0.4.0"
+    "@aragon/osx-commons-configs" "^0.8.0"
     "@ethersproject/address" "5.7.0"
     "@ethersproject/bignumber" "5.7.0"
     "@ethersproject/contracts" "5.7.0"
     "@ethersproject/hash" "5.7.0"
     "@ethersproject/logger" "5.7.0"
     "@ethersproject/providers" "5.7.2"
-    dotenv "^16.4.5"
-    undici "^6.21.0"
 
 "@aragon/osx-commons-subgraph@^0.0.4":
   version "0.0.4"
@@ -5441,7 +5432,7 @@ dotenv@^10.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
-dotenv@^16.0.0, dotenv@^16.4.5:
+dotenv@^16.0.0:
   version "16.4.7"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.7.tgz#0e20c5b82950140aa99be360a8a5f52335f53c26"
   integrity sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==
@@ -12404,11 +12395,6 @@ undici@^6.18.2, undici@^6.19.5:
   version "6.21.0"
   resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.0.tgz#4b3d3afaef984e07b48e7620c34ed8a285ed4cd4"
   integrity sha512-BUgJXc752Kou3oOIuU1i+yZZypyZRqNPW0vqoMPl8VaoalSfeR0D8/t4iAS3yirs79SSMTxTag+ZC86uswv+Cw==
-
-undici@^6.21.0:
-  version "6.21.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.1.tgz#336025a14162e6837e44ad7b819b35b6c6af0e05"
-  integrity sha512-q/1rj5D0/zayJB2FraXdaWxbhWiNKDvu8naDT2dl1yTlvJp4BLtOcp2a5BvgGNQpYYJzau7tf1WgKv3b+7mqpQ==
 
 unfetch@^4.2.0:
   version "4.2.0"
