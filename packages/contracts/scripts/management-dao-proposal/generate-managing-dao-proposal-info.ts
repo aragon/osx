@@ -8,17 +8,6 @@ import * as path from 'path';
 
 dotenv.config({path: path.resolve(__dirname, '../../.env')});
 
-/**
- * This script merges the plugin proposals actions inside the `proposalActionsPath` (./plugin-proposals-data) folder
- * into the `mergedProposalActionsPath` (./merged-proposals.json) file.
- *
- * Steps
- * 1- deploy all needed plugins
- * 2- copy their deployment json files to the `scripts/plugin-proposals-data` folder
- * 3- deploy the new osx version (this can be done before deploy the plugins) => this will create a `deployed_contracts.json` file
- * 4- run this script to merge the calldata from each plugin and the framework deployment into a single file
- */
-
 interface Action {
   to: string;
   value: number;
