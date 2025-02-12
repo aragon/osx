@@ -27,7 +27,7 @@ jobs:
           cache: 'yarn'
           node-version: 18
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
       - name: Generate partial introspection query results for documentation
         run: yarn generate:introspection:partial
         working-directory: packages/subgraph/

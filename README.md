@@ -74,7 +74,7 @@ Ensure you have Node and Yarn installed.
 
 The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. It's recommended to use a tool such as [nvm](https://github.com/nvm-sh/nvm) to manage different node environments. Please see the relevant documentation for details.
 
-Start by running `yarn install` in the project root in your terminal.
+Start by running `yarn --ignore-scripts` in the project root in your terminal.
 
 ### Dependencies
 
