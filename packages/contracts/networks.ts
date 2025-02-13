@@ -33,4 +33,14 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   zksyncSepolia: {
     deploy: ['./deploy'],
   },
+  agungTestnet: {
+    deploy: ['./deploy/new', './deploy/verification'],
+    timeout: 300000,
+    gasPrice: 30000000000,
+  },
+  peaq: {
+    deploy: ['./deploy/new', './deploy/verification'],
+    timeout: 300000,
+    gasPrice: 30000000000,
+  },
 };

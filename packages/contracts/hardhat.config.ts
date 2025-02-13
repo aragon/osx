@@ -98,10 +98,14 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
+      forking: {
+        url: 'https://mpfn1.peaq.network',
+        blockNumber: 3936303,
+      },
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
-      gasPrice: 80000000000,
+      // gasPrice: 90000000000,
       deploy: ENABLE_DEPLOY_TEST
         ? ['./deploy']
         : ['./deploy/env', './deploy/new', './deploy/verification'],
@@ -135,6 +139,8 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
+      peaq: process.env.PEAQ_KEY || '',
+      agungTestnet: process.env.PEAQ_KEY || '',
     },
     customChains: [
       {
@@ -193,6 +199,22 @@ const config: HardhatUserConfig = {
           apiURL:
             'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
           browserURL: 'https://modescan.io',
+        },
+      },
+      {
+        network: 'AgugnNetwork', // Peaq testnet
+        chainId: 9990,
+        urls: {
+          apiURL: 'https://wss-async.agung.peaq.network',
+          browserURL: 'https://agung-testnet.subscan.io/',
+        },
+      },
+      {
+        network: 'peaq', // Peaq mainnet
+        chainId: 3338,
+        urls: {
+          apiURL: 'https://erpc-mpfn1.peaq.network',
+          browserURL: 'https://peaq.subscan.io/',
         },
       },
     ],
