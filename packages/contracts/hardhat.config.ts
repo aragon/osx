@@ -202,7 +202,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'AgugnNetwork', // Peaq testnet
+        network: 'agungTestnet', // Peaq testnet
         chainId: 9990,
         urls: {
           apiURL: 'https://wss-async.agung.peaq.network',
