@@ -27,6 +27,16 @@ declare module 'hardhat/types/runtime' {
     aragonToVerifyContracts: AragonVerifyEntry[];
     managementDAOMultisigPluginAddress: string;
     placeholderBuildCIDPath: string;
+    proposalInfo: {
+      proposalTitle: string;
+      proposalSummary: string;
+      proposalResources: {
+        name: string;
+        url: string;
+      }[];
+      proposalStartDate: number;
+      proposalEndDate: number;
+    };
     managementDAOActions: {
       to: string;
       value: BigNumberish;
