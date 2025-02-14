@@ -1,4 +1,5 @@
 type NetworkExtension = {
+  explorer?: string;
   deploy: string[];
 };
 
@@ -32,5 +33,11 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   },
   zksyncSepolia: {
     deploy: ['./deploy'],
+  },
+  agungTestnet: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  peaq: {
+    deploy: ['./deploy/new', './deploy/verification'],
   },
 };
