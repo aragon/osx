@@ -1,4 +1,5 @@
 type NetworkExtension = {
+  explorer?: string;
   deploy: string[];
 };
 
@@ -35,12 +36,8 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   },
   agungTestnet: {
     deploy: ['./deploy/new', './deploy/verification'],
-    timeout: 300000,
-    gasPrice: 30000000000,
   },
   peaq: {
     deploy: ['./deploy/new', './deploy/verification'],
-    timeout: 300000,
-    gasPrice: 30000000000,
   },
 };

@@ -30,8 +30,20 @@ if (process.env.ALCHEMY_API_KEY) {
 }
 
 // add accounts to network configs
-const hardhatNetworks: {[index: string]: NetworkUserConfig} =
+let hardhatNetworks: {[index: string]: NetworkUserConfig} =
   commonNetworkConfigs;
+
+// add custom networks
+hardhatNetworks = {
+  ...hardhatNetworks,
+  agungTestnet: {
+    explorer: 'subscan',
+    url: 'https://wss-async.agung.peaq.network',
+    chainId: 9990,
+    gasPrice: 20_000_000,
+  },
+};
+
 for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
