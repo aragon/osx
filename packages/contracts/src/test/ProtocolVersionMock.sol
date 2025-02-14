@@ -6,6 +6,4 @@ import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versionin
 
 /// @title ProtocolVersionMock
 // solhint-disable-next-line no-empty-blocks
-contract ProtocolVersionMock is ProtocolVersion {
-
-}
+contract ProtocolVersionMock is ProtocolVersion {}

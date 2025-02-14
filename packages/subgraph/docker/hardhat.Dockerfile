@@ -2,7 +2,7 @@ FROM node:20-alpine3.19
 
 COPY ./hardhat /hardhat
 WORKDIR /hardhat
-RUN yarn install
+RUN yarn install --ignore-scripts
 
 EXPOSE 8545
 
