@@ -81,11 +81,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let metadataCIDPath = '0x';
 
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
+
   if (!isLocal(hre.network)) {
     // Upload the metadata to IPFS
     metadataCIDPath = await uploadToPinata(
-      JSON.stringify(MANAGEMENT_DAO_METADATA, null, 2),
-      `management-dao-metadata`
+      MANAGEMENT_DAO_METADATA,
+      `management-dao-metadata`,
+      process.env.PUB_PINATA_JWT
     );
   }
 

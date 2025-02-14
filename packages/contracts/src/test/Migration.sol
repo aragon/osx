@@ -40,6 +40,9 @@ import {PluginRepoRegistry as PluginRepoRegistry_v1_3_0} from "@aragon/osx-v1.3.
 import {ENSSubdomainRegistrar as ENSSubdomainRegistrar_v1_0_0} from "@aragon/osx-v1.0.1/framework/utils/ens/ENSSubdomainRegistrar.sol";
 import {ENSSubdomainRegistrar as ENSSubdomainRegistrar_v1_3_0} from "@aragon/osx-v1.3.0/framework/utils/ens/ENSSubdomainRegistrar.sol";
 
+// needed in the script to generate the managing dao proposal when upgrading
+import {Multisig as Multisig_v1_3_0} from "@aragon/osx-v1.3.0/plugins/governance/multisig/Multisig.sol";
+
 // Integration Testing
 import {ProxyFactory} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyFactory.sol";
 
