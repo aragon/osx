@@ -32,15 +32,15 @@ For more information on the individual packages, please read the respective `REA
 
 ## Audits
 
-Our smart contracts undergo regular audits.
+OSx smart contracts undergo regular audits.
 
-### v1.0.0
+### v1.4.0
 
-**Halborn**: [link 1](./audits/Halborn_AragonOSx_2023-02-24.pdf), [link 2](https://github.com/HalbornSecurity/PublicReports/blob/b3fe424535dce7ce345f74dc7e6c25e9200e7860/Solidity%20Smart%20Contract%20Audits/Aragon_aragonOS_Smart_Contract_Security_Audit_Report_Halborn_Final.pdf)
+**Halborn**: [audit report](./audits/Halborn_AragonOSx_v1_4_Smart_Contract_Security_Assessment_Report_2025_01_03.pdf)
 
-- Commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
-- Started: 2023-02-07
-- Finished: 2023-02-24
+- Commit ID: [e0ba7b60b08fa1665ecac92dc12ea89e4245e7dc](https://github.com/aragon/osx/commit/e0ba7b60b08fa1665ecac92dc12ea89e4245e7dc)
+- Started: 2024-11-18
+- Finished: 2025-02-13
 
 ### v1.3.0
 
@@ -55,6 +55,14 @@ Our smart contracts undergo regular audits.
 - Commit ID: [0ad8cad2bb661fbd53086d097d11228304d9b73e](https://github.com/aragon/osx/commit/0ad8cad2bb661fbd53086d097d11228304d9b73e)
 - Started: 2023-05-29
 - Finished: 2023-06-13
+
+### v1.0.0
+
+**Halborn**: [link 1](./audits/Halborn_AragonOSx_2023-02-24.pdf), [link 2](https://github.com/HalbornSecurity/PublicReports/blob/b3fe424535dce7ce345f74dc7e6c25e9200e7860/Solidity%20Smart%20Contract%20Audits/Aragon_aragonOS_Smart_Contract_Security_Audit_Report_Halborn_Final.pdf)
+
+- Commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
+- Started: 2023-02-07
+- Finished: 2023-02-24
 
 ## Contributing
 
