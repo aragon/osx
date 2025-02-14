@@ -1,0 +1,13 @@
+== Core Contracts API
+
+The natspec generated API for the core contracts. You can also find the contracts on the following link:https://github.com/aragon/osx[repository].
+
+== Core
+
+{{DAO}}
+
+{{IDAO}}
+
+{{PermissionManager}}
+
+{{CallbackHandler}}

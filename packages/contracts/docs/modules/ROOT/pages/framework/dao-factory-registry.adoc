@@ -1,0 +1,64 @@
+= DAO Factory and Registry
+
+Two framework contracts manage the `DAO` contract creation process, the `DAOFactory` and the `DAORegistry`. 
+
+NOTE: Find detailed contract documentation at xref:api:framework.adoc#DAOFactory[DAOFactory API] and xref:api:framework.adoc#DAORegistry[DAORegistry API]
+
+== DAO Factory
+
+The `DAOFactory` creates and sets up a `DAO` for you with the `createDao` function. 
+
+```solidity
+function createDao(
+  DAOSettings calldata _daoSettings,
+  PluginSettings[] calldata _pluginSettings
+) external returns (DAO createdDao, InstalledPlugin[] memory installedPlugins);
+```
+
+This function requires the `DAOSettings` including:
+
+  * The trusted forwarder address for future link:https://eips.ethereum.org/EIPS/eip-2771[ERC-2771 (Meta Transaction)] compatibility that is set to `address(0)` for now
+  * The ENS name to be registered under the `dao.eth` domain
+  * The link:https://eips.ethereum.org/EIPS/eip-4824[ERC-4824 (Common Interfaces for DAOs)] `daoURI`
+  * Optional metadata
+
+as well as an array of `PluginSettings` containing:
+
+ * The `PluginSetup` contract reference
+    ** The version tag of the plugin setup
+    ** The plugin setup repository address
+ * The bytes-encoded data needed for the plugin installation. 
+
+The `DAOFactory` create the `DAO` in four steps and interacts with the `DAORegistry` and being also part of the Aragon OSx framework:
+
+1. Creates a new DAO by deploying an link:https://eips.ethereum.org/EIPS/eip-1967[ERC-1967] proxy pointing to the latest Aragon OSx `DAO` implementation and becomes the initial owner.
+
+2. Registers the new contract in the xref:#dao_registry[`DAORegistry`].
+
+3. Installs the plugins using the `PluginSetupProcessor` (see also the section about xref:framework/plugin-setup-processor.adoc[the plugin setup process]).
+
+4. Sets the xref:core/permissions.adoc#permissions_native_to_the_dao_contract[native permissions] of the `DAO` and revokes its own ownership.
+
+This function returns the `DAO` address and an array of `InstalledPlugin` structs each containing:
+
+* The new created plugin address
+* The list of plugin helpers
+* The list of the permissions applied during the plugin installation
+
+== DAO Registry
+
+The `DAORegistry` is used by the `DAOFactory` and contains the `register` function
+
+```solidity"
+function register(
+  IDAO dao,
+  address creator,
+  string calldata subdomain
+) external auth(REGISTER_DAO_PERMISSION_ID);
+```
+
+requiring the `REGISTER_DAO_PERMISSION_ID` permission currently held only by the `DAOFactory`.
+
+If the requested ENS `subdomain` name xref:framework/ens-registrar.adoc#allowed_character_set[is valid] and not taken, the `DAORegistry` registers the subdomain and adds the `DAO` contract address to the `DAORegistry`.
+If the `subdomain` parameter is non-empty (not `""`) and still available, the ENS name will be registered.
+If the registration was successful, the DAO name, contract and creator addresses are emitted in an event.

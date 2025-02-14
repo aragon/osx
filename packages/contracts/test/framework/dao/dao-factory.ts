@@ -99,7 +99,7 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   };
 }
 
-async function getAnticipatedAddress(from: string, offset: number = 0) {
+export async function getAnticipatedAddress(from: string, offset: number = 0) {
   const nonce = await hre.wrapper.getNonce(from);
   const anticipatedAddress = hre.wrapper.getCreateAddress(from, nonce + offset);
 

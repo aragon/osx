@@ -1,0 +1,63 @@
+name: Publish Artifacts
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-artifacts-to-npm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Configure NPM for Scoped Package
+        run: |
+          cd packages/artifacts
+          SCOPE=$(jq -r '.name' package.json | cut -d'/' -f1)
+          echo "$SCOPE:registry=https://registry.npmjs.org/" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+
+      - name: Get Version from package.json
+        id: get_version
+        run: |
+          cd packages/artifacts
+          VERSION=$(jq -r '.version' package.json)
+          TAG_VERSION="v$VERSION"
+          echo "VERSION=$TAG_VERSION" >> $GITHUB_ENV
+
+      - name: Create Git Tag
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Install Dependencies
+        run: |
+          cd packages/artifacts
+          yarn install
+
+      - name: Build Package
+        env:
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+        run: |
+          cd packages/artifacts
+          yarn build
+
+      - name: Publish to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/artifacts
+          if [[ "$VERSION" == *"-alpha"* ]]; then
+            npm publish --tag alpha --access public
+          else
+            npm publish --tag latest --access public
+          fi

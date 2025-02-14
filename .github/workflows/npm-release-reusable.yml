@@ -53,10 +53,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'yarn'
-          node-version: 16
+          node-version: 18
           registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies
-        run: yarn install --pure-lockfile
+        run: yarn install --pure-lockfile --ignore-scripts
         working-directory: packages/${{ matrix.package }}
       - name: Version bump
         working-directory: packages/${{ matrix.package }}
