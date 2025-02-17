@@ -41,4 +41,7 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   peaq: {
     deploy: ['./deploy/new', './deploy/verification'],
   },
+  localhost: {
+    deploy: ['./deploy/new'],
+  },
 };

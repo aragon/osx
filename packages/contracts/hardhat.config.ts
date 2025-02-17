@@ -42,7 +42,12 @@ hardhatNetworks = {
   agungTestnet: {
     url: 'https://wss-async.agung.peaq.network',
     chainId: 9990,
-    gasPrice: 10000000000,
+    gasPrice: 15000000000,
+  },
+  // run with: npx hardhat node --no-deploy --fork https://wss-async.agung.peaq.network
+  localhost: {
+    url: 'http://127.0.0.1:8545',
+    chainId: 31337,
   },
 };
 
@@ -142,10 +147,10 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
-      forking: {
-        url: 'https://mpfn1.peaq.network',
-        blockNumber: 3936303,
-      },
+      // forking: {
+      //   url: 'https://mpfn1.peaq.network',
+      //   blockNumber: 3936303,
+      // },
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
