@@ -17,6 +17,9 @@ import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
+const fs = require('fs');
+const path = require('path');
+
 dotenv.config();
 
 const ETH_KEY = process.env.ETH_KEY;
@@ -37,10 +40,9 @@ let hardhatNetworks: {[index: string]: NetworkUserConfig} =
 hardhatNetworks = {
   ...hardhatNetworks,
   agungTestnet: {
-    explorer: 'subscan',
     url: 'https://wss-async.agung.peaq.network',
     chainId: 9990,
-    gasPrice: 20_000_000,
+    gasPrice: 10000000000,
   },
 };
 
@@ -75,6 +77,35 @@ const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 
 console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 
+task('extract-json', 'Extracts per-contract Standard JSON Input').setAction(
+  async () => {
+    const buildInfoPath = path.join(__dirname, 'artifacts/build-info');
+    const outputDir = path.join(__dirname, 'artifacts/standard-json');
+
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, {recursive: true});
+    }
+
+    const buildFiles = fs.readdirSync(buildInfoPath);
+    buildFiles.forEach(file => {
+      if (file.endsWith('.json')) {
+        const buildInfo = JSON.parse(
+          fs.readFileSync(path.join(buildInfoPath, file), 'utf8')
+        );
+        const input = buildInfo.input;
+        const contracts = Object.keys(input.sources);
+
+        contracts.forEach(contract => {
+          const contractName = path.basename(contract, '.sol');
+          const outputFilePath = path.join(outputDir, `${contractName}.json`);
+          fs.writeFileSync(outputFilePath, JSON.stringify(input, null, 2));
+          console.log(`✅ Extracted JSON for ${contractName}`);
+        });
+      }
+    });
+  }
+);
+
 // Override the test task so it injects wrapper.
 // Note that this also gets injected when running it through coverage.
 task('test').setAction(async (args, hre, runSuper) => {
@@ -107,6 +138,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
+
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
