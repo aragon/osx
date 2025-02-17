@@ -147,10 +147,10 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
-      // forking: {
-      //   url: 'https://mpfn1.peaq.network',
-      //   blockNumber: 3936303,
-      // },
+      forking: {
+        url: 'https://mpfn1.peaq.network',
+        blockNumber: 3936303,
+      },
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       blockGasLimit: 3000000000, // really high to test some things that are only possible with a higher block gas limit
