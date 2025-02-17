@@ -19,4 +19,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['New', 'GlobalExecutor'];
+func.tags = ['New', 'GlobalExecutor', 'Batch-10'];

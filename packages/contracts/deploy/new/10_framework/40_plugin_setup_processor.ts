@@ -22,4 +22,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['New', 'PluginSetupProcessor'];
+func.tags = ['New', 'PluginSetupProcessor', 'Batch-8'];

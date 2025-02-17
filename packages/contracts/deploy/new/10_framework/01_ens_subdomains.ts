@@ -96,4 +96,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = ['New', 'ENSSubdomains'];
+func.tags = ['New', 'ENSSubdomains', 'Batch-3'];

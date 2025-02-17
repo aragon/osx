@@ -51,5 +51,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['New', 'ManagementDao'];
+func.tags = ['New', 'ManagementDao', 'Batch-1'];
 func.dependencies = ['Env'];

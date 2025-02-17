@@ -42,7 +42,7 @@ hardhatNetworks = {
   agungTestnet: {
     url: 'https://wss-async.agung.peaq.network',
     chainId: 9990,
-    gasPrice: 15000000000,
+    gasPrice: 25000000000,
   },
   // run with: npx hardhat node --no-deploy --fork https://wss-async.agung.peaq.network
   localhost: {

@@ -17,4 +17,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['New', 'PluginRepoRegistry', 'Verify'];
+func.tags = ['New', 'PluginRepoRegistry', 'Verify', 'Batch-6'];

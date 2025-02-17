@@ -204,4 +204,5 @@ func.tags = [
   'PluginRepoFactory',
   'PluginSetupProcessor',
   'DAOFactory',
+  'Batch-11',
 ];

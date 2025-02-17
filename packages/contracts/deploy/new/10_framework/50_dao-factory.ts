@@ -25,4 +25,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['New', 'DAOFactory'];
+func.tags = ['New', 'DAOFactory', 'Batch-9'];
