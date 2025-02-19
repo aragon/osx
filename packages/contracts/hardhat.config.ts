@@ -44,6 +44,11 @@ hardhatNetworks = {
     chainId: 9990,
     gasPrice: 25000000000,
   },
+  peaq: {
+    url: 'https://erpc-mpfn1.peaq.network',
+    chainId: 3338,
+    gasPrice: 25000000000,
+  },
   // run with: npx hardhat node --no-deploy --fork https://wss-async.agung.peaq.network
   localhost: {
     url: 'http://127.0.0.1:8545',
@@ -81,35 +86,6 @@ extendEnvironment(hre => {
 const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 
 console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
-
-task('extract-json', 'Extracts per-contract Standard JSON Input').setAction(
-  async () => {
-    const buildInfoPath = path.join(__dirname, 'artifacts/build-info');
-    const outputDir = path.join(__dirname, 'artifacts/standard-json');
-
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, {recursive: true});
-    }
-
-    const buildFiles = fs.readdirSync(buildInfoPath);
-    buildFiles.forEach(file => {
-      if (file.endsWith('.json')) {
-        const buildInfo = JSON.parse(
-          fs.readFileSync(path.join(buildInfoPath, file), 'utf8')
-        );
-        const input = buildInfo.input;
-        const contracts = Object.keys(input.sources);
-
-        contracts.forEach(contract => {
-          const contractName = path.basename(contract, '.sol');
-          const outputFilePath = path.join(outputDir, `${contractName}.json`);
-          fs.writeFileSync(outputFilePath, JSON.stringify(input, null, 2));
-          console.log(`✅ Extracted JSON for ${contractName}`);
-        });
-      }
-    });
-  }
-);
 
 // Override the test task so it injects wrapper.
 // Note that this also gets injected when running it through coverage.
@@ -254,7 +230,7 @@ const config: HardhatUserConfig = {
         network: 'agungTestnet', // Peaq testnet
         chainId: 9990,
         urls: {
-          apiURL: 'https://wss-async.agung.peaq.network',
+          apiURL: '',
           browserURL: 'https://agung-testnet.subscan.io/',
         },
       },
@@ -262,7 +238,7 @@ const config: HardhatUserConfig = {
         network: 'peaq', // Peaq mainnet
         chainId: 3338,
         urls: {
-          apiURL: 'https://erpc-mpfn1.peaq.network',
+          apiURL: '',
           browserURL: 'https://peaq.subscan.io/',
         },
       },
