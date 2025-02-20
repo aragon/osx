@@ -35,7 +35,7 @@ const hardhatNetworks: {[index: string]: NetworkUserConfig} = {
   agungTestnet: {
     url: 'https://wss-async.agung.peaq.network',
     chainId: 9990,
-    gasPrice: 25000000000,
+    gasPrice: 40000000000,
   },
   peaq: {
     url: 'https://erpc-mpfn1.peaq.network',
