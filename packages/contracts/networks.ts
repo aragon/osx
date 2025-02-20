@@ -1,5 +1,4 @@
 type NetworkExtension = {
-  explorer?: string;
   deploy: string[];
 };
 
