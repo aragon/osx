@@ -30,8 +30,20 @@ if (process.env.ALCHEMY_API_KEY) {
 }
 
 // add accounts to network configs
-const hardhatNetworks: {[index: string]: NetworkUserConfig} =
-  commonNetworkConfigs;
+const hardhatNetworks: {[index: string]: NetworkUserConfig} = {
+  ...commonNetworkConfigs,
+  agungTestnet: {
+    url: 'https://wss-async.agung.peaq.network',
+    chainId: 9990,
+    gasPrice: 40000000000,
+  },
+  peaq: {
+    url: 'https://erpc-mpfn1.peaq.network',
+    chainId: 3338,
+    gasPrice: 25000000000,
+  },
+};
+
 for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
@@ -95,6 +107,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
+
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
@@ -135,6 +148,7 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
+      peaq: '1', // It can be set to null. date: 26/Feb/2025
     },
     customChains: [
       {
@@ -193,6 +207,15 @@ const config: HardhatUserConfig = {
           apiURL:
             'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
           browserURL: 'https://modescan.io',
+        },
+      },
+      {
+        network: 'peaq',
+        chainId: 3338,
+        urls: {
+          apiURL:
+            'https://peaq.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://peaq.subscan.io/',
         },
       },
     ],

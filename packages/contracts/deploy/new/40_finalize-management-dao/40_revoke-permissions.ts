@@ -37,8 +37,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Revoke `REGISTER_DAO_PERMISSION` from `Deployer`.
-  // Revoke `ROOT_PERMISSION` from `Deployer`.
   // Revoke `SET_METADATA_PERMISSION` from `Deployer`.
+  // Revoke `EXECUTE_PERMISSION` from `Deployer`.
+  // Note:  `ROOT_PERMISSION` is not revoked from `Deployer`
+  // because it is needed for installing multisig, and it will be revoked on that repo
   const revokePermissions = [
     {
       operation: Operation.Revoke,
@@ -50,13 +52,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       operation: Operation.Revoke,
       where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
-      permission: 'ROOT_PERMISSION',
+      permission: 'SET_METADATA_PERMISSION',
     },
     {
       operation: Operation.Revoke,
       where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
       who: {name: 'Deployer', address: deployer.address},
-      permission: 'SET_METADATA_PERMISSION',
+      permission: 'EXECUTE_PERMISSION',
     },
   ];
   await managePermissions(managementDaoContract, revokePermissions);
