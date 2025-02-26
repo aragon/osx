@@ -148,7 +148,7 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
-      peaq: '1', // can be set to null
+      peaq: '1', // It can be set to null. date: 26/Feb/2025
     },
     customChains: [
       {
