@@ -20,4 +20,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['New', 'ENSRegistry', 'Batch-2'];
+func.tags = ['New', 'ENSRegistry'];

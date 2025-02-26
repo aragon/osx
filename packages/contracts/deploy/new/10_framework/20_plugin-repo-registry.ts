@@ -40,4 +40,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 // func.runAtTheEnd = true;
-func.tags = ['New', 'PluginRepoRegistry', 'Batch-6'];
+func.tags = ['New', 'PluginRepoRegistry'];

@@ -64,4 +64,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await managePermissions(managementDaoContract, revokePermissions);
 };
 export default func;
-func.tags = ['New', 'RevokeManagementPermissionsDAO', 'Batch-18'];
+func.tags = ['New', 'RevokeManagementPermissionsDAO'];

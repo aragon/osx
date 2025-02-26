@@ -51,5 +51,4 @@ func.tags = [
   'ENSSubdomains',
   'ENSSubdomainRegistrars',
   'Verify',
-  'Batch-4',
 ];

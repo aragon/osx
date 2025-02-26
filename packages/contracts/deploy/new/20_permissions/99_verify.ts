@@ -105,5 +105,4 @@ func.tags = [
   'ENS_Permissions',
   'DAO_Registry_Permissions',
   'Plugin_Registry_Permissions',
-  'Batch-15',
 ];
