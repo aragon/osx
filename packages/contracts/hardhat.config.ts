@@ -157,6 +157,7 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
+      peaq: '1', // can be set to null
     },
     customChains: [
       {
@@ -215,6 +216,15 @@ const config: HardhatUserConfig = {
           apiURL:
             'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
           browserURL: 'https://modescan.io',
+        },
+      },
+      {
+        network: 'peaq',
+        chainId: 3338,
+        urls: {
+          apiURL:
+            'https://peaq.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://peaq.subscan.io/',
         },
       },
     ],
