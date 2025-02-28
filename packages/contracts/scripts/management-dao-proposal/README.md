@@ -45,6 +45,14 @@ This will generate two files in the `./generated` folder:
 - A `merged-proposals.json` file with all the proposal and deployment details
 - A `calldata.json` file with the proposal information and the raw calldata
 
+## Testing the calldata
+
+Once all the files are in place:
+
+- Add `RUN_UPGRADE_1_4_0_TESTS_AT_FORK_BLOCK` to the .env and set a fork block, it is recommended to use a recent block.
+- Run `yarn test`.
+  This will test the call data and simulate the proposal creation and execution.
+
 ## Steps
 
 1. Deploy the framework

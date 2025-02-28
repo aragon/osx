@@ -438,8 +438,6 @@ if (process.env.RUN_UPGRADE_1_4_0_TESTS_AT_FORK_BLOCK) {
       tx = await multisig.execute(proposalId);
       receipt = await tx.wait();
 
-      // todo think on a way to parse all events or if it is worthy
-
       // check the proposal is executed
       proposal = await multisig.getProposal(proposalId);
       expect(proposal.executed).to.be.true;
