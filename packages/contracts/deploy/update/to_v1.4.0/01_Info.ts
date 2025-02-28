@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
     // Adjust this values
     proposalStartDate: 0,
-    proposalEndDate: 1748773409, // Date and time (GMT): Sunday, 1 June 2025 10:23:29
+    proposalEndDate: 1741370400, // Date and time (GMT): Friday, 7 March 2025 18:00:00
   };
 };
 export default func;
