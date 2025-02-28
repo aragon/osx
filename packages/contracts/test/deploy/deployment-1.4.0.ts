@@ -12,7 +12,9 @@ import * as fs from 'fs';
 import hre, {ethers} from 'hardhat';
 import * as path from 'path';
 
-const FORK_BLOCK_NUMBER = 7805006;
+const FORK_BLOCK_NUMBER = process.env.RUN_UPGRADE_1_4_0_TESTS_AT_FORK_BLOCK
+  ? parseInt(process.env.RUN_UPGRADE_1_4_0_TESTS_AT_FORK_BLOCK, 10)
+  : 0; // Default value if not set
 
 // change to test on a different network
 const NETWORK = 'sepolia';
@@ -324,132 +326,146 @@ async function checkStatusAfterProposal() {
   );
 }
 
-// todo think when do this this test because it should only run when testing deployment
-describe.only('1.4.0 Deployment', function () {
-  let calldataJson: any;
+if (process.env.RUN_UPGRADE_1_4_0_TESTS_AT_FORK_BLOCK) {
+  describe('1.4.0 Upgrade Deployment', function () {
+    let calldataJson: any;
 
-  beforeEach(async () => {
-    await forkNetwork(NETWORK);
-    console.log('forked network: ', NETWORK);
+    beforeEach(async () => {
+      await forkNetwork(NETWORK);
+      console.log('forked network: ', NETWORK);
 
-    calldataJson = getCalldataJson();
-  });
-
-  // Close fork so that other tests(not related to this file) are
-  // not run in forked network.
-  afterEach(async () => {
-    closeFork();
-  });
-
-  it('test the proposal can be created', async () => {
-    const member0 = await impersonateAccount(daoMultisigMembers[0]);
-    const multisig = Multisig_v1_3_0__factory.connect(daoMultisigAddr, member0);
-
-    // get proposal count before
-    const proposalCountBefore = await multisig.proposalCount();
-
-    // execute the generated calldata
-    let tx = await member0.sendTransaction({
-      to: multisig.address,
-      data: calldataJson.calldata,
-      gasLimit: 3000000,
+      calldataJson = getCalldataJson();
     });
 
-    let receipt = await tx.wait();
+    // Close fork so that other tests(not related to this file) are
+    // not run in forked network.
+    afterEach(async () => {
+      closeFork();
+    });
 
-    const proposalCountAfter = await multisig.proposalCount();
+    it('test the proposal can be created', async () => {
+      const member0 = await impersonateAccount(daoMultisigMembers[0]);
+      const multisig = Multisig_v1_3_0__factory.connect(
+        daoMultisigAddr,
+        member0
+      );
 
-    // check proposal count is increased
-    expect(proposalCountAfter).to.be.greaterThan(
-      ethers.BigNumber.from(proposalCountBefore)
-    );
+      // get proposal count before
+      const proposalCountBefore = await multisig.proposalCount();
 
-    // check proposal created event
-    let proposalCreatedEvent = getMultisigEvents(
-      receipt,
-      'ProposalCreated',
-      multisig
-    );
-
-    const proposalId = proposalCreatedEvent.args.proposalId;
-    expect(proposalCreatedEvent).to.not.be.undefined;
-    expect(proposalCreatedEvent.args.creator).to.equal(member0.address);
-    expect(proposalCreatedEvent.args.endDate).to.equal(
-      calldataJson.functionArgs[calldataJson.functionArgs.length - 1]
-    );
-    expect(proposalCreatedEvent.args.actions.length).to.equal(
-      calldataJson.functionArgs[1].length
-    );
-    expect(proposalCreatedEvent.args.actions.length).to.equal(
-      calldataJson.functionArgs[1].length
-    );
-
-    // get proposal and check the info
-    let proposal = await multisig.getProposal(proposalId);
-
-    expect(proposal.executed).to.be.false;
-    expect(proposal.approvals).to.equal(0);
-    expect(proposal.actions.length).to.equal(
-      calldataJson.functionArgs[1].length
-    );
-
-    // impersonate member1 member2 and member3 to approve proposal
-    const member1 = await impersonateAccount(daoMultisigMembers[1]);
-    const member2 = await impersonateAccount(daoMultisigMembers[2]);
-    const member3 = await impersonateAccount(daoMultisigMembers[3]);
-
-    const multisigAsMember1 = Multisig_v1_3_0__factory.connect(
-      daoMultisigAddr,
-      member1
-    );
-    const multisigAsMember2 = Multisig_v1_3_0__factory.connect(
-      daoMultisigAddr,
-      member2
-    );
-    const multisigAsMember3 = Multisig_v1_3_0__factory.connect(
-      daoMultisigAddr,
-      member3
-    );
-
-    // vote for the proposal
-    await multisigAsMember1.approve(proposalId, false);
-    await multisigAsMember2.approve(proposalId, false);
-    await multisigAsMember3.approve(proposalId, false);
-
-    // check the members approved the proposal
-    expect(await multisig.hasApproved(proposalId, member0.address)).to.be.false;
-    expect(await multisig.hasApproved(proposalId, member1.address)).to.be.true;
-    expect(await multisig.hasApproved(proposalId, member2.address)).to.be.true;
-    expect(await multisig.hasApproved(proposalId, member3.address)).to.be.true;
-
-    // check the proposal can execute
-    expect(await multisig.canExecute(proposalId)).to.be.true;
-
-    // execute the proposal
-    tx = await multisig.execute(proposalId);
-    receipt = await tx.wait();
-
-    // todo think on a way to parse all events or if it is worthy
-
-    // check the proposal is executed
-    proposal = await multisig.getProposal(proposalId);
-    expect(proposal.executed).to.be.true;
-
-    await checkStatusAfterProposal();
-  });
-
-  it('execute all the proposal actions one by one', async () => {
-    const daoSigner = await impersonateAccount(daoAddress);
-
-    // iterate over the actions and execute them one by one
-    const actions = calldataJson.functionArgs[1];
-    for (const action of actions) {
-      let tx = await daoSigner.sendTransaction({
-        to: action.to,
-        data: action.data,
+      // execute the generated calldata
+      let tx = await member0.sendTransaction({
+        to: multisig.address,
+        data: calldataJson.calldata,
+        gasLimit: 3000000,
       });
-    }
 
-    await checkStatusAfterProposal();
+      let receipt = await tx.wait();
+
+      const proposalCountAfter = await multisig.proposalCount();
+
+      // check proposal count is increased
+      expect(proposalCountAfter).to.be.greaterThan(
+        ethers.BigNumber.from(proposalCountBefore)
+      );
+
+      // check proposal created event
+      let proposalCreatedEvent = getMultisigEvents(
+        receipt,
+        'ProposalCreated',
+        multisig
+      );
+
+      const proposalId = proposalCreatedEvent.args.proposalId;
+      expect(proposalCreatedEvent).to.not.be.undefined;
+      expect(proposalCreatedEvent.args.creator).to.equal(member0.address);
+      expect(proposalCreatedEvent.args.endDate).to.equal(
+        calldataJson.functionArgs[calldataJson.functionArgs.length - 1]
+      );
+      expect(proposalCreatedEvent.args.actions.length).to.equal(
+        calldataJson.functionArgs[1].length
+      );
+      expect(proposalCreatedEvent.args.actions.length).to.equal(
+        calldataJson.functionArgs[1].length
+      );
+
+      // get proposal and check the info
+      let proposal = await multisig.getProposal(proposalId);
+
+      expect(proposal.executed).to.be.false;
+      expect(proposal.approvals).to.equal(0);
+      expect(proposal.actions.length).to.equal(
+        calldataJson.functionArgs[1].length
+      );
+
+      // impersonate member1 member2 and member3 to approve proposal
+      const member1 = await impersonateAccount(daoMultisigMembers[1]);
+      const member2 = await impersonateAccount(daoMultisigMembers[2]);
+      const member3 = await impersonateAccount(daoMultisigMembers[3]);
+
+      const multisigAsMember1 = Multisig_v1_3_0__factory.connect(
+        daoMultisigAddr,
+        member1
+      );
+      const multisigAsMember2 = Multisig_v1_3_0__factory.connect(
+        daoMultisigAddr,
+        member2
+      );
+      const multisigAsMember3 = Multisig_v1_3_0__factory.connect(
+        daoMultisigAddr,
+        member3
+      );
+
+      // vote for the proposal
+      await multisigAsMember1.approve(proposalId, false);
+      await multisigAsMember2.approve(proposalId, false);
+      await multisigAsMember3.approve(proposalId, false);
+
+      // check the members approved the proposal
+      expect(await multisig.hasApproved(proposalId, member0.address)).to.be
+        .false;
+      expect(await multisig.hasApproved(proposalId, member1.address)).to.be
+        .true;
+      expect(await multisig.hasApproved(proposalId, member2.address)).to.be
+        .true;
+      expect(await multisig.hasApproved(proposalId, member3.address)).to.be
+        .true;
+
+      // check the proposal can execute
+      expect(await multisig.canExecute(proposalId)).to.be.true;
+
+      // execute the proposal
+      tx = await multisig.execute(proposalId);
+      receipt = await tx.wait();
+
+      // todo think on a way to parse all events or if it is worthy
+
+      // check the proposal is executed
+      proposal = await multisig.getProposal(proposalId);
+      expect(proposal.executed).to.be.true;
+
+      await checkStatusAfterProposal();
+    });
+
+    it('execute all the proposal actions one by one', async () => {
+      const daoSigner = await impersonateAccount(daoAddress);
+
+      // iterate over the actions and execute them one by one
+      const actions = calldataJson.functionArgs[1];
+      for (const action of actions) {
+        let tx = await daoSigner.sendTransaction({
+          to: action.to,
+          data: action.data,
+        });
+      }
+
+      await checkStatusAfterProposal();
+    });
   });
-});
+} else {
+  describe.skip('1.4.0 Upgrade Deployment', function () {
+    it('Skipped because RUN_UPGRADE_1_4_0_TESTS_AT_FORK_BLOCK is not set in .env', function () {
+      this.skip();
+    });
+  });
+}
