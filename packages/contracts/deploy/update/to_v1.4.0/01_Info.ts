@@ -14,9 +14,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         url: 'https://github.com/aragon/osx/tree/main/audits',
       },
     ],
-    // todo either adjust this values or configure them to get the correct ones from env or json
+    // Adjust this values
     proposalStartDate: 0,
-    proposalEndDate: 1739802134,
+    proposalEndDate: 1748773409, // Date and time (GMT): Sunday, 1 June 2025 10:23:29
   };
 };
 export default func;

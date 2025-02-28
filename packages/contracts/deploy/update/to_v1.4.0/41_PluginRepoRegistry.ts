@@ -51,7 +51,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: upgradeTX.to,
     data: upgradeTX.data,
     value: 0,
-    description: `Upgrade the <strong>PluginRepoRegistry </strong> (<code>${pluginRepoRegistryAddress}</code>) to the new <strong>implementation</strong> (<code>${result.address}</code>).`,
+    description: `\n- Upgrade the **PluginRepoRegistry** (\`${pluginRepoRegistryAddress}\`) to the new **implementation** (\`${result.address}\`).`,
   });
 };
 export default func;

@@ -62,7 +62,7 @@ function generateProposalJson() {
 
   // store each plugin action
   let tmpAction: Action;
-  for (const file of proposalFiles) {
+  for (const [index, file] of proposalFiles.entries()) {
     const filePath = path.join(proposalActionsPath, file);
     const dataRaw = fs.readFileSync(filePath, 'utf-8');
     const data = JSON.parse(dataRaw);
@@ -83,11 +83,17 @@ function generateProposalJson() {
       continue;
     }
 
+    let proposalDescription = data.proposalDescription;
+    if (index === 0) {
+      proposalDescription =
+        '\n\n# Publish New Plguin Versions' + data.proposalDescription;
+    }
+
     tmpAction = {
       to: data.actions[0]?.to,
       value: data.actions[0]?.value,
       data: data.actions[0]?.data,
-      description: data.proposalDescription,
+      description: proposalDescription,
     };
 
     deployedContracts.managementDAOActions.push(tmpAction);
@@ -151,6 +157,7 @@ async function main() {
   // remove the description from the actions
   let proposalActions: ProposalAction[] = [];
   let proposalMetadataFullDescription: string = '';
+  proposalMetadataFullDescription = '# Protocol Upgrade';
   jsonFile.managementDAOActions.forEach((action: Action) => {
     proposalActions.push({
       to: action.to,
@@ -181,6 +188,8 @@ async function main() {
     `management-dao-proposal-update-v1.4.0-metadata`,
     process.env.PUB_PINATA_JWT
   );
+
+  console.log('Uploaded proposal metadata:', metadataCIDPath);
 
   // push the metadata
   args.push(ethers.utils.hexlify(ethers.utils.toUtf8Bytes(metadataCIDPath)));

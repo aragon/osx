@@ -37,7 +37,7 @@ This deployment will generate a `createVersionProposalData-network.json` file th
 Once you have both the `deployed_contracts.json` file and the plugin deployment json files, you can run this script to merge the proposal actions:
 
 ```
-yarn generate-proposal-json
+yarn generate-proposal
 ```
 
 This will generate two files in the `./generated` folder:
