@@ -12,6 +12,8 @@ import * as fs from 'fs';
 import hre, {ethers} from 'hardhat';
 import * as path from 'path';
 
+const FORK_BLOCK_NUMBER = 7805006;
+
 // change to test on a different network
 const NETWORK = 'sepolia';
 
@@ -64,7 +66,7 @@ async function forkNetwork(network: string) {
 
   await initForkForOsxVersion(network, {
     version: '1.3.0',
-    forkBlockNumber: 7685985, // todo adjust to latest block
+    forkBlockNumber: FORK_BLOCK_NUMBER,
     activeContracts: [],
   });
 }
@@ -77,7 +79,7 @@ function getCalldataJson() {
 }
 
 function getAddressFromDescription(description: string): string {
-  const address = description.split("at '")[1].split("' \n")[0];
+  const address = description.split("at **'")[1].split("'**")[0];
   return address;
 }
 
