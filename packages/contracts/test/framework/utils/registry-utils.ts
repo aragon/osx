@@ -1,7 +1,7 @@
 import {RegistryUtils, RegistryUtils__factory} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 describe('RegistryUtils', () => {
   let registryUtilsContract: RegistryUtils;
@@ -12,8 +12,7 @@ describe('RegistryUtils', () => {
   });
 
   beforeEach(async () => {
-    const RegistryUtilsFactory = new RegistryUtils__factory(signers[0]);
-    registryUtilsContract = await RegistryUtilsFactory.deploy();
+    registryUtilsContract = await hre.wrapper.deploy('RegistryUtils');
   });
 
   describe('isSubdomainValid', () => {

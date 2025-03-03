@@ -4,33 +4,43 @@ type NetworkExtension = {
 
 export const networkExtensions: {[index: string]: NetworkExtension} = {
   mainnet: {
-    deploy: ['./deploy/update/to_v1.3.0', './deploy/verification'],
-  },
-  goerli: {
-    deploy: ['./deploy/update/to_v1.3.0', './deploy/verification'],
+    deploy: ['./deploy'],
   },
   sepolia: {
-    deploy: ['./deploy/new', './deploy/verification'],
+    deploy: ['./deploy'],
   },
   polygon: {
-    deploy: ['./deploy/update/to_v1.3.0', './deploy/verification'],
+    deploy: ['./deploy'],
   },
   mumbai: {
-    deploy: ['./deploy/update/to_v1.3.0', './deploy/verification'],
+    deploy: ['./deploy'],
   },
   baseMainnet: {
-    deploy: ['./deploy/new', './deploy/verification'],
-  },
-  baseGoerli: {
-    deploy: ['./deploy/new', './deploy/verification'],
-  },
-  arbitrum: {
-    deploy: ['./deploy/new', './deploy/verification'],
+    deploy: ['./deploy'],
   },
   baseSepolia: {
-    deploy: ['./deploy/new', './deploy/verification'],
+    deploy: ['./deploy'],
+  },
+  arbitrum: {
+    deploy: ['./deploy'],
   },
   arbitrumSepolia: {
+    deploy: ['./deploy'],
+  },
+  zksyncMainnet: {
+    deploy: ['./deploy'],
+  },
+  zksyncSepolia: {
+    deploy: ['./deploy'],
+  },
+  agungTestnet: {
+    explorer: 'subscan',
     deploy: ['./deploy/new', './deploy/verification'],
+  },
+  peaq: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  localhost: {
+    deploy: ['./deploy/new'],
   },
 };

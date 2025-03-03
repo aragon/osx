@@ -31,15 +31,15 @@ For more information on the individual packages, please read the respective `REA
 
 ## Audits
 
-Our smart contracts undergo regular audits.
+OSx smart contracts undergo regular audits.
 
-### v1.0.0
+### v1.4.0
 
-**Halborn**: [link 1](./audits/Halborn_AragonOSx_2023-02-24.pdf), [link 2](https://github.com/HalbornSecurity/PublicReports/blob/b3fe424535dce7ce345f74dc7e6c25e9200e7860/Solidity%20Smart%20Contract%20Audits/Aragon_aragonOS_Smart_Contract_Security_Audit_Report_Halborn_Final.pdf)
+**Halborn**: [audit report](./audits/Halborn_AragonOSx_v1_4_Smart_Contract_Security_Assessment_Report_2025_01_03.pdf)
 
-- Commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
-- Started: 2023-02-07
-- Finished: 2023-02-24
+- Commit ID: [e0ba7b60b08fa1665ecac92dc12ea89e4245e7dc](https://github.com/aragon/osx/commit/e0ba7b60b08fa1665ecac92dc12ea89e4245e7dc)
+- Started: 2024-11-18
+- Finished: 2025-02-13
 
 ### v1.3.0
 
@@ -54,6 +54,14 @@ Our smart contracts undergo regular audits.
 - Commit ID: [0ad8cad2bb661fbd53086d097d11228304d9b73e](https://github.com/aragon/osx/commit/0ad8cad2bb661fbd53086d097d11228304d9b73e)
 - Started: 2023-05-29
 - Finished: 2023-06-13
+
+### v1.0.0
+
+**Halborn**: [link 1](./audits/Halborn_AragonOSx_2023-02-24.pdf), [link 2](https://github.com/HalbornSecurity/PublicReports/blob/b3fe424535dce7ce345f74dc7e6c25e9200e7860/Solidity%20Smart%20Contract%20Audits/Aragon_aragonOS_Smart_Contract_Security_Audit_Report_Halborn_Final.pdf)
+
+- Commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
+- Started: 2023-02-07
+- Finished: 2023-02-24
 
 ## Contributing
 
@@ -73,7 +81,7 @@ Ensure you have Node and Yarn installed.
 
 The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. It's recommended to use a tool such as [nvm](https://github.com/nvm-sh/nvm) to manage different node environments. Please see the relevant documentation for details.
 
-Start by running `yarn install` in the project root in your terminal.
+Start by running `yarn --ignore-scripts` in the project root in your terminal.
 
 ### Dependencies
 
@@ -125,7 +133,7 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
 
 The following graphic shows an exemplary DAO setup:
 
-![An examplary DAO setup](https://devs.aragon.org/assets/images/dao-plugin.drawio-7086d0911d25218097dae94665b1a7b1.svg)
+![A potential DAO setup](./images/dao-plugin.svg)
 
 An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
 

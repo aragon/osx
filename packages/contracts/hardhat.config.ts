@@ -12,7 +12,7 @@ import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
-import {extendEnvironment, HardhatUserConfig} from 'hardhat/config';
+import {extendEnvironment, HardhatUserConfig, task} from 'hardhat/config';
 import type {NetworkUserConfig} from 'hardhat/types';
 import 'solidity-coverage';
 import 'solidity-docgen';
@@ -30,12 +30,30 @@ if (process.env.ALCHEMY_API_KEY) {
 }
 
 // add accounts to network configs
-const hardhatNetworks: {[index: string]: NetworkUserConfig} =
-  commonNetworkConfigs;
+const hardhatNetworks: {[index: string]: NetworkUserConfig} = {
+  ...commonNetworkConfigs,
+  agungTestnet: {
+    url: 'https://wss-async.agung.peaq.network',
+    chainId: 9990,
+    gasPrice: 40000000000,
+  },
+  peaq: {
+    url: 'https://erpc-mpfn1.peaq.network',
+    chainId: 3338,
+    gasPrice: 25000000000,
+  },
+};
+
 for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
   }
+
+  if (networkExtensions[network] == undefined) {
+    console.log(`WARNING: newtork ${network} is not found in networks.ts file`);
+    continue;
+  }
+
   hardhatNetworks[network].accounts = accounts;
   hardhatNetworks[network].deploy = networkExtensions[network].deploy;
 }
@@ -57,6 +75,21 @@ const ENABLE_DEPLOY_TEST = process.env.TEST_UPDATE_DEPLOY_SCRIPT !== undefined;
 
 console.log('Is deploy test is enabled: ', ENABLE_DEPLOY_TEST);
 
+// Override the test task so it injects wrapper.
+// Note that this also gets injected when running it through coverage.
+task('test').setAction(async (args, hre, runSuper) => {
+  await hre.run('compile');
+  const imp = await import('./test/test-utils/wrapper');
+
+  const wrapper = await imp.Wrapper.create(
+    hre.network.name,
+    hre.ethers.provider
+  );
+  hre.wrapper = wrapper;
+
+  await runSuper(args);
+});
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
@@ -74,6 +107,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
+
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
@@ -114,6 +148,7 @@ const config: HardhatUserConfig = {
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
+      peaq: '1', // It can be set to null. date: 26/Feb/2025
     },
     customChains: [
       {
@@ -174,6 +209,15 @@ const config: HardhatUserConfig = {
           browserURL: 'https://modescan.io',
         },
       },
+      {
+        network: 'peaq',
+        chainId: 3338,
+        urls: {
+          apiURL:
+            'https://peaq.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://peaq.subscan.io/',
+        },
+      },
     ],
   },
   namedAccounts: {
@@ -186,14 +230,7 @@ const config: HardhatUserConfig = {
     artifacts: './artifacts',
     deploy: './deploy',
   },
-  docgen: {
-    outputDir: 'docs/developer-portal/03-reference-guide',
-    theme: 'markdown',
-    pages: 'files',
-    templates: 'docs/templates',
-    collapseNewlines: true,
-    exclude: ['test'],
-  },
+  docgen: process.env.DOCS ? require('./docs/config.js') : undefined,
   mocha: {
     timeout: 90_000, // 90 seconds // increase the timeout for subdomain validation tests
   },

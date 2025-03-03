@@ -1,0 +1,238 @@
+= Publishing your plugin
+
+Once you've deployed your Plugin Setup contract, you will be able to publish your plugin into Aragon's plugin registry so any 
+Aragon DAO can install it.
+
+== How to publish new plugin
+
+Publishing a plugin to Aragon OSx involves a few key steps to ensure your plugin is properly registered and accessible to DAOs.
+
+=== Make sure your plugin is deployed in a supported network
+
+Make sure your Plugin Setup contract is deployed in your network of choice (you can find all of the networks we support link:https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json[here]). 
+You will need the address of your Plugin Setup contract to be able to publish the plugin into the protocol.
+
+=== Publication of your Plugin into Aragon OSx
+
+Every plugin in Aragon can have future versions, so when publishing a plugin to the Aragon protocol, we're really creating a link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol[PluginRepo] instance for each plugin,
+which will contain all of the plugin's versions.
+
+To publish a plugin, we will use Aragon's `PluginRepoFactory` contract - in charge of creating `PluginRepo` instances containing your plugin's versions. 
+To do this, we will call its `createPluginRepoWithFirstVersion` function, which will link:https://github.com/aragon/core/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepoFactory.sol#L48[create the first version of a plugin] 
+and add that new `PluginRepo` address into the `PluginRepoRegistry` containing all available plugins within the protocol.
+
+You can find all of the addresses of `PluginRepoFactory` contracts by network link:https://github.com/aragon/osx-commons/tree/develop/configs/src/deployments/json[here].
+
+To create more versions of your plugin in the future, you'll call on the link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L128[createVersion function] 
+from the `PluginRepo` instance of your plugin. When you publish your plugin, you'll be able to find the address of your plugin's `PluginRepo` instance within the transaction data.
+
+=== Publishing subsequent builds
+
+When publishing subsequent builds, you want to use the `createVersion` function in the `PluginRepo` contract (link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L132[check out the function's source code here]).
+
+To deploy your plugin, follow the steps in the link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/README.md#deployment[osx-plugin-template-hardhat README.md].
+
+
+== How to add a new version of your plugin
+
+The Aragon OSx protocol has an on-chain versioning system built-in, which distinguishes between releases and builds.
+
+- **Releases** contain breaking changes, which are incompatible with preexisting installations. Updates to a different release are 
+not possible. Instead, you must install the new plugin release and uninstall the old one.
+- **Builds** are minor/patch versions within a release, and they are meant for compatible upgrades only 
+(adding a feature or fixing a bug without changing anything else).
+
+Builds are particularly important for `UUPSUpgradeable` plugins, whereas a non-upgradeable plugin will work off of only releases.
+
+Given a version tag `RELEASE.BUILD`, we can infer that:
+
+1.  We are doing a `RELEASE` version when we apply breaking changes affecting the interaction with other contracts on the blockchain to:
+
+* The `Plugin` implementation contract such as the
+** change or removal of storage variables
+** removal of external functions
+** change of external function headers
+
+2.  We are doing a `BUILD` version when we apply backward compatible changes not affecting the interaction with other contracts on the blockchain to:
+
+* The `Plugin` implementation contract such as the
+      ** addition of
+        *** storage variables
+        *** external functions
+
+      ** change of
+        *** external function bodies
+
+      ** addition, change, or removal of
+        *** internal functions
+        *** constants
+        *** immutables
+        *** events
+        *** errors
+
+* The `PluginSetup` contract such as
+      ** addition, change, or removal of
+        *** input parameters
+        *** helper contracts
+        *** requested permissions
+
+* The release and build `metadata` URIs such as the
+      ** change of
+        *** the plugin setup ABI
+        *** the plugin UI components
+        *** the plugin description
+
+== Plugin Metadata Specification
+
+The plugin metadata is necessary to allow the App frontend to interact with any plugins:
+
+* Now: generic setup (installation, update, uninstallation)
+  ** Allows the frontend to render the necessary fields for the input being required to setup the plugin (e.g., the list of initial members of the Multisig plugin)
+* Future: render a UI in a generic way (buttons, text fields, flows) within the specs of the Open Design System (ODS) (e.g. manage the list of Multisig members or the approval settings)
+
+Currently, two kinds of metadata exist:
+
+1. Release metadata
+2. Build metadata
+
+=== Release Metadata
+
+The release metadata is a `.json` file stored on IPFS with its IPFS CID published for each release in the xref:framework/plugin-repos.adoc[PluginRepo](see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
+
+The intention is to provide an appealing overview of each releases functionality.
+It can be updated with each call to xref:api:framework.adoc#PluginRepo-createVersion-uint8-address-bytes-bytes-[`createVersion()`] in `IPluginRepo` by the repo maintainer.
+
+It can be replaced at any time with xref:api:framework.adoc#PluginRepo-updateReleaseMetadata-uint8-bytes-[`updateReleaseMetadata()`] in `IPluginRepo` by the repo maintainer.
+
+The `release-metadata.json` file consists of the following entries:
+
+|===
+|Key |Type |Description
+
+| name
+| `string` 
+| Name of the plugin (e.g. `"Multisig"`)  
+
+| description
+| `string`
+| Description of the plugin release and its functionality.   
+
+| images
+| UNSPECIFIED
+| Optional. Contains a series of images advertising the plugins functionality..
+
+|===
+
+
+==== Example
+
+```json
+{
+  "name": "Multisig",
+  "description": "",
+  "images": {}
+}
+```
+
+=== Build Metadata
+
+The build metadata is a `.json` file stored on IPFS with its IPFS CID published for each build **only once** 
+in the xref:framework/plugin-repos.adoc[PluginRepo] (see also the section about xref:#how_to_add_a_new_version_of_your_plugin[versioning]).
+
+The intention is to inform about the changes that were introduced in this build compared to the previous one and give instructions to the App frontend and other users on how to interact with the plugin setup and implementation contract.
+It can be published **only once** with the call to xref:api:framework.adoc#PluginRepo-createVersion-uint8-address-bytes-bytes-[`createVersion()`] in `IPluginRepo` by the repo maintainer.
+
+
+|===
+|Key |Type |Description
+
+| ui
+| UNSPECIFIED 
+| A special formatted object containing instructions for the App frontend on how to render the plugin's UI.
+
+| change
+| `string`
+| Description of the code and UI changes compared to the previous build of the same release. 
+
+| pluginSetup
+| `object`
+| Optional. Contains a series of images advertising the plugins functionality.  
+
+|===
+
+Each build metadata contains the following fields:
+
+- one `"prepareInstallation"` object
+- one `"prepareUninstallation"` object
+- 0 to N `"prepareUpdate"` objects enumerated from 1 to N+1
+
+Each `"prepare..."` object contains:
+
+|===
+|Key |Type |Description
+
+| description
+| `string`
+| The description of what this particular setup step is doing and what it requires the input for. 
+
+| inputs
+| `object[]`
+| A description of the inputs required for this setup step following the link:https://docs.ethers.org/v5/api/utils/abi/formats/#abi-formats--solidity[Solidity JSON ABI] format enriched with an additional `"description"` field for each element.
+
+|===
+
+
+
+By following the Solidity JSON ABI format for the inputs, we followed an established standard, have support for complex types (tuples, arrays, nested versions of the prior) and allow for future extensibility (such as the human readable description texts that we have added).
+
+==== Example
+
+```json
+{
+  "ui": {},
+  "change": "- The ability to create a proposal now depends on the membership status of the current instead of the snapshot block.\n- Added a check ensuring that the initial member list cannot overflow.",
+  "pluginSetup": {
+    "prepareInstallation": {
+      "description": "The information required for the installation.",
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "members",
+          "type": "address[]",
+          "description": "The addresses of the initial members to be added."
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "onlyListed",
+              "type": "bool",
+              "description": "Whether only listed addresses can create a proposal or not."
+            },
+            {
+              "internalType": "uint16",
+              "name": "minApprovals",
+              "type": "uint16",
+              "description": "The minimal number of approvals required for a proposal to pass."
+            }
+          ],
+          "internalType": "struct Multisig.MultisigSettings",
+          "name": "multisigSettings",
+          "type": "tuple",
+          "description": "The initial multisig settings."
+        }
+      ],
+      "prepareUpdate": {
+        "1": {
+          "description": "No input is required for the update.",
+          "inputs": []
+        }
+      },
+      "prepareUninstallation": {
+        "description": "No input is required for the uninstallation.",
+        "inputs": []
+      }
+    }
+  }
+}
+```

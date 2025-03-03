@@ -5,7 +5,7 @@ import {
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {defaultAbiCoder, hexDataSlice, id} from 'ethers/lib/utils';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 
 const EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
@@ -24,11 +24,10 @@ describe('CallbackHandler', function () {
   beforeEach(async () => {
     signers = await ethers.getSigners();
     owner = await signers[0].getAddress();
-    const CallbackHandlerHelper = new CallbackHandlerMockHelper__factory(
-      signers[0]
-    );
 
-    callbackHandlerMockHelper = await CallbackHandlerHelper.deploy();
+    callbackHandlerMockHelper = await hre.wrapper.deploy(
+      'CallbackHandlerMockHelper'
+    );
   });
 
   it('reverts for an unknown callback function signature', async () => {

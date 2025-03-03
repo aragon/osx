@@ -36,6 +36,7 @@ deployed_contracts.json
 managementDAOTX.json
 
 # generated
+packages/artifacts/src/abi.ts
 generated
 .bin
 mythx.json

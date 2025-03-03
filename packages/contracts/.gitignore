@@ -11,3 +11,8 @@ docs/developer-portal/03-reference-guide/*
 #Hardhat files
 cache
 artifacts
+out
+
+artifacts-zk
+cache-zk
+deployments-zk
