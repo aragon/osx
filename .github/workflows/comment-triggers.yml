@@ -107,29 +107,3 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: release:${{ steps.type.outputs.type }}
-
-  subgraph_label:
-    needs: [check_user_permission]
-    runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request }}
-    steps:
-      - uses: khan/pull-request-comment-trigger@v1.1.0
-        id: check
-        with:
-          trigger: '/subgraph'
-          prefix_only: true
-          reaction: rocket
-        env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-      - name: Get type
-        id: type
-        run: |
-          type=$(echo "$BODY" | sed "s|/subgraph ||" | sed "s/ //")
-          echo "type=$type" >> $GITHUB_OUTPUT
-        env:
-          BODY: ${{ github.event.comment.body }}
-      - name: add label
-        if: steps.check.outputs.triggered == 'true'
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: subgraph:${{ steps.type.outputs.type }}

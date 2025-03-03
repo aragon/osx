@@ -38,11 +38,6 @@ managementDAOTX.json
 # generated
 packages/artifacts/src/abi.ts
 generated
-subgraph.yaml
 .bin
 mythx.json
 schema-introspection.json
-
-# docs
-packages/subgraph/docs/developer-portal/
-schema-introspection-partial.json

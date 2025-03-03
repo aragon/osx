@@ -19,7 +19,6 @@ The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allo
 Within this monorepo, you will be able to find 3 individual packages:
 
 - [Contracts](https://github.com/aragon/osx/tree/develop/packages/contracts): the Aragon OSx protocol contracts.
-- [Subgraph](https://github.com/aragon/osx/tree/develop/packages/subgraph): contains all code generating our subgraph and event indexing.
 - [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): contains the connection between the ethers package and our contracts.
 
 The contents of this repository are distributed via 3 different NPM packages:
@@ -160,9 +159,7 @@ Each plugin consists of two key components:
 
 You can find all plugins built by the Aragon team [here](https://github.com/aragon/osx/tree/develop/packages/contracts/src/plugins).
 
-### Connection between OSx, subgraph, and ethers.js packages
-
-The [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts) emits events that get indexed within our `subgraph`. This `subgraph`, whose [source code can be found here](https://github.com/aragon/osx/tree/develop/packages/subgraph), is what then fuels the [Aragon SDK](https://github.com/aragon/sdk).
+### Connection between OSx, and ethers.js packages
 
 The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
 
@@ -210,9 +207,8 @@ Follow [our update checklist here](https://github.com/aragon/osx/blob/develop/UP
 
 Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.
 
-| Command                                      | Description                                                 |
-| -------------------------------------------- | ----------------------------------------------------------- |
-| `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request               |
-| `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request                   |
-| `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request          |
-| `/subgraph (patch \| minor \| major)`        | Adds the proper subgraph release label to this pull request |
+| Command                                      | Description                                        |
+| -------------------------------------------- | -------------------------------------------------- |
+| `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request      |
+| `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request          |
+| `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request |

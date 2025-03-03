@@ -5,7 +5,6 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 ## Pre-Deployment
 
 - [ ] Verify that the deployers wallet has enough funds.
-- [ ] Check that the subgraph hoster supports the network OSx is deployed to.
 - [ ] Check that you are using Node v16
 - [ ] Check that you are using the intended `@aragon/osx-commons-contracts` package version.
 - [ ] Check that the OSx protocol version in `@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol` is bumped correctly.
@@ -91,22 +90,6 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 - [ ] Publish a new version of `@aragon/osx` (`./packages/contracts/src`) to NPM
 - [ ] Publish a new version of `@aragon/osx-ethers` (`./packages/contracts-ethers`) to NPM
 - [ ] Update the changelog with the new version
-
-### Subgraph
-
-- [ ] Update `packages/subgraph/manifest/data/NETWORK.json` where `NETWORK` is replaced with the deployed network with the new contract addresses. If the file doesn't exist create a new one.
-- [ ] Update the version in `packages/subgraph/package.json`
-- [ ] Update `packages/subgraph/.env` with the correct values
-  - [ ] set `NETWORK_NAME` to the deployed network
-  - [ ] set `SUBGRAPH_NAME` to `osx`
-  - [ ] set `GRAPH_KEY` with the value obtained from the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
-  - [ ] set the `SUBGRAPH_VERSION` to the same value as in `packages/subgraph/package.json`
-- [ ] Run `yarn manifest` in `packages/subgraph` to generate the manifest
-- [ ] Run `yarn build` in `packages/subgraph` to build the subgraph
-- [ ] Run `yarn test` in `packages/subgraph` to test the subgraph
-- [ ] Run `yarn deploy` in `packages/subgraph` to deploy the subgraph
-- [ ] Test the new deployed subgraph with the frontend team
-- [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
 
 ## Appendix
 
