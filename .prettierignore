@@ -25,4 +25,3 @@ packages/contracts/docs/templates/page.hbs
 coverage.json
 package-lock.json
 yarn.lock
-extended-schema.ts

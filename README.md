@@ -19,7 +19,6 @@ The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allo
 Within this monorepo, you will be able to find 3 individual packages:
 
 - [Contracts](https://github.com/aragon/osx/tree/develop/packages/contracts): the Aragon OSx protocol contracts.
-- [Subgraph](https://github.com/aragon/osx/tree/develop/packages/subgraph): contains all code generating our subgraph and event indexing.
 - [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): contains the connection between the ethers package and our contracts.
 
 The contents of this repository are distributed via 3 different NPM packages:
@@ -32,15 +31,15 @@ For more information on the individual packages, please read the respective `REA
 
 ## Audits
 
-Our smart contracts undergo regular audits.
+OSx smart contracts undergo regular audits.
 
-### v1.0.0
+### v1.4.0
 
-**Halborn**: [link 1](./audits/Halborn_AragonOSx_2023-02-24.pdf), [link 2](https://github.com/HalbornSecurity/PublicReports/blob/b3fe424535dce7ce345f74dc7e6c25e9200e7860/Solidity%20Smart%20Contract%20Audits/Aragon_aragonOS_Smart_Contract_Security_Audit_Report_Halborn_Final.pdf)
+**Halborn**: [audit report](./audits/Halborn_AragonOSx_v1_4_Smart_Contract_Security_Assessment_Report_2025_01_03.pdf)
 
-- Commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
-- Started: 2023-02-07
-- Finished: 2023-02-24
+- Commit ID: [e0ba7b60b08fa1665ecac92dc12ea89e4245e7dc](https://github.com/aragon/osx/commit/e0ba7b60b08fa1665ecac92dc12ea89e4245e7dc)
+- Started: 2024-11-18
+- Finished: 2025-02-13
 
 ### v1.3.0
 
@@ -55,6 +54,14 @@ Our smart contracts undergo regular audits.
 - Commit ID: [0ad8cad2bb661fbd53086d097d11228304d9b73e](https://github.com/aragon/osx/commit/0ad8cad2bb661fbd53086d097d11228304d9b73e)
 - Started: 2023-05-29
 - Finished: 2023-06-13
+
+### v1.0.0
+
+**Halborn**: [link 1](./audits/Halborn_AragonOSx_2023-02-24.pdf), [link 2](https://github.com/HalbornSecurity/PublicReports/blob/b3fe424535dce7ce345f74dc7e6c25e9200e7860/Solidity%20Smart%20Contract%20Audits/Aragon_aragonOS_Smart_Contract_Security_Audit_Report_Halborn_Final.pdf)
+
+- Commit ID: [cb0621dc5185a73240a6ca33fccc7698f059fdf5](https://github.com/aragon/osx/commit/cb0621dc5185a73240a6ca33fccc7698f059fdf5)
+- Started: 2023-02-07
+- Finished: 2023-02-24
 
 ## Contributing
 
@@ -74,7 +81,7 @@ Ensure you have Node and Yarn installed.
 
 The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. It's recommended to use a tool such as [nvm](https://github.com/nvm-sh/nvm) to manage different node environments. Please see the relevant documentation for details.
 
-Start by running `yarn install` in the project root in your terminal.
+Start by running `yarn --ignore-scripts` in the project root in your terminal.
 
 ### Dependencies
 
@@ -152,9 +159,7 @@ Each plugin consists of two key components:
 
 You can find all plugins built by the Aragon team [here](https://github.com/aragon/osx/tree/develop/packages/contracts/src/plugins).
 
-### Connection between OSx, subgraph, and ethers.js packages
-
-The [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts) emits events that get indexed within our `subgraph`. This `subgraph`, whose [source code can be found here](https://github.com/aragon/osx/tree/develop/packages/subgraph), is what then fuels the [Aragon SDK](https://github.com/aragon/sdk).
+### Connection between OSx, and ethers.js packages
 
 The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
 
@@ -204,9 +209,8 @@ Also check the [README](./packages/contracts/scripts/management-dao-proposal/REA
 
 Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.
 
-| Command                                      | Description                                                 |
-| -------------------------------------------- | ----------------------------------------------------------- |
-| `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request               |
-| `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request                   |
-| `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request          |
-| `/subgraph (patch \| minor \| major)`        | Adds the proper subgraph release label to this pull request |
+| Command                                      | Description                                        |
+| -------------------------------------------- | -------------------------------------------------- |
+| `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request      |
+| `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request          |
+| `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request |

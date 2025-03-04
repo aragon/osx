@@ -37,12 +37,8 @@ managementDAOTX.json
 packages/contracts/scripts/management-dao-proposal/files-to-merge/
 
 # generated
+packages/artifacts/src/abi.ts
 generated
-subgraph.yaml
 .bin
 mythx.json
 schema-introspection.json
-
-# docs
-packages/subgraph/docs/developer-portal/
-schema-introspection-partial.json

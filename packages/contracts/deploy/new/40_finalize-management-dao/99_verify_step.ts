@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // On some chains - such as holesky - wait so
   // previous permission txs are fully applied and verified.
-  await delay(5000);
+  await delay(20000);
 
   // Check revoked permission.
   await checkPermission(managementDaoContract, {
@@ -54,14 +54,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   await checkPermission(managementDaoContract, {
-    operation: Operation.Revoke,
+    operation: Operation.Grant,
     where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
     who: {name: 'Deployer', address: deployer.address},
     permission: 'ROOT_PERMISSION',
   });
 
   await checkPermission(managementDaoContract, {
-    operation: Operation.Grant,
+    operation: Operation.Revoke,
     where: {name: 'ManagementDAOProxy', address: managementDAOAddress},
     who: {name: 'Deployer', address: deployer.address},
     permission: 'EXECUTE_PERMISSION',

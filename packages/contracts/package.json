@@ -1,16 +1,8 @@
 {
-  "name": "@aragon/osx-artifacts",
-  "version": "1.4.0-rc0",
-  "description": "The Aragon OSx Solidity contracts",
-  "main": "dist/bundle-cjs.js",
-  "module": "dist/bundle-esm.js",
-  "types": "dist/bundle.d.ts",
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "dist"
-  ],
+  "name": "@aragon/osx",
+  "version": "1.4.0",
+  "description": "The Aragon OSx source code",
+  "private": true,
   "scripts": {
     "typechain:osx": "ts-node scripts/generate-typechain-osx.ts",
     "typechain:osx-versions": "ts-node scripts/generate-typechain-osx-versions.ts",
@@ -21,7 +13,6 @@
     "test:zksync": "hardhat test --config hardhat-zksync.config.ts",
     "build": "hardhat compile && yarn typechain",
     "build:zksync": "hardhat compile --config hardhat-zksync.config.ts && yarn typechain",
-    "build:npm": "rollup --config rollup.config.ts",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
@@ -29,7 +20,6 @@
     "deploy:zksync": "hardhat deploy-contracts --config hardhat-zksync.config.ts",
     "deploy:local": "yarn deploy --network localhost --reset",
     "dev": "yarn hardhat node --hostname 0.0.0.0",
-    "prepublishOnly": "yarn build && yarn build:npm",
     "docgen": "hardhat docgen",
     "docs": "DOCS=true scripts/prepare-docs.sh",
     "clean": "rm -rf artifacts cache deployments typechain",
@@ -39,7 +29,7 @@
     "type": "git",
     "url": "https://github.com/aragon/osx"
   },
-  "author": "",
+  "author": "Aragon X",
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/aragon/osx/issues"
@@ -70,7 +60,6 @@
     "@nomicfoundation/hardhat-verify": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@openzeppelin/hardhat-upgrades": "^1.23.1",
-    "@rollup/plugin-json": "^4.1.0",
     "@typechain/ethers-v5": "7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.2.22",
@@ -93,8 +82,6 @@
     "hardhat-deploy": "0.12.4",
     "hardhat-gas-reporter": "^1.0.4",
     "ipfs-http-client": "51.0.0",
-    "rollup": "^2.70.1",
-    "rollup-plugin-dts": "^4.2.0",
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.8.2",
     "solidity-docgen": "^0.6.0-beta.35",

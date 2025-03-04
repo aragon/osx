@@ -21,7 +21,7 @@ jobs:
           cache: 'yarn'
           node-version: 18
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
       - name: Clean the contracts directory
         run: yarn clean
         working-directory: packages/contracts/
