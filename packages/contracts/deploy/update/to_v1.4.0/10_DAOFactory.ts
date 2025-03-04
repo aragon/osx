@@ -52,7 +52,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     to: managementDAOAddress,
     value: 0,
     data: calldata,
-    description: `Grant the <strong>REGISTER_DAO_PERMISSION_ID</strong> permission on the <strong>DAORegistry</strong> (<code>${daoRegistryAddress}</code>) to the new <strong>DAOFactory</strong> (<code>${deployResult.address}</code>).`,
+    description: `\n- Grant the **REGISTER_DAO_PERMISSION_ID** permission on the **DAORegistry** (\`${daoRegistryAddress}\`) to the new **DAOFactory** (\`${deployResult.address}\`).`,
   });
 };
 export default func;

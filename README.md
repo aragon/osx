@@ -203,6 +203,8 @@ You can find more details about [our deployment checklist here](https://github.c
 
 Follow [our update checklist here](https://github.com/aragon/osx/blob/develop/UPDATE_CHECKLIST.md).
 
+Also check the [README](./packages/contracts/scripts/management-dao-proposal/README.md) of the Management DAO proposal generation flow.
+
 ## Pull request commands
 
 Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.

@@ -24,6 +24,8 @@ import {expect} from 'chai';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 import hre, {ethers, deployments} from 'hardhat';
 
+const FORK_BLOCK_NUMBER = 7805006;
+
 const IMPLEMENTATION_ADDRESS_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
 
@@ -45,7 +47,7 @@ async function forkSepolia() {
   // console.log(hre);
   await initForkForOsxVersion('sepolia', {
     version: '1.3.0',
-    forkBlockNumber: 7296100,
+    forkBlockNumber: FORK_BLOCK_NUMBER,
     activeContracts: [],
   });
 }

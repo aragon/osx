@@ -43,11 +43,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const storeInfo = {
+    proposalInfo: hre.proposalInfo,
     deployedContractAddresses,
     managementDAOActions: hre.managementDAOActions,
   };
 
-  await fs.writeFile('deployed_contracts.json', JSON.stringify(storeInfo));
+  await fs.writeFile(
+    'deployed_contracts.json',
+    JSON.stringify(storeInfo, null, 2),
+    'utf-8'
+  );
 };
 export default func;
 func.tags = ['New', 'Conclude', 'ConcludeEnd'];
