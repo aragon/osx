@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
     // Adjust this values
     proposalStartDate: 0,
-    proposalEndDate: Math.ceil(Date.now() / 1000),
+    proposalEndDate: Math.ceil(Date.now() / 1000) + 60*60*24*14,
   };
 };
 export default func;
