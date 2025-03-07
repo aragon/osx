@@ -120,7 +120,7 @@ const config: HardhatUserConfig = {
       zksync: true,
       verifyURL:
         'https://explorer.sepolia.era.zksync.dev/contract_verification',
-      deploy: ['./deploy/new', './deploy/verification'],
+      deploy: ['./deploy/update', './deploy/verification'],
       accounts: accounts,
       forceDeploy: true,
     },
@@ -130,7 +130,7 @@ const config: HardhatUserConfig = {
       zksync: true,
       verifyURL:
         'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
-      deploy: ['./deploy/new', './deploy/verification'],
+      deploy: ['./deploy/update', './deploy/verification'],
       accounts: accounts,
       forceDeploy: true,
     },
