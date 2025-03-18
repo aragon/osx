@@ -6,6 +6,7 @@ import {getContractAddress, uploadToIPFS} from '../../helpers';
 import addresslistVotingSetupArtifact from '../../../artifacts/src/plugins/governance/majority-voting/addresslist/AddresslistVotingSetup.sol/AddresslistVotingSetup.json';
 import addresslistVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import addresslistVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 
 const TARGET_RELEASE = 1;
 
@@ -22,13 +23,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  const addresslistVotingReleaseCIDPath = await uploadToIPFS(
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
+
+  const addresslistVotingReleaseCIDPath = await uploadToPinata(
     JSON.stringify(addresslistVotingReleaseMetadata),
-    network.name
+    `addresslistVotingReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const addresslistVotingBuildCIDPath = await uploadToIPFS(
+
+  const addresslistVotingBuildCIDPath = await uploadToPinata(
     JSON.stringify(addresslistVotingBuildMetadata),
-    network.name
+    `addresslistVotingBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   const addresslistVotingRepoAddress = await getContractAddress(
@@ -55,8 +63,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .createVersion(
         TARGET_RELEASE,
         deployResult.address,
-        ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingBuildCIDPath}`),
-        ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${addresslistVotingBuildCIDPath}`),
+        ethers.utils.toUtf8Bytes(`${addresslistVotingReleaseCIDPath}`)
       );
     console.log(`Creating new AddresslistVoting build version with ${tx.hash}`);
     await tx.wait();
@@ -68,8 +76,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     .populateTransaction.createVersion(
       TARGET_RELEASE,
       deployResult.address,
-      ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingBuildCIDPath}`),
-      ethers.utils.toUtf8Bytes(`ipfs://${addresslistVotingReleaseCIDPath}`)
+      ethers.utils.toUtf8Bytes(`${addresslistVotingBuildCIDPath}`),
+      ethers.utils.toUtf8Bytes(`${addresslistVotingReleaseCIDPath}`)
     );
 
   if (!tx.to || !tx.data) {

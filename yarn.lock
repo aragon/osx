@@ -2,6 +2,26 @@
 # yarn lockfile v1
 
 
+"@aragon/osx-commons-configs@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-configs/-/osx-commons-configs-0.8.0.tgz#71e27c7063c3ca7a26a2c5ae12594063800bd9db"
+  integrity sha512-O8CIKxm+jCN4sq8DBAISlo+Y75VKY03uMqGVP1bUxshqW3ax42r2vlYtTRE/0dJgS9Yh5ElO1tVfDutsGoYWoA==
+  dependencies:
+    tslib "^2.6.2"
+
+"@aragon/osx-commons-sdk@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-commons-sdk/-/osx-commons-sdk-0.2.0.tgz#e5ca5db172866775a02337c22af3a05ac16541fa"
+  integrity sha512-bxzvIbxdQtObqLPrJlJcPuy2cMzrE9TI7zlNMcbKnyr4swp44ZHZi5NKcwX1eFAf+oZc1aFlehb1gPwPMvaT8Q==
+  dependencies:
+    "@aragon/osx-commons-configs" "^0.8.0"
+    "@ethersproject/address" "5.7.0"
+    "@ethersproject/bignumber" "5.7.0"
+    "@ethersproject/contracts" "5.7.0"
+    "@ethersproject/hash" "5.7.0"
+    "@ethersproject/logger" "5.7.0"
+    "@ethersproject/providers" "5.7.2"
+
 "@aragon/osx-commons-subgraph@^0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@aragon/osx-commons-subgraph/-/osx-commons-subgraph-0.0.4.tgz#2aa52f3089d21189c9152d2f3d14c0d7c66d129f"
@@ -11740,6 +11760,11 @@ tslib@^2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
   integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
+
+tslib@^2.6.2:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
+  integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
 
 tsort@0.0.1:
   version "0.0.1"

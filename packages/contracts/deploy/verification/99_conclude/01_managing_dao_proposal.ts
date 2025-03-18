@@ -3,6 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {Multisig__factory} from '../../../typechain';
 import {getManagingDAOMultisigAddress, uploadToIPFS} from '../../helpers';
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nCreating managing DAO Proposal');
@@ -25,14 +26,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const proposalDescription = hre.managingDAOActions
     .map(action => action.description)
     .join('\n');
-  const cid = await uploadToIPFS(
-    JSON.stringify({
-      title: 'Framework Upgrade 1.3.0',
-      summary: proposalDescription,
-      resources: [],
-    }),
-    network.name
-  );
+
+    if (!process.env.PUB_PINATA_JWT) {
+      throw new Error('PUB_PINATA_JWT is not set');
+    }
+  
+    const cid = await uploadToPinata(
+      JSON.stringify({
+        title: 'Framework Upgrade 1.3.0',
+        summary: proposalDescription,
+        resources: [],
+      }),
+      `Framework-Upgrade-1.3.0`,
+      process.env.PUB_PINATA_JWT
+    );
+
+  
 
   if (managingDAOMultisigSettings.onlyListed) {
     if (!(await managingDAOMultisig.callStatic.isMember(deployer.address))) {
@@ -40,7 +49,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         `ManagingDAOMultisig (${managingDAOMultisigAddress}) doesn't allow deployer ${deployer.address} to create proposal.`
       );
       const tx = await managingDAOMultisig.populateTransaction.createProposal(
-        ethers.utils.toUtf8Bytes(`ipfs://${cid}`),
+        ethers.utils.toUtf8Bytes(`${cid}`),
         hre.managingDAOActions,
         0,
         true,
@@ -58,7 +67,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     `ManagingDAOMultisig (${managingDAOMultisigAddress}) does allow deployer ${deployer.address} to create proposal.`
   );
   const tx = await managingDAOMultisig.createProposal(
-    ethers.utils.toUtf8Bytes(`ipfs://${cid}`),
+    ethers.utils.toUtf8Bytes(`${cid}`),
     hre.managingDAOActions,
     0,
     true,

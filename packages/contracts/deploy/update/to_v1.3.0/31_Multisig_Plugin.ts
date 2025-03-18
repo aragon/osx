@@ -7,6 +7,7 @@ import multisigSetupArtifact from '../../../artifacts/src/plugins/governance/mul
 
 import multisigReleaseMetadata from '../../../src/plugins/governance/multisig/release-metadata.json';
 import multisigBuildMetadata from '../../../src/plugins/governance/multisig/build-metadata.json';
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 
 const TARGET_RELEASE = 1;
 
@@ -23,13 +24,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  const multisigReleaseCIDPath = await uploadToIPFS(
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
+
+  const multisigReleaseCIDPath = await uploadToPinata(
     JSON.stringify(multisigReleaseMetadata),
-    network.name
+    `multisigReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const multisigBuildCIDPath = await uploadToIPFS(
+
+  const multisigBuildCIDPath = await uploadToPinata(
     JSON.stringify(multisigBuildMetadata),
-    network.name
+    `multisigBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   const multisigRepoAddress = await getContractAddress('multisig-repo', hre);
@@ -51,8 +59,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .createVersion(
         TARGET_RELEASE,
         deployResult.address,
-        ethers.utils.toUtf8Bytes(`ipfs://${multisigBuildCIDPath}`),
-        ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${multisigBuildCIDPath}`),
+        ethers.utils.toUtf8Bytes(`${multisigReleaseCIDPath}`)
       );
     console.log(`Creating new multisig build version with ${tx.hash}`);
     await tx.wait();
@@ -64,8 +72,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     .populateTransaction.createVersion(
       TARGET_RELEASE,
       deployResult.address,
-      ethers.utils.toUtf8Bytes(`ipfs://${multisigBuildCIDPath}`),
-      ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
+      ethers.utils.toUtf8Bytes(`${multisigBuildCIDPath}`),
+      ethers.utils.toUtf8Bytes(`${multisigReleaseCIDPath}`)
     );
 
   if (!tx.to || !tx.data) {

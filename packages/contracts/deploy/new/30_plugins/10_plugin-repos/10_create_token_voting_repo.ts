@@ -1,3 +1,4 @@
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 import tokenVotingBuildMetadata from '../../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 import tokenVotingReleaseMetadata from '../../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import {
@@ -18,15 +19,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
-  const {network} = hre;
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
 
-  const tokenVotingReleaseCIDPath = await uploadToIPFS(
+  const tokenVotingReleaseCIDPath = await uploadToPinata(
     JSON.stringify(tokenVotingReleaseMetadata),
-    network.name
+    `tokenVotingReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const tokenVotingBuildCIDPath = await uploadToIPFS(
+
+  const tokenVotingBuildCIDPath = await uploadToPinata(
     JSON.stringify(tokenVotingBuildMetadata),
-    network.name
+    `tokenVotingBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   const tokenVotingSetupContract = await getTokenVotingSetupAddress(hre);
@@ -37,10 +43,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       versionTag: [1, 2],
       pluginSetupContract: tokenVotingSetupContract,
       releaseMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${tokenVotingReleaseCIDPath}`)
       ),
       buildMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingBuildCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${tokenVotingBuildCIDPath}`)
       ),
     },
   ]);

@@ -7,6 +7,7 @@ import {getContractAddress, getENSAddress, uploadToIPFS} from '../../helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import MANAGING_DAO_METADATA from '../../management-dao-metadata.json';
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {ethers, network} = hre;
@@ -72,9 +73,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     managingDAOAddress,
     deployer
   );
-  const metadataCIDPath = await uploadToIPFS(
+
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
+
+  const metadataCIDPath = await uploadToPinata(
     JSON.stringify(MANAGING_DAO_METADATA),
-    network.name
+    `MANAGING_DAO_METADATA`,
+    process.env.PUB_PINATA_JWT
   );
 
   const hasMetadataPermission = await managingDaoContract.hasPermission(
@@ -89,7 +96,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (hasMetadataPermission) {
     const setMetadataTX = await managingDaoContract.setMetadata(
       ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${metadataCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${metadataCIDPath}`)
       )
     );
     await setMetadataTX.wait();
