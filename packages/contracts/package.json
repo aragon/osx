@@ -42,11 +42,13 @@
   },
   "homepage": "https://github.com/aragon/osx#readme",
   "devDependencies": {
+    "@aragon/osx-commons-sdk": "^0.2.0",
     "@aragon/osx-ethers-v1.2.0": "npm:@aragon/osx-ethers@1.2.0",
     "@aragon/osx-v1.0.1": "npm:@aragon/osx@1.0.1",
     "@defi-wonderland/smock": "^2.3.4",
     "@ensdomains/ens-contracts": "0.0.11",
     "@matterlabs/hardhat-zksync-deploy": "0.8",
+    "@matterlabs/hardhat-zksync-ethers": "0.0.1-beta.2",
     "@matterlabs/hardhat-zksync-node": "^0.1.0",
     "@matterlabs/hardhat-zksync-solc": "^1.1.4",
     "@matterlabs/hardhat-zksync-upgradable": "^0.4.0",
@@ -93,7 +95,6 @@
     "ts-node": "^8.1.0",
     "typechain": "^5.2.0",
     "typescript": "^4.4.4",
-    "zksync-ethers": "^5.0",
-    "@matterlabs/hardhat-zksync-ethers": "0.0.1-beta.2"
+    "zksync-ethers": "^5.0"
   }
 }

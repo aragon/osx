@@ -378,7 +378,7 @@ export async function populatePluginRepo(
         i,
         emptyJsonObject,
         ethers.utils.hexlify(
-          ethers.utils.toUtf8Bytes(`ipfs://${hre.placeholderBuildCIDPath}`)
+          ethers.utils.toUtf8Bytes(`${hre.placeholderBuildCIDPath}`)
         )
       );
     }

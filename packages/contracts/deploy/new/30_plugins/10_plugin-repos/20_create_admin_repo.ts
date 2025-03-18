@@ -1,3 +1,4 @@
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 import adminBuildMetadata from '../../../../src/plugins/governance/admin/build-metadata.json';
 import adminReleaseMetadata from '../../../../src/plugins/governance/admin/release-metadata.json';
 import {
@@ -18,15 +19,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
-  const {network} = hre;
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
 
-  const adminReleaseCIDPath = await uploadToIPFS(
+  const adminReleaseCIDPath = await uploadToPinata(
     JSON.stringify(adminReleaseMetadata),
-    network.name
+    `adminReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const adminBuildCIDPath = await uploadToIPFS(
+
+  const adminBuildCIDPath = await uploadToPinata(
     JSON.stringify(adminBuildMetadata),
-    network.name
+    `adminBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   const adminSetupContract = await getContractAddress('AdminSetup', hre);
@@ -37,10 +43,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       versionTag: [1, 1],
       pluginSetupContract: adminSetupContract,
       releaseMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${adminReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${adminReleaseCIDPath}`)
       ),
       buildMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${adminBuildCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${adminBuildCIDPath}`)
       ),
     },
   ]);

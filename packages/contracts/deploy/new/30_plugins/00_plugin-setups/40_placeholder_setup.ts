@@ -1,6 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {uploadToIPFS} from '../../../helpers';
+import {uploadToPinata} from '@aragon/osx-commons-sdk';
 
 import placeholderSetupArtifact from '../../../../artifacts/src/plugins/placeholder-version/PlaceholderSetup.sol/PlaceholderSetup.json';
 import placeholderBuildMetadata from '../../../../src/plugins/placeholder-version/build-metadata.json';
@@ -17,12 +18,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  const {network} = hre;
+  let metadataCIDPath = '0x';
+  
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
 
-  hre.placeholderBuildCIDPath = await uploadToIPFS(
+  // Upload the metadata to IPFS
+  metadataCIDPath = await uploadToPinata(
     JSON.stringify(placeholderBuildMetadata),
-    network.name
+    `placeholderBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
+
+  hre.placeholderBuildCIDPath = metadataCIDPath
 };
 
 export default func;

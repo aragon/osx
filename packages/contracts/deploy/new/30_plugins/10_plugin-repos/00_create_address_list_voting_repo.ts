@@ -1,3 +1,4 @@
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 import addresslistBuildMetadata from '../../../../src/plugins/governance/majority-voting/addresslist/build-metadata.json';
 import addresslistReleaseMetadata from '../../../../src/plugins/governance/majority-voting/addresslist/release-metadata.json';
 import {
@@ -17,16 +18,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
-  const {network} = hre;
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
 
-  const addresslistReleaseCIDPath = await uploadToIPFS(
+  const addresslistReleaseCIDPath = await uploadToPinata(
     JSON.stringify(addresslistReleaseMetadata),
-    network.name
+    `addresslistReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const addresslistBuildCIDPath = await uploadToIPFS(
+
+  
+  const addresslistBuildCIDPath = await uploadToPinata(
     JSON.stringify(addresslistBuildMetadata),
-    network.name
+    `addresslistBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
+
 
   const addresslistVotingSetupContract = await getContractAddress(
     'AddresslistVotingSetup',
@@ -39,10 +47,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       versionTag: [1, 2],
       pluginSetupContract: addresslistVotingSetupContract,
       releaseMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${addresslistReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${addresslistReleaseCIDPath}`)
       ),
       buildMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${addresslistBuildCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${addresslistBuildCIDPath}`)
       ),
     },
   ]);

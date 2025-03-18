@@ -9,6 +9,7 @@ import tokenVotingSetupArtifact from '../../../artifacts/src/plugins/governance/
 import tokenVotingReleaseMetadata from '../../../src/plugins/governance/majority-voting/token/release-metadata.json';
 import tokenVotingBuildMetadata from '../../../src/plugins/governance/majority-voting/token/build-metadata.json';
 import {MintSettings} from '../../../test/token/erc20/governance-erc20';
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 
 const TARGET_RELEASE = 1;
 
@@ -56,13 +57,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  const tokenVotingReleaseCIDPath = await uploadToIPFS(
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
+
+  const tokenVotingReleaseCIDPath = await uploadToPinata(
     JSON.stringify(tokenVotingReleaseMetadata),
-    network.name
+    `tokenVotingReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const tokenVotingBuildCIDPath = await uploadToIPFS(
+
+  const tokenVotingBuildCIDPath = await uploadToPinata(
     JSON.stringify(tokenVotingBuildMetadata),
-    network.name
+    `tokenVotingBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   const tokenVotingRepoAddress = await getContractAddress(
@@ -87,8 +95,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       .createVersion(
         TARGET_RELEASE,
         deployResult.address,
-        ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingBuildCIDPath}`),
-        ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${tokenVotingBuildCIDPath}`),
+        ethers.utils.toUtf8Bytes(`${tokenVotingReleaseCIDPath}`)
       );
     console.log(`Creating new TokenVoting build version with ${tx.hash}`);
     await tx.wait();
@@ -100,8 +108,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     .populateTransaction.createVersion(
       TARGET_RELEASE,
       deployResult.address,
-      ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingBuildCIDPath}`),
-      ethers.utils.toUtf8Bytes(`ipfs://${tokenVotingReleaseCIDPath}`)
+      ethers.utils.toUtf8Bytes(`${tokenVotingBuildCIDPath}`),
+      ethers.utils.toUtf8Bytes(`${tokenVotingReleaseCIDPath}`)
     );
 
   if (!tx.to || !tx.data) {

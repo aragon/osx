@@ -229,8 +229,26 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumGoerli: process.env.ARBISCAN_KEY || '',
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
+      bscMainnet: process.env.BSCSCAN_KEY || '',
+      bscTestnet: process.env.BSCSCAN_KEY || '',
     },
     customChains: [
+      {
+        network: 'bscMainnet',
+        chainId: 56,
+        urls: {
+          apiURL: 'https://api.bscscan.com/api',
+          browserURL: 'https://bscscan.com/',
+        },
+      },
+      {
+        network: 'bscTestnet',
+        chainId: 97,
+        urls: {
+          apiURL: 'https://api-testnet.bscscan.com/api',
+          browserURL: 'https://testnet.bscscan.com/',
+        },
+      },
       {
         network: 'baseMainnet',
         chainId: 8453,

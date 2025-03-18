@@ -11,6 +11,7 @@ import {
   uploadToIPFS,
 } from '../../../helpers';
 import {ethers} from 'ethers';
+import { uploadToPinata } from '@aragon/osx-commons-sdk';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating multisig repo.`);
@@ -19,15 +20,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
-  const {network} = hre;
+  if (!process.env.PUB_PINATA_JWT) {
+    throw new Error('PUB_PINATA_JWT is not set');
+  }
 
-  const multisigReleaseCIDPath = await uploadToIPFS(
+  const multisigReleaseCIDPath = await uploadToPinata(
     JSON.stringify(multisigReleaseMetadata),
-    network.name
+    `multisigReleaseMetadata`,
+    process.env.PUB_PINATA_JWT
   );
-  const multisigBuildCIDPath = await uploadToIPFS(
+
+  const multisigBuildCIDPath = await uploadToPinata(
     JSON.stringify(multisigBuildMetadata),
-    network.name
+    `multisigBuildMetadata`,
+    process.env.PUB_PINATA_JWT
   );
 
   const multisigSetupContract = await getContractAddress('MultisigSetup', hre);
@@ -38,10 +44,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       versionTag: [1, 2],
       pluginSetupContract: multisigSetupContract,
       releaseMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${multisigReleaseCIDPath}`)
       ),
       buildMetadata: ethers.utils.hexlify(
-        ethers.utils.toUtf8Bytes(`ipfs://${multisigBuildCIDPath}`)
+        ethers.utils.toUtf8Bytes(`${multisigBuildCIDPath}`)
       ),
     },
   ]);
