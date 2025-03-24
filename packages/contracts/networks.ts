@@ -33,6 +33,9 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   zksyncSepolia: {
     deploy: ['./deploy'],
   },
+  holesky: {
+    deploy: ['./deploy'],
+  },
   linea: {
     deploy: ['./deploy'],
   },
