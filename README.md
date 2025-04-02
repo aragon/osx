@@ -63,6 +63,10 @@ OSx smart contracts undergo regular audits.
 - Started: 2023-02-07
 - Finished: 2023-02-24
 
+## ABI and artifacts
+
+Check out the [artifacts folder](./packages/artifacts/README.md) to get the deployed addresses and the contract ABI's.
+
 ## Contributing
 
 We'd love to hear what you think! If you want to build this with us, please find a detailed contribution guide in the `CONTRIBUTION_GUIDE.md` [file here](https://github.com/aragon/osx/blob/develop/CONTRIBUTION_GUIDE.md).

@@ -30,7 +30,7 @@ import { addresses } from "@aragon/osx-artifacts";
 console.log(addresses.daoFactory.mainnet);
 ```
 
-You can also open [addresses.json](./src/addresses.json) directly.
+You can also open [addresses.json](https://github.com/aragon/osx/blob/main/packages/artifacts/src/addresses.json) directly.
 
 ## Development
 
