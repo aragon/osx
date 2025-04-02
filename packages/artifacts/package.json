@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-artifacts",
-  "version": "1.4.0-alpha",
+  "version": "1.4.0",
   "description": "The ABI definitions and addresses for Aragon OSx",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "build": "yarn prepare-abi && rm -Rf dist && tsc -p tsconfig.json",
-    "prepare-abi": "bash prepare-abi.sh"
+    "prepare-abi": "bash ./prepare-abi.sh",
+    "sync-addrs": "bash ./sync-addresses.sh ../../../osx-commons/configs/src/deployments/json ./src/addresses.json"
   },
   "repository": {
     "type": "git",
