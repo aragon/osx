@@ -1,5 +1,7 @@
 # Aragon OSx Contracts for ethers.js
 
+> NOTE: This package has been deprecated. Please, refer to [packages/artifacts](../artifacts/README.md) instead.
+
 NPM package that provides ethers.js wrappers to use the Aragon DAO framework smart contracts.
 
 ```sh

@@ -59,4 +59,4 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 # Releases
 
-Contract releases are tracked in [Releases.md](Releases.md)
+Contract addresses can be obtained via the [OSx artifacts](https://www.npmjs.com/package/@aragon/osx-artifacts) NPM package.

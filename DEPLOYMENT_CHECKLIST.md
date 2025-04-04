@@ -43,7 +43,7 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
 - [ ] Add the new deployment to the `@aragon/osx-commons-config` package found here: [https://github.com/aragon/osx-commons/tree/develop/configs](https://github.com/aragon/osx-commons/tree/develop/configs)
-- [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Copy all new addresses to `packages/artifacts/src/addresses.json` and release a new package version
 - [ ] Add the management DAOs' multisig address to `packages/contracts/.env.example` in the format `{NETWORK}_MANAGEMENT_DAO_MULTISIG`
 - [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
