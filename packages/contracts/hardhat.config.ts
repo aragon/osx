@@ -248,6 +248,11 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  sourcify: {
+    enabled: false,
+    apiUrl: 'https://sourcify-api-monad.blockvision.org',
+    browserUrl: 'https://testnet.monadexplorer.com',
+  },
   namedAccounts: {
     deployer: 0,
   },
