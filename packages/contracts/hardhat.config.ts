@@ -137,6 +137,7 @@ const config: HardhatUserConfig = {
     currency: 'USD',
   },
   etherscan: {
+    enabled: true,
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY || '',
       sepolia: process.env.ETHERSCAN_KEY || '',
