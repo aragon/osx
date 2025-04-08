@@ -18,14 +18,15 @@ The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allo
 
 Within this monorepo, you will be able to find 3 individual packages:
 
-- [Contracts](https://github.com/aragon/osx/tree/develop/packages/contracts): the Aragon OSx protocol contracts.
-- [Contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers): contains the connection between the ethers package and our contracts.
+- [Contracts](https://github.com/aragon/osx/tree/main/packages/contracts): the protocol source code (solidity).
+- [Artifacts](https://github.com/aragon/osx/tree/main/packages/artifacts): the ABI and the contract addresses (per network)
+- [Contract-ethers](https://github.com/aragon/osx/tree/main/packages/contracts-ethers) (deprecated): TypeScript wrappers for use on Ethers.js projects.
 
-The contents of this repository are distributed via 3 different NPM packages:
+Each package is distributed via 3 NPM packages:
 
 - `@aragon/osx`: The source files, including the protocol contracts and interfaces
 - `@aragon/osx-artifacts`: The contracts bytecode and ABI to use the protocol or deploy it
-- `@aragon/osx-ethers`: The TypeScript wrappers to use the protocol or deploy it using ethers.js
+- `@aragon/osx-ethers` (deprecated): The TypeScript wrappers to use the protocol or deploy it using ethers.js
 
 For more information on the individual packages, please read the respective `README.md`.
 
@@ -69,7 +70,7 @@ Check out the [artifacts folder](./packages/artifacts/README.md) to get the depl
 
 ## Contributing
 
-We'd love to hear what you think! If you want to build this with us, please find a detailed contribution guide in the `CONTRIBUTION_GUIDE.md` [file here](https://github.com/aragon/osx/blob/develop/CONTRIBUTION_GUIDE.md).
+We'd love to hear what you think! If you want to build this with us, please find a detailed contribution guide in the `CONTRIBUTION_GUIDE.md` [file here](https://github.com/aragon/osx/blob/main/CONTRIBUTION_GUIDE.md).
 
 ## Security
 
@@ -161,11 +162,11 @@ Each plugin consists of two key components:
 - **The Plugin Logic**: contains the logic for each plugin; the main functionality the plugin extends for the DAO. Can be linked to other helper contracts if needed.
 - **The Plugin Setup**: contains the installation, uninstallation, and upgrade instructions for a plugin into a DAO.
 
-You can find all plugins built by the Aragon team [here](https://github.com/aragon/osx/tree/develop/packages/contracts/src/plugins).
+You can find all plugins built by the Aragon team [here](https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins).
 
 ### Connection between OSx, and ethers.js packages
 
-The [contract-ethers](https://github.com/aragon/osx/tree/develop/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/develop/packages/contracts).
+The [contract-ethers](https://github.com/aragon/osx/tree/main/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/main/packages/contracts).
 
 ## Tests
 
@@ -201,11 +202,11 @@ npx solhint 'contracts/**/*.sol'
 npx solhint 'contracts/**/*.sol' --fix
 ```
 
-You can find more details about [our deployment checklist here](https://github.com/aragon/osx/blob/develop/DEPLOYMENT_CHECKLIST.md).
+You can find more details about [our deployment checklist here](https://github.com/aragon/osx/blob/main/DEPLOYMENT_CHECKLIST.md).
 
 ## Publishing protocol upgrades
 
-Follow [our update checklist here](https://github.com/aragon/osx/blob/develop/UPDATE_CHECKLIST.md).
+Follow [our update checklist here](https://github.com/aragon/osx/blob/main/UPDATE_CHECKLIST.md).
 
 Also check the [README](./packages/contracts/scripts/management-dao-proposal/README.md) of the Management DAO proposal generation flow.
 
