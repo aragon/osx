@@ -34,7 +34,7 @@
   "bugs": {
     "url": "https://github.com/aragon/osx/issues"
   },
-  "homepage": "https://github.com/aragon/osx#readme",
+  "homepage": "https://github.com/aragon/osx/tree/main/packages/contracts#readme",
   "dependencies": {
     "@aragon/osx-commons-contracts": "1.4.0",
     "@ensdomains/ens-contracts": "0.0.11",
