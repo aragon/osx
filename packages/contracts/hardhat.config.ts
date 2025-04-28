@@ -137,6 +137,7 @@ const config: HardhatUserConfig = {
     currency: 'USD',
   },
   etherscan: {
+    enabled: true,
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY || '',
       sepolia: process.env.ETHERSCAN_KEY || '',
@@ -247,6 +248,11 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+  sourcify: {
+    enabled: false,
+    apiUrl: 'https://sourcify-api-monad.blockvision.org',
+    browserUrl: 'https://testnet.monadexplorer.com',
   },
   namedAccounts: {
     deployer: 0,
