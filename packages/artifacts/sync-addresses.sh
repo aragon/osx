@@ -128,6 +128,7 @@ DAO_REGISTRY_MERGED_ADDRS_FILE=$(mktemp)
 PLUGIN_REPO_FACTORY_MERGED_ADDRS_FILE=$(mktemp)
 PLUGIN_REPO_REGISTRY_MERGED_ADDRS_FILE=$(mktemp)
 PLUGIN_SETUP_PROCESSOR_MERGED_ADDRS_FILE=$(mktemp)
+EXECUTOR_MERGED_ADDRS_FILE=$(mktemp)
 
 trap 'rm -f "$TEMP_OUTPUT"' EXIT
 trap 'rm -f "$DAO_MERGED_ADDRS_FILE"' EXIT
@@ -144,6 +145,7 @@ getContractAddrs "DAORegistryProxy" "daoRegistry" > $DAO_REGISTRY_MERGED_ADDRS_F
 getContractAddrs "PluginRepoFactory" "pluginRepoFactory" > $PLUGIN_REPO_FACTORY_MERGED_ADDRS_FILE
 getContractAddrs "PluginRepoRegistryProxy" "pluginRepoRegistry" > $PLUGIN_REPO_REGISTRY_MERGED_ADDRS_FILE
 getContractAddrs "PluginSetupProcessor" "pluginSetupProcessor" > $PLUGIN_SETUP_PROCESSOR_MERGED_ADDRS_FILE
+getContractAddrs "Executor" "executor" > $EXECUTOR_MERGED_ADDRS_FILE
 
 # Ensure destination
 touch "$DEST_FILE"
@@ -157,18 +159,21 @@ jq \
     --slurpfile addrs4 "$PLUGIN_REPO_FACTORY_MERGED_ADDRS_FILE" \
     --slurpfile addrs5 "$PLUGIN_REPO_REGISTRY_MERGED_ADDRS_FILE" \
     --slurpfile addrs6 "$PLUGIN_SETUP_PROCESSOR_MERGED_ADDRS_FILE" \
+    --slurpfile addrs7 "$EXECUTOR_MERGED_ADDRS_FILE" \
     --arg key1 "dao" \
     --arg key2 "daoFactory" \
     --arg key3 "daoRegistry" \
     --arg key4 "pluginRepoFactory" \
     --arg key5 "pluginRepoRegistry" \
     --arg key6 "pluginSetupProcessor" \
+    --arg key7 "executor" \
     '. + { ($key1): ( $addrs1 | map(.[$key1] // {}) | add ) }
        + { ($key2): ( $addrs2 | map(.[$key2] // {}) | add ) }
        + { ($key3): ( $addrs3 | map(.[$key3] // {}) | add ) }
        + { ($key4): ( $addrs4 | map(.[$key4] // {}) | add ) }
        + { ($key5): ( $addrs5 | map(.[$key5] // {}) | add ) }
-       + { ($key6): ( $addrs6 | map(.[$key6] // {}) | add ) }' \
+       + { ($key6): ( $addrs6 | map(.[$key6] // {}) | add ) }
+       + { ($key7): ( $addrs7 | map(.[$key7] // {}) | add ) }' \
     "$DEST_FILE" > "$TEMP_OUTPUT"
 
 if [[ $? -ne 0 ]]; then
