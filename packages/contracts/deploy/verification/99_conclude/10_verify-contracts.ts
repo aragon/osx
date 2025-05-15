@@ -19,11 +19,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await verifyContract(element.address, element.args || [], element.contract);
 
     // Etherscan Max rate limit is 1/5s,
-    // use 6s just to be safe.
+    // use 5.1s just to be safe.
     console.log(
-      `Delaying 6s, so we dont reach Etherscan's Max rate limit of 1/5s.`
+      `Delaying 5 seconds, to prevent hitting the block explorer's rate limit.`
     );
-    await delay(6000);
+    await delay(5100);
   }
 };
 export default func;
