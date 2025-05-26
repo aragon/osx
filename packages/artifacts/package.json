@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-artifacts",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "The ABI definitions and addresses for Aragon OSx",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
