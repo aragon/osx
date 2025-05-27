@@ -1,7 +1,10 @@
 name: Publish Artifacts
 
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches:
+      - release-v*
 
 jobs:
   publish-artifacts-to-npm:
