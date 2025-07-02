@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.4.5
+
+- Added Avalanche
+- Added Base Sepolia
+
 ## v1.4.4
 
 - Added Avalance Testnet
