@@ -25,7 +25,6 @@ UNSUPPORTED_NETWORKS=(
     "devSepolia"
     # not upgraded
     "mumbai"
-    "baseSepolia"
     "lineaSepolia"
 )
 
