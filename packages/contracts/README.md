@@ -19,7 +19,7 @@ Before starting make sure that you have created an `.env` file from the `.env.ex
 Now you can get started running your repository locally:
 
 1. Install packages from the root folder with `yarn`
-2. Change directory into this package (`/pacakages/contracts`)
+2. Change directory into this package (`/packages/contracts`)
 3. Run `yarn build` to compile the contracts
 4. Run `yarn test` to execute the test suite (this can take a while, so see [performance optimizations](#performance-optimizations) for ways to speed up the tests).
 
