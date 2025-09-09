@@ -38,7 +38,7 @@ When testing locally:
 
 Default values for all required environment variables are provided when running against hardhat, check the [`.env.example`](./.env.example) for details of what these are and what they mean.
 
-The private key provided by default is a hardhat publically known key for `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. Don't use it outside of a local development context.
+The private key provided by default is a hardhat publicly known key for `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. Don't use it outside of a local development context.
 
 > Tests can be sped up if needed. See [the test performance optimization](#performance-optimizations) section for more info.
 
