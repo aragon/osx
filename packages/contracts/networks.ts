@@ -33,4 +33,22 @@ export const networkExtensions: {[index: string]: NetworkExtension} = {
   zksyncSepolia: {
     deploy: ['./deploy'],
   },
+  holesky: {
+    deploy: ['./deploy'],
+  },
+  linea: {
+    deploy: ['./deploy'],
+  },
+  mode: {
+    deploy: ['./deploy'],
+  },
+  agungTestnet: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  peaq: {
+    deploy: ['./deploy/new', './deploy/verification'],
+  },
+  localhost: {
+    deploy: ['./deploy/new'],
+  },
 };

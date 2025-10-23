@@ -30,8 +30,20 @@ if (process.env.ALCHEMY_API_KEY) {
 }
 
 // add accounts to network configs
-const hardhatNetworks: {[index: string]: NetworkUserConfig} =
-  commonNetworkConfigs;
+const hardhatNetworks: {[index: string]: NetworkUserConfig} = {
+  ...commonNetworkConfigs,
+  agungTestnet: {
+    url: 'https://wss-async.agung.peaq.network',
+    chainId: 9990,
+    gasPrice: 40000000000,
+  },
+  peaq: {
+    url: 'https://erpc-mpfn1.peaq.network',
+    chainId: 3338,
+    gasPrice: 25000000000,
+  },
+};
+
 for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   if (network === SupportedNetworks.LOCAL) {
     continue;
@@ -95,6 +107,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
+
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
@@ -104,7 +117,12 @@ const config: HardhatUserConfig = {
       gasPrice: 80000000000,
       deploy: ENABLE_DEPLOY_TEST
         ? ['./deploy']
-        : ['./deploy/env', './deploy/new', './deploy/verification'],
+        : [
+            './deploy/env',
+            './deploy/new',
+            './deploy/verification',
+            './deploy/update',
+          ],
     },
     localhost: {
       deploy: ENABLE_DEPLOY_TEST
@@ -121,8 +139,6 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY || '',
-      rinkeby: process.env.ETHERSCAN_KEY || '',
-      goerli: process.env.ETHERSCAN_KEY || '',
       sepolia: process.env.ETHERSCAN_KEY || '',
       holesky: process.env.ETHERSCAN_KEY || '',
       polygon: process.env.POLYGONSCAN_KEY || '',
@@ -131,26 +147,28 @@ const config: HardhatUserConfig = {
       baseGoerli: process.env.BASESCAN_KEY || '',
       baseSepolia: process.env.BASESCAN_KEY || '',
       arbitrumOne: process.env.ARBISCAN_KEY || '',
-      arbitrumGoerli: process.env.ARBISCAN_KEY || '',
       arbitrumSepolia: process.env.ARBISCAN_KEY || '',
       modeTestnet: 'modeTestnet',
       modeMainnet: 'modeMainnet',
+      lineaSepolia: process.env.LINEASCAN_KEY || '',
+      linea: process.env.LINEASCAN_KEY || '',
+      peaq: '1', // It can be set to null. date: 26/Feb/2025
     },
     customChains: [
+      {
+        network: 'polygon',
+        chainId: 137,
+        urls: {
+          apiURL: 'https://api.polygonscan.com/api',
+          browserURL: 'https://polygonscan.com',
+        },
+      },
       {
         network: 'baseMainnet',
         chainId: 8453,
         urls: {
           apiURL: 'https://api.basescan.org/api',
           browserURL: 'https://basescan.org',
-        },
-      },
-      {
-        network: 'baseGoerli',
-        chainId: 84531,
-        urls: {
-          apiURL: 'https://api-goerli.basescan.org/api',
-          browserURL: 'https://goerli.basescan.org',
         },
       },
       {
@@ -167,6 +185,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-sepolia.arbiscan.io/api',
           browserURL: 'https://sepolia.arbiscan.io',
+        },
+      },
+      {
+        network: 'arbitrumOne',
+        chainId: 421614,
+        urls: {
+          apiURL: 'https://api.arbiscan.io/api',
+          browserURL: 'https://arbiscan.io',
         },
       },
       {
@@ -193,6 +219,31 @@ const config: HardhatUserConfig = {
           apiURL:
             'https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan',
           browserURL: 'https://modescan.io',
+        },
+      },
+      {
+        network: 'lineaSepolia',
+        chainId: 59141,
+        urls: {
+          apiURL: 'https://api-sepolia.lineascan.build/api',
+          browserURL: 'https://sepolia.lineascan.build',
+        },
+      },
+      {
+        network: 'linea',
+        chainId: 59144,
+        urls: {
+          apiURL: 'https://api.lineascan.build/api',
+          browserURL: 'https://lineascan.build',
+        },
+      },
+      {
+        network: 'peaq',
+        chainId: 3338,
+        urls: {
+          apiURL:
+            'https://peaq.api.subscan.io/api/scan/evm/contract/verifysource',
+          browserURL: 'https://peaq.subscan.io/',
         },
       },
     ],

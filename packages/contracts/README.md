@@ -94,10 +94,10 @@ For example, to use version 1.0.1 of the `@aragon/osx` package, add the followin
 
 ### Step 2: Install Dependencies
 
-Now, run the yarn install command to install the dependencies:
+Now, run yarn to install the dependencies:
 
 ```sh
-yarn install
+yarn install --ignore-scripts
 ```
 
 ### Step 3: Update OSX_VERSION_ALIASES in the Script
@@ -185,4 +185,4 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 # Releases
 
-Contract releases are tracked in [Releases.md](Releases.md)
+Contract addresses can be obtained via the [OSx artifacts](https://www.npmjs.com/package/@aragon/osx-artifacts) NPM package.

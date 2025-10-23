@@ -36,9 +36,9 @@ jobs:
           cache: 'yarn'
           node-version: 18
       - name: Install dependencies
-        run: cd ../../ && yarn install --pure-lockfile
+        run: cd ../../ && yarn install --pure-lockfile --ignore-scripts
       - name: Compile contracts
-        run: yarn run build && yarn run build:npm
+        run: yarn run build
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true

@@ -44,7 +44,7 @@ To update run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 - [ ] Take the addresses from this file `packages/contracts/deployed_contracts.json`
 - [ ] Update the deployment in the `@aragon/osx-commons-config` package found here: [https://github.com/aragon/osx-commons/tree/develop/configs](https://github.com/aragon/osx-commons/tree/develop/configs)
-- [ ] Update `packages/contracts/Releases.md` with the new deployed addresses
+- [ ] Copy all new addresses to `packages/artifacts/src/addresses.json` and release a new package version
 - [ ] Add a Github Release with the version number as tag and the defined content (check previous releases for reference)
 
 ### Management DAO Proposal
@@ -87,22 +87,6 @@ if the new contracts **aren't** published:
 
 - [ ] Publish a new version of `@aragon/osx` (`./packages/contracts/src`) to NPM
 - [ ] Update the changelog with the new version
-
-### Subgraph
-
-- [ ] Update `packages/subgraph/manifest/data/NETWORK.json` where `NETWORK` is replaced with the deployed network with the new contract addresses
-- [ ] Update the version in `packages/subgraph/package.json`
-- [ ] Update `packages/subgraph/.env` with the correct values
-  - [ ] set `NETWORK_NAME` to the deployed network
-  - [ ] set `SUBGRAPH_NAME` to `osx`
-  - [ ] set `GRAPH_KEY` with the value obtained from the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
-  - [ ] set the `SUBGRAPH_VERSION` to the same value as in `packages/subgraph/package.json`
-- [ ] Run `yarn manifest` in `packages/subgraph` to generate the manifest
-- [ ] Run `yarn build` in `packages/subgraph` to build the subgraph
-- [ ] Run `yarn test` in `packages/subgraph` to test the subgraph
-- [ ] Run `yarn deploy` in `packages/subgraph` to deploy the subgraph
-- [ ] Test the new deployed subgraph with the frontend team
-- [ ] Promote the new subgraph to live in the [Satsuma Dashboard](https://app.satsuma.xyz/dashboard)
 
 ## Version tasks
 
