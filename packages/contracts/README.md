@@ -19,7 +19,7 @@ Before starting make sure that you have created an `.env` file from the `.env.ex
 Now you can get started running your repository locally:
 
 1. Install packages from the root folder with `yarn`
-2. Change directory into this package (`/pacakages/contracts`)
+2. Change directory into this package (`/packages/contracts`)
 3. Run `yarn build` to compile the contracts
 4. Run `yarn test` to execute the test suite (this can take a while, so see [performance optimizations](#performance-optimizations) for ways to speed up the tests).
 
@@ -38,7 +38,7 @@ When testing locally:
 
 Default values for all required environment variables are provided when running against hardhat, check the [`.env.example`](./.env.example) for details of what these are and what they mean.
 
-The private key provided by default is a hardhat publically known key for `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. Don't use it outside of a local development context.
+The private key provided by default is a hardhat publicly known key for `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`. Don't use it outside of a local development context.
 
 > Tests can be sped up if needed. See [the test performance optimization](#performance-optimizations) section for more info.
 

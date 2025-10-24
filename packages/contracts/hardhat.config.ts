@@ -50,7 +50,7 @@ for (const network of Object.keys(hardhatNetworks) as SupportedNetworks[]) {
   }
 
   if (networkExtensions[network] == undefined) {
-    console.log(`WARNING: newtork ${network} is not found in networks.ts file`);
+    console.log(`WARNING: network ${network} is not found in networks.ts file`);
     continue;
   }
 
