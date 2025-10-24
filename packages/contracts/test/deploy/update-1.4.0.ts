@@ -197,7 +197,7 @@ skipTestSuiteIfNetworkIsZkSync('Update to 1.4.0', function () {
       {
         where: daoRegistry.address,
         who: previousDAOFactoryAddress,
-        isSet: true, // Makes sure we keep the the permission of the previouse DAO factory
+        isSet: true, // Makes sure we keep the permission of the previouse DAO factory
       },
       {
         where: pluginRepoRegistry.address,

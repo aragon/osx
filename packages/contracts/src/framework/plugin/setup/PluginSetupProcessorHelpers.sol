@@ -85,7 +85,7 @@ function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
 }
 
 /// @notice Returns a hash of an array of multi-targeted permission operations.
-/// @param _permissions The array of of multi-targeted permission operations.
+/// @param _permissions The array of multi-targeted permission operations.
 /// @return The hash of the array of permission operations.
 /// @custom:security-contact sirt@aragon.org
 function hashPermissions(
