@@ -219,3 +219,5 @@ Certain actions can be triggered via a command to a pull request. To issue a com
 | `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request      |
 | `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request          |
 | `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request |
+<br>## Welcome to OSx Plugins<br>Aragon OSx's plugins modularize DAO actions—new contributors, start with the Voting plugin tutorial for your first execution. Tip: Use ACL for permissions! <br>
+
