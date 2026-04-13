@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+pragma solidity ^0.8.17;
+
+/// @title IMemberRegistry
+/// @notice Entry point for member self-registration via ENS subdomain claims.
+/// Relays operations to a MemberSubdomainRegistrar that manages the ENS state.
+/// @custom:security-contact sirt@aragon.org
+interface IMemberRegistry {
+    /// @notice Emitted when a member registers and claims a subdomain.
+    event MemberRegistered(address indexed member, string subdomain);
+
+    /// @notice Emitted when a member voluntarily releases their subdomain.
+    event MemberReleased(address indexed member, string subdomain);
+
+    /// @notice Emitted when governance forcibly revokes a member's subdomain.
+    event MemberRevoked(address indexed member, address indexed revoker, string subdomain);
+
+    /// @notice Emitted when a member renames their subdomain (release old + claim new).
+    event MemberRenamed(address indexed member, string oldSubdomain, string newSubdomain);
+
+    /// @notice Thrown if the subdomain contains invalid characters. Valid: [0-9a-z-], non-empty.
+    error InvalidSubdomain(string subdomain);
+
+    /// @notice Register as a member by claiming a subdomain. Permissionless.
+    ///         One subdomain per address. Reverts if already registered (release first).
+    /// @param subdomain The subdomain label to claim (e.g., "alice").
+    function register(string calldata subdomain) external;
+
+    /// @notice Voluntarily release your subdomain. Permissionless.
+    ///         Only releases the caller's own subdomain. Reverts if not registered.
+    function release() external;
+
+    /// @notice Forcibly revoke a member's subdomain. Governed.
+    ///         Requires REVOKE_MEMBER_PERMISSION_ID on this contract (OSx permission system).
+    /// @param member The address of the member to revoke.
+    function revoke(address member) external;
+
+    /// @notice Rename your subdomain. Releases the old label and claims the new one atomically.
+    ///         Only renames the caller's own subdomain. Reverts if not registered or new label taken.
+    /// @param newSubdomain The new subdomain label to claim.
+    function rename(string calldata newSubdomain) external;
+}

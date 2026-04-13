@@ -1,0 +1,5 @@
+default: help
+
+import 'lib/just-foundry/justfile'
+
+DEPLOY_SCRIPT := "script/DeployMemberRegistry.s.sol:DeployMemberRegistry"

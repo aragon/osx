@@ -1,0 +1,6 @@
+forge-std/=lib/forge-std/src/
+@ensdomains/ens-contracts/=lib/ens-contracts/
+@aragon/osx/=../contracts/src/
+@aragon/osx-commons-contracts/=lib/osx-commons/contracts/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
