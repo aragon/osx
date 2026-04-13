@@ -12,3 +12,6 @@ docs/
 
 # Dotenv file
 .env
+
+# Deployment artifacts (generated, not committed)
+artifacts/

@@ -1,0 +1,15 @@
+# Secrets managed by vars (https://github.com/vars-cli/vars)
+# Values are age-encrypted in your personal store — only key names are committed here.
+# Usage:
+#   vars set DEPLOYER_KEY              # store a value
+#   eval "$(vars resolve)"             # load into current shell
+#   just deploy                        # justfile recipes call vars resolve automatically
+
+keys:
+    - DEPLOYER_KEY
+    - ETHERSCAN_API_KEY
+    - RPC_URL
+
+profiles:
+    sepolia:
+        DEPLOYER_KEY: dev/DEPLOYER_KEY

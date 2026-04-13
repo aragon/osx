@@ -7,18 +7,15 @@ import {ENS} from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 import {DaoUnauthorized} from "@aragon/osx-commons-contracts/src/permission/auth/auth.sol";
 import {DAOMock} from "@aragon/osx-commons-contracts/src/mocks/dao/DAOMock.sol";
-import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {MemberRegistry} from "../src/MemberRegistry.sol";
 import {MemberSubdomainRegistrar} from "../src/MemberSubdomainRegistrar.sol";
 import {IMemberRegistry} from "../src/IMemberRegistry.sol";
-import {IResolver} from "../src/IResolver.sol";
 import {MockENS} from "./mocks/MockENS.sol";
 import {MockResolver} from "./mocks/MockResolver.sol";
 
 contract MemberRegistryTest is Test {
-    using ProxyLib for address;
-
     DAOMock dao;
     MockENS ens;
     MockResolver resolver;
@@ -43,12 +40,14 @@ contract MemberRegistryTest is Test {
         // We deploy the registrar first, then set ownership.
 
         // Deploy registrar behind UUPS proxy
-        MemberSubdomainRegistrar registrarImpl = new MemberSubdomainRegistrar();
         registrar = MemberSubdomainRegistrar(
-            address(registrarImpl).deployUUPSProxy(
-                abi.encodeCall(
-                    MemberSubdomainRegistrar.initialize,
-                    (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
+            address(
+                new ERC1967Proxy(
+                    address(new MemberSubdomainRegistrar()),
+                    abi.encodeCall(
+                        MemberSubdomainRegistrar.initialize,
+                        (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
+                    )
                 )
             )
         );
@@ -57,12 +56,14 @@ contract MemberRegistryTest is Test {
         ens.setOwner(NODE, address(registrar));
 
         // Deploy registry behind UUPS proxy
-        MemberRegistry registryImpl = new MemberRegistry();
         registry = MemberRegistry(
-            address(registryImpl).deployUUPSProxy(
-                abi.encodeCall(
-                    MemberRegistry.initialize,
-                    (IDAO(address(dao)), registrar)
+            address(
+                new ERC1967Proxy(
+                    address(new MemberRegistry()),
+                    abi.encodeCall(
+                        MemberRegistry.initialize,
+                        (IDAO(address(dao)), registrar)
+                    )
                 )
             )
         );
