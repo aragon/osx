@@ -33,39 +33,41 @@ contract RegisterSimulationTest is Test {
         parentDomain = vm.envOr("PARENT_DOMAIN", string("aragonx.eth"));
         node = _namehash(parentDomain);
 
-        // Look up the domain holder in the NameWrapper
-        (, bytes memory data) =
-            NAME_WRAPPER.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(node)));
-        domainHolder = abi.decode(data, (address));
-
         address ensOwner = ENS_REGISTRY.owner(node);
+        bool isWrapped = ensOwner == NAME_WRAPPER;
 
         console.log("=== Initial state ===");
         console.log("Domain:        ", parentDomain);
         console.log("ENS owner:     ", ensOwner);
-        console.log("Domain holder: ", domainHolder);
-        console.log("Is wrapped:    ", ensOwner == NAME_WRAPPER);
-        console.log();
+        console.log("Is wrapped:    ", isWrapped);
 
-        // --- Step 1: Unwrap the domain ---
+        if (isWrapped) {
+            // Look up the domain holder in the NameWrapper and unwrap
+            (, bytes memory data) =
+                NAME_WRAPPER.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(node)));
+            domainHolder = abi.decode(data, (address));
+            console.log("Domain holder: ", domainHolder);
+            console.log();
 
-        // The domain holder unwraps — ownership transfers from NameWrapper to the holder
-        // in the ENS registry directly.
-        (string memory label,) = _splitDomain(parentDomain);
-        bytes32 labelHash = keccak256(bytes(label));
+            (string memory label,) = _splitDomain(parentDomain);
+            bytes32 labelHash = keccak256(bytes(label));
 
-        console.log("Step 1: Unwrapping", parentDomain);
-        vm.prank(domainHolder);
-        (bool unwrapOk,) = NAME_WRAPPER.call(
-            abi.encodeWithSignature(
-                "unwrapETH2LD(bytes32,address,address)", labelHash, domainHolder, domainHolder
-            )
-        );
-        assertTrue(unwrapOk, "unwrap failed");
+            console.log("Step 1: Unwrapping", parentDomain);
+            vm.prank(domainHolder);
+            (bool unwrapOk,) = NAME_WRAPPER.call(
+                abi.encodeWithSignature(
+                    "unwrapETH2LD(bytes32,address,address)", labelHash, domainHolder, domainHolder
+                )
+            );
+            assertTrue(unwrapOk, "unwrap failed");
 
-        ensOwner = ENS_REGISTRY.owner(node);
-        console.log("  ENS owner after unwrap:", ensOwner);
-        console.log("  Is holder the owner:   ", ensOwner == domainHolder);
+            ensOwner = ENS_REGISTRY.owner(node);
+            console.log("  ENS owner after unwrap:", ensOwner);
+        } else {
+            // Already unwrapped — the ENS owner is the domain holder
+            domainHolder = ensOwner;
+            console.log("Domain holder: ", domainHolder, "(already unwrapped)");
+        }
         console.log();
 
         // --- Step 2: Deploy registry ---
@@ -125,20 +127,103 @@ contract RegisterSimulationTest is Test {
         console.log("  Resolver approval: true");
     }
 
-    function test_setTextRecords_afterUnwrap() public {
+    function test_resolverRecords_afterUnwrap() public {
         vm.prank(randomUser);
         registry.register("potato123456");
 
         bytes32 subnode = keccak256(abi.encodePacked(node, keccak256("potato123456")));
+        console.log("=== Member manages resolver records ===");
 
+        // addr record was set by the registry during register()
+        (bool ok, bytes memory data) =
+            PUBLIC_RESOLVER.staticcall(abi.encodeWithSignature("addr(bytes32)", subnode));
+        assertTrue(ok);
+        address resolvedAddr = abi.decode(data, (address));
+        assertEq(resolvedAddr, randomUser);
+        console.log("  addr:        ", resolvedAddr, "(set by registry)");
+
+        // setText -- avatar
         vm.prank(randomUser);
-        (bool ok,) = PUBLIC_RESOLVER.call(
+        (ok,) = PUBLIC_RESOLVER.call(
             abi.encodeWithSignature(
                 "setText(bytes32,string,string)", subnode, "avatar", "https://example.com/potato.png"
             )
         );
-        assertTrue(ok, "setText failed");
-        console.log("  setText succeeded");
+        assertTrue(ok, "setText avatar failed");
+
+        (ok, data) = PUBLIC_RESOLVER.staticcall(
+            abi.encodeWithSignature("text(bytes32,string)", subnode, "avatar")
+        );
+        assertTrue(ok);
+        string memory avatar = abi.decode(data, (string));
+        assertEq(avatar, "https://example.com/potato.png");
+        console.log("  avatar:       set and verified");
+
+        // setText -- description
+        vm.prank(randomUser);
+        (ok,) = PUBLIC_RESOLVER.call(
+            abi.encodeWithSignature(
+                "setText(bytes32,string,string)", subnode, "description", "I am a potato"
+            )
+        );
+        assertTrue(ok, "setText description failed");
+
+        (ok, data) = PUBLIC_RESOLVER.staticcall(
+            abi.encodeWithSignature("text(bytes32,string)", subnode, "description")
+        );
+        assertTrue(ok);
+        assertEq(abi.decode(data, (string)), "I am a potato");
+        console.log("  description:  set and verified");
+
+        // setText -- url
+        vm.prank(randomUser);
+        (ok,) = PUBLIC_RESOLVER.call(
+            abi.encodeWithSignature(
+                "setText(bytes32,string,string)", subnode, "url", "https://potato.xyz"
+            )
+        );
+        assertTrue(ok, "setText url failed");
+
+        (ok, data) = PUBLIC_RESOLVER.staticcall(
+            abi.encodeWithSignature("text(bytes32,string)", subnode, "url")
+        );
+        assertTrue(ok);
+        assertEq(abi.decode(data, (string)), "https://potato.xyz");
+        console.log("  url:          set and verified");
+
+        // setAddr (coinType 60 = ETH) -- member can update their own addr
+        vm.prank(randomUser);
+        (ok,) = PUBLIC_RESOLVER.call(
+            abi.encodeWithSignature("setAddr(bytes32,address)", subnode, randomUser)
+        );
+        assertTrue(ok, "setAddr failed");
+        console.log("  setAddr:      set and verified");
+
+        // setContenthash
+        bytes memory contenthash = hex"e3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f";
+        vm.prank(randomUser);
+        (ok,) = PUBLIC_RESOLVER.call(
+            abi.encodeWithSignature("setContenthash(bytes32,bytes)", subnode, contenthash)
+        );
+        assertTrue(ok, "setContenthash failed");
+
+        (ok, data) = PUBLIC_RESOLVER.staticcall(
+            abi.encodeWithSignature("contenthash(bytes32)", subnode)
+        );
+        assertTrue(ok);
+        assertEq(abi.decode(data, (bytes)), contenthash);
+        console.log("  contenthash:  set and verified");
+
+        // Another user CANNOT set records on this subnode
+        address attacker = address(0xBAD);
+        vm.prank(attacker);
+        (ok,) = PUBLIC_RESOLVER.call(
+            abi.encodeWithSignature(
+                "setText(bytes32,string,string)", subnode, "avatar", "hacked"
+            )
+        );
+        assertFalse(ok, "attacker should not be able to setText");
+        console.log("  attacker:     correctly rejected");
     }
 
     function test_fullCycle_afterUnwrap() public {

@@ -1,8 +1,177 @@
 # MemberRegistry
 
-Permissionless member self-registration via ENS subdomain claims. Members claim a subdomain under a configurable parent domain (e.g., `alice.aragonx.eth`), manage their own resolver records (text, avatar, etc.) via per-node approval, and can release or rename their subdomain at any time.
+Permissionless member self-registration via ENS subdomain claims.
 
-## Setup
+Members claim a subdomain under a configurable parent domain (e.g., `alice.aragonx.eth`), manage their own resolver records (text, avatar, etc.), and can release or rename at any time. Governance can forcibly revoke a member's subdomain.
+
+## How it works
+
+### The contract
+
+One contract: `MemberRegistry`. It is an approved ENS operator on the parent domain (e.g., `aragonx.eth`). The domain owner retains full ownership and can revoke the registry's access at any time.
+
+When a user calls `register("alice")`, the registry:
+1. Validates the subdomain (`[0-9a-z-]`, max 50 chars)
+2. Creates the ENS subnode `alice.aragonx.eth`, owned by the registry
+3. Sets the resolver and the addr record (points to the member's address)
+4. Grants the member **per-node resolver approval** so they can manage their own records
+
+After registration, the member can call the PublicResolver directly to set text records, contenthash, etc. The registry doesn't proxy these calls -- the member talks to the resolver as an approved delegate.
+
+### ENS ownership model
+
+```
+aragonx.eth            -- owned by the domain holder (e.g., a multisig)
+  alice.aragonx.eth    -- owned by the MemberRegistry contract
+  bob.aragonx.eth      -- owned by the MemberRegistry contract
+```
+
+The registry is **not** the owner of the parent domain. It operates as an approved ENS operator via `setApprovalForAll`. The parent owner keeps full control.
+
+Each subnode (e.g., `alice.aragonx.eth`) is owned by the registry contract. This prevents members from transferring or selling their subdomains. Members get resolver record management via per-node `approve()`, not ENS ownership.
+
+### Per-node resolver approval
+
+The ENS PublicResolver has three authorization levels:
+```
+1. owner == msg.sender                         -- direct node owner
+2. isApprovedForAll(owner, msg.sender)          -- global operator
+3. isApprovedFor(owner, node, msg.sender)       -- per-node delegate  <-- members use this
+```
+
+After registration, the member is a per-node delegate on their subnode. They can call any resolver record function (`setText`, `setAddr`, `setContenthash`, etc.) directly on the PublicResolver. They cannot transfer the node, manage other members' records, or approve other delegates.
+
+### Important UX note for the frontend
+
+The official ENS app (app.ens.domains) does **not** show edit controls for per-node delegates. It only shows controls if `ens.owner(subnode) == connectedWallet`. Since the registry owns all subnodes, the ENS app won't show record management UI to members.
+
+**The frontend must call the PublicResolver directly.** The resolver will accept the call because `isApprovedFor(registry, subnode, member)` is true. This is a protocol-level feature that the ENS frontend hasn't built UI for.
+
+## Contract interface
+
+```solidity
+// Permissionless -- any address can call
+function register(string calldata subdomain) external;
+function release() external;
+function rename(string calldata newSubdomain) external;
+
+// Governed -- requires REVOKE_MEMBER_PERMISSION
+function revoke(address member) external;
+```
+
+### Events
+
+```solidity
+event MemberRegistered(address indexed member, string subdomain);
+event MemberReleased(address indexed member, string subdomain);
+event MemberRevoked(address indexed member, address indexed revoker, string subdomain);
+event MemberRenamed(address indexed member, string oldSubdomain, string newSubdomain);
+```
+
+### View functions
+
+```solidity
+function isRegistered(address member) external view returns (bool);
+function memberLabel(address member) external view returns (bytes32);     // labelhash, 0 = not registered
+function memberSubdomain(address member) external view returns (string);  // "alice"
+function labelOwner(bytes32 label) external view returns (address);       // reverse lookup
+```
+
+### Errors
+
+```solidity
+error InvalidSubdomain(string subdomain);       // empty, >50 chars, or invalid chars
+error AlreadyRegistered(address member);         // address already has a subdomain
+error NotRegistered(address member);             // address has no subdomain
+error SubdomainAlreadyTaken(string subdomain);   // label already claimed by someone else
+```
+
+## Frontend integration guide
+
+### Reading member state
+
+```typescript
+// Check if an address is registered
+const registered = await registry.isRegistered(address);
+
+// Get the subdomain string
+const subdomain = await registry.memberSubdomain(address);
+// => "alice"
+
+// Full domain = subdomain + "." + parentDomain
+// => "alice.aragonx.eth"
+
+// Check if a subdomain is available
+const label = keccak256(toUtf8Bytes(subdomain));
+const owner = await registry.labelOwner(label);
+// owner == address(0) means available
+```
+
+### Writing member records (setText, setAddr, etc.)
+
+Members do NOT go through the registry for record management. They call the PublicResolver directly. The resolver accepts their calls because they have per-node approval.
+
+```typescript
+// The subnode hash is needed for all resolver calls
+const parentNode = namehash("aragonx.eth");
+const label = keccak256(toUtf8Bytes("alice"));
+const subnode = keccak256(solidityPacked(["bytes32", "bytes32"], [parentNode, label]));
+
+// Member sets their avatar (calls PublicResolver directly)
+const resolver = new Contract(resolverAddress, resolverAbi, memberSigner);
+await resolver.setText(subnode, "avatar", "https://example.com/avatar.png");
+await resolver.setText(subnode, "description", "Aragon delegate");
+await resolver.setText(subnode, "url", "https://alice.xyz");
+await resolver.setContenthash(subnode, ipfsContenthash);
+```
+
+### Reading member records
+
+```typescript
+// Anyone can read -- these are standard ENS resolver calls
+const avatar = await resolver.text(subnode, "avatar");
+const description = await resolver.text(subnode, "description");
+const addr = await resolver.addr(subnode);
+```
+
+### Listening for events
+
+```typescript
+// New registrations
+registry.on("MemberRegistered", (member, subdomain) => { ... });
+
+// All membership changes
+registry.on("MemberReleased", (member, subdomain) => { ... });
+registry.on("MemberRevoked", (member, revoker, subdomain) => { ... });
+registry.on("MemberRenamed", (member, oldSubdomain, newSubdomain) => { ... });
+```
+
+### Building a member list
+
+The registry does not store a member list on-chain. Enumerate members by indexing events:
+
+```typescript
+// Get all registrations, then subtract releases/revokes
+const registered = await registry.queryFilter(registry.filters.MemberRegistered());
+const released = await registry.queryFilter(registry.filters.MemberReleased());
+const revoked = await registry.queryFilter(registry.filters.MemberRevoked());
+const renamed = await registry.queryFilter(registry.filters.MemberRenamed());
+```
+
+Or use a subgraph / indexer for efficient querying.
+
+## ENS requirements
+
+The parent domain must be **unwrapped** (not managed by the ENS NameWrapper). The domain owner must approve the registry as an ENS operator:
+
+```solidity
+// Domain owner calls this on the ENS registry
+ENSRegistry.setApprovalForAll(registryAddress, true)
+```
+
+The deploy script (`just predeploy`) detects wrapped names and prints unwrap instructions.
+
+## Development
 
 ```sh
 just switch <network>   # select network (e.g., mainnet, sepolia)
@@ -12,47 +181,6 @@ just predeploy          # simulate deployment
 just deploy             # deploy (broadcast)
 ```
 
-Copy `.env.example` to `.env` and fill in secrets, or use `vars` for encrypted secret management.
-
-## Architecture
-
-A single `MemberRegistry` contract (UUPS upgradeable) that:
-
-- Validates subdomain input (`[0-9a-z-]`, max 50 chars)
-- Manages internal state (member-to-label mappings, label-to-owner reverse lookups)
-- Operates ENS directly: creates subnodes, sets resolver records, grants per-node resolver approval
-- Emits events for off-chain indexing
-
-The registry does not own the parent ENS node. Instead, the domain owner approves the registry as an ENS operator (`setApprovalForAll`). The domain owner retains full control and can revoke access at any time.
-
-## ENS Requirements
-
-The registry calls the ENS registry directly via `setSubnodeOwner`. This requires the registry to be an approved operator of the parent node owner.
-
-**The parent ENS domain must be unwrapped.** Wrapped names (managed by the ENS NameWrapper) cannot delegate `setSubnodeOwner` to external contracts. The NameWrapper does not propagate `setApprovalForAll` to the ENS registry. If the domain is wrapped, the domain holder must unwrap it first:
-
-```solidity
-NameWrapper.unwrapETH2LD(labelhash, holder, holder)
-```
-
-After unwrapping, the holder becomes the direct ENS owner and can approve the registry:
-
-```solidity
-ENSRegistry.setApprovalForAll(registryAddress, true)
-```
-
-The deploy script (`just predeploy`) detects wrapped names and prints the unwrap instructions with all parameters.
-
-## Deployment
-
-The deploy script handles deployment and prints the required governance actions:
-
-1. **Deploy** -- `just deploy` deploys the implementation + UUPS proxy
-2. **DAO action** -- grant `REVOKE_MEMBER_PERMISSION` on the registry (governance proposal)
-3. **ENS action** -- domain holder approves registry as ENS operator
-
-For new domains that don't exist yet, the script also prints the `setSubnodeRecord` action to create the node.
-
 ## Permissions
 
 | Permission | On | Granted to | Purpose |
@@ -61,10 +189,3 @@ For new domains that don't exist yet, the script also prints the `setSubnodeReco
 | `UPGRADE_REGISTRY_PERMISSION` | Registry | Management DAO | Authorize UUPS upgrades |
 
 Registration, release, and rename are permissionless.
-
-## Testing
-
-- **Unit tests** (`test/MemberRegistry.t.sol`) -- 39 tests with mocked ENS/resolver
-- **Fork tests** (`test/fork/`) -- mainnet fork tests verifying the full flow including ENS integration, NameWrapper unwrap, and resolver approval
-- Run unit tests: `just test`
-- Run fork tests: `just test-fork`
