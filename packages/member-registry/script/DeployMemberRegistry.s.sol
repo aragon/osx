@@ -51,17 +51,20 @@ contract DeployMemberRegistry is Script {
         console.log();
 
         // Deploy implementation + proxy
-        registryImpl = new MemberRegistry();
+        registryImpl =  MemberRegistry(address(0x780B78C283f102d30Ea89F2Df5B9745361112b51));
+        // registryImpl = new MemberRegistry();
         vm.label(address(registryImpl), "MemberRegistry Impl");
 
         registry = MemberRegistry(
-            address(
-                new ERC1967Proxy(
-                    address(registryImpl),
-                    abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), node, resolver))
-                )
-            )
-        );
+            address(0x2292A7275b73c5bFA4A8aB5aFbbd997de94Bea82));
+        // registry = MemberRegistry(
+        //     address(
+        //         new ERC1967Proxy(
+        //             address(registryImpl),
+        //             abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), node, resolver))
+        //         )
+        //     )
+        // );
         vm.label(address(registry), "MemberRegistry Proxy");
 
         printDeployment();
@@ -93,37 +96,92 @@ contract DeployMemberRegistry is Script {
         console.log();
         console.log("DAO action: Grant REVOKE_MEMBER_PERMISSION on registry to the DAO");
         console.log();
-        console.log("- To:           ", dao, " (controlling DAO)");
-        console.log("- Function:      grant(address where, address who, bytes32 permissionId)");
-        console.log("  where:        ", address(registry), " (registry)");
-        console.log("  who:          ", dao, " (controlling DAO)");
-        console.log("  permissionId: ", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
+        console.log("- From:          ", dao, " (controlling DAO)");
+        console.log("- To:            ", dao, " (controlling DAO)");
+        console.log("- Function:       grant(address where, address who, bytes32 permissionId)");
+        console.log("  where:         ", address(registry), " (registry)");
+        console.log("  who:           ", dao, " (controlling DAO)");
+        console.log("  permissionId:  ", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
+
+        address ensOwner = ENS(ens).owner(node);
+        // Known NameWrapper on mainnet
+        address nameWrapper = 0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401;
+        bool isWrapped = ensOwner == nameWrapper;
 
         console.log();
-        console.log("=== ENS setup actions (by the parent domain owner) ===");
+        console.log("=== ENS setup actions ===");
 
-        // Action 2: create the subdomain node, owned by the DAO (not the registry)
-        console.log();
-        console.log("ENS action 1: Create ENS node for", parentDomain, "owned by the DAO");
-        console.log();
-        console.log("- To:             ", ens);
-        console.log(
-            "- Function:        setSubnodeRecord(bytes32 node, bytes32 label, address owner, address resolver, uint64 ttl)"
-        );
-        console.log("  node:           ", vm.toString(parentNode), string.concat('(namehash("', parent, '"))'));
-        console.log("  label:          ", vm.toString(labelHash), string.concat('(keccak256("', label, '"))'));
-        console.log("  owner:          ", dao, " (DAO)");
-        console.log("  resolver:       ", resolver);
-        console.log("  ttl:             0");
+        if (ensOwner == address(0)) {
+            // Domain doesn't exist — create it
+            console.log();
+            address parentOfParentOwner = ENS(ens).owner(parentNode);
+            console.log("ENS action: Create ENS node for", parentDomain, "owned by the DAO");
+            console.log();
+            console.log("- From:            ", parentOfParentOwner, string.concat(" (owner of ", parent, ")"));
+            console.log("- To:              ", ens);
+            console.log(
+                "- Function:        setSubnodeRecord(bytes32 node, bytes32 label, address owner, address resolver, uint64 ttl)"
+            );
+            console.log("  node:           ", vm.toString(parentNode), string.concat('(namehash("', parent, '"))'));
+            console.log("  label:          ", vm.toString(labelHash), string.concat('(keccak256("', label, '"))'));
+            console.log("  owner:          ", dao, " (DAO)");
+            console.log("  resolver:       ", resolver);
+            console.log("  ttl:             0");
 
-        // Action 3: approve registry as ENS operator so it can create subnodes
+            // For a new node owned by the DAO, approval goes on the ENS registry
+            _printApprovalAction(ens, dao, "DAO");
+        } else if (isWrapped) {
+            // Wrapped name — the NameWrapper owns the node in the ENS registry.
+            // The registry cannot operate on wrapped names because it calls the ENS
+            // registry directly, and the NameWrapper doesn't propagate setApprovalForAll
+            // to the ENS registry. The domain must be unwrapped first.
+            (bool ok, bytes memory data) =
+                nameWrapper.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(node)));
+            address domainHolder = ok ? abi.decode(data, (address)) : address(0);
+
+            (string memory domainLabel,) = ENSUtils.splitDomain(parentDomain);
+
+            console.log();
+            console.log("! ENS node for", parentDomain, "is WRAPPED: must unwrap first !");
+            console.log("  ENS owner (NameWrapper):", ensOwner);
+            console.log("  Domain holder:          ", domainHolder);
+            console.log();
+            console.log("Prerequisite: Unwrap the domain");
+            console.log();
+            console.log("- From:            ", domainHolder, " (domain holder)");
+            console.log("- To:              ", nameWrapper, " (NameWrapper)");
+            console.log("- Function:         unwrapETH2LD(bytes32 labelhash, address registrant, address controller)");
+            console.log(
+                "  labelhash:       ",
+                vm.toString(keccak256(bytes(domainLabel))),
+                string.concat('(keccak256("', domainLabel, '"))')
+            );
+            console.log("  registrant:      ", domainHolder);
+            console.log("  controller:      ", domainHolder);
+            console.log();
+            console.log("After unwrapping, the domain holder becomes the direct ENS owner.");
+            console.log("Then proceed with the approval below.");
+
+            _printApprovalAction(ens, domainHolder, "domain holder (after unwrap)");
+        } else {
+            // Unwrapped, existing name — approval goes on the ENS registry
+            console.log();
+            console.log("ENS node for", parentDomain, "already exists (unwrapped)");
+            console.log("  owner:          ", ensOwner);
+
+            _printApprovalAction(ens, ensOwner, "domain owner");
+        }
+    }
+
+    function _printApprovalAction(address target, address from, string memory fromLabel) internal view {
         console.log();
-        console.log("ENS action 2: Approve registry as ENS operator");
+        console.log("ENS action: Approve registry as ENS operator");
         console.log();
-        console.log("- To:             ", ens);
-        console.log("- Function:        setApprovalForAll(address operator, bool approved)");
-        console.log("  operator:       ", address(registry), " (registry)");
-        console.log("  approved:        true");
+        console.log("- From:            ", from, string.concat(" (", fromLabel, ")"));
+        console.log("- To:              ", target);
+        console.log("- Function:         setApprovalForAll(address operator, bool approved)");
+        console.log("  operator:        ", address(registry), " (registry)");
+        console.log("  approved:         true");
     }
 
     function writeJsonArtifacts() internal {
