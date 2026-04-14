@@ -47,11 +47,7 @@ contract DeployMemberRegistry is Script {
         resolver = vm.envAddress("RESOLVER");
 
         console.log("- Parent domain:", parentDomain);
-        console.log(
-            "- Node:         ",
-            vm.toString(node),
-            string.concat('(namehash("', parentDomain, '"))')
-        );
+        console.log("- Node:         ", vm.toString(node), string.concat('(namehash("', parentDomain, '"))'));
         console.log();
 
         // Deploy implementation + proxy
@@ -95,38 +91,39 @@ contract DeployMemberRegistry is Script {
 
         // Action 1
         console.log();
-        console.log("DAO action: Grant REVOKE_MEMBER_PERMISSION on registry");
+        console.log("DAO action: Grant REVOKE_MEMBER_PERMISSION on registry to the DAO");
         console.log();
-        console.log("- To:           ", dao);
+        console.log("- To:           ", dao, " (controlling DAO)");
         console.log("- Function:      grant(address where, address who, bytes32 permissionId)");
-        console.log("  where:        ", address(registry));
-        console.log("  who:          ", address(dao));
+        console.log("  where:        ", address(registry), " (registry)");
+        console.log("  who:          ", dao, " (controlling DAO)");
         console.log("  permissionId: ", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
 
         console.log();
-        console.log("=== ENS setup actions ===");
+        console.log("=== ENS setup actions (by the parent domain owner) ===");
 
-        // Action 2
+        // Action 2: create the subdomain node, owned by the DAO (not the registry)
         console.log();
-        console.log("ENS owner action: Create ENS node for", parentDomain, "owned by registry");
+        console.log("ENS action 1: Create ENS node for", parentDomain, "owned by the DAO");
         console.log();
         console.log("- To:             ", ens);
         console.log(
             "- Function:        setSubnodeRecord(bytes32 node, bytes32 label, address owner, address resolver, uint64 ttl)"
         );
-        console.log(
-            "  node:           ",
-            vm.toString(parentNode),
-            string.concat('(namehash("', parent, '"))')
-        );
-        console.log(
-            "  label:          ",
-            vm.toString(labelHash),
-            string.concat('(keccak256("', label, '"))')
-        );
-        console.log("  owner:          ", address(registry), " (registry)");
+        console.log("  node:           ", vm.toString(parentNode), string.concat('(namehash("', parent, '"))'));
+        console.log("  label:          ", vm.toString(labelHash), string.concat('(keccak256("', label, '"))'));
+        console.log("  owner:          ", dao, " (DAO)");
         console.log("  resolver:       ", resolver);
         console.log("  ttl:             0");
+
+        // Action 3: approve registry as ENS operator so it can create subnodes
+        console.log();
+        console.log("ENS action 2: Approve registry as ENS operator");
+        console.log();
+        console.log("- To:             ", ens);
+        console.log("- Function:        setApprovalForAll(address operator, bool approved)");
+        console.log("  operator:       ", address(registry), " (registry)");
+        console.log("  approved:        true");
     }
 
     function writeJsonArtifacts() internal {
@@ -138,12 +135,7 @@ contract DeployMemberRegistry is Script {
 
         string memory networkName = vm.envOr("NETWORK_NAME", string("local"));
         string memory filePath = string.concat(
-            vm.projectRoot(),
-            "/artifacts/deployment-",
-            networkName,
-            "-",
-            vm.toString(block.timestamp),
-            ".json"
+            vm.projectRoot(), "/artifacts/deployment-", networkName, "-", vm.toString(block.timestamp), ".json"
         );
         artifacts.write(filePath);
 

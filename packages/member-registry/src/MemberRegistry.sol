@@ -5,7 +5,9 @@ pragma solidity ^0.8.17;
 import {ENS} from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol";
-import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol";
+import {
+    DaoAuthorizableUpgradeable
+} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 import {isSubdomainValid} from "@aragon/osx/framework/utils/RegistryUtils.sol";
 
@@ -20,15 +22,9 @@ import {IResolver} from "./IResolver.sol";
 /// @dev The ENS registry and resolver are trusted, known mainnet contracts. No reentrancy
 /// guard is needed — the contract is the sole caller of its own ENS operations.
 /// @custom:security-contact sirt@aragon.org
-contract MemberRegistry is
-    IMemberRegistry,
-    UUPSUpgradeable,
-    DaoAuthorizableUpgradeable,
-    ProtocolVersion
-{
+contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgradeable, ProtocolVersion {
     /// @notice The ID of the permission required to call `_authorizeUpgrade`.
-    bytes32 public constant UPGRADE_REGISTRY_PERMISSION_ID =
-        keccak256("UPGRADE_REGISTRY_PERMISSION");
+    bytes32 public constant UPGRADE_REGISTRY_PERMISSION_ID = keccak256("UPGRADE_REGISTRY_PERMISSION");
 
     /// @notice The ID of the permission required to call `revoke`.
     bytes32 public constant REVOKE_MEMBER_PERMISSION_ID = keccak256("REVOKE_MEMBER_PERMISSION");
@@ -66,12 +62,7 @@ contract MemberRegistry is
     /// @param _ens The ENS registry contract.
     /// @param _node The namehash of the parent domain this registry manages.
     /// @param _resolver The resolver address. Must support per-node `approve()`.
-    function initialize(
-        IDAO _managementDao,
-        ENS _ens,
-        bytes32 _node,
-        address _resolver
-    ) external initializer {
+    function initialize(IDAO _managementDao, ENS _ens, bytes32 _node, address _resolver) external initializer {
         __DaoAuthorizableUpgradeable_init(_managementDao);
 
         // Verify the ENS registry is valid (root node must have an owner).
@@ -210,9 +201,7 @@ contract MemberRegistry is
     }
 
     /// @notice Authorizes UUPS upgrades. Caller must have `UPGRADE_REGISTRY_PERMISSION_ID`.
-    function _authorizeUpgrade(
-        address
-    ) internal virtual override auth(UPGRADE_REGISTRY_PERMISSION_ID) {}
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_REGISTRY_PERMISSION_ID) {}
 
     /// @notice Reserved storage gap for future upgrades.
     uint256[44] private __gap;

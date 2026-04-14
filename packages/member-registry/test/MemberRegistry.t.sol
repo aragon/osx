@@ -40,8 +40,7 @@ contract MemberRegistryTest is Test {
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
-                        MemberRegistry.initialize,
-                        (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
+                        MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
                     )
                 )
             )
@@ -107,9 +106,7 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.register("taken");
 
-        vm.expectRevert(
-            abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "taken")
-        );
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "taken"));
         vm.prank(bob);
         registry.register("taken");
     }
@@ -127,9 +124,7 @@ contract MemberRegistryTest is Test {
     }
 
     function test_register_revertsIfUnderscore() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "al_ice")
-        );
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "al_ice"));
         vm.prank(alice);
         registry.register("al_ice");
     }
@@ -295,9 +290,7 @@ contract MemberRegistryTest is Test {
         vm.prank(bob);
         registry.register("bob");
 
-        vm.expectRevert(
-            abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "bob")
-        );
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "bob"));
         vm.prank(alice);
         registry.rename("bob");
     }
@@ -315,9 +308,7 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.register("alice");
 
-        vm.expectRevert(
-            abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "alice")
-        );
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "alice"));
         vm.prank(alice);
         registry.rename("alice");
     }
@@ -470,8 +461,7 @@ contract MemberRegistryTest is Test {
         new ERC1967Proxy(
             address(impl),
             abi.encodeCall(
-                MemberRegistry.initialize,
-                (IDAO(address(dao)), ENS(address(emptyENS)), NODE, address(resolver))
+                MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(emptyENS)), NODE, address(resolver))
             )
         );
     }
@@ -483,17 +473,14 @@ contract MemberRegistryTest is Test {
         new ERC1967Proxy(
             address(impl),
             abi.encodeCall(
-                MemberRegistry.initialize,
-                (IDAO(address(dao)), ENS(address(ens)), bytes32(0), address(resolver))
+                MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), bytes32(0), address(resolver))
             )
         );
     }
 
     function test_initialize_revertsIfDoubleInit() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        registry.initialize(
-            IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver)
-        );
+        registry.initialize(IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver));
     }
 
     function test_protocolVersion() public view {

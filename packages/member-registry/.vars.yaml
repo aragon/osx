@@ -11,5 +11,7 @@ keys:
     - RPC_URL
 
 profiles:
+    mainnet:
+        RPC_URL: mainnet/RPC_URL
     sepolia:
         DEPLOYER_KEY: dev/DEPLOYER_KEY
