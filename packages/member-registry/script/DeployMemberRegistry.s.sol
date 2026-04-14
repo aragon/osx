@@ -9,18 +9,13 @@ import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {MemberRegistry} from "../src/MemberRegistry.sol";
-import {MemberSubdomainRegistrar} from "../src/MemberSubdomainRegistrar.sol";
 import {ENSUtils} from "./lib/ENSUtils.sol";
 
-/// @notice Deploys MemberRegistry + MemberSubdomainRegistrar behind UUPS proxies.
-/// @dev After deployment, prints the DAO governance proposal calldata for the three
-/// completion actions (two permission grants + ENS node transfer). These can be batched
-/// into a single DAO proposal as an Action[] array.
+/// @notice Deploys MemberRegistry behind a UUPS proxy and prints the required governance
+/// actions (permission grant + ENS node transfer).
 contract DeployMemberRegistry is Script {
     using stdJson for string;
 
-    MemberSubdomainRegistrar registrarImpl;
-    MemberSubdomainRegistrar registrar;
     MemberRegistry registryImpl;
     MemberRegistry registry;
 
@@ -45,7 +40,7 @@ contract DeployMemberRegistry is Script {
     }
 
     function run() public broadcast {
-        dao = vm.envAddress("MANAGING_DAO");
+        dao = vm.envAddress("MANAGEMENT_DAO");
         ens = vm.envAddress("ENS_REGISTRY");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("members.dao.eth"));
         node = ENSUtils.namehash(parentDomain);
@@ -59,24 +54,7 @@ contract DeployMemberRegistry is Script {
         );
         console.log();
 
-        // 1. Deploy registrar implementation + proxy
-        registrarImpl = new MemberSubdomainRegistrar();
-        vm.label(address(registrarImpl), "MemberSubdomainRegistrar Impl");
-
-        registrar = MemberSubdomainRegistrar(
-            address(
-                new ERC1967Proxy(
-                    address(registrarImpl),
-                    abi.encodeCall(
-                        MemberSubdomainRegistrar.initialize,
-                        (IDAO(dao), ENS(ens), node, resolver)
-                    )
-                )
-            )
-        );
-        vm.label(address(registrar), "MemberSubdomainRegistrar Proxy");
-
-        // 2. Deploy registry implementation + proxy
+        // Deploy implementation + proxy
         registryImpl = new MemberRegistry();
         vm.label(address(registryImpl), "MemberRegistry Impl");
 
@@ -84,14 +62,14 @@ contract DeployMemberRegistry is Script {
             address(
                 new ERC1967Proxy(
                     address(registryImpl),
-                    abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), registrar))
+                    abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), node, resolver))
                 )
             )
         );
         vm.label(address(registry), "MemberRegistry Proxy");
 
         printDeployment();
-        printProposalActions();
+        printSetupActions();
 
         if (!vm.envOr("SIMULATION", false)) {
             writeJsonArtifacts();
@@ -100,13 +78,14 @@ contract DeployMemberRegistry is Script {
 
     function printDeployment() internal view {
         console.log("Deployed contracts:");
-        console.log("- MemberSubdomainRegistrar impl: ", address(registrarImpl));
-        console.log("- MemberSubdomainRegistrar proxy:", address(registrar));
-        console.log("- MemberRegistry impl:           ", address(registryImpl));
-        console.log("- MemberRegistry proxy:          ", address(registry));
+        console.log("- MemberRegistry impl: ", address(registryImpl));
+        console.log("- MemberRegistry proxy:", address(registry));
+        console.log();
+        console.log("Other:");
+        console.log("- Management DAO:      ", address(dao));
     }
 
-    function printProposalActions() internal view {
+    function printSetupActions() internal view {
         (string memory label, string memory parent) = ENSUtils.splitDomain(parentDomain);
         bytes32 parentNode = ENSUtils.namehash(parent);
         bytes32 labelHash = keccak256(bytes(label));
@@ -116,30 +95,20 @@ contract DeployMemberRegistry is Script {
 
         // Action 1
         console.log();
-        console.log("DAO action 1: Grant REGISTER_SUBDOMAIN_PERMISSION on registrar to registry");
+        console.log("DAO action: Grant REVOKE_MEMBER_PERMISSION on registry");
         console.log();
         console.log("- To:           ", dao);
-        console.log("- Function:      grant(address _where, address _who, bytes32 _permissionId)");
-        console.log("  _where:       ", address(registrar));
-        console.log("  _who:         ", address(registry));
-        console.log("  _permissionId:", vm.toString(registrar.REGISTER_SUBDOMAIN_PERMISSION_ID()));
-
-        // Action 2
-        console.log();
-        console.log("DAO action 2: Grant REVOKE_MEMBER_PERMISSION on registry");
-        console.log();
-        console.log("- To:           ", dao);
-        console.log("- Function:      grant(address _where, address _who, bytes32 _permissionId)");
-        console.log("  _where:       ", address(registry));
-        console.log("  _who:         ", address(dao));
-        console.log("  _permissionId:", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
+        console.log("- Function:      grant(address where, address who, bytes32 permissionId)");
+        console.log("  where:        ", address(registry));
+        console.log("  who:          ", address(dao));
+        console.log("  permissionId: ", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
 
         console.log();
         console.log("=== ENS setup actions ===");
 
-        // Action 3
+        // Action 2
         console.log();
-        console.log("ENS owner action 1: Create ENS node for", parentDomain, "owned by registrar");
+        console.log("ENS owner action: Create ENS node for", parentDomain, "owned by registry");
         console.log();
         console.log("- To:             ", ens);
         console.log(
@@ -155,7 +124,7 @@ contract DeployMemberRegistry is Script {
             vm.toString(labelHash),
             string.concat('(keccak256("', label, '"))')
         );
-        console.log("  owner:          ", address(registrar));
+        console.log("  owner:          ", address(registry), " (registry)");
         console.log("  resolver:       ", resolver);
         console.log("  ttl:             0");
     }
@@ -164,8 +133,6 @@ contract DeployMemberRegistry is Script {
         string memory artifacts = "output";
         artifacts.serialize("parentDomain", parentDomain);
         artifacts.serialize("parentNode", vm.toString(node));
-        artifacts.serialize("memberSubdomainRegistrarImpl", address(registrarImpl));
-        artifacts.serialize("memberSubdomainRegistrarProxy", address(registrar));
         artifacts.serialize("memberRegistryImpl", address(registryImpl));
         artifacts = artifacts.serialize("memberRegistryProxy", address(registry));
 

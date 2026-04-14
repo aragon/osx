@@ -22,9 +22,7 @@ library ENSUtils {
 
     /// @dev Splits "members.dao.eth" into ("members", "dao.eth") at the first dot.
     ///      Reverts if the domain contains no dot.
-    function splitDomain(
-        string memory domain
-    ) internal pure returns (string memory label, string memory parent) {
+    function splitDomain(string memory domain) internal pure returns (string memory label, string memory parent) {
         bytes memory b = bytes(domain);
         for (uint256 i = 0; i < b.length; i++) {
             if (b[i] == ".") {
@@ -32,8 +30,12 @@ library ENSUtils {
                 parent = new string(b.length - i - 1);
                 bytes memory lb = bytes(label);
                 bytes memory pb = bytes(parent);
-                for (uint256 j = 0; j < i; j++) lb[j] = b[j];
-                for (uint256 j = i + 1; j < b.length; j++) pb[j - i - 1] = b[j];
+                for (uint256 j = 0; j < i; j++) {
+                    lb[j] = b[j];
+                }
+                for (uint256 j = i + 1; j < b.length; j++) {
+                    pb[j - i - 1] = b[j];
+                }
                 return (label, parent);
             }
         }
@@ -42,7 +44,9 @@ library ENSUtils {
 
     function _labelHash(bytes memory b, uint256 start, uint256 end) private pure returns (bytes32) {
         bytes memory label = new bytes(end - start);
-        for (uint256 i = start; i < end; i++) label[i - start] = b[i];
+        for (uint256 i = start; i < end; i++) {
+            label[i - start] = b[i];
+        }
         return keccak256(label);
     }
 }

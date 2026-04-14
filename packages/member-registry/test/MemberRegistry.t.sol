@@ -10,7 +10,6 @@ import {DAOMock} from "@aragon/osx-commons-contracts/src/mocks/dao/DAOMock.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {MemberRegistry} from "../src/MemberRegistry.sol";
-import {MemberSubdomainRegistrar} from "../src/MemberSubdomainRegistrar.sol";
 import {IMemberRegistry} from "../src/IMemberRegistry.sol";
 import {MockENS} from "./mocks/MockENS.sol";
 import {MockResolver} from "./mocks/MockResolver.sol";
@@ -19,7 +18,6 @@ contract MemberRegistryTest is Test {
     DAOMock dao;
     MockENS ens;
     MockResolver resolver;
-    MemberSubdomainRegistrar registrar;
     MemberRegistry registry;
 
     // namehash("members.dao.eth") — precomputed for tests
@@ -34,63 +32,41 @@ contract MemberRegistryTest is Test {
         dao.setHasPermissionReturnValueMock(true);
 
         ens = new MockENS();
+        ens.setOwner(bytes32(0), address(this)); // ENS root must have an owner
         resolver = new MockResolver(ENS(address(ens)));
 
-        // Make the registrar own the parent node in ENS (simulates governance action)
-        // We deploy the registrar first, then set ownership.
-
-        // Deploy registrar behind UUPS proxy
-        registrar = MemberSubdomainRegistrar(
-            address(
-                new ERC1967Proxy(
-                    address(new MemberSubdomainRegistrar()),
-                    abi.encodeCall(
-                        MemberSubdomainRegistrar.initialize,
-                        (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
-                    )
-                )
-            )
-        );
-
-        // The registrar must own the parent ENS node
-        ens.setOwner(NODE, address(registrar));
-
-        // Deploy registry behind UUPS proxy
         registry = MemberRegistry(
             address(
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
                         MemberRegistry.initialize,
-                        (IDAO(address(dao)), registrar)
+                        (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
                     )
                 )
             )
         );
+
+        // The registry must own the parent ENS node
+        ens.setOwner(NODE, address(registry));
     }
 
     // -------------------------------------------------------------------------
-    // register — happy path
+    // register
     // -------------------------------------------------------------------------
 
     function test_register() public {
         vm.prank(alice);
         registry.register("alice");
 
-        // Registrar state
-        assertTrue(registrar.isRegistered(alice));
-        assertEq(registrar.labelOwner(keccak256("alice")), alice);
-        assertEq(registrar.memberSubdomain(alice), "alice");
+        assertTrue(registry.isRegistered(alice));
+        assertEq(registry.labelOwner(keccak256("alice")), alice);
+        assertEq(registry.memberSubdomain(alice), "alice");
 
-        // ENS: subnode owned by registrar
         bytes32 subnode = _subnode("alice");
-        assertEq(ens.owner(subnode), address(registrar));
-
-        // Resolver: addr record set
+        assertEq(ens.owner(subnode), address(registry));
         assertEq(resolver.addr(subnode), alice);
-
-        // Resolver: per-node approval granted
-        assertTrue(resolver.isApprovedFor(address(registrar), subnode, alice));
+        assertTrue(resolver.isApprovedFor(address(registry), subnode, alice));
     }
 
     function test_register_emitsEvent() public {
@@ -108,28 +84,21 @@ contract MemberRegistryTest is Test {
         vm.prank(bob);
         registry.register("bob");
 
-        assertTrue(registrar.isRegistered(alice));
-        assertTrue(registrar.isRegistered(bob));
-        assertEq(registrar.labelOwner(keccak256("alice")), alice);
-        assertEq(registrar.labelOwner(keccak256("bob")), bob);
+        assertTrue(registry.isRegistered(alice));
+        assertTrue(registry.isRegistered(bob));
     }
 
     function test_register_hyphenAndDigits() public {
         vm.prank(alice);
         registry.register("alice-123");
-
-        assertEq(registrar.memberSubdomain(alice), "alice-123");
+        assertEq(registry.memberSubdomain(alice), "alice-123");
     }
-
-    // -------------------------------------------------------------------------
-    // register — error paths
-    // -------------------------------------------------------------------------
 
     function test_register_revertsIfAlreadyRegistered() public {
         vm.prank(alice);
         registry.register("alice");
 
-        vm.expectRevert(abi.encodeWithSelector(MemberSubdomainRegistrar.AlreadyRegistered.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.AlreadyRegistered.selector, alice));
         vm.prank(alice);
         registry.register("other");
     }
@@ -139,7 +108,7 @@ contract MemberRegistryTest is Test {
         registry.register("taken");
 
         vm.expectRevert(
-            abi.encodeWithSelector(MemberSubdomainRegistrar.SubdomainAlreadyTaken.selector, "taken")
+            abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "taken")
         );
         vm.prank(bob);
         registry.register("taken");
@@ -157,14 +126,32 @@ contract MemberRegistryTest is Test {
         registry.register("Alice");
     }
 
-    function test_register_revertsIfInvalidCharsUnderscore() public {
-        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "al_ice"));
+    function test_register_revertsIfUnderscore() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "al_ice")
+        );
         vm.prank(alice);
         registry.register("al_ice");
     }
 
+    function test_register_revertsIfTooLong() public {
+        // 51 characters — exceeds MAX_SUBDOMAIN_LENGTH (50)
+        string memory long = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, long));
+        vm.prank(alice);
+        registry.register(long);
+    }
+
+    function test_register_maxLengthAccepted() public {
+        // Exactly 50 characters — should succeed
+        string memory maxLen = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        vm.prank(alice);
+        registry.register(maxLen);
+        assertTrue(registry.isRegistered(alice));
+    }
+
     // -------------------------------------------------------------------------
-    // release — happy path
+    // release
     // -------------------------------------------------------------------------
 
     function test_release() public {
@@ -174,16 +161,11 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.release();
 
-        // State cleared
-        assertFalse(registrar.isRegistered(alice));
-        assertEq(registrar.labelOwner(keccak256("alice")), address(0));
-        assertEq(bytes(registrar.memberSubdomain(alice)).length, 0);
-
-        // ENS: subnode released
+        assertFalse(registry.isRegistered(alice));
+        assertEq(registry.labelOwner(keccak256("alice")), address(0));
+        assertEq(bytes(registry.memberSubdomain(alice)).length, 0);
         assertEq(ens.owner(_subnode("alice")), address(0));
-
-        // Resolver: approval revoked
-        assertFalse(resolver.isApprovedFor(address(registrar), _subnode("alice"), alice));
+        assertFalse(resolver.isApprovedFor(address(registry), _subnode("alice"), alice));
     }
 
     function test_release_emitsEvent() public {
@@ -197,18 +179,14 @@ contract MemberRegistryTest is Test {
         registry.release();
     }
 
-    // -------------------------------------------------------------------------
-    // release — error paths
-    // -------------------------------------------------------------------------
-
     function test_release_revertsIfNotRegistered() public {
-        vm.expectRevert(abi.encodeWithSelector(MemberSubdomainRegistrar.NotRegistered.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.NotRegistered.selector, alice));
         vm.prank(alice);
         registry.release();
     }
 
     // -------------------------------------------------------------------------
-    // revoke — happy path
+    // revoke
     // -------------------------------------------------------------------------
 
     function test_revoke() public {
@@ -218,7 +196,7 @@ contract MemberRegistryTest is Test {
         vm.prank(revoker);
         registry.revoke(alice);
 
-        assertFalse(registrar.isRegistered(alice));
+        assertFalse(registry.isRegistered(alice));
         assertEq(ens.owner(_subnode("alice")), address(0));
     }
 
@@ -233,15 +211,10 @@ contract MemberRegistryTest is Test {
         registry.revoke(alice);
     }
 
-    // -------------------------------------------------------------------------
-    // revoke — error paths
-    // -------------------------------------------------------------------------
-
     function test_revoke_revertsWithoutPermission() public {
         vm.prank(alice);
         registry.register("alice");
 
-        // Disable permissions
         dao.setHasPermissionReturnValueMock(false);
 
         vm.expectRevert(
@@ -258,13 +231,25 @@ contract MemberRegistryTest is Test {
     }
 
     function test_revoke_revertsIfNotRegistered() public {
-        vm.expectRevert(abi.encodeWithSelector(MemberSubdomainRegistrar.NotRegistered.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.NotRegistered.selector, alice));
         vm.prank(revoker);
         registry.revoke(alice);
     }
 
+    function test_revoke_self() public {
+        // Revoker is also a registered member and revokes themselves
+        vm.prank(revoker);
+        registry.register("revoker");
+
+        vm.prank(revoker);
+        registry.revoke(revoker);
+
+        assertFalse(registry.isRegistered(revoker));
+        assertEq(ens.owner(_subnode("revoker")), address(0));
+    }
+
     // -------------------------------------------------------------------------
-    // rename — happy path
+    // rename
     // -------------------------------------------------------------------------
 
     function test_rename() public {
@@ -274,17 +259,16 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.rename("alice2");
 
-        // New registration
-        assertTrue(registrar.isRegistered(alice));
-        assertEq(registrar.memberSubdomain(alice), "alice2");
-        assertEq(registrar.labelOwner(keccak256("alice2")), alice);
+        assertTrue(registry.isRegistered(alice));
+        assertEq(registry.memberSubdomain(alice), "alice2");
+        assertEq(registry.labelOwner(keccak256("alice2")), alice);
         assertEq(resolver.addr(_subnode("alice2")), alice);
-        assertTrue(resolver.isApprovedFor(address(registrar), _subnode("alice2"), alice));
+        assertTrue(resolver.isApprovedFor(address(registry), _subnode("alice2"), alice));
 
         // Old label freed
-        assertEq(registrar.labelOwner(keccak256("alice")), address(0));
+        assertEq(registry.labelOwner(keccak256("alice")), address(0));
         assertEq(ens.owner(_subnode("alice")), address(0));
-        assertFalse(resolver.isApprovedFor(address(registrar), _subnode("alice"), alice));
+        assertFalse(resolver.isApprovedFor(address(registry), _subnode("alice"), alice));
     }
 
     function test_rename_emitsEvent() public {
@@ -298,12 +282,8 @@ contract MemberRegistryTest is Test {
         registry.rename("alice2");
     }
 
-    // -------------------------------------------------------------------------
-    // rename — error paths
-    // -------------------------------------------------------------------------
-
     function test_rename_revertsIfNotRegistered() public {
-        vm.expectRevert(abi.encodeWithSelector(MemberSubdomainRegistrar.NotRegistered.selector, alice));
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.NotRegistered.selector, alice));
         vm.prank(alice);
         registry.rename("newname");
     }
@@ -316,7 +296,7 @@ contract MemberRegistryTest is Test {
         registry.register("bob");
 
         vm.expectRevert(
-            abi.encodeWithSelector(MemberSubdomainRegistrar.SubdomainAlreadyTaken.selector, "bob")
+            abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "bob")
         );
         vm.prank(alice);
         registry.rename("bob");
@@ -335,29 +315,52 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.register("alice");
 
-        // Renaming to own current label reverts — label is still taken (by self)
         vm.expectRevert(
-            abi.encodeWithSelector(MemberSubdomainRegistrar.SubdomainAlreadyTaken.selector, "alice")
+            abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "alice")
         );
         vm.prank(alice);
         registry.rename("alice");
     }
 
+    function test_rename_eventStringsCorrectAfterMultipleRenames() public {
+        vm.prank(alice);
+        registry.register("first");
+
+        vm.expectEmit(true, false, false, true);
+        emit IMemberRegistry.MemberRenamed(alice, "first", "second");
+        vm.prank(alice);
+        registry.rename("second");
+
+        vm.expectEmit(true, false, false, true);
+        emit IMemberRegistry.MemberRenamed(alice, "second", "third");
+        vm.prank(alice);
+        registry.rename("third");
+
+        assertEq(registry.memberSubdomain(alice), "third");
+    }
+
+    function test_rename_revertsIfTooLong() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        string memory long = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; // 51
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, long));
+        vm.prank(alice);
+        registry.rename(long);
+    }
+
     // -------------------------------------------------------------------------
-    // Resolver delegation — member can set text records after registration
+    // Resolver delegation
     // -------------------------------------------------------------------------
 
     function test_memberCanSetTextRecords() public {
         vm.prank(alice);
         registry.register("alice");
 
-        bytes32 subnode = _subnode("alice");
-
-        // Alice sets a text record directly on the resolver (per-node approval allows this)
         vm.prank(alice);
-        resolver.setText(subnode, "avatar", "https://example.com/alice.png");
+        resolver.setText(_subnode("alice"), "avatar", "https://example.com/alice.png");
 
-        assertEq(resolver.text(subnode, "avatar"), "https://example.com/alice.png");
+        assertEq(resolver.text(_subnode("alice"), "avatar"), "https://example.com/alice.png");
     }
 
     function test_memberCannotSetOtherMembersRecords() public {
@@ -367,7 +370,6 @@ contract MemberRegistryTest is Test {
         vm.prank(bob);
         registry.register("bob");
 
-        // Bob cannot set Alice's text records
         vm.expectRevert("MockResolver: not authorised");
         vm.prank(bob);
         resolver.setText(_subnode("alice"), "avatar", "hacked");
@@ -378,7 +380,6 @@ contract MemberRegistryTest is Test {
     // -------------------------------------------------------------------------
 
     function test_reRegisterFreedLabel() public {
-        // Alice registers, releases, Bob claims the same label
         vm.prank(alice);
         registry.register("shared");
 
@@ -388,8 +389,8 @@ contract MemberRegistryTest is Test {
         vm.prank(bob);
         registry.register("shared");
 
-        assertTrue(registrar.isRegistered(bob));
-        assertEq(registrar.labelOwner(keccak256("shared")), bob);
+        assertTrue(registry.isRegistered(bob));
+        assertEq(registry.labelOwner(keccak256("shared")), bob);
         assertEq(resolver.addr(_subnode("shared")), bob);
     }
 
@@ -397,37 +398,28 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.register("alice");
 
-        bytes32 subnode = _subnode("alice");
-
-        // Alice sets text records
         vm.prank(alice);
-        resolver.setText(subnode, "description", "original");
+        resolver.setText(_subnode("alice"), "description", "original");
 
-        // Release clears records (via version increment)
         vm.prank(alice);
         registry.release();
 
-        // Text record is now empty (version incremented)
-        assertEq(bytes(resolver.text(subnode, "description")).length, 0);
+        assertEq(bytes(resolver.text(_subnode("alice"), "description")).length, 0);
     }
 
     function test_noStaleRecordsAfterReRegister() public {
         vm.prank(alice);
         registry.register("label1");
 
-        // Alice sets text records
         vm.prank(alice);
         resolver.setText(_subnode("label1"), "key", "alice-value");
 
-        // Alice releases
         vm.prank(alice);
         registry.release();
 
-        // Bob claims the same label
         vm.prank(bob);
         registry.register("label1");
 
-        // Bob does NOT see Alice's old text records
         assertEq(bytes(resolver.text(_subnode("label1"), "key")).length, 0);
     }
 
@@ -438,12 +430,11 @@ contract MemberRegistryTest is Test {
         vm.prank(revoker);
         registry.revoke(alice);
 
-        // Alice can re-register after being revoked
         vm.prank(alice);
         registry.register("alice2");
 
-        assertTrue(registrar.isRegistered(alice));
-        assertEq(registrar.memberSubdomain(alice), "alice2");
+        assertTrue(registry.isRegistered(alice));
+        assertEq(registry.memberSubdomain(alice), "alice2");
     }
 
     function test_releaseThenRegisterNewLabel() public {
@@ -456,26 +447,56 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         registry.register("second");
 
-        assertEq(registrar.memberSubdomain(alice), "second");
-        assertEq(registrar.labelOwner(keccak256("first")), address(0));
-        assertEq(registrar.labelOwner(keccak256("second")), alice);
+        assertEq(registry.memberSubdomain(alice), "second");
+        assertEq(registry.labelOwner(keccak256("first")), address(0));
+        assertEq(registry.labelOwner(keccak256("second")), alice);
     }
 
     // -------------------------------------------------------------------------
     // Initialization
     // -------------------------------------------------------------------------
 
-    function test_registrarInitialization() public {
-        assertEq(address(registrar.ens()), address(ens));
-        assertEq(registrar.node(), NODE);
-        assertEq(registrar.resolver(), address(resolver));
+    function test_initialization() public view {
+        assertEq(address(registry.ens()), address(ens));
+        assertEq(registry.node(), NODE);
+        assertEq(registry.resolver(), address(resolver));
     }
 
-    function test_registryInitialization() public {
-        assertEq(address(registry.registrar()), address(registrar));
+    function test_initialize_revertsIfInvalidENS() public {
+        MockENS emptyENS = new MockENS(); // root has no owner
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(); // InvalidENSRegistry, wrapped by proxy delegate call
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(
+                MemberRegistry.initialize,
+                (IDAO(address(dao)), ENS(address(emptyENS)), NODE, address(resolver))
+            )
+        );
     }
 
-    function test_protocolVersion() public {
+    function test_initialize_revertsIfEmptyNode() public {
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(); // InvalidNode, wrapped by proxy delegate call
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(
+                MemberRegistry.initialize,
+                (IDAO(address(dao)), ENS(address(ens)), bytes32(0), address(resolver))
+            )
+        );
+    }
+
+    function test_initialize_revertsIfDoubleInit() public {
+        vm.expectRevert("Initializable: contract is already initialized");
+        registry.initialize(
+            IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver)
+        );
+    }
+
+    function test_protocolVersion() public view {
         uint8[3] memory version = registry.protocolVersion();
         assertEq(version[0], 1);
         assertEq(version[1], 4);

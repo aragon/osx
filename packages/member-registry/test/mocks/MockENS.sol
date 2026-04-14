@@ -17,24 +17,14 @@ contract MockENS is ENS {
         _ttls[node] = _ttl;
     }
 
-    function setSubnodeRecord(
-        bytes32 node,
-        bytes32 label,
-        address _owner,
-        address _resolver,
-        uint64 _ttl
-    ) external {
+    function setSubnodeRecord(bytes32 node, bytes32 label, address _owner, address _resolver, uint64 _ttl) external {
         bytes32 subnode = keccak256(abi.encodePacked(node, label));
         _owners[subnode] = _owner;
         _resolvers[subnode] = _resolver;
         _ttls[subnode] = _ttl;
     }
 
-    function setSubnodeOwner(
-        bytes32 node,
-        bytes32 label,
-        address _owner
-    ) external returns (bytes32) {
+    function setSubnodeOwner(bytes32 node, bytes32 label, address _owner) external returns (bytes32) {
         bytes32 subnode = keccak256(abi.encodePacked(node, label));
         _owners[subnode] = _owner;
         emit NewOwner(node, label, _owner);

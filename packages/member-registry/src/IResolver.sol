@@ -3,8 +3,8 @@
 pragma solidity ^0.8.17;
 
 /// @title IResolver
-/// @notice Minimal resolver interface for MemberSubdomainRegistrar.
-/// Covers only what the registrar calls: setAddr, approve, clearRecords, isApprovedFor.
+/// @notice Minimal resolver interface for MemberRegistry.
+/// Covers only what the registry calls: setAddr, approve, clearRecords, isApprovedFor.
 /// Members call the full PublicResolver directly for text records, contenthash, etc.
 /// @custom:security-contact sirt@aragon.org
 interface IResolver {
@@ -19,9 +19,5 @@ interface IResolver {
     function clearRecords(bytes32 node) external;
 
     /// @notice Check if a delegate is approved for a node by a given owner.
-    function isApprovedFor(
-        address owner,
-        bytes32 node,
-        address delegate
-    ) external view returns (bool);
+    function isApprovedFor(address owner, bytes32 node, address delegate) external view returns (bool);
 }

@@ -45,11 +45,7 @@ contract MockResolver is IResolver {
         _versions[node]++;
     }
 
-    function isApprovedFor(
-        address owner,
-        bytes32 node,
-        address delegate
-    ) external view returns (bool) {
+    function isApprovedFor(address owner, bytes32 node, address delegate) external view returns (bool) {
         return _approvals[owner][node][delegate];
     }
 

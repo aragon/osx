@@ -3,8 +3,10 @@
 pragma solidity ^0.8.17;
 
 /// @title IMemberRegistry
-/// @notice Entry point for member self-registration via ENS subdomain claims.
-/// Relays operations to a MemberSubdomainRegistrar that manages the ENS state.
+/// @notice Permissionless member self-registration via ENS subdomain claims.
+/// Members claim a subdomain under a configurable parent domain, manage their own
+/// resolver records (text, avatar, etc.) via per-node approval, and can release or
+/// rename their subdomain at any time.
 /// @custom:security-contact sirt@aragon.org
 interface IMemberRegistry {
     /// @notice Emitted when a member registers and claims a subdomain.
@@ -19,8 +21,24 @@ interface IMemberRegistry {
     /// @notice Emitted when a member renames their subdomain (release old + claim new).
     event MemberRenamed(address indexed member, string oldSubdomain, string newSubdomain);
 
-    /// @notice Thrown if the subdomain contains invalid characters. Valid: [0-9a-z-], non-empty.
+    /// @notice Thrown if the subdomain is invalid: empty, exceeds 50 characters, or
+    ///         contains characters outside [0-9a-z-].
     error InvalidSubdomain(string subdomain);
+
+    /// @notice Thrown if the member is already registered.
+    error AlreadyRegistered(address member);
+
+    /// @notice Thrown if the member is not registered.
+    error NotRegistered(address member);
+
+    /// @notice Thrown if the requested subdomain label is already taken.
+    error SubdomainAlreadyTaken(string subdomain);
+
+    /// @notice Thrown if the ENS registry address is not a valid ENS registry.
+    error InvalidENSRegistry(address ens);
+
+    /// @notice Thrown if the parent node is empty (bytes32(0)).
+    error InvalidNode();
 
     /// @notice Register as a member by claiming a subdomain. Permissionless.
     ///         One subdomain per address. Reverts if already registered (release first).
