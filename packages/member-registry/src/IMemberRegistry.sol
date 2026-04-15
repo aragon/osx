@@ -9,6 +9,22 @@ pragma solidity ^0.8.17;
 /// rename their subdomain at any time.
 /// @custom:security-contact sirt@aragon.org
 interface IMemberRegistry {
+    /// @notice A key-value pair for an ENS text record.
+    struct TextRecord {
+        string key;
+        string value;
+    }
+
+    /// @notice A bundle of ENS resolver records to set atomically during register or rename.
+    /// @param textRecords Text records to set (avatar, description, url, etc.)
+    /// @param addr The address record. Use address(0) to default to msg.sender.
+    /// @param contenthash The contenthash (IPFS, Swarm, etc.). Empty bytes = don't set.
+    struct Records {
+        TextRecord[] textRecords;
+        address addr;
+        bytes contenthash;
+    }
+
     /// @notice Emitted when a member registers and claims a subdomain.
     event MemberRegistered(address indexed member, string subdomain);
 
@@ -45,6 +61,13 @@ interface IMemberRegistry {
     /// @param subdomain The subdomain label to claim (e.g., "alice").
     function register(string calldata subdomain) external;
 
+    /// @notice Register as a member with initial resolver records set atomically. Permissionless.
+    ///         One subdomain per address. Reverts if already registered (release first).
+    /// @param subdomain The subdomain label to claim (e.g., "alice").
+    /// @param records Resolver records to set on the new subnode (text, addr, contenthash).
+    ///         addr=address(0) defaults to msg.sender. Empty contenthash is skipped.
+    function register(string calldata subdomain, Records calldata records) external;
+
     /// @notice Voluntarily release your subdomain. Permissionless.
     ///         Only releases the caller's own subdomain. Reverts if not registered.
     function release() external;
@@ -58,4 +81,11 @@ interface IMemberRegistry {
     ///         Only renames the caller's own subdomain. Reverts if not registered or new label taken.
     /// @param newSubdomain The new subdomain label to claim.
     function rename(string calldata newSubdomain) external;
+
+    /// @notice Rename your subdomain and carry over resolver records atomically.
+    ///         Only renames the caller's own subdomain. Reverts if not registered or new label taken.
+    /// @param newSubdomain The new subdomain label to claim.
+    /// @param records Resolver records to set on the new subnode (text, addr, contenthash).
+    ///         addr=address(0) keeps the default (msg.sender). Empty contenthash is skipped.
+    function rename(string calldata newSubdomain, Records calldata records) external;
 }

@@ -4,12 +4,18 @@ pragma solidity ^0.8.17;
 
 /// @title IResolver
 /// @notice Minimal resolver interface for MemberRegistry.
-/// Covers only what the registry calls: setAddr, approve, clearRecords, isApprovedFor.
-/// Members call the full PublicResolver directly for text records, contenthash, etc.
+/// Covers what the registry calls during subnode lifecycle and record migration.
+/// Members call the full PublicResolver directly for additional record management.
 /// @custom:security-contact sirt@aragon.org
 interface IResolver {
     /// @notice Set the address record for a node.
     function setAddr(bytes32 node, address addr) external;
+
+    /// @notice Set a text record for a node.
+    function setText(bytes32 node, string calldata key, string calldata value) external;
+
+    /// @notice Set the contenthash for a node.
+    function setContenthash(bytes32 node, bytes calldata hash) external;
 
     /// @notice Approve a delegate to manage resolver records for a specific node.
     /// @dev Per-node delegation. Available in ens-contracts >= v0.0.19.

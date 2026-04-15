@@ -75,8 +75,7 @@ contract SetupSimulationTest is Test {
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
-                        MemberRegistry.initialize,
-                        (IDAO(managementDao), ENS_REGISTRY, parentNode, PUBLIC_RESOLVER)
+                        MemberRegistry.initialize, (IDAO(managementDao), ENS_REGISTRY, parentNode, PUBLIC_RESOLVER)
                     )
                 )
             )
@@ -89,9 +88,7 @@ contract SetupSimulationTest is Test {
         bytes32 revokePermId = registry.REVOKE_MEMBER_PERMISSION_ID();
         vm.prank(managementDao);
         (bool grantOk,) = managementDao.call(
-            abi.encodeWithSignature(
-                "grant(address,address,bytes32)", address(registry), managementDao, revokePermId
-            )
+            abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, revokePermId)
         );
         assertTrue(grantOk, "Step 2: grant REVOKE_MEMBER_PERMISSION failed");
         console.log("Step 2: Granted REVOKE_MEMBER_PERMISSION");
@@ -187,9 +184,7 @@ contract SetupSimulationTest is Test {
         result = keccak256(abi.encodePacked(result, _labelHash(b, 0, end)));
     }
 
-    function _splitDomain(
-        string memory domain
-    ) internal pure returns (string memory label, string memory parent) {
+    function _splitDomain(string memory domain) internal pure returns (string memory label, string memory parent) {
         bytes memory b = bytes(domain);
         for (uint256 i = 0; i < b.length; i++) {
             if (b[i] == ".") {
@@ -197,8 +192,12 @@ contract SetupSimulationTest is Test {
                 parent = new string(b.length - i - 1);
                 bytes memory lb = bytes(label);
                 bytes memory pb = bytes(parent);
-                for (uint256 j = 0; j < i; j++) lb[j] = b[j];
-                for (uint256 j = i + 1; j < b.length; j++) pb[j - i - 1] = b[j];
+                for (uint256 j = 0; j < i; j++) {
+                    lb[j] = b[j];
+                }
+                for (uint256 j = i + 1; j < b.length; j++) {
+                    pb[j - i - 1] = b[j];
+                }
                 return (label, parent);
             }
         }
@@ -207,7 +206,9 @@ contract SetupSimulationTest is Test {
 
     function _labelHash(bytes memory b, uint256 start, uint256 end) internal pure returns (bytes32) {
         bytes memory label = new bytes(end - start);
-        for (uint256 i = start; i < end; i++) label[i - start] = b[i];
+        for (uint256 i = start; i < end; i++) {
+            label[i - start] = b[i];
+        }
         return keccak256(label);
     }
 }

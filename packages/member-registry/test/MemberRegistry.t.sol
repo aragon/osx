@@ -491,6 +491,130 @@ contract MemberRegistryTest is Test {
     }
 
     // -------------------------------------------------------------------------
+    // register with records
+    // -------------------------------------------------------------------------
+
+    function test_registerWithRecords() public {
+        IMemberRegistry.TextRecord[] memory texts = new IMemberRegistry.TextRecord[](2);
+        texts[0] = IMemberRegistry.TextRecord("avatar", "https://example.com/alice.png");
+        texts[1] = IMemberRegistry.TextRecord("description", "Aragon delegate");
+
+        IMemberRegistry.Records memory records = IMemberRegistry.Records({
+            textRecords: texts,
+            addr: address(0), // default to msg.sender
+            contenthash: hex"e3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f"
+        });
+
+        vm.prank(alice);
+        registry.register("alice", records);
+
+        assertTrue(registry.isRegistered(alice));
+
+        bytes32 subnode = _subnode("alice");
+        assertEq(resolver.addr(subnode), alice);
+        assertEq(resolver.text(subnode, "avatar"), "https://example.com/alice.png");
+        assertEq(resolver.text(subnode, "description"), "Aragon delegate");
+        assertEq(
+            resolver.contenthash(subnode),
+            hex"e3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f"
+        );
+    }
+
+    function test_registerWithRecords_customAddr() public {
+        address coldWallet = address(0xC01D);
+
+        IMemberRegistry.Records memory records = IMemberRegistry.Records({
+            textRecords: new IMemberRegistry.TextRecord[](0), addr: coldWallet, contenthash: ""
+        });
+
+        vm.prank(alice);
+        registry.register("alice", records);
+
+        assertEq(resolver.addr(_subnode("alice")), coldWallet);
+    }
+
+    function test_registerWithRecords_emptyRecords() public {
+        // Empty records = same as simple register()
+        IMemberRegistry.Records memory records = IMemberRegistry.Records({
+            textRecords: new IMemberRegistry.TextRecord[](0), addr: address(0), contenthash: ""
+        });
+
+        vm.prank(alice);
+        registry.register("alice", records);
+
+        assertTrue(registry.isRegistered(alice));
+        assertEq(resolver.addr(_subnode("alice")), alice);
+    }
+
+    // -------------------------------------------------------------------------
+    // rename with records
+    // -------------------------------------------------------------------------
+
+    function test_renameWithRecords() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        // Alice sets records on old subdomain
+        bytes32 oldSubnode = _subnode("alice");
+        vm.prank(alice);
+        resolver.setText(oldSubnode, "avatar", "https://example.com/old.png");
+        vm.prank(alice);
+        resolver.setText(oldSubnode, "description", "Old bio");
+
+        // Rename and carry records over
+        IMemberRegistry.TextRecord[] memory texts = new IMemberRegistry.TextRecord[](2);
+        texts[0] = IMemberRegistry.TextRecord("avatar", "https://example.com/old.png");
+        texts[1] = IMemberRegistry.TextRecord("description", "Updated bio");
+
+        IMemberRegistry.Records memory records =
+            IMemberRegistry.Records({textRecords: texts, addr: address(0), contenthash: ""});
+
+        vm.prank(alice);
+        registry.rename("alice2", records);
+
+        // New subnode has the carried-over records
+        bytes32 newSubnode = _subnode("alice2");
+        assertEq(resolver.text(newSubnode, "avatar"), "https://example.com/old.png");
+        assertEq(resolver.text(newSubnode, "description"), "Updated bio");
+        assertEq(resolver.addr(newSubnode), alice);
+
+        // Old subnode records are cleared
+        assertEq(bytes(resolver.text(oldSubnode, "avatar")).length, 0);
+    }
+
+    function test_renameWithRecords_customAddr() public {
+        address coldWallet = address(0xC01D);
+
+        vm.prank(alice);
+        registry.register("alice");
+
+        IMemberRegistry.Records memory records = IMemberRegistry.Records({
+            textRecords: new IMemberRegistry.TextRecord[](0), addr: coldWallet, contenthash: ""
+        });
+
+        vm.prank(alice);
+        registry.rename("alice2", records);
+
+        assertEq(resolver.addr(_subnode("alice2")), coldWallet);
+    }
+
+    function test_renameWithRecords_contenthash() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        bytes memory ipfs = hex"e3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f";
+
+        IMemberRegistry.Records memory records = IMemberRegistry.Records({
+            textRecords: new IMemberRegistry.TextRecord[](0), addr: address(0), contenthash: ipfs
+        });
+
+        vm.prank(alice);
+        registry.rename("alice2", records);
+
+        assertEq(resolver.contenthash(_subnode("alice2")), ipfs);
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 

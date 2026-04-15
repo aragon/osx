@@ -80,8 +80,6 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     // External functions
 
-    // External functions
-    //
     // All functions follow Checks-Effects-Interactions (CEI): state is written before
     // external ENS calls. This prevents reentrancy attacks where a malicious resolver
     // could reenter register() with the same label from a different sender, bypassing
@@ -89,20 +87,14 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain) external {
-        _validateSubdomain(subdomain);
+        _register(subdomain);
+    }
 
-        bytes32 label = keccak256(bytes(subdomain));
-
-        if (memberLabel[msg.sender] != bytes32(0)) revert AlreadyRegistered(msg.sender);
-        else if (labelOwner[label] != address(0)) revert SubdomainAlreadyTaken(subdomain);
-
-        memberLabel[msg.sender] = label;
-        memberSubdomain[msg.sender] = subdomain;
-        labelOwner[label] = msg.sender;
-
-        _assignSubnode(msg.sender, label);
-
-        emit MemberRegistered(msg.sender, subdomain);
+    /// @inheritdoc IMemberRegistry
+    function register(string calldata subdomain, Records calldata records) external {
+        bytes32 label = _register(subdomain);
+        bytes32 subnode = keccak256(abi.encodePacked(node, label));
+        _applyRecords(subnode, msg.sender, records);
     }
 
     /// @inheritdoc IMemberRegistry
@@ -139,11 +131,52 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     /// @inheritdoc IMemberRegistry
     function rename(string calldata newSubdomain) external {
+        _rename(newSubdomain);
+    }
+
+    /// @inheritdoc IMemberRegistry
+    function rename(string calldata newSubdomain, Records calldata records) external {
+        bytes32 newLabel = _rename(newSubdomain);
+        bytes32 subnode = keccak256(abi.encodePacked(node, newLabel));
+        _applyRecords(subnode, msg.sender, records);
+    }
+
+    // Views
+
+    /// @notice Returns true if the member has a registered subdomain.
+    function isRegistered(address member) external view returns (bool) {
+        return memberLabel[member] != bytes32(0);
+    }
+
+    // Internal
+
+    uint256 internal constant MAX_SUBDOMAIN_LENGTH = 50;
+
+    /// @dev Core registration logic. Returns the labelhash of the claimed subdomain.
+    function _register(string calldata subdomain) internal returns (bytes32 label) {
+        _validateSubdomain(subdomain);
+
+        label = keccak256(bytes(subdomain));
+
+        if (memberLabel[msg.sender] != bytes32(0)) revert AlreadyRegistered(msg.sender);
+        else if (labelOwner[label] != address(0)) revert SubdomainAlreadyTaken(subdomain);
+
+        memberLabel[msg.sender] = label;
+        memberSubdomain[msg.sender] = subdomain;
+        labelOwner[label] = msg.sender;
+
+        _assignSubnode(msg.sender, label);
+
+        emit MemberRegistered(msg.sender, subdomain);
+    }
+
+    /// @dev Core rename logic. Returns the new labelhash.
+    function _rename(string calldata newSubdomain) internal returns (bytes32 newLabel) {
         _validateSubdomain(newSubdomain);
 
         if (memberLabel[msg.sender] == bytes32(0)) revert NotRegistered(msg.sender);
 
-        bytes32 newLabel = keccak256(bytes(newSubdomain));
+        newLabel = keccak256(bytes(newSubdomain));
         if (labelOwner[newLabel] != address(0)) revert SubdomainAlreadyTaken(newSubdomain);
 
         bytes32 oldLabel = memberLabel[msg.sender];
@@ -159,17 +192,6 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
         emit MemberRenamed(msg.sender, oldSubdomain, newSubdomain);
     }
-
-    // Views
-
-    /// @notice Returns true if the member has a registered subdomain.
-    function isRegistered(address member) external view returns (bool) {
-        return memberLabel[member] != bytes32(0);
-    }
-
-    // Internal
-
-    uint256 internal constant MAX_SUBDOMAIN_LENGTH = 50;
 
     /// @dev Validates the subdomain: non-empty, max 50 chars, only [0-9a-z-].
     function _validateSubdomain(string calldata subdomain) internal pure {
@@ -189,7 +211,7 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     }
 
     /// @dev Releases an ENS subnode: revoke approval, clear records, zero addr, release node.
-    /// @dev setAddr(address(0)) is intentionally kept after clearRecords — clearRecords bumps the
+    /// @dev setAddr(address(0)) is intentionally kept after clearRecords -- clearRecords bumps the
     /// resolver version counter (invalidating all records), but zeroing addr explicitly ensures no
     /// stale forward resolution regardless of resolver implementation details.
     function _releaseSubnode(address member, bytes32 label) internal {
@@ -198,6 +220,26 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         IResolver(resolver).clearRecords(subnode);
         IResolver(resolver).setAddr(subnode, address(0));
         ens.setSubnodeOwner(node, label, address(0));
+    }
+
+    /// @dev Applies resolver records to a subnode. Called after _assignSubnode while the
+    /// registry still owns the subnode and can write to the resolver.
+    /// addr=address(0) means keep the default (msg.sender, already set by _assignSubnode).
+    /// Empty contenthash means don't set.
+    function _applyRecords(bytes32 subnode, address member, Records calldata records) internal {
+        IResolver r = IResolver(resolver);
+
+        for (uint256 i; i < records.textRecords.length; i++) {
+            r.setText(subnode, records.textRecords[i].key, records.textRecords[i].value);
+        }
+
+        if (records.addr != address(0) && records.addr != member) {
+            r.setAddr(subnode, records.addr);
+        }
+
+        if (records.contenthash.length > 0) {
+            r.setContenthash(subnode, records.contenthash);
+        }
     }
 
     /// @notice Authorizes UUPS upgrades. Caller must have `UPGRADE_REGISTRY_PERMISSION_ID`.

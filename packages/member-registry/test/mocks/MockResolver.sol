@@ -20,6 +20,9 @@ contract MockResolver is IResolver {
     // text records, keyed by (version, node, key)
     mapping(uint64 => mapping(bytes32 => mapping(string => string))) private _texts;
 
+    // contenthash records, keyed by (version, node)
+    mapping(uint64 => mapping(bytes32 => bytes)) private _contenthashes;
+
     // record version counter per node
     mapping(bytes32 => uint64) private _versions;
 
@@ -58,6 +61,17 @@ contract MockResolver is IResolver {
 
     function text(bytes32 node, string calldata key) external view returns (string memory) {
         return _texts[_versions[node]][node][key];
+    }
+
+    // --- Contenthash support ---
+
+    function setContenthash(bytes32 node, bytes calldata hash) external {
+        _requireAuthorised(node);
+        _contenthashes[_versions[node]][node] = hash;
+    }
+
+    function contenthash(bytes32 node) external view returns (bytes memory) {
+        return _contenthashes[_versions[node]][node];
     }
 
     // --- View helpers ---

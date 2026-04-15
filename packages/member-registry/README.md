@@ -107,9 +107,76 @@ const owner = await registry.labelOwner(label);
 // owner == address(0) means available
 ```
 
-### Writing member records (setText, setAddr, etc.)
+### Registering and renaming with records
 
-Members do NOT go through the registry for record management. They call the PublicResolver directly. The resolver accepts their calls because they have per-node approval.
+`register` and `rename` have two overloads each: a simple one and one that accepts a `Records` struct to set text records, a custom addr, and/or a contenthash atomically in the same transaction.
+
+**viem** resolves overloads automatically by argument count:
+
+```typescript
+import { registryAbi } from "./artifacts/MemberRegistry";
+
+// Simple register -- no records
+await walletClient.writeContract({
+  abi: registryAbi,
+  address: registryAddress,
+  functionName: "register",
+  args: ["alice"],
+});
+
+// Register with records -- viem picks the 2-arg overload
+await walletClient.writeContract({
+  abi: registryAbi,
+  address: registryAddress,
+  functionName: "register",
+  args: [
+    "alice",
+    {
+      textRecords: [
+        { key: "avatar", value: "https://example.com/alice.png" },
+        { key: "description", value: "Aragon delegate" },
+      ],
+      addr: zeroAddress,         // address(0) = default to msg.sender
+      contenthash: "0x",         // empty = don't set
+    },
+  ],
+});
+
+// Simple rename
+await walletClient.writeContract({
+  abi: registryAbi,
+  address: registryAddress,
+  functionName: "rename",
+  args: ["alice2"],
+});
+
+// Rename carrying records to the new subdomain
+await walletClient.writeContract({
+  abi: registryAbi,
+  address: registryAddress,
+  functionName: "rename",
+  args: [
+    "alice2",
+    {
+      textRecords: [
+        { key: "avatar", value: "https://example.com/alice.png" },
+        { key: "description", value: "Updated bio" },
+      ],
+      addr: zeroAddress,
+      contenthash: "0x",
+    },
+  ],
+});
+```
+
+The `Records` struct fields:
+- `textRecords` -- array of `{ key, value }` pairs (avatar, description, url, com.twitter, etc.)
+- `addr` -- the ENS address record. `address(0)` keeps the default (msg.sender). Set to a different address if the delegate uses a cold wallet or multisig.
+- `contenthash` -- IPFS/Swarm contenthash bytes. Empty bytes (`"0x"`) means don't set.
+
+### Writing member records after registration (setText, setAddr, etc.)
+
+Members do NOT go through the registry for post-registration record management. They call the PublicResolver directly. The resolver accepts their calls because they have per-node approval.
 
 ```typescript
 // The subnode hash is needed for all resolver calls
