@@ -50,14 +50,29 @@ The official ENS app (app.ens.domains) does **not** show edit controls for per-n
 ## Contract interface
 
 ```solidity
+struct TextRecord {
+    string key;
+    string value;
+}
+
+struct Records {
+    TextRecord[] textRecords;   // avatar, description, url, com.twitter, etc.
+    address addr;               // address(0) = default to msg.sender
+    bytes contenthash;          // empty = don't set
+}
+
 // Permissionless -- any address can call
 function register(string calldata subdomain) external;
+function register(string calldata subdomain, Records calldata records) external;
 function release() external;
 function rename(string calldata newSubdomain) external;
+function rename(string calldata newSubdomain, Records calldata records) external;
 
 // Governed -- requires REVOKE_MEMBER_PERMISSION
 function revoke(address member) external;
 ```
+
+The `Records` overloads allow setting resolver records (text, addr, contenthash) atomically during registration or rename. This is how delegates carry their profile over when renaming.
 
 ### Events
 
