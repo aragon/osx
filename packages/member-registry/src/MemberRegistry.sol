@@ -80,21 +80,16 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     // External functions
 
-    // All functions follow Checks-Effects-Interactions (CEI): state is written before
-    // external ENS calls. This prevents reentrancy attacks where a malicious resolver
-    // could reenter register() with the same label from a different sender, bypassing
-    // the labelOwner collision check while state is still unwritten.
-
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain) external {
-        _register(subdomain);
+        bytes32 label = _register(subdomain);
+        _setResolverAddr(label, msg.sender);
     }
 
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain, Records calldata records) external {
         bytes32 label = _register(subdomain);
-        bytes32 subnode = keccak256(abi.encodePacked(node, label));
-        _applyRecords(subnode, msg.sender, records);
+        _applyRecords(label, records);
     }
 
     /// @inheritdoc IMemberRegistry
@@ -131,14 +126,14 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     /// @inheritdoc IMemberRegistry
     function rename(string calldata newSubdomain) external {
-        _rename(newSubdomain);
+        bytes32 newLabel = _rename(newSubdomain);
+        _setResolverAddr(newLabel, msg.sender);
     }
 
     /// @inheritdoc IMemberRegistry
     function rename(string calldata newSubdomain, Records calldata records) external {
         bytes32 newLabel = _rename(newSubdomain);
-        bytes32 subnode = keccak256(abi.encodePacked(node, newLabel));
-        _applyRecords(subnode, msg.sender, records);
+        _applyRecords(newLabel, records);
     }
 
     // Views
@@ -152,7 +147,8 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     uint256 internal constant MAX_SUBDOMAIN_LENGTH = 50;
 
-    /// @dev Core registration logic. Returns the labelhash of the claimed subdomain.
+    /// @dev Core registration logic. Sets up the subnode but does NOT set resolver records.
+    /// The caller must set addr (and optionally other records) after this returns.
     function _register(string calldata subdomain) internal returns (bytes32 label) {
         _validateSubdomain(subdomain);
 
@@ -170,7 +166,8 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         emit MemberRegistered(msg.sender, subdomain);
     }
 
-    /// @dev Core rename logic. Returns the new labelhash.
+    /// @dev Core rename logic. Sets up the new subnode but does NOT set resolver records.
+    /// The caller must set addr (and optionally other records) after this returns.
     function _rename(string calldata newSubdomain) internal returns (bytes32 newLabel) {
         _validateSubdomain(newSubdomain);
 
@@ -201,12 +198,12 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         }
     }
 
-    /// @dev Claims an ENS subnode: set owner, resolver, addr record, and per-node approval.
+    /// @dev Claims an ENS subnode: set owner, resolver, and per-node approval for the member.
+    /// Does not set any resolver records -- the caller handles that via _applyRecords or _setResolverAddr.
     function _assignSubnode(address member, bytes32 label) internal {
         bytes32 subnode = keccak256(abi.encodePacked(node, label));
         ens.setSubnodeOwner(node, label, address(this));
         ens.setResolver(subnode, resolver);
-        IResolver(resolver).setAddr(subnode, member);
         IResolver(resolver).approve(subnode, member, true);
     }
 
@@ -222,20 +219,22 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         ens.setSubnodeOwner(node, label, address(0));
     }
 
-    /// @dev Applies resolver records to a subnode. Called after _assignSubnode while the
-    /// registry still owns the subnode and can write to the resolver.
-    /// addr=address(0) means keep the default (msg.sender, already set by _assignSubnode).
-    /// Empty contenthash means don't set.
-    function _applyRecords(bytes32 subnode, address member, Records calldata records) internal {
+    /// @dev Sets the addr record on a subnode.
+    function _setResolverAddr(bytes32 label, address addr) internal {
+        IResolver(resolver).setAddr(keccak256(abi.encodePacked(node, label)), addr);
+    }
+
+    /// @dev Applies resolver records to a subnode: addr, text records, and contenthash.
+    /// addr defaults to msg.sender if records.addr is address(0).
+    function _applyRecords(bytes32 label, Records calldata records) internal {
+        bytes32 subnode = keccak256(abi.encodePacked(node, label));
         IResolver r = IResolver(resolver);
 
         for (uint256 i; i < records.textRecords.length; i++) {
             r.setText(subnode, records.textRecords[i].key, records.textRecords[i].value);
         }
 
-        if (records.addr != address(0) && records.addr != member) {
-            r.setAddr(subnode, records.addr);
-        }
+        r.setAddr(subnode, records.addr != address(0) ? records.addr : msg.sender);
 
         if (records.contenthash.length > 0) {
             r.setContenthash(subnode, records.contenthash);
