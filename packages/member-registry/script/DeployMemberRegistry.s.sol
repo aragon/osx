@@ -51,19 +51,17 @@ contract DeployMemberRegistry is Script {
         console.log();
 
         // Deploy implementation + proxy
-        registryImpl = MemberRegistry(address(0x780B78C283f102d30Ea89F2Df5B9745361112b51));
-        // registryImpl = new MemberRegistry();
+        registryImpl = new MemberRegistry();
         vm.label(address(registryImpl), "MemberRegistry Impl");
 
-        registry = MemberRegistry(address(0x2292A7275b73c5bFA4A8aB5aFbbd997de94Bea82));
-        // registry = MemberRegistry(
-        //     address(
-        //         new ERC1967Proxy(
-        //             address(registryImpl),
-        //             abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), node, resolver))
-        //         )
-        //     )
-        // );
+        registry = MemberRegistry(
+            address(
+                new ERC1967Proxy(
+                    address(registryImpl),
+                    abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), node, resolver))
+                )
+            )
+        );
         vm.label(address(registry), "MemberRegistry Proxy");
 
         printDeployment();

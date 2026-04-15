@@ -84,56 +84,40 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     function register(string calldata subdomain) external {
         bytes32 label = _register(subdomain);
         _setResolverAddr(label, msg.sender);
+        emit MemberRegistered(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain, Records calldata records) external {
         bytes32 label = _register(subdomain);
         _applyRecords(label, records);
+        emit MemberRegistered(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function release() external {
-        if (memberLabel[msg.sender] == bytes32(0)) revert NotRegistered(msg.sender);
-
-        bytes32 label = memberLabel[msg.sender];
-        string memory subdomain = memberSubdomain[msg.sender];
-
-        delete memberLabel[msg.sender];
-        delete memberSubdomain[msg.sender];
-        delete labelOwner[label];
-
-        _releaseSubnode(msg.sender, label);
-
+        string memory subdomain = _release(msg.sender);
         emit MemberReleased(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function revoke(address member) external auth(REVOKE_MEMBER_PERMISSION_ID) {
-        if (memberLabel[member] == bytes32(0)) revert NotRegistered(member);
-
-        bytes32 label = memberLabel[member];
-        string memory subdomain = memberSubdomain[member];
-
-        delete memberLabel[member];
-        delete memberSubdomain[member];
-        delete labelOwner[label];
-
-        _releaseSubnode(member, label);
-
+        string memory subdomain = _release(member);
         emit MemberRevoked(member, msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function rename(string calldata newSubdomain) external {
-        bytes32 newLabel = _rename(newSubdomain);
+        (bytes32 newLabel, string memory oldSubdomain) = _rename(newSubdomain);
         _setResolverAddr(newLabel, msg.sender);
+        emit MemberRenamed(msg.sender, oldSubdomain, newSubdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function rename(string calldata newSubdomain, Records calldata records) external {
-        bytes32 newLabel = _rename(newSubdomain);
+        (bytes32 newLabel, string memory oldSubdomain) = _rename(newSubdomain);
         _applyRecords(newLabel, records);
+        emit MemberRenamed(msg.sender, oldSubdomain, newSubdomain);
     }
 
     // Views
@@ -148,7 +132,7 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     uint256 internal constant MAX_SUBDOMAIN_LENGTH = 50;
 
     /// @dev Core registration logic. Sets up the subnode but does NOT set resolver records.
-    /// The caller must set addr (and optionally other records) after this returns.
+    /// The caller must set records and emit the event after this returns.
     function _register(string calldata subdomain) internal returns (bytes32 label) {
         _validateSubdomain(subdomain);
 
@@ -162,13 +146,11 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         labelOwner[label] = msg.sender;
 
         _assignSubnode(msg.sender, label);
-
-        emit MemberRegistered(msg.sender, subdomain);
     }
 
     /// @dev Core rename logic. Sets up the new subnode but does NOT set resolver records.
-    /// The caller must set addr (and optionally other records) after this returns.
-    function _rename(string calldata newSubdomain) internal returns (bytes32 newLabel) {
+    /// The caller must set records and emit the event after this returns.
+    function _rename(string calldata newSubdomain) internal returns (bytes32 newLabel, string memory oldSubdomain) {
         _validateSubdomain(newSubdomain);
 
         if (memberLabel[msg.sender] == bytes32(0)) revert NotRegistered(msg.sender);
@@ -177,7 +159,7 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         if (labelOwner[newLabel] != address(0)) revert SubdomainAlreadyTaken(newSubdomain);
 
         bytes32 oldLabel = memberLabel[msg.sender];
-        string memory oldSubdomain = memberSubdomain[msg.sender];
+        oldSubdomain = memberSubdomain[msg.sender];
 
         delete labelOwner[oldLabel];
         memberLabel[msg.sender] = newLabel;
@@ -186,8 +168,20 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
         _releaseSubnode(msg.sender, oldLabel);
         _assignSubnode(msg.sender, newLabel);
+    }
 
-        emit MemberRenamed(msg.sender, oldSubdomain, newSubdomain);
+    /// @dev Clears member state and releases the ENS subnode. Returns the subdomain string for events.
+    function _release(address member) internal returns (string memory subdomain) {
+        if (memberLabel[member] == bytes32(0)) revert NotRegistered(member);
+
+        bytes32 label = memberLabel[member];
+        subdomain = memberSubdomain[member];
+
+        delete memberLabel[member];
+        delete memberSubdomain[member];
+        delete labelOwner[label];
+
+        _releaseSubnode(member, label);
     }
 
     /// @dev Validates the subdomain: non-empty, max 50 chars, only [0-9a-z-].
@@ -230,11 +224,11 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         bytes32 subnode = keccak256(abi.encodePacked(node, label));
         IResolver r = IResolver(resolver);
 
+        r.setAddr(subnode, records.addr != address(0) ? records.addr : msg.sender);
+
         for (uint256 i; i < records.textRecords.length; i++) {
             r.setText(subnode, records.textRecords[i].key, records.textRecords[i].value);
         }
-
-        r.setAddr(subnode, records.addr != address(0) ? records.addr : msg.sender);
 
         if (records.contenthash.length > 0) {
             r.setContenthash(subnode, records.contenthash);
