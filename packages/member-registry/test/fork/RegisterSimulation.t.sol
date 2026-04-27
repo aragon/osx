@@ -207,14 +207,14 @@ contract RegisterSimulationTest is Test {
         registry.register("potato123456");
 
         vm.prank(randomUser);
-        registry.rename("spud");
+        registry.move("spud");
         assertEq(registry.memberSubdomain(randomUser), "spud");
 
         vm.prank(randomUser);
         registry.release();
         assertFalse(registry.isRegistered(randomUser));
 
-        console.log("  Full cycle (register, rename, release) succeeded");
+        console.log("  Full cycle (register, move, release) succeeded");
     }
 
     function test_revoke_afterUnwrap() public {

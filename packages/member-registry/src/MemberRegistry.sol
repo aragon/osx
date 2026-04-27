@@ -17,7 +17,7 @@ import {IResolver} from "./IResolver.sol";
 /// @title MemberRegistry
 /// @author Aragon X - 2026
 /// @notice Permissionless member self-registration via ENS subdomain claims. Owns the parent
-/// ENS node, manages subdomain lifecycle (claim, release, rename), and grants per-node
+/// ENS node, manages subdomain lifecycle (claim, release, move), and grants per-node
 /// resolver approval so members can manage their own ENS records natively.
 /// @dev The ENS registry and resolver are trusted, known mainnet contracts. No reentrancy
 /// guard is needed — the contract is the sole caller of its own ENS operations.
@@ -84,40 +84,40 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     function register(string calldata subdomain) external {
         bytes32 label = _register(subdomain);
         _setResolverAddr(label, msg.sender);
-        emit MemberRegistered(msg.sender, subdomain);
+        emit Registered(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain, Records calldata records) external {
         bytes32 label = _register(subdomain);
         _applyRecords(label, records);
-        emit MemberRegistered(msg.sender, subdomain);
+        emit Registered(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function release() external {
         string memory subdomain = _release(msg.sender);
-        emit MemberReleased(msg.sender, subdomain);
+        emit Released(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function revoke(address member) external auth(REVOKE_MEMBER_PERMISSION_ID) {
         string memory subdomain = _release(member);
-        emit MemberRevoked(member, msg.sender, subdomain);
+        emit SubdomainRevoked(member, msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
-    function rename(string calldata newSubdomain) external {
-        (bytes32 newLabel, string memory oldSubdomain) = _rename(newSubdomain);
+    function move(string calldata newSubdomain) external {
+        (bytes32 newLabel, string memory oldSubdomain) = _move(newSubdomain);
         _setResolverAddr(newLabel, msg.sender);
-        emit MemberRenamed(msg.sender, oldSubdomain, newSubdomain);
+        emit ProfileMoved(msg.sender, oldSubdomain, newSubdomain);
     }
 
     /// @inheritdoc IMemberRegistry
-    function rename(string calldata newSubdomain, Records calldata records) external {
-        (bytes32 newLabel, string memory oldSubdomain) = _rename(newSubdomain);
+    function move(string calldata newSubdomain, Records calldata records) external {
+        (bytes32 newLabel, string memory oldSubdomain) = _move(newSubdomain);
         _applyRecords(newLabel, records);
-        emit MemberRenamed(msg.sender, oldSubdomain, newSubdomain);
+        emit ProfileMoved(msg.sender, oldSubdomain, newSubdomain);
     }
 
     // Views
@@ -148,9 +148,9 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         _assignSubnode(msg.sender, label);
     }
 
-    /// @dev Core rename logic. Sets up the new subnode but does NOT set resolver records.
+    /// @dev Core move logic. Sets up the new subnode but does NOT set resolver records.
     /// The caller must set records and emit the event after this returns.
-    function _rename(string calldata newSubdomain) internal returns (bytes32 newLabel, string memory oldSubdomain) {
+    function _move(string calldata newSubdomain) internal returns (bytes32 newLabel, string memory oldSubdomain) {
         _validateSubdomain(newSubdomain);
 
         if (memberLabel[msg.sender] == bytes32(0)) revert NotRegistered(msg.sender);

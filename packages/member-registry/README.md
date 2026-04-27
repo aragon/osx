@@ -2,7 +2,7 @@
 
 Permissionless member self-registration via ENS subdomain claims.
 
-Members claim a subdomain under a configurable parent domain (e.g., `alice.aragonx.eth`), manage their own resolver records (text, avatar, etc.), and can release or rename at any time. Governance can forcibly revoke a member's subdomain.
+Members claim a subdomain under a configurable parent domain (e.g., `alice.aragonx.eth`), manage their own resolver records (text, avatar, etc.), and can release or move at any time. Governance can forcibly revoke a member's subdomain.
 
 ## How it works
 
@@ -65,22 +65,22 @@ struct Records {
 function register(string calldata subdomain) external;
 function register(string calldata subdomain, Records calldata records) external;
 function release() external;
-function rename(string calldata newSubdomain) external;
-function rename(string calldata newSubdomain, Records calldata records) external;
+function move(string calldata newSubdomain) external;
+function move(string calldata newSubdomain, Records calldata records) external;
 
 // Governed -- requires REVOKE_MEMBER_PERMISSION
 function revoke(address member) external;
 ```
 
-The `Records` overloads allow setting resolver records (text, addr, contenthash) atomically during registration or rename. This is how delegates carry their profile over when renaming.
+The `Records` overloads allow setting resolver records (text, addr, contenthash) atomically during registration or move. This is how delegates carry their profile over when renaming.
 
 ### Events
 
 ```solidity
-event MemberRegistered(address indexed member, string subdomain);
-event MemberReleased(address indexed member, string subdomain);
-event MemberRevoked(address indexed member, address indexed revoker, string subdomain);
-event MemberRenamed(address indexed member, string oldSubdomain, string newSubdomain);
+event Registered(address indexed member, string subdomain);
+event Released(address indexed member, string subdomain);
+event SubdomainRevoked(address indexed member, address indexed revoker, string subdomain);
+event ProfileMoved(address indexed member, string oldSubdomain, string newSubdomain);
 ```
 
 ### View functions
@@ -124,7 +124,7 @@ const owner = await registry.labelOwner(label);
 
 ### Registering and renaming with records
 
-`register` and `rename` have two overloads each: a simple one and one that accepts a `Records` struct to set text records, a custom addr, and/or a contenthash atomically in the same transaction.
+`register` and `move` have two overloads each: a simple one and one that accepts a `Records` struct to set text records, a custom addr, and/or a contenthash atomically in the same transaction.
 
 **viem** resolves overloads automatically by argument count:
 
@@ -157,19 +157,19 @@ await walletClient.writeContract({
   ],
 });
 
-// Simple rename
+// Simple move
 await walletClient.writeContract({
   abi: registryAbi,
   address: registryAddress,
-  functionName: "rename",
+  functionName: "move",
   args: ["alice2"],
 });
 
-// Rename carrying records to the new subdomain
+// Carrying records to the new subdomain
 await walletClient.writeContract({
   abi: registryAbi,
   address: registryAddress,
-  functionName: "rename",
+  functionName: "move",
   args: [
     "alice2",
     {
@@ -220,12 +220,12 @@ const addr = await resolver.addr(subnode);
 
 ```typescript
 // New registrations
-registry.on("MemberRegistered", (member, subdomain) => { ... });
+registry.on("Registered", (member, subdomain) => { ... });
 
 // All membership changes
-registry.on("MemberReleased", (member, subdomain) => { ... });
-registry.on("MemberRevoked", (member, revoker, subdomain) => { ... });
-registry.on("MemberRenamed", (member, oldSubdomain, newSubdomain) => { ... });
+registry.on("Released", (member, subdomain) => { ... });
+registry.on("SubdomainRevoked", (member, revoker, subdomain) => { ... });
+registry.on("ProfileMoved", (member, oldSubdomain, newSubdomain) => { ... });
 ```
 
 ### Building a member list
@@ -234,10 +234,10 @@ The registry does not store a member list on-chain. Enumerate members by indexin
 
 ```typescript
 // Get all registrations, then subtract releases/revokes
-const registered = await registry.queryFilter(registry.filters.MemberRegistered());
-const released = await registry.queryFilter(registry.filters.MemberReleased());
-const revoked = await registry.queryFilter(registry.filters.MemberRevoked());
-const renamed = await registry.queryFilter(registry.filters.MemberRenamed());
+const registered = await registry.queryFilter(registry.filters.Registered());
+const released = await registry.queryFilter(registry.filters.Released());
+const revoked = await registry.queryFilter(registry.filters.SubdomainRevoked());
+const moved = await registry.queryFilter(registry.filters.ProfileMoved());
 ```
 
 Or use a subgraph / indexer for efficient querying.
@@ -270,4 +270,4 @@ just deploy             # deploy (broadcast)
 | `REVOKE_MEMBER_PERMISSION` | Registry | Management DAO | Forcibly revoke a member's subdomain |
 | `UPGRADE_REGISTRY_PERMISSION` | Registry | Management DAO | Authorize UUPS upgrades |
 
-Registration, release, and rename are permissionless.
+Registration, release, and move are permissionless.

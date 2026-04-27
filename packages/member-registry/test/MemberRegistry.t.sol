@@ -70,7 +70,7 @@ contract MemberRegistryTest is Test {
 
     function test_register_emitsEvent() public {
         vm.expectEmit(true, false, false, true);
-        emit IMemberRegistry.MemberRegistered(alice, "alice");
+        emit IMemberRegistry.Registered(alice, "alice");
 
         vm.prank(alice);
         registry.register("alice");
@@ -168,7 +168,7 @@ contract MemberRegistryTest is Test {
         registry.register("alice");
 
         vm.expectEmit(true, false, false, true);
-        emit IMemberRegistry.MemberReleased(alice, "alice");
+        emit IMemberRegistry.Released(alice, "alice");
 
         vm.prank(alice);
         registry.release();
@@ -200,7 +200,7 @@ contract MemberRegistryTest is Test {
         registry.register("alice");
 
         vm.expectEmit(true, true, false, true);
-        emit IMemberRegistry.MemberRevoked(alice, revoker, "alice");
+        emit IMemberRegistry.SubdomainRevoked(alice, revoker, "alice");
 
         vm.prank(revoker);
         registry.revoke(alice);
@@ -244,15 +244,15 @@ contract MemberRegistryTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // rename
+    // move
     // -------------------------------------------------------------------------
 
-    function test_rename() public {
+    function test_move() public {
         vm.prank(alice);
         registry.register("alice");
 
         vm.prank(alice);
-        registry.rename("alice2");
+        registry.move("alice2");
 
         assertTrue(registry.isRegistered(alice));
         assertEq(registry.memberSubdomain(alice), "alice2");
@@ -266,24 +266,24 @@ contract MemberRegistryTest is Test {
         assertFalse(resolver.isApprovedFor(address(registry), _subnode("alice"), alice));
     }
 
-    function test_rename_emitsEvent() public {
+    function test_move_emitsEvent() public {
         vm.prank(alice);
         registry.register("alice");
 
         vm.expectEmit(true, false, false, true);
-        emit IMemberRegistry.MemberRenamed(alice, "alice", "alice2");
+        emit IMemberRegistry.ProfileMoved(alice, "alice", "alice2");
 
         vm.prank(alice);
-        registry.rename("alice2");
+        registry.move("alice2");
     }
 
-    function test_rename_revertsIfNotRegistered() public {
+    function test_move_revertsIfNotRegistered() public {
         vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.NotRegistered.selector, alice));
         vm.prank(alice);
-        registry.rename("newname");
+        registry.move("newname");
     }
 
-    function test_rename_revertsIfNewLabelTaken() public {
+    function test_move_revertsIfNewLabelTaken() public {
         vm.prank(alice);
         registry.register("alice");
 
@@ -292,52 +292,52 @@ contract MemberRegistryTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "bob"));
         vm.prank(alice);
-        registry.rename("bob");
+        registry.move("bob");
     }
 
-    function test_rename_revertsIfInvalidSubdomain() public {
+    function test_move_revertsIfInvalidSubdomain() public {
         vm.prank(alice);
         registry.register("alice");
 
         vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, ""));
         vm.prank(alice);
-        registry.rename("");
+        registry.move("");
     }
 
-    function test_rename_revertsIfRenameToOwnLabel() public {
+    function test_move_revertsIfMoveToOwnLabel() public {
         vm.prank(alice);
         registry.register("alice");
 
         vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.SubdomainAlreadyTaken.selector, "alice"));
         vm.prank(alice);
-        registry.rename("alice");
+        registry.move("alice");
     }
 
-    function test_rename_eventStringsCorrectAfterMultipleRenames() public {
+    function test_move_eventStringsCorrectAfterMultipleMoves() public {
         vm.prank(alice);
         registry.register("first");
 
         vm.expectEmit(true, false, false, true);
-        emit IMemberRegistry.MemberRenamed(alice, "first", "second");
+        emit IMemberRegistry.ProfileMoved(alice, "first", "second");
         vm.prank(alice);
-        registry.rename("second");
+        registry.move("second");
 
         vm.expectEmit(true, false, false, true);
-        emit IMemberRegistry.MemberRenamed(alice, "second", "third");
+        emit IMemberRegistry.ProfileMoved(alice, "second", "third");
         vm.prank(alice);
-        registry.rename("third");
+        registry.move("third");
 
         assertEq(registry.memberSubdomain(alice), "third");
     }
 
-    function test_rename_revertsIfTooLong() public {
+    function test_move_revertsIfTooLong() public {
         vm.prank(alice);
         registry.register("alice");
 
         string memory long = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"; // 51
         vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, long));
         vm.prank(alice);
-        registry.rename(long);
+        registry.move(long);
     }
 
     // -------------------------------------------------------------------------
@@ -547,10 +547,10 @@ contract MemberRegistryTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // rename with records
+    // move with records
     // -------------------------------------------------------------------------
 
-    function test_renameWithRecords() public {
+    function test_moveWithRecords() public {
         vm.prank(alice);
         registry.register("alice");
 
@@ -561,7 +561,7 @@ contract MemberRegistryTest is Test {
         vm.prank(alice);
         resolver.setText(oldSubnode, "description", "Old bio");
 
-        // Rename and carry records over
+        // Move and carry records over
         IMemberRegistry.TextRecord[] memory texts = new IMemberRegistry.TextRecord[](2);
         texts[0] = IMemberRegistry.TextRecord("avatar", "https://example.com/old.png");
         texts[1] = IMemberRegistry.TextRecord("description", "Updated bio");
@@ -570,7 +570,7 @@ contract MemberRegistryTest is Test {
             IMemberRegistry.Records({textRecords: texts, addr: address(0), contenthash: ""});
 
         vm.prank(alice);
-        registry.rename("alice2", records);
+        registry.move("alice2", records);
 
         // New subnode has the carried-over records
         bytes32 newSubnode = _subnode("alice2");
@@ -582,7 +582,7 @@ contract MemberRegistryTest is Test {
         assertEq(bytes(resolver.text(oldSubnode, "avatar")).length, 0);
     }
 
-    function test_renameWithRecords_customAddr() public {
+    function test_moveWithRecords_customAddr() public {
         address coldWallet = address(0xC01D);
 
         vm.prank(alice);
@@ -593,12 +593,12 @@ contract MemberRegistryTest is Test {
         });
 
         vm.prank(alice);
-        registry.rename("alice2", records);
+        registry.move("alice2", records);
 
         assertEq(resolver.addr(_subnode("alice2")), coldWallet);
     }
 
-    function test_renameWithRecords_contenthash() public {
+    function test_moveWithRecords_contenthash() public {
         vm.prank(alice);
         registry.register("alice");
 
@@ -609,7 +609,7 @@ contract MemberRegistryTest is Test {
         });
 
         vm.prank(alice);
-        registry.rename("alice2", records);
+        registry.move("alice2", records);
 
         assertEq(resolver.contenthash(_subnode("alice2")), ipfs);
     }

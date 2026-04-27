@@ -102,7 +102,7 @@ contract MemberRegistryForkTest is Test {
         assertTrue(registry.isRegistered(alice));
 
         vm.prank(alice);
-        registry.rename("alice2");
+        registry.move("alice2");
         assertEq(registry.memberSubdomain(alice), "alice2");
 
         vm.prank(alice);

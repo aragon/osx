@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 /// @notice Permissionless member self-registration via ENS subdomain claims.
 /// Members claim a subdomain under a configurable parent domain, manage their own
 /// resolver records (text, avatar, etc.) via per-node approval, and can release or
-/// rename their subdomain at any time.
+/// move their subdomain at any time.
 /// @custom:security-contact sirt@aragon.org
 interface IMemberRegistry {
     /// @notice A key-value pair for an ENS text record.
@@ -15,7 +15,7 @@ interface IMemberRegistry {
         string value;
     }
 
-    /// @notice A bundle of ENS resolver records to set atomically during register or rename.
+    /// @notice A bundle of ENS resolver records to set atomically during register or move.
     /// @param textRecords Text records to set (avatar, description, url, etc.)
     /// @param addr The address record. Use address(0) to default to msg.sender.
     /// @param contenthash The contenthash (IPFS, Swarm, etc.). Empty bytes = don't set.
@@ -26,16 +26,16 @@ interface IMemberRegistry {
     }
 
     /// @notice Emitted when a member registers and claims a subdomain.
-    event MemberRegistered(address indexed member, string subdomain);
+    event Registered(address indexed member, string subdomain);
 
     /// @notice Emitted when a member voluntarily releases their subdomain.
-    event MemberReleased(address indexed member, string subdomain);
+    event Released(address indexed member, string subdomain);
 
     /// @notice Emitted when governance forcibly revokes a member's subdomain.
-    event MemberRevoked(address indexed member, address indexed revoker, string subdomain);
+    event SubdomainRevoked(address indexed member, address indexed revoker, string subdomain);
 
-    /// @notice Emitted when a member renames their subdomain (release old + claim new).
-    event MemberRenamed(address indexed member, string oldSubdomain, string newSubdomain);
+    /// @notice Emitted when a member moves their subdomain (release old + claim new).
+    event ProfileMoved(address indexed member, string oldSubdomain, string newSubdomain);
 
     /// @notice Thrown if the subdomain is invalid: empty, exceeds 50 characters, or
     ///         contains characters outside [0-9a-z-].
@@ -77,15 +77,15 @@ interface IMemberRegistry {
     /// @param member The address of the member to revoke.
     function revoke(address member) external;
 
-    /// @notice Rename your subdomain. Releases the old label and claims the new one atomically.
-    ///         Only renames the caller's own subdomain. Reverts if not registered or new label taken.
+    /// @notice Move your subdomain. Releases the old label and claims the new one atomically.
+    ///         Only moves the caller's own subdomain. Reverts if not registered or new label taken.
     /// @param newSubdomain The new subdomain label to claim.
-    function rename(string calldata newSubdomain) external;
+    function move(string calldata newSubdomain) external;
 
-    /// @notice Rename your subdomain and carry over resolver records atomically.
-    ///         Only renames the caller's own subdomain. Reverts if not registered or new label taken.
+    /// @notice Move your subdomain and carry over resolver records atomically.
+    ///         Only moves the caller's own subdomain. Reverts if not registered or new label taken.
     /// @param newSubdomain The new subdomain label to claim.
     /// @param records Resolver records to set on the new subnode (text, addr, contenthash).
     ///         addr=address(0) keeps the default (msg.sender). Empty contenthash is skipped.
-    function rename(string calldata newSubdomain, Records calldata records) external;
+    function move(string calldata newSubdomain, Records calldata records) external;
 }
