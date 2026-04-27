@@ -21,6 +21,8 @@ contract MemberRegistryForkTest is Test {
     DAOMock dao;
     MemberRegistry registry;
 
+    // A 1-label name under the ENS root, used as the parent for fork tests.
+    string constant TEST_DOMAIN = "test-member-registry";
     bytes32 testNode;
     address deployer = address(0xDEAD);
     address alice = address(0xa11ce);
@@ -31,11 +33,11 @@ contract MemberRegistryForkTest is Test {
         dao = new DAOMock();
         dao.setHasPermissionReturnValueMock(true);
 
-        testNode = keccak256(abi.encodePacked(bytes32(0), keccak256("test-member-registry")));
+        testNode = keccak256(abi.encodePacked(bytes32(0), keccak256(bytes(TEST_DOMAIN))));
 
         address rootOwner = ENS_REGISTRY.owner(bytes32(0));
         vm.prank(rootOwner);
-        ENS_REGISTRY.setSubnodeOwner(bytes32(0), keccak256("test-member-registry"), deployer);
+        ENS_REGISTRY.setSubnodeOwner(bytes32(0), keccak256(bytes(TEST_DOMAIN)), deployer);
 
         vm.startPrank(deployer);
         registry = MemberRegistry(
@@ -43,7 +45,7 @@ contract MemberRegistryForkTest is Test {
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
-                        MemberRegistry.initialize, (IDAO(address(dao)), ENS_REGISTRY, testNode, PUBLIC_RESOLVER)
+                        MemberRegistry.initialize, (IDAO(address(dao)), ENS_REGISTRY, TEST_DOMAIN, PUBLIC_RESOLVER)
                     )
                 )
             )

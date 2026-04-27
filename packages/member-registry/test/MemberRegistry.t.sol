@@ -11,6 +11,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 import {MemberRegistry} from "../src/MemberRegistry.sol";
 import {IMemberRegistry} from "../src/IMemberRegistry.sol";
+import {ENSDomain} from "../src/lib/ENSDomain.sol";
 import {MockENS} from "./mocks/MockENS.sol";
 import {MockResolver} from "./mocks/MockResolver.sol";
 
@@ -20,8 +21,9 @@ contract MemberRegistryTest is Test {
     MockResolver resolver;
     MemberRegistry registry;
 
-    // namehash("members.dao.eth") — precomputed for tests
-    bytes32 constant NODE = 0x9093d252ec2b5895c76e2e438e1519bfefe8e2e6d48e8cb9bdb6c5bd75c96225;
+    string constant DOMAIN = "members.dao.eth";
+    // namehash("members.dao.eth") — verified with `cast namehash members.dao.eth`
+    bytes32 constant NODE = 0x8348de755e5deb9b453b8daddcebe62e81e1539508088eac81fd3ccbb23245d3;
 
     address alice = address(0xa11ce);
     address bob = address(0xb0b);
@@ -40,7 +42,7 @@ contract MemberRegistryTest is Test {
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
-                        MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver))
+                        MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), DOMAIN, address(resolver))
                     )
                 )
             )
@@ -449,38 +451,63 @@ contract MemberRegistryTest is Test {
 
     function test_initialization() public view {
         assertEq(address(registry.ens()), address(ens));
-        assertEq(registry.node(), NODE);
+        assertEq(registry.parentNode(), NODE);
+        assertEq(registry.parentDomain(), DOMAIN);
         assertEq(registry.resolver(), address(resolver));
+    }
+
+    function test_initialize_parentNodeMatchesParentDomainNamehash() public view {
+        // The on-chain namehash must match the off-chain precomputed constant.
+        assertEq(registry.parentNode(), ENSDomain.namehash(DOMAIN));
+        assertEq(registry.parentNode(), NODE);
+    }
+
+    function test_parentDomain_returnsConfiguredString() public {
+        // Deploy a second registry with a different parent domain to ensure the
+        // getter reflects whatever was configured, not a hardcoded value.
+        string memory other = "delegates.aragon.eth";
+        MemberRegistry otherRegistry = MemberRegistry(
+            address(
+                new ERC1967Proxy(
+                    address(new MemberRegistry()),
+                    abi.encodeCall(
+                        MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), other, address(resolver))
+                    )
+                )
+            )
+        );
+        assertEq(otherRegistry.parentDomain(), other);
+        assertEq(otherRegistry.parentNode(), ENSDomain.namehash(other));
     }
 
     function test_initialize_revertsIfInvalidENS() public {
         MockENS emptyENS = new MockENS(); // root has no owner
         MemberRegistry impl = new MemberRegistry();
 
-        vm.expectRevert(); // InvalidENSRegistry, wrapped by proxy delegate call
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidENSRegistry.selector, address(emptyENS)));
         new ERC1967Proxy(
             address(impl),
             abi.encodeCall(
-                MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(emptyENS)), NODE, address(resolver))
+                MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(emptyENS)), DOMAIN, address(resolver))
             )
         );
     }
 
-    function test_initialize_revertsIfEmptyNode() public {
+    function test_initialize_revertsIfEmptyDomain() public {
         MemberRegistry impl = new MemberRegistry();
 
-        vm.expectRevert(); // InvalidNode, wrapped by proxy delegate call
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidDomain.selector, ""));
         new ERC1967Proxy(
             address(impl),
             abi.encodeCall(
-                MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), bytes32(0), address(resolver))
+                MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), string(""), address(resolver))
             )
         );
     }
 
     function test_initialize_revertsIfDoubleInit() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        registry.initialize(IDAO(address(dao)), ENS(address(ens)), NODE, address(resolver));
+        registry.initialize(IDAO(address(dao)), ENS(address(ens)), DOMAIN, address(resolver));
     }
 
     function test_protocolVersion() public view {

@@ -53,8 +53,8 @@ interface IMemberRegistry {
     /// @notice Thrown if the ENS registry address is not a valid ENS registry.
     error InvalidENSRegistry(address ens);
 
-    /// @notice Thrown if the parent node is empty (bytes32(0)).
-    error InvalidNode();
+    /// @notice Thrown if the parent domain is empty.
+    error InvalidDomain(string domain);
 
     /// @notice Register as a member by claiming a subdomain. Permissionless.
     ///         One subdomain per address. Reverts if already registered (release first).
@@ -88,4 +88,14 @@ interface IMemberRegistry {
     /// @param records Resolver records to set on the new subnode (text, addr, contenthash).
     ///         addr=address(0) keeps the default (msg.sender). Empty contenthash is skipped.
     function move(string calldata newSubdomain, Records calldata records) external;
+
+    /// @notice The parent domain string this registry manages (e.g., `"members.dao.eth"`).
+    ///         Pre-image of `parentNode()`.
+    function parentDomain() external view returns (string memory);
+
+    /// @notice The namehash of the parent domain. Equal to `namehash(parentDomain())`.
+    function parentNode() external view returns (bytes32);
+
+    /// @notice Returns true if `member` has a registered subdomain.
+    function isRegistered(address member) external view returns (bool);
 }

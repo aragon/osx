@@ -9,7 +9,7 @@ import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {MemberRegistry} from "../src/MemberRegistry.sol";
-import {ENSUtils} from "./lib/ENSUtils.sol";
+import {ENSDomain} from "../src/lib/ENSDomain.sol";
 
 /// @notice Deploys MemberRegistry behind a UUPS proxy and prints the required governance
 /// actions (permission grant + ENS node transfer).
@@ -22,7 +22,7 @@ contract DeployMemberRegistry is Script {
     string parentDomain;
     address dao;
     address ens;
-    bytes32 node;
+    bytes32 parentNode;
     address resolver;
 
     modifier broadcast() {
@@ -43,11 +43,11 @@ contract DeployMemberRegistry is Script {
         dao = vm.envAddress("MANAGEMENT_DAO");
         ens = vm.envAddress("ENS_REGISTRY");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("members.dao.eth"));
-        node = ENSUtils.namehash(parentDomain);
+        parentNode = ENSDomain.namehash(parentDomain);
         resolver = vm.envAddress("RESOLVER");
 
         console.log("- Parent domain:", parentDomain);
-        console.log("- Node:         ", vm.toString(node), string.concat('(namehash("', parentDomain, '"))'));
+        console.log("- Parent node:  ", vm.toString(parentNode), string.concat('(namehash("', parentDomain, '"))'));
         console.log();
 
         // Deploy implementation + proxy
@@ -58,7 +58,7 @@ contract DeployMemberRegistry is Script {
             address(
                 new ERC1967Proxy(
                     address(registryImpl),
-                    abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), node, resolver))
+                    abi.encodeCall(MemberRegistry.initialize, (IDAO(dao), ENS(ens), parentDomain, resolver))
                 )
             )
         );
@@ -82,8 +82,8 @@ contract DeployMemberRegistry is Script {
     }
 
     function printSetupActions() internal view {
-        (string memory label, string memory parent) = ENSUtils.splitDomain(parentDomain);
-        bytes32 parentNode = ENSUtils.namehash(parent);
+        (string memory label, string memory parent) = ENSDomain.splitDomain(parentDomain);
+        bytes32 grandparentNode = ENSDomain.namehash(parent);
         bytes32 labelHash = keccak256(bytes(label));
 
         console.log();
@@ -100,7 +100,7 @@ contract DeployMemberRegistry is Script {
         console.log("  who:           ", dao, " (controlling DAO)");
         console.log("  permissionId:  ", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
 
-        address ensOwner = ENS(ens).owner(node);
+        address ensOwner = ENS(ens).owner(parentNode);
         // Known NameWrapper on mainnet
         address nameWrapper = 0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401;
         bool isWrapped = ensOwner == nameWrapper;
@@ -111,7 +111,7 @@ contract DeployMemberRegistry is Script {
         if (ensOwner == address(0)) {
             // Domain doesn't exist — create it
             console.log();
-            address parentOfParentOwner = ENS(ens).owner(parentNode);
+            address parentOfParentOwner = ENS(ens).owner(grandparentNode);
             console.log("ENS action: Create ENS node for", parentDomain, "owned by the DAO");
             console.log();
             console.log("- From:            ", parentOfParentOwner, string.concat(" (owner of ", parent, ")"));
@@ -119,7 +119,7 @@ contract DeployMemberRegistry is Script {
             console.log(
                 "- Function:        setSubnodeRecord(bytes32 node, bytes32 label, address owner, address resolver, uint64 ttl)"
             );
-            console.log("  node:           ", vm.toString(parentNode), string.concat('(namehash("', parent, '"))'));
+            console.log("  node:           ", vm.toString(grandparentNode), string.concat('(namehash("', parent, '"))'));
             console.log("  label:          ", vm.toString(labelHash), string.concat('(keccak256("', label, '"))'));
             console.log("  owner:          ", dao, " (DAO)");
             console.log("  resolver:       ", resolver);
@@ -133,10 +133,10 @@ contract DeployMemberRegistry is Script {
             // registry directly, and the NameWrapper doesn't propagate setApprovalForAll
             // to the ENS registry. The domain must be unwrapped first.
             (bool ok, bytes memory data) =
-                nameWrapper.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(node)));
+                nameWrapper.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(parentNode)));
             address domainHolder = ok ? abi.decode(data, (address)) : address(0);
 
-            (string memory domainLabel,) = ENSUtils.splitDomain(parentDomain);
+            (string memory domainLabel,) = ENSDomain.splitDomain(parentDomain);
 
             console.log();
             console.log("! ENS node for", parentDomain, "is WRAPPED: must unwrap first !");
@@ -184,7 +184,7 @@ contract DeployMemberRegistry is Script {
     function writeJsonArtifacts() internal {
         string memory artifacts = "output";
         artifacts.serialize("parentDomain", parentDomain);
-        artifacts.serialize("parentNode", vm.toString(node));
+        artifacts.serialize("parentNode", vm.toString(parentNode));
         artifacts.serialize("memberRegistryImpl", address(registryImpl));
         artifacts = artifacts.serialize("memberRegistryProxy", address(registry));
 

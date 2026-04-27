@@ -10,6 +10,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {MemberRegistry} from "../../src/MemberRegistry.sol";
 import {IMemberRegistry} from "../../src/IMemberRegistry.sol";
 import {IResolver} from "../../src/IResolver.sol";
+import {ENSDomain} from "../../src/lib/ENSDomain.sol";
 
 /// @notice Simulates the full deployment + governance setup on a mainnet fork.
 /// Reads PARENT_DOMAIN and MANAGEMENT_DAO from env. Looks up the actual ENS domain
@@ -33,7 +34,7 @@ contract SetupSimulationTest is Test {
 
         managementDao = vm.envAddress("MANAGEMENT_DAO");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("members.dao.eth"));
-        parentNode = _namehash(parentDomain);
+        parentNode = ENSDomain.namehash(parentDomain);
 
         // Look up who actually owns this domain on the fork
         domainOwner = ENS_REGISTRY.owner(parentNode);
@@ -47,8 +48,8 @@ contract SetupSimulationTest is Test {
         if (domainOwner == address(0)) {
             // Domain doesn't exist yet — create it.
             // Split to find the parent's parent and create the subnode.
-            (string memory label, string memory parent) = _splitDomain(parentDomain);
-            bytes32 parentOfParentNode = _namehash(parent);
+            (string memory label, string memory parent) = ENSDomain.splitDomain(parentDomain);
+            bytes32 parentOfParentNode = ENSDomain.namehash(parent);
             address parentOfParentOwner = ENS_REGISTRY.owner(parentOfParentNode);
 
             console.log("- Domain does not exist, creating under", parent);
@@ -75,7 +76,7 @@ contract SetupSimulationTest is Test {
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
-                        MemberRegistry.initialize, (IDAO(managementDao), ENS_REGISTRY, parentNode, PUBLIC_RESOLVER)
+                        MemberRegistry.initialize, (IDAO(managementDao), ENS_REGISTRY, parentDomain, PUBLIC_RESOLVER)
                     )
                 )
             )
@@ -167,48 +168,5 @@ contract SetupSimulationTest is Test {
         registry.register("alice");
 
         console.log("domain owner retains control and can revoke operator access");
-    }
-
-    // --- ENS helpers ---
-
-    function _namehash(string memory domain) internal pure returns (bytes32 result) {
-        if (bytes(domain).length == 0) return bytes32(0);
-        bytes memory b = bytes(domain);
-        uint256 end = b.length;
-        for (uint256 i = b.length; i > 0; i--) {
-            if (b[i - 1] == ".") {
-                result = keccak256(abi.encodePacked(result, _labelHash(b, i, end)));
-                end = i - 1;
-            }
-        }
-        result = keccak256(abi.encodePacked(result, _labelHash(b, 0, end)));
-    }
-
-    function _splitDomain(string memory domain) internal pure returns (string memory label, string memory parent) {
-        bytes memory b = bytes(domain);
-        for (uint256 i = 0; i < b.length; i++) {
-            if (b[i] == ".") {
-                label = new string(i);
-                parent = new string(b.length - i - 1);
-                bytes memory lb = bytes(label);
-                bytes memory pb = bytes(parent);
-                for (uint256 j = 0; j < i; j++) {
-                    lb[j] = b[j];
-                }
-                for (uint256 j = i + 1; j < b.length; j++) {
-                    pb[j - i - 1] = b[j];
-                }
-                return (label, parent);
-            }
-        }
-        revert("domain must contain a dot");
-    }
-
-    function _labelHash(bytes memory b, uint256 start, uint256 end) internal pure returns (bytes32) {
-        bytes memory label = new bytes(end - start);
-        for (uint256 i = start; i < end; i++) {
-            label[i - start] = b[i];
-        }
-        return keccak256(label);
     }
 }

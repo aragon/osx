@@ -10,6 +10,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {MemberRegistry} from "../../src/MemberRegistry.sol";
 import {IMemberRegistry} from "../../src/IMemberRegistry.sol";
 import {IResolver} from "../../src/IResolver.sol";
+import {ENSDomain} from "../../src/lib/ENSDomain.sol";
 
 /// @notice Simulates unwrapping a domain and then registering a member.
 /// @dev Run with: just test-fork --match-contract RegisterSimulation
@@ -22,7 +23,7 @@ contract RegisterSimulationTest is Test {
     MemberRegistry registry;
 
     string parentDomain;
-    bytes32 node;
+    bytes32 parentNode;
     address domainHolder;
     address randomUser = address(0xBEEF);
 
@@ -31,9 +32,9 @@ contract RegisterSimulationTest is Test {
 
         managementDao = vm.envAddress("MANAGEMENT_DAO");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("aragonx.eth"));
-        node = _namehash(parentDomain);
+        parentNode = ENSDomain.namehash(parentDomain);
 
-        address ensOwner = ENS_REGISTRY.owner(node);
+        address ensOwner = ENS_REGISTRY.owner(parentNode);
         bool isWrapped = ensOwner == NAME_WRAPPER;
 
         console.log("=== Initial state ===");
@@ -43,12 +44,13 @@ contract RegisterSimulationTest is Test {
 
         if (isWrapped) {
             // Look up the domain holder in the NameWrapper and unwrap
-            (, bytes memory data) = NAME_WRAPPER.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(node)));
+            (, bytes memory data) =
+                NAME_WRAPPER.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(parentNode)));
             domainHolder = abi.decode(data, (address));
             console.log("Domain holder: ", domainHolder);
             console.log();
 
-            (string memory label,) = _splitDomain(parentDomain);
+            (string memory label,) = ENSDomain.splitDomain(parentDomain);
             bytes32 labelHash = keccak256(bytes(label));
 
             console.log("Step 1: Unwrapping", parentDomain);
@@ -58,7 +60,7 @@ contract RegisterSimulationTest is Test {
             );
             assertTrue(unwrapOk, "unwrap failed");
 
-            ensOwner = ENS_REGISTRY.owner(node);
+            ensOwner = ENS_REGISTRY.owner(parentNode);
             console.log("  ENS owner after unwrap:", ensOwner);
         } else {
             // Already unwrapped — the ENS owner is the domain holder
@@ -75,7 +77,7 @@ contract RegisterSimulationTest is Test {
                 new ERC1967Proxy(
                     address(new MemberRegistry()),
                     abi.encodeCall(
-                        MemberRegistry.initialize, (IDAO(managementDao), ENS_REGISTRY, node, PUBLIC_RESOLVER)
+                        MemberRegistry.initialize, (IDAO(managementDao), ENS_REGISTRY, parentDomain, PUBLIC_RESOLVER)
                     )
                 )
             )
@@ -112,7 +114,7 @@ contract RegisterSimulationTest is Test {
         assertTrue(registry.isRegistered(randomUser));
         assertEq(registry.memberSubdomain(randomUser), "potato123456");
 
-        bytes32 subnode = keccak256(abi.encodePacked(node, keccak256("potato123456")));
+        bytes32 subnode = keccak256(abi.encodePacked(parentNode, keccak256("potato123456")));
         assertEq(ENS_REGISTRY.owner(subnode), address(registry));
         assertTrue(IResolver(PUBLIC_RESOLVER).isApprovedFor(address(registry), subnode, randomUser));
 
@@ -126,7 +128,7 @@ contract RegisterSimulationTest is Test {
         vm.prank(randomUser);
         registry.register("potato123456");
 
-        bytes32 subnode = keccak256(abi.encodePacked(node, keccak256("potato123456")));
+        bytes32 subnode = keccak256(abi.encodePacked(parentNode, keccak256("potato123456")));
         console.log("=== Member manages resolver records ===");
 
         // addr record was set by the registry during register()
@@ -226,48 +228,5 @@ contract RegisterSimulationTest is Test {
 
         assertFalse(registry.isRegistered(randomUser));
         console.log("  Revoke succeeded");
-    }
-
-    // --- ENS helpers ---
-
-    function _namehash(string memory domain) internal pure returns (bytes32 result) {
-        if (bytes(domain).length == 0) return bytes32(0);
-        bytes memory b = bytes(domain);
-        uint256 end = b.length;
-        for (uint256 i = b.length; i > 0; i--) {
-            if (b[i - 1] == ".") {
-                result = keccak256(abi.encodePacked(result, _labelHash(b, i, end)));
-                end = i - 1;
-            }
-        }
-        result = keccak256(abi.encodePacked(result, _labelHash(b, 0, end)));
-    }
-
-    function _splitDomain(string memory domain) internal pure returns (string memory label, string memory parent) {
-        bytes memory b = bytes(domain);
-        for (uint256 i = 0; i < b.length; i++) {
-            if (b[i] == ".") {
-                label = new string(i);
-                parent = new string(b.length - i - 1);
-                bytes memory lb = bytes(label);
-                bytes memory pb = bytes(parent);
-                for (uint256 j = 0; j < i; j++) {
-                    lb[j] = b[j];
-                }
-                for (uint256 j = i + 1; j < b.length; j++) {
-                    pb[j - i - 1] = b[j];
-                }
-                return (label, parent);
-            }
-        }
-        revert("domain must contain a dot");
-    }
-
-    function _labelHash(bytes memory b, uint256 start, uint256 end) internal pure returns (bytes32) {
-        bytes memory label = new bytes(end - start);
-        for (uint256 i = start; i < end; i++) {
-            label[i - start] = b[i];
-        }
-        return keccak256(label);
     }
 }

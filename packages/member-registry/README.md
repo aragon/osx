@@ -86,11 +86,15 @@ event ProfileMoved(address indexed member, string oldSubdomain, string newSubdom
 ### View functions
 
 ```solidity
+function parentDomain() external view returns (string);                   // "members.dao.eth"
+function parentNode() external view returns (bytes32);                    // namehash(parentDomain())
 function isRegistered(address member) external view returns (bool);
 function memberLabel(address member) external view returns (bytes32);     // labelhash, 0 = not registered
 function memberSubdomain(address member) external view returns (string);  // "alice"
 function labelOwner(bytes32 label) external view returns (address);       // reverse lookup
 ```
+
+`parentDomain()` returns the parent domain string this registry manages, set at initialization. It is the pre-image of `parentNode()` -- frontends should read it from the contract instead of hardcoding it, so a single registry deployment can be re-pointed without code changes.
 
 ### Errors
 
@@ -99,6 +103,8 @@ error InvalidSubdomain(string subdomain);       // empty, >50 chars, or invalid 
 error AlreadyRegistered(address member);         // address already has a subdomain
 error NotRegistered(address member);             // address has no subdomain
 error SubdomainAlreadyTaken(string subdomain);   // label already claimed by someone else
+error InvalidDomain(string domain);              // empty parent domain at init
+error InvalidENSRegistry(address ens);           // ENS registry has no root owner at init
 ```
 
 ## Frontend integration guide
@@ -106,6 +112,10 @@ error SubdomainAlreadyTaken(string subdomain);   // label already claimed by som
 ### Reading member state
 
 ```typescript
+// Read the parent domain straight from the contract -- never hardcode it.
+const parentDomain = await registry.parentDomain();
+// => "members.dao.eth"
+
 // Check if an address is registered
 const registered = await registry.isRegistered(address);
 
@@ -113,8 +123,8 @@ const registered = await registry.isRegistered(address);
 const subdomain = await registry.memberSubdomain(address);
 // => "alice"
 
-// Full domain = subdomain + "." + parentDomain
-// => "alice.aragonx.eth"
+// Full ENS name = subdomain + "." + parentDomain
+// => "alice.members.dao.eth"
 
 // Check if a subdomain is available
 const label = keccak256(toUtf8Bytes(subdomain));

@@ -13,6 +13,7 @@ import {isSubdomainValid} from "@aragon/osx/framework/utils/RegistryUtils.sol";
 
 import {IMemberRegistry} from "./IMemberRegistry.sol";
 import {IResolver} from "./IResolver.sol";
+import {ENSDomain} from "./lib/ENSDomain.sol";
 
 /// @title MemberRegistry
 /// @author Aragon X - 2026
@@ -35,7 +36,10 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     ENS public ens;
 
     /// @notice The namehash of the parent domain (e.g., `namehash("members.dao.eth")`).
-    bytes32 public node;
+    bytes32 public parentNode;
+
+    /// @notice The parent domain string (e.g., `"members.dao.eth"`). Pre-image of `parentNode`.
+    string public parentDomain;
 
     /// @notice The resolver address (must support per-node `approve()`).
     address public resolver;
@@ -60,21 +64,22 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice Initializes the registry.
     /// @param _managementDao The DAO management permissions.
     /// @param _ens The ENS registry contract.
-    /// @param _node The namehash of the parent domain this registry manages.
+    /// @param _domain The parent domain this registry manages (e.g., `"members.dao.eth"`).
     /// @param _resolver The resolver address. Must support per-node `approve()`.
-    function initialize(IDAO _managementDao, ENS _ens, bytes32 _node, address _resolver) external initializer {
+    function initialize(IDAO _managementDao, ENS _ens, string memory _domain, address _resolver) external initializer {
         __DaoAuthorizableUpgradeable_init(_managementDao);
 
         // Verify the ENS registry is valid (root node must have an owner).
         if (_ens.owner(bytes32(0)) == address(0)) revert InvalidENSRegistry(address(_ens));
-        // Verify the parent node is not empty.
-        else if (_node == bytes32(0)) revert InvalidNode();
+        // Verify the parent domain is not empty.
+        else if (bytes(_domain).length == 0) revert InvalidDomain(_domain);
 
         // Verify the resolver supports per-node approval (reverts if missing).
         IResolver(_resolver).isApprovedFor(address(this), bytes32(0), address(0));
 
         ens = _ens;
-        node = _node;
+        parentDomain = _domain;
+        parentNode = ENSDomain.namehash(_domain);
         resolver = _resolver;
     }
 
@@ -195,8 +200,8 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     /// @dev Claims an ENS subnode: set owner, resolver, and per-node approval for the member.
     /// Does not set any resolver records -- the caller handles that via _applyRecords or _setResolverAddr.
     function _assignSubnode(address member, bytes32 label) internal {
-        bytes32 subnode = keccak256(abi.encodePacked(node, label));
-        ens.setSubnodeOwner(node, label, address(this));
+        bytes32 subnode = keccak256(abi.encodePacked(parentNode, label));
+        ens.setSubnodeOwner(parentNode, label, address(this));
         ens.setResolver(subnode, resolver);
         IResolver(resolver).approve(subnode, member, true);
     }
@@ -206,22 +211,22 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     /// resolver version counter (invalidating all records), but zeroing addr explicitly ensures no
     /// stale forward resolution regardless of resolver implementation details.
     function _releaseSubnode(address member, bytes32 label) internal {
-        bytes32 subnode = keccak256(abi.encodePacked(node, label));
+        bytes32 subnode = keccak256(abi.encodePacked(parentNode, label));
         IResolver(resolver).approve(subnode, member, false);
         IResolver(resolver).clearRecords(subnode);
         IResolver(resolver).setAddr(subnode, address(0));
-        ens.setSubnodeOwner(node, label, address(0));
+        ens.setSubnodeOwner(parentNode, label, address(0));
     }
 
     /// @dev Sets the addr record on a subnode.
     function _setResolverAddr(bytes32 label, address addr) internal {
-        IResolver(resolver).setAddr(keccak256(abi.encodePacked(node, label)), addr);
+        IResolver(resolver).setAddr(keccak256(abi.encodePacked(parentNode, label)), addr);
     }
 
     /// @dev Applies resolver records to a subnode: addr, text records, and contenthash.
     /// addr defaults to msg.sender if records.addr is address(0).
     function _applyRecords(bytes32 label, Records calldata records) internal {
-        bytes32 subnode = keccak256(abi.encodePacked(node, label));
+        bytes32 subnode = keccak256(abi.encodePacked(parentNode, label));
         IResolver r = IResolver(resolver);
 
         r.setAddr(subnode, records.addr != address(0) ? records.addr : msg.sender);
@@ -239,5 +244,5 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_REGISTRY_PERMISSION_ID) {}
 
     /// @notice Reserved storage gap for future upgrades.
-    uint256[44] private __gap;
+    uint256[43] private __gap;
 }
