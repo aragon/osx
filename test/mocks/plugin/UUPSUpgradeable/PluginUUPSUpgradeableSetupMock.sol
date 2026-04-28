@@ -11,7 +11,6 @@ import {PluginUpgradeableSetup} from "@aragon/osx-commons-contracts/src/plugin/s
 
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
-import "hardhat/console.sol";
 
 abstract contract MockedHelper is IPluginSetup {
     // Used for mocking in tests

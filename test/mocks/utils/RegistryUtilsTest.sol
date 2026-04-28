@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {isSubdomainValid as _isSubdomainValid} from "../../framework/utils/RegistryUtils.sol";
+import {isSubdomainValid as _isSubdomainValid} from "../../../src/framework/utils/RegistryUtils.sol";
 
 contract RegistryUtils {
     function isSubdomainValid(string calldata subdomain) external pure returns (bool) {

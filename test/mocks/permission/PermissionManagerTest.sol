@@ -4,7 +4,7 @@ pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../../core/permission/PermissionManager.sol";
+import "../../../src/core/permission/PermissionManager.sol";
 
 contract PermissionManagerTest is PermissionManager {
     // Restricted permissionIds that shouldn't be allowed to grant for who == ANY_ADDR or where == ANY_ADDR
