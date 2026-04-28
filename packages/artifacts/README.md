@@ -75,7 +75,7 @@ You can find all documentation regarding how to use this plugin in [Aragon's doc
 
 ## Contributing
 
-If you like what we're doing and would love to support, please review our `CONTRIBUTING_GUIDE.md` [here](https://github.com/aragon/osx/blob/main/CONTRIBUTION_GUIDE.md). We'd love to build with you.
+See [`CONTRIBUTING.md`](https://github.com/aragon/osx/blob/main/CONTRIBUTING.md) in the main repository.
 
 ## Security
 

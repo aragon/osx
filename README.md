@@ -63,7 +63,7 @@ Check out the [artifacts folder](./npm-artifacts/README.md) to get the deployed 
 
 ## Contributing
 
-We'd love to hear what you think! If you want to build this with us, please find a detailed contribution guide in the `CONTRIBUTION_GUIDE.md` [file here](https://github.com/aragon/osx/blob/main/CONTRIBUTION_GUIDE.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for security reporting, PR expectations, and the SemVer classification rules used when bumping the protocol version.
 
 ## Security
 

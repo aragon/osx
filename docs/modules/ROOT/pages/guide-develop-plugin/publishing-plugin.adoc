@@ -14,11 +14,11 @@ You will need the address of your Plugin Setup contract in order to publish your
 
 === Publishing your plugin to Aragon OSx
 
-Every plugin in Aragon can have multiple versions. When publishing a plugin to the Aragon protocol, we create a link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol[PluginRepo] for each plugin,
+Every plugin in Aragon can have multiple versions. When publishing a plugin to the Aragon protocol, we create a link:https://github.com/aragon/osx/blob/develop/src/framework/plugin/repo/PluginRepo.sol[PluginRepo] for each plugin,
 which will contain the plugin's versions.
 
 To publish a plugin, use Aragon's `PluginRepoFactory` contract, which creates new `PluginRepo` instances for you and assigns them an ENS subdomain.
-Call `pluginRepo.createPluginRepoWithFirstVersion()` to create the first version of your plugin, as described link:https://github.com/aragon/core/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepoFactory.sol#L54[here].
+Call `pluginRepo.createPluginRepoWithFirstVersion()` to create the first version of your plugin, as described link:https://github.com/aragon/core/blob/develop/src/framework/plugin/repo/PluginRepoFactory.sol#L54[here].
 This adds the new `PluginRepo` address to the `PluginRepoRegistry`, which tracks all available plugins in the protocol.
 
 You can find the `PluginRepoFactory` contract addresses for each network link:https://github.com/aragon/osx/blob/main/packages/artifacts/src/addresses.json[here].
@@ -27,8 +27,8 @@ To build and deploy your plugin, you can look at link:https://github.com/aragon/
 
 === Publishing subsequent builds
 
-To publish subsequent versions of your plugin, call `pluginRepo.createVersion()` as described link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/IPluginRepo.sol#L15[here].
-The source code can be found link:https://github.com/aragon/osx/blob/develop/packages/contracts/src/framework/plugin/repo/PluginRepo.sol#L132[here].
+To publish subsequent versions of your plugin, call `pluginRepo.createVersion()` as described link:https://github.com/aragon/osx/blob/develop/src/framework/plugin/repo/IPluginRepo.sol#L15[here].
+The source code can be found link:https://github.com/aragon/osx/blob/develop/src/framework/plugin/repo/PluginRepo.sol#L132[here].
 
 == Versioning schema
 

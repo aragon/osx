@@ -2,19 +2,19 @@
 
 Plugins are how we extend the functionality for DAOs. In Aragon OSx, everything a DAO can do is based on Plugin functionality enabled through permissions.
 
-In this Quickstart guide, we will use the Aragon Hardhat template to set up a plugin.
+In this Quickstart guide, we will use the Aragon Foundry template to set up a plugin.
 
 == Setting up your environment
 
-We recommend using our link:https://github.com/aragon/osx-plugin-template-hardhat[hardhat template] to get started. If you don't have
+We recommend using our link:https://github.com/aragon/osx-plugin-template-foundry[Foundry template] to get started. If you don't have
 it installed, you can do so by running:
 
 ```bash
-git clone github.com/aragon/osx-plugin-template-hardhat
+git clone github.com/aragon/osx-plugin-template-foundry
 ```
 
 Once you have cloned the repository the first step is to add a `.env` file with your `ALCHEMY_API_KEY`, 
-there is a link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/.env.example[.env.example] file you can use as a template.
+there is a link:https://github.com/aragon/osx-plugin-template-foundry/blob/main/.env.example[.env.example] file you can use as a template.
 
 This file contains more env variables that you may need throughout the development process, but to get started you only need to 
 add the `ALCHEMY_API_KEY`.
@@ -28,20 +28,16 @@ NETWORK_NAME="sepolia" #  ["mainnet", "sepolia", "polygon", "baseMainnet", "arbi
 
 # CONTRACTS
 
-## One or multiple hex encoded private keys separated by commas `,` replacing the hardhat default accounts.
-PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" # Default hardhat account 0 private key. DON'T USE FOR DEPLOYMENTS
+## One or multiple hex encoded private keys separated by commas `,` replacing the default accounts.
+PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" # Default Anvil account 0 private key. DON'T USE FOR DEPLOYMENTS
 
 ## Alchemy RPC endpoint credentials
 ALCHEMY_API_KEY="zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 ```
 
-Once the `.env` file is created, you can run the following command to install the dependencies:
+Follow the template's `README.md` to install dependencies and build the project.
 
-```bash
-yarn install --ignore-scripts && cd packages/contracts && yarn install --ignore-scripts && yarn build && yarn typechain
-```
-
-Now you are ready to start developing your plugin. You should have two files called `MyPlugin.sol` and `MyPluginSetup.sol` inside 
+Once set up, you should have two files called `MyPlugin.sol` and `MyPluginSetup.sol` inside
 the `contracts` folder.
 
 The template is already set up with a basic plugin and plugin setup contract. You can start by modifying these files to create
@@ -49,8 +45,8 @@ your own plugin. The tests and deployment scripts are also set up for you to use
 
 ## Next Steps
 
-For more information on how to use the template, you can check the link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/README.md[README] and 
-the link:https://github.com/aragon/osx-plugin-template-hardhat/blob/main/USAGE_GUIDE.md[USAGE GUIDE].
+For more information on how to use the template, you can check the link:https://github.com/aragon/osx-plugin-template-foundry/blob/main/README.md[README] and 
+the link:https://github.com/aragon/osx-plugin-template-foundry/blob/main/USAGE_GUIDE.md[USAGE GUIDE].
 
 For more information on how to develop a plugin, you can check our plugin development guides:
 

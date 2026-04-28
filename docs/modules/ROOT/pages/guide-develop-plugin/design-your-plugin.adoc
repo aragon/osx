@@ -27,10 +27,10 @@ Beyond this fundamental ability, governance plugins usually implement two interf
 
 Some examples of governance plugins are:
 
-- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/majority-voting/token[A token-voting plugin]: Results are based on what the majority votes and the vote's weight is determined by how many tokens an account holds. Ex: Alice has 10 tokens, Bob 2, and Alice votes yes, the yes wins.
-- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/multisig[Multisig plugin]: A determined set of addresses is able to approve. Once `x` amount of addresses approve (as determined by the plugin settings), then the proposal automatically succeeds.
-- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/admin[Admin plugin]: One address can create and immediately execute proposals on the DAO (full control).
-- link:https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins/governance/majority-voting/addresslist[Addresslist plugin]: Majority-based voting, where list of addresses are able to vote in decision-making for the organization. Unlike a multisig, everybody here is expected to vote yes/no/abstain within a certain time frame.
+- link:https://github.com/aragon/osx/tree/main/src/plugins/governance/majority-voting/token[A token-voting plugin]: Results are based on what the majority votes and the vote's weight is determined by how many tokens an account holds. Ex: Alice has 10 tokens, Bob 2, and Alice votes yes, the yes wins.
+- link:https://github.com/aragon/osx/tree/main/src/plugins/governance/multisig[Multisig plugin]: A determined set of addresses is able to approve. Once `x` amount of addresses approve (as determined by the plugin settings), then the proposal automatically succeeds.
+- link:https://github.com/aragon/osx/tree/main/src/plugins/governance/admin[Admin plugin]: One address can create and immediately execute proposals on the DAO (full control).
+- link:https://github.com/aragon/osx/tree/main/src/plugins/governance/majority-voting/addresslist[Addresslist plugin]: Majority-based voting, where list of addresses are able to vote in decision-making for the organization. Unlike a multisig, everybody here is expected to vote yes/no/abstain within a certain time frame.
 
 // <!-- Add a graphic -->
 
