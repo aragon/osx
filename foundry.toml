@@ -1,0 +1,12 @@
+[profile.default]
+src = "packages/contracts/src"
+test = "packages/contracts/test"
+out = "out"
+libs = ["lib"]
+solc = "0.8.17"
+optimizer = true
+optimizer-runs = 200
+extra_output = ["storageLayout"]
+
+[profile.ci]
+fuzz = { runs = 512 }
