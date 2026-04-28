@@ -5,7 +5,7 @@ out = "out"
 libs = ["lib"]
 solc = "0.8.17"
 optimizer = true
-optimizer-runs = 200
+optimizer-runs = 2000
 extra_output = ["storageLayout"]
 
 [profile.ci]

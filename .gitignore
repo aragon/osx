@@ -2,6 +2,10 @@
 out
 cache
 
+# tooling
+node_modules
+.openzeppelin
+
 # testing
 coverage
 
