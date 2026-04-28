@@ -56,6 +56,9 @@ interface IMemberRegistry {
     /// @notice Thrown if the parent domain is empty.
     error InvalidDomain(string domain);
 
+    /// @notice Thrown if the management DAO address is the zero address.
+    error InvalidManagementDao(address dao);
+
     /// @notice Register as a member by claiming a subdomain. Permissionless.
     ///         One subdomain per address. Reverts if already registered (release first).
     /// @param subdomain The subdomain label to claim (e.g., "alice").

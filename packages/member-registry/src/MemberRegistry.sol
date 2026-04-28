@@ -67,6 +67,10 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     /// @param _domain The parent domain this registry manages (e.g., `"members.dao.eth"`).
     /// @param _resolver The resolver address. Must support per-node `approve()`.
     function initialize(IDAO _managementDao, ENS _ens, string memory _domain, address _resolver) external initializer {
+        // Verify the management DAO is not the zero address — without it, no permission
+        // checks (revoke, upgrade) can ever succeed.
+        if (address(_managementDao) == address(0)) revert InvalidManagementDao(address(_managementDao));
+
         __DaoAuthorizableUpgradeable_init(_managementDao);
 
         // Verify the ENS registry is valid (root node must have an owner).

@@ -105,6 +105,7 @@ error NotRegistered(address member);             // address has no subdomain
 error SubdomainAlreadyTaken(string subdomain);   // label already claimed by someone else
 error InvalidDomain(string domain);              // empty parent domain at init
 error InvalidENSRegistry(address ens);           // ENS registry has no root owner at init
+error InvalidManagementDao(address dao);         // management DAO is the zero address at init
 ```
 
 ## Frontend integration guide

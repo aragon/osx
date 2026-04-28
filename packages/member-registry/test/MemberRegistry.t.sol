@@ -480,6 +480,16 @@ contract MemberRegistryTest is Test {
         assertEq(otherRegistry.parentNode(), ENSDomain.namehash(other));
     }
 
+    function test_initialize_revertsIfZeroManagementDao() public {
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidManagementDao.selector, address(0)));
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(MemberRegistry.initialize, (IDAO(address(0)), ENS(address(ens)), DOMAIN, address(resolver)))
+        );
+    }
+
     function test_initialize_revertsIfInvalidENS() public {
         MockENS emptyENS = new MockENS(); // root has no owner
         MemberRegistry impl = new MemberRegistry();
