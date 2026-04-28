@@ -1,6 +1,6 @@
 [profile.default]
-src = "packages/contracts/src"
-test = "packages/contracts/test"
+src = "src"
+test = "test"
 out = "out"
 libs = ["lib"]
 solc = "0.8.17"
