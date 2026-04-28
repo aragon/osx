@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [contracts, contracts-ethers]
+        package: [contracts]
     steps:
       - uses: actions/checkout@v4
         if: ${{ inputs.ref != '' }}
@@ -98,10 +98,6 @@ jobs:
         with:
           path: packages/contracts/
           name: contracts
-      - uses: actions/download-artifact@v4
-        with:
-          path: packages/contracts-ethers/
-          name: contracts-ethers
       - name: Commit changes
         id: commit
         run: |
@@ -110,8 +106,6 @@ jobs:
           git config --global user.name "Arabot-1"
           git config --global user.email "arabot-1@users.noreply.github.com"
           git add packages/contracts/package.json
-          git add packages/contracts-ethers/package.json
           git add packages/contracts/CHANGELOG.md
-          git add packages/contracts-ethers/CHANGELOG.md
           git commit -am "Updates package.json versions and changelogs"
           git push
