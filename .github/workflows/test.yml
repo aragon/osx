@@ -37,4 +37,4 @@ jobs:
         run: forge build --sizes
 
       - name: Run Forge tests
-        run: forge test -vvv --no-match-path "./test/fork*/*"
+        run: forge test -vvv --no-match-path '**/fork/**'

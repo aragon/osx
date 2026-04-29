@@ -2,6 +2,10 @@
 out
 cache
 
+#
+# Generated ABI files and deployed addresses
+artifacts
+
 # tooling
 node_modules
 .openzeppelin
@@ -23,3 +27,4 @@ dist-ssr
 # local env files
 .env
 .env.*
+!.env.example

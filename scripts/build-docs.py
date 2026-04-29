@@ -19,7 +19,6 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "out"
@@ -69,7 +68,6 @@ class Contract:
     source_path: str  # e.g. "src/core/dao/DAO.sol"
     kind: str  # 'contract' | 'interface' | 'library'
     notice: str = ""
-    details: str = ""
     linearized_bases: list[str] = field(default_factory=list)  # ordered, includes self
     members: list[Member] = field(default_factory=list)
 
@@ -116,7 +114,7 @@ def load_all_contracts() -> dict[str, Contract]:
 
     # Second pass: build Contract objects, only for contracts with their own
     # artifact (i.e., where the artifact filename matches the contract name)
-    for cid, info in by_id.items():
+    for info in by_id.values():
         art_path = Path(info["artifact_file"])
         if art_path.stem != info["name"]:
             continue  # this artifact wasn't generated for this contract specifically
@@ -135,7 +133,6 @@ def load_all_contracts() -> dict[str, Contract]:
             source_path=info["source"],
             kind=info["kind"],
             notice=devdoc.get("details") or userdoc.get("notice") or "",
-            details="",
             linearized_bases=[
                 by_id[b]["name"] for b in info["linearized"] if b in by_id
             ],
@@ -146,7 +143,7 @@ def load_all_contracts() -> dict[str, Contract]:
             base = by_id.get(base_id)
             if not base:
                 continue
-            for m in extract_members(base, devdoc, userdoc, art=info["artifact"]):
+            for m in extract_members(base, devdoc, userdoc):
                 # Avoid duplicates (overrides) — keep first occurrence (most-derived)
                 if not any(
                     e.signature == m.signature and e.kind == m.kind
@@ -159,42 +156,31 @@ def load_all_contracts() -> dict[str, Contract]:
     return contracts
 
 
-def extract_members(base: dict, devdoc: dict, userdoc: dict, art: dict) -> list[Member]:
+def extract_members(base: dict, devdoc: dict, userdoc: dict) -> list[Member]:
     """Extract member declarations from a contract's AST node."""
     out: list[Member] = []
     base_name = base["name"]
-    abi = art.get("abi", []) if base["name"] == base.get("artifact_name", "") else []
-    abi_by_sig = {}
-    for it in art.get("abi", []):
-        if it.get("type") in ("function", "event", "error"):
-            abi_by_sig[abi_signature(it)] = it
 
     for n in base["ast_node"].get("nodes", []):
         nt = n.get("nodeType")
         if nt == "FunctionDefinition":
             # Match solidity-docgen: skip private functions (they're not part
-            # of the contract's documented API).
+            # of the contract's documented API). Constructors / receive / fallback
+            # share the function render path; only their `name` differs (taken
+            # from `kind` when there's no explicit name).
             if n.get("visibility") == "private":
                 continue
-            kind_map = {
-                "function": "function",
-                "constructor": "function",
-                "receive": "function",
-                "fallback": "function",
-            }
-            kind = kind_map.get(n.get("kind", "function"), "function")
             name = n.get("name") or n.get("kind") or "function"
             inputs = ast_params(n.get("parameters", {}).get("parameters", []))
             outputs = ast_params(n.get("returnParameters", {}).get("parameters", []))
             sig = canonical_sig(name, inputs)
-            full_sig = sig
-            ndev = devdoc.get("methods", {}).get(full_sig, {}) if devdoc else {}
-            nuser = userdoc.get("methods", {}).get(full_sig, {}) if userdoc else {}
+            ndev = devdoc.get("methods", {}).get(sig, {}) if devdoc else {}
+            nuser = userdoc.get("methods", {}).get(sig, {}) if userdoc else {}
             out.append(
                 Member(
-                    kind=kind,
+                    kind="function",
                     name=name,
-                    signature=full_sig,
+                    signature=sig,
                     inputs=inputs,
                     outputs=outputs,
                     notice=nuser.get("notice", "") if isinstance(nuser, dict) else "",
@@ -310,20 +296,6 @@ def ast_params(params: list[dict]) -> list[dict]:
     return out
 
 
-def abi_signature(item: dict) -> str:
-    """Canonical signature from an ABI item."""
-    types = ",".join(abi_type(p) for p in item.get("inputs", []))
-    return f"{item.get('name', '')}({types})"
-
-
-def abi_type(p: dict) -> str:
-    t = p.get("type", "")
-    if t.startswith("tuple") and p.get("components"):
-        inner = ",".join(abi_type(c) for c in p["components"])
-        return f"({inner}){t[len('tuple') :]}"
-    return t
-
-
 def canonical_sig(name: str, inputs: list[dict]) -> str:
     """Canonical signature like solc emits: execute(bytes32,uint256)."""
 
@@ -332,9 +304,6 @@ def canonical_sig(name: str, inputs: list[dict]) -> str:
         t = re.sub(r"^(struct|contract|enum)\s+", "", t)
         # Drop storage location qualifiers
         t = re.sub(r"\s+(memory|calldata|storage|payable)\b", "", t)
-        # Strip leading dotted scope like 'Module.Type' -> 'Type'
-        # (kept here as-is — solc canonical does include it for some cases;
-        # if mismatches arise, refine.)
         return t.strip()
 
     types = ",".join(to_canon(p.get("type", "")) for p in inputs)
@@ -550,9 +519,6 @@ def render_contract(contract: Contract, contracts: dict[str, Contract]) -> list[
     out.append("")
     if contract.notice:
         out.append(contract.notice)
-        out.append("")
-    if contract.details:
-        out.append(contract.details)
         out.append("")
 
     out.extend(render_index_block(contract, ["modifier"], "Modifiers", contracts))
