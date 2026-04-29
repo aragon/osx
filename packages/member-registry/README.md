@@ -2,7 +2,7 @@
 
 Permissionless member self-registration via ENS subdomain claims.
 
-Members claim a subdomain under a configurable parent domain (e.g., `alice.aragonx.eth`), manage their own resolver records (text, avatar, etc.), and can release or move at any time. Governance can forcibly revoke a member's subdomain.
+Members claim a subdomain under a configurable parent domain (e.g., `alice.aragonx.eth`), manage their own resolver records (text, avatar, etc.), and can release or move at any time. Governance can forcibly evict a subdomain — fully releasing it, or re-assigning it to a legitimate controller in the same call.
 
 ## How it works
 
@@ -11,7 +11,7 @@ Members claim a subdomain under a configurable parent domain (e.g., `alice.arago
 One contract: `MemberRegistry`. It is an approved ENS operator on the parent domain (e.g., `aragonx.eth`). The domain owner retains full ownership and can revoke the registry's access at any time.
 
 When a user calls `register("alice")`, the registry:
-1. Validates the subdomain (`[0-9a-z-]`, max 50 chars)
+1. Validates the subdomain (`[0-9a-z-]`, 3–50 chars, no leading or trailing `-`)
 2. Creates the ENS subnode `alice.aragonx.eth`, owned by the registry
 3. Sets the resolver and the addr record (points to the member's address)
 4. Grants the member **per-node resolver approval** so they can manage their own records
@@ -68,8 +68,10 @@ function release() external;
 function move(string calldata newSubdomain) external;
 function move(string calldata newSubdomain, Records calldata records) external;
 
-// Governed -- requires REVOKE_MEMBER_PERMISSION
-function revoke(address member) external;
+// Governed -- requires EVICT_SUBDOMAIN_PERMISSION
+// newController = address(0) releases the subdomain;
+// newController != address(0) re-assigns it as if it had called register itself.
+function evict(string calldata subdomain, address newController) external;
 ```
 
 The `Records` overloads allow setting resolver records (text, addr, contenthash) atomically during registration or move. This is how delegates carry their profile over when renaming.
@@ -79,7 +81,7 @@ The `Records` overloads allow setting resolver records (text, addr, contenthash)
 ```solidity
 event Registered(address indexed member, string subdomain);
 event Released(address indexed member, string subdomain);
-event SubdomainRevoked(address indexed member, address indexed revoker, string subdomain);
+event SubdomainEvicted(address indexed member, address indexed evictor, string subdomain);
 event ProfileMoved(address indexed member, string oldSubdomain, string newSubdomain);
 ```
 
@@ -99,13 +101,15 @@ function labelOwner(bytes32 label) external view returns (address);       // rev
 ### Errors
 
 ```solidity
-error InvalidSubdomain(string subdomain);       // empty, >50 chars, or invalid chars
-error AlreadyRegistered(address member);         // address already has a subdomain
-error NotRegistered(address member);             // address has no subdomain
-error SubdomainAlreadyTaken(string subdomain);   // label already claimed by someone else
-error InvalidDomain(string domain);              // empty parent domain at init
-error InvalidENSRegistry(address ens);           // ENS registry has no root owner at init
-error InvalidManagementDao(address dao);         // management DAO is the zero address at init
+error InvalidSubdomain(string subdomain);         // <3 chars, >50 chars, leading/trailing `-`, or invalid chars
+error AlreadyRegistered(address member);          // address already has a subdomain
+error NotRegistered(address member);              // address has no subdomain
+error SubdomainAlreadyTaken(string subdomain);    // label already claimed by someone else
+error SubdomainNotRegistered(string subdomain);   // evict target has no current owner
+error InvalidNewController(address newController);// evict newController is the same as the current controller
+error InvalidDomain(string domain);               // empty parent domain at init
+error InvalidENSRegistry(address ens);            // ENS registry has no root owner at init
+error InvalidManagementDao(address dao);          // management DAO is the zero address at init
 ```
 
 ## Frontend integration guide
@@ -235,8 +239,12 @@ registry.on("Registered", (member, subdomain) => { ... });
 
 // All membership changes
 registry.on("Released", (member, subdomain) => { ... });
-registry.on("SubdomainRevoked", (member, revoker, subdomain) => { ... });
+registry.on("SubdomainEvicted", (member, evictor, subdomain) => { ... });
 registry.on("ProfileMoved", (member, oldSubdomain, newSubdomain) => { ... });
+
+// Note: an evict-with-transfer (newController != 0) emits both `SubdomainEvicted`
+// (for the prior holder) and `Registered` (for the new controller) in the same tx —
+// indexers see it as release + re-register on the same label.
 ```
 
 ### Building a member list
@@ -244,10 +252,10 @@ registry.on("ProfileMoved", (member, oldSubdomain, newSubdomain) => { ... });
 The registry does not store a member list on-chain. Enumerate members by indexing events:
 
 ```typescript
-// Get all registrations, then subtract releases/revokes
+// Get all registrations, then subtract releases/evictions
 const registered = await registry.queryFilter(registry.filters.Registered());
 const released = await registry.queryFilter(registry.filters.Released());
-const revoked = await registry.queryFilter(registry.filters.SubdomainRevoked());
+const evicted = await registry.queryFilter(registry.filters.SubdomainEvicted());
 const moved = await registry.queryFilter(registry.filters.ProfileMoved());
 ```
 
@@ -278,7 +286,7 @@ just deploy             # deploy (broadcast)
 
 | Permission | On | Granted to | Purpose |
 |---|---|---|---|
-| `REVOKE_MEMBER_PERMISSION` | Registry | Management DAO | Forcibly revoke a member's subdomain |
+| `EVICT_SUBDOMAIN_PERMISSION` | Registry | Management DAO | Forcibly evict a subdomain (release or transfer to a legitimate controller) |
 | `UPGRADE_REGISTRY_PERMISSION` | Registry | Management DAO | Authorize UUPS upgrades |
 
 Registration, release, and move are permissionless.

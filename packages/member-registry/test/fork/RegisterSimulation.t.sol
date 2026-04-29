@@ -30,7 +30,7 @@ contract RegisterSimulationTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.envString("RPC_URL"));
 
-        managementDao = vm.envAddress("MANAGEMENT_DAO");
+        managementDao = vm.envAddress("MANAGEMENT_DAO_ADDRESS");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("aragonx.eth"));
         parentNode = ENSDomain.namehash(parentDomain);
 
@@ -93,15 +93,15 @@ contract RegisterSimulationTest is Test {
         console.log("  Approved:", ENS_REGISTRY.isApprovedForAll(domainHolder, address(registry)));
         console.log();
 
-        // --- Step 4: DAO grants REVOKE_MEMBER_PERMISSION ---
+        // --- Step 4: DAO grants EVICT_SUBDOMAIN_PERMISSION ---
 
-        bytes32 revokePermId = registry.REVOKE_MEMBER_PERMISSION_ID();
+        bytes32 evictPermId = registry.EVICT_SUBDOMAIN_PERMISSION_ID();
         vm.prank(managementDao);
         (bool grantOk,) = managementDao.call(
-            abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, revokePermId)
+            abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, evictPermId)
         );
-        assertTrue(grantOk, "grant REVOKE_MEMBER_PERMISSION failed");
-        console.log("Step 4: Granted REVOKE_MEMBER_PERMISSION");
+        assertTrue(grantOk, "grant EVICT_SUBDOMAIN_PERMISSION failed");
+        console.log("Step 4: Granted EVICT_SUBDOMAIN_PERMISSION");
         console.log();
     }
 
@@ -219,14 +219,14 @@ contract RegisterSimulationTest is Test {
         console.log("  Full cycle (register, move, release) succeeded");
     }
 
-    function test_revoke_afterUnwrap() public {
+    function test_evict_afterUnwrap() public {
         vm.prank(randomUser);
         registry.register("potato123456");
 
         vm.prank(managementDao);
-        registry.revoke(randomUser);
+        registry.evict("potato123456", address(0));
 
         assertFalse(registry.isRegistered(randomUser));
-        console.log("  Revoke succeeded");
+        console.log("  Evict succeeded");
     }
 }

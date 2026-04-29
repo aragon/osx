@@ -27,8 +27,8 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice The ID of the permission required to call `_authorizeUpgrade`.
     bytes32 public constant UPGRADE_REGISTRY_PERMISSION_ID = keccak256("UPGRADE_REGISTRY_PERMISSION");
 
-    /// @notice The ID of the permission required to call `revoke`.
-    bytes32 public constant REVOKE_MEMBER_PERMISSION_ID = keccak256("REVOKE_MEMBER_PERMISSION");
+    /// @notice The ID of the permission required to call `evict`.
+    bytes32 public constant EVICT_SUBDOMAIN_PERMISSION_ID = keccak256("EVICT_SUBDOMAIN_PERMISSION");
 
     // State
 
@@ -91,14 +91,14 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain) external {
-        bytes32 label = _register(subdomain);
+        bytes32 label = _register(subdomain, msg.sender);
         _setResolverAddr(label, msg.sender);
         emit Registered(msg.sender, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
     function register(string calldata subdomain, Records calldata records) external {
-        bytes32 label = _register(subdomain);
+        bytes32 label = _register(subdomain, msg.sender);
         _applyRecords(label, records);
         emit Registered(msg.sender, subdomain);
     }
@@ -110,9 +110,22 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
     }
 
     /// @inheritdoc IMemberRegistry
-    function revoke(address member) external auth(REVOKE_MEMBER_PERMISSION_ID) {
-        string memory subdomain = _release(member);
-        emit SubdomainRevoked(member, msg.sender, subdomain);
+    function evict(string calldata subdomain, address newController) external auth(EVICT_SUBDOMAIN_PERMISSION_ID) {
+        bytes32 label = keccak256(bytes(subdomain));
+        address member = labelOwner[label];
+        if (member == address(0)) revert SubdomainNotRegistered(subdomain);
+        if (newController == member) revert InvalidNewController(newController);
+
+        _release(member);
+        emit SubdomainEvicted(member, msg.sender, subdomain);
+
+        if (newController == address(0)) return;
+
+        // Re-assign the same subdomain to the new controller. Goes through `_register` so the
+        // AlreadyRegistered guard and subdomain validation apply uniformly with `register()`.
+        _register(subdomain, newController);
+        _setResolverAddr(label, newController);
+        emit Registered(newController, subdomain);
     }
 
     /// @inheritdoc IMemberRegistry
@@ -138,29 +151,30 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
 
     // Internal
 
+    uint256 internal constant MIN_SUBDOMAIN_LENGTH = 3;
     uint256 internal constant MAX_SUBDOMAIN_LENGTH = 50;
 
-    /// @dev Core registration logic. Sets up the subnode but does NOT set resolver records.
-    /// The caller must set records and emit the event after this returns.
-    function _register(string calldata subdomain) internal returns (bytes32 label) {
-        _validateSubdomain(subdomain);
+    /// @dev Core registration logic. Sets up the subnode for `member` but does NOT set resolver
+    /// records. The caller must set records and emit the event after this returns.
+    function _register(string calldata subdomain, address member) internal returns (bytes32 label) {
+        _requireValidSubdomain(subdomain);
 
         label = keccak256(bytes(subdomain));
 
-        if (memberLabel[msg.sender] != bytes32(0)) revert AlreadyRegistered(msg.sender);
+        if (memberLabel[member] != bytes32(0)) revert AlreadyRegistered(member);
         else if (labelOwner[label] != address(0)) revert SubdomainAlreadyTaken(subdomain);
 
-        memberLabel[msg.sender] = label;
-        memberSubdomain[msg.sender] = subdomain;
-        labelOwner[label] = msg.sender;
+        memberLabel[member] = label;
+        memberSubdomain[member] = subdomain;
+        labelOwner[label] = member;
 
-        _assignSubnode(msg.sender, label);
+        _assignSubnode(member, label);
     }
 
     /// @dev Core move logic. Sets up the new subnode but does NOT set resolver records.
     /// The caller must set records and emit the event after this returns.
     function _move(string calldata newSubdomain) internal returns (bytes32 newLabel, string memory oldSubdomain) {
-        _validateSubdomain(newSubdomain);
+        _requireValidSubdomain(newSubdomain);
 
         if (memberLabel[msg.sender] == bytes32(0)) revert NotRegistered(msg.sender);
 
@@ -193,10 +207,17 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         _releaseSubnode(member, label);
     }
 
-    /// @dev Validates the subdomain: non-empty, max 50 chars, only [0-9a-z-].
-    function _validateSubdomain(string calldata subdomain) internal pure {
+    /// @dev Validates the subdomain: 3–50 chars, only [0-9a-z-], no leading or trailing `-`.
+    function _requireValidSubdomain(string calldata subdomain) internal pure {
         uint256 len = bytes(subdomain).length;
-        if (len == 0 || len > MAX_SUBDOMAIN_LENGTH || !isSubdomainValid(subdomain)) {
+        if (len < MIN_SUBDOMAIN_LENGTH || len > MAX_SUBDOMAIN_LENGTH) {
+            revert InvalidSubdomain(subdomain);
+        }
+        // Leading/trailing dashes are not allowed
+        if (bytes(subdomain)[0] == 0x2d || bytes(subdomain)[len - 1] == 0x2d) {
+            revert InvalidSubdomain(subdomain);
+        }
+        if (!isSubdomainValid(subdomain)) {
             revert InvalidSubdomain(subdomain);
         }
     }

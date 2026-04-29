@@ -27,7 +27,8 @@ contract MemberRegistryTest is Test {
 
     address alice = address(0xa11ce);
     address bob = address(0xb0b);
-    address revoker = address(0x3e40);
+    address carol = address(0xca501);
+    address evictor = address(0x3e40);
 
     function setUp() public {
         dao = new DAOMock();
@@ -147,6 +148,51 @@ contract MemberRegistryTest is Test {
         assertTrue(registry.isRegistered(alice));
     }
 
+    function test_register_revertsIfTooShort() public {
+        // 2 characters — under MIN_SUBDOMAIN_LENGTH (3)
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "ab"));
+        vm.prank(alice);
+        registry.register("ab");
+    }
+
+    function test_register_revertsIfSingleChar() public {
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "a"));
+        vm.prank(alice);
+        registry.register("a");
+    }
+
+    function test_register_minLengthAccepted() public {
+        // Exactly 3 characters — should succeed
+        vm.prank(alice);
+        registry.register("abc");
+        assertTrue(registry.isRegistered(alice));
+    }
+
+    function test_register_revertsIfLeadingHyphen() public {
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "-alice"));
+        vm.prank(alice);
+        registry.register("-alice");
+    }
+
+    function test_register_revertsIfTrailingHyphen() public {
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "alice-"));
+        vm.prank(alice);
+        registry.register("alice-");
+    }
+
+    function test_register_revertsIfHyphenOnly() public {
+        // Edge case: a single hyphen is both leading and trailing.
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidSubdomain.selector, "---"));
+        vm.prank(alice);
+        registry.register("---");
+    }
+
+    function test_register_midHyphenAllowed() public {
+        vm.prank(alice);
+        registry.register("al-ice");
+        assertTrue(registry.isRegistered(alice));
+    }
+
     // -------------------------------------------------------------------------
     // release
     // -------------------------------------------------------------------------
@@ -183,32 +229,43 @@ contract MemberRegistryTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // revoke
+    // evict
     // -------------------------------------------------------------------------
 
-    function test_revoke() public {
+    function test_evict() public {
         vm.prank(alice);
         registry.register("alice");
 
-        vm.prank(revoker);
-        registry.revoke(alice);
+        vm.prank(evictor);
+        registry.evict("alice", address(0));
 
         assertFalse(registry.isRegistered(alice));
         assertEq(ens.owner(_subnode("alice")), address(0));
+        assertEq(registry.labelOwner(keccak256("alice")), address(0));
     }
 
-    function test_revoke_emitsEvent() public {
+    function test_evict_emitsEvent() public {
         vm.prank(alice);
         registry.register("alice");
 
         vm.expectEmit(true, true, false, true);
-        emit IMemberRegistry.SubdomainRevoked(alice, revoker, "alice");
+        emit IMemberRegistry.SubdomainEvicted(alice, evictor, "alice");
 
-        vm.prank(revoker);
-        registry.revoke(alice);
+        vm.prank(evictor);
+        registry.evict("alice", address(0));
     }
 
-    function test_revoke_revertsWithoutPermission() public {
+    function test_evict_clearsResolverRecords() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.prank(evictor);
+        registry.evict("alice", address(0));
+
+        assertEq(resolver.addr(_subnode("alice")), address(0));
+    }
+
+    function test_evict_revertsWithoutPermission() public {
         vm.prank(alice);
         registry.register("alice");
 
@@ -219,30 +276,144 @@ contract MemberRegistryTest is Test {
                 DaoUnauthorized.selector,
                 address(dao),
                 address(registry),
-                revoker,
-                registry.REVOKE_MEMBER_PERMISSION_ID()
+                evictor,
+                registry.EVICT_SUBDOMAIN_PERMISSION_ID()
             )
         );
-        vm.prank(revoker);
-        registry.revoke(alice);
+        vm.prank(evictor);
+        registry.evict("alice", address(0));
     }
 
-    function test_revoke_revertsIfNotRegistered() public {
-        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.NotRegistered.selector, alice));
-        vm.prank(revoker);
-        registry.revoke(alice);
+    function test_evict_revertsIfSubdomainNotRegistered() public {
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.SubdomainNotRegistered.selector, "alice"));
+        vm.prank(evictor);
+        registry.evict("alice", address(0));
     }
 
-    function test_revoke_self() public {
-        // Revoker is also a registered member and revokes themselves
-        vm.prank(revoker);
-        registry.register("revoker");
+    function test_evict_self() public {
+        // Evictor is also a registered member and evicts themselves
+        vm.prank(evictor);
+        registry.register("evictor");
 
-        vm.prank(revoker);
-        registry.revoke(revoker);
+        vm.prank(evictor);
+        registry.evict("evictor", address(0));
 
-        assertFalse(registry.isRegistered(revoker));
-        assertEq(ens.owner(_subnode("revoker")), address(0));
+        assertFalse(registry.isRegistered(evictor));
+        assertEq(ens.owner(_subnode("evictor")), address(0));
+    }
+
+    // evict — transfer to a new controller
+
+    function test_evict_transfersToNewController() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.prank(evictor);
+        registry.evict("alice", bob);
+
+        assertFalse(registry.isRegistered(alice));
+        assertTrue(registry.isRegistered(bob));
+        assertEq(registry.memberSubdomain(bob), "alice");
+        assertEq(registry.labelOwner(keccak256("alice")), bob);
+    }
+
+    function test_evict_transferRebindsENSAndResolver() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.prank(evictor);
+        registry.evict("alice", bob);
+
+        bytes32 subnode = _subnode("alice");
+        assertEq(ens.owner(subnode), address(registry));
+        assertEq(resolver.addr(subnode), bob);
+        assertTrue(resolver.isApprovedFor(address(registry), subnode, bob));
+        assertFalse(resolver.isApprovedFor(address(registry), subnode, alice));
+    }
+
+    function test_evict_transferEmitsEvictedAndRegistered() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.expectEmit(true, true, false, true);
+        emit IMemberRegistry.SubdomainEvicted(alice, evictor, "alice");
+        vm.expectEmit(true, false, false, true);
+        emit IMemberRegistry.Registered(bob, "alice");
+
+        vm.prank(evictor);
+        registry.evict("alice", bob);
+    }
+
+    function test_evict_transferClearsPriorTextRecords() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        bytes32 subnode = _subnode("alice");
+        vm.prank(alice);
+        resolver.setText(subnode, "key", "alice-value");
+
+        vm.prank(evictor);
+        registry.evict("alice", bob);
+
+        // clearRecords bumps the resolver version — the old text is no longer reachable.
+        assertEq(bytes(resolver.text(subnode, "key")).length, 0);
+    }
+
+    function test_evict_transferRevertsIfNewControllerEqualsCurrent() public {
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidNewController.selector, alice));
+        vm.prank(evictor);
+        registry.evict("alice", alice);
+    }
+
+    function test_evict_transferRevertsIfNewControllerAlreadyRegistered() public {
+        vm.prank(alice);
+        registry.register("alice");
+        vm.prank(bob);
+        registry.register("bob");
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.AlreadyRegistered.selector, bob));
+        vm.prank(evictor);
+        registry.evict("alice", bob);
+
+        // alice's claim and ENS state are untouched (atomic revert).
+        assertTrue(registry.isRegistered(alice));
+        assertEq(registry.labelOwner(keccak256("alice")), alice);
+        assertEq(ens.owner(_subnode("alice")), address(registry));
+    }
+
+    function test_evict_transferAtomicityOnInnerRevert() public {
+        // The transfer path goes _release → emit → _register. If _register reverts
+        // (newController already registered), the whole tx reverts and alice is preserved.
+        vm.prank(alice);
+        registry.register("alice");
+        vm.prank(bob);
+        registry.register("bob");
+
+        vm.prank(evictor);
+        try registry.evict("alice", bob) {
+            fail();
+        } catch {
+            // alice still owns "alice"; bob still owns "bob".
+            assertTrue(registry.isRegistered(alice));
+            assertEq(registry.memberSubdomain(alice), "alice");
+            assertTrue(registry.isRegistered(bob));
+            assertEq(registry.memberSubdomain(bob), "bob");
+        }
+    }
+
+    function test_evict_transferAllowsThirdParty() public {
+        // newController doesn't have to be a "known" address — anyone (carol) can be assigned.
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.prank(evictor);
+        registry.evict("alice", carol);
+
+        assertTrue(registry.isRegistered(carol));
+        assertEq(registry.memberSubdomain(carol), "alice");
     }
 
     // -------------------------------------------------------------------------
@@ -416,12 +587,12 @@ contract MemberRegistryTest is Test {
         assertEq(bytes(resolver.text(_subnode("label1"), "key")).length, 0);
     }
 
-    function test_revokeAndReRegister() public {
+    function test_evictAndReRegister() public {
         vm.prank(alice);
         registry.register("alice");
 
-        vm.prank(revoker);
-        registry.revoke(alice);
+        vm.prank(evictor);
+        registry.evict("alice", address(0));
 
         vm.prank(alice);
         registry.register("alice2");
