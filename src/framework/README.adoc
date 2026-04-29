@@ -14,6 +14,8 @@ The natspec generated API for the framework contracts. You can also find the con
 
 {{PluginRepoRegistry}}
 
+{{MemberRegistry}}
+
 == Framework 
 
 {{PluginRepo}}

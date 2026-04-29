@@ -51,6 +51,47 @@
 :xref-PluginRepoRegistry-PluginRepoRegistered-string-address-: xref:framework.adoc#PluginRepoRegistry-PluginRepoRegistered-string-address-
 :xref-PluginRepoRegistry-InvalidPluginSubdomain-string-: xref:framework.adoc#PluginRepoRegistry-InvalidPluginSubdomain-string-
 :xref-PluginRepoRegistry-ENSNotSupported--: xref:framework.adoc#PluginRepoRegistry-ENSNotSupported--
+:xref-MemberRegistry-constructor--: xref:framework.adoc#MemberRegistry-constructor--
+:xref-MemberRegistry-initialize-contract-IDAO-contract-ENS-string-address-: xref:framework.adoc#MemberRegistry-initialize-contract-IDAO-contract-ENS-string-address-
+:xref-MemberRegistry-register-string-: xref:framework.adoc#MemberRegistry-register-string-
+:xref-MemberRegistry-register-string-struct-IMemberRegistry-Records-: xref:framework.adoc#MemberRegistry-register-string-struct-IMemberRegistry-Records-
+:xref-MemberRegistry-release--: xref:framework.adoc#MemberRegistry-release--
+:xref-MemberRegistry-revoke-address-: xref:framework.adoc#MemberRegistry-revoke-address-
+:xref-MemberRegistry-move-string-: xref:framework.adoc#MemberRegistry-move-string-
+:xref-MemberRegistry-move-string-struct-IMemberRegistry-Records-: xref:framework.adoc#MemberRegistry-move-string-struct-IMemberRegistry-Records-
+:xref-MemberRegistry-isRegistered-address-: xref:framework.adoc#MemberRegistry-isRegistered-address-
+:xref-MemberRegistry-_register-string-: xref:framework.adoc#MemberRegistry-_register-string-
+:xref-MemberRegistry-_move-string-: xref:framework.adoc#MemberRegistry-_move-string-
+:xref-MemberRegistry-_release-address-: xref:framework.adoc#MemberRegistry-_release-address-
+:xref-MemberRegistry-_validateSubdomain-string-: xref:framework.adoc#MemberRegistry-_validateSubdomain-string-
+:xref-MemberRegistry-_assignSubnode-address-bytes32-: xref:framework.adoc#MemberRegistry-_assignSubnode-address-bytes32-
+:xref-MemberRegistry-_releaseSubnode-address-bytes32-: xref:framework.adoc#MemberRegistry-_releaseSubnode-address-bytes32-
+:xref-MemberRegistry-_setResolverAddr-bytes32-address-: xref:framework.adoc#MemberRegistry-_setResolverAddr-bytes32-address-
+:xref-MemberRegistry-_applyRecords-bytes32-struct-IMemberRegistry-Records-: xref:framework.adoc#MemberRegistry-_applyRecords-bytes32-struct-IMemberRegistry-Records-
+:xref-MemberRegistry-_authorizeUpgrade-address-: xref:framework.adoc#MemberRegistry-_authorizeUpgrade-address-
+:xref-IMemberRegistry-parentDomain--: xref:framework.adoc#IMemberRegistry-parentDomain--
+:xref-IMemberRegistry-parentNode--: xref:framework.adoc#IMemberRegistry-parentNode--
+:xref-MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32: xref:framework.adoc#MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32
+:xref-MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32: xref:framework.adoc#MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32
+:xref-MemberRegistry-ens-contract-ENS: xref:framework.adoc#MemberRegistry-ens-contract-ENS
+:xref-MemberRegistry-parentNode-bytes32: xref:framework.adoc#MemberRegistry-parentNode-bytes32
+:xref-MemberRegistry-parentDomain-string: xref:framework.adoc#MemberRegistry-parentDomain-string
+:xref-MemberRegistry-resolver-address: xref:framework.adoc#MemberRegistry-resolver-address
+:xref-MemberRegistry-memberLabel-mapping-address----bytes32-: xref:framework.adoc#MemberRegistry-memberLabel-mapping-address----bytes32-
+:xref-MemberRegistry-memberSubdomain-mapping-address----string-: xref:framework.adoc#MemberRegistry-memberSubdomain-mapping-address----string-
+:xref-MemberRegistry-labelOwner-mapping-bytes32----address-: xref:framework.adoc#MemberRegistry-labelOwner-mapping-bytes32----address-
+:xref-MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256: xref:framework.adoc#MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256
+:xref-IMemberRegistry-Registered-address-string-: xref:framework.adoc#IMemberRegistry-Registered-address-string-
+:xref-IMemberRegistry-Released-address-string-: xref:framework.adoc#IMemberRegistry-Released-address-string-
+:xref-IMemberRegistry-SubdomainRevoked-address-address-string-: xref:framework.adoc#IMemberRegistry-SubdomainRevoked-address-address-string-
+:xref-IMemberRegistry-ProfileMoved-address-string-string-: xref:framework.adoc#IMemberRegistry-ProfileMoved-address-string-string-
+:xref-IMemberRegistry-InvalidSubdomain-string-: xref:framework.adoc#IMemberRegistry-InvalidSubdomain-string-
+:xref-IMemberRegistry-AlreadyRegistered-address-: xref:framework.adoc#IMemberRegistry-AlreadyRegistered-address-
+:xref-IMemberRegistry-NotRegistered-address-: xref:framework.adoc#IMemberRegistry-NotRegistered-address-
+:xref-IMemberRegistry-SubdomainAlreadyTaken-string-: xref:framework.adoc#IMemberRegistry-SubdomainAlreadyTaken-string-
+:xref-IMemberRegistry-InvalidENSRegistry-address-: xref:framework.adoc#IMemberRegistry-InvalidENSRegistry-address-
+:xref-IMemberRegistry-InvalidDomain-string-: xref:framework.adoc#IMemberRegistry-InvalidDomain-string-
+:xref-IMemberRegistry-InvalidManagementDao-address-: xref:framework.adoc#IMemberRegistry-InvalidManagementDao-address-
 :xref-PluginRepo-constructor--: xref:framework.adoc#PluginRepo-constructor--
 :xref-PluginRepo-initialize-address-: xref:framework.adoc#PluginRepo-initialize-address-
 :xref-PluginRepo-initializeFrom-uint8-3--bytes-: xref:framework.adoc#PluginRepo-initializeFrom-uint8-3--bytes-
@@ -711,6 +752,291 @@ Thrown if the subdomain is present, but registrar is address(0).
 Registers a plugin repository with a subdomain and address.
 
 If subdomain is empty, registration on ENS is skipped.
+
+
+[.contract]
+[[MemberRegistry]]
+=== `++MemberRegistry++` link:https://github.com/aragon/osx/blob/main/src/framework/member/MemberRegistry.sol[{github-icon},role=heading-link]
+
+The ENS registry and resolver are trusted, known mainnet contracts. No reentrancy guard is needed — the contract is the sole caller of its own ENS operations.
+
+[.contract-index]
+.Modifiers
+--
+--
+
+[.contract-index]
+.Functions
+--
+* {xref-MemberRegistry-constructor--}[`++constructor()++`]
+* {xref-MemberRegistry-initialize-contract-IDAO-contract-ENS-string-address-}[`++initialize(_managementDao, _ens, _domain, _resolver)++`]
+* {xref-MemberRegistry-register-string-}[`++register(subdomain)++`]
+* {xref-MemberRegistry-register-string-struct-IMemberRegistry-Records-}[`++register(subdomain, records)++`]
+* {xref-MemberRegistry-release--}[`++release()++`]
+* {xref-MemberRegistry-revoke-address-}[`++revoke(member)++`]
+* {xref-MemberRegistry-move-string-}[`++move(newSubdomain)++`]
+* {xref-MemberRegistry-move-string-struct-IMemberRegistry-Records-}[`++move(newSubdomain, records)++`]
+* {xref-MemberRegistry-isRegistered-address-}[`++isRegistered(member)++`]
+* {xref-MemberRegistry-_register-string-}[`++_register(subdomain)++`]
+* {xref-MemberRegistry-_move-string-}[`++_move(newSubdomain)++`]
+* {xref-MemberRegistry-_release-address-}[`++_release(member)++`]
+* {xref-MemberRegistry-_validateSubdomain-string-}[`++_validateSubdomain(subdomain)++`]
+* {xref-MemberRegistry-_assignSubnode-address-bytes32-}[`++_assignSubnode(member, label)++`]
+* {xref-MemberRegistry-_releaseSubnode-address-bytes32-}[`++_releaseSubnode(member, label)++`]
+* {xref-MemberRegistry-_setResolverAddr-bytes32-address-}[`++_setResolverAddr(label, addr)++`]
+* {xref-MemberRegistry-_applyRecords-bytes32-struct-IMemberRegistry-Records-}[`++_applyRecords(label, records)++`]
+* {xref-MemberRegistry-_authorizeUpgrade-address-}[`++_authorizeUpgrade()++`]
+
+[.contract-subindex-inherited]
+.ProtocolVersion
+* {xref-ProtocolVersion-protocolVersion--}[`++protocolVersion()++`]
+
+[.contract-subindex-inherited]
+.DaoAuthorizableUpgradeable
+* {xref-DaoAuthorizableUpgradeable-__DaoAuthorizableUpgradeable_init-contract-IDAO-}[`++__DaoAuthorizableUpgradeable_init(_dao)++`]
+* {xref-DaoAuthorizableUpgradeable-dao--}[`++dao()++`]
+
+[.contract-subindex-inherited]
+.ContextUpgradeable
+
+[.contract-subindex-inherited]
+.UUPSUpgradeable
+
+[.contract-subindex-inherited]
+.ERC1967UpgradeUpgradeable
+
+[.contract-subindex-inherited]
+.IERC1967Upgradeable
+
+[.contract-subindex-inherited]
+.IERC1822ProxiableUpgradeable
+
+[.contract-subindex-inherited]
+.Initializable
+
+[.contract-subindex-inherited]
+.IMemberRegistry
+* {xref-IMemberRegistry-parentDomain--}[`++parentDomain()++`]
+* {xref-IMemberRegistry-parentNode--}[`++parentNode()++`]
+--
+
+[.contract-index]
+.Events
+--
+
+[.contract-subindex-inherited]
+.ContextUpgradeable
+
+[.contract-subindex-inherited]
+.UUPSUpgradeable
+
+[.contract-subindex-inherited]
+.ERC1967UpgradeUpgradeable
+
+[.contract-subindex-inherited]
+.IERC1967Upgradeable
+
+[.contract-subindex-inherited]
+.IERC1822ProxiableUpgradeable
+
+[.contract-subindex-inherited]
+.Initializable
+
+[.contract-subindex-inherited]
+.IMemberRegistry
+* {xref-IMemberRegistry-Registered-address-string-}[`++Registered(member, subdomain)++`]
+* {xref-IMemberRegistry-Released-address-string-}[`++Released(member, subdomain)++`]
+* {xref-IMemberRegistry-SubdomainRevoked-address-address-string-}[`++SubdomainRevoked(member, revoker, subdomain)++`]
+* {xref-IMemberRegistry-ProfileMoved-address-string-string-}[`++ProfileMoved(member, oldSubdomain, newSubdomain)++`]
+--
+
+[.contract-index]
+.Errors
+--
+
+[.contract-subindex-inherited]
+.ContextUpgradeable
+
+[.contract-subindex-inherited]
+.UUPSUpgradeable
+
+[.contract-subindex-inherited]
+.ERC1967UpgradeUpgradeable
+
+[.contract-subindex-inherited]
+.IERC1967Upgradeable
+
+[.contract-subindex-inherited]
+.IERC1822ProxiableUpgradeable
+
+[.contract-subindex-inherited]
+.Initializable
+
+[.contract-subindex-inherited]
+.IMemberRegistry
+* {xref-IMemberRegistry-InvalidSubdomain-string-}[`++InvalidSubdomain(subdomain)++`]
+* {xref-IMemberRegistry-AlreadyRegistered-address-}[`++AlreadyRegistered(member)++`]
+* {xref-IMemberRegistry-NotRegistered-address-}[`++NotRegistered(member)++`]
+* {xref-IMemberRegistry-SubdomainAlreadyTaken-string-}[`++SubdomainAlreadyTaken(subdomain)++`]
+* {xref-IMemberRegistry-InvalidENSRegistry-address-}[`++InvalidENSRegistry(ens)++`]
+* {xref-IMemberRegistry-InvalidDomain-string-}[`++InvalidDomain(domain)++`]
+* {xref-IMemberRegistry-InvalidManagementDao-address-}[`++InvalidManagementDao(dao)++`]
+--
+
+[.contract-index]
+.Internal Variables
+--
+* {xref-MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32}[`++bytes32 constant UPGRADE_REGISTRY_PERMISSION_ID++`]
+* {xref-MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32}[`++bytes32 constant REVOKE_MEMBER_PERMISSION_ID++`]
+* {xref-MemberRegistry-ens-contract-ENS}[`++contract ENS ens++`]
+* {xref-MemberRegistry-parentNode-bytes32}[`++bytes32 parentNode++`]
+* {xref-MemberRegistry-parentDomain-string}[`++string parentDomain++`]
+* {xref-MemberRegistry-resolver-address}[`++address resolver++`]
+* {xref-MemberRegistry-memberLabel-mapping-address----bytes32-}[`++mapping(address => bytes32) memberLabel++`]
+* {xref-MemberRegistry-memberSubdomain-mapping-address----string-}[`++mapping(address => string) memberSubdomain++`]
+* {xref-MemberRegistry-labelOwner-mapping-bytes32----address-}[`++mapping(bytes32 => address) labelOwner++`]
+* {xref-MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256}[`++uint256 constant MAX_SUBDOMAIN_LENGTH++`]
+
+[.contract-subindex-inherited]
+.ContextUpgradeable
+
+[.contract-subindex-inherited]
+.UUPSUpgradeable
+
+[.contract-subindex-inherited]
+.ERC1967UpgradeUpgradeable
+
+[.contract-subindex-inherited]
+.IERC1967Upgradeable
+
+[.contract-subindex-inherited]
+.IERC1822ProxiableUpgradeable
+
+[.contract-subindex-inherited]
+.Initializable
+--
+
+[.contract-item]
+[[MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32]]
+==== `[.contract-item-name]#++UPGRADE_REGISTRY_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32]]
+==== `[.contract-item-name]#++REVOKE_MEMBER_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-ens-contract-ENS]]
+==== `[.contract-item-name]#++ens++#++() → contract ENS++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-parentNode-bytes32]]
+==== `[.contract-item-name]#++parentNode++#++() → bytes32++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-parentDomain-string]]
+==== `[.contract-item-name]#++parentDomain++#++() → string++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-resolver-address]]
+==== `[.contract-item-name]#++resolver++#++() → address++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-memberLabel-mapping-address----bytes32-]]
+==== `[.contract-item-name]#++memberLabel++#++() → mapping(address => bytes32)++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-memberSubdomain-mapping-address----string-]]
+==== `[.contract-item-name]#++memberSubdomain++#++() → mapping(address => string)++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-labelOwner-mapping-bytes32----address-]]
+==== `[.contract-item-name]#++labelOwner++#++() → mapping(bytes32 => address)++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-constructor--]]
+==== `[.contract-item-name]#++constructor++#++()++` [.item-kind]#public#
+
+[.contract-item]
+[[MemberRegistry-initialize-contract-IDAO-contract-ENS-string-address-]]
+==== `[.contract-item-name]#++initialize++#++(contract IDAO _managementDao, contract ENS _ens, string _domain, address _resolver)++` [.item-kind]#external#
+
+[.contract-item]
+[[MemberRegistry-register-string-]]
+==== `[.contract-item-name]#++register++#++(string subdomain)++` [.item-kind]#external#
+
+Register as a member by claiming a subdomain. Permissionless.         One subdomain per address. Reverts if already registered (release first).
+
+[.contract-item]
+[[MemberRegistry-register-string-struct-IMemberRegistry-Records-]]
+==== `[.contract-item-name]#++register++#++(string subdomain, struct IMemberRegistry.Records records)++` [.item-kind]#external#
+
+[.contract-item]
+[[MemberRegistry-release--]]
+==== `[.contract-item-name]#++release++#++()++` [.item-kind]#external#
+
+Voluntarily release your subdomain. Permissionless.         Only releases the caller's own subdomain. Reverts if not registered.
+
+[.contract-item]
+[[MemberRegistry-revoke-address-]]
+==== `[.contract-item-name]#++revoke++#++(address member)++` [.item-kind]#external#
+
+Forcibly revoke a member's subdomain. Governed.         Requires REVOKE_MEMBER_PERMISSION_ID on this contract (OSx permission system).
+
+[.contract-item]
+[[MemberRegistry-move-string-]]
+==== `[.contract-item-name]#++move++#++(string newSubdomain)++` [.item-kind]#external#
+
+Move your subdomain. Releases the old label and claims the new one atomically.         Only moves the caller's own subdomain. Reverts if not registered or new label taken.
+
+[.contract-item]
+[[MemberRegistry-move-string-struct-IMemberRegistry-Records-]]
+==== `[.contract-item-name]#++move++#++(string newSubdomain, struct IMemberRegistry.Records records)++` [.item-kind]#external#
+
+[.contract-item]
+[[MemberRegistry-isRegistered-address-]]
+==== `[.contract-item-name]#++isRegistered++#++(address member) → bool++` [.item-kind]#external#
+
+Returns true if the member has a registered subdomain.
+
+[.contract-item]
+[[MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256]]
+==== `[.contract-item-name]#++MAX_SUBDOMAIN_LENGTH++#++() → uint256++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_register-string-]]
+==== `[.contract-item-name]#++_register++#++(string subdomain) → bytes32 label++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_move-string-]]
+==== `[.contract-item-name]#++_move++#++(string newSubdomain) → bytes32 newLabel, string oldSubdomain++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_release-address-]]
+==== `[.contract-item-name]#++_release++#++(address member) → string subdomain++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_validateSubdomain-string-]]
+==== `[.contract-item-name]#++_validateSubdomain++#++(string subdomain)++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_assignSubnode-address-bytes32-]]
+==== `[.contract-item-name]#++_assignSubnode++#++(address member, bytes32 label)++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_releaseSubnode-address-bytes32-]]
+==== `[.contract-item-name]#++_releaseSubnode++#++(address member, bytes32 label)++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_setResolverAddr-bytes32-address-]]
+==== `[.contract-item-name]#++_setResolverAddr++#++(bytes32 label, address addr)++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_applyRecords-bytes32-struct-IMemberRegistry-Records-]]
+==== `[.contract-item-name]#++_applyRecords++#++(bytes32 label, struct IMemberRegistry.Records records)++` [.item-kind]#internal#
+
+[.contract-item]
+[[MemberRegistry-_authorizeUpgrade-address-]]
+==== `[.contract-item-name]#++_authorizeUpgrade++#++(address)++` [.item-kind]#internal#
 
 
 == Framework 
