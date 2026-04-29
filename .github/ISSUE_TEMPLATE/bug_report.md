@@ -23,8 +23,9 @@ labels: bug
 
 **Context**
 
-- Network:
-- Contract version (or commit hash):
-- Address(es):
-- Transaction hash (if any):
+- Network: 
+- Contract(s): 
+- Protocol version (or commit hash): 
+- Address(es): 
+- Transaction hash (if any): 
 - Anything else relevant:
