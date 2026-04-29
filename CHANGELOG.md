@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.5.0
+
+### Added
+
+- `MemberRegistry` (and `IMemberRegistry`): permissionless member self-registration via ENS subdomain claims under a configurable parent. Manages subdomain lifecycle (claim, release, move, governance revoke), with per-node resolver approval so members manage their own ENS records natively.
+- `ENSDomain` library (`namehash`, `splitDomain`) under `src/framework/utils/ens/`.
+- `IResolver` interface for per-node resolver approval (requires `ens-contracts` v0.0.19+).
+
+### Changed
+
+- Toolchain migration: HardHat → Foundry. Build via `forge`, tasks via `just` (with shared `just-foundry` recipes). `osx-commons-contracts` source absorbed at `src/common/` (was previously an npm dep).
+- The `@aragon/osx` npm package is retired. Consume Solidity via git submodule.
+
+### Notes
+
+- Existing OSx core contracts (`DAO`, `DAORegistry`, `PluginRepoRegistry`, `DAOFactory`, `PluginRepoFactory`, `PluginSetupProcessor`, `ENSSubdomainRegistrar`, etc.) are byte-identical to v1.4.0 — same compiler (`solc 0.8.17`), same `optimizer-runs = 2000`. No behavior change for any deployed contract.
+- `ProtocolVersion` (in `src/common/utils/versioning/`) stays at `[1, 4, 0]`. This release adds new sibling components but the existing protocol surface is unchanged. New deploys via `protocol-factory` continue to report `1.4.0` for the core contracts; `MemberRegistry` inherits `ProtocolVersion` and reports the same.
+
 ## v1.4.0
 
 ### Added

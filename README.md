@@ -144,6 +144,7 @@ In contrast, the _Framework Contracts_ are in charge of creating and registering
   - **The DAO Registry**: In charge of registering DAOs into our protocol so plugins can easily access all DAO instances within our protocol. It is also in charge of giving DAOs subdomains for easier access.
   - **The Plugin Factory**: A `PluginRepo` is the repository of versions for a given plugin. The `PluginRepoFactory` contract creates a `PluginRepo` instance for each plugin, so that plugins can update their versioning without complexity in a semantic way similar to the App Store.
   - **The Plugin Registry**: In charge of registering the `PluginRepo` addresses into our protocol so that DAOs can access all plugins published in the protocol.
+  - **The Member Registry**: Permissionless self-registration of DAO members under a parent ENS domain. Members claim a subdomain, the registry grants per-node resolver approval so they manage their own ENS records (avatar, addr, contenthash) directly, and governance can revoke entries. See `src/framework/member/MemberRegistry.sol`.
 - **Plugin Setup Processor**: The processor is the manager for plugins. It installs, uninstalls, and upgrades plugins for DAOs based on the instructions provided by the plugin setup.
 
 For a more detailed description of each of these components, please visit our [Developer Portal](https://docs.aragon.org).
@@ -171,13 +172,9 @@ See the [Foundry book](https://book.getfoundry.sh/forge/tests) for advanced opti
 
 ## Deployment
 
-This repository is **source-only** — deployment is handled by [protocol-factory](https://github.com/aragon/protocol-factory), which orchestrates the full network bring-up (OSx core + plugins + registries).
+The split:
 
-For deployment checklist details, see [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md).
+- **Full OSx protocol bring-up on a new chain** (core + plugins + ENS + Management DAO) is the job of [`aragon/protocol-factory`](https://github.com/aragon/protocol-factory) — refer to its checklist.
+- **Component-level deploys and upgrades** (e.g., `MemberRegistry`; future modernized registrars) live in this repo as `scripts/Deploy<Component>.s.sol` / `scripts/Upgrade<Component>.s.sol`. They run under `just deploy-<component>` / `just simulate-<component>`, broadcast + verify via just-foundry, and print encoded governance actions for the Management DAO multisig.
 
-## Publishing protocol upgrades
-
-Follow [our update checklist here](https://github.com/aragon/osx/blob/main/UPDATE_CHECKLIST.md).
-
-Also check the [README](./packages/contracts/scripts/management-dao-proposal/README.md) of the Management DAO proposal generation flow.
-
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for the component-deploy checklist (pre/post steps, ceremony coordination).
