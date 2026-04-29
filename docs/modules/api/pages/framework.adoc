@@ -56,14 +56,14 @@
 :xref-MemberRegistry-register-string-: xref:framework.adoc#MemberRegistry-register-string-
 :xref-MemberRegistry-register-string-struct-IMemberRegistry-Records-: xref:framework.adoc#MemberRegistry-register-string-struct-IMemberRegistry-Records-
 :xref-MemberRegistry-release--: xref:framework.adoc#MemberRegistry-release--
-:xref-MemberRegistry-revoke-address-: xref:framework.adoc#MemberRegistry-revoke-address-
+:xref-MemberRegistry-evict-string-address-: xref:framework.adoc#MemberRegistry-evict-string-address-
 :xref-MemberRegistry-move-string-: xref:framework.adoc#MemberRegistry-move-string-
 :xref-MemberRegistry-move-string-struct-IMemberRegistry-Records-: xref:framework.adoc#MemberRegistry-move-string-struct-IMemberRegistry-Records-
 :xref-MemberRegistry-isRegistered-address-: xref:framework.adoc#MemberRegistry-isRegistered-address-
-:xref-MemberRegistry-_register-string-: xref:framework.adoc#MemberRegistry-_register-string-
+:xref-MemberRegistry-_register-string-address-: xref:framework.adoc#MemberRegistry-_register-string-address-
 :xref-MemberRegistry-_move-string-: xref:framework.adoc#MemberRegistry-_move-string-
 :xref-MemberRegistry-_release-address-: xref:framework.adoc#MemberRegistry-_release-address-
-:xref-MemberRegistry-_validateSubdomain-string-: xref:framework.adoc#MemberRegistry-_validateSubdomain-string-
+:xref-MemberRegistry-_requireValidSubdomain-string-: xref:framework.adoc#MemberRegistry-_requireValidSubdomain-string-
 :xref-MemberRegistry-_assignSubnode-address-bytes32-: xref:framework.adoc#MemberRegistry-_assignSubnode-address-bytes32-
 :xref-MemberRegistry-_releaseSubnode-address-bytes32-: xref:framework.adoc#MemberRegistry-_releaseSubnode-address-bytes32-
 :xref-MemberRegistry-_setResolverAddr-bytes32-address-: xref:framework.adoc#MemberRegistry-_setResolverAddr-bytes32-address-
@@ -72,7 +72,7 @@
 :xref-IMemberRegistry-parentDomain--: xref:framework.adoc#IMemberRegistry-parentDomain--
 :xref-IMemberRegistry-parentNode--: xref:framework.adoc#IMemberRegistry-parentNode--
 :xref-MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32: xref:framework.adoc#MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32
-:xref-MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32: xref:framework.adoc#MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32
+:xref-MemberRegistry-EVICT_SUBDOMAIN_PERMISSION_ID-bytes32: xref:framework.adoc#MemberRegistry-EVICT_SUBDOMAIN_PERMISSION_ID-bytes32
 :xref-MemberRegistry-ens-contract-ENS: xref:framework.adoc#MemberRegistry-ens-contract-ENS
 :xref-MemberRegistry-parentNode-bytes32: xref:framework.adoc#MemberRegistry-parentNode-bytes32
 :xref-MemberRegistry-parentDomain-string: xref:framework.adoc#MemberRegistry-parentDomain-string
@@ -80,15 +80,18 @@
 :xref-MemberRegistry-memberLabel-mapping-address----bytes32-: xref:framework.adoc#MemberRegistry-memberLabel-mapping-address----bytes32-
 :xref-MemberRegistry-memberSubdomain-mapping-address----string-: xref:framework.adoc#MemberRegistry-memberSubdomain-mapping-address----string-
 :xref-MemberRegistry-labelOwner-mapping-bytes32----address-: xref:framework.adoc#MemberRegistry-labelOwner-mapping-bytes32----address-
+:xref-MemberRegistry-MIN_SUBDOMAIN_LENGTH-uint256: xref:framework.adoc#MemberRegistry-MIN_SUBDOMAIN_LENGTH-uint256
 :xref-MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256: xref:framework.adoc#MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256
 :xref-IMemberRegistry-Registered-address-string-: xref:framework.adoc#IMemberRegistry-Registered-address-string-
 :xref-IMemberRegistry-Released-address-string-: xref:framework.adoc#IMemberRegistry-Released-address-string-
-:xref-IMemberRegistry-SubdomainRevoked-address-address-string-: xref:framework.adoc#IMemberRegistry-SubdomainRevoked-address-address-string-
+:xref-IMemberRegistry-SubdomainEvicted-address-address-string-: xref:framework.adoc#IMemberRegistry-SubdomainEvicted-address-address-string-
 :xref-IMemberRegistry-ProfileMoved-address-string-string-: xref:framework.adoc#IMemberRegistry-ProfileMoved-address-string-string-
 :xref-IMemberRegistry-InvalidSubdomain-string-: xref:framework.adoc#IMemberRegistry-InvalidSubdomain-string-
 :xref-IMemberRegistry-AlreadyRegistered-address-: xref:framework.adoc#IMemberRegistry-AlreadyRegistered-address-
 :xref-IMemberRegistry-NotRegistered-address-: xref:framework.adoc#IMemberRegistry-NotRegistered-address-
 :xref-IMemberRegistry-SubdomainAlreadyTaken-string-: xref:framework.adoc#IMemberRegistry-SubdomainAlreadyTaken-string-
+:xref-IMemberRegistry-SubdomainNotRegistered-string-: xref:framework.adoc#IMemberRegistry-SubdomainNotRegistered-string-
+:xref-IMemberRegistry-InvalidNewController-address-: xref:framework.adoc#IMemberRegistry-InvalidNewController-address-
 :xref-IMemberRegistry-InvalidENSRegistry-address-: xref:framework.adoc#IMemberRegistry-InvalidENSRegistry-address-
 :xref-IMemberRegistry-InvalidDomain-string-: xref:framework.adoc#IMemberRegistry-InvalidDomain-string-
 :xref-IMemberRegistry-InvalidManagementDao-address-: xref:framework.adoc#IMemberRegistry-InvalidManagementDao-address-
@@ -773,14 +776,14 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 * {xref-MemberRegistry-register-string-}[`++register(subdomain)++`]
 * {xref-MemberRegistry-register-string-struct-IMemberRegistry-Records-}[`++register(subdomain, records)++`]
 * {xref-MemberRegistry-release--}[`++release()++`]
-* {xref-MemberRegistry-revoke-address-}[`++revoke(member)++`]
+* {xref-MemberRegistry-evict-string-address-}[`++evict(subdomain, newController)++`]
 * {xref-MemberRegistry-move-string-}[`++move(newSubdomain)++`]
 * {xref-MemberRegistry-move-string-struct-IMemberRegistry-Records-}[`++move(newSubdomain, records)++`]
 * {xref-MemberRegistry-isRegistered-address-}[`++isRegistered(member)++`]
-* {xref-MemberRegistry-_register-string-}[`++_register(subdomain)++`]
+* {xref-MemberRegistry-_register-string-address-}[`++_register(subdomain, member)++`]
 * {xref-MemberRegistry-_move-string-}[`++_move(newSubdomain)++`]
 * {xref-MemberRegistry-_release-address-}[`++_release(member)++`]
-* {xref-MemberRegistry-_validateSubdomain-string-}[`++_validateSubdomain(subdomain)++`]
+* {xref-MemberRegistry-_requireValidSubdomain-string-}[`++_requireValidSubdomain(subdomain)++`]
 * {xref-MemberRegistry-_assignSubnode-address-bytes32-}[`++_assignSubnode(member, label)++`]
 * {xref-MemberRegistry-_releaseSubnode-address-bytes32-}[`++_releaseSubnode(member, label)++`]
 * {xref-MemberRegistry-_setResolverAddr-bytes32-address-}[`++_setResolverAddr(label, addr)++`]
@@ -846,7 +849,7 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 .IMemberRegistry
 * {xref-IMemberRegistry-Registered-address-string-}[`++Registered(member, subdomain)++`]
 * {xref-IMemberRegistry-Released-address-string-}[`++Released(member, subdomain)++`]
-* {xref-IMemberRegistry-SubdomainRevoked-address-address-string-}[`++SubdomainRevoked(member, revoker, subdomain)++`]
+* {xref-IMemberRegistry-SubdomainEvicted-address-address-string-}[`++SubdomainEvicted(member, evictor, subdomain)++`]
 * {xref-IMemberRegistry-ProfileMoved-address-string-string-}[`++ProfileMoved(member, oldSubdomain, newSubdomain)++`]
 --
 
@@ -878,6 +881,8 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 * {xref-IMemberRegistry-AlreadyRegistered-address-}[`++AlreadyRegistered(member)++`]
 * {xref-IMemberRegistry-NotRegistered-address-}[`++NotRegistered(member)++`]
 * {xref-IMemberRegistry-SubdomainAlreadyTaken-string-}[`++SubdomainAlreadyTaken(subdomain)++`]
+* {xref-IMemberRegistry-SubdomainNotRegistered-string-}[`++SubdomainNotRegistered(subdomain)++`]
+* {xref-IMemberRegistry-InvalidNewController-address-}[`++InvalidNewController(newController)++`]
 * {xref-IMemberRegistry-InvalidENSRegistry-address-}[`++InvalidENSRegistry(ens)++`]
 * {xref-IMemberRegistry-InvalidDomain-string-}[`++InvalidDomain(domain)++`]
 * {xref-IMemberRegistry-InvalidManagementDao-address-}[`++InvalidManagementDao(dao)++`]
@@ -887,7 +892,7 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 .Internal Variables
 --
 * {xref-MemberRegistry-UPGRADE_REGISTRY_PERMISSION_ID-bytes32}[`++bytes32 constant UPGRADE_REGISTRY_PERMISSION_ID++`]
-* {xref-MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32}[`++bytes32 constant REVOKE_MEMBER_PERMISSION_ID++`]
+* {xref-MemberRegistry-EVICT_SUBDOMAIN_PERMISSION_ID-bytes32}[`++bytes32 constant EVICT_SUBDOMAIN_PERMISSION_ID++`]
 * {xref-MemberRegistry-ens-contract-ENS}[`++contract ENS ens++`]
 * {xref-MemberRegistry-parentNode-bytes32}[`++bytes32 parentNode++`]
 * {xref-MemberRegistry-parentDomain-string}[`++string parentDomain++`]
@@ -895,6 +900,7 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 * {xref-MemberRegistry-memberLabel-mapping-address----bytes32-}[`++mapping(address => bytes32) memberLabel++`]
 * {xref-MemberRegistry-memberSubdomain-mapping-address----string-}[`++mapping(address => string) memberSubdomain++`]
 * {xref-MemberRegistry-labelOwner-mapping-bytes32----address-}[`++mapping(bytes32 => address) labelOwner++`]
+* {xref-MemberRegistry-MIN_SUBDOMAIN_LENGTH-uint256}[`++uint256 constant MIN_SUBDOMAIN_LENGTH++`]
 * {xref-MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256}[`++uint256 constant MAX_SUBDOMAIN_LENGTH++`]
 
 [.contract-subindex-inherited]
@@ -921,8 +927,8 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 ==== `[.contract-item-name]#++UPGRADE_REGISTRY_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
 [.contract-item]
-[[MemberRegistry-REVOKE_MEMBER_PERMISSION_ID-bytes32]]
-==== `[.contract-item-name]#++REVOKE_MEMBER_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
+[[MemberRegistry-EVICT_SUBDOMAIN_PERMISSION_ID-bytes32]]
+==== `[.contract-item-name]#++EVICT_SUBDOMAIN_PERMISSION_ID++#++() → bytes32++` [.item-kind]#public#
 
 [.contract-item]
 [[MemberRegistry-ens-contract-ENS]]
@@ -977,10 +983,10 @@ Register as a member by claiming a subdomain. Permissionless.         One subdom
 Voluntarily release your subdomain. Permissionless.         Only releases the caller's own subdomain. Reverts if not registered.
 
 [.contract-item]
-[[MemberRegistry-revoke-address-]]
-==== `[.contract-item-name]#++revoke++#++(address member)++` [.item-kind]#external#
+[[MemberRegistry-evict-string-address-]]
+==== `[.contract-item-name]#++evict++#++(string subdomain, address newController)++` [.item-kind]#external#
 
-Forcibly revoke a member's subdomain. Governed.         Requires REVOKE_MEMBER_PERMISSION_ID on this contract (OSx permission system).
+Forcibly evict a subdomain, optionally re-assigning it to a new controller. Governed.         Requires EVICT_SUBDOMAIN_PERMISSION_ID on this contract (OSx permission system).         If `newController` is the zero address, the subdomain is fully released (records         cleared, subnode released). If `newController` is non-zero, the same subdomain is         re-assigned to it as if it had called `register` itself: ENS subnode re-created,         addr record set to `newController`, per-node resolver approval granted to it.         Reverts if the subdomain is unknown, if `newController` already controls it, or         if `newController` is already registered with a different subdomain.
 
 [.contract-item]
 [[MemberRegistry-move-string-]]
@@ -999,12 +1005,16 @@ Move your subdomain. Releases the old label and claims the new one atomically.  
 Returns true if the member has a registered subdomain.
 
 [.contract-item]
+[[MemberRegistry-MIN_SUBDOMAIN_LENGTH-uint256]]
+==== `[.contract-item-name]#++MIN_SUBDOMAIN_LENGTH++#++() → uint256++` [.item-kind]#internal#
+
+[.contract-item]
 [[MemberRegistry-MAX_SUBDOMAIN_LENGTH-uint256]]
 ==== `[.contract-item-name]#++MAX_SUBDOMAIN_LENGTH++#++() → uint256++` [.item-kind]#internal#
 
 [.contract-item]
-[[MemberRegistry-_register-string-]]
-==== `[.contract-item-name]#++_register++#++(string subdomain) → bytes32 label++` [.item-kind]#internal#
+[[MemberRegistry-_register-string-address-]]
+==== `[.contract-item-name]#++_register++#++(string subdomain, address member) → bytes32 label++` [.item-kind]#internal#
 
 [.contract-item]
 [[MemberRegistry-_move-string-]]
@@ -1015,8 +1025,8 @@ Returns true if the member has a registered subdomain.
 ==== `[.contract-item-name]#++_release++#++(address member) → string subdomain++` [.item-kind]#internal#
 
 [.contract-item]
-[[MemberRegistry-_validateSubdomain-string-]]
-==== `[.contract-item-name]#++_validateSubdomain++#++(string subdomain)++` [.item-kind]#internal#
+[[MemberRegistry-_requireValidSubdomain-string-]]
+==== `[.contract-item-name]#++_requireValidSubdomain++#++(string subdomain)++` [.item-kind]#internal#
 
 [.contract-item]
 [[MemberRegistry-_assignSubnode-address-bytes32-]]

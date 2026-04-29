@@ -13,7 +13,7 @@ import {IResolver} from "../../../../src/framework/utils/ens/IResolver.sol";
 import {ENSDomain} from "../../../../src/framework/utils/ens/ENSDomain.sol";
 
 /// @notice Simulates the full deployment + governance setup on a mainnet fork.
-/// Reads PARENT_DOMAIN and MANAGEMENT_DAO from env. Looks up the actual ENS domain
+/// Reads PARENT_DOMAIN and MANAGEMENT_DAO_ADDRESS from env. Looks up the actual ENS domain
 /// owner on the fork and executes each action from the correct address.
 /// @dev Run with: just test-fork --match-contract SetupSimulation
 contract SetupSimulationTest is Test {
@@ -32,7 +32,7 @@ contract SetupSimulationTest is Test {
     function setUp() public {
         vm.createSelectFork(vm.envString("RPC_URL"));
 
-        managementDao = vm.envAddress("MANAGEMENT_DAO");
+        managementDao = vm.envAddress("MANAGEMENT_DAO_ADDRESS");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("members.dao.eth"));
         parentNode = ENSDomain.namehash(parentDomain);
 
@@ -84,15 +84,15 @@ contract SetupSimulationTest is Test {
         vm.stopPrank();
         console.log("Step 1: Deployed registry at", address(registry));
 
-        // --- Step 2: DAO grants REVOKE_MEMBER_PERMISSION to itself ---
+        // --- Step 2: DAO grants EVICT_SUBDOMAIN_PERMISSION to itself ---
 
-        bytes32 revokePermId = registry.REVOKE_MEMBER_PERMISSION_ID();
+        bytes32 evictPermId = registry.EVICT_SUBDOMAIN_PERMISSION_ID();
         vm.prank(managementDao);
         (bool grantOk,) = managementDao.call(
-            abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, revokePermId)
+            abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, evictPermId)
         );
-        assertTrue(grantOk, "Step 2: grant REVOKE_MEMBER_PERMISSION failed");
-        console.log("Step 2: Granted REVOKE_MEMBER_PERMISSION");
+        assertTrue(grantOk, "Step 2: grant EVICT_SUBDOMAIN_PERMISSION failed");
+        console.log("Step 2: Granted EVICT_SUBDOMAIN_PERMISSION");
 
         // --- Step 3: Domain owner approves registry as ENS operator ---
 
@@ -128,15 +128,15 @@ contract SetupSimulationTest is Test {
         console.log("member setText succeeded");
     }
 
-    function test_setup_revokeWorks() public {
+    function test_setup_evictWorks() public {
         vm.prank(alice);
         registry.register("alice");
 
         vm.prank(managementDao);
-        registry.revoke(alice);
+        registry.evict("alice", address(0));
 
         assertFalse(registry.isRegistered(alice));
-        console.log("revoke succeeded");
+        console.log("evict succeeded");
     }
 
     function test_setup_fullCycle() public {

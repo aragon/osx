@@ -40,7 +40,7 @@ contract DeployMemberRegistry is Script {
     }
 
     function run() public broadcast {
-        dao = vm.envAddress("MANAGEMENT_DAO");
+        dao = vm.envAddress("MANAGEMENT_DAO_ADDRESS");
         ens = vm.envAddress("ENS_REGISTRY");
         parentDomain = vm.envOr("PARENT_DOMAIN", string("members.dao.eth"));
         parentNode = ENSDomain.namehash(parentDomain);
@@ -91,14 +91,14 @@ contract DeployMemberRegistry is Script {
 
         // Action 1
         console.log();
-        console.log("DAO action: Grant REVOKE_MEMBER_PERMISSION on registry to the DAO");
+        console.log("DAO action: Grant EVICT_SUBDOMAIN_PERMISSION on registry to the DAO");
         console.log();
         console.log("- From:          ", dao, " (controlling DAO)");
         console.log("- To:            ", dao, " (controlling DAO)");
         console.log("- Function:       grant(address where, address who, bytes32 permissionId)");
         console.log("  where:         ", address(registry), " (registry)");
         console.log("  who:           ", dao, " (controlling DAO)");
-        console.log("  permissionId:  ", vm.toString(registry.REVOKE_MEMBER_PERMISSION_ID()));
+        console.log("  permissionId:  ", vm.toString(registry.EVICT_SUBDOMAIN_PERMISSION_ID()));
 
         address ensOwner = ENS(ens).owner(parentNode);
         // Known NameWrapper on mainnet
@@ -188,9 +188,17 @@ contract DeployMemberRegistry is Script {
         artifacts.serialize("memberRegistryImpl", address(registryImpl));
         artifacts = artifacts.serialize("memberRegistryProxy", address(registry));
 
+        // Ensure ./artifacts/deployments/ exists. `vm.createDir(_, true)` is
+        // recursive and idempotent.
+        vm.createDir("./artifacts/deployments", true);
         string memory networkName = vm.envOr("NETWORK_NAME", string("local"));
         string memory filePath = string.concat(
-            vm.projectRoot(), "/artifacts/deployment-", networkName, "-", vm.toString(block.timestamp), ".json"
+            vm.projectRoot(),
+            "/artifacts/deployments/",
+            networkName,
+            "-",
+            vm.toString(block.timestamp),
+            ".json"
         );
         artifacts.write(filePath);
 

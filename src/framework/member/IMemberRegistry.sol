@@ -31,14 +31,14 @@ interface IMemberRegistry {
     /// @notice Emitted when a member voluntarily releases their subdomain.
     event Released(address indexed member, string subdomain);
 
-    /// @notice Emitted when governance forcibly revokes a member's subdomain.
-    event SubdomainRevoked(address indexed member, address indexed revoker, string subdomain);
+    /// @notice Emitted when governance forcibly evicts a member's subdomain.
+    event SubdomainEvicted(address indexed member, address indexed evictor, string subdomain);
 
     /// @notice Emitted when a member moves their subdomain (release old + claim new).
     event ProfileMoved(address indexed member, string oldSubdomain, string newSubdomain);
 
-    /// @notice Thrown if the subdomain is invalid: empty, exceeds 50 characters, or
-    ///         contains characters outside [0-9a-z-].
+    /// @notice Thrown if the subdomain is invalid: shorter than 3 characters, longer than 50,
+    ///         starts or ends with `-`, or contains characters outside [0-9a-z-].
     error InvalidSubdomain(string subdomain);
 
     /// @notice Thrown if the member is already registered.
@@ -49,6 +49,13 @@ interface IMemberRegistry {
 
     /// @notice Thrown if the requested subdomain label is already taken.
     error SubdomainAlreadyTaken(string subdomain);
+
+    /// @notice Thrown if the subdomain has no current owner (evict target unknown).
+    error SubdomainNotRegistered(string subdomain);
+
+    /// @notice Thrown if the new controller passed to `evict` already controls the subdomain
+    ///         being evicted (no-op transfer is rejected to surface caller mistakes).
+    error InvalidNewController(address newController);
 
     /// @notice Thrown if the ENS registry address is not a valid ENS registry.
     error InvalidENSRegistry(address ens);
@@ -75,10 +82,18 @@ interface IMemberRegistry {
     ///         Only releases the caller's own subdomain. Reverts if not registered.
     function release() external;
 
-    /// @notice Forcibly revoke a member's subdomain. Governed.
-    ///         Requires REVOKE_MEMBER_PERMISSION_ID on this contract (OSx permission system).
-    /// @param member The address of the member to revoke.
-    function revoke(address member) external;
+    /// @notice Forcibly evict a subdomain, optionally re-assigning it to a new controller. Governed.
+    ///         Requires EVICT_SUBDOMAIN_PERMISSION_ID on this contract (OSx permission system).
+    ///         If `newController` is the zero address, the subdomain is fully released (records
+    ///         cleared, subnode released). If `newController` is non-zero, the same subdomain is
+    ///         re-assigned to it as if it had called `register` itself: ENS subnode re-created,
+    ///         addr record set to `newController`, per-node resolver approval granted to it.
+    ///         Reverts if the subdomain is unknown, if `newController` already controls it, or
+    ///         if `newController` is already registered with a different subdomain.
+    /// @param subdomain The subdomain label to evict (e.g., "alice").
+    /// @param newController Address that should control the subdomain after the eviction, or
+    ///         `address(0)` to release without reassignment.
+    function evict(string calldata subdomain, address newController) external;
 
     /// @notice Move your subdomain. Releases the old label and claims the new one atomically.
     ///         Only moves the caller's own subdomain. Reverts if not registered or new label taken.
