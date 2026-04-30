@@ -21,7 +21,7 @@ All component deploys use the same shape: `forge script` via `just-foundry`'s `r
 - [ ] `just switch <network>` activates the target network
 - [ ] `just env` shows expected addresses (Management DAO, ENS registry, etc.) and parameters
 - [ ] `.env` (or vars) populated with `DEPLOYER_KEY`, `ETHERSCAN_API_KEY`, and component-specific params (see `.env.example`)
-- [ ] `just simulate-<component>` runs cleanly — review the printed setup actions before broadcasting
+- [ ] `just predeploy-<component>` runs cleanly (dry-run, no broadcast) — review the printed setup actions before broadcasting
 - [ ] Burner deployer wallet (never a primary key)
 - [ ] Wallet funded with at least 15% above estimated cost
 - [ ] `just test` passes

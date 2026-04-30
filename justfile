@@ -1,16 +1,26 @@
 default: help
-
 import 'lib/just-foundry/justfile'
+
+# Shadow the inherited `deploy` / `predeploy` recipes — this repo has no canonical single-deploy script
+[private]
+deploy *args:
+    @echo "This repo has no canonical deploy. Use 'just deploy-<component>' (e.g. 'just deploy-member-registry')." >&2
+    @exit 1
+
+[private]
+predeploy:
+    @echo "This repo has no canonical deploy. Use 'just predeploy-<component>' (e.g. 'just predeploy-member-registry')." >&2
+    @exit 1
 
 # Deploy MemberRegistry to the currently active network.
 [group('deploy')]
 deploy-member-registry *args:
     just run scripts/DeployMemberRegistry.s.sol:DeployMemberRegistry {{ args }}
 
-# Simulate the MemberRegistry deployment without broadcasting.
+# Dry-run the MemberRegistry deployment without broadcasting.
 [group('deploy')]
-simulate-member-registry:
-    just simulate scripts/DeployMemberRegistry.s.sol:DeployMemberRegistry
+predeploy-member-registry:
+    just dry-run scripts/DeployMemberRegistry.s.sol:DeployMemberRegistry
 
 # Build Asciidoc documentation from forge build artifacts.
 [group('documentation')]

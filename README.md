@@ -78,12 +78,11 @@ Please do not use the issue tracker for security issues.
 You need [Foundry](https://book.getfoundry.sh) and [just](https://github.com/casey/just). All Solidity dependencies are tracked as git submodules — no NPM, Yarn, or Node toolchain required.
 
 ```bash
-git clone --recurse-submodules https://github.com/aragon/osx
+git clone https://github.com/aragon/osx
 cd osx
+git submodule update --init --recursive
 just build
 ```
-
-If you cloned without `--recurse-submodules`, run `git submodule update --init --recursive` first.
 
 ## How the Aragon OSx protocol works
 
@@ -175,6 +174,6 @@ See the [Foundry book](https://book.getfoundry.sh/forge/tests) for advanced opti
 The split:
 
 - **Full OSx protocol bring-up on a new chain** (core + plugins + ENS + Management DAO) is the job of [`aragon/protocol-factory`](https://github.com/aragon/protocol-factory) — refer to its checklist.
-- **Component-level deploys and upgrades** (e.g., `MemberRegistry`; future modernized registrars) live in this repo as `scripts/Deploy<Component>.s.sol` / `scripts/Upgrade<Component>.s.sol`. They run under `just deploy-<component>` / `just simulate-<component>`, broadcast + verify via just-foundry, and print encoded governance actions for the Management DAO multisig.
+- **Component-level deploys and upgrades** (e.g., `MemberRegistry`; future modernized registrars) live in this repo as `scripts/Deploy<Component>.s.sol` / `scripts/Upgrade<Component>.s.sol`. They run under `just deploy-<component>` / `just predeploy-<component>` (the `predeploy-` recipe dry-runs the same script without broadcasting), broadcast + verify via just-foundry, and print encoded governance actions for the Management DAO multisig.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for the component-deploy checklist (pre/post steps, ceremony coordination).
