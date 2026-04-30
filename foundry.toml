@@ -8,8 +8,8 @@ solc = "0.8.17"
 optimizer = true
 optimizer-runs = 2000
 extra_output = ["storageLayout"]
-# Allow forge scripts to write to ./artifacts/ (deployment outputs).
-fs_permissions = [{ access = "write", path = "./artifacts" }]
+# Allow forge scripts to write to ./deployments/ (deployment JSON outputs).
+fs_permissions = [{ access = "write", path = "./deployments" }]
 
 [profile.ci]
 fuzz = { runs = 512 }

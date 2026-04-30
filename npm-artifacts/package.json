@@ -1,6 +1,6 @@
 {
   "name": "@aragon/osx-artifacts",
-  "version": "1.4.5",
+  "version": "1.5.0",
   "description": "The ABI definitions and addresses for Aragon OSx",
   "typings": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -10,11 +10,7 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "build": "yarn prepare-abi && rm -Rf dist && tsc -p tsconfig.json",
-    "prepare-abi": "bash ./prepare-abi.sh",
-    "sync-addresses": "bash ./sync-addresses.sh ../../../osx-commons/configs/src/deployments/json ./src/addresses.json"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/aragon/osx"
@@ -24,7 +20,7 @@
   "bugs": {
     "url": "https://github.com/aragon/osx/issues"
   },
-  "homepage": "https://github.com/aragon/osx/tree/main/packages/artifacts#readme",
+  "homepage": "https://github.com/aragon/osx/tree/main/npm-artifacts#readme",
   "devDependencies": {
     "typescript": "^5.7.3"
   }

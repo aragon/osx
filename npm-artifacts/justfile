@@ -1,0 +1,19 @@
+default: help
+
+# Regenerate src/abi.ts from forge build artifacts (at the repo root).
+# src/addresses.json is hand-curated — see README.md "Address curation".
+[group('source')]
+abi:
+    bash prepare-abi.sh
+
+# Regenerate src/abi.ts, install deps, compile TS → dist/. Run before `bun publish`.
+# Requires `bun` (https://bun.sh) — npm and yarn are not recommended.
+[group('build')]
+build: abi
+    rm -rf dist
+    bun install --frozen-lockfile
+    bun x tsc -p tsconfig.json
+
+# List available recipes.
+help:
+    @just --list

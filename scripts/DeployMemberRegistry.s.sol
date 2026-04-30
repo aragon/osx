@@ -188,13 +188,13 @@ contract DeployMemberRegistry is Script {
         artifacts.serialize("memberRegistryImpl", address(registryImpl));
         artifacts = artifacts.serialize("memberRegistryProxy", address(registry));
 
-        // Ensure ./artifacts/deployments/ exists. `vm.createDir(_, true)` is
+        // Ensure ./deployments/ exists. `vm.createDir(_, true)` is
         // recursive and idempotent.
-        vm.createDir("./artifacts/deployments", true);
+        vm.createDir("./deployments", true);
         string memory networkName = vm.envOr("NETWORK_NAME", string("local"));
         string memory filePath = string.concat(
             vm.projectRoot(),
-            "/artifacts/deployments/",
+            "/deployments/",
             networkName,
             "-",
             vm.toString(block.timestamp),

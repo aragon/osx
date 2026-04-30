@@ -2,9 +2,8 @@
 out
 cache
 
-#
-# Generated ABI files and deployed addresses
-artifacts
+# Deployment outputs from `just deploy-*` scripts
+deployments
 
 # tooling
 node_modules

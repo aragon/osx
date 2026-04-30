@@ -42,7 +42,7 @@ The script broadcasts the deployment via the just-foundry `run` recipe (broadcas
 
 ### Post-deployment checklist
 
-- [ ] Deployment artifact saved at `artifacts/deployments/<network>-<timestamp>.json`
+- [ ] Deployment artifact saved at `deployments/<network>-<timestamp>.json`
 - [ ] Output log captured (stdout from `just deploy-<component>` includes the proposal calldata for the Management DAO multisig)
 - [ ] Source verified on the block explorer (handled automatically by the verify flag in just-foundry's `run`)
 - [ ] Artifact + proposal calldata shared with the multisig signers
