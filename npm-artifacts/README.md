@@ -88,7 +88,7 @@ cd npm-artifacts && just build
 bun publish
 ```
 
-CI (`.github/workflows/artifacts-publish.yml`) automates the build + publish on PR-merge to a `release-v*` branch.
+CI (`.github/workflows/publish-artifacts.yml`) automates the build + publish on `vX.Y.Z` tag push (or via `workflow_dispatch` for re-publishing an existing tag).
 
 ## Documentation
 

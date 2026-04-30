@@ -8,15 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - ABI for `MemberRegistry` (`MemberRegistryABI`) — the new ENS-subdomain member registry.
-- New top-level address keys: `managementDao`, `managementDaoMultisig`. Currently populated for the 13 chiains where the data was available at release time; other chains will fill in via subsequent deploy PRs.
-- Coverage for `chiliz` and `katana` across the legacy address keys (`dao`, `daoFactory`, `daoRegistry`, `pluginRepoFactory`, `pluginRepoRegistry`, `pluginSetupProcessor`). `executor.{chiliz,katana}` is intentionally an empty string — the singleton has no on-chain getter, address must come from the protocol-factory deploy log.
+- New top-level address keys: `managementDao`, `managementDaoMultisig`. Currently populated for the 13 chains where the data was available at release time; other chains will fill in via subsequent deploy PRs.
+- Coverage for `chiliz` and `katana` across the legacy address keys (`dao`, `daoFactory`, `daoRegistry`, `pluginRepoFactory`, `pluginRepoRegistry`, `pluginSetupProcessor`).
 
 ### Changed
 
 - Build pipeline migrated to `just` + `bun` + `forge`.
 - `npm`/`yarn` are no longer used.
 - Run `just abi` to regenerate `src/abi.ts` from forge artifacts at the repo root; `just build` chains that + `tsc`.
-- **`src/addresses.json` is now hand-curated** — this package is the source of truth for OSx-core deployed addresses. The previous auto-sync from `lib/just-foundry/networks/*.env` is gone (`sync-addresses.sh` removed). To add a chain or update an address, edit the JSON directly. Long-term, protocol-factory will fan-out updates to this repo + each plugin repo + just-foundry as part of its deploy ceremony — see `PLAN.md` "Pending cross-team actions".
+- **`src/addresses.json` is now hand-curated** — this package is the source of truth for OSx-core deployed addresses. The previous auto-sync from `lib/just-foundry/networks/*.env` is gone (`sync-addresses.sh` removed). To add a chain or update an address, edit the JSON directly. Long-term, protocol-factory will write to this repo + each plugin repo's artifacts package; `just-foundry` becomes a downstream consumer that pulls from those (one direction). See `PLAN.md` "Pending cross-team actions".
 
 ### Breaking
 
