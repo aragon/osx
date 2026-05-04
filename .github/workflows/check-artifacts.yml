@@ -1,13 +1,12 @@
-name: API Docs
+name: Generated artifacts in sync
 
-# The aragon/developer-portal site is Antora-based and PULLS this repo's
-# `docs/` tree (Antora playbook in that repo defines source repos + paths).
-# We don't push docs anywhere from CI — the auto-generated `.adoc` files
-# under `docs/modules/api/` are committed alongside contract changes.
+# This workflow validates that auto-generated content committed to the repo
+# is in sync with its sources:
+#  - docs/modules/api/         ← forge-doc Asciidoc (consumed by aragon/developer-portal)
+#  - npm-artifacts/src/abi.ts  ← extracted ABIs (shipped via @aragon/osx-artifacts)
 #
-# This workflow only validates that the committed docs are in sync with
-# the source. If a PR changes a contract but forgets to regenerate, CI
-# fails with a clear message telling the contributor to run `just build-docs`.
+# If a PR changes a contract but forgets to regenerate either, CI fails with
+# a clear message telling the contributor what to run.
 
 on:
   push:
@@ -20,10 +19,11 @@ on:
       - 'foundry.toml'
       - 'remappings.txt'
       - 'docs/**'
+      - 'npm-artifacts/prepare-abi.sh'
 
 jobs:
-  check_docs:
-    name: API docs in sync
+  check:
+    name: Generated artifacts
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,5 +49,14 @@ jobs:
           if ! git diff --exit-code -- docs/modules/api/; then
             echo "::error::Generated API docs are out of date."
             echo "::error::Run \`just build-docs\` locally and commit the diff."
+            exit 1
+          fi
+
+      - name: Verify ABI is in sync with contracts
+        run: |
+          (cd npm-artifacts && just abi)
+          if ! git diff --exit-code -- npm-artifacts/src/abi.ts; then
+            echo "::error::npm-artifacts/src/abi.ts is out of date."
+            echo "::error::Run 'just abi' from npm-artifacts/ locally and commit the diff."
             exit 1
           fi

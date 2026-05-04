@@ -78,17 +78,15 @@ just build
 
 Regenerates `src/abi.ts`, installs dependencies via `bun`, then runs `tsc` to produce `dist/`.
 
-### Publishing flow
+### Releasing
 
-```
-deployment lands → addresses.json patched (PR) + ABIs in sync (just abi if src/ contracts changed)
-    ↓
-cd npm-artifacts && just build
-    ↓
-bun publish
-```
+Releases are PR-driven. Tag creation and NPM publishing are handled exclusively by CI — there is no manual release flow.
 
-CI (`.github/workflows/publish-artifacts.yml`) automates the build + publish on `vX.Y.Z` tag push (or via `workflow_dispatch` for re-publishing an existing tag).
+1. Open a PR that bumps `version` in [`package.json`](./package.json).
+2. (If contracts changed) update [`CHANGELOG.md`](./CHANGELOG.md) in the same PR. If addresses changed, patch [`src/addresses.json`](./src/addresses.json).
+3. After review and merge to `main`, [`.github/workflows/release.yml`](../.github/workflows/release.yml) detects the new version, creates the `vX.Y.Z` tag, and runs `bun publish`.
+
+If the merged version already has a tag (e.g. unrelated edit to `package.json`), the workflow exits cleanly without releasing.
 
 ## Documentation
 

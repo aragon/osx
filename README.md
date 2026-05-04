@@ -61,6 +61,10 @@ OSx smart contracts undergo regular audits.
 
 Check out the [artifacts folder](./npm-artifacts/README.md) to get the deployed addresses and the contract ABIs.
 
+## Releases
+
+The artifacts package is released by merging a PR that bumps `npm-artifacts/package.json#version`. CI tags and publishes automatically on merge — see [npm-artifacts/README.md](./npm-artifacts/README.md#releasing).
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for security reporting, PR expectations, and the SemVer classification rules used when bumping the protocol version.

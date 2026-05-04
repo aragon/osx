@@ -2,8 +2,13 @@ name: CI
 
 permissions: {}
 
+# Triggers are arranged so each commit produces exactly one CI run:
+# - push to main always runs (post-merge or direct push)
+# - pull_request events always run (PRs always have CI before merge)
+# - feature-branch pushes outside a PR don't trigger anything
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
