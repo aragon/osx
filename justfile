@@ -22,11 +22,11 @@ deploy-member-registry *args:
 predeploy-member-registry:
     just dry-run scripts/DeployMemberRegistry.s.sol:DeployMemberRegistry
 
-# Build Asciidoc documentation from forge build artifacts.
+# Build Asciidoc documentation. Override `ref` for tagged-release re-runs (e.g. `just build-docs v1.4.0`).
 [group('documentation')]
-build-docs:
+build-docs ref="main":
     forge build --ast
-    GITHUB_REF="${GITHUB_REF:-main}" python3 scripts/build-docs.py
+    GITHUB_REF="{{ ref }}" python3 scripts/build-docs.py
 
 # ABI generation and addresses sync live in `npm-artifacts/justfile`.
 # Run them from there: `cd npm-artifacts && just abi` (or `just build`).

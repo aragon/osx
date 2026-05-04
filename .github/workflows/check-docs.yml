@@ -42,7 +42,7 @@ jobs:
         uses: extractions/setup-just@v2
 
       - name: Build docs
-        run: just build-docs
+        run: just build-docs main
 
       - name: Verify docs are committed in sync
         run: |
