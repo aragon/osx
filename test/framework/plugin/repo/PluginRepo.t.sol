@@ -10,7 +10,7 @@ import {PermissionManager} from "../../../../src/core/permission/PermissionManag
 import {IPermissionCondition} from "../../../../src/common/permission/condition/IPermissionCondition.sol";
 import {PermissionConditionMock} from "../../../mocks/permission/PermissionConditionMock.sol";
 
-/// @notice Regression coverage for finding C-2: `PluginRepo` must override
+/// @notice Regression coverage: `PluginRepo` must override
 /// `isPermissionRestrictedForAnyAddr` so that the dangerous `MAINTAINER` and
 /// `UPGRADE_REPO` permissions cannot be granted to `ANY_ADDR`. Mirrors the
 /// `DAO.sol` defense-in-depth pattern.
@@ -42,7 +42,7 @@ contract PluginRepoAnyAddrRestrictionTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // C-2 regression — bare grants to ANY_ADDR
+    // bare grants to ANY_ADDR
     // -------------------------------------------------------------------------
 
     function test_C2_GrantMaintainerToAnyAddr_Reverts() public {
@@ -56,7 +56,7 @@ contract PluginRepoAnyAddrRestrictionTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // C-2 regression — conditional grants to ANY_ADDR
+    // conditional grants to ANY_ADDR
     // -------------------------------------------------------------------------
     //
     // The same restriction applies to `grantWithCondition` because
