@@ -7,6 +7,9 @@
 
 set -euo pipefail
 
+# Pin sort order to byte-wise C collation so the generated file is identical
+export LC_ALL=C
+
 cd "$(dirname "$0")"
 REPO_ROOT="$(cd .. && pwd)"
 TARGET="src/abi.ts"
