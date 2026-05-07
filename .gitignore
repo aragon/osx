@@ -4,6 +4,8 @@ cache
 
 # Deployment outputs from `just deploy-*` scripts
 deployments
+/broadcast/**
+logs/*
 
 # tooling
 node_modules
