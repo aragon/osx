@@ -7,16 +7,13 @@ pragma solidity ^0.8.17;
 /// and splitting at the first dot. Single source of truth used by the contract,
 /// deploy scripts and tests.
 library ENSDomain {
-    /// @notice Thrown when `domain` is structurally malformed (empty label from a leading,
-    /// trailing, or consecutive dot). Silently hashing such inputs would produce a value
-    /// that diverges from EIP-137, so the library reverts instead.
+    /// @notice Thrown when `domain` is structurally malformed
     error InvalidDomain(string domain);
 
     /// @notice Returns the namehash of `domain` (e.g., `"members.dao.eth"`).
     /// @dev Returns `bytes32(0)` for an empty input. Reverts with `InvalidDomain` on
-    /// structurally malformed inputs (leading, trailing, or consecutive dot — i.e. any
-    /// empty label). Does not validate label *characters* — callers must enforce any
-    /// character/length rules separately.
+    /// structurally malformed inputs. Does not validate label characters:
+    /// callers must enforce any extra rules separately.
     function namehash(string memory domain) internal pure returns (bytes32 result) {
         bytes memory b = bytes(domain);
         if (b.length == 0) return bytes32(0);

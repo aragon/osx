@@ -713,6 +713,28 @@ contract MemberRegistryTest is Test {
         );
     }
 
+    function test_initialize_revertsIfZeroResolver() public {
+        // Guards against address(0) succeeding silently
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidResolver.selector, address(0)));
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), DOMAIN, address(0)))
+        );
+    }
+
+    function test_initialize_revertsIfEOAResolver() public {
+        // Same root cause as the zero-address case: an EOA has no code
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidResolver.selector, bob));
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), DOMAIN, bob))
+        );
+    }
+
     function test_initialize_revertsIfDoubleInit() public {
         vm.expectRevert("Initializable: contract is already initialized");
         registry.initialize(IDAO(address(dao)), ENS(address(ens)), DOMAIN, address(resolver));

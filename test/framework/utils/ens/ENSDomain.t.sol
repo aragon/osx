@@ -86,15 +86,6 @@ contract ENSDomainTest is Test {
         assertTrue(a != b);
     }
 
-    // -------------------------------------------------------------------------
-    // namehash — malformed input rejection (HAL-03)
-    //
-    // Empty labels (leading, trailing, or consecutive dots) would produce a hash that
-    // diverges from EIP-137. The library must revert rather than silently return a
-    // wrong value, since the wrong value would propagate to `parentNode` and every
-    // subnode computation downstream.
-    // -------------------------------------------------------------------------
-
     /// @dev External wrapper so `vm.expectRevert` sees a real call boundary
     /// (the library function is `internal` and would otherwise be inlined).
     function callNamehash(string calldata domain) external pure returns (bytes32) {
