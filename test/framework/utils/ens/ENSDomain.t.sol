@@ -87,6 +87,51 @@ contract ENSDomainTest is Test {
     }
 
     // -------------------------------------------------------------------------
+    // namehash — malformed input rejection (HAL-03)
+    //
+    // Empty labels (leading, trailing, or consecutive dots) would produce a hash that
+    // diverges from EIP-137. The library must revert rather than silently return a
+    // wrong value, since the wrong value would propagate to `parentNode` and every
+    // subnode computation downstream.
+    // -------------------------------------------------------------------------
+
+    /// @dev External wrapper so `vm.expectRevert` sees a real call boundary
+    /// (the library function is `internal` and would otherwise be inlined).
+    function callNamehash(string calldata domain) external pure returns (bytes32) {
+        return ENSDomain.namehash(domain);
+    }
+
+    function test_namehash_revertsOnTrailingDot() public {
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "eth."));
+        this.callNamehash("eth.");
+
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "members.dao.eth."));
+        this.callNamehash("members.dao.eth.");
+    }
+
+    function test_namehash_revertsOnLeadingDot() public {
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, ".eth"));
+        this.callNamehash(".eth");
+
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, ".members.dao.eth"));
+        this.callNamehash(".members.dao.eth");
+    }
+
+    function test_namehash_revertsOnConsecutiveDots() public {
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "a..b"));
+        this.callNamehash("a..b");
+
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "members..dao.eth"));
+        this.callNamehash("members..dao.eth");
+    }
+
+    function test_namehash_revertsOnDotOnly() public {
+        // A single dot is simultaneously a leading and trailing dot.
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "."));
+        this.callNamehash(".");
+    }
+
+    // -------------------------------------------------------------------------
     // splitDomain
     // -------------------------------------------------------------------------
 
