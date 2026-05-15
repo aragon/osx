@@ -114,7 +114,9 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         bytes32 label = keccak256(bytes(subdomain));
         address member = labelOwner[label];
         if (member == address(0)) revert SubdomainNotRegistered(subdomain);
-        if (newController == member) revert InvalidNewController(newController);
+        // Reject `address(this)` — registering the registry as a member would lock the
+        // subdomain (release() keys on msg.sender, and the registry never self-calls).
+        if (newController == member || newController == address(this)) revert InvalidNewController(newController);
 
         _release(member);
         emit SubdomainEvicted(member, msg.sender, subdomain);

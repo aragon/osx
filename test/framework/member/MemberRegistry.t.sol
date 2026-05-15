@@ -377,6 +377,24 @@ contract MemberRegistryTest is Test {
         registry.evict("alice", alice);
     }
 
+    function test_evict_transferRevertsIfNewControllerIsRegistry() public {
+        // Guards against HAL-02: assigning the registry itself as a member would lock the
+        // subdomain (release() keys on msg.sender; the contract never self-calls).
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IMemberRegistry.InvalidNewController.selector, address(registry))
+        );
+        vm.prank(evictor);
+        registry.evict("alice", address(registry));
+
+        // alice is untouched (revert happens before _release).
+        assertTrue(registry.isRegistered(alice));
+        assertEq(registry.labelOwner(keccak256("alice")), alice);
+        assertEq(ens.owner(_subnode("alice")), address(registry));
+    }
+
     function test_evict_transferRevertsIfNewControllerAlreadyRegistered() public {
         vm.prank(alice);
         registry.register("alice");
