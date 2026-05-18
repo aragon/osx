@@ -1,3 +1,0 @@
-contracts:
-  - changed-files:
-      - any-glob-to-any-file: 'packages/contracts/**/*'

@@ -1,5 +1,13 @@
-# dependencies
+# foundry
+out
+cache
+
+# Deployment outputs from `just deploy-*` scripts
+deployments
+
+# tooling
 node_modules
+.openzeppelin
 
 # testing
 coverage
@@ -8,37 +16,14 @@ coverage
 build
 dist
 dist-ssr
-*.local
 .cache
-storybook-static
-typechain
 
 # misc
 .DS_Store
 *.pem
 *.tgz
 
-# debug
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# deployments
-deployments
-deployed_contracts.json
-managementDAOTX.json
-packages/contracts/scripts/management-dao-proposal/files-to-merge/
-
-# generated
-packages/artifacts/src/abi.ts
-generated
-.bin
-mythx.json
-schema-introspection.json
+.env
+.env.*
+!.env.example

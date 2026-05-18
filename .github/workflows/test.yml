@@ -1,0 +1,47 @@
+name: CI
+
+permissions: {}
+
+# Triggers are arranged so each commit produces exactly one CI run:
+# - push to main always runs (post-merge or direct push)
+# - pull_request events always run (PRs always have CI before merge)
+# - feature-branch pushes outside a PR don't trigger anything
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  check:
+    name: Foundry project
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.0
+
+      - name: Show Forge version
+        run: forge --version
+
+      # TODO: re-enable after main lands; one-shot `forge fmt` to follow.
+      # Disabled now to preserve byte-identical audited Solidity.
+      # - name: Run Forge fmt
+      #   run: forge fmt --check
+
+      - name: Run Forge build
+        run: forge build --sizes
+
+      - name: Run Forge tests
+        run: forge test -vvv --no-match-path '**/fork/**'

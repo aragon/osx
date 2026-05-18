@@ -1,34 +1,31 @@
 ---
 name: Bug report
-about: Create a bug report to help us
-title: 'Bug: <add-text-here>'
+about: Report a problem with the OSx contracts
+title: 'Bug: '
 labels: bug
-assignees: ''
 ---
 
-**Describe the bug**
-A short summary of what the bug is. Please be clear and concise.
+**Summary**
 
-**To Reproduce (please complete the following information)**
+<!-- One or two sentences describing the bug. -->
 
-- Config and flags: [e.g. variable="xyz"]
-- Steps to reproduce the behavior:
-  1. node '...'
-  2. make request with '....'
-  3. '...'
-  4. See error
+**Steps to reproduce**
 
-**Current behavior**
-In depth explanation, if required, or a clear and concise description of what actually happens.
+<!-- Minimal sequence of calls / interactions that triggers the bug. -->
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+1.
+2.
+3.
 
-**System (please complete the following information):**
+**Expected vs actual**
 
-- OS: [e.g. Fedora 35]
-- Software version [e.g. Docker 8, Node 14.19.1]
-- Commit hash [e.g. e84617d]
+<!-- What should happen vs what does. -->
 
-**Additional context**
-Add any other context about the problem here.
+**Context**
+
+- Network: 
+- Contract(s): 
+- Protocol version (or commit hash): 
+- Address(es): 
+- Transaction hash (if any): 
+- Anything else relevant:

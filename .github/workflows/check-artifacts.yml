@@ -1,0 +1,62 @@
+name: Generated artifacts in sync
+
+# This workflow validates that auto-generated content committed to the repo
+# is in sync with its sources:
+#  - docs/modules/api/         ← forge-doc Asciidoc (consumed by aragon/developer-portal)
+#  - npm-artifacts/src/abi.ts  ← extracted ABIs (shipped via @aragon/osx-artifacts)
+#
+# If a PR changes a contract but forgets to regenerate either, CI fails with
+# a clear message telling the contributor what to run.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'scripts/build-docs.py'
+      - 'foundry.toml'
+      - 'remappings.txt'
+      - 'docs/**'
+      - 'npm-artifacts/prepare-abi.sh'
+
+jobs:
+  check:
+    name: Generated artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.0
+
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Build docs
+        run: just build-docs main
+
+      - name: Verify docs are committed in sync
+        run: |
+          if ! git diff --exit-code -- docs/modules/api/; then
+            echo "::error::Generated API docs are out of date."
+            echo "::error::Run \`just build-docs\` locally and commit the diff."
+            exit 1
+          fi
+
+      - name: Verify ABI is in sync with contracts
+        run: |
+          (cd npm-artifacts && just abi)
+          if ! git diff --exit-code -- npm-artifacts/src/abi.ts; then
+            echo "::error::npm-artifacts/src/abi.ts is out of date."
+            echo "::error::Run 'just abi' from npm-artifacts/ locally and commit the diff."
+            exit 1
+          fi

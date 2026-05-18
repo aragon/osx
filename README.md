@@ -1,13 +1,11 @@
-![Aragon](https://res.cloudinary.com/dacofvu8m/image/upload/v1677353961/Aragon%20CodeArena/osx_blue_logo_lqrvkr.png)
+![Aragon](./images/aragon-osx.png)
 
 <p align="center">
   <a href="https://aragon.org/">Aragon website</a>
   •
-  <a href="https://devs.aragon.org/">Developer Portal</a>
+  <a href="https://docs.aragon.org/">Developer Portal</a>
   •
-  <a href="https://aragonproject.typeform.com/to/LngekEhU">Join our Developer Community</a>
-  •
-  <a href="https://aragonproject.typeform.com/dx-contribution">Contribute</a>
+  <a href="https://form.typeform.com/to/LngekEhU">Join our Developer Community</a>
 </p>
 
 <br/>
@@ -16,17 +14,12 @@
 
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
 
-Within this monorepo, you will be able to find 3 individual packages:
+- [Contracts](https://github.com/aragon/osx/tree/main/src): the protocol source code (solidity).
+- [Artifacts](https://github.com/aragon/osx/tree/main/npm-artifacts): the ABI and the contract addresses (per network)
 
-- [Contracts](https://github.com/aragon/osx/tree/main/packages/contracts): the protocol source code (solidity).
-- [Artifacts](https://github.com/aragon/osx/tree/main/packages/artifacts): the ABI and the contract addresses (per network)
-- [Contract-ethers](https://github.com/aragon/osx/tree/main/packages/contracts-ethers) (deprecated): TypeScript wrappers for use on Ethers.js projects.
+NPM packages:
 
-Each package is distributed via 3 NPM packages:
-
-- `@aragon/osx`: The source files, including the protocol contracts and interfaces
-- `@aragon/osx-artifacts`: The contracts bytecode and ABI to use the protocol or deploy it
-- `@aragon/osx-ethers` (deprecated): The TypeScript wrappers to use the protocol or deploy it using ethers.js
+- `@aragon/osx-artifacts`: The deployed addresses, contract ABI's and bytecode
 
 For more information on the individual packages, please read the respective `README.md`.
 
@@ -66,11 +59,15 @@ OSx smart contracts undergo regular audits.
 
 ## ABI and artifacts
 
-Check out the [artifacts folder](./packages/artifacts/README.md) to get the deployed addresses and the contract ABI's.
+Check out the [artifacts folder](./npm-artifacts/README.md) to get the deployed addresses and the contract ABIs.
+
+## Releases
+
+The artifacts package is released by merging a PR that bumps `npm-artifacts/package.json#version`. CI tags and publishes automatically on merge — see [npm-artifacts/README.md](./npm-artifacts/README.md#releasing).
 
 ## Contributing
 
-We'd love to hear what you think! If you want to build this with us, please find a detailed contribution guide in the `CONTRIBUTION_GUIDE.md` [file here](https://github.com/aragon/osx/blob/main/CONTRIBUTION_GUIDE.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for security reporting, PR expectations, and the SemVer classification rules used when bumping the protocol version.
 
 ## Security
 
@@ -82,19 +79,18 @@ Please do not use the issue tracker for security issues.
 
 ## Setup
 
-Ensure you have Node and Yarn installed.
+You need [Foundry](https://book.getfoundry.sh) and [just](https://github.com/casey/just). All Solidity dependencies are tracked as git submodules — no NPM, Yarn, or Node toolchain required.
 
-The latest Node version officially supported by OSx and Hardhat is 16. Node >=19 also works, but is technically unsupported by Hardhat. It's recommended to use a tool such as [nvm](https://github.com/nvm-sh/nvm) to manage different node environments. Please see the relevant documentation for details.
-
-Start by running `yarn --ignore-scripts` in the project root in your terminal.
-
-### Dependencies
-
-Since the repo is set up as yarn workspace, all the linking is done automatically. When contributing, we recommend to `cd` into each package, as this mirrors the workflow of the development team.
+```bash
+git clone https://github.com/aragon/osx
+cd osx
+git submodule update --init --recursive
+just build
+```
 
 ## How the Aragon OSx protocol works
 
-To review the contracts powering the Aragon OSx protocol, feel free to head to `packages/contracts`.
+To review the contracts powering the Aragon OSx protocol, feel free to head to `src/`.
 
 The Aragon OSx protocol architecture is composed of two key sections:
 
@@ -110,7 +106,7 @@ The Aragon OSx protocol architecture is composed of two key sections:
 Additionally to those two sections, we have developed several plugins DAOs can easily install upon creation. These are:
 
 - **Token Voting plugin**: enables token holders to vote yes, no or abstain on incoming DAO proposals
-- **Multisig plugin**: enables DAO governance based on approval from a pre-defined members list.
+- **Multisig plugin**: enables DAO governance based on approval from a pre-defined member list.
 - **Addresslist Voting plugin**: enables a pre-defined set of addresses to vote yes, no or abstain in a "one address, one vote" mode
 - **Admin plugin**: enables full access to an account needing to perform initial maintenance tasks without unnecessary overhead
 
@@ -131,16 +127,16 @@ In a nutshell, each DAO is composed of 3 interconnecting components:
      - call functions in external contracts
    - Providing general technical utilities like callback handling and others
 2. **Permissions:** Permissions are an integral part of any DAO and the center of our protocol architecture. The Permissions manager **manages permissions for the DAO** by specifying which addresses have permission to call distinct functions on contracts associated with your DAO. This Permissions manager lives inside the DAO contract.
-3. **Plugins**: Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. You'll find some base templates of plugins within the `plugins` folder of the _Core Contracts_. Some examples of plugins that DAOs could install are:
+3. **Plugins**: Any custom functionality can be added or removed through plugins, allowing you to **fully customize your DAO**. Some examples of plugins that DAOs could install are:
    - Governance (e.g., token voting, one-address one-vote)
    - Asset management (e.g., ERC-20 or NFT minting, token streaming, DeFi)
    - Membership (governing budget allowances, access gating, curating a member list)
 
-The following graphic shows an exemplary DAO setup:
+The following diagram shows an example DAO setup:
 
-![A potential DAO setup](./images/dao-plugin.svg)
+![Example DAO setup](./images/dao-plugin.svg)
 
-An examplary DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if an DeFi-related plugin is allowed to invest in a certain, external contract.
+An example DAO setup showing interactions between the three core contract pieces triggered by different user groups: The `DAO` and `PermissionManager` contract in blue and red, respectively, as well as two `Plugin` contracts in green. Bear in mind, the `DAO` and `Permission Manager` components both coexist within the same `DAO` contract. Function calls are visualized as black arrows and require permission checks (red, dashed arrow). In this example, the permission manager determines whether the token voting plugin can execute actions on the DAO, a member can change its settings, or if a DeFi-related plugin is allowed to invest in a certain external contract.
 
 ### Framework Contracts
 
@@ -151,9 +147,10 @@ In contrast, the _Framework Contracts_ are in charge of creating and registering
   - **The DAO Registry**: In charge of registering DAOs into our protocol so plugins can easily access all DAO instances within our protocol. It is also in charge of giving DAOs subdomains for easier access.
   - **The Plugin Factory**: A `PluginRepo` is the repository of versions for a given plugin. The `PluginRepoFactory` contract creates a `PluginRepo` instance for each plugin, so that plugins can update their versioning without complexity in a semantic way similar to the App Store.
   - **The Plugin Registry**: In charge of registering the `PluginRepo` addresses into our protocol so that DAOs can access all plugins published in the protocol.
+  - **The Member Registry**: Permissionless self-registration of DAO members under a parent ENS domain. Members claim a subdomain, the registry grants per-node resolver approval so they manage their own ENS records (avatar, addr, contenthash) directly, and governance can revoke entries. See `src/framework/member/MemberRegistry.sol`.
 - **Plugin Setup Processor**: The processor is the manager for plugins. It installs, uninstalls, and upgrades plugins for DAOs based on the instructions provided by the plugin setup.
 
-For a more detailed description of each of these components, please visit our [Developer Portal](https://devs.aragon.org).
+For a more detailed description of each of these components, please visit our [Developer Portal](https://docs.aragon.org).
 
 ### Plugins
 
@@ -162,60 +159,25 @@ Each plugin consists of two key components:
 - **The Plugin Logic**: contains the logic for each plugin; the main functionality the plugin extends for the DAO. Can be linked to other helper contracts if needed.
 - **The Plugin Setup**: contains the installation, uninstallation, and upgrade instructions for a plugin into a DAO.
 
-You can find all plugins built by the Aragon team [here](https://github.com/aragon/osx/tree/main/packages/contracts/src/plugins).
-
-### Connection between OSx, and ethers.js packages
-
-The [contract-ethers](https://github.com/aragon/osx/tree/main/packages/contracts-ethers) package is the NPM package that provides `ethers.js` wrappers to use the [Aragon OSx contracts](https://github.com/aragon/osx/tree/main/packages/contracts).
+Aragon-built plugins live in their own repositories — see the [Aragon GitHub organization](https://github.com/aragon).
 
 ## Tests
 
-To run tests, run these commands in the root folder in your terminal:
-
 ```bash
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
+just test                  # run unit tests via the just-foundry recipe
+forge test                 # or invoke forge directly
+forge test --gas-report    # include gas usage per test
 ```
 
-For faster runs of your tests and scripts, consider skipping `ts-node`'s type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment.
+Fork tests live under `test/fork/` and run against a real RPC; standard CI excludes them. Run them locally with the appropriate RPC URL set.
 
-For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+See the [Foundry book](https://book.getfoundry.sh/forge/tests) for advanced options.
 
 ## Deployment
 
-To deploy contracts, run these commands in your terminal:
+The split:
 
-```bash
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
-```
+- **Full OSx protocol bring-up on a new chain** (core + plugins + ENS + Management DAO) is the job of [`aragon/protocol-factory`](https://github.com/aragon/protocol-factory) — refer to its checklist.
+- **Component-level deploys and upgrades** (e.g., `MemberRegistry`; future modernized registrars) live in this repo as `scripts/Deploy<Component>.s.sol` / `scripts/Upgrade<Component>.s.sol`. They run under `just deploy-<component>` / `just predeploy-<component>` (the `predeploy-` recipe dry-runs the same script without broadcasting), broadcast + verify via just-foundry, and print encoded governance actions for the Management DAO multisig.
 
-You can find more details about [our deployment checklist here](https://github.com/aragon/osx/blob/main/DEPLOYMENT_CHECKLIST.md).
-
-## Publishing protocol upgrades
-
-Follow [our update checklist here](https://github.com/aragon/osx/blob/main/UPDATE_CHECKLIST.md).
-
-Also check the [README](./packages/contracts/scripts/management-dao-proposal/README.md) of the Management DAO proposal generation flow.
-
-## Pull request commands
-
-Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.
-
-| Command                                      | Description                                        |
-| -------------------------------------------- | -------------------------------------------------- |
-| `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request      |
-| `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request          |
-| `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request |
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for the component-deploy checklist (pre/post steps, ceremony coordination).

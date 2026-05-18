@@ -1,0 +1,66 @@
+name: Release
+
+# Releases @aragon/osx-artifacts.
+#
+# Flow:
+# 1. A PR bumps `npm-artifacts/package.json#version`.
+# 2. On merge to main, this workflow runs.
+# 3. If the version is new (no tag `vX.Y.Z` yet), it builds, tags, pushes the
+#    tag, and publishes to NPM. Otherwise it exits cleanly.
+
+on:
+  push:
+    branches: [main]
+    paths: ['npm-artifacts/package.json']
+
+permissions:
+  contents: write    # to push the tag
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-tags: true                     # need existing tags for the version-already-released check
+          submodules: recursive
+          persist-credentials: true            # needed to push the tag
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.0
+      - uses: extractions/setup-just@v2
+      - uses: oven-sh/setup-bun@v2
+      - run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Resolve version + skip flag
+        id: meta
+        run: |
+          set -euo pipefail
+          version=$(jq -r '.version' npm-artifacts/package.json)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+(\.[0-9]+)?)?$ ]] || { echo "::error::Bad semver in package.json: $version"; exit 1; }
+          tag="v$version"
+
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists — version is unchanged or was previously released. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        if: steps.meta.outputs.skip != 'true'
+        run: cd npm-artifacts && just build
+
+      - name: Tag
+        if: steps.meta.outputs.skip != 'true'
+        run: |
+          git tag "${{ steps.meta.outputs.tag }}"
+          git push origin "${{ steps.meta.outputs.tag }}"
+
+      - name: Publish to NPM
+        if: steps.meta.outputs.skip != 'true'
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: cd npm-artifacts && bun publish --access public
