@@ -10,10 +10,10 @@ import {ProtocolVersionMock} from "../../../mocks/commons/utils/versioning/Proto
 /// @notice Direct tests for the abstract `ProtocolVersion` base contract and
 /// the `IProtocolVersion` interface in `src/common/utils/versioning/`.
 ///
-/// Ports `osx-commons/contracts/test/utils/versioning/protocol-version.ts`
-/// and closes the gaps from `TESTS.md` §5: exact return-value check against
-/// the inline `[1, 4, 0]` constant (replacing the TS dependency on
-/// `package.json`), stateless / deterministic across calls.
+/// Ports `osx-commons/contracts/test/utils/versioning/protocol-version.ts`.
+/// Asserts the exact return value against the inline `[1, 4, 0]` constant
+/// (replacing the TS dependency on `package.json`), and that the function is
+/// stateless / deterministic across calls.
 contract ProtocolVersionTest is Test {
     /// Frozen iface ID introduced in v1.3.0. `IProtocolVersion` has a single
     /// function `protocolVersion()`, so its ERC-165 ID equals that function's
@@ -40,7 +40,10 @@ contract ProtocolVersionTest is Test {
     // -------------------------------------------------------------------------
 
     function test_IProtocolVersion_hasSameInterfaceIdAsV1_3_0() public pure {
-        assertEq(type(IProtocolVersion).interfaceId, IPROTOCOL_VERSION_V1_3_0_INTERFACE_ID);
+        assertEq(
+            type(IProtocolVersion).interfaceId,
+            IPROTOCOL_VERSION_V1_3_0_INTERFACE_ID
+        );
     }
 
     function test_IProtocolVersion_interfaceIdIsNotEmpty() public pure {
@@ -52,14 +55,19 @@ contract ProtocolVersionTest is Test {
     function test_IProtocolVersion_interfaceIdIsNotIERC165() public pure {
         // Cross-check: `IProtocolVersion` is a distinct interface, not an alias
         // of `IERC165`.
-        assertTrue(type(IProtocolVersion).interfaceId != type(IERC165).interfaceId);
+        assertTrue(
+            type(IProtocolVersion).interfaceId != type(IERC165).interfaceId
+        );
     }
 
     // -------------------------------------------------------------------------
     // ProtocolVersion — concrete value
     // -------------------------------------------------------------------------
 
-    function test_protocolVersion_returnsCurrentProductionVersion() public view {
+    function test_protocolVersion_returnsCurrentProductionVersion()
+        public
+        view
+    {
         uint8[3] memory v = mock.protocolVersion();
         assertEq(v[0], MAJOR);
         assertEq(v[1], MINOR);

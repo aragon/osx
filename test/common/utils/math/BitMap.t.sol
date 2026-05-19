@@ -8,10 +8,9 @@ import {hasBit, flipBit} from "../../../../src/common/utils/math/BitMap.sol";
 /// @notice Direct tests for the `hasBit` / `flipBit` file-level functions
 /// in `src/common/utils/math/BitMap.sol`.
 ///
-/// Ports `osx-commons/contracts/test/utils/math/bitmap.ts` and adds the
-/// gap-analysis items recorded in `TESTS.md` §1 (boundary at index 255,
-/// bit-position isolation, and three cross-function invariants expressed
-/// as fuzz tests).
+/// Ports `osx-commons/contracts/test/utils/math/bitmap.ts` and adds boundary
+/// coverage at index 255, bit-position isolation, and three cross-function
+/// invariants expressed as fuzz tests.
 contract BitMapTest is Test {
     uint256 internal constant ZEROS = 0;
     uint256 internal constant ONES = type(uint256).max;
@@ -116,15 +115,20 @@ contract BitMapTest is Test {
     // -------------------------------------------------------------------------
 
     /// `flipBit` toggles the queried bit, every time, for any bitmap and index.
-    /// Closes gap #1 from `TESTS.md` §1: `hasBit(flipBit(bm, i), i) != hasBit(bm, i)`.
-    function testFuzz_flipBitTogglesQueriedBit(uint256 bm, uint8 idx) public pure {
+    /// Invariant: `hasBit(flipBit(bm, i), i) != hasBit(bm, i)`.
+    function testFuzz_flipBitTogglesQueriedBit(
+        uint256 bm,
+        uint8 idx
+    ) public pure {
         bool before = hasBit(bm, idx);
         assertEq(hasBit(flipBit(bm, idx), idx), !before);
     }
 
     /// `flipBit` is its own inverse: `flipBit(flipBit(bm, i), i) == bm`.
-    /// Closes gap #2 from `TESTS.md` §1.
-    function testFuzz_flipBitIsItsOwnInverse(uint256 bm, uint8 idx) public pure {
+    function testFuzz_flipBitIsItsOwnInverse(
+        uint256 bm,
+        uint8 idx
+    ) public pure {
         assertEq(flipBit(flipBit(bm, idx), idx), bm);
     }
 
@@ -132,7 +136,11 @@ contract BitMapTest is Test {
     /// checking an independent index `j != i` against the original bitmap.
     /// This is the bit-position isolation invariant — a localized version of
     /// the gap test `test_hasBit_isolatesIndividualBits` above.
-    function testFuzz_flipBitOnlyAffectsQueriedBit(uint256 bm, uint8 idx, uint8 other) public pure {
+    function testFuzz_flipBitOnlyAffectsQueriedBit(
+        uint256 bm,
+        uint8 idx,
+        uint8 other
+    ) public pure {
         vm.assume(idx != other);
         assertEq(hasBit(flipBit(bm, idx), other), hasBit(bm, other));
     }

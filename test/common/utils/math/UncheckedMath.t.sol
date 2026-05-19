@@ -8,10 +8,10 @@ import {_uncheckedAdd, _uncheckedSub} from "../../../../src/common/utils/math/Un
 /// @notice Direct tests for `_uncheckedAdd` and `_uncheckedSub` in
 /// `src/common/utils/math/UncheckedMath.sol`.
 ///
-/// No upstream TS coverage existed for these helpers — entire surface is
-/// the gap recorded in `TESTS.md` §3. Boundary cases verify wrap-around
-/// (no panic); fuzz tests verify each helper agrees with the same expression
-/// inside an explicit `unchecked` block, pinning behavioural equivalence.
+/// No upstream TS coverage existed for these helpers. Boundary cases verify
+/// wrap-around (no panic); fuzz tests verify each helper agrees with the same
+/// expression inside an explicit `unchecked` block, pinning behavioural
+/// equivalence.
 contract UncheckedMathTest is Test {
     // -------------------------------------------------------------------------
     // _uncheckedAdd
@@ -30,7 +30,10 @@ contract UncheckedMathTest is Test {
         // `type(uint256).max + 2` wraps to 1.
         assertEq(_uncheckedAdd(type(uint256).max, 2), 1);
         // Two large operands wrap predictably.
-        assertEq(_uncheckedAdd(type(uint256).max, type(uint256).max), type(uint256).max - 1);
+        assertEq(
+            _uncheckedAdd(type(uint256).max, type(uint256).max),
+            type(uint256).max - 1
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -60,7 +63,10 @@ contract UncheckedMathTest is Test {
     /// `_uncheckedAdd(a, b)` agrees with `unchecked { a + b }` for any inputs.
     /// Pins the helper to the canonical wrap-on-overflow semantics so a future
     /// refactor that accidentally re-introduces checked arithmetic fails here.
-    function testFuzz_uncheckedAdd_equalsInlineUnchecked(uint256 a, uint256 b) public pure {
+    function testFuzz_uncheckedAdd_equalsInlineUnchecked(
+        uint256 a,
+        uint256 b
+    ) public pure {
         uint256 expected;
         unchecked {
             expected = a + b;
@@ -69,7 +75,10 @@ contract UncheckedMathTest is Test {
     }
 
     /// `_uncheckedSub(a, b)` agrees with `unchecked { a - b }` for any inputs.
-    function testFuzz_uncheckedSub_equalsInlineUnchecked(uint256 a, uint256 b) public pure {
+    function testFuzz_uncheckedSub_equalsInlineUnchecked(
+        uint256 a,
+        uint256 b
+    ) public pure {
         uint256 expected;
         unchecked {
             expected = a - b;

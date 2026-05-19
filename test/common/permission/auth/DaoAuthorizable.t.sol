@@ -6,15 +6,14 @@ import {Test} from "forge-std/Test.sol";
 import {IDAO} from "../../../../src/common/dao/IDAO.sol";
 import {DaoUnauthorized} from "../../../../src/common/permission/auth/auth.sol";
 import {DaoAuthorizableMock} from "../../../mocks/commons/permission/auth/DaoAuthorizableMock.sol";
-import {
-    DaoAuthorizableUpgradeableMock
-} from "../../../mocks/commons/permission/auth/DaoAuthorizableUpgradeableMock.sol";
+import {DaoAuthorizableUpgradeableMock} from "../../../mocks/commons/permission/auth/DaoAuthorizableUpgradeableMock.sol";
 import {DAOMock} from "../../../mocks/commons/dao/DAOMock.sol";
 
 /// @dev Minimal shape both `DaoAuthorizableMock` and `DaoAuthorizableUpgradeableMock` expose.
 /// Lets the shared base test contract call into either variant through one typed reference.
 interface IDaoAuthorizableMock {
     function dao() external view returns (IDAO);
+
     function authorizedFunc() external;
 }
 
@@ -23,9 +22,8 @@ interface IDaoAuthorizableMock {
 /// Ports `osx-commons/contracts/test/permission/auth/dao-authorizable.ts`. The
 /// TS suite's `daoAuthorizableBaseTests(fixture)` DRY pattern is reproduced
 /// via this abstract base + two concrete derivations (one per source contract).
-/// Gaps closed from `TESTS.md` §8: `DaoUnauthorized` error carries all four
-/// fields, auth guard reverts (no silent fallthrough), and `dao()` returns the
-/// exact stored address.
+/// Adds: `DaoUnauthorized` error carries all four fields, auth guard reverts
+/// (no silent fallthrough), and `dao()` returns the exact stored address.
 abstract contract DaoAuthorizableSharedTest is Test {
     bytes32 internal constant PERM_ID = keccak256("AUTHORIZED_FUNC_PERMISSION");
 
@@ -51,7 +49,13 @@ abstract contract DaoAuthorizableSharedTest is Test {
         assertFalse(daoMock.hasPermissionReturnValueMock());
 
         vm.expectRevert(
-            abi.encodeWithSelector(DaoUnauthorized.selector, address(daoMock), address(target), bob, PERM_ID)
+            abi.encodeWithSelector(
+                DaoUnauthorized.selector,
+                address(daoMock),
+                address(target),
+                bob,
+                PERM_ID
+            )
         );
         vm.prank(bob);
         target.authorizedFunc();
@@ -67,7 +71,10 @@ abstract contract DaoAuthorizableSharedTest is Test {
 /// @notice Constructable variant: `DaoAuthorizable` is set via constructor.
 contract DaoAuthorizableTest is DaoAuthorizableSharedTest {
     function _deployTarget() internal override returns (IDaoAuthorizableMock) {
-        return IDaoAuthorizableMock(address(new DaoAuthorizableMock(IDAO(address(daoMock)))));
+        return
+            IDaoAuthorizableMock(
+                address(new DaoAuthorizableMock(IDAO(address(daoMock))))
+            );
     }
 }
 
@@ -81,13 +88,17 @@ contract DaoAuthorizableUpgradeableTest is DaoAuthorizableSharedTest {
     }
 
     function test_initialize_revertsIfCalledTwice() public {
-        DaoAuthorizableUpgradeableMock m = DaoAuthorizableUpgradeableMock(address(target));
+        DaoAuthorizableUpgradeableMock m = DaoAuthorizableUpgradeableMock(
+            address(target)
+        );
         vm.expectRevert("Initializable: contract is already initialized");
         m.initialize(IDAO(address(daoMock)));
     }
 
     function test_initInternal_revertsIfCalledOutsideInitializer() public {
-        DaoAuthorizableUpgradeableMock m = DaoAuthorizableUpgradeableMock(address(target));
+        DaoAuthorizableUpgradeableMock m = DaoAuthorizableUpgradeableMock(
+            address(target)
+        );
         vm.expectRevert("Initializable: contract is not initializing");
         m.notAnInitializer(IDAO(address(daoMock)));
     }

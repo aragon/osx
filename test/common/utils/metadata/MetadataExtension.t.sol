@@ -7,9 +7,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IDAO} from "../../../../src/common/dao/IDAO.sol";
 import {DaoUnauthorized} from "../../../../src/common/permission/auth/auth.sol";
 import {MetadataExtensionMock} from "../../../mocks/commons/utils/metadata/MetadataExtensionMock.sol";
-import {
-    MetadataExtensionUpgradeableMock
-} from "../../../mocks/commons/utils/metadata/MetadataExtensionUpgradeableMock.sol";
+import {MetadataExtensionUpgradeableMock} from "../../../mocks/commons/utils/metadata/MetadataExtensionUpgradeableMock.sol";
 import {DAOMock} from "../../../mocks/commons/dao/DAOMock.sol";
 
 /// @dev Minimal shape that both `MetadataExtensionMock` and
@@ -17,18 +15,21 @@ import {DAOMock} from "../../../mocks/commons/dao/DAOMock.sol";
 /// source for the ERC-165 ID and as a typed handle in the shared tests.
 interface IMetadataExtension {
     function setMetadata(bytes calldata _metadata) external;
+
     function getMetadata() external view returns (bytes memory);
-    function supportsInterface(bytes4 _interfaceId) external view returns (bool);
+
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) external view returns (bool);
 }
 
 /// @notice Shared behaviour tests for `MetadataExtension` and
 /// `MetadataExtensionUpgradeable` in `src/common/utils/metadata/`.
 ///
-/// Ports `osx-commons/contracts/test/utils/metadata.ts` and closes the gaps
-/// from `TESTS.md` §10: empty / large payload roundtrips, explicit XOR
-/// selector check, auth guard verified via `DaoUnauthorized`, event-after-
-/// state-change ordering, and (Upgradeable only) hard-coded storage slot
-/// isolation via `vm.load`.
+/// Ports `osx-commons/contracts/test/utils/metadata.ts` and adds empty /
+/// large payload roundtrips, an explicit XOR selector check, the auth guard
+/// verified via `DaoUnauthorized`, event-after-state-change ordering, and
+/// (Upgradeable only) hard-coded storage slot isolation via `vm.load`.
 abstract contract MetadataExtensionSharedTest is Test {
     DAOMock internal daoMock;
     IMetadataExtension internal target;
@@ -37,7 +38,8 @@ abstract contract MetadataExtensionSharedTest is Test {
     /// `MetadataExtension`'s `supportsInterface` returns true for this XOR
     /// (per source); pre-computed here so the assertion is double-anchored.
     bytes4 internal immutable METADATA_SELECTOR_INTERFACE_ID =
-        IMetadataExtension.setMetadata.selector ^ IMetadataExtension.getMetadata.selector;
+        IMetadataExtension.setMetadata.selector ^
+            IMetadataExtension.getMetadata.selector;
 
     function _deployTarget() internal virtual returns (IMetadataExtension);
 
@@ -64,7 +66,10 @@ abstract contract MetadataExtensionSharedTest is Test {
         assertEq(METADATA_SELECTOR_INTERFACE_ID, bytes4(0x940cac36));
     }
 
-    function test_supportsInterface_returnsFalseForUnknownInterface() public view {
+    function test_supportsInterface_returnsFalseForUnknownInterface()
+        public
+        view
+    {
         assertFalse(target.supportsInterface(0xdeadbeef));
     }
 
@@ -90,7 +95,10 @@ abstract contract MetadataExtensionSharedTest is Test {
         bytes32 expectedTopic = keccak256("MetadataSet(bytes)");
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
-            if (logs[i].topics[0] == expectedTopic && logs[i].emitter == address(target)) {
+            if (
+                logs[i].topics[0] == expectedTopic &&
+                logs[i].emitter == address(target)
+            ) {
                 bytes memory decoded = abi.decode(logs[i].data, (bytes));
                 assertEq(decoded, payload);
                 found = true;
@@ -142,7 +150,10 @@ abstract contract MetadataExtensionSharedTest is Test {
 
         bytes32 expectedTopic = keccak256("MetadataSet(bytes)");
         for (uint256 i = 0; i < logs.length; i++) {
-            if (logs[i].topics[0] == expectedTopic && logs[i].emitter == address(target)) {
+            if (
+                logs[i].topics[0] == expectedTopic &&
+                logs[i].emitter == address(target)
+            ) {
                 assertEq(abi.decode(logs[i].data, (bytes)), payload);
                 return;
             }
@@ -154,12 +165,15 @@ abstract contract MetadataExtensionSharedTest is Test {
 /// @notice Constructable variant.
 contract MetadataExtensionTest is MetadataExtensionSharedTest {
     function _deployTarget() internal override returns (IMetadataExtension) {
-        return IMetadataExtension(address(new MetadataExtensionMock(IDAO(address(daoMock)))));
+        return
+            IMetadataExtension(
+                address(new MetadataExtensionMock(IDAO(address(daoMock))))
+            );
     }
 }
 
 /// @notice Upgradeable variant — adds the hard-coded storage-slot isolation
-/// test (closes the `MetadataExtensionUpgradeable` storage-slot gap in §10).
+/// test for `MetadataExtensionUpgradeable`.
 contract MetadataExtensionUpgradeableTest is MetadataExtensionSharedTest {
     /// `keccak256(abi.encode(uint256(keccak256("osx-commons.storage.MetadataExtension")) - 1)) & ~bytes32(uint256(0xff))`
     /// — duplicated verbatim from `MetadataExtensionUpgradeable.sol`.
@@ -182,7 +196,11 @@ contract MetadataExtensionUpgradeableTest is MetadataExtensionSharedTest {
         bytes32 raw = vm.load(address(target), METADATA_STORAGE_SLOT);
         // The low byte encodes `length * 2` for short bytes. payload is 1 byte
         // long, so the low byte is 2.
-        assertEq(uint256(raw) & 0xff, 2, "short-bytes length encoding mismatch");
+        assertEq(
+            uint256(raw) & 0xff,
+            2,
+            "short-bytes length encoding mismatch"
+        );
         // The high byte holds the payload itself.
         assertEq(uint256(raw) >> 248, 0x42, "short-bytes value mismatch");
     }

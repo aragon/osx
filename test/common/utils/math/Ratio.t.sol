@@ -9,9 +9,9 @@ import {RATIO_BASE, _applyRatioCeiled, RatioOutOfBounds} from "../../../../src/c
 /// `src/common/utils/math/Ratio.sol`.
 ///
 /// Ports `osx-commons/contracts/test/utils/math/ratio.ts` and adds the
-/// gap-analysis items from `TESTS.md` §2: identity case (ratio == base),
-/// zero-value, zero-ratio, distinct revert paths for `RatioOutOfBounds`
-/// vs arithmetic overflow, and the inclusive-boundary property.
+/// identity case (ratio == base), zero-value, zero-ratio, distinct revert
+/// paths for `RatioOutOfBounds` vs arithmetic overflow, and the inclusive-
+/// boundary property.
 contract RatioTest is Test {
     /// 50% in `RATIO_BASE` units. Replaces the TS `pctToRatio(50)` SDK helper.
     uint256 internal constant HALF = RATIO_BASE / 2;
@@ -20,7 +20,10 @@ contract RatioTest is Test {
     /// frame so `vm.expectRevert` can intercept them. File-level functions
     /// otherwise inline into the test contract and reverts collapse to the
     /// test's own frame.
-    function applyRatioCeiledExt(uint256 value, uint256 ratio) external pure returns (uint256) {
+    function applyRatioCeiledExt(
+        uint256 value,
+        uint256 ratio
+    ) external pure returns (uint256) {
         return _applyRatioCeiled(value, ratio);
     }
 
@@ -47,12 +50,18 @@ contract RatioTest is Test {
         assertEq(_applyRatioCeiled(33, HALF), 17);
     }
 
-    function test_applyRatioCeiled_ratioEqualsBaseReturnsValueUnchanged() public pure {
+    function test_applyRatioCeiled_ratioEqualsBaseReturnsValueUnchanged()
+        public
+        pure
+    {
         // GAP: ratio == RATIO_BASE is the identity case.
         assertEq(_applyRatioCeiled(123, RATIO_BASE), 123);
         assertEq(_applyRatioCeiled(0, RATIO_BASE), 0);
         assertEq(_applyRatioCeiled(1, RATIO_BASE), 1);
-        assertEq(_applyRatioCeiled(type(uint128).max, RATIO_BASE), type(uint128).max);
+        assertEq(
+            _applyRatioCeiled(type(uint128).max, RATIO_BASE),
+            type(uint128).max
+        );
     }
 
     function test_applyRatioCeiled_zeroValueReturnsZero() public pure {
@@ -76,7 +85,13 @@ contract RatioTest is Test {
 
     function test_applyRatioCeiled_revertsIfRatioExceedsBase() public {
         uint256 tooBig = RATIO_BASE + 1;
-        vm.expectRevert(abi.encodeWithSelector(RatioOutOfBounds.selector, RATIO_BASE, tooBig));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                RatioOutOfBounds.selector,
+                RATIO_BASE,
+                tooBig
+            )
+        );
         this.applyRatioCeiledExt(123, tooBig);
     }
 
@@ -84,7 +99,9 @@ contract RatioTest is Test {
         // GAP: the custom error must carry the exact actual ratio in its second arg,
         // not just any too-large value.
         uint256 max = type(uint256).max;
-        vm.expectRevert(abi.encodeWithSelector(RatioOutOfBounds.selector, RATIO_BASE, max));
+        vm.expectRevert(
+            abi.encodeWithSelector(RatioOutOfBounds.selector, RATIO_BASE, max)
+        );
         this.applyRatioCeiledExt(0, max);
     }
 
@@ -101,7 +118,10 @@ contract RatioTest is Test {
         this.applyRatioCeiledExt(overflowValue, RATIO_BASE);
     }
 
-    function test_applyRatioCeiled_justBelowOverflowDoesNotRevert() public pure {
+    function test_applyRatioCeiled_justBelowOverflowDoesNotRevert()
+        public
+        pure
+    {
         // The largest value that does NOT overflow `_value * RATIO_BASE`.
         uint256 borderValue = type(uint256).max / RATIO_BASE;
         _applyRatioCeiled(borderValue, RATIO_BASE);
@@ -115,14 +135,19 @@ contract RatioTest is Test {
     /// ceiling, applying a ratio in `[0, 1]` to `value` cannot grow it.
     /// `value` bounded to `uint128` to stay inside the no-overflow envelope
     /// (`uint128 << uint256.max / RATIO_BASE`).
-    function testFuzz_applyRatioCeiled_resultNeverExceedsValue(uint128 value, uint256 ratio) public pure {
+    function testFuzz_applyRatioCeiled_resultNeverExceedsValue(
+        uint128 value,
+        uint256 ratio
+    ) public pure {
         ratio = bound(ratio, 0, RATIO_BASE);
         assertLe(_applyRatioCeiled(uint256(value), ratio), uint256(value));
     }
 
     /// `ratio == RATIO_BASE` is the identity function on `value` for any value
     /// that does not overflow `value * RATIO_BASE`.
-    function testFuzz_applyRatioCeiled_baseRatioIsIdentity(uint256 value) public pure {
+    function testFuzz_applyRatioCeiled_baseRatioIsIdentity(
+        uint256 value
+    ) public pure {
         value = bound(value, 0, type(uint256).max / RATIO_BASE);
         assertEq(_applyRatioCeiled(value, RATIO_BASE), value);
     }

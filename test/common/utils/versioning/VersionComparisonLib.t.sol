@@ -9,10 +9,10 @@ import {VersionComparisonLib} from "../../../../src/common/utils/versioning/Vers
 /// `src/common/utils/versioning/VersionComparisonLib.sol`.
 ///
 /// Ports `osx-commons/contracts/test/utils/versioning/version-comparison-lib.ts`
-/// and adds the gap items from `TESTS.md` §4:
+/// and adds:
 ///   - boundary versions [0,0,0] / [255,255,255] / asymmetric extremes,
-///   - the logical-consistency invariant `!lt(a,b) && !eq(a,b) ⇔ gt(a,b)`
-///     plus the lte/gte duals (closes central flaw log F16),
+///   - the logical-consistency invariant `!lt(a,b) && !eq(a,b) <=> gt(a,b)`
+///     plus the lte/gte duals,
 ///   - transitivity of `lt`.
 ///
 /// The TS suite uses three matrix helpers (`eqChecks`, `ltChecks`, `gtChecks`)
@@ -29,31 +29,53 @@ contract VersionComparisonLibTest is Test {
     // contract so we can pass it by reference into the matrix helpers below.
     // -------------------------------------------------------------------------
 
-    function _opEq(uint8[3] memory l, uint8[3] memory r) internal pure returns (bool) {
+    function _opEq(
+        uint8[3] memory l,
+        uint8[3] memory r
+    ) internal pure returns (bool) {
         return l.eq(r);
     }
 
-    function _opNeq(uint8[3] memory l, uint8[3] memory r) internal pure returns (bool) {
+    function _opNeq(
+        uint8[3] memory l,
+        uint8[3] memory r
+    ) internal pure returns (bool) {
         return l.neq(r);
     }
 
-    function _opLt(uint8[3] memory l, uint8[3] memory r) internal pure returns (bool) {
+    function _opLt(
+        uint8[3] memory l,
+        uint8[3] memory r
+    ) internal pure returns (bool) {
         return l.lt(r);
     }
 
-    function _opLte(uint8[3] memory l, uint8[3] memory r) internal pure returns (bool) {
+    function _opLte(
+        uint8[3] memory l,
+        uint8[3] memory r
+    ) internal pure returns (bool) {
         return l.lte(r);
     }
 
-    function _opGt(uint8[3] memory l, uint8[3] memory r) internal pure returns (bool) {
+    function _opGt(
+        uint8[3] memory l,
+        uint8[3] memory r
+    ) internal pure returns (bool) {
         return l.gt(r);
     }
 
-    function _opGte(uint8[3] memory l, uint8[3] memory r) internal pure returns (bool) {
+    function _opGte(
+        uint8[3] memory l,
+        uint8[3] memory r
+    ) internal pure returns (bool) {
         return l.gte(r);
     }
 
-    function _v(uint8 a, uint8 b, uint8 c) internal pure returns (uint8[3] memory v) {
+    function _v(
+        uint8 a,
+        uint8 b,
+        uint8 c
+    ) internal pure returns (uint8[3] memory v) {
         v[0] = a;
         v[1] = b;
         v[2] = c;
@@ -65,10 +87,13 @@ contract VersionComparisonLibTest is Test {
 
     /// 8 pairs where `lhs == rhs`. Covers every "all-zero subset" combination
     /// of the three semver components, including the all-zero and all-one vectors.
-    function _runEqualPairs(function(uint8[3] memory, uint8[3] memory) internal pure returns (bool) op, bool expected)
-        internal
-        pure
-    {
+    function _runEqualPairs(
+        function(uint8[3] memory, uint8[3] memory)
+            internal
+            pure
+            returns (bool) op,
+        bool expected
+    ) internal pure {
         assertEq(op(_v(1, 1, 1), _v(1, 1, 1)), expected);
         assertEq(op(_v(0, 1, 1), _v(0, 1, 1)), expected);
         assertEq(op(_v(1, 0, 1), _v(1, 0, 1)), expected);
@@ -81,10 +106,13 @@ contract VersionComparisonLibTest is Test {
 
     /// 16 pairs where `lhs < rhs` — exercises every single-component step-up
     /// as well as multi-component variations.
-    function _runLtPairs(function(uint8[3] memory, uint8[3] memory) internal pure returns (bool) op, bool expected)
-        internal
-        pure
-    {
+    function _runLtPairs(
+        function(uint8[3] memory, uint8[3] memory)
+            internal
+            pure
+            returns (bool) op,
+        bool expected
+    ) internal pure {
         // Single-component bumps from [1,1,1].
         assertEq(op(_v(1, 1, 1), _v(2, 1, 1)), expected);
         assertEq(op(_v(1, 1, 1), _v(1, 2, 1)), expected);
@@ -110,10 +138,13 @@ contract VersionComparisonLibTest is Test {
     }
 
     /// Mirror of `_runLtPairs` with sides swapped.
-    function _runGtPairs(function(uint8[3] memory, uint8[3] memory) internal pure returns (bool) op, bool expected)
-        internal
-        pure
-    {
+    function _runGtPairs(
+        function(uint8[3] memory, uint8[3] memory)
+            internal
+            pure
+            returns (bool) op,
+        bool expected
+    ) internal pure {
         assertEq(op(_v(2, 1, 1), _v(1, 1, 1)), expected);
         assertEq(op(_v(1, 2, 1), _v(1, 1, 1)), expected);
         assertEq(op(_v(1, 1, 2), _v(1, 1, 1)), expected);
@@ -245,7 +276,10 @@ contract VersionComparisonLibTest is Test {
     /// Exactly one of `lt`, `eq`, `gt` is true for any pair. The TS suite never
     /// asserted the full trichotomy across the 6 operators; locking it in here
     /// catches a class of subtle operator-drift bugs.
-    function testFuzz_trichotomy(uint8[3] memory a, uint8[3] memory b) public pure {
+    function testFuzz_trichotomy(
+        uint8[3] memory a,
+        uint8[3] memory b
+    ) public pure {
         bool isLt = a.lt(b);
         bool isEq = a.eq(b);
         bool isGt = a.gt(b);
@@ -256,27 +290,42 @@ contract VersionComparisonLibTest is Test {
     }
 
     /// `neq` is the negation of `eq`.
-    function testFuzz_neqIsNegationOfEq(uint8[3] memory a, uint8[3] memory b) public pure {
+    function testFuzz_neqIsNegationOfEq(
+        uint8[3] memory a,
+        uint8[3] memory b
+    ) public pure {
         assertEq(a.neq(b), !a.eq(b));
     }
 
     /// `lte` is `lt || eq`. Same shape for `gte`.
-    function testFuzz_lteEqualsLtOrEq(uint8[3] memory a, uint8[3] memory b) public pure {
+    function testFuzz_lteEqualsLtOrEq(
+        uint8[3] memory a,
+        uint8[3] memory b
+    ) public pure {
         assertEq(a.lte(b), a.lt(b) || a.eq(b));
     }
 
-    function testFuzz_gteEqualsGtOrEq(uint8[3] memory a, uint8[3] memory b) public pure {
+    function testFuzz_gteEqualsGtOrEq(
+        uint8[3] memory a,
+        uint8[3] memory b
+    ) public pure {
         assertEq(a.gte(b), a.gt(b) || a.eq(b));
     }
 
-    /// `!lt(a,b) && !eq(a,b) ⇔ gt(a,b)` — the consistency invariant called out
-    /// in `TESTS.md` F16.
-    function testFuzz_consistencyAcrossOperators(uint8[3] memory a, uint8[3] memory b) public pure {
+    /// `!lt(a,b) && !eq(a,b) <=> gt(a,b)` — trichotomy-consistency invariant.
+    function testFuzz_consistencyAcrossOperators(
+        uint8[3] memory a,
+        uint8[3] memory b
+    ) public pure {
         assertEq(!a.lt(b) && !a.eq(b), a.gt(b));
     }
 
     /// `lt` is transitive: `lt(a, b) && lt(b, c) ⇒ lt(a, c)`.
-    function testFuzz_ltIsTransitive(uint8[3] memory a, uint8[3] memory b, uint8[3] memory c) public pure {
+    function testFuzz_ltIsTransitive(
+        uint8[3] memory a,
+        uint8[3] memory b,
+        uint8[3] memory c
+    ) public pure {
         vm.assume(a.lt(b) && b.lt(c));
         assertTrue(a.lt(c));
     }

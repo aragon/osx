@@ -8,14 +8,13 @@ import {Proposal} from "../../../../../src/common/plugin/extensions/proposal/Pro
 import {ProposalUpgradeable} from "../../../../../src/common/plugin/extensions/proposal/ProposalUpgradeable.sol";
 import {IProposal} from "../../../../../src/common/plugin/extensions/proposal/IProposal.sol";
 import {ProposalMock} from "../../../../mocks/commons/plugin/extensions/proposal/ProposalMock.sol";
-import {
-    ProposalUpgradeableMock
-} from "../../../../mocks/commons/plugin/extensions/proposal/ProposalUpgradeableMock.sol";
+import {ProposalUpgradeableMock} from "../../../../mocks/commons/plugin/extensions/proposal/ProposalUpgradeableMock.sol";
 
 /// @dev Shared shape both Proposal-mock variants expose. Lets the abstract
 /// base test call into either via one typed handle.
 interface IProposalLike {
     function supportsInterface(bytes4) external view returns (bool);
+
     function proposalCount() external view returns (uint256);
 }
 
@@ -23,7 +22,9 @@ interface IProposalLike {
 /// the production `_createProposalId` is `internal`. Inherits from the
 /// constructable mock to keep the abstract-function stubs intact.
 contract ProposalIdHarness is ProposalMock {
-    function exposed_createProposalId(bytes32 _salt) external view returns (uint256) {
+    function exposed_createProposalId(
+        bytes32 _salt
+    ) external view returns (uint256) {
         return _createProposalId(_salt);
     }
 }
@@ -31,10 +32,10 @@ contract ProposalIdHarness is ProposalMock {
 /// @notice Shared behaviour tests for `Proposal` and `ProposalUpgradeable` in
 /// `src/common/plugin/extensions/proposal/`.
 ///
-/// Ports `osx-commons/contracts/test/plugin/extensions/proposal.ts` and closes
-/// the gaps from `TESTS.md` §12: explicit `FunctionDeprecated` revert path,
-/// legacy `IProposal` v1.0.0 frozen iface ID matches, `_createProposalId`
-/// determinism + uniqueness under typical perturbations.
+/// Ports `osx-commons/contracts/test/plugin/extensions/proposal.ts` and adds:
+/// an explicit `FunctionDeprecated` revert path, a legacy `IProposal` v1.0.0
+/// frozen iface ID match, and `_createProposalId` determinism + uniqueness
+/// under typical perturbations.
 abstract contract ProposalSharedTest is Test {
     /// Frozen v1.0.0 `IProposal` interface ID: at that time `IProposal` had
     /// only one external function, `proposalCount()`. Single-function
@@ -79,7 +80,10 @@ abstract contract ProposalSharedTest is Test {
         assertTrue(target.supportsInterface(IPROPOSAL_V1_0_0_INTERFACE_ID));
     }
 
-    function test_supportsInterface_returnsFalseForUnknownInterface() public view {
+    function test_supportsInterface_returnsFalseForUnknownInterface()
+        public
+        view
+    {
         assertFalse(target.supportsInterface(0xdeadbeef));
     }
 
@@ -87,9 +91,12 @@ abstract contract ProposalSharedTest is Test {
     /// the five v1.0.0-absent function selectors. Locks the source-side XOR
     /// arithmetic to the literal we assert against above.
     function test_supportsInterface_legacyXorMatchesSource() public pure {
-        bytes4 computed = type(IProposal).interfaceId ^ IProposal.createProposal.selector
-            ^ IProposal.hasSucceeded.selector ^ IProposal.execute.selector ^ IProposal.canExecute.selector
-            ^ IProposal.customProposalParamsABI.selector;
+        bytes4 computed = type(IProposal).interfaceId ^
+            IProposal.createProposal.selector ^
+            IProposal.hasSucceeded.selector ^
+            IProposal.execute.selector ^
+            IProposal.canExecute.selector ^
+            IProposal.customProposalParamsABI.selector;
         assertEq(computed, IPROPOSAL_V1_0_0_INTERFACE_ID);
     }
 }

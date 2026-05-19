@@ -12,8 +12,8 @@ import {AddresslistMock} from "../../../../mocks/commons/plugin/extensions/gover
 /// Ports `osx-commons/contracts/test/plugin/extensions/governance/addresslist.ts`.
 /// Each TS step that advanced the chain via `evm_mine` is reproduced with
 /// `vm.roll(block.number + 1)` so the checkpoint reads target distinct blocks.
-/// Closes the gaps from `TESTS.md` §11: large-array behaviour, exact-block
-/// precision, off-by-one window around the boundary block.
+/// Adds large-array behaviour, exact-block precision, and off-by-one window
+/// around the boundary block.
 contract AddresslistTest is Test {
     AddresslistMock internal addresslist;
     address internal alice;
@@ -165,7 +165,12 @@ contract AddresslistTest is Test {
         address[] memory batch = new address[](2);
         batch[0] = bob;
         batch[1] = carol;
-        vm.expectRevert(abi.encodeWithSelector(Addresslist.InvalidAddresslistUpdate.selector, carol));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Addresslist.InvalidAddresslistUpdate.selector,
+                carol
+            )
+        );
         addresslist.addAddresses(batch);
 
         vm.roll(block.number + 1);
@@ -179,7 +184,12 @@ contract AddresslistTest is Test {
         address[] memory batch = new address[](2);
         batch[0] = alice;
         batch[1] = alice;
-        vm.expectRevert(abi.encodeWithSelector(Addresslist.InvalidAddresslistUpdate.selector, alice));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Addresslist.InvalidAddresslistUpdate.selector,
+                alice
+            )
+        );
         addresslist.addAddresses(batch);
     }
 
@@ -212,7 +222,12 @@ contract AddresslistTest is Test {
         address[] memory batch = new address[](2);
         batch[0] = bob;
         batch[1] = carol;
-        vm.expectRevert(abi.encodeWithSelector(Addresslist.InvalidAddresslistUpdate.selector, carol));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Addresslist.InvalidAddresslistUpdate.selector,
+                carol
+            )
+        );
         addresslist.removeAddresses(batch);
 
         vm.roll(block.number + 1);
@@ -228,7 +243,12 @@ contract AddresslistTest is Test {
         address[] memory batch = new address[](2);
         batch[0] = alice;
         batch[1] = alice;
-        vm.expectRevert(abi.encodeWithSelector(Addresslist.InvalidAddresslistUpdate.selector, alice));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Addresslist.InvalidAddresslistUpdate.selector,
+                alice
+            )
+        );
         addresslist.removeAddresses(batch);
     }
 
