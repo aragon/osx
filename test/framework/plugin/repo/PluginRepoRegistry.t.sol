@@ -172,10 +172,20 @@ contract PluginRepoRegistryTest is Test {
 
     function test_register_revertsIfRepoAlreadyRegistered() public {
         pluginRepoRegistry.registerPluginRepo("repo-1", address(repo));
+
+        // The source writes the ENS subnode BEFORE the `_register` check
+        // (which is what reverts on already-registered repos). Pre-call,
+        // the "repo-2" subnode is empty; post-revert it must remain empty
+        // — locks in the EVM-revert cascade rolling back the ENS write.
+        bytes32 secondNode = keccak256(abi.encodePacked(DAO_ETH_NODE, keccak256(bytes("repo-2"))));
+        assertEq(ens.owner(secondNode), address(0));
+
         vm.expectRevert(
             abi.encodeWithSelector(InterfaceBasedRegistry.ContractAlreadyRegistered.selector, address(repo))
         );
         pluginRepoRegistry.registerPluginRepo("repo-2", address(repo));
+
+        assertEq(ens.owner(secondNode), address(0), "ENS subnode must be rolled back when _register reverts");
     }
 
     function test_register_revertsIfSubdomainAlreadyTaken() public {
@@ -191,6 +201,9 @@ contract PluginRepoRegistryTest is Test {
             )
         );
         pluginRepoRegistry.registerPluginRepo("my-plugin-repo", address(repo2));
+
+        // repo2 must not have been recorded in `entries` (state rollback).
+        assertFalse(pluginRepoRegistry.entries(address(repo2)));
     }
 
     function test_register_revertsIfSubdomainHasInvalidChar() public {
@@ -212,4 +225,83 @@ contract PluginRepoRegistryTest is Test {
         assertEq(v[1], 4);
         assertEq(v[2], 0);
     }
+
+    // -------------------------------------------------------------------------
+    // Implementation / lifecycle
+    // -------------------------------------------------------------------------
+
+    /// The bare `PluginRepoRegistry` impl invokes `_disableInitializers()` in
+    /// its constructor — calling `initialize` on the impl directly must revert.
+    /// Only the proxy created via `ERC1967Proxy` can be initialized.
+    function test_impl_cannotBeInitializedDirectly() public {
+        PluginRepoRegistry impl = new PluginRepoRegistry();
+        vm.expectRevert(); // Initializable: contract is already initialized
+        impl.initialize(IDAO(address(managingDao)), subdomainRegistrar);
+    }
+
+    /// Second call to `initialize` on an already-initialized proxy reverts.
+    function test_initialize_revertsIfCalledTwice() public {
+        vm.expectRevert(); // Initializable: contract is already initialized
+        pluginRepoRegistry.initialize(IDAO(address(managingDao)), subdomainRegistrar);
+    }
+
+    /// Managing DAO is stored at init via the inherited
+    /// `DaoAuthorizableUpgradeable` base and exposed via the `dao()` getter.
+    function test_initialize_storesManagingDao() public view {
+        assertEq(address(pluginRepoRegistry.dao()), address(managingDao));
+    }
+
+    // -------------------------------------------------------------------------
+    // registerPluginRepo — interface-check edges (inherited from InterfaceBasedRegistry)
+    // -------------------------------------------------------------------------
+
+    /// Non-contract repo addresses (zero address, EOA) fail the ERC-165
+    /// interface probe inside `InterfaceBasedRegistry._register` and revert
+    /// cleanly with `ContractInterfaceInvalid`.
+    function test_register_revertsForNonContractRepo() public {
+        // address(0): `address(0).supportsInterface(...)` is a call to a no-code
+        // address; ERC165Checker returns false → revert.
+        vm.expectRevert(
+            abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, address(0))
+        );
+        pluginRepoRegistry.registerPluginRepo("zero-addr", address(0));
+
+        // Plain EOA address (no code).
+        address eoa = makeAddr("plain-eoa");
+        vm.expectRevert(abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, eoa));
+        pluginRepoRegistry.registerPluginRepo("eoa-repo", eoa);
+    }
+
+    /// A contract whose `supportsInterface` itself reverts must be caught by
+    /// `ERC165CheckerUpgradeable` (it uses staticcall + try/catch) so the
+    /// outer call reverts cleanly with `ContractInterfaceInvalid` — never
+    /// propagates the inner revert.
+    function test_register_revertsIfRepoSupportsInterfaceReverts() public {
+        address bad = makeAddr("reverter");
+        vm.etch(bad, hex"fe"); // INVALID opcode
+
+        vm.expectRevert(abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, bad));
+        pluginRepoRegistry.registerPluginRepo("reverter", bad);
+    }
+
+    /// When the registry is initialized WITHOUT an ENS subdomain registrar
+    /// (sentinel `address(0)`), an empty subdomain still allows registration
+    /// — the ENS block is skipped entirely.
+    function test_register_succeedsWithEmptySubdomainAndNoRegistrar() public {
+        PluginRepoRegistry impl = new PluginRepoRegistry();
+        PluginRepoRegistry noEnsRegistry = PluginRepoRegistry(
+            address(
+                new ERC1967Proxy(
+                    address(impl),
+                    abi.encodeCall(
+                        PluginRepoRegistry.initialize, (IDAO(address(managingDao)), ENSSubdomainRegistrar(address(0)))
+                    )
+                )
+            )
+        );
+
+        noEnsRegistry.registerPluginRepo("", address(repo));
+        assertTrue(noEnsRegistry.entries(address(repo)));
+    }
+
 }
