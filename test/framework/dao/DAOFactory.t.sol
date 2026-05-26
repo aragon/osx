@@ -366,4 +366,176 @@ contract DAOFactoryTest is Test {
         assertTrue(base != address(0));
         assertTrue(base.code.length > 0);
     }
+
+    /// The base DAO impl is deployed via `new DAO()` in the factory's
+    /// constructor, and its constructor invokes `_disableInitializers()`.
+    /// Calling `initialize` on the base directly must revert; only the UUPS
+    /// proxies the factory creates can be initialized.
+    function test_daoBase_cannotBeInitializedDirectly() public {
+        DAO base = DAO(payable(daoFactory.daoBase()));
+        vm.expectRevert(); // Initializable: contract is already initialized
+        base.initialize(DUMMY_METADATA, address(this), address(0), DAO_URI);
+    }
+
+    /// `daoBase` is a naked impl owned only by the factory — it must NOT
+    /// appear in the DAO registry (only proxies created via `createDao` do).
+    function test_daoBase_isNotRegisteredInDAORegistry() public view {
+        assertFalse(daoRegistry.entries(daoFactory.daoBase()));
+    }
+
+    /// The factory is not a DAO itself; the `IDAO` interface id is not advertised.
+    function test_supportsInterface_doesNotSupportIDAO() public view {
+        assertFalse(daoFactory.supportsInterface(type(IDAO).interfaceId));
+    }
+
+    /// The factory is not a plugin setup either.
+    function test_supportsInterface_doesNotSupportIPluginSetup() public view {
+        bytes4 ipluginSetupId = 0xb6c2cccf; // type(IPluginSetup).interfaceId at v1.4.0
+        assertFalse(daoFactory.supportsInterface(ipluginSetupId));
+    }
+
+    // -------------------------------------------------------------------------
+    // Proxy shape + address prediction
+    // -------------------------------------------------------------------------
+
+    /// The DAO proxy's ERC1967 implementation slot must point to `daoBase` —
+    /// confirms the factory uses the UUPS pattern (not minimal proxy or beacon).
+    function test_createDao_proxyPointsToDaoBase() public {
+        (DAO createdDao,) = daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
+
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(createdDao), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), daoFactory.daoBase());
+    }
+
+    /// The DAO proxy address is deterministic from the factory's nonce — off-chain
+    /// deploy scripts rely on this to pre-compute the address before the call.
+    function test_createDao_addressMatchesComputeCreateAddress() public {
+        address expected = vm.computeCreateAddress(address(daoFactory), vm.getNonce(address(daoFactory)));
+        (DAO createdDao,) = daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
+        assertEq(address(createdDao), expected);
+    }
+
+    // -------------------------------------------------------------------------
+    // Permission asymmetries — caller and DAO
+    // -------------------------------------------------------------------------
+
+    /// In the no-plugins branch, the caller is granted ONLY `EXECUTE` — never
+    /// `ROOT`. Locks in that the factory never leaks privilege escalation.
+    function test_createDao_withoutPlugins_doesNotGrantRootToCaller() public {
+        (DAO createdDao,) = daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
+        assertFalse(createdDao.hasPermission(address(createdDao), address(this), ROOT_PERMISSION_ID, ""));
+    }
+
+    /// In the with-plugins branch, the caller does NOT receive `EXECUTE` —
+    /// only the plugins receive the permissions they explicitly request.
+    /// Users who create a DAO with plugins cannot call `execute()` directly
+    /// afterward; they must route through the plugins.
+    function test_createDao_withPlugin_doesNotGrantExecuteToCaller() public {
+        DAOFactory.PluginSettings[] memory plugins = new DAOFactory.PluginSettings[](1);
+        plugins[0] = _installationData(1, 1);
+
+        (DAO createdDao,) = daoFactory.createDao(_defaultDaoSettings(), plugins);
+        assertFalse(createdDao.hasPermission(address(createdDao), address(this), EXECUTE_PERMISSION_ID, ""));
+    }
+
+    /// The 5-permission self-grant set does NOT include `EXECUTE_PERMISSION` —
+    /// the DAO cannot call `execute()` on itself via a direct self-call.
+    /// (Plugins or external callers with `EXECUTE` are the only entry points.)
+    function test_createDao_daoDoesNotHoldExecuteOnItself() public {
+        (DAO createdDao,) = daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
+        assertFalse(
+            createdDao.hasPermission(address(createdDao), address(createdDao), EXECUTE_PERMISSION_ID, ""),
+            "DAO must not hold EXECUTE on itself"
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // Multi-plugin install ordering + atomicity
+    // -------------------------------------------------------------------------
+
+    /// `installedPlugins[i]` must correspond to `_pluginSettings[i]` —
+    /// plugins are installed in input order, not parallelized or reordered.
+    function test_createDao_withMultiplePlugins_installedOrderMatchesInputOrder() public {
+        pluginRepo.createVersion(1, address(pluginSetupV1Mock), hex"11", hex"11");
+
+        DAOFactory.PluginSettings[] memory plugins = new DAOFactory.PluginSettings[](2);
+        plugins[0] = _installationData(1, 1);
+        plugins[1] = _installationData(1, 2);
+
+        vm.recordLogs();
+        (, DAOFactory.InstalledPlugin[] memory installed) = daoFactory.createDao(_defaultDaoSettings(), plugins);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        // Capture the order in which InstallationApplied events fire — they
+        // should land in array order.
+        bytes32 installedTopic = keccak256("InstallationApplied(address,address,bytes32,bytes32)");
+        address[] memory pluginsInEventOrder = new address[](2);
+        uint256 found;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(psp) && logs[i].topics[0] == installedTopic && found < 2) {
+                // topics: [sig, dao, plugin]
+                pluginsInEventOrder[found++] = address(uint160(uint256(logs[i].topics[2])));
+            }
+        }
+        assertEq(found, 2);
+        assertEq(installed[0].plugin, pluginsInEventOrder[0], "installed[0] matches first InstallationApplied");
+        assertEq(installed[1].plugin, pluginsInEventOrder[1], "installed[1] matches second InstallationApplied");
+    }
+
+    /// Subdomain uniqueness propagates from `DAORegistry`: a second `createDao`
+    /// with the same subdomain reverts atomically — the second DAO is NOT
+    /// deployed (its expected proxy address has no code afterward).
+    function test_createDao_revertsAtomicallyOnSubdomainConflict() public {
+        daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
+
+        address expectedSecond = vm.computeCreateAddress(address(daoFactory), vm.getNonce(address(daoFactory)));
+        vm.expectRevert();
+        daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
+
+        assertEq(expectedSecond.code.length, 0, "second DAO proxy must not exist post-revert");
+        assertFalse(daoRegistry.entries(expectedSecond), "registry must not retain reverted second DAO");
+    }
+
+    /// If a plugin install fails (e.g., version not published in the repo),
+    /// the entire `createDao` reverts atomically: no DAO is registered,
+    /// no proxy is left dangling.
+    function test_createDao_revertsAtomicallyIfPluginInstallReverts() public {
+        DAOFactory.PluginSettings[] memory plugins = new DAOFactory.PluginSettings[](1);
+        plugins[0] = _installationData(1, 99); // unpublished version
+
+        address expected = vm.computeCreateAddress(address(daoFactory), vm.getNonce(address(daoFactory)));
+        vm.expectRevert();
+        daoFactory.createDao(_defaultDaoSettings(), plugins);
+
+        assertEq(expected.code.length, 0, "DAO proxy must not exist post-revert");
+        assertFalse(daoRegistry.entries(expected), "registry must not retain reverted DAO");
+    }
+
+    /// `DAORegistered` fires BEFORE any `InstallationApplied` — plugins can
+    /// reference the DAO's registered identity at install time.
+    function test_createDao_emitsDAORegisteredBeforeInstallationApplied() public {
+        DAOFactory.PluginSettings[] memory plugins = new DAOFactory.PluginSettings[](1);
+        plugins[0] = _installationData(1, 1);
+
+        vm.recordLogs();
+        daoFactory.createDao(_defaultDaoSettings(), plugins);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 registeredTopic = keccak256("DAORegistered(address,address,string)");
+        bytes32 installedTopic = keccak256("InstallationApplied(address,address,bytes32,bytes32)");
+        int256 registeredIdx = -1;
+        int256 firstInstallIdx = -1;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(daoRegistry) && logs[i].topics[0] == registeredTopic) {
+                registeredIdx = int256(i);
+            } else if (
+                logs[i].emitter == address(psp) && logs[i].topics[0] == installedTopic && firstInstallIdx == -1
+            ) {
+                firstInstallIdx = int256(i);
+            }
+        }
+        assertTrue(registeredIdx != -1 && firstInstallIdx != -1, "both events present");
+        assertLt(registeredIdx, firstInstallIdx, "DAORegistered precedes InstallationApplied");
+    }
 }
