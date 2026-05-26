@@ -256,4 +256,120 @@ contract PluginRepoFactoryTest is Test {
         assertTrue(base != address(0));
         assertTrue(base.code.length > 0);
     }
+
+    /// The base `PluginRepo` impl is deployed via `new PluginRepo()` in the
+    /// factory's constructor, and its constructor invokes
+    /// `_disableInitializers()`. Calling `initialize` on the base directly
+    /// must revert — only the UUPS proxy created by the factory can be
+    /// initialized.
+    function test_pluginRepoBase_cannotBeInitializedDirectly() public {
+        PluginRepo base = PluginRepo(factory.pluginRepoBase());
+        vm.expectRevert(); // Initializable: contract is already initialized
+        base.initialize(owner);
+    }
+
+    /// The factory is not a plugin setup itself; the IPluginSetup interface
+    /// is intentionally NOT advertised.
+    function test_supportsInterface_doesNotSupportIPluginSetup() public view {
+        // IPluginSetup id is computed inline to avoid an extra import.
+        bytes4 ipluginSetupId = 0xb6c2cccf; // type(IPluginSetup).interfaceId at v1.4.0
+        // The repo-base, by contrast, has setups register against it — but
+        // the factory itself answers false.
+        assertFalse(factory.supportsInterface(ipluginSetupId));
+    }
+
+    /// `createPluginRepo` deploys a UUPS proxy whose ERC1967 implementation
+    /// slot points to the factory's `pluginRepoBase`.
+    function test_createPluginRepo_proxyPointsToPluginRepoBase() public {
+        PluginRepo repo = factory.createPluginRepo("my-plugin-repo", owner);
+
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(repo), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), factory.pluginRepoBase());
+    }
+
+    /// Two consecutive `createPluginRepo` calls land at distinct addresses
+    /// (factory nonce bumps on each `new ERC1967Proxy(...)`).
+    function test_createPluginRepo_consecutiveCallsProduceDistinctAddresses() public {
+        PluginRepo repoA = factory.createPluginRepo("repo-a", owner);
+        PluginRepo repoB = factory.createPluginRepo("repo-b", owner);
+        assertTrue(address(repoA) != address(repoB));
+    }
+
+    /// Subdomain uniqueness is enforced by the registry — re-using the
+    /// same subdomain in a second factory call reverts.
+    function test_createPluginRepo_revertsOnDuplicateSubdomain() public {
+        factory.createPluginRepo("dup", owner);
+        vm.expectRevert();
+        factory.createPluginRepo("dup", owner);
+    }
+
+    // -------------------------------------------------------------------------
+    // createPluginRepoWithFirstVersion — atomicity + permission ceremony
+    // -------------------------------------------------------------------------
+
+    /// `_setPluginRepoPermissions` emits its 6-event ceremony in a fixed
+    /// order: the 3 GRANTS to the maintainer fire BEFORE the 3 REVOKES from
+    /// the factory. If the source ever flipped the order, the factory would
+    /// lose ROOT before granting it to the maintainer and the batch would
+    /// fail mid-flight — locking in defends against that refactor.
+    function test_createPluginRepoWithFirstVersion_emitsGrantsBeforeRevokes() public {
+        PluginUUPSUpgradeableSetupV1Mock setup = _deployMockPluginSetup();
+
+        vm.recordLogs();
+        PluginRepo repo =
+            factory.createPluginRepoWithFirstVersion("ordering", address(setup), owner, hex"11", hex"11");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 grantedTopic = keccak256("Granted(bytes32,address,address,address,address)");
+        bytes32 revokedTopic = keccak256("Revoked(bytes32,address,address,address)");
+
+        int256 lastGrantIdx = -1;
+        int256 firstRevokeIdx = -1;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != address(repo)) continue;
+            if (logs[i].topics[0] == grantedTopic) lastGrantIdx = int256(i);
+            else if (logs[i].topics[0] == revokedTopic && firstRevokeIdx == -1) firstRevokeIdx = int256(i);
+        }
+        assertTrue(lastGrantIdx != -1, "grants observed");
+        assertTrue(firstRevokeIdx != -1, "revokes observed");
+        assertLt(lastGrantIdx, firstRevokeIdx, "all grants precede the first revoke");
+    }
+
+    /// `_pluginSetup` that doesn't implement `IPluginSetup` causes the
+    /// inner `pluginRepo.createVersion` to revert `InvalidPluginSetupInterface`.
+    /// The entire call rolls back atomically: no proxy is registered.
+    function test_createPluginRepoWithFirstVersion_revertsIfPluginSetupInvalid() public {
+        // Use an EOA-shaped address as the "setup".
+        address notASetup = makeAddr("not-a-setup");
+        address expected = _expectedRepoAddress();
+
+        vm.expectRevert(PluginRepo.InvalidPluginSetupInterface.selector);
+        factory.createPluginRepoWithFirstVersion("atomic-setup", notASetup, owner, hex"11", hex"11");
+
+        // Registry state reverted: the would-be proxy address never landed in `entries`.
+        assertFalse(pluginRepoRegistry.entries(expected), "registry must not retain reverted proxy");
+        assertEq(expected.code.length, 0, "proxy must not exist post-revert");
+    }
+
+    /// Empty `_releaseMetadata` causes the first `createVersion` to revert
+    /// `EmptyReleaseMetadata`. Entire factory call rolls back.
+    function test_createPluginRepoWithFirstVersion_revertsIfReleaseMetadataEmpty() public {
+        PluginUUPSUpgradeableSetupV1Mock setup = _deployMockPluginSetup();
+
+        vm.expectRevert(PluginRepo.EmptyReleaseMetadata.selector);
+        factory.createPluginRepoWithFirstVersion("empty-md", address(setup), owner, "", hex"11");
+    }
+
+    /// Empty `_buildMetadata` is NOT checked by `createVersion` — accepted.
+    /// Asymmetric with `_releaseMetadata`; lock in the inputs that pass.
+    function test_createPluginRepoWithFirstVersion_acceptsEmptyBuildMetadata() public {
+        PluginUUPSUpgradeableSetupV1Mock setup = _deployMockPluginSetup();
+        PluginRepo repo =
+            factory.createPluginRepoWithFirstVersion("empty-build", address(setup), owner, hex"11", "");
+
+        PluginRepo.Version memory v = repo.getLatestVersion(uint8(1));
+        assertEq(v.tag.build, 1);
+        assertEq(v.buildMetadata.length, 0, "build metadata stored as empty");
+    }
 }
