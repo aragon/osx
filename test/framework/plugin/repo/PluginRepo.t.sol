@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.17;
 
-import {Test, Vm} from "forge-std/Test.sol";
+import {Test, Vm, stdError} from "forge-std/Test.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
@@ -12,6 +12,7 @@ import {PlaceholderSetup} from "../../../../src/framework/plugin/repo/placeholde
 import {PermissionManager} from "../../../../src/core/permission/PermissionManager.sol";
 import {IPermissionCondition} from "../../../../src/common/permission/condition/IPermissionCondition.sol";
 import {IProtocolVersion} from "../../../../src/common/utils/versioning/IProtocolVersion.sol";
+import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
 import {PermissionConditionMock} from "../../../mocks/permission/PermissionConditionMock.sol";
 import {
     PluginUUPSUpgradeableSetupV1Mock
@@ -193,6 +194,34 @@ contract PluginRepoInitializeTest is PluginRepoTestBase {
         assertEq(v[1], 4);
         assertEq(v[2], 0);
     }
+
+    /// `IPluginSetup` is the interface that registered setups must support —
+    /// the repo itself does NOT (lock in: repo and setup roles are distinct).
+    function test_supportsInterface_doesNotSupportIPluginSetup() public view {
+        assertFalse(repo.supportsInterface(type(IPluginSetup).interfaceId));
+    }
+
+    /// `initialOwner == ANY_ADDR` reverts because ROOT cannot be granted to
+    /// ANY_ADDR. Init fails atomically; no partial state.
+    function test_initialize_revertsIfOwnerIsAnyAddr() public {
+        address ANY_ADDR = address(type(uint160).max);
+        PluginRepo impl = new PluginRepo();
+        vm.expectRevert(PermissionManager.PermissionsForAnyAddressDisallowed.selector);
+        new ERC1967Proxy(address(impl), abi.encodeCall(PluginRepo.initialize, (ANY_ADDR)));
+    }
+
+    /// Storage-gap sentinel — `uint256[46] __gap` at the tail of the layout.
+    /// If the gap shrinks without a major version bump, upgrade-shaped tests
+    /// catch the collision. Probe a slot deep enough to be in the gap on
+    /// the current layout (~slot 250) and assert it's untouched.
+    function test_storageGap_sentinelSlotIsUnused() public view {
+        // The gap on the current layout sits well past the last named state
+        // var (`latestRelease` plus the PM/UUPS/ERC165 ancestors). Probe a
+        // slot inside the gap range; should be zero on a fresh deploy.
+        bytes32 sentinel = bytes32(uint256(250));
+        bytes32 raw = vm.load(address(repo), sentinel);
+        assertEq(uint256(raw), 0, "gap slot 250 should be unused");
+    }
 }
 
 /// @notice Ports the "CreateVersion" describe block.
@@ -286,8 +315,26 @@ contract PluginRepoCreateVersionTest is PluginRepoTestBase {
         bool releaseEmitted;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter != address(repo)) continue;
-            if (logs[i].topics[0] == versionTopic) versionEmitted = true;
-            if (logs[i].topics[0] == releaseTopic) releaseEmitted = true;
+
+            if (logs[i].topics[0] == versionTopic) {
+                // Topic layout: [sig, pluginSetup]. Only pluginSetup is
+                // indexed; release+build+buildMetadata live in data.
+                assertEq(logs[i].topics.length, 2, "VersionCreated has 2 topics");
+                assertEq(address(uint160(uint256(logs[i].topics[1]))), address(pluginSetupMock), "pluginSetup indexed");
+
+                (uint8 release, uint16 build, bytes memory buildMd) = abi.decode(logs[i].data, (uint8, uint16, bytes));
+                assertEq(release, 1, "release in data");
+                assertEq(build, 1, "build in data");
+                assertEq(buildMd, BUILD_METADATA, "buildMetadata in data");
+                versionEmitted = true;
+            } else if (logs[i].topics[0] == releaseTopic) {
+                // ReleaseMetadataUpdated has NO indexed fields.
+                assertEq(logs[i].topics.length, 1, "ReleaseMetadataUpdated has 1 topic (sig only)");
+                (uint8 release, bytes memory releaseMd) = abi.decode(logs[i].data, (uint8, bytes));
+                assertEq(release, 1, "release in data");
+                assertEq(releaseMd, RELEASE_METADATA, "releaseMetadata in data");
+                releaseEmitted = true;
+            }
         }
         assertTrue(versionEmitted, "VersionCreated not emitted");
         assertTrue(releaseEmitted, "ReleaseMetadataUpdated not emitted");
@@ -337,6 +384,184 @@ contract PluginRepoCreateVersionTest is PluginRepoTestBase {
         repo.createVersion(2, address(placeholder2), zero32, zero32);
         repo.createVersion(2, address(placeholder2), zero32, zero32);
         assertEq(repo.buildCount(2), 2);
+    }
+
+    /// Cannot retroactively create a version in an older release — the
+    /// arithmetic `_release - latestRelease` underflows when `_release <
+    /// latestRelease` and panics (checked-math in Solidity 0.8.x). Lock in.
+    function test_createVersion_revertsIfReleaseLessThanLatest() public {
+        // Bump latestRelease to 2.
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+        PluginUUPSUpgradeableSetupV1Mock setup2 = _deployMockPluginSetup();
+        repo.createVersion(2, address(setup2), BUILD_METADATA, RELEASE_METADATA);
+
+        // Now attempt to create a "release 1" — arithmetic underflow panic.
+        PluginUUPSUpgradeableSetupV1Mock setup3 = _deployMockPluginSetup();
+        vm.expectRevert(stdError.arithmeticError);
+        repo.createVersion(1, address(setup3), BUILD_METADATA, RELEASE_METADATA);
+    }
+
+    /// `_release == 0` reverts BEFORE the increment check — the order of
+    /// checks matters when both could fail. Lock in current behaviour.
+    function test_createVersion_revertsIfReleaseZeroBeforeIncrementCheck() public {
+        // After this, latestRelease == 1; release 0 would underflow if
+        // increment check ran first, but ReleaseZeroNotAllowed should fire.
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+
+        vm.expectRevert(PluginRepo.ReleaseZeroNotAllowed.selector);
+        repo.createVersion(0, address(pluginSetupMock), BUILD_METADATA, "");
+    }
+
+    /// Calling createVersion with `_release == latestRelease` succeeds and
+    /// must NOT touch `latestRelease` (no spurious write).
+    function test_createVersion_sameReleaseDoesNotTouchLatestRelease() public {
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+        uint8 latestBefore = repo.latestRelease();
+
+        // Same release, different build.
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, "");
+        uint8 latestAfter = repo.latestRelease();
+
+        assertEq(latestAfter, latestBefore, "latestRelease must not advance on same-release build");
+    }
+
+    /// Bumping release leaves the OLD release's build counter untouched —
+    /// release-isolated build numbering.
+    function test_createVersion_bumpingReleaseLeavesOldBuildCounterUntouched() public {
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, "");
+        assertEq(repo.buildCount(1), 2);
+
+        PluginUUPSUpgradeableSetupV1Mock setup2 = _deployMockPluginSetup();
+        repo.createVersion(2, address(setup2), BUILD_METADATA, RELEASE_METADATA);
+
+        assertEq(repo.buildCount(1), 2, "release 1's counter must not change");
+        assertEq(repo.buildCount(2), 1, "release 2's counter starts at 1");
+    }
+
+    /// A pluginSetup whose `supportsInterface` itself reverts must be caught
+    /// by `ERC165CheckerUpgradeable` (it uses staticcall + try/catch). The
+    /// repo cleanly reverts `InvalidPluginSetupInterface` — never propagating
+    /// the inner revert. Lock in.
+    function test_createVersion_revertsIfPluginSetupSupportsInterfaceReverts() public {
+        // A 1-byte contract whose any call hits INVALID opcode and reverts.
+        address bad = makeAddr("bad");
+        vm.etch(bad, hex"fe"); // INVALID
+
+        vm.expectRevert(PluginRepo.InvalidPluginSetupInterface.selector);
+        repo.createVersion(1, bad, BUILD_METADATA, RELEASE_METADATA);
+    }
+
+    /// `_pluginSetup == address(0)` — `address(0).supportsInterface(...)` is
+    /// a call to an empty address; `ERC165CheckerUpgradeable` returns false;
+    /// repo reverts `InvalidPluginSetupInterface`.
+    function test_createVersion_revertsIfPluginSetupIsZeroAddress() public {
+        vm.expectRevert(PluginRepo.InvalidPluginSetupInterface.selector);
+        repo.createVersion(1, address(0), BUILD_METADATA, RELEASE_METADATA);
+    }
+
+    /// Re-using the same setup in the SAME release overwrites
+    /// `latestTagHashForPluginSetup` to point to the LATEST build. Older
+    /// builds are still queryable by tag hash, but per-setup view tracks
+    /// only the most recent registration.
+    function test_createVersion_reusingSetupInSameReleaseOverwritesPerSetupMapping() public {
+        // Use placeholder (which can be reused indefinitely) for build 1 and 2.
+        PlaceholderSetup placeholder = new PlaceholderSetup();
+        bytes memory zero32 = abi.encode(bytes32(0));
+
+        repo.createVersion(1, address(placeholder), zero32, zero32);
+        PluginRepo.Version memory afterFirst = repo.getLatestVersion(address(placeholder));
+        assertEq(afterFirst.tag.build, 1);
+
+        repo.createVersion(1, address(placeholder), zero32, zero32);
+        PluginRepo.Version memory afterSecond = repo.getLatestVersion(address(placeholder));
+        assertEq(afterSecond.tag.build, 2, "per-setup mapping points to LATEST build");
+
+        // Build 1 is still queryable via tag.
+        PluginRepo.Version memory v1 = repo.getVersion(PluginRepo.Tag({release: 1, build: 1}));
+        assertEq(v1.tag.build, 1);
+    }
+
+    /// Both events fire in canonical order when release is bumped AND
+    /// non-empty release metadata is supplied: `VersionCreated` first,
+    /// `ReleaseMetadataUpdated` second. Lock in for log-consumer ordering.
+    function test_createVersion_emitsBothEventsInOrderWhenReleaseBumps() public {
+        // First create release 1 so we can bump to 2 cleanly.
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+
+        vm.recordLogs();
+        PluginUUPSUpgradeableSetupV1Mock setup2 = _deployMockPluginSetup();
+        repo.createVersion(2, address(setup2), BUILD_METADATA, RELEASE_METADATA);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 versionTopic = keccak256("VersionCreated(uint8,uint16,address,bytes)");
+        bytes32 releaseTopic = keccak256("ReleaseMetadataUpdated(uint8,bytes)");
+        int256 versionIdx = -1;
+        int256 releaseIdx = -1;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != address(repo)) continue;
+            if (logs[i].topics[0] == versionTopic) versionIdx = int256(i);
+            else if (logs[i].topics[0] == releaseTopic) releaseIdx = int256(i);
+        }
+        assertTrue(versionIdx != -1 && releaseIdx != -1, "both events emitted");
+        assertLt(versionIdx, releaseIdx, "VersionCreated must precede ReleaseMetadataUpdated");
+    }
+
+    /// `_release == latestRelease` + non-empty metadata: BOTH events fire
+    /// (the `if (_releaseMetadata.length > 0)` is independent of the
+    /// release-bump branch). Lock in: re-emitting release metadata for an
+    /// existing release without bumping is allowed.
+    function test_createVersion_emitsBothEventsWhenReleaseStaysAndMetadataNonEmpty() public {
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+
+        vm.recordLogs();
+        // Same release, non-empty metadata.
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 versionTopic = keccak256("VersionCreated(uint8,uint16,address,bytes)");
+        bytes32 releaseTopic = keccak256("ReleaseMetadataUpdated(uint8,bytes)");
+        bool versionEmitted;
+        bool releaseEmitted;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != address(repo)) continue;
+            if (logs[i].topics[0] == versionTopic) versionEmitted = true;
+            if (logs[i].topics[0] == releaseTopic) releaseEmitted = true;
+        }
+        assertTrue(versionEmitted && releaseEmitted, "both events fire even on same-release re-emit");
+    }
+
+    /// Atomicity: when `createVersion` reverts on the "setup already in a
+    /// previous release" branch, the build counter, version map, per-setup
+    /// mapping, and latestRelease must all be unchanged. Lock in via
+    /// snapshot pre/post.
+    function test_createVersion_stateUnchangedOnRevert() public {
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+        PluginUUPSUpgradeableSetupV1Mock setup2 = _deployMockPluginSetup();
+        repo.createVersion(2, address(setup2), BUILD_METADATA, RELEASE_METADATA);
+
+        // Snapshot.
+        uint8 latestBefore = repo.latestRelease();
+        uint256 release1BuildsBefore = repo.buildCount(1);
+        uint256 release2BuildsBefore = repo.buildCount(2);
+
+        // Attempt to re-use setup1 under release 3 — reverts.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PluginRepo.PluginSetupAlreadyInPreviousRelease.selector,
+                uint8(1),
+                uint16(1),
+                address(pluginSetupMock)
+            )
+        );
+        repo.createVersion(3, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+
+        // The `if (_release > latestRelease) latestRelease = _release;` line
+        // had run before the revert; EVM rollback restores it to the snapshot.
+        assertEq(repo.latestRelease(), latestBefore, "latestRelease rolls back");
+        assertEq(repo.buildCount(1), release1BuildsBefore, "release 1 build count unchanged");
+        assertEq(repo.buildCount(2), release2BuildsBefore, "release 2 build count unchanged");
+        assertEq(repo.buildCount(3), 0, "release 3 never created");
     }
 }
 
@@ -388,6 +613,7 @@ contract PluginRepoUpdateReleaseMetadataTest is PluginRepoTestBase {
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(repo) && logs[i].topics[0] == expectedTopic) {
+                assertEq(logs[i].topics.length, 1, "no indexed fields");
                 (uint8 release, bytes memory md) = abi.decode(logs[i].data, (uint8, bytes));
                 assertEq(release, 1);
                 assertEq(md, hex"11");
@@ -396,6 +622,51 @@ contract PluginRepoUpdateReleaseMetadataTest is PluginRepoTestBase {
             }
         }
         assertTrue(found, "ReleaseMetadataUpdated not emitted");
+    }
+
+    /// `updateReleaseMetadata` can retroactively update an OLDER release's
+    /// metadata (the gate is `_release > latestRelease`, not `>=`).
+    function test_updateReleaseMetadata_succeedsForOlderRelease() public {
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+        PluginUUPSUpgradeableSetupV1Mock setup2 = _deployMockPluginSetup();
+        repo.createVersion(2, address(setup2), BUILD_METADATA, RELEASE_METADATA);
+
+        // latestRelease == 2; update older release 1.
+        bytes memory newMd = hex"deadbeef";
+        vm.recordLogs();
+        repo.updateReleaseMetadata(1, newMd);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 topic = keccak256("ReleaseMetadataUpdated(uint8,bytes)");
+        bool found;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(repo) && logs[i].topics[0] == topic) {
+                (uint8 r, bytes memory md) = abi.decode(logs[i].data, (uint8, bytes));
+                if (r == 1 && keccak256(md) == keccak256(newMd)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        assertTrue(found, "ReleaseMetadataUpdated for older release not emitted");
+    }
+
+    /// Multiple updates each emit their own event.
+    function test_updateReleaseMetadata_multipleUpdatesEmitMultipleEvents() public {
+        repo.createVersion(1, address(pluginSetupMock), BUILD_METADATA, RELEASE_METADATA);
+
+        vm.recordLogs();
+        repo.updateReleaseMetadata(1, hex"01");
+        repo.updateReleaseMetadata(1, hex"02");
+        repo.updateReleaseMetadata(1, hex"03");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 topic = keccak256("ReleaseMetadataUpdated(uint8,bytes)");
+        uint256 count;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(repo) && logs[i].topics[0] == topic) count++;
+        }
+        assertEq(count, 3, "one event per update");
     }
 }
 
@@ -480,5 +751,133 @@ contract PluginRepoGetVersionTest is PluginRepoTestBase {
         assertEq(v.tag.build, 1);
         assertEq(v.pluginSetup, address(setupR1B1));
         assertEq(v.buildMetadata, BUILD_MD_R1_B1);
+    }
+
+    /// `getLatestVersion(release=0)` reverts via the same `tag.release == 0`
+    /// check — `versions[tagHash(0, 0)]` is the default-zero entry.
+    function test_getLatestVersion_byRelease_revertsForReleaseZero() public {
+        vm.expectRevert(abi.encodeWithSelector(PluginRepo.VersionHashDoesNotExist.selector, _tagHash(0, 0)));
+        repo.getLatestVersion(uint8(0));
+    }
+
+    /// Re-registering the SAME setup in the SAME release: `getLatestVersion`
+    /// by setup returns the LATEST build for that setup. setUp leaves
+    /// latestRelease at 2 so we must re-register a release-2 setup here
+    /// (re-registering in an older release would arithmetic-panic the
+    /// `_release - latestRelease` calculation).
+    function test_getLatestVersion_bySetup_returnsLatestBuildIfReused() public {
+        // setupR2B1 is currently at (2, 1). Re-register at (2, 2).
+        repo.createVersion(2, address(setupR2B1), BUILD_MD_R2_B1, RELEASE_METADATA);
+
+        PluginRepo.Version memory v = repo.getLatestVersion(address(setupR2B1));
+        assertEq(v.tag.release, 2);
+        assertEq(v.tag.build, 2, "per-setup view tracks latest build");
+    }
+
+    /// `getLatestVersion(setup)` is INDEPENDENT of "latest by release".
+    /// Registering setupB later doesn't disturb setupA's per-setup pointer.
+    /// Lock in.
+    function test_getLatestVersion_bySetup_independentOfLatestByRelease() public {
+        // setupR1B1 is at (1, 1); setupR1B2 is at (1, 2); setupR2B1 is at (2, 1).
+        // setupR1B1's per-setup view should still point to (1, 1) even
+        // though (1, 2) and (2, 1) are now "later" in release/build numbering.
+        PluginRepo.Version memory v = repo.getLatestVersion(address(setupR1B1));
+        assertEq(v.tag.release, 1);
+        assertEq(v.tag.build, 1, "setupA's per-setup view stays at its own latest");
+    }
+
+    /// `getLatestVersion(address(0))` reverts — `latestTagHashForPluginSetup[0]`
+    /// is the default-zero hash; `versions[0].tag.release == 0` → revert.
+    function test_getLatestVersion_bySetup_revertsForZeroAddress() public {
+        vm.expectRevert(abi.encodeWithSelector(PluginRepo.VersionHashDoesNotExist.selector, bytes32(0)));
+        repo.getLatestVersion(address(0));
+    }
+
+    /// `getVersion(Tag{release: 0, build: X})` reverts: `versions[tagHash(0,X)].tag.release == 0`.
+    function test_getVersion_byTag_revertsForReleaseZero() public {
+        vm.expectRevert(abi.encodeWithSelector(PluginRepo.VersionHashDoesNotExist.selector, _tagHash(0, 1)));
+        repo.getVersion(PluginRepo.Tag({release: 0, build: 1}));
+    }
+
+    /// `getVersion(bytes32(0))` reverts — slot 0 is the default-zero entry.
+    function test_getVersion_byTagHash_revertsForZeroHash() public {
+        vm.expectRevert(abi.encodeWithSelector(PluginRepo.VersionHashDoesNotExist.selector, bytes32(0)));
+        repo.getVersion(bytes32(0));
+    }
+
+    /// `buildCount(release)` returns 0 for an unused release.
+    function test_buildCount_returnsZeroForUnusedRelease() public view {
+        assertEq(repo.buildCount(uint8(5)), 0);
+    }
+
+    /// `buildCount(0)` returns 0 — release 0 can never be created so the
+    /// underlying mapping default suffices.
+    function test_buildCount_returnsZeroForRelease0() public view {
+        assertEq(repo.buildCount(uint8(0)), 0);
+    }
+
+    /// `buildCount` is per-release; creating a build in release N never
+    /// changes release M (M != N) — release-isolated counters.
+    function test_buildCount_independentAcrossReleases() public view {
+        assertEq(repo.buildCount(uint8(1)), 2, "release 1 has 2 builds");
+        assertEq(repo.buildCount(uint8(2)), 1, "release 2 has 1 build");
+    }
+}
+
+/// @notice `_authorizeUpgrade` — UPGRADE_REPO permission gate.
+contract PluginRepoUpgradeAuthTest is PluginRepoTestBase {
+    PluginRepo internal repo;
+    address internal stranger = makeAddr("stranger");
+
+    function setUp() public {
+        repo = _deployRepo(address(this));
+    }
+
+    /// A caller without `UPGRADE_REPO_PERMISSION_ID` cannot upgrade — the
+    /// `_authorizeUpgrade` hook reverts via the `auth(UPGRADE_REPO_PERMISSION_ID)`
+    /// modifier with `Unauthorized`.
+    function test_authorizeUpgrade_revertsWithoutUpgradeRepoPermission() public {
+        PluginRepo nextImpl = new PluginRepo();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PermissionManager.Unauthorized.selector, address(repo), stranger, UPGRADE_REPO_PERMISSION_ID
+            )
+        );
+        vm.prank(stranger);
+        repo.upgradeTo(address(nextImpl));
+    }
+
+    /// Holding ROOT alone does NOT bypass the `UPGRADE_REPO_PERMISSION_ID`
+    /// check — the `auth` modifier checks the SPECIFIC permission. Lock in:
+    /// strangers granted ROOT (but not UPGRADE_REPO) cannot upgrade.
+    function test_authorizeUpgrade_rootOnlyDoesNotBypass() public {
+        // Grant ROOT to a stranger but withhold UPGRADE_REPO.
+        repo.grant(address(repo), stranger, ROOT_PERMISSION_ID);
+
+        PluginRepo nextImpl = new PluginRepo();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PermissionManager.Unauthorized.selector, address(repo), stranger, UPGRADE_REPO_PERMISSION_ID
+            )
+        );
+        vm.prank(stranger);
+        repo.upgradeTo(address(nextImpl));
+    }
+
+    /// Conversely: a holder of `UPGRADE_REPO_PERMISSION_ID` (no other perms)
+    /// can upgrade. Establishes the positive control for N1/N3.
+    function test_authorizeUpgrade_succeedsWithUpgradeRepoPermission() public {
+        address upgrader = makeAddr("upgrader");
+        repo.grant(address(repo), upgrader, UPGRADE_REPO_PERMISSION_ID);
+
+        PluginRepo nextImpl = new PluginRepo();
+        vm.prank(upgrader);
+        repo.upgradeTo(address(nextImpl));
+
+        // Read the ERC1967 implementation slot to confirm the upgrade landed.
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(repo), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), address(nextImpl), "implementation slot updated");
     }
 }
