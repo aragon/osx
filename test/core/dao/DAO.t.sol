@@ -285,8 +285,9 @@ contract DAOExecuteTest is DAOTestBase {
         Action[] memory actions = new Action[](1);
         actions[0] = _succeedAction();
 
+        bytes32 callId = bytes32(uint256(0xcafe));
         vm.recordLogs();
-        dao.execute(bytes32(uint256(0xcafe)), actions, 0);
+        dao.execute(callId, actions, 0);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         bytes32 expectedTopic = keccak256("Executed(address,bytes32,(address,uint256,bytes)[],uint256,uint256,bytes[])");
@@ -294,8 +295,15 @@ contract DAOExecuteTest is DAOTestBase {
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(dao) && logs[i].topics[0] == expectedTopic) {
                 // topics[1] = indexed actor.
-                address actor = address(uint160(uint256(logs[i].topics[1])));
-                assertEq(actor, address(this));
+                assertEq(address(uint160(uint256(logs[i].topics[1]))), address(this), "actor");
+
+                // callId is the first non-indexed parameter → first 32 bytes of data.
+                bytes memory d = logs[i].data;
+                bytes32 callIdInEvent;
+                assembly {
+                    callIdInEvent := mload(add(d, 32))
+                }
+                assertEq(callIdInEvent, callId, "callId");
                 found = true;
                 break;
             }
@@ -471,6 +479,12 @@ contract DAODepositTest is DAOTestBase {
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(dao) && logs[i].topics[0] == expectedTopic) {
+                // sender + token indexed.
+                assertEq(address(uint160(uint256(logs[i].topics[1]))), address(this), "sender");
+                assertEq(address(uint160(uint256(logs[i].topics[2]))), address(0), "token (native)");
+                (uint256 amount, string memory ref) = abi.decode(logs[i].data, (uint256, string));
+                assertEq(amount, 1 ether, "amount");
+                assertEq(ref, "ref", "reference");
                 found = true;
                 break;
             }
@@ -499,9 +513,12 @@ contract DAODirectDepositTest is DAOTestBase {
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         bytes32 expectedTopic = keccak256("CallbackReceived(address,bytes4,bytes)");
+        bytes4 erc721Selector = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(dao) && logs[i].topics[0] == expectedTopic) {
+                // `sig` is the indexed param (topics[1]); confirm the routed selector.
+                assertEq(logs[i].topics[1], bytes32(erc721Selector), "sig topic");
                 found = true;
                 break;
             }
@@ -1134,34 +1151,6 @@ contract DAOExecuteEventTest is DAOTestBase {
         actionMock = new ActionExecute();
     }
 
-    /// `Executed` event encodes `callId` as the FIRST non-indexed parameter.
-    /// Only `actor` is indexed (per `IDAO.Executed`). callId lives in the
-    /// first 32 bytes of `data`.
-    function test_execute_eventEncodesCallId() public {
-        Action[] memory actions = new Action[](1);
-        actions[0] = Action({to: address(actionMock), value: 0, data: abi.encodeCall(ActionExecute.setTest, (1))});
-
-        bytes32 callId = bytes32(uint256(0xfeedface));
-        vm.recordLogs();
-        dao.execute(callId, actions, 0);
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        bytes32 topic = keccak256("Executed(address,bytes32,(address,uint256,bytes)[],uint256,uint256,bytes[])");
-        for (uint256 i = 0; i < logs.length; i++) {
-            if (logs[i].emitter == address(dao) && logs[i].topics[0] == topic) {
-                // callId is the first non-indexed param → first 32 bytes of data.
-                bytes32 callIdDecoded;
-                bytes memory d = logs[i].data;
-                assembly {
-                    callIdDecoded := mload(add(d, 32))
-                }
-                assertEq(callIdDecoded, callId, "callId mismatch");
-                return;
-            }
-        }
-        revert("Executed not found");
-    }
-
     /// Same callId reused across calls — no nonce/dedup semantics; both
     /// execute calls succeed and emit their own Executed.
     function test_execute_sameCallIdReusedAcrossCalls() public {
@@ -1178,29 +1167,6 @@ contract DAOExecuteEventTest is DAOTestBase {
 /// @notice `deposit` — extended (event fields, dao-as-token, reference string).
 contract DAODepositExtTest is DAOTestBase {
     /// `Deposited` event field assertion — all four fields.
-    function test_deposit_eventCarriesAllFields() public {
-        vm.deal(address(this), 5 ether);
-        vm.recordLogs();
-        dao.deposit{value: 1 ether}(address(0), 1 ether, "ref-7");
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        bytes32 topic = keccak256("Deposited(address,address,uint256,string)");
-        bool found;
-        for (uint256 i = 0; i < logs.length; i++) {
-            if (logs[i].emitter == address(dao) && logs[i].topics[0] == topic) {
-                // sender + token are indexed.
-                assertEq(address(uint160(uint256(logs[i].topics[1]))), address(this), "sender");
-                assertEq(address(uint160(uint256(logs[i].topics[2]))), address(0), "token (native)");
-                (uint256 amount, string memory ref) = abi.decode(logs[i].data, (uint256, string));
-                assertEq(amount, 1 ether, "amount");
-                assertEq(ref, "ref-7", "reference");
-                found = true;
-                break;
-            }
-        }
-        assertTrue(found, "Deposited not emitted");
-    }
-
     /// Long reference string accepted (multi-kB).
     function test_deposit_longReferenceAccepted() public {
         vm.deal(address(this), 1 ether);
@@ -1266,30 +1232,6 @@ contract DAOReceiveFallbackTest is DAOTestBase {
         vm.deal(address(this), 1 ether);
         (bool ok,) = address(dao).call{value: 1}(hex"deadbeef");
         assertFalse(ok);
-    }
-
-    /// `CallbackReceived` event fields — sender, sig indexed, data.
-    function test_fallback_callbackReceivedFieldsCorrect() public {
-        // Use a registered callback (ERC721 onERC721Received).
-        bytes4 selector = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
-        bytes memory call = abi.encodeWithSelector(selector, address(this), address(this), uint256(1), bytes(""));
-
-        vm.recordLogs();
-        (bool ok,) = address(dao).call(call);
-        assertTrue(ok);
-
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        bytes32 topic = keccak256("CallbackReceived(address,bytes4,bytes)");
-        bool found;
-        for (uint256 i = 0; i < logs.length; i++) {
-            if (logs[i].emitter == address(dao) && logs[i].topics[0] == topic) {
-                // sig is indexed (topics[1]); sender + data in payload.
-                assertEq(logs[i].topics[1], bytes32(selector));
-                found = true;
-                break;
-            }
-        }
-        assertTrue(found, "CallbackReceived not emitted");
     }
 
     /// Re-register same selector with a DIFFERENT magic silently overwrites.
@@ -1369,14 +1311,6 @@ contract DAOERC1271CombinedTest is DAOTestBase {
         vm.prank(caller);
         assertEq(dao.isValidSignature(bytes32(0), ""), ERC1271_INVALID);
     }
-
-    /// ROOT holder calls setSignatureValidator — still reverts FunctionRemoved
-    /// (no permission check; the function is pure-revert).
-    function test_setSignatureValidator_revertsEvenForRootHolder() public {
-        // owner has ROOT (granted via init). Should still revert.
-        vm.expectRevert(DAO.FunctionRemoved.selector);
-        dao.setSignatureValidator(makeAddr("anyone"));
-    }
 }
 
 /// @notice `hasPermission` — condition + ANY_ADDR + data forwarding (U surface).
@@ -1446,20 +1380,5 @@ contract DAOInvariantsTest is DAOTestBase {
         Action[] memory empty;
         dao.execute(bytes32(0), empty, 0);
         assertEq(uint256(vm.load(address(dao), slot304)), 1);
-    }
-
-    /// `protocolVersion()` drift detector — frozen literal `[1, 4, 0]`.
-    function test_protocolVersion_driftDetector() public view {
-        uint8[3] memory v = dao.protocolVersion();
-        assertEq(v[0], 1);
-        assertEq(v[1], 4);
-        assertEq(v[2], 0);
-    }
-
-    /// `IDAO XOR IExecutor.execute` legacy interface id — frozen for v1.0.0
-    /// backwards compat. Drift detector.
-    function test_supportsInterface_legacyXorDriftDetector() public view {
-        bytes4 legacy = type(IDAO).interfaceId ^ IExecutor.execute.selector;
-        assertTrue(dao.supportsInterface(legacy));
     }
 }

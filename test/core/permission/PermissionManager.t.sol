@@ -111,6 +111,15 @@ contract PermissionManagerGrantTest is PermissionManagerTestBase {
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(pm) && logs[i].topics[0] == grantedTopic) {
+                // Indexed topic layout: [sig, permissionId, here, who].
+                assertEq(logs[i].topics.length, 4, "4 topics");
+                assertEq(logs[i].topics[1], ADMIN_PERMISSION_ID, "permissionId");
+                assertEq(address(uint160(uint256(logs[i].topics[2]))), owner, "here == msg.sender");
+                assertEq(address(uint160(uint256(logs[i].topics[3]))), other, "who");
+                // Data layout: (where, condition). For plain grant, condition == ALLOW_FLAG.
+                (address whereField, address condField) = abi.decode(logs[i].data, (address, address));
+                assertEq(whereField, address(pm), "where");
+                assertEq(condField, ALLOW_FLAG, "condition == ALLOW_FLAG for plain grant");
                 found = true;
                 break;
             }
@@ -200,6 +209,9 @@ contract PermissionManagerGrantWithConditionTest is PermissionManagerTestBase {
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(pm) && logs[i].topics[0] == grantedTopic) {
+                // Data layout: (where, condition). Condition field carries the condition address.
+                (, address condField) = abi.decode(logs[i].data, (address, address));
+                assertEq(condField, address(condition), "condition field");
                 found = true;
                 break;
             }
@@ -288,6 +300,11 @@ contract PermissionManagerRevokeTest is PermissionManagerTestBase {
         bool found;
         for (uint256 i = 0; i < logs.length; i++) {
             if (logs[i].emitter == address(pm) && logs[i].topics[0] == revokedTopic) {
+                // Indexed topic layout: [sig, permissionId, here, who].
+                assertEq(logs[i].topics.length, 4, "4 topics");
+                assertEq(logs[i].topics[1], ADMIN_PERMISSION_ID, "permissionId");
+                assertEq(address(uint160(uint256(logs[i].topics[2]))), owner, "here == msg.sender");
+                assertEq(address(uint160(uint256(logs[i].topics[3]))), other, "who");
                 found = true;
                 break;
             }
@@ -682,3 +699,453 @@ contract PermissionManagerHelpersTest is PermissionManagerTestBase {
         assertEq(pm.getPermissionHash(address(pm), owner, ROOT_PERMISSION_ID), expected);
     }
 }
+
+// =============================================================================
+//                  PermissionManager — extended test coverage
+// =============================================================================
+
+/// @dev A condition that always reverts with a string. Used to exercise the
+///      `_checkCondition` try/catch path.
+contract _RevertingStringCondition is IPermissionCondition {
+    function isGranted(address, address, bytes32, bytes calldata) external pure returns (bool) {
+        revert("condition denied");
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(IPermissionCondition).interfaceId || id == 0x01ffc9a7;
+    }
+}
+
+/// @dev A condition that reverts with a custom error. Same purpose.
+contract _RevertingCustomErrorCondition is IPermissionCondition {
+    error ConditionRejected();
+
+    function isGranted(address, address, bytes32, bytes calldata) external pure returns (bool) {
+        revert ConditionRejected();
+    }
+
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(IPermissionCondition).interfaceId || id == 0x01ffc9a7;
+    }
+}
+
+/// @dev A "lying" condition: claims `IPermissionCondition` via supportsInterface
+///      but has no `isGranted` implementation (no entry in the fallback either).
+///      Used to verify that a condition with a missing `isGranted` is accepted
+///      by `grantWithCondition` but causes `isGranted` to return false later.
+contract _SupportsInterfaceOnlyCondition {
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == type(IPermissionCondition).interfaceId || id == 0x01ffc9a7;
+    }
+}
+
+/// @notice Init — extended edge cases.
+contract PMInitEdgeTest is PermissionManagerTestBase {
+    /// `_initialOwner == address(pm)` — PM self-owns ROOT. Subsequent self-calls
+    /// pass auth via tier-1 (where == pm, who == pm). Lock in this pattern
+    /// (used by inheriting contracts that govern themselves via `execute`).
+    function test_init_pmSelfOwnsRoot() public {
+        PermissionManagerHarness fresh = new PermissionManagerHarness();
+        fresh.init(address(fresh));
+        assertTrue(fresh.hasPermission(address(fresh), address(fresh), ROOT_PERMISSION_ID, ""));
+        assertFalse(fresh.hasPermission(address(fresh), owner, ROOT_PERMISSION_ID, ""));
+    }
+}
+
+/// @notice `permissionHash` — order-sensitivity + collision-freeness.
+contract PMPermissionHashTest is PermissionManagerTestBase {
+    function test_permissionHash_orderSensitive_whoVsWhere() public {
+        address a = makeAddr("a");
+        address b = makeAddr("b");
+        bytes32 id = keccak256("X");
+        // permissionHash packs (who, where, id) — swapping (a, b) → (b, a)
+        // must yield a different hash.
+        assertTrue(pm.getPermissionHash(a, b, id) != pm.getPermissionHash(b, a, id));
+    }
+
+    function test_permissionHash_distinctPermissionIds_distinctHashes() public {
+        address w = makeAddr("w");
+        address h = makeAddr("h");
+        assertTrue(pm.getPermissionHash(w, h, keccak256("A")) != pm.getPermissionHash(w, h, keccak256("B")));
+    }
+
+    function test_permissionHash_selfPair_wellDefined() public {
+        // permissionHash(A, A, id) is just a normal hash — no collision with
+        // any (A, B, id) where B != A.
+        address a = makeAddr("a");
+        address b = makeAddr("b");
+        bytes32 id = keccak256("X");
+        bytes32 selfHash = pm.getPermissionHash(a, a, id);
+        assertTrue(selfHash != pm.getPermissionHash(a, b, id));
+        assertTrue(selfHash != pm.getPermissionHash(b, a, id));
+    }
+
+    function test_permissionHash_deterministic_acrossCalls() public {
+        address w = makeAddr("w");
+        address h = makeAddr("h");
+        bytes32 id = keccak256("X");
+        bytes32 first = pm.getPermissionHash(w, h, id);
+        bytes32 second = pm.getPermissionHash(w, h, id);
+        assertEq(first, second);
+    }
+}
+
+/// @notice `grant` — who/where edge addresses.
+contract PMGrantEdgeTest is PermissionManagerTestBase {
+    function test_grant_whoIsZero_accepted() public {
+        vm.prank(owner);
+        pm.grant(address(pm), address(0), ADMIN_PERMISSION_ID);
+        // ALLOW_FLAG stored at the slot for (pm, address(0), ADMIN).
+        assertEq(pm.getAuthPermission(address(pm), address(0), ADMIN_PERMISSION_ID), ALLOW_FLAG);
+    }
+
+    function test_grant_selfPairWhoEqualsWhere_accepted() public {
+        address t = makeAddr("target");
+        vm.prank(owner);
+        pm.grant(t, t, ADMIN_PERMISSION_ID);
+        assertEq(pm.getAuthPermission(t, t, ADMIN_PERMISSION_ID), ALLOW_FLAG);
+    }
+
+    function test_grant_pmSelfGrant_accepted() public {
+        // PM holding a permission on itself is a valid pattern (DAO-as-self).
+        vm.prank(owner);
+        pm.grant(address(pm), address(pm), ADMIN_PERMISSION_ID);
+        assertTrue(pm.hasPermission(address(pm), address(pm), ADMIN_PERMISSION_ID, ""));
+    }
+
+    function test_grant_whereIsZero_accepted() public {
+        // `_where == address(0)` is not explicitly blocked. The grant lands at
+        // its own slot; no functional consumer would query against where=0.
+        vm.prank(owner);
+        pm.grant(address(0), other, ADMIN_PERMISSION_ID);
+        assertEq(pm.getAuthPermission(address(0), other, ADMIN_PERMISSION_ID), ALLOW_FLAG);
+    }
+}
+
+/// @notice `grantWithCondition` — extended.
+contract PMGrantWithConditionEdgeTest is PermissionManagerTestBase {
+    /// Condition whose `supportsInterface` itself reverts — the outer call
+    /// propagates the inner revert (no try/catch around supportsInterface).
+    function test_grantWithCondition_conditionWithRevertingSupportsInterfaceBubbles() public {
+        // Deploy a contract whose supportsInterface reverts (use a non-condition
+        // contract — e.g., PermissionManager itself doesn't implement supportsInterface).
+        // Use vm.etch to create a 1-byte contract that reverts on call.
+        address bad = makeAddr("bad");
+        vm.etch(bad, hex"fe"); // INVALID opcode
+
+        vm.prank(owner);
+        vm.expectRevert();
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(bad));
+    }
+
+    /// Slot already holds `ALLOW_FLAG` (plain grant). Subsequent
+    /// `grantWithCondition(differentCondition)` reverts
+    /// `PermissionAlreadyGrantedForDifferentCondition` (since current=ALLOW != new).
+    function test_grantWithCondition_overExistingAllow_reverts() public {
+        vm.prank(owner);
+        pm.grant(address(pm), other, ADMIN_PERMISSION_ID);
+
+        PermissionConditionMock cond = new PermissionConditionMock();
+        vm.prank(owner);
+        vm.expectRevert();
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
+    }
+
+    /// `_condition == ALLOW_FLAG` (address(2)) — fails `isContract()` check
+    /// → reverts `ConditionNotAContract`.
+    function test_grantWithCondition_allowFlagAddress_reverts() public {
+        vm.prank(owner);
+        vm.expectRevert();
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(ALLOW_FLAG));
+    }
+
+    /// `_condition == address(0)` — fails `isContract()` check.
+    function test_grantWithCondition_zeroAddress_reverts() public {
+        vm.prank(owner);
+        vm.expectRevert();
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(0)));
+    }
+
+    /// A "condition" that ONLY implements `supportsInterface` but not
+    /// `isGranted` is accepted at grant time (because the interface check
+    /// passes), but later `isGranted` queries return false because the
+    /// condition call fails inside try/catch.
+    function test_grantWithCondition_supportsInterfaceOnly_acceptedButCheckReturnsFalse() public {
+        _SupportsInterfaceOnlyCondition liar = new _SupportsInterfaceOnlyCondition();
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(liar)));
+
+        // Slot is stored as the condition address (not ALLOW_FLAG).
+        assertEq(pm.getAuthPermission(address(pm), other, ADMIN_PERMISSION_ID), address(liar));
+        // But isGranted returns false (call to isGranted fails → try/catch → false).
+        assertFalse(pm.hasPermission(address(pm), other, ADMIN_PERMISSION_ID, ""));
+    }
+}
+
+/// @notice `revoke` — extended (cycles, condition clearance, ANY_ADDR semantics).
+contract PMRevokeEdgeTest is PermissionManagerTestBase {
+    function test_revoke_conditional_clearsToUnset() public {
+        PermissionConditionMock cond = new PermissionConditionMock();
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
+        assertEq(pm.getAuthPermission(address(pm), other, ADMIN_PERMISSION_ID), address(cond));
+
+        vm.prank(owner);
+        pm.revoke(address(pm), other, ADMIN_PERMISSION_ID);
+        assertEq(pm.getAuthPermission(address(pm), other, ADMIN_PERMISSION_ID), UNSET_FLAG);
+    }
+
+    function test_revoke_anyAddrWho_succeeds() public {
+        // grant ANY_ADDR (unrestricted permission), then revoke that grant.
+        vm.prank(owner);
+        pm.grant(address(pm), ANY_ADDR, ADMIN_PERMISSION_ID);
+        vm.prank(owner);
+        pm.revoke(address(pm), ANY_ADDR, ADMIN_PERMISSION_ID);
+        assertEq(pm.getAuthPermission(address(pm), ANY_ADDR, ADMIN_PERMISSION_ID), UNSET_FLAG);
+    }
+
+    function test_revoke_thenRegrant_storesAllowAgain() public {
+        vm.prank(owner);
+        pm.grant(address(pm), other, ADMIN_PERMISSION_ID);
+        vm.prank(owner);
+        pm.revoke(address(pm), other, ADMIN_PERMISSION_ID);
+        vm.prank(owner);
+        pm.grant(address(pm), other, ADMIN_PERMISSION_ID);
+        assertEq(pm.getAuthPermission(address(pm), other, ADMIN_PERMISSION_ID), ALLOW_FLAG);
+    }
+
+    function test_revoke_thenRegrantWithDifferentCondition_storesNewCondition() public {
+        PermissionConditionMock condA = new PermissionConditionMock();
+        PermissionConditionMock condB = new PermissionConditionMock();
+
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(condA)));
+        vm.prank(owner);
+        pm.revoke(address(pm), other, ADMIN_PERMISSION_ID);
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(condB)));
+
+        assertEq(pm.getAuthPermission(address(pm), other, ADMIN_PERMISSION_ID), address(condB));
+    }
+}
+
+/// @notice `applySingleTargetPermissions` — extended.
+contract PMApplySingleEdgeTest is PermissionManagerTestBase {
+    function test_bulkSingle_emptyBatch_succeedsNoEvents() public {
+        PermissionLib.SingleTargetPermission[] memory items;
+        vm.recordLogs();
+        vm.prank(owner);
+        pm.applySingleTargetPermissions(address(pm), items);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        assertEq(logs.length, 0);
+    }
+
+    function test_bulkSingle_failingItemRollsBackPriorItems() public {
+        // Build a batch where item[1] is GrantWithCondition (unsupported by
+        // applySingleTargetPermissions → reverts). Item[0] is a valid Grant.
+        // The whole batch must revert atomically; item[0] state must NOT persist.
+        address a1 = makeAddr("a1");
+        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](2);
+        items[0] = PermissionLib.SingleTargetPermission({
+            operation: PermissionLib.Operation.Grant, who: a1, permissionId: ADMIN_PERMISSION_ID
+        });
+        items[1] = PermissionLib.SingleTargetPermission({
+            operation: PermissionLib.Operation.GrantWithCondition, who: a1, permissionId: ADMIN_PERMISSION_ID
+        });
+
+        vm.prank(owner);
+        vm.expectRevert();
+        pm.applySingleTargetPermissions(address(pm), items);
+
+        // Item[0]'s grant was rolled back.
+        assertEq(pm.getAuthPermission(address(pm), a1, ADMIN_PERMISSION_ID), UNSET_FLAG);
+    }
+
+    /// Duplicate items in the same batch: first item grants; second is a
+    /// silent no-op (slot already ALLOW). No second event.
+    function test_bulkSingle_duplicateItemsSecondIsNoop() public {
+        address a1 = makeAddr("a1");
+        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](2);
+        items[0] = PermissionLib.SingleTargetPermission({
+            operation: PermissionLib.Operation.Grant, who: a1, permissionId: ADMIN_PERMISSION_ID
+        });
+        items[1] = items[0];
+
+        vm.recordLogs();
+        vm.prank(owner);
+        pm.applySingleTargetPermissions(address(pm), items);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 grantedTopic = keccak256("Granted(bytes32,address,address,address,address)");
+        uint256 grants;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(pm) && logs[i].topics[0] == grantedTopic) grants++;
+        }
+        assertEq(grants, 1, "second duplicate should not re-emit");
+    }
+}
+
+/// @notice `applyMultiTargetPermissions` — extended.
+contract PMApplyMultiEdgeTest is PermissionManagerTestBase {
+    function test_bulkMulti_emptyBatch_succeedsNoEvents() public {
+        PermissionLib.MultiTargetPermission[] memory items;
+        vm.recordLogs();
+        vm.prank(owner);
+        pm.applyMultiTargetPermissions(items);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        assertEq(logs.length, 0);
+    }
+
+    function test_bulkMulti_mixedOps_GrantRevokeGrantWithCondition() public {
+        // 3 items: Grant + Revoke (of a pre-existing permission) + GrantWithCondition.
+        address a1 = makeAddr("a1");
+        address a2 = makeAddr("a2");
+        address a3 = makeAddr("a3");
+        bytes32 perm = keccak256("MIXED");
+
+        // Pre-grant for the revoke step.
+        vm.prank(owner);
+        pm.grant(address(pm), a2, perm);
+
+        PermissionConditionMock cond = new PermissionConditionMock();
+        PermissionLib.MultiTargetPermission[] memory items = new PermissionLib.MultiTargetPermission[](3);
+        items[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Grant,
+            where: address(pm),
+            who: a1,
+            condition: address(0),
+            permissionId: perm
+        });
+        items[1] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: address(pm),
+            who: a2,
+            condition: address(0),
+            permissionId: perm
+        });
+        items[2] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.GrantWithCondition,
+            where: address(pm),
+            who: a3,
+            condition: address(cond),
+            permissionId: perm
+        });
+
+        vm.prank(owner);
+        pm.applyMultiTargetPermissions(items);
+
+        assertEq(pm.getAuthPermission(address(pm), a1, perm), ALLOW_FLAG, "a1 granted");
+        assertEq(pm.getAuthPermission(address(pm), a2, perm), UNSET_FLAG, "a2 revoked");
+        assertEq(pm.getAuthPermission(address(pm), a3, perm), address(cond), "a3 conditional");
+    }
+
+    /// `Revoke` operation's `condition` field is ignored (the function only
+    /// dereferences it for Grant / GrantWithCondition operations).
+    function test_bulkMulti_revokeIgnoresConditionField() public {
+        address a1 = makeAddr("a1");
+        bytes32 perm = keccak256("X");
+
+        vm.prank(owner);
+        pm.grant(address(pm), a1, perm);
+
+        // Revoke with a junk condition field — should still succeed.
+        PermissionLib.MultiTargetPermission[] memory items = new PermissionLib.MultiTargetPermission[](1);
+        items[0] = PermissionLib.MultiTargetPermission({
+            operation: PermissionLib.Operation.Revoke,
+            where: address(pm),
+            who: a1,
+            condition: address(0x1234), // arbitrary junk
+            permissionId: perm
+        });
+
+        vm.prank(owner);
+        pm.applyMultiTargetPermissions(items);
+        assertEq(pm.getAuthPermission(address(pm), a1, perm), UNSET_FLAG);
+    }
+}
+
+/// @notice `isGranted` — extended fall-through + ALLOW precedence + `_data` forwarding.
+contract PMIsGrantedExtTest is PermissionManagerTestBase {
+    /// Tier 1 condition reverts → returns false (no fall-through to tier 2/3).
+    function test_isGranted_tier1RevertingCondition_returnsFalse() public {
+        _RevertingStringCondition rev = new _RevertingStringCondition();
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(rev)));
+
+        // Add a tier-2 ALLOW grant so fall-through would yield true if it
+        // happened — but spec says no fall-through, so result is false.
+        vm.prank(owner);
+        pm.grant(address(pm), ANY_ADDR, ADMIN_PERMISSION_ID);
+
+        assertFalse(
+            pm.hasPermission(address(pm), other, ADMIN_PERMISSION_ID, ""), "tier-1 revert should NOT fall through"
+        );
+    }
+
+    /// Tier 1 ALLOW takes precedence over tier 2 ANY_ADDR condition that
+    /// would return false. ALLOW wins.
+    function test_isGranted_tier1AllowBeatsTier2FalseCondition() public {
+        vm.prank(owner);
+        pm.grant(address(pm), other, ADMIN_PERMISSION_ID);
+
+        PermissionConditionMock cond = new PermissionConditionMock();
+        cond.setAnswer(false);
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), ANY_ADDR, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
+
+        assertTrue(pm.hasPermission(address(pm), other, ADMIN_PERMISSION_ID, ""), "ALLOW precedence");
+    }
+
+    /// `_data` parameter forwarded byte-identical to the condition. Verified
+    /// via `vm.expectCall` which asserts the condition's `isGranted` is
+    /// invoked with the exact (where, who, permissionId, data) calldata.
+    function test_isGranted_forwardsDataToCondition() public {
+        PermissionConditionMock cond = new PermissionConditionMock();
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
+
+        bytes memory payload = abi.encode("hello", uint256(42));
+        bytes memory expectedCall =
+            abi.encodeCall(IPermissionCondition.isGranted, (address(pm), other, ADMIN_PERMISSION_ID, payload));
+        vm.expectCall(address(cond), expectedCall);
+        pm.hasPermission(address(pm), other, ADMIN_PERMISSION_ID, payload);
+    }
+
+    /// Querying with `_where == ANY_ADDR` aliases the tier-3 slot at the
+    /// tier-1 lookup. Lock in: the aliasing is observable.
+    function test_isGranted_anyAddrWhere_aliasesTier3Slot() public {
+        // Populate tier-3 via grantWithCondition (the only legal route).
+        PermissionConditionMock cond = new PermissionConditionMock();
+        cond.setAnswer(true);
+        vm.prank(owner);
+        pm.grantWithCondition(ANY_ADDR, other, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
+
+        // Direct query with where == ANY_ADDR hits the same slot via tier-1.
+        assertTrue(pm.hasPermission(ANY_ADDR, other, ADMIN_PERMISSION_ID, ""));
+    }
+
+    /// `(ANY_ADDR, ANY_ADDR)` slot is unreachable from any grant path
+    /// (rejected by `_grantWithCondition` line 408 and `_grant` line 347).
+    /// So `isGranted(ANY_ADDR, ANY_ADDR, ...)` always returns false.
+    function test_isGranted_anyAddrAnyAddrCombo_returnsFalse() public view {
+        assertFalse(pm.hasPermission(ANY_ADDR, ANY_ADDR, ADMIN_PERMISSION_ID, ""));
+    }
+}
+
+/// @notice `_checkCondition` — try/catch behaviour for various failure modes.
+contract PMCheckConditionTest is PermissionManagerTestBase {
+    function test_checkCondition_revertingString_returnsFalse() public {
+        _RevertingStringCondition c = new _RevertingStringCondition();
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(c)));
+        assertFalse(pm.hasPermission(address(pm), other, ADMIN_PERMISSION_ID, ""));
+    }
+
+    function test_checkCondition_customError_returnsFalse() public {
+        _RevertingCustomErrorCondition c = new _RevertingCustomErrorCondition();
+        vm.prank(owner);
+        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(c)));
+        assertFalse(pm.hasPermission(address(pm), other, ADMIN_PERMISSION_ID, ""));
+    }
+}
+
