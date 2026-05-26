@@ -92,7 +92,8 @@ contract PSPPrepareUninstallationTest is PSPUninstallationFixture {
         (address plugin, address[] memory helpers) = _installV1();
 
         vm.recordLogs();
-        psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
+        PermissionLib.MultiTargetPermission[] memory perms =
+            psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         bytes32 expected = keccak256(
@@ -104,6 +105,23 @@ contract PSPPrepareUninstallationTest is PSPUninstallationFixture {
                 assertEq(address(uint160(uint256(logs[i].topics[1]))), address(this));
                 assertEq(address(uint160(uint256(logs[i].topics[2]))), address(dao));
                 assertEq(address(uint160(uint256(logs[i].topics[3]))), address(uupsRepo));
+
+                // preparedSetupId is the first non-indexed field; uninstall composition
+                // locks in: ZERO_BYTES_HASH for helpersHash (not hashHelpers of current
+                // helpers) and PreparationType.Uninstallation as the type-separator.
+                bytes memory d = logs[i].data;
+                bytes32 setupIdInEvent;
+                assembly {
+                    setupIdInEvent := mload(add(d, 32))
+                }
+                bytes32 expectedSetupId = _getPreparedSetupId(
+                    _ref(1),
+                    hashPermissions(perms),
+                    keccak256(abi.encode(uint256(0))), // ZERO_BYTES_HASH
+                    bytes(""),
+                    PreparationType.Uninstallation
+                );
+                assertEq(setupIdInEvent, expectedSetupId, "preparedSetupId hash");
                 found = true;
                 break;
             }
@@ -116,6 +134,15 @@ contract PSPPrepareUninstallationTest is PSPUninstallationFixture {
 
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
         vm.expectRevert(); // SetupAlreadyPrepared
+        psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
+    }
+
+    /// `prepareUninstallation` has no auth check — any caller succeeds.
+    function test_prepareUninstallation_anyAddressCanCall() public {
+        (address plugin, address[] memory helpers) = _installV1();
+
+        address rando = makeAddr("rando");
+        vm.prank(rando);
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
     }
 }
@@ -194,6 +221,17 @@ contract PSPApplyUninstallationTest is PSPUninstallationFixture {
             if (logs[i].emitter == address(psp) && logs[i].topics[0] == expected) {
                 assertEq(address(uint160(uint256(logs[i].topics[1]))), address(dao));
                 assertEq(address(uint160(uint256(logs[i].topics[2]))), plugin);
+
+                // Data field carries the preparedSetupId that was just applied.
+                bytes32 prep = abi.decode(logs[i].data, (bytes32));
+                bytes32 expectedPrep = _getPreparedSetupId(
+                    _ref(1),
+                    hashPermissions(p.permissions),
+                    keccak256(abi.encode(uint256(0))), // ZERO_BYTES_HASH
+                    bytes(""),
+                    PreparationType.Uninstallation
+                );
+                assertEq(prep, expectedPrep, "preparedSetupId");
                 found = true;
                 break;
             }
@@ -267,5 +305,58 @@ contract PSPApplyUninstallationTest is PSPUninstallationFixture {
         bytes32 newId = _getPluginInstallationId(address(dao), newPlugin);
         (, bytes32 currentId) = psp.states(newId);
         assertTrue(currentId != bytes32(0));
+    }
+
+    /// Atomicity: if PSP lacks ROOT on the DAO when uninstall permissions are
+    /// applied, `applyMultiTargetPermissions` reverts and the uninstall-specific
+    /// state mutations (zeroing `currentAppliedSetupId`, bumping `blockNumber`)
+    /// must NOT have landed.
+    function test_applyUninstallation_revertsIfPspLacksDaoRootAndRollsBack() public {
+        (address plugin, PluginSetupProcessor.ApplyUninstallationParams memory p) = _prepareUninstall();
+        _grantApplyUninstallation(owner);
+        // Deliberately do NOT grant PSP ROOT — `applyMultiTargetPermissions` will revert.
+
+        // Snapshot state before the doomed apply.
+        bytes32 installationId = _getPluginInstallationId(address(dao), plugin);
+        (uint256 blockBefore, bytes32 appliedBefore) = psp.states(installationId);
+        assertTrue(appliedBefore != bytes32(0), "fixture: install was applied");
+
+        vm.expectRevert();
+        psp.applyUninstallation(address(dao), p);
+
+        // State unchanged — neither the block bump nor the zero-out landed.
+        (uint256 blockAfter, bytes32 appliedAfter) = psp.states(installationId);
+        assertEq(blockAfter, blockBefore, "blockNumber must not advance on revert");
+        assertEq(appliedAfter, appliedBefore, "currentAppliedSetupId must not zero out on revert");
+    }
+
+    /// If the prepared uninstall returns an empty permissions array, the
+    /// `if (_params.permissions.length > 0)` branch is skipped — PSP does not
+    /// need ROOT on the DAO and `applyMultiTargetPermissions` is never called.
+    function test_applyUninstallation_skipsApplyMultiTargetPermissionsIfEmpty() public {
+        (address plugin, address[] memory helpers) = _installV1();
+
+        // Mock the V1 setup to return ZERO permissions on prepareUninstallation.
+        setupV1.mockPermissionIndexes(1, 1);
+        PermissionLib.MultiTargetPermission[] memory perms =
+            psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
+        assertEq(perms.length, 0, "fixture: empty permissions array");
+
+        // No PSP ROOT grant — the empty-branch path must short-circuit before
+        // any DAO permission call would have needed ROOT.
+        _grantApplyUninstallation(owner);
+        psp.applyUninstallation(
+            address(dao),
+            PluginSetupProcessor.ApplyUninstallationParams({
+                plugin: plugin, pluginSetupRef: _ref(1), permissions: perms
+            })
+        );
+
+        bytes32 installationId = _getPluginInstallationId(address(dao), plugin);
+        (uint256 blockNum, bytes32 currentAppliedId) = psp.states(installationId);
+        assertEq(blockNum, block.number, "uninstall latched without permissions");
+        assertEq(currentAppliedId, bytes32(0), "currentAppliedSetupId reset");
+
+        setupV1.reset();
     }
 }

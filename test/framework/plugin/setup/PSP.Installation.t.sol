@@ -20,6 +20,11 @@ import {PluginRepo} from "../../../../src/framework/plugin/repo/PluginRepo.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
 import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
 import {PermissionManager} from "../../../../src/core/permission/PermissionManager.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {
+    PluginUUPSUpgradeableReenteringSetupMock
+} from "../../../mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableReenteringSetupMock.sol";
+import {PluginUUPSUpgradeableV1Mock} from "../../../mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableMock.sol";
 
 /// @notice `prepareInstallation` happy + adversarial paths.
 contract PSPPrepareInstallationTest is PSPBaseTest {
@@ -80,7 +85,8 @@ contract PSPPrepareInstallationTest is PSPBaseTest {
 
     function test_prepareInstallation_emitsInstallationPrepared() public {
         vm.recordLogs();
-        psp.prepareInstallation(address(dao), _prepareInstallParams(1, ""));
+        (address plugin, IPluginSetup.PreparedSetupData memory data) =
+            psp.prepareInstallation(address(dao), _prepareInstallParams(1, ""));
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         bytes32 expected = keccak256(
@@ -93,6 +99,22 @@ contract PSPPrepareInstallationTest is PSPBaseTest {
                 assertEq(address(uint160(uint256(logs[i].topics[1]))), address(this), "sender");
                 assertEq(address(uint160(uint256(logs[i].topics[2]))), address(dao), "dao");
                 assertEq(address(uint160(uint256(logs[i].topics[3]))), address(uupsRepo), "repo");
+
+                // preparedSetupId is the first non-indexed field in data.
+                bytes memory d = logs[i].data;
+                bytes32 setupIdInEvent;
+                assembly {
+                    setupIdInEvent := mload(add(d, 32))
+                }
+                bytes32 expectedSetupId = _getPreparedSetupId(
+                    _ref(1),
+                    hashPermissions(data.permissions),
+                    hashHelpers(data.helpers),
+                    bytes(""),
+                    PreparationType.Installation
+                );
+                assertEq(setupIdInEvent, expectedSetupId, "preparedSetupId");
+                assertTrue(plugin != address(0), "plugin returned");
                 found = true;
                 break;
             }
@@ -245,6 +267,14 @@ contract PSPApplyInstallationTest is PSPBaseTest {
             if (logs[i].emitter == address(psp) && logs[i].topics[0] == expectedTopic) {
                 assertEq(address(uint160(uint256(logs[i].topics[1]))), address(dao), "dao");
                 assertEq(address(uint160(uint256(logs[i].topics[2]))), plugin, "plugin");
+
+                (bytes32 prep, bytes32 applied) = abi.decode(logs[i].data, (bytes32, bytes32));
+                bytes32 expectedPrep = _getPreparedSetupId(
+                    _ref(1), hashPermissions(p.permissions), p.helpersHash, bytes(""), PreparationType.Installation
+                );
+                bytes32 expectedApplied = _getAppliedSetupId(_ref(1), p.helpersHash);
+                assertEq(prep, expectedPrep, "preparedSetupId");
+                assertEq(applied, expectedApplied, "appliedSetupId");
                 found = true;
                 break;
             }
@@ -393,5 +423,128 @@ contract PSPInstallationEdgeTest is PSPBaseTest {
 
         vm.expectRevert(abi.encodeWithSelector(PluginSetupProcessor.SetupNotApplicable.selector, setupId));
         psp.validatePreparedSetupId(installationId, setupId);
+    }
+}
+
+/// @notice Constructor + permission ID drift detectors.
+contract PSPConstructorAndConstantsTest is PSPBaseTest {
+    function test_constructor_storesRepoRegistry() public view {
+        assertEq(address(psp.repoRegistry()), address(pluginRepoRegistry));
+    }
+
+    function test_permissionId_applyInstallationMatchesKeccak() public view {
+        assertEq(psp.APPLY_INSTALLATION_PERMISSION_ID(), keccak256("APPLY_INSTALLATION_PERMISSION"));
+    }
+
+    function test_permissionId_applyUpdateMatchesKeccak() public view {
+        assertEq(psp.APPLY_UPDATE_PERMISSION_ID(), keccak256("APPLY_UPDATE_PERMISSION"));
+    }
+
+    function test_permissionId_applyUninstallationMatchesKeccak() public view {
+        assertEq(psp.APPLY_UNINSTALLATION_PERMISSION_ID(), keccak256("APPLY_UNINSTALLATION_PERMISSION"));
+    }
+
+    /// The three apply-permission IDs must be pairwise distinct.
+    function test_permissionIds_distinctAcrossApplyOperations() public view {
+        bytes32 ins = psp.APPLY_INSTALLATION_PERMISSION_ID();
+        bytes32 upd = psp.APPLY_UPDATE_PERMISSION_ID();
+        bytes32 uni = psp.APPLY_UNINSTALLATION_PERMISSION_ID();
+        assertTrue(ins != upd);
+        assertTrue(ins != uni);
+        assertTrue(upd != uni);
+    }
+}
+
+/// @notice `prepareInstallation` — payload edges + re-entry behaviour.
+contract PSPPrepareInstallationPayloadTest is PSPBaseTest {
+    /// Very large `_data` payload accepted (gas-bounded but no length cap).
+    function test_prepareInstallation_acceptsLargeData() public {
+        bytes memory big = new bytes(8_000);
+        for (uint256 i = 0; i < big.length; i++) {
+            big[i] = bytes1(uint8(i & 0xff));
+        }
+        psp.prepareInstallation(address(dao), _prepareInstallParams(1, big));
+    }
+
+    /// A `PluginSetup` whose `prepareInstallation` re-enters `psp.prepareInstallation`
+    /// (for a different setup target) succeeds. PSP does not protect against
+    /// re-entry from the setup callback; both prepares complete, recording two
+    /// independent prepared-setup-ids for two independent (dao, plugin) pairs.
+    function test_prepareInstallation_allowsReentryFromPluginSetup() public {
+        // Publish a re-entering setup as build 6 of uupsRepo. It re-enters PSP
+        // to also prepare an install via build 1 (setupV1) during its own
+        // prepareInstallation.
+        PluginUUPSUpgradeableV1Mock pluginImpl = new PluginUUPSUpgradeableV1Mock();
+        PluginUUPSUpgradeableReenteringSetupMock reenterer =
+            new PluginUUPSUpgradeableReenteringSetupMock(address(pluginImpl), psp, uupsRepo, 1, 1);
+        uupsRepo.createVersion(1, address(reenterer), hex"66", hex"");
+
+        // Outer call uses build 6 (reentering); inner re-entry uses build 1.
+        (address outerPlugin, IPluginSetup.PreparedSetupData memory outerData) =
+            psp.prepareInstallation(address(dao), _prepareInstallParams(6, ""));
+
+        // Both prepare calls succeeded. Outer's prepared setup id is recorded:
+        bytes32 outerInstallationId = _getPluginInstallationId(address(dao), outerPlugin);
+        bytes32 outerSetupId = _getPreparedSetupId(
+            _ref(6),
+            hashPermissions(outerData.permissions),
+            hashHelpers(outerData.helpers),
+            bytes(""),
+            PreparationType.Installation
+        );
+        psp.validatePreparedSetupId(outerInstallationId, outerSetupId);
+    }
+}
+
+/// @notice `validatePreparedSetupId` — fresh-state revert.
+contract PSPValidatePreparedSetupIdEdgesTest is PSPBaseTest {
+    /// On a completely fresh `(dao, plugin)` pair, querying any setupId reverts
+    /// `SetupNotApplicable` because pluginState.blockNumber == 0 AND
+    /// preparedSetupIdToBlockNumber[id] == 0 (so `0 >= 0` fires).
+    function test_validatePreparedSetupId_freshStateReverts() public {
+        bytes32 installationId = _getPluginInstallationId(address(dao), makeAddr("untouched-plugin"));
+        bytes32 fakeSetupId = keccak256("anything");
+
+        vm.expectRevert(abi.encodeWithSelector(PluginSetupProcessor.SetupNotApplicable.selector, fakeSetupId));
+        psp.validatePreparedSetupId(installationId, fakeSetupId);
+    }
+}
+
+/// @notice Cross-DAO isolation — state changes on dao1 must not leak to dao2.
+contract PSPMultiDaoIsolationTest is PSPBaseTest {
+    DAO internal dao2;
+
+    function setUp() public override {
+        super.setUp();
+        DAO impl = new DAO();
+        dao2 = DAO(
+            payable(address(
+                    new ERC1967Proxy(
+                        address(impl),
+                        abi.encodeCall(DAO.initialize, (hex"0002", owner, address(0), "https://example2.org"))
+                    )
+                ))
+        );
+    }
+
+    function test_multiDao_installOnDao1_dao2StateUntouched() public {
+        (address plugin, IPluginSetup.PreparedSetupData memory data) =
+            psp.prepareInstallation(address(dao), _prepareInstallParams(1, ""));
+        _grantApplyInstallation(owner);
+        _grantPspRoot();
+        psp.applyInstallation(
+            address(dao),
+            PluginSetupProcessor.ApplyInstallationParams({
+                pluginSetupRef: _ref(1),
+                plugin: plugin,
+                permissions: data.permissions,
+                helpersHash: hashHelpers(data.helpers)
+            })
+        );
+
+        bytes32 dao2InstallationId = _getPluginInstallationId(address(dao2), plugin);
+        (uint256 dao2Block, bytes32 dao2AppliedId) = psp.states(dao2InstallationId);
+        assertEq(dao2Block, 0);
+        assertEq(dao2AppliedId, bytes32(0));
     }
 }

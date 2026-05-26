@@ -851,19 +851,14 @@ contract PMGrantWithConditionEdgeTest is PermissionManagerTestBase {
         pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
     }
 
-    /// `_condition == ALLOW_FLAG` (address(2)) — fails `isContract()` check
-    /// → reverts `ConditionNotAContract`.
+    /// `_condition == ALLOW_FLAG` (address(2)) — same `isContract()` check that
+    /// rejects `address(0)`, but locking in this sentinel-collision case
+    /// guards against confusion between the slot's ALLOW_FLAG marker and
+    /// a real condition address being stored there.
     function test_grantWithCondition_allowFlagAddress_reverts() public {
         vm.prank(owner);
         vm.expectRevert();
         pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(ALLOW_FLAG));
-    }
-
-    /// `_condition == address(0)` — fails `isContract()` check.
-    function test_grantWithCondition_zeroAddress_reverts() public {
-        vm.prank(owner);
-        vm.expectRevert();
-        pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(0)));
     }
 
     /// A "condition" that ONLY implements `supportsInterface` but not

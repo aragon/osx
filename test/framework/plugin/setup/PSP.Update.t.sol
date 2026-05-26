@@ -223,6 +223,13 @@ contract PSPApplyUpdateTest is PSPUpdateFixture {
             if (logs[i].emitter == address(psp) && logs[i].topics[0] == expected) {
                 assertEq(address(uint160(uint256(logs[i].topics[1]))), address(dao));
                 assertEq(address(uint160(uint256(logs[i].topics[2]))), plugin);
+
+                (bytes32 prep, bytes32 applied) = abi.decode(logs[i].data, (bytes32, bytes32));
+                bytes32 expectedPrep = _getPreparedSetupId(
+                    _ref(2), hashPermissions(p.permissions), p.helpersHash, p.initData, PreparationType.Update
+                );
+                assertEq(prep, expectedPrep, "preparedSetupId");
+                assertEq(applied, _getAppliedSetupId(_ref(2), p.helpersHash), "appliedSetupId");
                 found = true;
                 break;
             }
