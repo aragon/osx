@@ -66,6 +66,35 @@ abstract contract DaoAuthorizableSharedTest is Test {
         vm.prank(bob);
         target.authorizedFunc();
     }
+
+    /// The auth modifier forwards the FULL original calldata to the DAO's
+    /// `hasPermission(_where, _who, _permissionId, _data)` call. Locks in
+    /// the `_msgData()` plumbing — conditions receive the caller's selector
+    /// + args, not a synthetic payload.
+    function test_auth_forwardsCalldataToDao() public {
+        daoMock.setHasPermissionReturnValueMock(true);
+
+        bytes memory innerCalldata = abi.encodeWithSelector(IDaoAuthorizableMock.authorizedFunc.selector);
+        bytes memory expectedDaoCall = abi.encodeWithSelector(
+            IDAO.hasPermission.selector,
+            address(target),
+            bob,
+            PERM_ID,
+            innerCalldata
+        );
+
+        vm.expectCall(address(daoMock), expectedDaoCall);
+        vm.prank(bob);
+        target.authorizedFunc();
+    }
+
+    /// `DaoUnauthorized(address,address,address,bytes32)` selector is locked.
+    /// If any field is renamed or reordered, the selector drifts and the
+    /// caller-side `vm.expectRevert(DaoUnauthorized.selector)` calls in
+    /// other test files break — this detector pins it explicitly.
+    function test_daoUnauthorized_selectorDriftDetector() public pure {
+        assertEq(DaoUnauthorized.selector, bytes4(0x32dbe3b4));
+    }
 }
 
 /// @notice Constructable variant: `DaoAuthorizable` is set via constructor.
@@ -101,5 +130,15 @@ contract DaoAuthorizableUpgradeableTest is DaoAuthorizableSharedTest {
         );
         vm.expectRevert("Initializable: contract is not initializing");
         m.notAnInitializer(IDAO(address(daoMock)));
+    }
+
+    /// Drift detector for the `uint256[49]` tail gap. Probe a slot deep
+    /// enough to be inside the gap on the current layout; should be zero
+    /// on a fresh deploy. If the gap shrinks without a major-version bump,
+    /// upgrade-shaped tests catch the collision.
+    function test_storageGap_sentinelSlotIsUnused() public view {
+        bytes32 sentinel = bytes32(uint256(80));
+        bytes32 raw = vm.load(address(target), sentinel);
+        assertEq(uint256(raw), 0, "gap slot 80 should be unused");
     }
 }
