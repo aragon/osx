@@ -140,4 +140,60 @@ contract InterfaceBasedRegistryTest is Test {
 
         assertTrue(registry.entries(address(claimer)));
     }
+
+    // -------------------------------------------------------------------------
+    // Lifecycle / init guard
+    // -------------------------------------------------------------------------
+
+    /// Second call to `initialize` on an already-initialized proxy reverts.
+    function test_initialize_revertsIfCalledTwice() public {
+        vm.expectRevert(); // Initializable: contract is already initialized
+        registry.initialize(IDAO(address(daoMock)), type(IDAO).interfaceId);
+    }
+
+    /// A registrant whose `supportsInterface` reverts must be caught by
+    /// `ERC165CheckerUpgradeable` (staticcall + try/catch). The registry
+    /// reverts cleanly with `ContractInterfaceInvalid` — never propagates
+    /// the inner revert.
+    function test_register_revertsIfSupportsInterfaceReverts() public {
+        address bad = makeAddr("reverter");
+        vm.etch(bad, hex"60006000fd"); // PUSH1 0, PUSH1 0, REVERT
+
+        vm.expectRevert(abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, bad));
+        registry.register(bad);
+    }
+
+    // -------------------------------------------------------------------------
+    // _authorizeUpgrade — UPGRADE_REGISTRY permission gate
+    // -------------------------------------------------------------------------
+
+    /// Upgrade gated by `UPGRADE_REGISTRY_PERMISSION_ID` via the auth modifier;
+    /// without permission, `upgradeTo` reverts.
+    function test_authorizeUpgrade_revertsWithoutPermission() public {
+        daoMock.setHasPermissionReturnValueMock(false);
+
+        InterfaceBasedRegistryMock nextImpl = new InterfaceBasedRegistryMock();
+        vm.expectRevert();
+        vm.prank(alice);
+        registry.upgradeTo(address(nextImpl));
+    }
+
+    /// Positive control — with permission, the upgrade lands and the ERC1967
+    /// implementation slot reflects the new impl.
+    function test_authorizeUpgrade_succeedsWithPermission() public {
+        InterfaceBasedRegistryMock nextImpl = new InterfaceBasedRegistryMock();
+        registry.upgradeTo(address(nextImpl));
+
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(registry), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), address(nextImpl));
+    }
+
+    /// Drift detector for the `uint256[48]` tail gap. Probe a slot inside
+    /// the gap range; should be zero on a fresh deploy.
+    function test_storageGap_sentinelSlotIsUnused() public view {
+        bytes32 sentinel = bytes32(uint256(250));
+        bytes32 raw = vm.load(address(registry), sentinel);
+        assertEq(uint256(raw), 0, "gap slot 250 should be unused");
+    }
 }
