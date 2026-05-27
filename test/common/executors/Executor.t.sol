@@ -295,4 +295,84 @@ contract ExecutorTest is Test {
         executor.execute{gas: budget}(ZERO_CALLID, actions, allowMap);
         return true;
     }
+
+    // -------------------------------------------------------------------------
+    // Drift detectors
+    // -------------------------------------------------------------------------
+
+    /// The custom reentrancy slot is hardcoded as
+    /// `keccak256("osx-commons.storage.Executor")`. Catches drift if anyone
+    /// changes the constant or the seed string without updating both.
+    function test_reentrancyGuardStorageLocation_matchesKeccak() public pure {
+        assertEq(REENTRANCY_GUARD_STORAGE_LOCATION, keccak256("osx-commons.storage.Executor"));
+    }
+
+    /// `IExecutor.interfaceId` is the XOR of its function selectors. Lock in
+    /// the frozen literal — catches silent drift if `execute(...)` is ever
+    /// renamed.
+    function test_iExecutorInterfaceId_driftDetector() public pure {
+        assertEq(type(IExecutor).interfaceId, bytes4(0xc71bf324));
+    }
+
+    // -------------------------------------------------------------------------
+    // Boundary cases
+    // -------------------------------------------------------------------------
+
+    /// Empty actions array succeeds — `execResults` and `failureMap` are
+    /// zero-length / zero, but the `Executed` event still fires.
+    function test_execute_emptyActionsArraySucceedsAndEmits() public {
+        Action[] memory empty;
+
+        vm.recordLogs();
+        (bytes[] memory results, uint256 failureMap) = executor.execute(ZERO_CALLID, empty, 0);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        assertEq(results.length, 0);
+        assertEq(failureMap, 0);
+
+        bool found;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(executor) && logs[i].topics[0] == EXECUTED_TOPIC) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found, "Executed not emitted for empty actions");
+    }
+
+    /// Actions forward their `value` field to the target. The executor must
+    /// already hold the ETH; standard `.call{value: x}` semantics apply.
+    function test_execute_forwardsValueToTarget() public {
+        PayableSink sink = new PayableSink();
+        vm.deal(address(executor), 5 ether);
+
+        Action[] memory actions = new Action[](1);
+        actions[0] = Action({to: address(sink), value: 1 ether, data: ""});
+
+        executor.execute(ZERO_CALLID, actions, 0);
+
+        assertEq(address(sink).balance, 1 ether, "value forwarded to target");
+        assertEq(address(executor).balance, 4 ether, "executor balance debited");
+    }
+
+    /// Even when `execute` reverts mid-batch, the reentrancy guard slot
+    /// returns to `_NOT_ENTERED` after the tx unwinds (EVM cascade rolls back
+    /// the `_ENTERED` write made by the modifier). Locks in the
+    /// "no stuck-in-entered" invariant.
+    function test_execute_reentrancyGuardSlotStaysNotEnteredAfterRevert() public {
+        Action[] memory actions = new Action[](1);
+        actions[0] = _failAction();
+
+        // No allow-failure → outer reverts ActionFailed(0).
+        vm.expectRevert(abi.encodeWithSelector(Executor.ActionFailed.selector, 0));
+        executor.execute(ZERO_CALLID, actions, 0);
+
+        bytes32 raw = vm.load(address(executor), REENTRANCY_GUARD_STORAGE_LOCATION);
+        assertEq(uint256(raw), 1, "reentrancy slot must be NOT_ENTERED post-revert");
+    }
+}
+
+/// @dev Minimal payable recipient for the ETH-forwarding test.
+contract PayableSink {
+    receive() external payable {}
 }

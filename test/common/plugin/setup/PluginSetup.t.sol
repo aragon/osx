@@ -70,6 +70,17 @@ abstract contract PluginSetupSharedTest is Test {
     function test_supportsInterface_returnsFalseForUnknownInterface() public view {
         assertFalse(setupMock.supportsInterface(0xdeadbeef));
     }
+
+    /// Two instances of the same setup variant each carry their OWN
+    /// `IMPLEMENTATION` immutable — confirms the immutable is per-instance
+    /// (each constructor runs and stores its own impl), not a shared static.
+    function test_implementation_isPerInstance() public {
+        IPluginSetupLike other = _deploySetupMock();
+        assertTrue(
+            setupMock.implementation() != other.implementation(),
+            "each setup instance must hold its own implementation"
+        );
+    }
 }
 
 /// @notice Non-upgradeable `PluginSetup` variant (via the cloneable mock).
