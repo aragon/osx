@@ -121,8 +121,14 @@ contract ENSSubdomainRegistrarTest is Test {
         vm.prank(address(registrar));
         ens.setOwner(TEST_NODE, alice);
 
+        bytes32 subnode2 = keccak256(abi.encodePacked(TEST_NODE, MY2_LABEL));
+        assertEq(ens.owner(subnode2), address(0));
+
         vm.expectRevert();
         registrar.registerSubnode(MY2_LABEL, target);
+
+        // The second subnode was never claimed — ENS state stays untouched.
+        assertEq(ens.owner(subnode2), address(0), "subnode2 owner not written on revert");
     }
 
     function test_postInit_revertsIfInitializedTwice() public {
@@ -293,5 +299,80 @@ contract ENSSubdomainRegistrarTest is Test {
         vm.expectRevert();
         vm.prank(bob);
         registrar.setDefaultResolver(address(0xCAFE));
+    }
+
+    // -------------------------------------------------------------------------
+    // registerSubnode — atomicity when the resolver reverts mid-stream
+    // -------------------------------------------------------------------------
+
+    /// `registerSubnode` performs three ENS writes in sequence:
+    /// 1. `ens.setSubnodeOwner(node, label, address(this))`
+    /// 2. `ens.setResolver(subnode, resolver)`
+    /// 3. `Resolver(resolver).setAddr(subnode, target)`
+    ///
+    /// If step 3 reverts (a malicious or misconfigured resolver), the EVM
+    /// rolls back steps 1 and 2 — confirm by checking that the subnode's
+    /// owner stays at zero and no half-state remains where the registrar
+    /// owns the subnode but no addr resolves.
+    function test_registerSubnode_revertsAndRollsBackIfResolverReverts() public {
+        _initAsOwner();
+
+        // Etch a "resolver" that always reverts cleanly (REVERT with no data).
+        // Avoids INVALID's gas-burn so the test stays fast.
+        address badResolver = makeAddr("bad-resolver");
+        vm.etch(badResolver, hex"60006000fd"); // PUSH1 0, PUSH1 0, REVERT
+        registrar.setDefaultResolver(badResolver);
+
+        bytes32 subnode = keccak256(abi.encodePacked(TEST_NODE, MY_LABEL));
+        assertEq(ens.owner(subnode), address(0));
+
+        vm.expectRevert();
+        registrar.registerSubnode(MY_LABEL, target);
+
+        // The whole-tx revert rolled back the `setSubnodeOwner` write too.
+        assertEq(ens.owner(subnode), address(0), "subnode owner must be rolled back");
+    }
+
+    // -------------------------------------------------------------------------
+    // _authorizeUpgrade — UPGRADE_REGISTRAR permission gate
+    // -------------------------------------------------------------------------
+
+    /// Caller without `UPGRADE_REGISTRAR_PERMISSION_ID` cannot upgrade.
+    function test_authorizeUpgrade_revertsWithoutPermission() public {
+        _initAsOwner();
+        managingDao.setHasPermissionReturnValueMock(false);
+
+        ENSSubdomainRegistrar nextImpl = new ENSSubdomainRegistrar();
+        vm.expectRevert();
+        vm.prank(alice);
+        registrar.upgradeTo(address(nextImpl));
+    }
+
+    /// With the right permission, upgrade lands — the ERC1967 implementation
+    /// slot updates to the new impl address.
+    function test_authorizeUpgrade_succeedsWithPermission() public {
+        _initAsOwner();
+
+        ENSSubdomainRegistrar nextImpl = new ENSSubdomainRegistrar();
+        registrar.upgradeTo(address(nextImpl));
+
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(registrar), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), address(nextImpl));
+    }
+
+    // -------------------------------------------------------------------------
+    // Storage gap drift detector
+    // -------------------------------------------------------------------------
+
+    /// `uint256[47] __gap` at the tail of the layout. Probe a slot deep
+    /// enough to be inside the gap on the current layout; should be zero
+    /// on a fresh deploy. If the gap shrinks without a major-version bump,
+    /// this catches the collision.
+    function test_storageGap_sentinelSlotIsUnused() public {
+        _initAsOwner();
+        bytes32 sentinel = bytes32(uint256(250));
+        bytes32 raw = vm.load(address(registrar), sentinel);
+        assertEq(uint256(raw), 0, "gap slot 250 should be unused");
     }
 }

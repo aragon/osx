@@ -148,10 +148,20 @@ contract DAORegistryTest is Test {
 
     function test_register_revertsIfDAOAlreadyRegistered() public {
         daoRegistry.register(IDAO(address(targetDao)), creator, "my-cool-org");
+
+        // Source ordering: `_register` runs BEFORE the ENS subnode write.
+        // When `_register` reverts on an already-registered DAO, the ENS
+        // path for the new subdomain never executes — confirm via the ENS
+        // owner staying empty for "another-name".
+        bytes32 secondNode = keccak256(abi.encodePacked(DAO_ETH_NODE, keccak256(bytes("another-name"))));
+        assertEq(ens.owner(secondNode), address(0));
+
         vm.expectRevert(
             abi.encodeWithSelector(InterfaceBasedRegistry.ContractAlreadyRegistered.selector, address(targetDao))
         );
         daoRegistry.register(IDAO(address(targetDao)), creator, "another-name");
+
+        assertEq(ens.owner(secondNode), address(0), "ENS subnode not written when _register reverts");
     }
 
     function test_register_revertsIfSubdomainAlreadyTaken() public {
@@ -208,5 +218,72 @@ contract DAORegistryTest is Test {
         assertEq(v[0], 1);
         assertEq(v[1], 4);
         assertEq(v[2], 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // Implementation / lifecycle
+    // -------------------------------------------------------------------------
+
+    /// The bare `DAORegistry` impl invokes `_disableInitializers()` in its
+    /// constructor — calling `initialize` on the impl directly must revert.
+    /// Only the proxy created via `ERC1967Proxy` can be initialized.
+    function test_impl_cannotBeInitializedDirectly() public {
+        DAORegistry impl = new DAORegistry();
+        vm.expectRevert(); // Initializable: contract is already initialized
+        impl.initialize(IDAO(address(managingDao)), subdomainRegistrar);
+    }
+
+    /// Second call to `initialize` on an already-initialized proxy reverts.
+    function test_initialize_revertsIfCalledTwice() public {
+        vm.expectRevert(); // Initializable: contract is already initialized
+        daoRegistry.initialize(IDAO(address(managingDao)), subdomainRegistrar);
+    }
+
+    /// Managing DAO is stored at init via the inherited
+    /// `DaoAuthorizableUpgradeable` base and exposed via the `dao()` getter.
+    function test_initialize_storesManagingDao() public view {
+        assertEq(address(daoRegistry.dao()), address(managingDao));
+    }
+
+    // -------------------------------------------------------------------------
+    // register — interface-check edges (inherited from InterfaceBasedRegistry)
+    // -------------------------------------------------------------------------
+
+    /// Non-contract DAO addresses (zero address, EOA) fail the ERC-165
+    /// interface probe inside `InterfaceBasedRegistry._register` and revert
+    /// cleanly with `ContractInterfaceInvalid`.
+    function test_register_revertsForNonContractDAO() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, address(0))
+        );
+        daoRegistry.register(IDAO(address(0)), creator, "");
+
+        address eoa = makeAddr("eoa-dao");
+        vm.expectRevert(abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, eoa));
+        daoRegistry.register(IDAO(eoa), creator, "");
+    }
+
+    /// A contract whose `supportsInterface` itself reverts must be caught by
+    /// `ERC165CheckerUpgradeable` (it uses staticcall + try/catch). The outer
+    /// call reverts cleanly with `ContractInterfaceInvalid` — never propagates
+    /// the inner revert.
+    function test_register_revertsIfDAOSupportsInterfaceReverts() public {
+        address bad = makeAddr("reverter");
+        vm.etch(bad, hex"fe"); // INVALID opcode
+
+        vm.expectRevert(abi.encodeWithSelector(InterfaceBasedRegistry.ContractInterfaceInvalid.selector, bad));
+        daoRegistry.register(IDAO(bad), creator, "");
+    }
+
+    /// Storage-gap sentinel — `uint256[49] __gap` at the tail of DAORegistry +
+    /// `uint256[48] __gap` from InterfaceBasedRegistry. If either shrinks
+    /// without a major-version bump, the upgrade-shaped tests catch it via
+    /// the slot probe.
+    function test_storageGap_sentinelSlotIsUnused() public view {
+        // The gap range sits well past the last named state var. Probe a slot
+        // inside it; should be zero on a fresh deploy.
+        bytes32 sentinel = bytes32(uint256(250));
+        bytes32 raw = vm.load(address(daoRegistry), sentinel);
+        assertEq(uint256(raw), 0, "gap slot 250 should be unused");
     }
 }
