@@ -160,6 +160,34 @@ abstract contract MetadataExtensionSharedTest is Test {
         }
         revert("MetadataSet not emitted");
     }
+
+    /// Before any `setMetadata`, `getMetadata()` returns empty bytes — locks
+    /// in the initial state (no default seed, no inherited value).
+    function test_getMetadata_initialStateIsEmpty() public view {
+        assertEq(target.getMetadata().length, 0);
+    }
+
+    /// Each `setMetadata` call emits exactly one `MetadataSet` event — no
+    /// dedup/skip when the new value equals the old.
+    function test_setMetadata_eachCallEmitsItsOwnEvent() public {
+        vm.recordLogs();
+        target.setMetadata(hex"01");
+        target.setMetadata(hex"01"); // same value — must still emit
+        target.setMetadata(hex"02");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 expectedTopic = keccak256("MetadataSet(bytes)");
+        uint256 count;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].topics[0] == expectedTopic &&
+                logs[i].emitter == address(target)
+            ) {
+                count++;
+            }
+        }
+        assertEq(count, 3, "MetadataSet emitted once per call");
+    }
 }
 
 /// @notice Constructable variant.
@@ -203,5 +231,17 @@ contract MetadataExtensionUpgradeableTest is MetadataExtensionSharedTest {
         );
         // The high byte holds the payload itself.
         assertEq(uint256(raw) >> 248, 0x42, "short-bytes value mismatch");
+    }
+
+    /// The storage-slot constant in `MetadataExtensionUpgradeable` is documented
+    /// as the ERC-7201 namespaced derivation:
+    /// `keccak256(abi.encode(uint256(keccak256(seed)) - 1)) & ~bytes32(uint256(0xff))`.
+    /// If either the constant or the seed string drifts without the other
+    /// being updated, this catches the divergence.
+    function test_storageSlot_matchesErc7201Derivation() public pure {
+        bytes32 derived = keccak256(
+            abi.encode(uint256(keccak256("osx-commons.storage.MetadataExtension")) - 1)
+        ) & ~bytes32(uint256(0xff));
+        assertEq(derived, METADATA_STORAGE_SLOT, "storage slot must match ERC-7201 derivation");
     }
 }

@@ -184,4 +184,40 @@ contract ProxyLibTest is Test {
         assertTrue(b != c);
         assertTrue(a != c);
     }
+
+    // -------------------------------------------------------------------------
+    // Additional lock-ins
+    // -------------------------------------------------------------------------
+
+    /// `implementation()` returns the same value across calls — the address
+    /// is stored in `IMMUTABLE` and cannot change post-construction.
+    function test_implementation_consistentAcrossCalls() public view {
+        address a = uupsFactory.implementation();
+        address b = uupsFactory.implementation();
+        address c = uupsFactory.implementation();
+        assertEq(a, b);
+        assertEq(b, c);
+        assertEq(a, address(uupsImpl));
+    }
+
+    /// `ProxyCreated(address proxy)` has NO indexed fields — the address
+    /// lives entirely in the non-indexed data block. Off-chain indexers
+    /// cannot filter by proxy address via topic filters; locks in the
+    /// current ABI so any future `indexed` annotation surfaces here.
+    function test_proxyCreated_hasNoIndexedFields() public {
+        vm.recordLogs();
+        uupsFactory.deployUUPSProxy("");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 topic = keccak256("ProxyCreated(address)");
+        bool found;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(uupsFactory) && logs[i].topics[0] == topic) {
+                assertEq(logs[i].topics.length, 1, "only the signature topic - no indexed fields");
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found, "ProxyCreated not emitted");
+    }
 }
