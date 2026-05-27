@@ -595,9 +595,12 @@ contract RuledConditionTest is Test {
 
     function test_encodeLogicalOperator_decodeRoundTrip() public view {
         uint240 encoded = ruled.encodeLogicalOperator(11, 99);
-        (uint32 a, uint32 b, ) = ruled.decodeRuleValue(uint256(encoded));
+        (uint32 a, uint32 b, uint32 c) = ruled.decodeRuleValue(uint256(encoded));
         assertEq(a, 11);
         assertEq(b, 99);
+        // `encodeLogicalOperator` only packs two segments. The third must
+        // decode to zero — locks in the binary-vs-ternary encoding distinction.
+        assertEq(c, 0);
     }
 
     function testFuzz_encodeIfElse_decodeRoundTrip(
@@ -680,5 +683,88 @@ contract RuledConditionTest is Test {
 
         // `_checkCondition` checks `returndatasize() == 32`; 64 bytes → return false.
         assertFalse(_isGrantedEmpty());
+    }
+
+    /// `_checkCondition` with a no-code (EOA) address — `staticcall(EOA, ...)`
+    /// returns `(ok=true, data="")` per EVM semantics. The `size != 32` check
+    /// then trips → returns false. Distinct from the revert-from-contract case
+    /// (which fails at the `ok` check).
+    function test_checkCondition_returnsFalseForNoCodeCondition() public {
+        address noCode = makeAddr("eoa-condition");
+        RuledCondition.Rule[] memory rs = new RuledCondition.Rule[](1);
+        rs[0] = _rule(
+            CONDITION_RULE_ID,
+            OP_EQ,
+            _conditionAddr(IPermissionCondition(noCode))
+        );
+        ruled.updateRules(rs);
+
+        assertFalse(_isGrantedEmpty());
+    }
+
+    // -------------------------------------------------------------------------
+    // Logical-operator short-circuit semantics
+    // -------------------------------------------------------------------------
+
+    /// `AND` short-circuits when `r1 == false`: param2 is NOT evaluated. We
+    /// prove this by making the param2 rule point at an out-of-bounds index,
+    /// which would panic if it were ever reached.
+    function test_andOperation_shortCircuitsWhenLeftFalse() public {
+        RuledCondition.Rule[] memory rs = new RuledCondition.Rule[](3);
+        rs[0] = _rule(LOGIC_OP_RULE_ID, OP_AND, ruled.encodeLogicalOperator(1, 2));
+        // param1 — VALUE rule that returns false via OP_RET on value 0.
+        rs[1] = _rule(VALUE_RULE_ID, OP_RET, 0);
+        // param2 — tripwire that would OOB-panic if evaluated. Make it a
+        // LOGIC_OP referencing nonexistent indexes 5 and 6.
+        rs[2] = _rule(LOGIC_OP_RULE_ID, OP_AND, ruled.encodeLogicalOperator(5, 6));
+        ruled.updateRules(rs);
+
+        // If short-circuit works → outer returns false cleanly (no panic).
+        assertFalse(_isGrantedEmpty(), "AND with r1=false short-circuits to false");
+    }
+
+    /// `OR` short-circuits when `r1 == true`: param2 is NOT evaluated. Same
+    /// tripwire technique as the AND case.
+    function test_orOperation_shortCircuitsWhenLeftTrue() public {
+        RuledCondition.Rule[] memory rs = new RuledCondition.Rule[](3);
+        rs[0] = _rule(LOGIC_OP_RULE_ID, OP_OR, ruled.encodeLogicalOperator(1, 2));
+        // param1 — VALUE rule that returns true via OP_RET on value 1.
+        rs[1] = _rule(VALUE_RULE_ID, OP_RET, 1);
+        // param2 — tripwire.
+        rs[2] = _rule(LOGIC_OP_RULE_ID, OP_AND, ruled.encodeLogicalOperator(5, 6));
+        ruled.updateRules(rs);
+
+        // If short-circuit works → outer returns true cleanly.
+        assertTrue(_isGrantedEmpty(), "OR with r1=true short-circuits to true");
+    }
+
+    // -------------------------------------------------------------------------
+    // Array-OOB guard
+    // -------------------------------------------------------------------------
+
+    /// `_evalRule(_ruleIndex)` panics when `_ruleIndex >= rules.length` —
+    /// Solidity's array-OOB check fires (panic 0x32). The configurator is
+    /// trusted to wire rule indices correctly; mistakes surface as panics,
+    /// not as silent "false" returns.
+    function test_evalRule_panicsOnOutOfBoundsIndex() public {
+        RuledCondition.Rule[] memory rs = new RuledCondition.Rule[](1);
+        // Rule 0 is a LOGIC_OP that references rules 5 and 6, which don't exist.
+        rs[0] = _rule(LOGIC_OP_RULE_ID, OP_AND, ruled.encodeLogicalOperator(5, 6));
+        ruled.updateRules(rs);
+
+        vm.expectRevert(); // panic 0x32
+        _isGrantedEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // Interface ID drift detector
+    // -------------------------------------------------------------------------
+
+    /// `type(RuledCondition).interfaceId` is the XOR of its function selectors
+    /// (`getRules`, `encodeIfElse`, `encodeLogicalOperator`, `decodeRuleValue`).
+    /// Lock in the frozen literal — silent rename of any of those public
+    /// helpers shifts the id and breaks this test.
+    function test_ruledConditionInterfaceId_driftDetector() public pure {
+        assertEq(type(RuledCondition).interfaceId, bytes4(0xa3f37964));
     }
 }
