@@ -281,4 +281,26 @@ contract PluginCloneableTest is Test {
         vm.expectRevert();
         plugin.execute(address(0), uint256(1), actions, 0, IPlugin.Operation.Call);
     }
+
+    // -------------------------------------------------------------------------
+    // Cloneable-specific surface
+    // -------------------------------------------------------------------------
+
+    /// Clones produced via `Clones.clone` follow EIP-1167: a 45-byte runtime
+    /// shim that delegate-calls into the implementation. If OZ ever switches
+    /// to a different minimal-proxy encoding (or one of the alternate forms),
+    /// this length check catches the change.
+    function test_clone_runtimeCodeLengthMatchesEIP1167() public view {
+        assertEq(address(plugin).code.length, 45, "EIP-1167 minimal proxy is 45 bytes");
+    }
+
+    /// PluginCloneable is NOT UUPS-upgradeable — it must NOT advertise
+    /// `IERC1822Proxiable`. The sibling `PluginUUPSUpgradeable` does support
+    /// this interface; the negative answer here is what distinguishes the
+    /// two roles at the ERC-165 layer.
+    function test_supportsInterface_doesNotSupportERC1822Proxiable() public view {
+        // ERC-1822 ProxiableUUID has interfaceId 0x52d1902d
+        // (selector of `proxiableUUID()`).
+        assertFalse(plugin.supportsInterface(bytes4(0x52d1902d)));
+    }
 }

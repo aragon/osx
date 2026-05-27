@@ -296,4 +296,56 @@ contract PluginTest is Test {
         vm.expectRevert();
         plugin.execute(address(0), uint256(1), actions, 0, IPlugin.Operation.Call);
     }
+
+    /// Calling `setTargetConfig` a second time overrides the stored value and
+    /// emits `TargetSet` again. Lock in: there's no "already set" sentinel —
+    /// each call simply overwrites.
+    function test_setTargetConfig_secondCallOverridesAndEmitsAgain() public {
+        IPlugin.TargetConfig memory first =
+            IPlugin.TargetConfig({target: address(executor), operation: IPlugin.Operation.Call});
+        IPlugin.TargetConfig memory second =
+            IPlugin.TargetConfig({target: makeAddr("other"), operation: IPlugin.Operation.DelegateCall});
+
+        vm.recordLogs();
+        plugin.setTargetConfig(first);
+        plugin.setTargetConfig(second);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        bytes32 topic = keccak256("TargetSet((address,uint8))");
+        uint256 count;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter == address(plugin) && logs[i].topics[0] == topic) count++;
+        }
+        assertEq(count, 2, "TargetSet emitted once per call");
+
+        // Final stored config is the second one.
+        IPlugin.TargetConfig memory stored = plugin.getCurrentTargetConfig();
+        assertEq(stored.target, second.target);
+        assertEq(uint256(stored.operation), uint256(second.operation));
+    }
+
+    /// `getTargetConfig`'s fallback fires whenever `target == address(0)`,
+    /// regardless of the stored `operation`. So storing `(address(0), DelegateCall)`
+    /// still returns `(dao(), Call)` — the fallback overrides the operation too.
+    function test_getTargetConfig_zeroTargetIgnoresStoredOperation() public {
+        // Source rejects the literal `(0, DelegateCall)` only when the target
+        // implements IDAO; `address(0)` does not, so the setter accepts it.
+        IPlugin.TargetConfig memory cfg =
+            IPlugin.TargetConfig({target: address(0), operation: IPlugin.Operation.DelegateCall});
+        plugin.setTargetConfig(cfg);
+
+        IPlugin.TargetConfig memory resolved = plugin.getTargetConfig();
+        assertEq(resolved.target, address(daoMock));
+        assertEq(uint256(resolved.operation), uint256(IPlugin.Operation.Call), "fallback resets operation to Call");
+    }
+
+    /// The synthetic XOR-of-3-selectors "interface id" is computed at runtime
+    /// in `supportsInterface`. Lock in the frozen literal so any rename of
+    /// `setTargetConfig` / `getTargetConfig` / `getCurrentTargetConfig` is
+    /// caught at test time (the XOR changes silently otherwise).
+    function test_supportsInterface_xorDriftDetector() public view {
+        bytes4 computed =
+            plugin.setTargetConfig.selector ^ plugin.getTargetConfig.selector ^ plugin.getCurrentTargetConfig.selector;
+        assertEq(computed, bytes4(0xafc5b823), "XOR of the 3 target selectors is frozen");
+    }
 }

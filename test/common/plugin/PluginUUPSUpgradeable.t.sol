@@ -325,4 +325,40 @@ contract PluginUUPSUpgradeableTest is Test {
         PluginUUPSUpgradeableMockBuild2 asBuild2 = PluginUUPSUpgradeableMockBuild2(address(plugin));
         assertEq(asBuild2.state2(), 2);
     }
+
+    /// Upgrade-safety invariant: the plugin's own state (`currentTargetConfig`,
+    /// inherited `dao()`) must survive an impl swap. If the gap shrinks or the
+    /// new impl reorders state, this test catches the collision.
+    function test_upgrade_preservesPluginState() public {
+        // Establish pre-upgrade state.
+        IPlugin.TargetConfig memory cfg =
+            IPlugin.TargetConfig({target: address(executor), operation: IPlugin.Operation.DelegateCall});
+        plugin.setTargetConfig(cfg);
+        address daoBefore = address(plugin.dao());
+
+        // Upgrade impl.
+        PluginUUPSUpgradeableMockBuild2 newImpl = new PluginUUPSUpgradeableMockBuild2();
+        plugin.upgradeTo(address(newImpl));
+
+        // State survives.
+        assertEq(address(plugin.dao()), daoBefore, "dao() preserved across upgrade");
+        IPlugin.TargetConfig memory after_ = plugin.getCurrentTargetConfig();
+        assertEq(after_.target, address(executor), "target preserved");
+        assertEq(uint256(after_.operation), uint256(IPlugin.Operation.DelegateCall), "operation preserved");
+    }
+
+    /// `IERC1822ProxiableUpgradeable.interfaceId` is locked to `0x52d1902d`
+    /// (selector of `proxiableUUID()`). If OZ ever renames the function on
+    /// their interface, this test catches the silent drift.
+    function test_supportsInterface_erc1822InterfaceIdDriftDetector() public pure {
+        assertEq(type(IERC1822ProxiableUpgradeable).interfaceId, bytes4(0x52d1902d));
+    }
+
+    /// Drift detector for the `uint256[49]` tail gap. Probe a slot deep
+    /// enough to be inside the gap on the current layout; should be zero.
+    function test_storageGap_sentinelSlotIsUnused() public view {
+        bytes32 sentinel = bytes32(uint256(250));
+        bytes32 raw = vm.load(address(plugin), sentinel);
+        assertEq(uint256(raw), 0, "gap slot 250 should be unused");
+    }
 }
