@@ -12,18 +12,24 @@ import {IMemberRegistry} from "../../../../src/framework/member/IMemberRegistry.
 import {IResolver} from "../../../../src/framework/utils/ens/IResolver.sol";
 import {ENSDomain} from "../../../../src/framework/utils/ens/ENSDomain.sol";
 
-/// @notice Simulates the full deployment + governance setup on a mainnet fork.
-/// Reads PARENT_DOMAIN and MANAGEMENT_DAO_ADDRESS from env. Looks up the actual ENS domain
-/// owner on the fork and executes each action from the correct address.
+/// @notice Simulates the full deployment + governance setup on a mainnet fork using the
+/// production "scoped ENS controllership transfer" pattern (setOwner / setSubnodeRecord, not
+/// setApprovalForAll). Reads PARENT_DOMAIN and MANAGEMENT_DAO_ADDRESS from env.
 /// @dev Run with: just test-fork --match-contract SetupSimulation
 contract SetupSimulationTest is Test {
     ENS constant ENS_REGISTRY = ENS(0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e);
     address constant PUBLIC_RESOLVER = 0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63;
+    address constant BASE_REGISTRAR = 0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85;
 
     address managementDao;
     string parentDomain;
     bytes32 parentNode;
-    address domainOwner;
+
+    // Pre-setup ENS controller of parentNode (or, for a fresh node, the controller of its
+    // parent). After setUp(), ENS controllership of parentNode is transferred to the registry;
+    // this address still holds the BaseRegistrar NFT / parent node and therefore retains the
+    // ability to reclaim controllership.
+    address previousDomainOwner;
 
     MemberRegistry registry;
     address alice = address(0xa11ce);
@@ -36,39 +42,16 @@ contract SetupSimulationTest is Test {
         parentDomain = vm.envOr("PARENT_DOMAIN", string("members.dao.eth"));
         parentNode = ENSDomain.namehash(parentDomain);
 
-        // Look up who actually owns this domain on the fork
-        domainOwner = ENS_REGISTRY.owner(parentNode);
+        address currentEnsOwner = ENS_REGISTRY.owner(parentNode);
 
         console.log("Setup simulation");
-        console.log("- Parent domain:", parentDomain);
-        console.log("- Parent node:  ", vm.toString(parentNode));
-        console.log("- Domain owner: ", domainOwner);
+        console.log("- Parent domain: ", parentDomain);
+        console.log("- Parent node:   ", vm.toString(parentNode));
+        console.log("- Current owner: ", currentEnsOwner);
         console.log("- Management DAO:", managementDao);
-
-        if (domainOwner == address(0)) {
-            // Domain doesn't exist yet — create it.
-            // Split to find the parent's parent and create the subnode.
-            (string memory label, string memory parent) = ENSDomain.splitDomain(parentDomain);
-            bytes32 parentOfParentNode = ENSDomain.namehash(parent);
-            address parentOfParentOwner = ENS_REGISTRY.owner(parentOfParentNode);
-
-            console.log("- Domain does not exist, creating under", parent);
-            console.log("  parent owner: ", parentOfParentOwner);
-
-            vm.prank(parentOfParentOwner);
-            ENS_REGISTRY.setSubnodeRecord(
-                parentOfParentNode,
-                keccak256(bytes(label)),
-                managementDao, // DAO owns the new node
-                PUBLIC_RESOLVER,
-                0
-            );
-            domainOwner = managementDao;
-            console.log("  Created, owned by DAO");
-        }
         console.log();
 
-        // --- Step 1: Deploy (anyone can do this) ---
+        // --- Step 1: Deploy registry (anyone can do this) ---
 
         vm.startPrank(deployer);
         registry = MemberRegistry(
@@ -84,21 +67,41 @@ contract SetupSimulationTest is Test {
         vm.stopPrank();
         console.log("Step 1: Deployed registry at", address(registry));
 
-        // --- Step 2: DAO grants EVICT_SUBDOMAIN_PERMISSION to itself ---
+        // --- Step 2: Hand scoped ENS controllership of parentNode to the registry ---
+
+        if (currentEnsOwner == address(0)) {
+            // Fresh node: parent-of-parent controller creates the subnode controlled by the registry.
+            (string memory label, string memory parent) = ENSDomain.splitDomain(parentDomain);
+            bytes32 parentOfParentNode = ENSDomain.namehash(parent);
+            previousDomainOwner = ENS_REGISTRY.owner(parentOfParentNode);
+
+            vm.prank(previousDomainOwner);
+            ENS_REGISTRY.setSubnodeRecord(
+                parentOfParentNode, keccak256(bytes(label)), address(registry), PUBLIC_RESOLVER, 0
+            );
+            console.log("Step 2: Created node controlled directly by registry (under", parent, ")");
+        } else {
+            // Existing node: current controller transfers ENS controllership to the registry.
+            previousDomainOwner = currentEnsOwner;
+            vm.prank(previousDomainOwner);
+            ENS_REGISTRY.setOwner(parentNode, address(registry));
+            console.log("Step 2: Transferred ENS controllership from previous controller to registry");
+        }
+        assertEq(
+            ENS_REGISTRY.owner(parentNode),
+            address(registry),
+            "registry should control parentNode after setup"
+        );
+
+        // --- Step 3: DAO grants EVICT_SUBDOMAIN_PERMISSION to itself ---
 
         bytes32 evictPermId = registry.EVICT_SUBDOMAIN_PERMISSION_ID();
         vm.prank(managementDao);
         (bool grantOk,) = managementDao.call(
             abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, evictPermId)
         );
-        assertTrue(grantOk, "Step 2: grant EVICT_SUBDOMAIN_PERMISSION failed");
-        console.log("Step 2: Granted EVICT_SUBDOMAIN_PERMISSION");
-
-        // --- Step 3: Domain owner approves registry as ENS operator ---
-
-        vm.prank(domainOwner);
-        ENS_REGISTRY.setApprovalForAll(address(registry), true);
-        console.log("Step 3: Domain owner approved registry as ENS operator");
+        assertTrue(grantOk, "Step 3: grant EVICT_SUBDOMAIN_PERMISSION failed");
+        console.log("Step 3: Granted EVICT_SUBDOMAIN_PERMISSION");
         console.log();
     }
 
@@ -154,19 +157,48 @@ contract SetupSimulationTest is Test {
         console.log("full cycle succeeded");
     }
 
-    function test_setup_domainOwnerRetainsControl() public {
-        // Domain owner still owns the parent node
-        assertEq(ENS_REGISTRY.owner(parentNode), domainOwner);
+    /// @notice The registry is now the ENS controller; the previous holder no longer has direct
+    /// ENS-level authority over the parent node (cannot setOwner/setApprovalForAll back).
+    function test_setup_previousControllerCannotInterfere() public {
+        assertEq(ENS_REGISTRY.owner(parentNode), address(registry));
 
-        // Domain owner can revoke operator access
-        vm.prank(domainOwner);
-        ENS_REGISTRY.setApprovalForAll(address(registry), false);
+        // Previous controller cannot reclaim ENS controllership directly via setOwner.
+        vm.prank(previousDomainOwner);
+        vm.expectRevert();
+        ENS_REGISTRY.setOwner(parentNode, previousDomainOwner);
 
-        // After revoking, register should fail
+        // register() still works for users.
+        vm.prank(alice);
+        registry.register("alice");
+        assertTrue(registry.isRegistered(alice));
+        console.log("previous controller cannot interfere; registry remains in control");
+    }
+
+    /// @notice The parent's ENS controller (one level up) remains the kill-switch. For deeper
+    /// subdomains they can directly setSubnodeOwner to overwrite. For .eth 2LDs the
+    /// equivalent is BaseRegistrar.reclaim from the NFT registrant -- exercised by the
+    /// RegisterSimulation suite, not duplicated here.
+    function test_setup_parentControllerCanOverrideKillSwitch() public {
+        (string memory label, string memory parent) = ENSDomain.splitDomain(parentDomain);
+        bytes32 parentOfParentNode = ENSDomain.namehash(parent);
+        address parentOfParentController = ENS_REGISTRY.owner(parentOfParentNode);
+        bytes32 labelHash = keccak256(bytes(label));
+
+        if (parentOfParentController == BASE_REGISTRAR) {
+            console.log("Parent-of-parent is BaseRegistrar (.eth 2LD); reclaim path covered elsewhere.");
+            return;
+        }
+
+        // Parent-of-parent controller overwrites the subnode's controller.
+        vm.prank(parentOfParentController);
+        ENS_REGISTRY.setSubnodeOwner(parentOfParentNode, labelHash, parentOfParentController);
+
+        assertEq(ENS_REGISTRY.owner(parentNode), parentOfParentController);
+
+        // After the override, the registry no longer controls parentNode; register() reverts.
         vm.expectRevert();
         vm.prank(alice);
         registry.register("alice");
-
-        console.log("domain owner retains control and can revoke operator access");
+        console.log("parent-of-parent kill-switch effective");
     }
 }
