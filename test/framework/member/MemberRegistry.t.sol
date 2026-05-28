@@ -377,6 +377,24 @@ contract MemberRegistryTest is Test {
         registry.evict("alice", alice);
     }
 
+    function test_evict_transferRevertsIfNewControllerIsRegistry() public {
+        // Guards against HAL-02: assigning the registry itself as a member would lock the
+        // subdomain (release() keys on msg.sender; the contract never self-calls).
+        vm.prank(alice);
+        registry.register("alice");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IMemberRegistry.InvalidNewController.selector, address(registry))
+        );
+        vm.prank(evictor);
+        registry.evict("alice", address(registry));
+
+        // alice is untouched (revert happens before _release).
+        assertTrue(registry.isRegistered(alice));
+        assertEq(registry.labelOwner(keccak256("alice")), alice);
+        assertEq(ens.owner(_subnode("alice")), address(registry));
+    }
+
     function test_evict_transferRevertsIfNewControllerAlreadyRegistered() public {
         vm.prank(alice);
         registry.register("alice");
@@ -692,6 +710,28 @@ contract MemberRegistryTest is Test {
             abi.encodeCall(
                 MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), string(""), address(resolver))
             )
+        );
+    }
+
+    function test_initialize_revertsIfZeroResolver() public {
+        // Guards against address(0) succeeding silently
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidResolver.selector, address(0)));
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), DOMAIN, address(0)))
+        );
+    }
+
+    function test_initialize_revertsIfEOAResolver() public {
+        // Same root cause as the zero-address case: an EOA has no code
+        MemberRegistry impl = new MemberRegistry();
+
+        vm.expectRevert(abi.encodeWithSelector(IMemberRegistry.InvalidResolver.selector, bob));
+        new ERC1967Proxy(
+            address(impl),
+            abi.encodeCall(MemberRegistry.initialize, (IDAO(address(dao)), ENS(address(ens)), DOMAIN, bob))
         );
     }
 

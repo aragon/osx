@@ -7,9 +7,13 @@ pragma solidity ^0.8.17;
 /// and splitting at the first dot. Single source of truth used by the contract,
 /// deploy scripts and tests.
 library ENSDomain {
+    /// @notice Thrown when `domain` is structurally malformed
+    error InvalidDomain(string domain);
+
     /// @notice Returns the namehash of `domain` (e.g., `"members.dao.eth"`).
-    /// @dev Returns `bytes32(0)` for an empty input. Does not validate label characters —
-    /// callers must enforce any character/length rules separately.
+    /// @dev Returns `bytes32(0)` for an empty input. Reverts with `InvalidDomain` on
+    /// structurally malformed inputs. Does not validate label characters:
+    /// callers must enforce any extra rules separately.
     function namehash(string memory domain) internal pure returns (bytes32 result) {
         bytes memory b = bytes(domain);
         if (b.length == 0) return bytes32(0);
@@ -17,10 +21,14 @@ library ENSDomain {
         uint256 end = b.length;
         for (uint256 i = b.length; i > 0; i--) {
             if (b[i - 1] == ".") {
+                // Trailing dot (first iter) or consecutive dot (subsequent iters): empty label.
+                if (i == end) revert InvalidDomain(domain);
                 result = keccak256(abi.encodePacked(result, _labelHash(b, i, end)));
                 end = i - 1;
             }
         }
+        // Leading dot: the first label is empty.
+        if (end == 0) revert InvalidDomain(domain);
         result = keccak256(abi.encodePacked(result, _labelHash(b, 0, end)));
     }
 

@@ -78,6 +78,9 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         // Verify the parent domain is not empty.
         else if (bytes(_domain).length == 0) revert InvalidDomain(_domain);
 
+        // Reject zero address / EOA resolvers. High-level calls to a no-code address
+        if (_resolver.code.length == 0) revert InvalidResolver(_resolver);
+
         // Verify the resolver supports per-node approval (reverts if missing).
         IResolver(_resolver).isApprovedFor(address(this), bytes32(0), address(0));
 
@@ -114,7 +117,7 @@ contract MemberRegistry is IMemberRegistry, UUPSUpgradeable, DaoAuthorizableUpgr
         bytes32 label = keccak256(bytes(subdomain));
         address member = labelOwner[label];
         if (member == address(0)) revert SubdomainNotRegistered(subdomain);
-        if (newController == member) revert InvalidNewController(newController);
+        if (newController == member || newController == address(this)) revert InvalidNewController(newController);
 
         _release(member);
         emit SubdomainEvicted(member, msg.sender, subdomain);

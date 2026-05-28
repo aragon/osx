@@ -86,6 +86,42 @@ contract ENSDomainTest is Test {
         assertTrue(a != b);
     }
 
+    /// @dev External wrapper so `vm.expectRevert` sees a real call boundary
+    /// (the library function is `internal` and would otherwise be inlined).
+    function callNamehash(string calldata domain) external pure returns (bytes32) {
+        return ENSDomain.namehash(domain);
+    }
+
+    function test_namehash_revertsOnTrailingDot() public {
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "eth."));
+        this.callNamehash("eth.");
+
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "members.dao.eth."));
+        this.callNamehash("members.dao.eth.");
+    }
+
+    function test_namehash_revertsOnLeadingDot() public {
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, ".eth"));
+        this.callNamehash(".eth");
+
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, ".members.dao.eth"));
+        this.callNamehash(".members.dao.eth");
+    }
+
+    function test_namehash_revertsOnConsecutiveDots() public {
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "a..b"));
+        this.callNamehash("a..b");
+
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "members..dao.eth"));
+        this.callNamehash("members..dao.eth");
+    }
+
+    function test_namehash_revertsOnDotOnly() public {
+        // A single dot is simultaneously a leading and trailing dot.
+        vm.expectRevert(abi.encodeWithSelector(ENSDomain.InvalidDomain.selector, "."));
+        this.callNamehash(".");
+    }
+
     // -------------------------------------------------------------------------
     // splitDomain
     // -------------------------------------------------------------------------

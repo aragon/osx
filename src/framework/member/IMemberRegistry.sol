@@ -66,6 +66,9 @@ interface IMemberRegistry {
     /// @notice Thrown if the management DAO address is the zero address.
     error InvalidManagementDao(address dao);
 
+    /// @notice Thrown if the resolver address has no contract code (zero address or EOA).
+    error InvalidResolver(address resolver);
+
     /// @notice Register as a member by claiming a subdomain. Permissionless.
     ///         One subdomain per address. Reverts if already registered (release first).
     /// @param subdomain The subdomain label to claim (e.g., "alice").
