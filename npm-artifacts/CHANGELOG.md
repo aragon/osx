@@ -16,7 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build pipeline migrated to `just` + `bun` + `forge`.
 - `npm`/`yarn` are no longer used.
 - Run `just abi` to regenerate `src/abi.ts` from forge artifacts at the repo root; `just build` chains that + `tsc`.
-- **`src/addresses.json` is now hand-curated** — this package is the source of truth for OSx-core deployed addresses. The previous auto-sync from `lib/just-foundry/networks/*.env` is gone (`sync-addresses.sh` removed). To add a chain or update an address, edit the JSON directly. Long-term, protocol-factory will write to this repo + each plugin repo's artifacts package; `just-foundry` becomes a downstream consumer that pulls from those (one direction). See `PLAN.md` "Pending cross-team actions".
 
 ### Breaking
 
