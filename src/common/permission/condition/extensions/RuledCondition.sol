@@ -178,7 +178,7 @@ abstract contract RuledCondition is PermissionConditionUpgradeable {
                 uint32 ruleIndexOnSuccess,
                 uint32 ruleIndexOnFailure
             ) = decodeRuleValue(uint256(_rule.value));
-            bool result = _evalRule(currentRuleIndex, _who, _where, _permissionId, _compareList);
+            bool result = _evalRule(currentRuleIndex, _where, _who, _permissionId, _compareList);
 
             return
                 _evalRule(
