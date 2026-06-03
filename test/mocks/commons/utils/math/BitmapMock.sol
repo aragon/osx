@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {hasBit as _hasBit, flipBit as _flipBit} from "@aragon/osx-commons-contracts/src/utils/math/BitMap.sol";
+import {hasBit as _hasBit, flipBit as _flipBit} from "@aragon/osx-commons-contracts/utils/math/BitMap.sol";
 
 /// @notice A mock contract containing functions manipulating bitmaps.
 /// @dev DO NOT USE IN PRODUCTION!

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {VersionComparisonLib} from "@aragon/osx-commons-contracts/src/utils/versioning/VersionComparisonLib.sol";
+import {VersionComparisonLib} from "@aragon/osx-commons-contracts/utils/versioning/VersionComparisonLib.sol";
 
 /// @notice A mock contract containing functions to compare semantic version numbers.
 /// @dev DO NOT USE IN PRODUCTION!

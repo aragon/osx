@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/permission/PermissionLib.sol";
 
 address constant NO_CONDITION = address(0);
 

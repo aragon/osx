@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.8;
 
-import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
-import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
+import {PermissionLib} from "@aragon/osx-commons-contracts/permission/PermissionLib.sol";
+import {ProxyLib} from "@aragon/osx-commons-contracts/utils/deployment/ProxyLib.sol";
 
 address constant NO_CONDITION = address(0);
 

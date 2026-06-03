@@ -3,8 +3,8 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity ^0.8.8;
 
-import {PluginCloneable} from "@aragon/osx-commons-contracts/src/plugin/PluginCloneable.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {PluginCloneable} from "@aragon/osx-commons-contracts/plugin/PluginCloneable.sol";
+import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
 
 contract PluginCloneableV1Mock is PluginCloneable {
     uint256 public state1;
