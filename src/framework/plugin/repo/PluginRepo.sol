@@ -8,10 +8,10 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-import {IProtocolVersion} from "@aragon/osx-commons-contracts/utils/versioning/IProtocolVersion.sol";
-import {ProtocolVersion} from "@aragon/osx-commons-contracts/utils/versioning/ProtocolVersion.sol";
-import {IPluginSetup} from "@aragon/osx-commons-contracts/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons-contracts/plugin/setup/PluginSetup.sol";
+import {IProtocolVersion} from "../../../common/utils/versioning/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../../common/utils/versioning/ProtocolVersion.sol";
+import {IPluginSetup} from "../../../common/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "../../../common/plugin/setup/PluginSetup.sol";
 
 import {PermissionManager} from "../../../core/permission/PermissionManager.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";

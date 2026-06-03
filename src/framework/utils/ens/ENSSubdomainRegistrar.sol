@@ -7,9 +7,9 @@ import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import {ProtocolVersion} from "@aragon/osx-commons-contracts/utils/versioning/ProtocolVersion.sol";
-import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/permission/auth/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
+import {ProtocolVersion} from "../../../common/utils/versioning/ProtocolVersion.sol";
+import {DaoAuthorizableUpgradeable} from "../../../common/permission/auth/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../../../common/dao/IDAO.sol";
 
 /// @title ENSSubdomainRegistrar
 /// @author Aragon X - 2022-2023

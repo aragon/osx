@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.8;
 
-import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/permission/auth/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
+import {DaoAuthorizableUpgradeable} from "../../../../../src/common/permission/auth/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../../../../../src/common/dao/IDAO.sol";
 
 /// @notice A mock contract containing a function protected by the `auth` modifier.
 /// @dev DO NOT USE IN PRODUCTION!

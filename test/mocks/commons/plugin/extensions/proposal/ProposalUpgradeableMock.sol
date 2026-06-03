@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.8;
 
-import {ProposalUpgradeable} from "@aragon/osx-commons-contracts/plugin/extensions/proposal/ProposalUpgradeable.sol";
-import {Action} from "@aragon/osx-commons-contracts/executors/IExecutor.sol";
+import {ProposalUpgradeable} from "../../../../../../src/common/plugin/extensions/proposal/ProposalUpgradeable.sol";
+import {Action} from "../../../../../../src/common/executors/IExecutor.sol";
 
 /// @notice A mock contract.
 /// @dev DO NOT USE IN PRODUCTION!

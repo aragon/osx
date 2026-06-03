@@ -3,9 +3,9 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity ^0.8.8;
 
-import {PluginUUPSUpgradeable} from "@aragon/osx-commons-contracts/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
-import {Action} from "@aragon/osx-commons-contracts/executors/IExecutor.sol";
+import {PluginUUPSUpgradeable} from "../../../../src/common/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../../../src/common/dao/IDAO.sol";
+import {Action} from "../../../../src/common/executors/IExecutor.sol";
 
 /// @notice A mock upgradeable plugin to be deployed via the UUPS proxy pattern.
 /// v1.1 (Release 1, Build 1)

@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.8;
 
-import {Plugin} from "@aragon/osx-commons-contracts/plugin/Plugin.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
+import {Plugin} from "../../../../src/common/plugin/Plugin.sol";
+import {IDAO} from "../../../../src/common/dao/IDAO.sol";
 
 contract PluginV1Mock is Plugin {
     uint256 public state1;

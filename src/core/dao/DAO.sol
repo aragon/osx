@@ -13,13 +13,13 @@ import {IERC1155ReceiverUpgradeable} from "@openzeppelin/contracts-upgradeable/t
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import {IProtocolVersion} from "@aragon/osx-commons-contracts/utils/versioning/IProtocolVersion.sol";
-import {ProtocolVersion} from "@aragon/osx-commons-contracts/utils/versioning/ProtocolVersion.sol";
-import {VersionComparisonLib} from "@aragon/osx-commons-contracts/utils/versioning/VersionComparisonLib.sol";
-import {hasBit, flipBit} from "@aragon/osx-commons-contracts/utils/math/BitMap.sol";
-import {Action} from "@aragon/osx-commons-contracts/executors/Executor.sol";
-import {IExecutor} from "@aragon/osx-commons-contracts/executors/IExecutor.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
+import {IProtocolVersion} from "../../common/utils/versioning/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../common/utils/versioning/ProtocolVersion.sol";
+import {VersionComparisonLib} from "../../common/utils/versioning/VersionComparisonLib.sol";
+import {hasBit, flipBit} from "../../common/utils/math/BitMap.sol";
+import {Action} from "../../common/executors/Executor.sol";
+import {IExecutor} from "../../common/executors/IExecutor.sol";
+import {IDAO} from "../../common/dao/IDAO.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {CallbackHandler} from "../utils/CallbackHandler.sol";

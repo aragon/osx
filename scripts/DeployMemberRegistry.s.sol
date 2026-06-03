@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import {Script, console} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {ENS} from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
+import {IDAO} from "../src/common/dao/IDAO.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {MemberRegistry} from "../src/framework/member/MemberRegistry.sol";

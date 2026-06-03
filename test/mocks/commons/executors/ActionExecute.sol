@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {IExecutor, Action} from "@aragon/osx-commons-contracts/executors/Executor.sol";
+import {IExecutor, Action} from "../../../../src/common/executors/Executor.sol";
 
 /// @notice A dummy contract to test if Executor can successfully execute an action.
 contract ActionExecute {

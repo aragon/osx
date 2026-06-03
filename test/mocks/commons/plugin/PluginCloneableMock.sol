@@ -3,9 +3,9 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity ^0.8.8;
 
-import {PluginCloneable} from "@aragon/osx-commons-contracts/plugin/PluginCloneable.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/dao/IDAO.sol";
-import {Action} from "@aragon/osx-commons-contracts/executors/IExecutor.sol";
+import {PluginCloneable} from "../../../../src/common/plugin/PluginCloneable.sol";
+import {IDAO} from "../../../../src/common/dao/IDAO.sol";
+import {Action} from "../../../../src/common/executors/IExecutor.sol";
 
 /// @notice A mock cloneable plugin to be deployed via the minimal proxy pattern.
 /// v1.1 (Release 1, Build 1)

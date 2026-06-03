@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {IExecutor, Action} from "@aragon/osx-commons-contracts/executors/IExecutor.sol";
+import {IExecutor, Action} from "../../../../src/common/executors/IExecutor.sol";
 
 /// @notice A mock DAO that anyone can set permissions in.
 /// @dev DO NOT USE IN PRODUCTION!
