@@ -3,9 +3,9 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity ^0.8.8;
 
-import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
-import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
-import {PluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/PluginSetup.sol";
+import {PermissionLib} from "../../../../src/common/permission/PermissionLib.sol";
+import {IPluginSetup} from "../../../../src/common/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "../../../../src/common/plugin/setup/PluginSetup.sol";
 
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
 import {PluginCloneableV1Mock, PluginCloneableV1MockBad, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";

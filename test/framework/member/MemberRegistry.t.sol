@@ -4,8 +4,8 @@ pragma solidity ^0.8.17;
 
 import {Test} from "forge-std/Test.sol";
 import {ENS} from "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
-import {DaoUnauthorized} from "@aragon/osx-commons-contracts/src/permission/auth/auth.sol";
+import {IDAO} from "../../../src/common/dao/IDAO.sol";
+import {DaoUnauthorized} from "../../../src/common/permission/auth/auth.sol";
 import {DAOMock} from "../../mocks/commons/dao/DAOMock.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 

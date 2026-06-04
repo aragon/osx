@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.8;
 
-import {MetadataExtensionUpgradeable} from "@aragon/osx-commons-contracts/src/utils/metadata/MetadataExtensionUpgradeable.sol";
+import {MetadataExtensionUpgradeable} from "../../../../../src/common/utils/metadata/MetadataExtensionUpgradeable.sol";
 
-import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {IDAO} from "../../../../../src/common/dao/IDAO.sol";
 
 /// @notice A mock contract.
 /// @dev DO NOT USE IN PRODUCTION!

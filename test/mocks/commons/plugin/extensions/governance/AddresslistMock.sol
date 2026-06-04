@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {Addresslist} from "@aragon/osx-commons-contracts/src/plugin/extensions/governance/Addresslist.sol";
+import {Addresslist} from "../../../../../../src/common/plugin/extensions/governance/Addresslist.sol";
 
 /// @notice A mock addresslist that everyone can add and remove addresses to and from, respectively.
 /// @dev DO NOT USE IN PRODUCTION!

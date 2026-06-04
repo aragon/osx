@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity ^0.8.8;
-import {RuledCondition} from "@aragon/osx-commons-contracts/src/permission/condition/extensions/RuledCondition.sol";
-import {DaoAuthorizableUpgradeable} from "@aragon/osx-commons-contracts/src/permission/auth/DaoAuthorizableUpgradeable.sol";
+import {RuledCondition} from "../../../../../../src/common/permission/condition/extensions/RuledCondition.sol";
+import {DaoAuthorizableUpgradeable} from "../../../../../../src/common/permission/auth/DaoAuthorizableUpgradeable.sol";
 
 /// @notice A mock powerful condition to expose internal functions
 /// @dev DO NOT USE IN PRODUCTION!

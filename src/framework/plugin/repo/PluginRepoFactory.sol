@@ -4,10 +4,10 @@ pragma solidity ^0.8.8;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {PermissionLib} from "@aragon/osx-commons-contracts/src/permission/PermissionLib.sol";
-import {IProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/IProtocolVersion.sol";
-import {ProtocolVersion} from "@aragon/osx-commons-contracts/src/utils/versioning/ProtocolVersion.sol";
-import {ProxyLib} from "@aragon/osx-commons-contracts/src/utils/deployment/ProxyLib.sol";
+import {PermissionLib} from "../../../common/permission/PermissionLib.sol";
+import {IProtocolVersion} from "../../../common/utils/versioning/IProtocolVersion.sol";
+import {ProtocolVersion} from "../../../common/utils/versioning/ProtocolVersion.sol";
+import {ProxyLib} from "../../../common/utils/deployment/ProxyLib.sol";
 import {PluginRepoRegistry} from "./PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 

@@ -3,8 +3,8 @@
 /* solhint-disable one-contract-per-file */
 pragma solidity ^0.8.8;
 
-import {PluginUUPSUpgradeable} from "@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../../src/common/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../../../src/common/dao/IDAO.sol";
 
 contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
     uint256 public state1;

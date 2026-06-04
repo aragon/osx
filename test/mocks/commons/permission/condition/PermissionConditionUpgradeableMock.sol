@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8;
 
-import {PermissionConditionUpgradeable} from "@aragon/osx-commons-contracts/src/permission/condition/PermissionConditionUpgradeable.sol";
+import {PermissionConditionUpgradeable} from "../../../../../src/common/permission/condition/PermissionConditionUpgradeable.sol";
 
 /// @notice A mock permission condition that can be set to permit or deny every call and be upgraded by everyone.
 /// @dev DO NOT USE IN PRODUCTION!
