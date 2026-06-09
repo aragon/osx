@@ -12,18 +12,25 @@ import {IMemberRegistry} from "../../../../src/framework/member/IMemberRegistry.
 import {IResolver} from "../../../../src/framework/utils/ens/IResolver.sol";
 import {ENSDomain} from "../../../../src/framework/utils/ens/ENSDomain.sol";
 
-/// @notice Simulates unwrapping a domain and then registering a member.
+/// @notice Simulates setting up a registry on a real domain via the production
+/// "scoped ENS controllership transfer" pattern: unwrap-and-transfer-to-registry for wrapped
+/// names, setOwner-to-registry for unwrapped names. setApprovalForAll is intentionally
+/// NOT used -- it would expose every other ENS name held by the same address.
 /// @dev Run with: just test-fork --match-contract RegisterSimulation
 contract RegisterSimulationTest is Test {
     ENS constant ENS_REGISTRY = ENS(0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e);
     address constant PUBLIC_RESOLVER = 0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63;
     address constant NAME_WRAPPER = 0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401;
+    address constant BASE_REGISTRAR = 0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85;
 
     address managementDao;
     MemberRegistry registry;
 
     string parentDomain;
     bytes32 parentNode;
+    // The address that holds the .eth NFT (registrant) -- retains reclaim authority
+    // post-setup. Distinct from the ENS controller of parentNode, which after setUp() is
+    // the registry.
     address domainHolder;
     address randomUser = address(0xBEEF);
 
@@ -34,44 +41,28 @@ contract RegisterSimulationTest is Test {
         parentDomain = vm.envOr("PARENT_DOMAIN", string("aragonx.eth"));
         parentNode = ENSDomain.namehash(parentDomain);
 
-        address ensOwner = ENS_REGISTRY.owner(parentNode);
-        bool isWrapped = ensOwner == NAME_WRAPPER;
+        address ensController = ENS_REGISTRY.owner(parentNode);
+        bool isWrapped = ensController == NAME_WRAPPER;
 
         console.log("=== Initial state ===");
-        console.log("Domain:        ", parentDomain);
-        console.log("ENS owner:     ", ensOwner);
-        console.log("Is wrapped:    ", isWrapped);
+        console.log("Domain:           ", parentDomain);
+        console.log("ENS controller:   ", ensController);
+        console.log("Is wrapped:       ", isWrapped);
 
         if (isWrapped) {
-            // Look up the domain holder in the NameWrapper and unwrap
+            // Look up the wrapped-name holder; the actual registrant is one indirection deeper.
             (, bytes memory data) =
                 NAME_WRAPPER.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(parentNode)));
             domainHolder = abi.decode(data, (address));
-            console.log("Domain holder: ", domainHolder);
-            console.log();
-
-            (string memory label,) = ENSDomain.splitDomain(parentDomain);
-            bytes32 labelHash = keccak256(bytes(label));
-
-            console.log("Step 1: Unwrapping", parentDomain);
-            vm.prank(domainHolder);
-            (bool unwrapOk,) = NAME_WRAPPER.call(
-                abi.encodeWithSignature("unwrapETH2LD(bytes32,address,address)", labelHash, domainHolder, domainHolder)
-            );
-            assertTrue(unwrapOk, "unwrap failed");
-
-            ensOwner = ENS_REGISTRY.owner(parentNode);
-            console.log("  ENS owner after unwrap:", ensOwner);
         } else {
-            // Already unwrapped — the ENS owner is the domain holder
-            domainHolder = ensOwner;
-            console.log("Domain holder: ", domainHolder, "(already unwrapped)");
+            domainHolder = ensController;
         }
+        console.log("Domain holder:    ", domainHolder);
         console.log();
 
-        // --- Step 2: Deploy registry ---
+        // --- Step 1: Deploy registry first so we know its address ---
 
-        console.log("Step 2: Deploying registry");
+        console.log("Step 1: Deploying registry");
         registry = MemberRegistry(
             address(
                 new ERC1967Proxy(
@@ -85,15 +76,37 @@ contract RegisterSimulationTest is Test {
         console.log("  Registry:", address(registry));
         console.log();
 
-        // --- Step 3: Domain holder approves registry as ENS operator ---
+        // --- Step 2: Hand scoped ENS controllership of parentNode to the registry ---
 
-        console.log("Step 3: Domain holder approves registry as operator");
-        vm.prank(domainHolder);
-        ENS_REGISTRY.setApprovalForAll(address(registry), true);
-        console.log("  Approved:", ENS_REGISTRY.isApprovedForAll(domainHolder, address(registry)));
+        if (isWrapped) {
+            // Single tx: unwrap and hand controllership to the registry. Registrant
+            // (.eth NFT holder) stays domainHolder so they retain the reclaim kill-switch.
+            (string memory label,) = ENSDomain.splitDomain(parentDomain);
+            bytes32 labelHash = keccak256(bytes(label));
+
+            console.log("Step 2: Unwrapping and handing ENS controllership to registry");
+            vm.prank(domainHolder);
+            (bool unwrapOk,) = NAME_WRAPPER.call(
+                abi.encodeWithSignature(
+                    "unwrapETH2LD(bytes32,address,address)", labelHash, domainHolder, address(registry)
+                )
+            );
+            assertTrue(unwrapOk, "unwrap+transfer failed");
+        } else {
+            // Unwrapped: holder calls setOwner directly on the ENS Registry, scoped to parentNode.
+            console.log("Step 2: Holder transfers ENS controllership of parentNode to registry");
+            vm.prank(domainHolder);
+            ENS_REGISTRY.setOwner(parentNode, address(registry));
+        }
+        assertEq(
+            ENS_REGISTRY.owner(parentNode),
+            address(registry),
+            "registry should control parentNode after setup"
+        );
+        console.log("  Registry now controls parentNode:", ENS_REGISTRY.owner(parentNode));
         console.log();
 
-        // --- Step 4: DAO grants EVICT_SUBDOMAIN_PERMISSION ---
+        // --- Step 3: DAO grants EVICT_SUBDOMAIN_PERMISSION ---
 
         bytes32 evictPermId = registry.EVICT_SUBDOMAIN_PERMISSION_ID();
         vm.prank(managementDao);
@@ -101,11 +114,11 @@ contract RegisterSimulationTest is Test {
             abi.encodeWithSignature("grant(address,address,bytes32)", address(registry), managementDao, evictPermId)
         );
         assertTrue(grantOk, "grant EVICT_SUBDOMAIN_PERMISSION failed");
-        console.log("Step 4: Granted EVICT_SUBDOMAIN_PERMISSION");
+        console.log("Step 3: Granted EVICT_SUBDOMAIN_PERMISSION");
         console.log();
     }
 
-    function test_register_afterUnwrap() public {
+    function test_register_afterTransfer() public {
         console.log("=== Random user registers potato123456 ===");
 
         vm.prank(randomUser);
@@ -118,13 +131,13 @@ contract RegisterSimulationTest is Test {
         assertEq(ENS_REGISTRY.owner(subnode), address(registry));
         assertTrue(IResolver(PUBLIC_RESOLVER).isApprovedFor(address(registry), subnode, randomUser));
 
-        console.log("  Registered:      true");
-        console.log("  Subdomain:       potato123456");
-        console.log("  Subnode owner:  ", ENS_REGISTRY.owner(subnode));
+        console.log("  Registered:       true");
+        console.log("  Subdomain:        potato123456");
+        console.log("  Subnode owner:   ", ENS_REGISTRY.owner(subnode));
         console.log("  Resolver approval: true");
     }
 
-    function test_resolverRecords_afterUnwrap() public {
+    function test_resolverRecords_afterTransfer() public {
         vm.prank(randomUser);
         registry.register("potato123456");
 
@@ -204,7 +217,7 @@ contract RegisterSimulationTest is Test {
         console.log("  attacker:     correctly rejected");
     }
 
-    function test_fullCycle_afterUnwrap() public {
+    function test_fullCycle_afterTransfer() public {
         vm.prank(randomUser);
         registry.register("potato123456");
 
@@ -219,7 +232,7 @@ contract RegisterSimulationTest is Test {
         console.log("  Full cycle (register, move, release) succeeded");
     }
 
-    function test_evict_afterUnwrap() public {
+    function test_evict_afterTransfer() public {
         vm.prank(randomUser);
         registry.register("potato123456");
 
@@ -228,5 +241,37 @@ contract RegisterSimulationTest is Test {
 
         assertFalse(registry.isRegistered(randomUser));
         console.log("  Evict succeeded");
+    }
+
+    /// @notice The .eth NFT registrant retains the ability to reclaim ENS controllership
+    /// from the registry at any time -- this is the real kill-switch for .eth 2LDs.
+    function test_reclaimKillSwitchByRegistrant() public {
+        (string memory label, string memory parent) = ENSDomain.splitDomain(parentDomain);
+
+        // This test only applies to .eth 2LDs (parent controlled by BaseRegistrar).
+        if (ENS_REGISTRY.owner(ENSDomain.namehash(parent)) != BASE_REGISTRAR) {
+            console.log("Parent is not BaseRegistrar; reclaim kill-switch not applicable to this domain.");
+            return;
+        }
+
+        bytes32 labelHash = keccak256(bytes(label));
+
+        // Identify the registrant (current .eth NFT holder)
+        (, bytes memory data) =
+            BASE_REGISTRAR.staticcall(abi.encodeWithSignature("ownerOf(uint256)", uint256(labelHash)));
+        address registrant = abi.decode(data, (address));
+
+        // Registrant reclaims controllership back to themselves
+        vm.prank(registrant);
+        (bool ok,) =
+            BASE_REGISTRAR.call(abi.encodeWithSignature("reclaim(uint256,address)", uint256(labelHash), registrant));
+        assertTrue(ok, "reclaim failed");
+        assertEq(ENS_REGISTRY.owner(parentNode), registrant);
+
+        // After reclaim, the registry can no longer mint subnodes
+        vm.expectRevert();
+        vm.prank(randomUser);
+        registry.register("potato123456");
+        console.log("  Reclaim kill-switch effective; registry can no longer mint subnodes");
     }
 }
