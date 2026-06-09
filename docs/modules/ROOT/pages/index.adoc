@@ -1,14 +1,13 @@
-
 = OSx
 
 == The Contracts Behind the Protocol
 
-The Aragon OSx protocol is the foundation layer of the Aragon stack. It lets users create and manage onchain organizations through DAO contracts that can hold assets, execute actions, and manage permissions.
+The Aragon OSx protocol is the foundation layer of the Aragon stack. It lets users create and manage onchain organizational accounts that can hold assets, execute actions, and manage permissions.
 
-The Aragon OSx protocol provides **three primitives** for users to build their organization:
+The Aragon OSx protocol provides **three primitives** for users to build their onchain organization:
 
-- **DAO contract:** the onchain account and identity of your organization. It holds assets, executes actions, and manages permissions over itself, plugins, and other contracts.
-- **Permissions:** define which accounts, contracts, or plugins can perform specific actions on a DAO, plugin, or framework contract.
+- **DAO.sol contract:** the account and identity of the organization. It holds assets, executes actions, and manages permissions over itself, plugins, and other contracts.
+- **Permissions:** define which accounts, contracts, or plugins can perform specific actions on a DAO contract, plugin, or framework contract.
 - **Plugins:** permissioned contracts that extend what an OSx-based organization can do. They are managed in onchain plugin repositories and can be installed, updated, or uninstalled as the organization evolves.
 
 Through permissions and plugins, builders define who or what can act on behalf of an organization, and which capabilities can be added, changed, or removed over time.
