@@ -52,7 +52,7 @@ To **add the contracts to your project**, open a terminal in the root folder of 
 
 ```shell
 yarn add @aragon/osx
-````
+```
 
 Then import the OSx contracts you need from the package. For complete, version-specific import paths and contract APIs, see the xref:api:core.adoc[API Core] and xref:api:framework.adoc[API Framework] references.
 
