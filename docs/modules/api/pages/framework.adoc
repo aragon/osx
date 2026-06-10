@@ -95,6 +95,7 @@
 :xref-IMemberRegistry-InvalidENSRegistry-address-: xref:framework.adoc#IMemberRegistry-InvalidENSRegistry-address-
 :xref-IMemberRegistry-InvalidDomain-string-: xref:framework.adoc#IMemberRegistry-InvalidDomain-string-
 :xref-IMemberRegistry-InvalidManagementDao-address-: xref:framework.adoc#IMemberRegistry-InvalidManagementDao-address-
+:xref-IMemberRegistry-InvalidResolver-address-: xref:framework.adoc#IMemberRegistry-InvalidResolver-address-
 :xref-PluginRepo-constructor--: xref:framework.adoc#PluginRepo-constructor--
 :xref-PluginRepo-initialize-address-: xref:framework.adoc#PluginRepo-initialize-address-
 :xref-PluginRepo-initializeFrom-uint8-3--bytes-: xref:framework.adoc#PluginRepo-initializeFrom-uint8-3--bytes-
@@ -886,6 +887,7 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 * {xref-IMemberRegistry-InvalidENSRegistry-address-}[`++InvalidENSRegistry(ens)++`]
 * {xref-IMemberRegistry-InvalidDomain-string-}[`++InvalidDomain(domain)++`]
 * {xref-IMemberRegistry-InvalidManagementDao-address-}[`++InvalidManagementDao(dao)++`]
+* {xref-IMemberRegistry-InvalidResolver-address-}[`++InvalidResolver(resolver)++`]
 --
 
 [.contract-index]

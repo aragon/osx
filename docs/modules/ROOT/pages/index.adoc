@@ -2,46 +2,46 @@
 
 == The Contracts Behind the Protocol
 
-The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
+The Aragon OSx protocol is the foundation layer of the Aragon stack. It lets users create and manage onchain organizational accounts that can hold assets, execute actions, and manage permissions.
 
-The Aragon OSx protocol provides **three primitives** for users to build their organization:
+The Aragon OSx protocol provides **three primitives** for users to build their onchain organization:
 
-- **DAO contract:** the main body and identity of your organization containing the core functionality. It holds your assets, executes actions, and manages permissions.
-- **Permissions**: define relationships between plugins, DAOs, and other addresses.
-- **Plugins**: provide custom functionality for your organization and are managed in on-chain plugin repositories. They can be plugged in and out into your DAO without writing or deploying any contract code yourself.
+- **DAO.sol contract:** the account and identity of the organization. It holds assets, executes actions, and manages permissions over itself, plugins, and other contracts.
+- **Permissions:** define which accounts, contracts, or plugins can perform specific actions on a DAO contract, plugin, or framework contract.
+- **Plugins:** permissioned contracts that extend what an OSx-based organization can do. They are managed in onchain plugin repositories and can be installed, updated, or uninstalled as the organization evolves.
 
-Through permissions and plugins, DAO builders are able to build and customize their DAO to suit their needs.
+Through permissions and plugins, builders define who or what can act on behalf of an organization, and which capabilities can be added, changed, or removed over time.
 
-Developers can implement their own plugin by inheriting from one of our **plugin base classes**, writing a **plugin setup** and publishing it in an on-chain **plugin repository**.
+Developers can implement plugins by inheriting from one of our **plugin base classes**, writing a **plugin setup** that declares the required permissions, and publishing the plugin in an onchain **plugin repository**.
 
 To facilitate this, Aragon OSx runs a set of **framework contracts**:
 
-- **DAO Factory and registry contract:** create and curate DAOs.
+- **DAO Factory and registry contract:** create and register DAO contracts for OSx-based organizations.
 - **Plugin repo factory and registry contract:** create and version plugin repositories.
-- **Plugin Setup Processor contract:** sets up plugins from a plugin repository in a DAO (installation, update, uninstallation).
+- **Plugin Setup Processor contract:** installs, updates, and uninstalls plugins from a plugin repository, including the permission changes required by each setup.
 
-== The Aragon OSx DAO Framework
+== The Aragon OSx Framework
 
-The Aragon OSx protocol is a DAO framework structured as follows:
+The Aragon OSx protocol is a smart contract framework for onchain organizations, structured as follows:
 
 image::aragon-os-framework-overview.drawio.svg[align="center"]
 
-Overview of the Aragon OSx protocol with its structural components and their responsibilities: the governance layer constituted by the framework DAO, the code layer including the framework and core contracts, which depends on external libraries and services
+Overview of the Aragon OSx protocol and its structural components: the Framework DAO governs OSx framework infrastructure, while the code layer includes the framework and core contracts built on external libraries and services.
 
 === Code Layer
 
 The foundation of the Aragon OSx protocol is the **code layer** constituted by the *_framework_* and *_core_* related contracts.
-The xref:core/index.adoc[Core contracts] provide the core primitives intended to be used by users and implemented by developers of the DAO framework.
-The xref:framework/index.adoc[Framework contracts] provide the infrastructure to easily create and manage your DAOs and plugins easy.
+The xref:core/index.adoc[Core contracts] provide the core primitives used by OSx-based organizations and implemented by developers building on the framework.
+The xref:framework/index.adoc[Framework contracts] provide the infrastructure to create and manage OSx-based organizations, plugins, and plugin repositories.
 Both are built on top of external dependencies, most notably the link:https://www.openzeppelin.com/contracts[OpenZeppelin] and the link:https://docs.ens.domains/[Ethereum Name Service (ENS)] contracts.
 
 The core and framework contracts are free to use, and no additional fees are charged.
 
-=== Governance Layer
+=== OSx Framework Governance
 
-To govern the framework infrastructure, an Aragon OSx xref:framework/index.adoc[Framework DAO] is deployed constituting the **governance layer** of the Aragon OSx protocol.
+The Aragon OSx xref:framework/index.adoc[Framework DAO] governs OSx framework infrastructure. This is governance of the OSx protocol itself, not the governance model used by every OSx-based organization.
 
-In the next sections, you will learn more about the individual components of the framework.
+The next sections explain the framework and core contracts that OSx-based organizations use.
 
 
 == Getting Started
@@ -54,50 +54,18 @@ To **add the contracts to your project**, open a terminal in the root folder of 
 yarn add @aragon/osx
 ```
 
-Then, to use the contracts within your project, **import the contracts** through something like:
+Then import the OSx contracts you need from the package. For complete, version-specific import paths and contract APIs, see the xref:api:core.adoc[API Core] and xref:api:framework.adoc[API Framework] references.
 
-```solidity
-// contracts/Box.sol
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+== Extend your organization with plugins
 
-// Import Auth from the access-control subdirectory
-import "./access-control/Auth.sol";
+OSx plugins extend an organization with scoped, permissioned functionality. A plugin can add governance, membership, execution workflows, integrations, or other logic, and can be installed, updated, or uninstalled as the organization evolves.
 
-contract Box {
-    uint256 private _value;
-    Auth private _auth;
-
-    event ValueChanged(uint256 value);
-
-    constructor() {
-        _auth = new Auth(msg.sender);
-    }
-
-    function store(uint256 value) public {
-        // Require that the caller is registered as an administrator in Auth
-        require(_auth.isAdministrator(msg.sender), "Unauthorized");
-
-        _value = value;
-        emit ValueChanged(value);
-    }
-
-    function retrieve() public view returns (uint256) {
-        return _value;
-    }
-}
-```
-
-== Customize your DAO
-
-DAO Plugins are the best way to customize your DAO. These are modular extendable pieces of software which you can install or uninstall from your DAO as it evolves and grows.
-In the following sections, we'll dive deeper into this topic. You can take a quick look in the xref:guide-develop-plugin/index.adoc[Guide: Developing a Plugin].
-
+Learn how to build and publish plugins in the xref:guide-develop-plugin/index.adoc[Guide: Developing a Plugin].
 
 == Walkthrough
 
 This documentation is divided into conceptual and practical sections as well as the reference guide.
 
-- Conceptual xref:core/index.adoc[Core contracts] and xref:framework/index.adoc[Framework contracts] explain the architecture behind our protocol.
-- Practical xref:guide-set-up-dao/index.adoc[Guide: Setting up a DAO] and xref:guide-develop-plugin/index.adoc[Guide: Developing a Plugin] explain how to use and leverage our protocol.
-- The xref:api:core.adoc[API Core] and xref:api:framework.adoc[API Framework], generated from the NatSpec comments of the latest `@aragon/osx` release documents each individual Solidity contract, function, and variable.
+* Conceptual xref:core/index.adoc[Core contracts] and xref:framework/index.adoc[Framework contracts] explain the architecture behind our protocol.
+* Practical xref:guide-set-up-dao/index.adoc[Guide: Setting up a DAO] and xref:guide-develop-plugin/index.adoc[Guide: Developing a Plugin] explain how to use and leverage our protocol.
+* The xref:api:core.adoc[API Core] and xref:api:framework.adoc[API Framework], generated from the NatSpec comments of the latest `@aragon/osx` release documents each individual Solidity contract, function, and variable.
