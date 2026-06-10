@@ -98,7 +98,7 @@ The natspec generated API for the core contracts. You can also find the contract
 
 [.contract]
 [[DAO]]
-=== `++DAO++` link:https://github.com/aragon/osx/blob/main/src/core/dao/DAO.sol[{github-icon},role=heading-link]
+=== `++DAO++` link:https://github.com/aragon/osx/blob/v1.4.0/src/core/dao/DAO.sol[{github-icon},role=heading-link]
 
 Public API of the Aragon DAO framework.
 
@@ -562,7 +562,7 @@ Updates the set DAO URI to a new value.
 
 [.contract]
 [[IDAO]]
-=== `++IDAO++` link:https://github.com/aragon/osx/blob/main/src/common/dao/IDAO.sol[{github-icon},role=heading-link]
+=== `++IDAO++` link:https://github.com/aragon/osx/blob/v1.4.0/src/common/dao/IDAO.sol[{github-icon},role=heading-link]
 
 The interface required for DAOs within the Aragon App DAO framework.
 
@@ -674,7 +674,7 @@ Introduced in v1.0.0. Removed in v1.4.0.
 
 [.contract]
 [[PermissionManager]]
-=== `++PermissionManager++` link:https://github.com/aragon/osx/blob/main/src/core/permission/PermissionManager.sol[{github-icon},role=heading-link]
+=== `++PermissionManager++` link:https://github.com/aragon/osx/blob/v1.4.0/src/core/permission/PermissionManager.sol[{github-icon},role=heading-link]
 
 The abstract permission manager used in a DAO, its associated plugins, and other framework-related components.
 
@@ -894,7 +894,7 @@ Checks if the caller address has permission on the target contract via a permiss
 
 [.contract]
 [[CallbackHandler]]
-=== `++CallbackHandler++` link:https://github.com/aragon/osx/blob/main/src/core/utils/CallbackHandler.sol[{github-icon},role=heading-link]
+=== `++CallbackHandler++` link:https://github.com/aragon/osx/blob/v1.4.0/src/core/utils/CallbackHandler.sol[{github-icon},role=heading-link]
 
 This callback handling functionality is intended to be used by executor contracts (i.e., `DAO.sol`).
 

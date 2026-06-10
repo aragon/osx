@@ -95,6 +95,7 @@
 :xref-IMemberRegistry-InvalidENSRegistry-address-: xref:framework.adoc#IMemberRegistry-InvalidENSRegistry-address-
 :xref-IMemberRegistry-InvalidDomain-string-: xref:framework.adoc#IMemberRegistry-InvalidDomain-string-
 :xref-IMemberRegistry-InvalidManagementDao-address-: xref:framework.adoc#IMemberRegistry-InvalidManagementDao-address-
+:xref-IMemberRegistry-InvalidResolver-address-: xref:framework.adoc#IMemberRegistry-InvalidResolver-address-
 :xref-PluginRepo-constructor--: xref:framework.adoc#PluginRepo-constructor--
 :xref-PluginRepo-initialize-address-: xref:framework.adoc#PluginRepo-initialize-address-
 :xref-PluginRepo-initializeFrom-uint8-3--bytes-: xref:framework.adoc#PluginRepo-initializeFrom-uint8-3--bytes-
@@ -190,7 +191,7 @@ The natspec generated API for the framework contracts. You can also find the con
 
 [.contract]
 [[DAOFactory]]
-=== `++DAOFactory++` link:https://github.com/aragon/osx/blob/main/src/framework/dao/DAOFactory.sol[{github-icon},role=heading-link]
+=== `++DAOFactory++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/dao/DAOFactory.sol[{github-icon},role=heading-link]
 
 This contract is used to create a DAO.
 
@@ -318,7 +319,7 @@ Checks if this or the parent contract supports an interface by its ID.
 
 [.contract]
 [[PluginRepoFactory]]
-=== `++PluginRepoFactory++` link:https://github.com/aragon/osx/blob/main/src/framework/plugin/repo/PluginRepoFactory.sol[{github-icon},role=heading-link]
+=== `++PluginRepoFactory++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/plugin/repo/PluginRepoFactory.sol[{github-icon},role=heading-link]
 
 This contract creates `PluginRepo` proxies and registers them on a `PluginRepoRegistry` contract.
 
@@ -401,7 +402,7 @@ After the creation of the `PluginRepo` and release of the first version by the f
 
 [.contract]
 [[DAORegistry]]
-=== `++DAORegistry++` link:https://github.com/aragon/osx/blob/main/src/framework/dao/DAORegistry.sol[{github-icon},role=heading-link]
+=== `++DAORegistry++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/dao/DAORegistry.sol[{github-icon},role=heading-link]
 
 This contract provides the possibility to register a DAO.
 
@@ -578,7 +579,7 @@ Emitted when a new DAO is registered.
 
 [.contract]
 [[PluginRepoRegistry]]
-=== `++PluginRepoRegistry++` link:https://github.com/aragon/osx/blob/main/src/framework/plugin/repo/PluginRepoRegistry.sol[{github-icon},role=heading-link]
+=== `++PluginRepoRegistry++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/plugin/repo/PluginRepoRegistry.sol[{github-icon},role=heading-link]
 
 This contract maintains an address-based registry of plugin repositories in the Aragon App DAO framework.
 
@@ -759,7 +760,7 @@ If subdomain is empty, registration on ENS is skipped.
 
 [.contract]
 [[MemberRegistry]]
-=== `++MemberRegistry++` link:https://github.com/aragon/osx/blob/main/src/framework/member/MemberRegistry.sol[{github-icon},role=heading-link]
+=== `++MemberRegistry++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/member/MemberRegistry.sol[{github-icon},role=heading-link]
 
 The ENS registry and resolver are trusted, known mainnet contracts. No reentrancy guard is needed — the contract is the sole caller of its own ENS operations.
 
@@ -886,6 +887,7 @@ The ENS registry and resolver are trusted, known mainnet contracts. No reentranc
 * {xref-IMemberRegistry-InvalidENSRegistry-address-}[`++InvalidENSRegistry(ens)++`]
 * {xref-IMemberRegistry-InvalidDomain-string-}[`++InvalidDomain(domain)++`]
 * {xref-IMemberRegistry-InvalidManagementDao-address-}[`++InvalidManagementDao(dao)++`]
+* {xref-IMemberRegistry-InvalidResolver-address-}[`++InvalidResolver(resolver)++`]
 --
 
 [.contract-index]
@@ -1053,7 +1055,7 @@ Returns true if the member has a registered subdomain.
 
 [.contract]
 [[PluginRepo]]
-=== `++PluginRepo++` link:https://github.com/aragon/osx/blob/main/src/framework/plugin/repo/PluginRepo.sol[{github-icon},role=heading-link]
+=== `++PluginRepo++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/plugin/repo/PluginRepo.sol[{github-icon},role=heading-link]
 
 The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework.
 
@@ -1385,7 +1387,7 @@ Checks if this or the parent contract supports an interface by its ID.
 
 [.contract]
 [[PluginSetupProcessor]]
-=== `++PluginSetupProcessor++` link:https://github.com/aragon/osx/blob/main/src/framework/plugin/setup/PluginSetupProcessor.sol[{github-icon},role=heading-link]
+=== `++PluginSetupProcessor++` link:https://github.com/aragon/osx/blob/v1.4.0/src/framework/plugin/setup/PluginSetupProcessor.sol[{github-icon},role=heading-link]
 
 This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
 
