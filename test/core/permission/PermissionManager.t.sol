@@ -847,7 +847,16 @@ contract PMGrantWithConditionEdgeTest is PermissionManagerTestBase {
 
         PermissionConditionMock cond = new PermissionConditionMock();
         vm.prank(owner);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PermissionManager.PermissionAlreadyGrantedForDifferentCondition.selector,
+                address(pm),
+                other,
+                ADMIN_PERMISSION_ID,
+                ALLOW_FLAG, // existing plain-ALLOW grant is stored as the ALLOW_FLAG sentinel
+                address(cond)
+            )
+        );
         pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(address(cond)));
     }
 
@@ -857,7 +866,7 @@ contract PMGrantWithConditionEdgeTest is PermissionManagerTestBase {
     /// a real condition address being stored there.
     function test_grantWithCondition_allowFlagAddress_reverts() public {
         vm.prank(owner);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(PermissionManager.ConditionNotAContract.selector, ALLOW_FLAG));
         pm.grantWithCondition(address(pm), other, ADMIN_PERMISSION_ID, IPermissionCondition(ALLOW_FLAG));
     }
 
@@ -949,7 +958,7 @@ contract PMApplySingleEdgeTest is PermissionManagerTestBase {
         });
 
         vm.prank(owner);
-        vm.expectRevert();
+        vm.expectRevert(PermissionManager.GrantWithConditionNotSupported.selector);
         pm.applySingleTargetPermissions(address(pm), items);
 
         // Item[0]'s grant was rolled back.

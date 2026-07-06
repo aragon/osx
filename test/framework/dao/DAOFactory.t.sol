@@ -490,7 +490,8 @@ contract DAOFactoryTest is Test {
         daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
 
         address expectedSecond = vm.computeCreateAddress(address(daoFactory), vm.getNonce(address(daoFactory)));
-        vm.expectRevert();
+        // Subdomain clash bubbles from the ENS registrar (args are node/registrar-derived).
+        vm.expectPartialRevert(ENSSubdomainRegistrar.AlreadyRegistered.selector);
         daoFactory.createDao(_defaultDaoSettings(), new DAOFactory.PluginSettings[](0));
 
         assertEq(expectedSecond.code.length, 0, "second DAO proxy must not exist post-revert");
@@ -505,7 +506,8 @@ contract DAOFactoryTest is Test {
         plugins[0] = _installationData(1, 99); // unpublished version
 
         address expected = vm.computeCreateAddress(address(daoFactory), vm.getNonce(address(daoFactory)));
-        vm.expectRevert();
+        // Unpublished version → PluginRepo.getVersion reverts (hash is call-derived).
+        vm.expectPartialRevert(PluginRepo.VersionHashDoesNotExist.selector);
         daoFactory.createDao(_defaultDaoSettings(), plugins);
 
         assertEq(expected.code.length, 0, "DAO proxy must not exist post-revert");

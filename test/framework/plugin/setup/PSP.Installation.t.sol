@@ -49,7 +49,7 @@ contract PSPPrepareInstallationTest is PSPBaseTest {
         PluginSetupRef memory ref =
             PluginSetupRef({versionTag: PluginRepo.Tag({release: 1, build: 99}), pluginSetupRepo: uupsRepo});
 
-        vm.expectRevert(); // VersionHashDoesNotExist(hash) — exact hash is calldata-derived
+        vm.expectPartialRevert(PluginRepo.VersionHashDoesNotExist.selector); // hash is calldata-derived
         psp.prepareInstallation(
             address(dao), PluginSetupProcessor.PrepareInstallationParams({pluginSetupRef: ref, data: ""})
         );
@@ -150,7 +150,7 @@ contract PSPPrepareInstallationTest is PSPBaseTest {
         psp.prepareInstallation(address(dao), _prepareInstallParams(5, ""));
 
         // Same params → same preparedSetupId; second call must revert.
-        vm.expectRevert(); // SetupAlreadyPrepared(bytes32)
+        vm.expectPartialRevert(PluginSetupProcessor.SetupAlreadyPrepared.selector); // hash is calldata-derived
         psp.prepareInstallation(address(dao), _prepareInstallParams(5, ""));
     }
 
@@ -263,7 +263,11 @@ contract PSPApplyInstallationTest is PSPBaseTest {
         _grantApplyInstallation(owner);
         // PSP has NO ROOT on the DAO. The permissions array is non-empty, so
         // `dao.applyMultiTargetPermissions` runs and reverts Unauthorized.
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PermissionManager.Unauthorized.selector, address(dao), address(psp), ROOT_PERMISSION_ID
+            )
+        );
         psp.applyInstallation(address(dao), p);
     }
 
@@ -273,19 +277,21 @@ contract PSPApplyInstallationTest is PSPBaseTest {
         _grantPspRoot();
         psp.applyInstallation(address(dao), p);
 
-        // Re-running apply with same params reverts: the setup id's
-        // preparedBlock <= pluginState.blockNumber after the first apply.
-        vm.expectRevert();
+        // Re-running apply with the same params reverts. The `currentAppliedSetupId != 0`
+        // guard (PSP.sol:369) is checked BEFORE `validatePreparedSetupId`, so this
+        // surfaces `PluginAlreadyInstalled`, NOT `SetupNotApplicable`.
+        vm.expectRevert(PluginSetupProcessor.PluginAlreadyInstalled.selector);
         psp.applyInstallation(address(dao), p);
     }
 
     function test_applyInstallation_revertsIfPrepIdNotApplicable() public {
         (, PluginSetupProcessor.ApplyInstallationParams memory p) = _prepare();
+        _grantApplyInstallation(owner); // else the auth check reverts first
         _grantPspRoot();
         // Tamper helpersHash → computed preparedSetupId won't match any pending prep.
         p.helpersHash = keccak256("tampered");
 
-        vm.expectRevert(); // SetupNotApplicable
+        vm.expectPartialRevert(PluginSetupProcessor.SetupNotApplicable.selector);
         psp.applyInstallation(address(dao), p);
     }
 
@@ -325,12 +331,13 @@ contract PSPApplyInstallationTest is PSPBaseTest {
     /// zero → `validatePreparedSetupId` reverts `SetupNotApplicable`.
     function test_applyInstallation_blocksCrossPluginReplay() public {
         (, PluginSetupProcessor.ApplyInstallationParams memory p) = _prepare();
+        _grantApplyInstallation(owner); // else the auth check reverts before the replay defence
         _grantPspRoot();
 
         address fake = makeAddr("fakePlugin");
         p.plugin = fake;
 
-        vm.expectRevert(); // SetupNotApplicable
+        vm.expectPartialRevert(PluginSetupProcessor.SetupNotApplicable.selector);
         psp.applyInstallation(address(dao), p);
     }
 
@@ -340,8 +347,12 @@ contract PSPApplyInstallationTest is PSPBaseTest {
         (address plugin, PluginSetupProcessor.ApplyInstallationParams memory p) = _prepare();
         _grantApplyInstallation(owner);
 
-        // PSP without ROOT → outer reverts.
-        vm.expectRevert();
+        // PSP without ROOT → `dao.applyMultiTargetPermissions` reverts Unauthorized.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PermissionManager.Unauthorized.selector, address(dao), address(psp), ROOT_PERMISSION_ID
+            )
+        );
         psp.applyInstallation(address(dao), p);
 
         // State must be untouched.

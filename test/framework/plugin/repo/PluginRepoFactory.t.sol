@@ -300,7 +300,8 @@ contract PluginRepoFactoryTest is Test {
     /// same subdomain in a second factory call reverts.
     function test_createPluginRepo_revertsOnDuplicateSubdomain() public {
         factory.createPluginRepo("dup", owner);
-        vm.expectRevert();
+        // Subdomain clash bubbles from the ENS registrar (args are node/registrar-derived).
+        vm.expectPartialRevert(ENSSubdomainRegistrar.AlreadyRegistered.selector);
         factory.createPluginRepo("dup", owner);
     }
 

@@ -14,6 +14,7 @@ import {
 } from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 
 import {DAO} from "../../../src/core/dao/DAO.sol";
+import {CallbackHandler} from "../../../src/core/utils/CallbackHandler.sol";
 import {IEIP4824} from "../../../src/core/dao/IEIP4824.sol";
 import {PermissionManager} from "../../../src/core/permission/PermissionManager.sol";
 import {IDAO} from "../../../src/common/dao/IDAO.sol";
@@ -1228,7 +1229,16 @@ contract DAODepositExtTest is DAOTestBase {
     /// routes to the DAO's fallback; selector `transferFrom(...)` is not
     /// registered → reverts UnknownCallback.
     function test_deposit_daoAsToken_reverts() public {
-        vm.expectRevert();
+        // `_token == dao` → `safeTransferFrom` calls `dao.transferFrom`, which
+        // isn't a registered callback → the fallback reverts `UnknownCallback`
+        // (bubbled through SafeERC20) BEFORE any return-value decode.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CallbackHandler.UnknownCallback.selector,
+                bytes4(0x23b872dd), // IERC20.transferFrom.selector
+                bytes4(0) // UNREGISTERED_CALLBACK magic
+            )
+        );
         dao.deposit(address(dao), 1, "self");
     }
 }

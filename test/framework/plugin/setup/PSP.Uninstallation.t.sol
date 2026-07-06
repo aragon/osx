@@ -6,6 +6,7 @@ import {Vm} from "forge-std/Test.sol";
 
 import {PSPBaseTest} from "./PSP.Base.sol";
 import {PluginSetupProcessor} from "../../../../src/framework/plugin/setup/PluginSetupProcessor.sol";
+import {PermissionManager} from "../../../../src/core/permission/PermissionManager.sol";
 import {
     PluginSetupRef,
     hashHelpers,
@@ -68,7 +69,7 @@ contract PSPPrepareUninstallationTest is PSPUninstallationFixture {
         address[] memory helpers = new address[](2);
         helpers[0] = address(0);
         helpers[1] = address(1);
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.InvalidAppliedSetupId.selector);
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, makeAddr("fake"), helpers));
     }
 
@@ -77,14 +78,14 @@ contract PSPPrepareUninstallationTest is PSPUninstallationFixture {
         // Tamper helpers — computed appliedSetupId mismatches stored.
         address[] memory wrong = new address[](1);
         wrong[0] = makeAddr("tampered");
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.InvalidAppliedSetupId.selector);
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, wrong));
     }
 
     function test_prepareUninstallation_revertsIfVersionTagWrong() public {
         (address plugin, address[] memory helpers) = _installV1();
         // Use V2's tag — appliedSetupId computed from V2 doesn't match stored V1.
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.InvalidAppliedSetupId.selector);
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(2, plugin, helpers));
     }
 
@@ -133,7 +134,7 @@ contract PSPPrepareUninstallationTest is PSPUninstallationFixture {
         (address plugin, address[] memory helpers) = _installV1();
 
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
-        vm.expectRevert(); // SetupAlreadyPrepared
+        vm.expectPartialRevert(PluginSetupProcessor.SetupAlreadyPrepared.selector); // hash is calldata-derived
         psp.prepareUninstallation(address(dao), _prepareUninstallParams(1, plugin, helpers));
     }
 
@@ -189,7 +190,7 @@ contract PSPApplyUninstallationTest is PSPUninstallationFixture {
         });
 
         _grantApplyUninstallation(owner);
-        vm.expectRevert(); // SetupNotApplicable
+        vm.expectPartialRevert(PluginSetupProcessor.SetupNotApplicable.selector);
         psp.applyUninstallation(address(dao), p);
     }
 
@@ -266,7 +267,7 @@ contract PSPApplyUninstallationTest is PSPUninstallationFixture {
         );
 
         // B is now inapplicable.
-        vm.expectRevert(); // SetupNotApplicable
+        vm.expectPartialRevert(PluginSetupProcessor.SetupNotApplicable.selector);
         psp.applyUninstallation(
             address(dao),
             PluginSetupProcessor.ApplyUninstallationParams({
@@ -321,7 +322,11 @@ contract PSPApplyUninstallationTest is PSPUninstallationFixture {
         (uint256 blockBefore, bytes32 appliedBefore) = psp.states(installationId);
         assertTrue(appliedBefore != bytes32(0), "fixture: install was applied");
 
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PermissionManager.Unauthorized.selector, address(dao), address(psp), ROOT_PERMISSION_ID
+            )
+        );
         psp.applyUninstallation(address(dao), p);
 
         // State unchanged — neither the block bump nor the zero-out landed.

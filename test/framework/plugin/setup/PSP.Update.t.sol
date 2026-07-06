@@ -70,13 +70,25 @@ contract PSPPrepareUpdateTest is PSPUpdateFixture {
 
         PluginSetupProcessor.PrepareUpdateParams memory p = _prepareUpdateParams(1, 2, plugin, helpers);
         p.newVersionTag = PluginRepo.Tag({release: 2, build: 1});
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PluginSetupProcessor.InvalidUpdateVersion.selector,
+                PluginRepo.Tag({release: 1, build: 1}),
+                PluginRepo.Tag({release: 2, build: 1})
+            )
+        );
         psp.prepareUpdate(address(dao), p);
     }
 
     function test_prepareUpdate_revertsIfNewBuildEqualsCurrent() public {
         (address plugin, address[] memory helpers) = _installV1();
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PluginSetupProcessor.InvalidUpdateVersion.selector,
+                PluginRepo.Tag({release: 1, build: 1}),
+                PluginRepo.Tag({release: 1, build: 1})
+            )
+        );
         psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 1, plugin, helpers));
     }
 
@@ -84,7 +96,13 @@ contract PSPPrepareUpdateTest is PSPUpdateFixture {
         (address plugin, address[] memory helpers) = _installV1();
         // Pretend we're updating FROM build 2 TO build 1.
         PluginSetupProcessor.PrepareUpdateParams memory p = _prepareUpdateParams(2, 1, plugin, helpers);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                PluginSetupProcessor.InvalidUpdateVersion.selector,
+                PluginRepo.Tag({release: 1, build: 2}),
+                PluginRepo.Tag({release: 1, build: 1})
+            )
+        );
         psp.prepareUpdate(address(dao), p);
     }
 
@@ -93,7 +111,7 @@ contract PSPPrepareUpdateTest is PSPUpdateFixture {
         address[] memory helpers = new address[](2);
         helpers[0] = address(0);
         helpers[1] = address(1);
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.InvalidAppliedSetupId.selector);
         psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 2, makeAddr("fake"), helpers));
     }
 
@@ -101,14 +119,14 @@ contract PSPPrepareUpdateTest is PSPUpdateFixture {
         (address plugin,) = _installV1();
         address[] memory wrong = new address[](1);
         wrong[0] = makeAddr("tampered");
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.InvalidAppliedSetupId.selector);
         psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 2, plugin, wrong));
     }
 
     function test_prepareUpdate_revertsIfCurrentVersionTagWrong() public {
         (address plugin, address[] memory helpers) = _installV1();
         // Claim currentBuild == 2 when actual is 1 → appliedSetupId mismatches.
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.InvalidAppliedSetupId.selector);
         psp.prepareUpdate(address(dao), _prepareUpdateParams(2, 3, plugin, helpers));
     }
 
@@ -138,7 +156,7 @@ contract PSPPrepareUpdateTest is PSPUpdateFixture {
     function test_prepareUpdate_revertsIfSameSetupAlreadyPrepared() public {
         (address plugin, address[] memory helpers) = _installV1();
         psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 2, plugin, helpers));
-        vm.expectRevert();
+        vm.expectPartialRevert(PluginSetupProcessor.SetupAlreadyPrepared.selector);
         psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 2, plugin, helpers));
     }
 
@@ -204,7 +222,7 @@ contract PSPApplyUpdateTest is PSPUpdateFixture {
         PluginSetupProcessor.ApplyUpdateParams memory p = PluginSetupProcessor.ApplyUpdateParams({
             plugin: plugin, pluginSetupRef: _ref(2), initData: "", permissions: perms, helpersHash: hashHelpers(helpers)
         });
-        vm.expectRevert(); // SetupNotApplicable
+        vm.expectPartialRevert(PluginSetupProcessor.SetupNotApplicable.selector);
         psp.applyUpdate(address(dao), p);
     }
 
@@ -277,7 +295,7 @@ contract PSPApplyUpdateTest is PSPUpdateFixture {
         );
 
         // B is now inapplicable — its prepared block predates A's applied bump.
-        vm.expectRevert(); // SetupNotApplicable
+        vm.expectPartialRevert(PluginSetupProcessor.SetupNotApplicable.selector);
         psp.applyUpdate(
             address(dao),
             PluginSetupProcessor.ApplyUpdateParams({
@@ -409,7 +427,9 @@ contract PSPApplyUpdateTest is PSPUpdateFixture {
             setupPayload: IPluginSetup.SetupPayload({plugin: cPlugin, currentHelpers: cData.helpers, data: ""})
         });
 
-        vm.expectRevert(); // PluginNonupgradeable or IPluginNotSupported
+        // A cloneable plugin DOES support IPlugin, so only PluginNonupgradeable
+        // is reachable (its pluginType() != UUPS).
+        vm.expectRevert(abi.encodeWithSelector(PluginSetupProcessor.PluginNonupgradeable.selector, cPlugin));
         psp.prepareUpdate(address(dao), p);
     }
 }

@@ -343,7 +343,15 @@ contract ENSSubdomainRegistrarTest is Test {
         managingDao.setHasPermissionReturnValueMock(false);
 
         ENSSubdomainRegistrar nextImpl = new ENSSubdomainRegistrar();
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DaoUnauthorized.selector,
+                address(managingDao),
+                address(registrar),
+                alice,
+                registrar.UPGRADE_REGISTRAR_PERMISSION_ID()
+            )
+        );
         vm.prank(alice);
         registrar.upgradeTo(address(nextImpl));
     }

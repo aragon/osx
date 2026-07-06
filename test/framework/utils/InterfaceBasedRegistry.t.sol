@@ -173,7 +173,15 @@ contract InterfaceBasedRegistryTest is Test {
         daoMock.setHasPermissionReturnValueMock(false);
 
         InterfaceBasedRegistryMock nextImpl = new InterfaceBasedRegistryMock();
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DaoUnauthorized.selector,
+                address(daoMock),
+                address(registry),
+                alice,
+                registry.UPGRADE_REGISTRY_PERMISSION_ID()
+            )
+        );
         vm.prank(alice);
         registry.upgradeTo(address(nextImpl));
     }
