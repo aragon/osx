@@ -229,13 +229,13 @@ contract DAORegistryTest is Test {
     /// Only the proxy created via `ERC1967Proxy` can be initialized.
     function test_impl_cannotBeInitializedDirectly() public {
         DAORegistry impl = new DAORegistry();
-        vm.expectRevert(); // Initializable: contract is already initialized
+        vm.expectRevert("Initializable: contract is already initialized");
         impl.initialize(IDAO(address(managingDao)), subdomainRegistrar);
     }
 
     /// Second call to `initialize` on an already-initialized proxy reverts.
     function test_initialize_revertsIfCalledTwice() public {
-        vm.expectRevert(); // Initializable: contract is already initialized
+        vm.expectRevert("Initializable: contract is already initialized");
         daoRegistry.initialize(IDAO(address(managingDao)), subdomainRegistrar);
     }
 

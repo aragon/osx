@@ -503,7 +503,7 @@ contract DAODepositTest is DAOTestBase {
     function test_deposit_revertsIfSenderLacksERC20Balance() public {
         ERC20Mock token = new ERC20Mock("Token", "TKN");
         token.approve(address(dao), 100 ether);
-        vm.expectRevert(); // OZ ERC20: transfer amount exceeds balance
+        vm.expectRevert("ERC20: transfer amount exceeds balance");
         dao.deposit(address(token), 1, "ref");
     }
 
@@ -511,7 +511,7 @@ contract DAODepositTest is DAOTestBase {
         ERC20Mock token = new ERC20Mock("Token", "TKN");
         token.setBalance(address(this), 100 ether);
         // No approval given to the DAO → safeTransferFrom reverts.
-        vm.expectRevert();
+        vm.expectRevert("ERC20: insufficient allowance");
         dao.deposit(address(token), 1, "ref");
     }
 
@@ -871,7 +871,8 @@ contract DAOInitializeEdgeTest is DAOTestBase {
     /// because the impl's constructor called `_disableInitializers()`.
     function test_initialize_revertsOnImplDirectly() public {
         DAO impl = new DAO();
-        vm.expectRevert(); // Initializable: contract is initialized
+        // DAO's `onlyCallAtInitialization` reverts before the OZ Initializable guard.
+        vm.expectRevert(DAO.AlreadyInitialized.selector);
         impl.initialize(METADATA, owner, trustedForwarder, DAO_URI);
     }
 

@@ -147,7 +147,7 @@ contract InterfaceBasedRegistryTest is Test {
 
     /// Second call to `initialize` on an already-initialized proxy reverts.
     function test_initialize_revertsIfCalledTwice() public {
-        vm.expectRevert(); // Initializable: contract is already initialized
+        vm.expectRevert("Initializable: contract is already initialized");
         registry.initialize(IDAO(address(daoMock)), type(IDAO).interfaceId);
     }
 

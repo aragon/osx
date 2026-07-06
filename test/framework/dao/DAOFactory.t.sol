@@ -373,7 +373,8 @@ contract DAOFactoryTest is Test {
     /// proxies the factory creates can be initialized.
     function test_daoBase_cannotBeInitializedDirectly() public {
         DAO base = DAO(payable(daoFactory.daoBase()));
-        vm.expectRevert(); // Initializable: contract is already initialized
+        // `base` is a DAO — its `onlyCallAtInitialization` reverts before the OZ guard.
+        vm.expectRevert(DAO.AlreadyInitialized.selector);
         base.initialize(DUMMY_METADATA, address(this), address(0), DAO_URI);
     }
 

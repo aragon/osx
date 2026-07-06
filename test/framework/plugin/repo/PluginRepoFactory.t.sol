@@ -264,7 +264,7 @@ contract PluginRepoFactoryTest is Test {
     /// initialized.
     function test_pluginRepoBase_cannotBeInitializedDirectly() public {
         PluginRepo base = PluginRepo(factory.pluginRepoBase());
-        vm.expectRevert(); // Initializable: contract is already initialized
+        vm.expectRevert("Initializable: contract is already initialized");
         base.initialize(owner);
     }
 
