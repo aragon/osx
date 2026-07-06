@@ -304,4 +304,41 @@ contract PluginRepoRegistryTest is Test {
         assertTrue(noEnsRegistry.entries(address(repo)));
     }
 
+    // -------------------------------------------------------------------------
+    // _authorizeUpgrade — UPGRADE_REGISTRY permission gate
+    // -------------------------------------------------------------------------
+    // PluginRepoRegistry is a live, managing-DAO-controlled UUPS proxy. The
+    // upgrade hook lives in InterfaceBasedRegistry
+    // (`auth(UPGRADE_REGISTRY_PERMISSION_ID)`), exercised here on the concrete
+    // registry.
+
+    /// A caller without `UPGRADE_REGISTRY_PERMISSION_ID` cannot upgrade — the
+    /// `auth` modifier routes through the managing DAO and reverts.
+    function test_authorizeUpgrade_revertsWithoutPermission() public {
+        managingDao.setHasPermissionReturnValueMock(false);
+
+        PluginRepoRegistry nextImpl = new PluginRepoRegistry();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DaoUnauthorized.selector,
+                address(managingDao),
+                address(pluginRepoRegistry),
+                alice,
+                pluginRepoRegistry.UPGRADE_REGISTRY_PERMISSION_ID()
+            )
+        );
+        vm.prank(alice);
+        pluginRepoRegistry.upgradeTo(address(nextImpl));
+    }
+
+    /// With the permission held (mock returns true), the upgrade lands and the
+    /// ERC-1967 implementation slot points at the new implementation.
+    function test_authorizeUpgrade_succeedsWithPermission() public {
+        PluginRepoRegistry nextImpl = new PluginRepoRegistry();
+        pluginRepoRegistry.upgradeTo(address(nextImpl));
+
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(pluginRepoRegistry), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), address(nextImpl), "implementation slot updated");
+    }
 }

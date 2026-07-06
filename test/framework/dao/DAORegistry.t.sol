@@ -286,4 +286,41 @@ contract DAORegistryTest is Test {
         bytes32 raw = vm.load(address(daoRegistry), sentinel);
         assertEq(uint256(raw), 0, "gap slot 250 should be unused");
     }
+
+    // -------------------------------------------------------------------------
+    // _authorizeUpgrade — UPGRADE_REGISTRY permission gate
+    // -------------------------------------------------------------------------
+    // DAORegistry is a live, managing-DAO-controlled UUPS proxy. The upgrade
+    // hook lives in InterfaceBasedRegistry (`auth(UPGRADE_REGISTRY_PERMISSION_ID)`),
+    // so the gate is exercised here on the concrete registry.
+
+    /// A caller without `UPGRADE_REGISTRY_PERMISSION_ID` cannot upgrade — the
+    /// `auth` modifier routes through the managing DAO and reverts.
+    function test_authorizeUpgrade_revertsWithoutPermission() public {
+        managingDao.setHasPermissionReturnValueMock(false);
+
+        DAORegistry nextImpl = new DAORegistry();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DaoUnauthorized.selector,
+                address(managingDao),
+                address(daoRegistry),
+                alice,
+                daoRegistry.UPGRADE_REGISTRY_PERMISSION_ID()
+            )
+        );
+        vm.prank(alice);
+        daoRegistry.upgradeTo(address(nextImpl));
+    }
+
+    /// With the permission held (mock returns true), the upgrade lands and the
+    /// ERC-1967 implementation slot points at the new implementation.
+    function test_authorizeUpgrade_succeedsWithPermission() public {
+        DAORegistry nextImpl = new DAORegistry();
+        daoRegistry.upgradeTo(address(nextImpl));
+
+        bytes32 IMPL_SLOT = bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
+        bytes32 raw = vm.load(address(daoRegistry), IMPL_SLOT);
+        assertEq(address(uint160(uint256(raw))), address(nextImpl), "implementation slot updated");
+    }
 }
