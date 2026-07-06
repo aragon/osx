@@ -13,6 +13,7 @@ import {
 import {PluginRepo} from "../../../../src/framework/plugin/repo/PluginRepo.sol";
 import {IPluginSetup} from "@aragon/osx-commons-contracts/src/plugin/setup/IPluginSetup.sol";
 import {PluginUUPSUpgradeable} from "@aragon/osx-commons-contracts/src/plugin/PluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeableV3Mock} from "../../../mocks/plugin/UUPSUpgradeable/PluginUUPSUpgradeableMock.sol";
 
 /// @notice End-to-end install-and-update scenarios mirroring the TS
 /// `Update scenarios` describe block. Each scenario:
@@ -101,6 +102,27 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
         bytes32 id = _getPluginInstallationId(address(dao), plugin);
         (, bytes32 currentAppliedId) = psp.states(id);
         assertEq(currentAppliedId, _expectedAppliedId(expectedBuild, expectedHelpers), "appliedSetupId");
+
+        // Re-init actually ran: the plugin's public state. These values are
+        // cumulative and determined by the FINAL build (they hold on every
+        // path to that build), so they can be keyed on the build directly.
+        if (expectedBuild >= 2) {
+            assertEq(PluginUUPSUpgradeableV3Mock(plugin).state2(), 2, "state2 re-init ran");
+        }
+        if (expectedBuild >= 3) {
+            assertEq(PluginUUPSUpgradeableV3Mock(plugin).state3(), 3, "state3 re-init ran");
+        }
+    }
+
+    /// The permissions an update grants are PATH-specific (each hop grants a
+    /// different index), so — unlike the state above — this is asserted per hop
+    /// at the call site, NOT keyed on the final build. `mockPermissions` grants
+    /// `MOCK_PERMISSION` with `where == who == address(idx)`.
+    function _assertGranted(uint160 idx) internal view {
+        assertTrue(
+            dao.hasPermission(address(idx), address(idx), keccak256("MOCK_PERMISSION"), ""),
+            "expected update permission not granted"
+        );
     }
 
     // V1 installed --------------------------------------------------------
@@ -108,12 +130,16 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
     function test_v1Install_pointsToV1Implementation() public {
         (address plugin, address[] memory helpers) = _installBuild(1);
         _assertState(plugin, 1, helpers);
+        // V1 install grants address(0) + address(1).
+        _assertGranted(0);
+        _assertGranted(1);
     }
 
     function test_v1ThenV2_endsAtV2() public {
         (address plugin, address[] memory h1) = _installBuild(1);
         address[] memory h2 = _update(1, 2, plugin, h1);
         _assertState(plugin, 2, h2);
+        _assertGranted(1); // 1→2 grants address(1)
     }
 
     function test_v1ThenV2ThenV3_endsAtV3() public {
@@ -121,12 +147,17 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
         address[] memory h2 = _update(1, 2, plugin, h1);
         address[] memory h3 = _update(2, 3, plugin, h2);
         _assertState(plugin, 3, h3);
+        _assertGranted(1); // 1→2 grants address(1)
+        _assertGranted(2); // 2→3 grants address(2)
     }
 
     function test_v1ThenV3_skipsBuild2() public {
         (address plugin, address[] memory h1) = _installBuild(1);
         address[] memory h3 = _update(1, 3, plugin, h1);
         _assertState(plugin, 3, h3);
+        // 1→3 grants BOTH address(1) and address(2) in one hop.
+        _assertGranted(1);
+        _assertGranted(2);
     }
 
     function test_v1ThenV2ThenV4_endsAtV4SharingV3Impl() public {
@@ -145,6 +176,11 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
         assertEq(implAfter, _expectedImpl(3));
 
         _assertState(plugin, 4, h4);
+        // This path reaches build 4 via a 2→4 hop, which grants address(1)
+        // (from 1→2) + address(4) (from 2→4) — NOT address(2)/address(3). This
+        // is exactly why the permission checks can't be keyed on the final build.
+        _assertGranted(1);
+        _assertGranted(4);
     }
 
     // V2 installed --------------------------------------------------------
@@ -152,12 +188,16 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
     function test_v2Install_pointsToV2Implementation() public {
         (address plugin, address[] memory helpers) = _installBuild(2);
         _assertState(plugin, 2, helpers);
+        // V2 install grants address(0) + address(1).
+        _assertGranted(0);
+        _assertGranted(1);
     }
 
     function test_v2ThenV3_endsAtV3() public {
         (address plugin, address[] memory h2) = _installBuild(2);
         address[] memory h3 = _update(2, 3, plugin, h2);
         _assertState(plugin, 3, h3);
+        _assertGranted(2); // 2→3 grants address(2)
     }
 
     // V3 installed --------------------------------------------------------
@@ -165,6 +205,10 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
     function test_v3Install_pointsToV3Implementation() public {
         (address plugin, address[] memory helpers) = _installBuild(3);
         _assertState(plugin, 3, helpers);
+        // V3 install grants address(0) + address(1) + address(2).
+        _assertGranted(0);
+        _assertGranted(1);
+        _assertGranted(2);
     }
 
     function test_v3ThenV4_implementationStaysAtV3Address() public {
@@ -179,7 +223,9 @@ contract PSPUpdateScenariosTest is PSPBaseTest {
         bytes32 implAfter = vm.load(plugin, bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1));
         assertEq(implBefore, implAfter, "F11: impl slot must not change when currentImpl == newImpl");
 
-        // appliedSetupId tracks the new build.
+        // appliedSetupId tracks the new build; state3 (set at V3 install) is
+        // unchanged since V3→V4 carries no init data (`_assertState` checks it).
         _assertState(plugin, 4, h4);
+        _assertGranted(3); // 3→4 grants address(3)
     }
 }
