@@ -244,6 +244,52 @@ contract PSPApplyUpdateTest is PSPUpdateFixture {
         assertEq(currentAppliedId, expectedAppliedId);
     }
 
+    /// Twin of `PSP.Uninstallation.t.sol::test_applyUninstallation_otherPendingPrepsBecomeInapplicable`:
+    /// two distinct update preparations for the same plugin, applying one bumps
+    /// `pluginState.blockNumber`, invalidating the other (its `preparedBlock` is
+    /// now stale) → `SetupNotApplicable`.
+    function test_applyUpdate_otherPendingPrepsBecomeInapplicable() public {
+        (address plugin, address[] memory helpers) = _installV1();
+
+        // Prep A: default permission range → setup id A.
+        setupV2.mockPermissionIndexes(1, 2);
+        (bytes memory initA, IPluginSetup.PreparedSetupData memory dataA) =
+            psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 2, plugin, helpers));
+
+        // Prep B: different permission range → distinct setup id B.
+        setupV2.mockPermissionIndexes(3, 4);
+        (bytes memory initB, IPluginSetup.PreparedSetupData memory dataB) =
+            psp.prepareUpdate(address(dao), _prepareUpdateParams(1, 2, plugin, helpers));
+
+        _grantApplyUpdate(owner);
+        _grantPspRoot();
+
+        // Apply A.
+        psp.applyUpdate(
+            address(dao),
+            PluginSetupProcessor.ApplyUpdateParams({
+                plugin: plugin,
+                pluginSetupRef: _ref(2),
+                initData: initA,
+                permissions: dataA.permissions,
+                helpersHash: hashHelpers(dataA.helpers)
+            })
+        );
+
+        // B is now inapplicable — its prepared block predates A's applied bump.
+        vm.expectRevert(); // SetupNotApplicable
+        psp.applyUpdate(
+            address(dao),
+            PluginSetupProcessor.ApplyUpdateParams({
+                plugin: plugin,
+                pluginSetupRef: _ref(2),
+                initData: initB,
+                permissions: dataB.permissions,
+                helpersHash: hashHelpers(dataB.helpers)
+            })
+        );
+    }
+
     /// V2's prepareUpdate returns `_mockHelpers(2)` — same length as V1's helpers
     /// (both 2 entries: address(0), address(1)).
     function _helpersV2() internal pure returns (address[] memory h) {

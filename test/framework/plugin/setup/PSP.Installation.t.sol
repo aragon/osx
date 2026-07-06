@@ -122,6 +122,25 @@ contract PSPPrepareInstallationTest is PSPBaseTest {
         assertTrue(found, "InstallationPrepared not emitted");
     }
 
+    /// Preparing an installation for a plugin that is already installed reverts.
+    /// Build 5 (Bad) returns a fixed plugin address, so re-preparing after an
+    /// apply lands in the SAME installation slot (non-zero `currentAppliedSetupId`).
+    function test_prepareInstallation_revertsIfPluginAlreadyInstalled() public {
+        (address plugin, IPluginSetup.PreparedSetupData memory data) =
+            psp.prepareInstallation(address(dao), _prepareInstallParams(5, ""));
+        _grantApplyInstallation(owner);
+        _grantPspRoot();
+        psp.applyInstallation(
+            address(dao),
+            PluginSetupProcessor.ApplyInstallationParams({
+                pluginSetupRef: _ref(5), plugin: plugin, permissions: data.permissions, helpersHash: hashHelpers(data.helpers)
+            })
+        );
+
+        vm.expectRevert(PluginSetupProcessor.PluginAlreadyInstalled.selector);
+        psp.prepareInstallation(address(dao), _prepareInstallParams(5, ""));
+    }
+
     function test_prepareInstallation_revertsIfSamePrepIdPending() public {
         // The V1 mock deploys a NEW proxy each call (different `plugin` →
         // different installationId), so re-using V1 lands in a fresh state
@@ -206,6 +225,24 @@ contract PSPApplyInstallationTest is PSPBaseTest {
         bytes32 expectedAppliedId = _getAppliedSetupId(_ref(1), p.helpersHash);
         assertEq(blockNum, block.number);
         assertEq(currentAppliedId, expectedAppliedId);
+    }
+
+    /// Applying an installation for an already-installed plugin reverts. The
+    /// `currentAppliedSetupId != 0` guard is checked BEFORE `validatePreparedSetupId`,
+    /// so re-applying the same params surfaces `PluginAlreadyInstalled` (not
+    /// `SetupNotApplicable`). Build 5 (Bad) gives the fixed plugin address needed.
+    function test_applyInstallation_revertsIfPluginAlreadyInstalled() public {
+        (address plugin, IPluginSetup.PreparedSetupData memory data) =
+            psp.prepareInstallation(address(dao), _prepareInstallParams(5, ""));
+        PluginSetupProcessor.ApplyInstallationParams memory p = PluginSetupProcessor.ApplyInstallationParams({
+            pluginSetupRef: _ref(5), plugin: plugin, permissions: data.permissions, helpersHash: hashHelpers(data.helpers)
+        });
+        _grantApplyInstallation(owner);
+        _grantPspRoot();
+        psp.applyInstallation(address(dao), p);
+
+        vm.expectRevert(PluginSetupProcessor.PluginAlreadyInstalled.selector);
+        psp.applyInstallation(address(dao), p);
     }
 
     /// **F32 closer**: `msg.sender == _dao` bypasses APPLY_INSTALLATION_PERMISSION.
@@ -430,6 +467,13 @@ contract PSPInstallationEdgeTest is PSPBaseTest {
 contract PSPConstructorAndConstantsTest is PSPBaseTest {
     function test_constructor_storesRepoRegistry() public view {
         assertEq(address(psp.repoRegistry()), address(pluginRepoRegistry));
+    }
+
+    function test_protocolVersion_returnsCurrent() public view {
+        uint8[3] memory v = psp.protocolVersion();
+        assertEq(v[0], 1);
+        assertEq(v[1], 4);
+        assertEq(v[2], 0);
     }
 
     function test_permissionId_applyInstallationMatchesKeccak() public view {

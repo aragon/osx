@@ -150,6 +150,53 @@ contract DAOInitializeTest is DAOTestBase {
     }
 }
 
+/// @notice `initializeFrom` (the post-upgrade reinitializer). The live v1.3→v1.4
+/// path can't reach its body (F9: v1.3.0 already set `_initialized == 3`), so we
+/// exercise it directly on a fresh proxy: deployed WITHOUT `initialize`,
+/// `_initialized == 0 < 3`, so `reinitializer(3)` runs. Covers the major-version
+/// gate and the version-conditional side effects.
+contract DAOInitializeFromTest is DAOTestBase {
+    /// A proxy pointing at a DAO impl but never `initialize`d (`_initialized == 0`).
+    function _freshProxy() internal returns (DAO) {
+        DAO impl = new DAO();
+        return DAO(payable(address(new ERC1967Proxy(address(impl), ""))));
+    }
+
+    /// Upgrading across a major release is rejected.
+    function test_initializeFrom_revertsIfMajorVersionNotOne() public {
+        DAO d = _freshProxy();
+        uint8[3] memory prev = [uint8(2), 0, 0];
+        vm.expectRevert(abi.encodeWithSelector(DAO.ProtocolVersionUpgradeNotSupported.selector, prev));
+        d.initializeFrom(prev, "");
+    }
+
+    /// From a pre-1.3.0 source, the body arms the reentrancy guard and registers
+    /// the interfaces added in v1.3.0 (`IProtocolVersion`) and v1.4.0 (`IDAO`,
+    /// `IExecutor`), and bumps the OZ initialized slot to 3.
+    function test_initializeFrom_fromPre130_initsReentrancyGuardAndInterfaces() public {
+        DAO d = _freshProxy();
+        d.initializeFrom([uint8(1), 0, 0], "");
+
+        assertEq(uint8(uint256(vm.load(address(d), bytes32(uint256(0))))), 3, "_initialized == 3");
+        assertEq(uint256(vm.load(address(d), bytes32(uint256(304)))), 1, "_reentrancyStatus == _NOT_ENTERED");
+        assertTrue(d.supportsInterface(type(IProtocolVersion).interfaceId), "IProtocolVersion registered");
+        assertTrue(d.supportsInterface(type(IDAO).interfaceId), "IDAO registered");
+        assertTrue(d.supportsInterface(type(IExecutor).interfaceId), "IExecutor registered");
+    }
+
+    /// Boundary check: `[1,3,0]` is NOT `lt [1,3,0]`, so the reentrancy /
+    /// `IProtocolVersion` branch is skipped — proving the version gate is strict.
+    function test_initializeFrom_from130_skipsReentrancyBranch() public {
+        DAO d = _freshProxy();
+        d.initializeFrom([uint8(1), 3, 0], "");
+
+        assertEq(uint256(vm.load(address(d), bytes32(uint256(304)))), 0, "reentrancy branch skipped");
+        assertFalse(d.supportsInterface(type(IProtocolVersion).interfaceId), "IProtocolVersion NOT registered");
+        // The `< [1,4,0]` branch still ran.
+        assertTrue(d.supportsInterface(type(IDAO).interfaceId), "IDAO registered");
+    }
+}
+
 /// @notice setTrustedForwarder + setMetadata.
 contract DAOMetadataTest is DAOTestBase {
     function test_setTrustedForwarder_revertsIfCallerLacksPermission() public {
