@@ -26,6 +26,9 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
+          # Full history so the pinned v1.0.0 / v1.3.0 commits resolve for the
+          # upgrade-regression worktrees below.
+          fetch-depth: 0
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -45,3 +48,14 @@ jobs:
 
       - name: Run Forge tests
         run: forge test -vvv --no-match-path '**/fork/**'
+
+      # The upgrade-regression suite lives in a separate dir (test-upgrade/) run
+      # under the `upgrade` profile, against historical source pinned as git
+      # worktrees. Mirrors `just test-upgrade-setup` without needing `just`.
+      - name: Set up historical worktrees
+        run: |
+          git worktree add lib/osx-v1.0.0 c2b9d23a96654e81f22fbf91e6f334ef26a370af
+          git worktree add lib/osx-v1.3.0 6f35a85f6159ae62c68776c5cff57d4e8cfe1549
+
+      - name: Run upgrade-regression tests
+        run: FOUNDRY_PROFILE=upgrade forge test -vvv

@@ -171,6 +171,16 @@ forge test --gas-report    # include gas usage per test
 
 Fork tests live under `test/fork/` and run against a real RPC; standard CI excludes them. Run them locally with the appropriate RPC URL set.
 
+### DAO upgrade tests (v1.0.0 → v1.3.0 → v1.4.0)
+
+Historic-source upgrade tests live under `test-upgrade/` and run under an opt-in Foundry profile. They depend on two git worktrees of this repository pinned at the historic `v1.0.0` and `v1.3.0` commits — created on demand, no network clone required.
+
+```bash
+just test-upgrade          # auto-runs test-upgrade-setup on first invocation
+```
+
+The setup is idempotent: re-running `just test-upgrade-setup` is a no-op if the worktrees already exist. To remove them, `git worktree remove lib/osx-v1.0.0` and `git worktree remove lib/osx-v1.3.0`.
+
 See the [Foundry book](https://book.getfoundry.sh/forge/tests) for advanced options.
 
 ## Deployment

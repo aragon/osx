@@ -108,6 +108,7 @@
 :xref-PluginRepo-buildCount-uint8-: xref:framework.adoc#PluginRepo-buildCount-uint8-
 :xref-PluginRepo-tagHash-struct-PluginRepo-Tag-: xref:framework.adoc#PluginRepo-tagHash-struct-PluginRepo-Tag-
 :xref-PluginRepo-_authorizeUpgrade-address-: xref:framework.adoc#PluginRepo-_authorizeUpgrade-address-
+:xref-PluginRepo-isPermissionRestrictedForAnyAddr-bytes32-: xref:framework.adoc#PluginRepo-isPermissionRestrictedForAnyAddr-bytes32-
 :xref-PluginRepo-supportsInterface-bytes4-: xref:framework.adoc#PluginRepo-supportsInterface-bytes4-
 :xref-PermissionManager-__PermissionManager_init-address-: xref:framework.adoc#PermissionManager-__PermissionManager_init-address-
 :xref-PermissionManager-grant-address-address-bytes32-: xref:framework.adoc#PermissionManager-grant-address-address-bytes32-
@@ -123,7 +124,6 @@
 :xref-PermissionManager-_revoke-address-address-bytes32-: xref:framework.adoc#PermissionManager-_revoke-address-address-bytes32-
 :xref-PermissionManager-_auth-bytes32-: xref:framework.adoc#PermissionManager-_auth-bytes32-
 :xref-PermissionManager-permissionHash-address-address-bytes32-: xref:framework.adoc#PermissionManager-permissionHash-address-address-bytes32-
-:xref-PermissionManager-isPermissionRestrictedForAnyAddr-bytes32-: xref:framework.adoc#PermissionManager-isPermissionRestrictedForAnyAddr-bytes32-
 :xref-PluginRepo-MAINTAINER_PERMISSION_ID-bytes32: xref:framework.adoc#PluginRepo-MAINTAINER_PERMISSION_ID-bytes32
 :xref-PluginRepo-UPGRADE_REPO_PERMISSION_ID-bytes32: xref:framework.adoc#PluginRepo-UPGRADE_REPO_PERMISSION_ID-bytes32
 :xref-PluginRepo-buildsPerRelease-mapping-uint8----uint16-: xref:framework.adoc#PluginRepo-buildsPerRelease-mapping-uint8----uint16-
@@ -1079,6 +1079,7 @@ The plugin repository contract required for managing and publishing different pl
 * {xref-PluginRepo-buildCount-uint8-}[`++buildCount(_release)++`]
 * {xref-PluginRepo-tagHash-struct-PluginRepo-Tag-}[`++tagHash(_tag)++`]
 * {xref-PluginRepo-_authorizeUpgrade-address-}[`++_authorizeUpgrade()++`]
+* {xref-PluginRepo-isPermissionRestrictedForAnyAddr-bytes32-}[`++isPermissionRestrictedForAnyAddr(_permissionId)++`]
 * {xref-PluginRepo-supportsInterface-bytes4-}[`++supportsInterface(_interfaceId)++`]
 
 [.contract-subindex-inherited]
@@ -1097,7 +1098,6 @@ The plugin repository contract required for managing and publishing different pl
 * {xref-PermissionManager-_revoke-address-address-bytes32-}[`++_revoke(_where, _who, _permissionId)++`]
 * {xref-PermissionManager-_auth-bytes32-}[`++_auth(_permissionId)++`]
 * {xref-PermissionManager-permissionHash-address-address-bytes32-}[`++permissionHash(_where, _who, _permissionId)++`]
-* {xref-PermissionManager-isPermissionRestrictedForAnyAddr-bytes32-}[`++isPermissionRestrictedForAnyAddr(_permissionId)++`]
 
 [.contract-subindex-inherited]
 .ProtocolVersion
@@ -1377,6 +1377,10 @@ Gets the total number of builds for a given release number.
 [.contract-item]
 [[PluginRepo-_authorizeUpgrade-address-]]
 ==== `[.contract-item-name]#++_authorizeUpgrade++#++(address)++` [.item-kind]#internal#
+
+[.contract-item]
+[[PluginRepo-isPermissionRestrictedForAnyAddr-bytes32-]]
+==== `[.contract-item-name]#++isPermissionRestrictedForAnyAddr++#++(bytes32 _permissionId) → bool++` [.item-kind]#internal#
 
 [.contract-item]
 [[PluginRepo-supportsInterface-bytes4-]]

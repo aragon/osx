@@ -13,3 +13,9 @@ fs_permissions = [{ access = "write", path = "./deployments" }]
 
 [profile.ci]
 fuzz = { runs = 512 }
+
+# Opt-in profile for the DAO upgrade test (v1.0.0 → v1.3.0 → v1.4.0).
+# Historic sources are git worktrees at `lib/osx-v{1.0.0,1.3.0}`; run
+# `just test-upgrade-setup` once to create them
+[profile.upgrade]
+test = "test-upgrade"

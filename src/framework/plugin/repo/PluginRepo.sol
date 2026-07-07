@@ -262,6 +262,17 @@ contract PluginRepo is
         address
     ) internal virtual override auth(UPGRADE_REPO_PERMISSION_ID) {}
 
+    /// @inheritdoc PermissionManager
+    /// @dev Mirrors DAO.sol — block ANY_ADDR grants for permissions whose
+    /// compromise propagates to every consumer DAO of this repo.
+    function isPermissionRestrictedForAnyAddr(
+        bytes32 _permissionId
+    ) internal pure override returns (bool) {
+        return
+            _permissionId == MAINTAINER_PERMISSION_ID ||
+            _permissionId == UPGRADE_REPO_PERMISSION_ID;
+    }
+
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.

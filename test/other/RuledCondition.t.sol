@@ -116,10 +116,6 @@ contract RuledConditionEvalLogicTest is Test {
         harness.setRules(rules);
     }
 
-    // -------------------------------------------------------------------------
-    // C-1 regression
-    // -------------------------------------------------------------------------
-
     /// @notice With the args in the correct order, the predicate matches and
     /// the success branch fires. Sanity check that the rules are wired.
     function test_C1_IfElsePredicate_RoutesToSuccessOnMatch() public {
@@ -140,7 +136,7 @@ contract RuledConditionEvalLogicTest is Test {
         );
     }
 
-    /// @notice C-1: with `(_where, _who)` swapped at the call site, the
+    /// @notice Parameters swapped at the call site, the
     /// predicate must NOT match. Pre-fix, `_evalLogic` swaps them again
     /// internally (line 181) and the asymmetric predicate sees the original
     /// pair, returning true and routing to the success branch. Post-fix the
@@ -160,7 +156,7 @@ contract RuledConditionEvalLogicTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // C-1 propagation through an intermediate AND/OR layer in the predicate.
+    // Propagation through an intermediate AND/OR layer in the predicate.
     // AND/OR don't introduce their own swap, so the bug carries through.
     // -------------------------------------------------------------------------
 
@@ -224,7 +220,7 @@ contract RuledConditionEvalLogicTest is Test {
         _loadIfElseThroughAndRules();
         assertFalse(
             harness.isGranted(expectedWho, expectedWhere, PERM, bytes("")),
-            "C-1 (through AND): swapped args must not satisfy the asymmetric predicate"
+            "(through AND): swapped args must not satisfy the asymmetric predicate"
         );
     }
 

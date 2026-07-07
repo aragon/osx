@@ -10,6 +10,7 @@ logs/*
 # tooling
 node_modules
 .openzeppelin
+lib/osx-v*
 
 # testing
 coverage
