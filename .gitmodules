@@ -13,3 +13,12 @@
 [submodule "lib/just-foundry"]
 	path = lib/just-foundry
 	url = https://github.com/aragon/just-foundry
+[submodule "lib/chainlink-ccip"]
+	path = lib/chainlink-ccip
+	url = https://github.com/smartcontractkit/chainlink-ccip
+[submodule "lib/chainlink-local"]
+	path = lib/chainlink-local
+	url = https://github.com/smartcontractkit/chainlink-local
+[submodule "lib/chainlink-evm"]
+	path = lib/chainlink-evm
+	url = https://github.com/smartcontractkit/chainlink-evm
