@@ -13,11 +13,15 @@ library Errors {
     ///         "unset" marker of the `chainToAdapter` and chain-selector maps.
     error INVALID_CHAIN_ID();
 
-    /// @notice Thrown when only one of `localAdapter`/`remoteAdapter` is set.
-    ///         A lane is either fully configured or fully cleared.
+    /// @notice Thrown when a lane is only partially configured. A lane is
+    ///         either fully set (`localAdapter`, `remoteAdapter` and
+    ///         `bridgeChainId` all non-zero) or fully cleared.
     error INCOMPLETE_ADAPTER_CONFIG(uint256 chainId);
 
-    /// @notice Thrown when forwarding to a chain that has no adapter pair set.
+    /// @notice Thrown when forwarding to a chain whose lane is unset. Covers a
+    ///         missing local adapter, a missing remote adapter, and a missing
+    ///         bridge-native chain id (which would otherwise send to
+    ///         selector `0`).
     error ADAPTER_NOT_CONFIGURED(uint256 chainId);
 
     /// @notice Thrown when the configured local adapter has no deployed code.
@@ -41,6 +45,24 @@ library Errors {
     ///         than the `CrossChainController` that owns the adapter.
     error CALLER_NOT_CROSS_CHAIN_CONTROLLER(address caller);
 
+    /// @notice Thrown when the send path is executed outside a `delegatecall`
+    ///         from the owning `CrossChainController`, i.e. when
+    ///         `address(this) != CROSS_CHAIN_CONTROLLER`. Calling an adapter's
+    ///         `sendMessage` directly would use the adapter's own (empty)
+    ///         balance and make the bridge see the adapter as the sender, which
+    ///         the far side does not trust.
+    error SEND_PATH_NOT_DELEGATECALLED(address context);
+
+    /// @notice Thrown when a RECEIVE-path function — which legitimately reads
+    ///         the adapter's own storage — is reached in a foreign execution
+    ///         context, i.e. `address(this) != _selfAddress`.
+    /// @dev Mirror of `SEND_PATH_NOT_DELEGATECALLED`. The whole Option-1
+    ///      design rests on send and receive running in DIFFERENT contexts;
+    ///      this hard-blocks any future path that lets send-path context reach
+    ///      storage-reading receive code, which is precisely the class of bug
+    ///      the `delegatecall` mechanism could otherwise reintroduce.
+    error DELEGATE_CALL_FORBIDDEN(address context, address self);
+
     /// @notice Thrown when the internal self-call entry point is called
     ///         externally.
     error CALLER_NOT_SELF(address caller);
@@ -54,13 +76,21 @@ library Errors {
     error RECEIVER_ADDRESS_ZERO();
 
     /// @notice Thrown by the deployment-time consistency helper when the
-    ///         adapter's trusted remote does not match the controller's
-    ///         configured `remoteAdapter` for the same chain.
+    ///         adapter's trusted remote does not match the expected remote
+    ///         CONTROLLER address for that chain.
     error TRUSTED_REMOTE_MISMATCH(
         uint256 chainId,
         address trustedRemote,
-        address configuredRemoteAdapter
+        address expectedRemoteController
     );
+
+    /// @notice Thrown by the deployment-time consistency helper when the
+    ///         adapter's trusted remote equals the controller's configured
+    ///         `remoteAdapter` for the same chain. Under `delegatecall` the
+    ///         bridge sees the remote CONTROLLER as the sender, so trusting the
+    ///         remote ADAPTER is the canonical misconfiguration: every inbound
+    ///         message would be rejected.
+    error TRUSTED_REMOTE_IS_REMOTE_ADAPTER(uint256 chainId, address remote);
 
     // ---------------------------------------------------------------------
     // Chain id mapping
@@ -71,6 +101,16 @@ library Errors {
 
     /// @notice Thrown when a bridge-native chain id has no standard counterpart.
     error UNKNOWN_NATIVE_CHAIN_ID(uint256 nativeChainId);
+
+    /// @notice Thrown when the controller's send-side `bridgeChainId` for a
+    ///         chain disagrees with the adapter's receive-side chain-id map.
+    ///         The two live in different contracts by design (send config must
+    ///         be storage-free) and must be kept in sync.
+    error CHAIN_ID_DESYNC(
+        uint256 chainId,
+        uint64 controllerBridgeChainId,
+        uint64 adapterBridgeChainId
+    );
 
     // ---------------------------------------------------------------------
     // Fees
@@ -86,6 +126,10 @@ library Errors {
     );
 
     error NOT_ENOUGH_TO_PAY_BRIDGE();
+
+    /// @notice Thrown when the `delegatecall` into the local adapter's send
+    ///         path failed without returning a reason to bubble.
+    error MESSAGE_SEND_FAILED();
 
     /// @notice Thrown when native value is sent while an ERC20 fee token is
     ///         configured (the value would be stranded).
