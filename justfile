@@ -22,6 +22,21 @@ deploy-member-registry *args:
 predeploy-member-registry:
     just dry-run scripts/DeployMemberRegistry.s.sol:DeployMemberRegistry
 
+# Deploy a CrossChainController + CCIPAdapter pair to the currently active network.
+[group('deploy')]
+deploy-crosschain *args:
+    just run scripts/crosschain/DeployCrossChain.s.sol:DeployCrossChain {{ args }}
+
+# Dry-run the CrossChainController + CCIPAdapter deployment without broadcasting.
+[group('deploy')]
+predeploy-crosschain:
+    just dry-run scripts/crosschain/DeployCrossChain.s.sol:DeployCrossChain
+
+# Read-only wiring check of an already-deployed CrossChainController + CCIPAdapter pair (see CrossChainWiringCheck).
+[group('deploy')]
+verify-crosschain:
+    just dry-run scripts/crosschain/VerifyCrossChain.s.sol:VerifyCrossChain
+
 # Build Asciidoc documentation. Override `ref` for tagged-release re-runs (e.g. `just build-docs v1.4.0`).
 [group('documentation')]
 build-docs ref="main":

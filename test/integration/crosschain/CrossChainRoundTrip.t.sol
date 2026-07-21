@@ -13,6 +13,7 @@ import {CCIPAdapter} from "../../../src/common/crosschain/adapters/CCIP/CCIPAdap
 import {Errors} from "../../../src/common/crosschain/lib/Errors.sol";
 import {Client} from "@chainlink/contracts-ccip/contracts/libraries/Client.sol";
 
+import {CrossChainWiringCheck} from "../../../scripts/crosschain/CrossChainWiringCheck.sol";
 import {CCIPRelayRouterMock} from "../../mocks/commons/crosschain/CCIPRelayRouterMock.sol";
 import {CrossChainStackFixture} from "./CrossChainStackFixture.sol";
 
@@ -630,6 +631,59 @@ contract CrossChainRoundTripTest is CrossChainStackFixture {
 
         vm.expectRevert(abi.encodeWithSelector(Errors.MESSAGE_ALREADY_PENDING.selector, callId));
         _forgeDelivery(messageId, SELECTOR_A, address(a.controller), _cancelPayload(targetB));
+    }
+
+    // -------------------------------------------------------------------------
+    // The deployment verifier agrees with a wiring that demonstrably works
+    // -------------------------------------------------------------------------
+
+    /// @dev `CrossChainWiringCheck` is unit-tested against a permission mock in
+    ///      `CrossChainWiringCheck.t.sol`. Here it is pointed at the ONE wiring
+    ///      in this repository that is proven to carry a message end to end
+    ///      against real DAOs — which is what makes "0 failures" mean something.
+    function _wiringFailures(Stack memory _local, uint256 _remoteChainId, Stack memory _remote)
+        internal
+        view
+        returns (uint256 failures)
+    {
+        CrossChainWiringCheck.Expectation[] memory expectations = new CrossChainWiringCheck.Expectation[](1);
+        expectations[0] = CrossChainWiringCheck.Expectation({
+            chainId: _remoteChainId,
+            expectedRemoteController: address(_remote.controller),
+            expectedRemoteAdapter: address(_remote.adapter),
+            expectedSelector: _remoteChainId == CHAIN_A ? SELECTOR_A : SELECTOR_B
+        });
+
+        (, failures) = CrossChainWiringCheck.check(
+            address(_local.controller), address(_local.adapter), address(_local.dao), expectations, 1
+        );
+    }
+
+    function test_wiringCheck_passesOnTheWiringThatDemonstrablyWorks() public {
+        // First prove the wiring works, then prove the checker agrees.
+        _proposeAndForward(keccak256("proposal-verify"), CHAIN_B, _cancelPayload(targetB));
+        routerA.deliverNext();
+        assertEq(targetB.cancelCount(), 1, "the loop really closes");
+
+        assertEq(_wiringFailures(a, CHAIN_B, b), 0, "origin wiring clean");
+        assertEq(_wiringFailures(b, CHAIN_A, a), 0, "destination wiring clean");
+    }
+
+    function test_wiringCheck_catchesTheRevokedExecutePermission() public {
+        b.dao.revoke(address(b.dao), address(b.controller), EXECUTE_PERMISSION_ID);
+        assertEq(_wiringFailures(b, CHAIN_A, a), 1, "exactly the missing EXECUTE_PERMISSION");
+    }
+
+    function test_wiringCheck_catchesTheSwappedTrustedRemote() public {
+        _setTrustedRemote(b, CHAIN_A, address(a.adapter));
+        assertGt(_wiringFailures(b, CHAIN_A, a), 0, "the trusted-remote footgun is caught");
+    }
+
+    function test_wiringCheck_catchesAnUnfundedController() public {
+        vm.prank(address(a.dao));
+        a.controller.sweep(address(0), address(a.dao), address(a.controller).balance);
+
+        assertEq(_wiringFailures(a, CHAIN_B, b), 1, "exactly the empty fee balance");
     }
 
     // -------------------------------------------------------------------------
