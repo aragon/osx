@@ -37,6 +37,13 @@ predeploy-crosschain:
 verify-crosschain:
     just dry-run scripts/crosschain/VerifyCrossChain.s.sol:VerifyCrossChain
 
+# Run the cross-chain fork tests against the real CCIP Routers.
+# Requires MAINNET_RPC_URL (or RPC_URL); BASE_RPC_URL additionally enables the
+# destination half. Tests skip cleanly when a variable is unset.
+[group('test')]
+test-fork-crosschain *args:
+    forge test --match-path "test/integration/crosschain/fork/*" -vvv {{ args }}
+
 # Build Asciidoc documentation. Override `ref` for tagged-release re-runs (e.g. `just build-docs v1.4.0`).
 [group('documentation')]
 build-docs ref="main":
