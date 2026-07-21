@@ -58,7 +58,7 @@ abstract contract Addresslist {
 
     /// @notice Internal function to add new addresses to the address list.
     /// @param _newAddresses The new addresses to be added.
-    function _addAddresses(address[] calldata _newAddresses) internal virtual {
+    function _addAddresses(address[] memory _newAddresses) internal virtual {
         for (uint256 i; i < _newAddresses.length; ) {
             if (isListed(_newAddresses[i])) {
                 revert InvalidAddresslistUpdate(_newAddresses[i]);
@@ -76,7 +76,7 @@ abstract contract Addresslist {
 
     /// @notice Internal function to remove existing addresses from the address list.
     /// @param _exitingAddresses The existing addresses to be removed.
-    function _removeAddresses(address[] calldata _exitingAddresses) internal virtual {
+    function _removeAddresses(address[] memory _exitingAddresses) internal virtual {
         for (uint256 i; i < _exitingAddresses.length; ) {
             if (!isListed(_exitingAddresses[i])) {
                 revert InvalidAddresslistUpdate(_exitingAddresses[i]);
