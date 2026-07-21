@@ -224,6 +224,20 @@ contract CrossChainWiringCheckTest is Test {
         assertGt(failures, 0);
         // Unaffected: the controller's own lane config never changed.
         assertTrue(findings[IDX_LANE_CONFIG].ok, "lane config must be unaffected by this footgun");
+
+        // Isolate the confusion guard specifically: set `expectedRemoteController`
+        // equal to the (wrong) trusted value too, so the plain "trusted !=
+        // expected" mismatch does not fire first -- exactly like
+        // `CCIPAdapter.t.sol`'s `..._revertsWhenTrustedRemoteIsRemoteAdapter`.
+        // Only the `trusted == lane.remoteAdapter` confusion check can catch
+        // this; without it, `ok` would wrongly be `true`.
+        CrossChainWiringCheck.Expectation[] memory confusedExpectations = _correctExpectations();
+        confusedExpectations[0].expectedRemoteController = remoteAdapter;
+        (CrossChainWiringCheck.Finding[] memory isolated,) = _check(confusedExpectations);
+        assertFalse(
+            isolated[IDX_TRUSTED_REMOTE].ok,
+            "the remote-adapter-confusion guard, in isolation from the plain mismatch check, must still catch this"
+        );
     }
 
     // =========================================================================
@@ -309,6 +323,38 @@ contract CrossChainWiringCheckTest is Test {
             findings[IDX_LOCAL_ADAPTER_REG].ok,
             "clearing the last lane must also de-register the local adapter"
         );
+    }
+
+    /// @dev Isolates the OTHER half of `_checkLocalAdapterRegistration`:
+    ///      `isRegisteredLocalAdapter` alone is not enough. Register a SECOND
+    ///      lane on the same adapter, for a chain absent from `expectations`
+    ///      -- e.g. an adapter quietly serving more lanes than the operator's
+    ///      checklist covers. `isRegistered` stays `true`; only the lane-count
+    ///      comparison catches it.
+    function test_check_flagsLocalAdapterLaneCountMismatch() public {
+        uint256 otherChainId = 42161; // Arbitrum One, not in `_correctExpectations()`.
+        daoMock.setHasPermission(address(controller), address(this), UPDATE_CONFIG_PERMISSION_ID, true);
+        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = CrossChainController.ChainConfig({
+            localAdapter: address(adapter),
+            remoteAdapter: makeAddr("otherRemoteAdapter"),
+            bridgeChainId: 4949039107694359620 // real Arbitrum One CCIP selector
+        });
+        controller.updateConfig(_uint256s(otherChainId), configs);
+        daoMock.setHasPermission(address(controller), address(this), UPDATE_CONFIG_PERMISSION_ID, false);
+
+        assertTrue(controller.isRegisteredLocalAdapter(address(adapter)), "precondition: still registered");
+        assertEq(controller.localAdapterLaneCount(address(adapter)), 2, "precondition: adapter now serves 2 lanes");
+
+        (CrossChainWiringCheck.Finding[] memory findings, uint256 failures) = _check(_correctExpectations());
+
+        assertFalse(
+            findings[IDX_LOCAL_ADAPTER_REG].ok,
+            "an adapter serving more lanes than expectations.length must be flagged"
+        );
+        assertGt(failures, 0);
+        // Isolated: the CHAIN_BASE lane itself was never touched.
+        assertTrue(findings[IDX_LANE_CONFIG].ok, "the checked lane's own config must be unaffected");
     }
 
     // =========================================================================
