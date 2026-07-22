@@ -15,62 +15,21 @@ import {IDAO} from "../dao/IDAO.sol";
 import {Errors} from "./lib/Errors.sol";
 
 /// @title CrossChainController
-/// @notice Per-DAO hub for sending and receiving cross-chain messages. It holds
-///         `EXECUTE_PERMISSION` on its DAO, so every inbound path into
-///         `receiveMessage` is security critical.
-/// @dev Threat model / invariants:
-///      - `receiveMessage` is callable ONLY by a local adapter registered
-///        through `updateConfig`. The per-origin-chain authentication of the
-///        remote sender is the adapter's responsibility (trusted remotes).
-///      - SEND is a `delegatecall` into the local adapter. Consequences, all
-///        deliberate:
-///        * every send-path parameter that would otherwise be adapter storage
-///          lives HERE, in `chainToAdapter`, and is passed as an argument —
-///          including `bridgeChainId`, the bridge-native destination id. The
-///          adapter's send path reads no storage at all, so there is no
-///          storage collision to have.
-///        * the bridge sees THIS CONTRACT as the message sender. The remote
-///          side's trusted remote must therefore be the remote CONTROLLER,
-///          while `chainToAdapter[].remoteAdapter` is the remote ADAPTER (the
-///          bridge-level receiver). Two different addresses; see `ChainConfig`.
-///        * this contract pays the bridge fee directly out of its own balance,
-///          since it is the account executing the bridge call. There is no fee
-///          hand-over and no change to return.
-///      - RECEIVE is a normal call: router -> adapter -> `receiveMessage`. The
-///        adapter's own storage is authoritative there.
+/// @notice The entry point for sending a message cross chain.
+/// @dev Maps each standard chain id to the bridge adapter used to reach that
+///      chain; the adapter, not this contract, translates the standard chain id
+///      into the bridge's native one. Adapters are `delegatecall`ed, so the
+///      bridge sees this controller (not the adapter) as the message sender on
+///      the receiver side, and the send-side fee is paid by this controller.
 /// @custom:security-contact sirt@aragon.org
 contract CrossChainController is DaoAuthorizable {
     using SafeERC20 for IERC20;
 
-    /// @notice Permission to forward a message to a remote chain. Held by the
-    ///         DAO / the plugin whose proposals produce cross-chain actions.
+    /// @notice Permission to forward a message to a remote chain.
     bytes32 public constant FORWARD_MESSAGE_PERMISSION_ID =
         keccak256("FORWARD_MESSAGE_PERMISSION");
 
-    /// @notice Permission to (re)configure the chainId -> lane mapping.
-    /// @dev SECURITY — READ THIS. This permission is EFFECTIVELY ROOT ON THE
-    ///      DAO, and this design does not reduce that.
-    ///
-    ///      Because `forwardMessage` `delegatecall`s `localAdapter`, whoever
-    ///      can set `localAdapter` can execute ARBITRARY CODE IN THIS
-    ///      CONTRACT'S CONTEXT: it can overwrite any storage slot here
-    ///      (including `chainToAdapter` and the local-adapter registry), spend
-    ///      this contract's entire balance, and — since this contract holds
-    ///      `EXECUTE_PERMISSION` on the DAO — make the DAO execute anything.
-    ///      A single malicious `updateConfig` plus a single `forwardMessage`
-    ///      is a complete DAO takeover.
-    ///
-    ///      This is the accepted residual risk of keeping `delegatecall`. It is
-    ///      NOT mitigated by anything in this contract. Mitigation is
-    ///      operational and must be treated as a hard requirement:
-    ///      - grant `UPDATE_CONFIG_PERMISSION` to the DAO ITSELF ONLY, i.e.
-    ///        reachable only through a passed proposal. Never to an EOA, never
-    ///        to a multisig shortcut, never behind a permissionless condition.
-    ///      - consider gating it further with a permission condition that
-    ///        allows only an allowlist of audited adapter implementations.
-    ///      - note that the blast radius is strictly larger than under a plain
-    ///        `call` design, where a malicious adapter could only forge inbound
-    ///        messages.
+    /// @notice Permission to (re)configure the config.
     bytes32 public constant UPDATE_CONFIG_PERMISSION_ID =
         keccak256("UPDATE_CONFIG_PERMISSION");
 
@@ -83,27 +42,11 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice Permission to move pre-funded fee assets out of this contract.
     bytes32 public constant SWEEP_PERMISSION_ID = keccak256("SWEEP_PERMISSION");
 
-    /// @notice Everything the send path needs, held by the controller so that
-    ///         the `delegatecall`ed adapter code never touches storage.
-    /// @param localAdapter The adapter whose code is `delegatecall`ed to send.
-    /// @param remoteAdapter The bridge-level RECEIVER on the remote chain, i.e.
-    ///        the remote chain's ADAPTER address.
-    /// @param bridgeChainId The bridge-native destination chain id (for CCIP,
-    ///        the chain selector). Kept here rather than in an adapter mapping
-    ///        precisely because mappings cannot be `immutable` and the send
-    ///        path must not read storage.
-    /// @dev NOTE THE ASYMMETRY. `remoteAdapter` is the remote ADAPTER, because
-    ///      that is what the bridge delivers to. The remote adapter's
-    ///      `trustedRemote(thisChainId)` must be THIS CONTROLLER, because under
-    ///      `delegatecall` the bridge sees this controller as the sender. Do
-    ///      not set the remote adapter as a trusted remote and do not set a
-    ///      controller address as `remoteAdapter`. Verify with
-    ///      `BaseAdapter.assertTrustedRemotesMatchControllers` and
-    ///      `BaseAdapter.assertChainSelectorsMatchController` after deployment.
+    /// @param localAdapter The adapter where message will be forwarded to.
+    /// @param remoteAdapter The bridge-level RECEIVER on the remote chain.
     struct ChainConfig {
         address localAdapter;
         address remoteAdapter;
-        uint64 bridgeChainId;
     }
 
     /// @notice A message whose execution reverted on arrival, kept for retry.
@@ -118,12 +61,11 @@ contract CrossChainController is DaoAuthorizable {
         bytes payload;
     }
 
-    /// @notice Emitted when a lane is configured or cleared.
+    /// @notice Emitted when a config is configured or cleared.
     event ConfigUpdated(
         uint256 indexed chainId,
         address localAdapter,
-        address remoteAdapter,
-        uint64 bridgeChainId
+        address remoteAdapter
     );
 
     /// @notice Emitted when a message was handed to the local adapter.
@@ -133,7 +75,6 @@ contract CrossChainController is DaoAuthorizable {
         address indexed localAdapter,
         address remoteAdapter,
         uint256 gasLimit,
-        address feeToken,
         uint256 fee
     );
 
@@ -161,20 +102,15 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice standard chain id -> lane configuration.
     mapping(uint256 => ChainConfig) public chainToAdapter;
 
-    /// @notice local adapter -> number of chain ids it is registered for.
-    /// @dev A single adapter (e.g. one CCIP adapter) usually serves many lanes,
-    ///      so a refcount is required for correct removal/rotation: the
-    ///      adapter only stops being trusted once its last lane is cleared.
-    mapping(address => uint256) private _localAdapterLaneCount;
-
     /// @notice callId -> stored failed message.
-    mapping(bytes32 => FailedMessage) private _failedMessages;
+    mapping(bytes32 => FailedMessage) private failedMessages;
 
     /// @notice Restricts a function to local adapters registered via `updateConfig`.
-    modifier onlyLocalAdapter() {
-        if (_localAdapterLaneCount[msg.sender] == 0) {
+    modifier onlyLocalAdapter(uint256 _srcChainId) {
+        if (msg.sender != chainToAdapter[_srcChainId].localAdapter) {
             revert Errors.CALLER_NOT_LOCAL_ADAPTER(msg.sender);
         }
+
         _;
     }
 
@@ -187,18 +123,21 @@ contract CrossChainController is DaoAuthorizable {
     // Configuration
     // -------------------------------------------------------------------------
 
-    /// @notice Allows to update the lane configuration per chain.
-    /// @dev Pass an all-zero `ChainConfig` to clear a lane; this also
-    ///      decrements the local adapter's refcount so a rotated-out adapter
-    ///      loses the right to call `receiveMessage`.
-    /// @param _chainIds The standard chain ids to configure.
-    /// @param _configs The lane configuration per chain id.
+    /// @notice Allows to update configuration per chain.
+    /// @dev Pass an all-zero `ChainConfig` to clear/remove
+    ///      or a fully set one to configure it.
+    /// @param _chainIds The standard chain ids to configure. These are the
+    ///        REMOTE (destination/origin) chain ids, never this chain's own id:
+    ///        each entry keys the lane used to send to, and receive from, that
+    ///        remote chain.
+    /// @param _configs The configuration per chain id.
     function updateConfig(
         uint256[] memory _chainIds,
         ChainConfig[] memory _configs
     ) public auth(UPDATE_CONFIG_PERMISSION_ID) {
-        if (_chainIds.length != _configs.length)
+        if (_chainIds.length != _configs.length) {
             revert Errors.INVALID_LENGTH_MISMATCH();
+        }
 
         for (uint256 i = 0; i < _chainIds.length; i++) {
             uint256 chainId = _chainIds[i];
@@ -206,29 +145,11 @@ contract CrossChainController is DaoAuthorizable {
 
             ChainConfig memory newConfig = _configs[i];
 
-            // A lane is either fully set or fully cleared; a half-configured
-            // lane is the "silent no-op" footgun. `bridgeChainId == 0` in
-            // particular would otherwise mean "send to selector 0".
-            bool anySet = newConfig.localAdapter != address(0) ||
-                newConfig.remoteAdapter != address(0) ||
-                newConfig.bridgeChainId != 0;
-            bool allSet = newConfig.localAdapter != address(0) &&
-                newConfig.remoteAdapter != address(0) &&
-                newConfig.bridgeChainId != 0;
+            bool hasLocal = newConfig.localAdapter != address(0);
+            bool hasRemote = newConfig.remoteAdapter != address(0);
 
-            if (anySet != allSet) {
+            if (hasLocal != hasRemote) {
                 revert Errors.INCOMPLETE_ADAPTER_CONFIG(chainId);
-            }
-
-            address oldLocalAdapter = chainToAdapter[chainId].localAdapter;
-
-            if (oldLocalAdapter != newConfig.localAdapter) {
-                if (oldLocalAdapter != address(0)) {
-                    _localAdapterLaneCount[oldLocalAdapter] -= 1;
-                }
-                if (newConfig.localAdapter != address(0)) {
-                    _localAdapterLaneCount[newConfig.localAdapter] += 1;
-                }
             }
 
             chainToAdapter[chainId] = newConfig;
@@ -236,43 +157,22 @@ contract CrossChainController is DaoAuthorizable {
             emit ConfigUpdated(
                 chainId,
                 newConfig.localAdapter,
-                newConfig.remoteAdapter,
-                newConfig.bridgeChainId
+                newConfig.remoteAdapter
             );
         }
     }
 
     /// @notice Whether an address is currently registered as a local adapter.
     /// @param _adapter The address to check.
-    /// @return True if the address may call `receiveMessage`.
+    /// @param _chainId The chain id of remote chain.
     function isRegisteredLocalAdapter(
-        address _adapter
+        address _adapter,
+        uint256 _chainId
     ) public view returns (bool) {
-        return _adapter != address(0) && _localAdapterLaneCount[_adapter] != 0;
+        return chainToAdapter[_chainId].localAdapter == _adapter;
     }
 
-    /// @notice The number of lanes an adapter is registered for.
-    /// @param _adapter The adapter address.
-    /// @return The lane count.
-    function localAdapterLaneCount(
-        address _adapter
-    ) public view returns (uint256) {
-        return _localAdapterLaneCount[_adapter];
-    }
-
-    // -------------------------------------------------------------------------
-    // Sending
-    // -------------------------------------------------------------------------
-
-    /// @notice Quotes the bridge fee for a prospective send.
-    /// @dev Invoked as a normal `view` call on the adapter, which is safe and
-    ///      equivalent to what the `delegatecall`ed send path computes only
-    ///      because the adapter's quote path reads no storage either (fee token
-    ///      and router are `immutable`).
-    ///
-    ///      Off-chain monitoring should poll this and top the contract up ahead
-    ///      of a deadline: a quote taken when a proposal is created can be
-    ///      badly stale by the time the voting window closes.
+    /// @notice Quotes the bridge fee for a send.
     /// @param _destinationChainId The standard chain id of remote chain.
     /// @param _gasLimit The gas limit that will be used for crosschain message execution.
     /// @param _message The encoded Action[] message.
@@ -288,7 +188,7 @@ contract CrossChainController is DaoAuthorizable {
 
         (feeToken, fee) = IBaseAdapter(config.localAdapter).quoteFee(
             config.remoteAdapter,
-            config.bridgeChainId,
+            _destinationChainId,
             _gasLimit,
             _message
         );
@@ -313,46 +213,32 @@ contract CrossChainController is DaoAuthorizable {
     ) public auth(FORWARD_MESSAGE_PERMISSION_ID) returns (bytes32 messageId) {
         ChainConfig memory config = _validatedConfig(_destinationChainId);
 
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = config.localAdapter.delegatecall(
-            abi.encodeCall(
-                IBaseAdapter.sendMessage,
-                (
-                    config.remoteAdapter,
-                    config.bridgeChainId,
-                    _gasLimit,
-                    _message
-                )
-            )
+        bytes memory encodedCall = abi.encodeCall(
+            IBaseAdapter.sendMessage,
+            (config.remoteAdapter, _destinationChainId, _gasLimit, _message)
         );
 
-        // FAIL LOUDLY. This function must never return successfully having
-        // bridged nothing: the caller is a governance proposal racing an
-        // on-chain deadline, and a silent no-op would let the proposal execute,
-        // emit, and look healthy while the message never left the chain. Every
-        // way the dispatch can fail — unset lane, codeless adapter, adapter
-        // revert, insufficient fee, or a "successful" call that did not return
-        // a well-formed result — reverts here.
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = config
+            .localAdapter
+            .delegatecall(encodedCall);
+
+        // If failed, it means it failed on the same chain,
+        // not at arrival to remote chain.
         if (!success) {
-            // Bubble the adapter's revert reason verbatim (e.g.
-            // `INSUFFICIENT_FEE_BALANCE`), or fail loudly if there is none.
             if (returndata.length == 0) revert Errors.MESSAGE_SEND_FAILED();
+
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 revert(add(returndata, 32), mload(returndata))
             }
         }
 
-        // A conforming `sendMessage` returns (bytes32, address, uint256).
-        // Anything shorter did not dispatch a message.
-        if (returndata.length < 96) revert Errors.MESSAGE_SEND_FAILED();
+        // Make sure adapter returns the right length parameters.
+        if (returndata.length < 64) revert Errors.MESSAGE_SEND_FAILED();
 
-        address feeToken;
         uint256 fee;
-        (messageId, feeToken, fee) = abi.decode(
-            returndata,
-            (bytes32, address, uint256)
-        );
+        (messageId, fee) = abi.decode(returndata, (bytes32, uint256));
 
         emit MessageForwarded(
             _destinationChainId,
@@ -360,7 +246,6 @@ contract CrossChainController is DaoAuthorizable {
             config.localAdapter,
             config.remoteAdapter,
             _gasLimit,
-            feeToken,
             fee
         );
     }
@@ -371,10 +256,7 @@ contract CrossChainController is DaoAuthorizable {
 
     /// @notice The final destination for a message that arrives on remote chain.
     /// @dev Only a registered local adapter may call this. The adapter is
-    ///      responsible for having authenticated the remote sender. Execution
-    ///      is wrapped defensively: a reverting payload is stored and can be
-    ///      retried later instead of being stranded until the bridge's manual
-    ///      execution window (~8h for CCIP) closes.
+    ///      responsible for having authenticated the remote sender.
     /// @param _messageId The bridge-level message identifier.
     /// @param _payload The encoded Action[] message.
     /// @param _originChainId The origin chain id from which cross-chain message originated.
@@ -383,10 +265,10 @@ contract CrossChainController is DaoAuthorizable {
         bytes32 _messageId,
         bytes memory _payload,
         uint256 _originChainId
-    ) public onlyLocalAdapter returns (bytes32 callId) {
+    ) public onlyLocalAdapter(_originChainId) returns (bytes32 callId) {
         callId = deriveCallId(_originChainId, _messageId);
 
-        if (_failedMessages[callId].pending) {
+        if (failedMessages[callId].pending) {
             revert Errors.MESSAGE_ALREADY_PENDING(callId);
         }
 
@@ -395,7 +277,7 @@ contract CrossChainController is DaoAuthorizable {
         try this.executeActions(callId, _payload) {
             emit MessageReceived(_originChainId, _messageId, callId);
         } catch (bytes memory reason) {
-            _failedMessages[callId] = FailedMessage({
+            failedMessages[callId] = FailedMessage({
                 pending: true,
                 originChainId: _originChainId,
                 messageId: _messageId,
@@ -433,10 +315,10 @@ contract CrossChainController is DaoAuthorizable {
     function retryFailedMessage(
         bytes32 _callId
     ) public auth(RETRY_MESSAGE_PERMISSION_ID) {
-        FailedMessage memory failed = _failedMessages[_callId];
+        FailedMessage memory failed = failedMessages[_callId];
         if (!failed.pending) revert Errors.NO_FAILED_MESSAGE(_callId);
 
-        delete _failedMessages[_callId];
+        delete failedMessages[_callId];
 
         this.executeActions(_callId, failed.payload);
 
@@ -449,7 +331,7 @@ contract CrossChainController is DaoAuthorizable {
     function getFailedMessage(
         bytes32 _callId
     ) public view returns (FailedMessage memory) {
-        return _failedMessages[_callId];
+        return failedMessages[_callId];
     }
 
     /// @notice Derives the DAO call id / failed-message key of a message.
@@ -462,10 +344,6 @@ contract CrossChainController is DaoAuthorizable {
     ) public pure returns (bytes32) {
         return keccak256(abi.encode(_originChainId, _messageId));
     }
-
-    // -------------------------------------------------------------------------
-    // Fee custody
-    // -------------------------------------------------------------------------
 
     /// @notice Moves pre-funded fee assets out of this contract.
     /// @dev This contract is the fee payer: under `delegatecall` the bridge
@@ -509,14 +387,9 @@ contract CrossChainController is DaoAuthorizable {
 
         if (
             config.localAdapter == address(0) ||
-            config.remoteAdapter == address(0) ||
-            config.bridgeChainId == 0
+            config.remoteAdapter == address(0)
         ) {
             revert Errors.ADAPTER_NOT_CONFIGURED(_destinationChainId);
-        }
-
-        if (config.localAdapter.code.length == 0) {
-            revert Errors.ADAPTER_HAS_NO_CODE(config.localAdapter);
         }
     }
 }

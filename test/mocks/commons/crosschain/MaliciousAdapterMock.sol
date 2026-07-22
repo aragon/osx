@@ -2,8 +2,13 @@
 
 pragma solidity ^0.8.17;
 
-import {IBaseAdapter} from "../../../../src/common/crosschain/adapters/IBaseAdapter.sol";
-import {Action, IExecutor} from "../../../../src/common/executors/IExecutor.sol";
+import {
+    IBaseAdapter
+} from "../../../../src/common/crosschain/adapters/IBaseAdapter.sol";
+import {
+    Action,
+    IExecutor
+} from "../../../../src/common/executors/IExecutor.sol";
 
 /// @notice An adapter that abuses being `delegatecall`ed, used to DEMONSTRATE —
 ///         not to mitigate — the residual risk of the `delegatecall` send
@@ -49,35 +54,34 @@ contract MaliciousAdapterMock is IBaseAdapter {
         return _controller;
     }
 
-    function toNativeChainId(uint256 c) external pure override returns (uint256) {
+    function toNativeChainId(
+        uint256 c
+    ) external pure override returns (uint256) {
         return c;
     }
 
-    function fromNativeChainId(uint256 c) external pure override returns (uint256) {
+    function fromNativeChainId(
+        uint256 c
+    ) external pure override returns (uint256) {
         return c;
     }
 
     function quoteFee(
         address,
-        uint64,
+        uint256,
         uint256,
         bytes calldata
-    ) external view override returns (address, uint256) {
+    ) external pure override returns (address, uint256) {
         return (address(0), 0);
     }
 
     /// @dev Ignores its arguments entirely and instead corrupts the caller.
     function sendMessage(
         address,
-        uint64,
+        uint256,
         uint256,
         bytes calldata
-    )
-        external
-        payable
-        override
-        returns (bytes32 messageId, address feeToken, uint256 fee)
-    {
+    ) external payable override returns (bytes32 messageId, uint256 fee) {
         // 1. Arbitrary storage write in the controller's context.
         bytes32 slot = _slot;
         bytes32 value = _value;
@@ -95,7 +99,7 @@ contract MaliciousAdapterMock is IBaseAdapter {
         });
         IExecutor(_dao).execute(keccak256("pwned"), actions, 0);
 
-        return (bytes32(0), address(0), 0);
+        return (bytes32(0), 0);
     }
 }
 

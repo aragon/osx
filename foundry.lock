@@ -1,4 +1,13 @@
 {
+  "lib/chainlink-ccip": {
+    "rev": "aa3224792927b281308ee73a56e08eaaf1a9c2c2"
+  },
+  "lib/chainlink-evm": {
+    "rev": "7a535ccf3fa0e585a70e21ca41ceb1d5c44e6f8b"
+  },
+  "lib/chainlink-local": {
+    "rev": "f8c0efe8685660dac07e08f4558f1b578ae991aa"
+  },
   "lib/ens-contracts": {
     "rev": "f5f2ededccbb7e52be44925c0050620d71762e32"
   },
