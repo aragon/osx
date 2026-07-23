@@ -73,7 +73,7 @@ contract CCIPAdapter is IERC165, IAny2EVMMessageReceiver, BaseAdapter {
         uint256 _destinationChainId,
         uint256 _gasLimit,
         bytes calldata _message
-    ) public view override returns (address, uint256) {
+    ) public view virtual override returns (address, uint256) {
         if (_receiver == address(0)) revert Errors.RECEIVER_ADDRESS_ZERO();
 
         // Reverts if not set.
@@ -96,7 +96,14 @@ contract CCIPAdapter is IERC165, IAny2EVMMessageReceiver, BaseAdapter {
         uint256 _destinationChainId,
         uint256 _gasLimit,
         bytes calldata _message
-    ) public payable override returns (bytes32 messageId, uint256 fee) {
+    )
+        public
+        payable
+        virtual
+        override
+        onlyDelegatecallFromController
+        returns (bytes32 messageId, uint256 fee)
+    {
         if (_receiver == address(0)) revert Errors.RECEIVER_ADDRESS_ZERO();
 
         // Reverts if not set.
@@ -153,7 +160,7 @@ contract CCIPAdapter is IERC165, IAny2EVMMessageReceiver, BaseAdapter {
     /// @inheritdoc IAny2EVMMessageReceiver
     function ccipReceive(
         Client.Any2EVMMessage calldata message
-    ) external onlyRouter {
+    ) public virtual onlyRouter {
         address srcAddress = abi.decode(message.sender, (address));
 
         // Transform CCIP's chain selector into the standard chain Id.

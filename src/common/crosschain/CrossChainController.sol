@@ -14,6 +14,12 @@ import {Action, IExecutor} from "../executors/IExecutor.sol";
 import {IDAO} from "../dao/IDAO.sol";
 import {Errors} from "./lib/Errors.sol";
 
+import {
+    TransactionLib,
+    Transaction,
+    TransactionState
+} from "./lib/Transaction.sol";
+
 /// @title CrossChainController
 /// @notice The entry point for sending a message cross chain.
 /// @dev Maps each standard chain id to the bridge adapter used to reach that
@@ -24,6 +30,8 @@ import {Errors} from "./lib/Errors.sol";
 /// @custom:security-contact sirt@aragon.org
 contract CrossChainController is DaoAuthorizable {
     using SafeERC20 for IERC20;
+    using TransactionLib for Transaction;
+    using TransactionLib for bytes;
 
     /// @notice Permission to forward a message to a remote chain.
     bytes32 public constant FORWARD_MESSAGE_PERMISSION_ID =
@@ -72,7 +80,8 @@ contract CrossChainController is DaoAuthorizable {
     event MessageForwarded(
         uint256 indexed destinationChainId,
         bytes32 indexed messageId,
-        address indexed localAdapter,
+        bytes32 indexed txId,
+        address localAdapter,
         address remoteAdapter,
         uint256 gasLimit,
         uint256 fee
@@ -82,14 +91,14 @@ contract CrossChainController is DaoAuthorizable {
     event MessageReceived(
         uint256 indexed originChainId,
         bytes32 indexed messageId,
-        bytes32 indexed callId
+        bytes32 indexed txId
     );
 
     /// @notice Emitted when an inbound message reverted and was stored.
     event MessageExecutionFailed(
         uint256 indexed originChainId,
         bytes32 indexed messageId,
-        bytes32 indexed callId,
+        bytes32 indexed txId,
         bytes reason
     );
 
@@ -99,11 +108,14 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice Emitted when fee assets are moved out of the contract.
     event Swept(address indexed token, address indexed to, uint256 amount);
 
+    // every message originator sends we put into an transaction and attach a nonce. It increments by one
+    uint256 internal _currentTxNonce;
+
     /// @notice standard chain id -> lane configuration.
     mapping(uint256 => ChainConfig) public chainToAdapter;
 
-    /// @notice callId -> stored failed message.
-    mapping(bytes32 => FailedMessage) private failedMessages;
+    /// @notice txId -> stored message.
+    mapping(bytes32 => TransactionState) private _transactionState;
 
     /// @notice Restricts a function to local adapters registered via `updateConfig`.
     modifier onlyLocalAdapter(uint256 _srcChainId) {
@@ -213,9 +225,17 @@ contract CrossChainController is DaoAuthorizable {
     ) public auth(FORWARD_MESSAGE_PERMISSION_ID) returns (bytes32 messageId) {
         ChainConfig memory config = _validatedConfig(_destinationChainId);
 
+        bytes memory encodedTx = Transaction({
+            nonce: ++_currentTxNonce,
+            origin: msg.sender,
+            originChainId: block.chainid,
+            destinationChainId: _destinationChainId,
+            message: _message
+        }).encode();
+
         bytes memory encodedCall = abi.encodeCall(
             IBaseAdapter.sendMessage,
-            (config.remoteAdapter, _destinationChainId, _gasLimit, _message)
+            (config.remoteAdapter, _destinationChainId, _gasLimit, encodedTx)
         );
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -243,6 +263,7 @@ contract CrossChainController is DaoAuthorizable {
         emit MessageForwarded(
             _destinationChainId,
             messageId,
+            encodedTx.id(),
             config.localAdapter,
             config.remoteAdapter,
             _gasLimit,
@@ -257,37 +278,47 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice The final destination for a message that arrives on remote chain.
     /// @dev Only a registered local adapter may call this. The adapter is
     ///      responsible for having authenticated the remote sender.
-    /// @param _messageId The bridge-level message identifier.
-    /// @param _payload The encoded Action[] message.
+    ///      CrossChainController is bridge agnostic, so _messageId is only used
+    ///      for emit principles only and should not be fully trusted.
+    /// @param _messageId The bridge's own messageId for emit only.
+    /// @param _encodedTx The encoded transaction object(that contains message itself)
     /// @param _originChainId The origin chain id from which cross-chain message originated.
-    /// @return callId The deterministic call id used for the DAO execution.
+    /// @return txId The deterministic transaction id used for the DAO execution.
     function receiveMessage(
         bytes32 _messageId,
-        bytes memory _payload,
+        bytes memory _encodedTx,
         uint256 _originChainId
-    ) public onlyLocalAdapter(_originChainId) returns (bytes32 callId) {
-        callId = deriveCallId(_originChainId, _messageId);
+    ) public onlyLocalAdapter(_originChainId) returns (bytes32 txId) {
+        // Decode tx and get its id.
+        Transaction memory transaction = _encodedTx.decode();
+        txId = transaction.id();
 
-        if (failedMessages[callId].pending) {
-            revert Errors.MESSAGE_ALREADY_PENDING(callId);
+        // Don't fully trust the adapter/bridge.
+        if (
+            transaction.originChainId != _originChainId ||
+            transaction.destinationChainId != block.chainid
+        ) {
+            revert Errors.INCORRECT_CHAIN_MISMATCH();
+        }
+
+        // Either message is already delivered or executed.
+        // If delivered, but execution failed, call retry.
+        if (_transactionState[txId] != TransactionState.None) {
+            revert Errors.MESSAGE_ALREADY_DELIVERED_OR_EXECUTED(txId);
         }
 
         // The self-call also contains payload decoding, so a malformed payload
         // is captured for retry rather than reverting the bridge delivery.
-        try this.executeActions(callId, _payload) {
-            emit MessageReceived(_originChainId, _messageId, callId);
+        try this.executeActions(txId, transaction.message) {
+            _transactionState[txId] = TransactionState.Executed;
+            emit MessageReceived(_originChainId, _messageId, txId);
         } catch (bytes memory reason) {
-            failedMessages[callId] = FailedMessage({
-                pending: true,
-                originChainId: _originChainId,
-                messageId: _messageId,
-                payload: _payload
-            });
+            _transactionState[txId] = TransactionState.Delivered;
 
             emit MessageExecutionFailed(
                 _originChainId,
                 _messageId,
-                callId,
+                txId,
                 reason
             );
         }
@@ -311,38 +342,39 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice Retries a previously failed inbound message.
     /// @dev Reverts (bubbling the failure) if the retry fails again, so the
     ///      stored message stays pending.
-    /// @param _callId The call id emitted by `MessageExecutionFailed`.
-    function retryFailedMessage(
-        bytes32 _callId
+    /// @param _tx The transaction that must be retried.
+    function retryMessage(
+        Transaction memory _tx
     ) public auth(RETRY_MESSAGE_PERMISSION_ID) {
-        FailedMessage memory failed = failedMessages[_callId];
-        if (!failed.pending) revert Errors.NO_FAILED_MESSAGE(_callId);
+        bytes32 txId = _tx.id();
 
-        delete failedMessages[_callId];
+        if (_transactionState[txId] != TransactionState.Delivered) {
+            revert Errors.MESSAGE_ALREADY_EXECUTED_OR_NOT_EXISTS(txId);
+        }
 
-        this.executeActions(_callId, failed.payload);
+        _transactionState[txId] = TransactionState.Executed;
 
-        emit MessageRetried(_callId);
+        this.executeActions(txId, _tx.message);
+
+        emit MessageRetried(txId);
     }
 
-    /// @notice Returns a stored failed message.
-    /// @param _callId The call id.
-    /// @return The stored message; `pending` is false if there is none.
-    function getFailedMessage(
-        bytes32 _callId
-    ) public view returns (FailedMessage memory) {
-        return failedMessages[_callId];
+    /// @notice Returns a state of transaction.
+    /// @param _txId The tx id.
+    /// @return The state of the transaction(None, Delivered, Executed)
+    function getTransactionState(
+        bytes32 _txId
+    ) public view returns (TransactionState) {
+        return _transactionState[_txId];
     }
 
-    /// @notice Derives the DAO call id / failed-message key of a message.
-    /// @param _originChainId The standard origin chain id.
-    /// @param _messageId The bridge-level message identifier.
-    /// @return The call id.
-    function deriveCallId(
-        uint256 _originChainId,
-        bytes32 _messageId
-    ) public pure returns (bytes32) {
-        return keccak256(abi.encode(_originChainId, _messageId));
+    /// @notice Returns a state of transaction.
+    /// @param _tx The transaction.
+    /// @return The state of the transaction(None, Delivered, Executed)
+    function getTransactionState(
+        Transaction memory _tx
+    ) public view returns (TransactionState) {
+        return _transactionState[_tx.id()];
     }
 
     /// @notice Moves pre-funded fee assets out of this contract.
@@ -378,8 +410,7 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice Loads and validates the lane configuration for a destination.
     /// @dev Reverts instead of silently no-op'ing: a `delegatecall` to a
     ///      codeless address reports success, which would let a proposal
-    ///      "execute" while nothing was ever bridged. A zero `bridgeChainId`
-    ///      is rejected for the same reason: it would address bridge lane `0`.
+    ///      "execute" while nothing was ever bridged.
     function _validatedConfig(
         uint256 _destinationChainId
     ) internal view returns (ChainConfig memory config) {

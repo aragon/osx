@@ -142,9 +142,17 @@ library Errors {
     // ---------------------------------------------------------------------
 
     /// @notice Thrown when retrying a call id that has no stored failed message.
-    error NO_FAILED_MESSAGE(bytes32 callId);
+    error NO_FAILED_MESSAGE(bytes32 txId);
 
     /// @notice Thrown when an inbound message reuses a call id that is already
-    ///         stored as failed and pending retry.
-    error MESSAGE_ALREADY_PENDING(bytes32 callId);
+    ///         stored as delivered or executed.
+    error MESSAGE_ALREADY_DELIVERED_OR_EXECUTED(bytes32 txId);
+
+    /// @notice Thrown when an inbound message reuses a call id that is already
+    ///         stored as delivered or executed.
+    error MESSAGE_ALREADY_EXECUTED_OR_NOT_EXISTS(bytes32 txId);
+
+    /// @notice Thrown when message delivered to the actual chain doesn't match
+    ///         the chain sender intended to send.
+    error INCORRECT_CHAIN_MISMATCH();
 }
