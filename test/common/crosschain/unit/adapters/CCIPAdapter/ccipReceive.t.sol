@@ -83,6 +83,7 @@ contract CCIPAdapterCcipReceiveTest is CCIPAdapterBase {
         Transaction memory transaction = Transaction({
             nonce: 1,
             origin: remoteController,
+            controller: remoteController,
             originChainId: CHAIN_ETH_MAINNET,
             destinationChainId: block.chainid,
             message: _emptyActionsPayload()
@@ -100,7 +101,7 @@ contract CCIPAdapterCcipReceiveTest is CCIPAdapterBase {
         message.messageId = messageId;
 
         vm.expectEmit(true, true, true, true, address(controller));
-        emit MessageReceived(CHAIN_ETH_MAINNET, messageId, expectedTxId);
+        emit MessageReceived(CHAIN_ETH_MAINNET, messageId, expectedTxId, payload);
 
         vm.prank(address(router));
         adapter.ccipReceive(message);

@@ -105,23 +105,26 @@ contract CrossChainControllerForwardMessageTest is CrossChainControllerBase {
         bytes memory message = abi.encode("hello");
 
         // `forwardMessage` stamps nonce = ++_currentTxNonce (1 on first send),
-        // origin = msg.sender (alice), originChainId = block.chainid,
-        // destinationChainId = CHAIN_ID. The txId is that envelope's id.
-        bytes32 expectedTxId = TransactionLib.id(
-            Transaction({
-                nonce: 1,
-                origin: alice,
-                originChainId: block.chainid,
-                destinationChainId: CHAIN_ID,
-                message: message
-            })
-        );
+        // origin = msg.sender (alice), controller = address(this) (the
+        // controller), originChainId = block.chainid, destinationChainId =
+        // CHAIN_ID. The txId is that envelope's id.
+        Transaction memory expectedTx = Transaction({
+            nonce: 1,
+            origin: alice,
+            controller: address(controller),
+            originChainId: block.chainid,
+            destinationChainId: CHAIN_ID,
+            message: message
+        });
+        bytes32 expectedTxId = TransactionLib.id(expectedTx);
+        bytes memory expectedEnvelope = TransactionLib.encode(expectedTx);
 
         vm.expectEmit(true, true, true, true, address(controller));
         emit MessageForwarded(
             CHAIN_ID,
             expectedMessageId,
             expectedTxId,
+            expectedEnvelope,
             address(adapterA),
             remoteAdapterA,
             GAS_LIMIT,

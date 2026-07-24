@@ -209,6 +209,7 @@ contract CrossChainControllerReceiveMessageTest is CrossChainControllerBase {
             CHAIN_ID,
             messageId,
             expectedTxId,
+            encodedTx,
             expectedReason
         );
 
@@ -242,10 +243,11 @@ contract CrossChainControllerReceiveMessageTest is CrossChainControllerBase {
         bytes32 expectedTxId = _txId(56, CHAIN_ID, garbageMessage);
 
         // Only check the indexed topics here (origin/message/tx id); the
-        // exact revert bytes produced by a failed `abi.decode` are an
-        // implementation/compiler detail we don't want to pin.
+        // non-indexed data (envelope + the exact revert bytes produced by a
+        // failed `abi.decode`) is an implementation/compiler detail we don't
+        // want to pin, so `checkData` is false and these values are ignored.
         vm.expectEmit(true, true, true, false, address(controller));
-        emit MessageExecutionFailed(CHAIN_ID, messageId, expectedTxId, "");
+        emit MessageExecutionFailed(CHAIN_ID, messageId, expectedTxId, "", "");
 
         vm.prank(address(adapterA));
         bytes32 txId = controller.receiveMessage(

@@ -9,13 +9,16 @@ pragma solidity ^0.8.8;
 ///         than taken on the adapter's word.
 /// @param nonce The origin controller's monotonic nonce for this lane. Owns the
 ///        message identity; makes it unique in a namespace the origin controls.
-/// @param origin The originating `CrossChainController` address.
+/// @param origin The originating address that initiated forwardMessage on `CrossChainController`.
+/// @param controller The address of the controller to ensure that re-deploying the
+///                   controller will not cause tx id collision.
 /// @param originChainId The standard chain id the message was sent from.
 /// @param destinationChainId The standard chain id the message may execute on.
 /// @param message The encoded `Action[]` payload.
 struct Transaction {
     uint256 nonce;
     address origin;
+    address controller;
     uint256 originChainId;
     uint256 destinationChainId;
     bytes message;

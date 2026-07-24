@@ -34,7 +34,7 @@ contract CrossChainControllerRetryMessageTest is CrossChainControllerBase {
             )
         );
         vm.prank(bob);
-        controller.retryMessage(failedTx);
+        controller.retryMessage(TransactionLib.encode(failedTx));
     }
 
     function test_revertsForUnknownTransaction() public {
@@ -54,7 +54,7 @@ contract CrossChainControllerRetryMessageTest is CrossChainControllerBase {
             )
         );
         vm.prank(alice);
-        controller.retryMessage(unknownTx);
+        controller.retryMessage(TransactionLib.encode(unknownTx));
     }
 
     function test_succeedsOnceFailureConditionRemoved() public {
@@ -89,7 +89,7 @@ contract CrossChainControllerRetryMessageTest is CrossChainControllerBase {
         emit MessageRetried(txId);
 
         vm.prank(alice);
-        controller.retryMessage(failedTx);
+        controller.retryMessage(TransactionLib.encode(failedTx));
 
         assertEq(
             uint256(controller.getTransactionState(txId)),

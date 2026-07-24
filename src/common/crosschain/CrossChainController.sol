@@ -81,6 +81,7 @@ contract CrossChainController is DaoAuthorizable {
         uint256 indexed destinationChainId,
         bytes32 indexed messageId,
         bytes32 indexed txId,
+        bytes transaction,
         address localAdapter,
         address remoteAdapter,
         uint256 gasLimit,
@@ -91,7 +92,8 @@ contract CrossChainController is DaoAuthorizable {
     event MessageReceived(
         uint256 indexed originChainId,
         bytes32 indexed messageId,
-        bytes32 indexed txId
+        bytes32 indexed txId,
+        bytes transaction
     );
 
     /// @notice Emitted when an inbound message reverted and was stored.
@@ -99,6 +101,7 @@ contract CrossChainController is DaoAuthorizable {
         uint256 indexed originChainId,
         bytes32 indexed messageId,
         bytes32 indexed txId,
+        bytes transaction,
         bytes reason
     );
 
@@ -198,11 +201,21 @@ contract CrossChainController is DaoAuthorizable {
     ) public view returns (address feeToken, uint256 fee, uint256 available) {
         ChainConfig memory config = _validatedConfig(_destinationChainId);
 
+        // Quote the SAME bytes `forwardMessage` will send.
+        bytes memory encodedTx = Transaction({
+            nonce: _currentTxNonce,
+            origin: msg.sender,
+            controller: address(this),
+            originChainId: block.chainid,
+            destinationChainId: _destinationChainId,
+            message: _message
+        }).encode();
+
         (feeToken, fee) = IBaseAdapter(config.localAdapter).quoteFee(
             config.remoteAdapter,
             _destinationChainId,
             _gasLimit,
-            _message
+            encodedTx
         );
 
         available = feeToken == address(0)
@@ -228,42 +241,25 @@ contract CrossChainController is DaoAuthorizable {
         bytes memory encodedTx = Transaction({
             nonce: ++_currentTxNonce,
             origin: msg.sender,
+            controller: address(this),
             originChainId: block.chainid,
             destinationChainId: _destinationChainId,
             message: _message
         }).encode();
 
-        bytes memory encodedCall = abi.encodeCall(
-            IBaseAdapter.sendMessage,
-            (config.remoteAdapter, _destinationChainId, _gasLimit, encodedTx)
-        );
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = config
-            .localAdapter
-            .delegatecall(encodedCall);
-
-        // If failed, it means it failed on the same chain,
-        // not at arrival to remote chain.
-        if (!success) {
-            if (returndata.length == 0) revert Errors.MESSAGE_SEND_FAILED();
-
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                revert(add(returndata, 32), mload(returndata))
-            }
-        }
-
-        // Make sure adapter returns the right length parameters.
-        if (returndata.length < 64) revert Errors.MESSAGE_SEND_FAILED();
-
         uint256 fee;
-        (messageId, fee) = abi.decode(returndata, (bytes32, uint256));
+        (messageId, fee) = _dispatch(
+            config,
+            _destinationChainId,
+            _gasLimit,
+            encodedTx
+        );
 
         emit MessageForwarded(
             _destinationChainId,
             messageId,
             encodedTx.id(),
+            encodedTx,
             config.localAdapter,
             config.remoteAdapter,
             _gasLimit,
@@ -311,7 +307,7 @@ contract CrossChainController is DaoAuthorizable {
         // is captured for retry rather than reverting the bridge delivery.
         try this.executeActions(txId, transaction.message) {
             _transactionState[txId] = TransactionState.Executed;
-            emit MessageReceived(_originChainId, _messageId, txId);
+            emit MessageReceived(_originChainId, _messageId, txId, _encodedTx);
         } catch (bytes memory reason) {
             _transactionState[txId] = TransactionState.Delivered;
 
@@ -319,6 +315,7 @@ contract CrossChainController is DaoAuthorizable {
                 _originChainId,
                 _messageId,
                 txId,
+                _encodedTx,
                 reason
             );
         }
@@ -342,11 +339,11 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice Retries a previously failed inbound message.
     /// @dev Reverts (bubbling the failure) if the retry fails again, so the
     ///      stored message stays pending.
-    /// @param _tx The transaction that must be retried.
+    /// @param _encodedTx The encoded tx that must be retried.
     function retryMessage(
-        Transaction memory _tx
+        bytes memory _encodedTx
     ) public auth(RETRY_MESSAGE_PERMISSION_ID) {
-        bytes32 txId = _tx.id();
+        bytes32 txId = _encodedTx.id();
 
         if (_transactionState[txId] != TransactionState.Delivered) {
             revert Errors.MESSAGE_ALREADY_EXECUTED_OR_NOT_EXISTS(txId);
@@ -354,7 +351,7 @@ contract CrossChainController is DaoAuthorizable {
 
         _transactionState[txId] = TransactionState.Executed;
 
-        this.executeActions(txId, _tx.message);
+        this.executeActions(txId, _encodedTx.decode().message);
 
         emit MessageRetried(txId);
     }
@@ -406,6 +403,39 @@ contract CrossChainController is DaoAuthorizable {
     // -------------------------------------------------------------------------
     // Internal
     // -------------------------------------------------------------------------
+
+    /// @notice `delegatecall`s the local adapter's send path and
+    ///         decodes its `(messageId, fee)` return.
+    function _dispatch(
+        ChainConfig memory _config,
+        uint256 _destinationChainId,
+        uint256 _gasLimit,
+        bytes memory _encodedTx
+    ) internal virtual returns (bytes32 messageId, uint256 fee) {
+        bytes memory encodedCall = abi.encodeCall(
+            IBaseAdapter.sendMessage,
+            (_config.remoteAdapter, _destinationChainId, _gasLimit, _encodedTx)
+        );
+
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = _config
+            .localAdapter
+            .delegatecall(encodedCall);
+
+        if (!success) {
+            if (returndata.length == 0) revert Errors.MESSAGE_SEND_FAILED();
+
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                revert(add(returndata, 32), mload(returndata))
+            }
+        }
+
+        // Make sure adapter returns the right length parameters.
+        if (returndata.length < 64) revert Errors.MESSAGE_SEND_FAILED();
+
+        (messageId, fee) = abi.decode(returndata, (bytes32, uint256));
+    }
 
     /// @notice Loads and validates the lane configuration for a destination.
     /// @dev Reverts instead of silently no-op'ing: a `delegatecall` to a

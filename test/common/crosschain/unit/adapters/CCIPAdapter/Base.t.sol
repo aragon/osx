@@ -70,7 +70,8 @@ abstract contract CCIPAdapterBase is Test {
     event MessageReceived(
         uint256 indexed originChainId,
         bytes32 indexed messageId,
-        bytes32 indexed txId
+        bytes32 indexed txId,
+        bytes transaction
     );
 
     DAOMock internal daoMock;

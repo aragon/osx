@@ -41,6 +41,7 @@ abstract contract CrossChainControllerBase is Test {
         uint256 indexed destinationChainId,
         bytes32 indexed messageId,
         bytes32 indexed txId,
+        bytes transaction,
         address localAdapter,
         address remoteAdapter,
         uint256 gasLimit,
@@ -49,12 +50,14 @@ abstract contract CrossChainControllerBase is Test {
     event MessageReceived(
         uint256 indexed originChainId,
         bytes32 indexed messageId,
-        bytes32 indexed txId
+        bytes32 indexed txId,
+        bytes transaction
     );
     event MessageExecutionFailed(
         uint256 indexed originChainId,
         bytes32 indexed messageId,
         bytes32 indexed txId,
+        bytes transaction,
         bytes reason
     );
     event MessageRetried(bytes32 indexed txId);
@@ -206,9 +209,9 @@ abstract contract CrossChainControllerBase is Test {
     }
 
     /// @dev Builds a `Transaction` envelope carrying `_message` for the given
-    ///      origin/nonce. `origin`/`destinationChainId` default to values that
-    ///      are irrelevant to the receive path (which only decodes and hashes),
-    ///      but must be reproduced exactly to predict the txId.
+    ///      origin/nonce. `origin`/`controller`/`destinationChainId` default to
+    ///      values that are irrelevant to the receive path (which only decodes
+    ///      and hashes), but must be reproduced exactly to predict the txId.
     function _tx(
         uint256 _nonce,
         uint256 _originChainId,
@@ -218,6 +221,7 @@ abstract contract CrossChainControllerBase is Test {
             Transaction({
                 nonce: _nonce,
                 origin: address(this),
+                controller: address(this),
                 originChainId: _originChainId,
                 destinationChainId: block.chainid,
                 message: _message
