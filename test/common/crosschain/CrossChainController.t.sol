@@ -4,55 +4,28 @@ pragma solidity ^0.8.17;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {CrossChainController} from "../../../src/common/crosschain/CrossChainController.sol";
+import {
+    CrossChainController
+} from "../../../src/common/crosschain/CrossChainController.sol";
 import {Errors} from "../../../src/common/crosschain/lib/Errors.sol";
 import {Action} from "../../../src/common/executors/IExecutor.sol";
 import {DaoUnauthorized} from "../../../src/common/permission/auth/auth.sol";
 import {AdapterMock} from "../../mocks/commons/crosschain/AdapterMock.sol";
 import {
-    MaliciousAdapterMock, PwnTarget
+    MaliciousAdapterMock,
+    PwnTarget
 } from "../../mocks/commons/crosschain/MaliciousAdapterMock.sol";
-import {CrossChainControllerDAOMock} from "../../mocks/commons/crosschain/CrossChainControllerDAOMock.sol";
+import {
+    CrossChainControllerDAOMock
+} from "../../mocks/commons/crosschain/CrossChainControllerDAOMock.sol";
 import {ERC20Mock} from "../../mocks/commons/token/ERC20Mock.sol";
 import {ActionExecute} from "../../mocks/commons/executors/ActionExecute.sol";
 
-/// @notice Regression suite for the "Option 1" `CrossChainController`
-///         (`src/common/crosschain/CrossChainController.sol`), which sends by
-///         `delegatecall`ing the local adapter instead of `call`ing it. Every
-///         send-path parameter that used to live in adapter storage now lives
-///         in the controller's `chainToAdapter` mapping and is passed as an
-///         argument, so the adapter's send path reads NO storage.
-///
-/// Sections a)-j) preserve the pre-redesign coverage (inbound auth, adapter
-/// rotation, `updateConfig` validation, silent-no-op / fail-loudly guards,
-/// forwarding auth + happy path, fees, defensive receive/retry, the
-/// `executeActions` self-call guard, `sweep`, `deriveCallId`), adapted to the
-/// new `ChainConfig{localAdapter, remoteAdapter, bridgeChainId}` shape and to
-/// `AdapterMock` now being immutable-configured (constructor args, no
-/// setters, records calls via `SendMessageCalled` instead of storage).
-///
-/// Sections k)-o) are NEW and are the entire point of this redesign:
-///  k) the controller's own storage is byte-identical before/after a send
-///     (no collision with whatever the delegatecalled adapter code touches);
-///  l) two adapters with different `immutable`s produce provably different
-///     results, proving delegatecall resolves the CALLED adapter's bytecode
-///     immutables, not the controller's storage;
-///  m) an unconfigured/zeroed `bridgeChainId` can never silently address
-///     bridge lane `0`;
-///  n) an adapter's send path refuses to run outside a delegatecall from its
-///     owning controller;
-///  o) the accepted residual risk (security-review finding 7): whoever holds
-///     `UPDATE_CONFIG_PERMISSION` can fully take over the controller and, by
-///     extension, the DAO. This is NOT mitigated in code; it documents why
-///     that permission must be DAO-only.
 contract CrossChainControllerTest is Test {
-    // Solc 0.8.17 (this repo's pinned version) cannot `emit Contract.Event(...)`
-    // for an externally-defined event, so every event under test is
-    // redeclared here with an IDENTICAL signature purely so `vm.expectEmit`
-    // has something to match topics/data against (topic0 only depends on the
-    // signature, not on which contract declares it).
     event ConfigUpdated(
-        uint256 indexed chainId, address localAdapter, address remoteAdapter, uint64 bridgeChainId
+        uint256 indexed chainId,
+        address localAdapter,
+        address remoteAdapter
     );
     event MessageForwarded(
         uint256 indexed destinationChainId,
@@ -60,24 +33,16 @@ contract CrossChainControllerTest is Test {
         address indexed localAdapter,
         address remoteAdapter,
         uint256 gasLimit,
-        address feeToken,
         uint256 fee
     );
     event MessageExecutionFailed(
-        uint256 indexed originChainId, bytes32 indexed messageId, bytes32 indexed callId, bytes reason
+        uint256 indexed originChainId,
+        bytes32 indexed messageId,
+        bytes32 indexed callId,
+        bytes reason
     );
     event MessageRetried(bytes32 indexed callId);
     event Swept(address indexed token, address indexed to, uint256 amount);
-    /// @dev Mirrors `AdapterMock.SendMessageCalled`. IMPORTANT: because
-    ///      `forwardMessage` reaches this via `delegatecall`, the EVM records
-    ///      the log's emitting address as the CONTROLLER, not the adapter
-    ///      (exactly like storage, `LOG*` uses the current execution
-    ///      context's address, which delegatecall does not change). Every
-    ///      `vm.expectEmit` against this event below therefore targets
-    ///      `address(controller)`, never the adapter.
-    event SendMessageCalled(
-        address context, address receiver, uint64 bridgeChainId, uint256 gasLimit, bytes message, uint256 value
-    );
 
     uint256 internal constant CHAIN_ID = 10;
     uint256 internal constant OTHER_CHAIN_ID = 20;
@@ -123,18 +88,55 @@ contract CrossChainControllerTest is Test {
         // need to fund the controller. `AdapterMock` has no setters -- tests
         // that need different fee/messageId/feeSink/revert behaviour deploy
         // their own dedicated instance instead.
-        adapterA = new AdapterMock(address(controller), address(0), 0, bytes32(uint256(1)), feeSinkA, false, false);
-        adapterB = new AdapterMock(address(controller), address(0), 0, bytes32(uint256(2)), feeSinkB, false, false);
+        adapterA = new AdapterMock(
+            address(controller),
+            address(0),
+            0,
+            bytes32(uint256(1)),
+            feeSinkA,
+            false,
+            false
+        );
+        adapterB = new AdapterMock(
+            address(controller),
+            address(0),
+            0,
+            bytes32(uint256(2)),
+            feeSinkB,
+            false,
+            false
+        );
 
-        FORWARD_MESSAGE_PERMISSION_ID = controller.FORWARD_MESSAGE_PERMISSION_ID();
+        FORWARD_MESSAGE_PERMISSION_ID = controller
+            .FORWARD_MESSAGE_PERMISSION_ID();
         UPDATE_CONFIG_PERMISSION_ID = controller.UPDATE_CONFIG_PERMISSION_ID();
         RETRY_MESSAGE_PERMISSION_ID = controller.RETRY_MESSAGE_PERMISSION_ID();
         SWEEP_PERMISSION_ID = controller.SWEEP_PERMISSION_ID();
 
-        daoMock.setHasPermission(address(controller), alice, FORWARD_MESSAGE_PERMISSION_ID, true);
-        daoMock.setHasPermission(address(controller), alice, UPDATE_CONFIG_PERMISSION_ID, true);
-        daoMock.setHasPermission(address(controller), alice, RETRY_MESSAGE_PERMISSION_ID, true);
-        daoMock.setHasPermission(address(controller), alice, SWEEP_PERMISSION_ID, true);
+        daoMock.setHasPermission(
+            address(controller),
+            alice,
+            FORWARD_MESSAGE_PERMISSION_ID,
+            true
+        );
+        daoMock.setHasPermission(
+            address(controller),
+            alice,
+            UPDATE_CONFIG_PERMISSION_ID,
+            true
+        );
+        daoMock.setHasPermission(
+            address(controller),
+            alice,
+            RETRY_MESSAGE_PERMISSION_ID,
+            true
+        );
+        daoMock.setHasPermission(
+            address(controller),
+            alice,
+            SWEEP_PERMISSION_ID,
+            true
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -143,21 +145,25 @@ contract CrossChainControllerTest is Test {
 
     function _lane(
         address _local,
-        address _remote,
-        uint64 _bridgeChainId
+        address _remote
     ) internal pure returns (CrossChainController.ChainConfig memory) {
-        return CrossChainController.ChainConfig({
-            localAdapter: _local,
-            remoteAdapter: _remote,
-            bridgeChainId: _bridgeChainId
-        });
+        return
+            CrossChainController.ChainConfig({
+                localAdapter: _local,
+                remoteAdapter: _remote
+            });
     }
 
-    function _configureLane(uint256 _chainId, address _local, address _remote, uint64 _bridgeChainId) internal {
+    function _configureLane(
+        uint256 _chainId,
+        address _local,
+        address _remote
+    ) internal {
         uint256[] memory chainIds = new uint256[](1);
         chainIds[0] = _chainId;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(_local, _remote, _bridgeChainId);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(_local, _remote);
 
         vm.prank(alice);
         controller.updateConfig(chainIds, configs);
@@ -174,7 +180,9 @@ contract CrossChainControllerTest is Test {
     ///      TWO words: word 0 holds `localAdapter`; word 1 packs
     ///      `remoteAdapter` (low 20 bytes) with `bridgeChainId` (next 8
     ///      bytes). This returns word 0's slot; word 1 is `+ 1`.
-    function _chainConfigSlot(uint256 _chainId) internal pure returns (bytes32) {
+    function _chainConfigSlot(
+        uint256 _chainId
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode(_chainId, uint256(0)));
     }
 
@@ -189,36 +197,69 @@ contract CrossChainControllerTest is Test {
 
     function test_receiveMessage_revertsForCallerNotLocalAdapter() public {
         address random = makeAddr("random");
-        vm.expectRevert(abi.encodeWithSelector(Errors.CALLER_NOT_LOCAL_ADAPTER.selector, random));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.CALLER_NOT_LOCAL_ADAPTER.selector,
+                random
+            )
+        );
         vm.prank(random);
-        controller.receiveMessage(bytes32(uint256(1)), _emptyActionsPayload(), CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(1)),
+            _emptyActionsPayload(),
+            CHAIN_ID
+        );
     }
 
     function test_receiveMessage_revertsForUnregisteredContract() public {
         // A deployed contract that was never configured as a lane's local
         // adapter is just as unauthorized as an EOA.
-        AdapterMock strangerAdapter =
-            new AdapterMock(address(controller), address(0), 0, bytes32(0), feeSinkA, false, false);
-        vm.expectRevert(abi.encodeWithSelector(Errors.CALLER_NOT_LOCAL_ADAPTER.selector, address(strangerAdapter)));
+        AdapterMock strangerAdapter = new AdapterMock(
+            address(controller),
+            address(0),
+            0,
+            bytes32(0),
+            feeSinkA,
+            false,
+            false
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.CALLER_NOT_LOCAL_ADAPTER.selector,
+                address(strangerAdapter)
+            )
+        );
         vm.prank(address(strangerAdapter));
-        controller.receiveMessage(bytes32(uint256(1)), _emptyActionsPayload(), CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(1)),
+            _emptyActionsPayload(),
+            CHAIN_ID
+        );
     }
 
     function test_receiveMessage_succeedsForRegisteredLocalAdapter() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         bytes32 messageId = bytes32(uint256(42));
         vm.prank(address(adapterA));
-        bytes32 callId = controller.receiveMessage(messageId, _emptyActionsPayload(), CHAIN_ID);
+        bytes32 callId = controller.receiveMessage(
+            messageId,
+            _emptyActionsPayload(),
+            CHAIN_ID
+        );
 
         assertEq(callId, controller.deriveCallId(CHAIN_ID, messageId));
     }
 
     function test_receiveMessage_revertsIfMessageAlreadyPending() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         Action[] memory actions = new Action[](1);
-        actions[0] = Action({to: address(actionTarget), value: 0, data: abi.encodeCall(ActionExecute.fail, ())});
+        actions[0] = Action({
+            to: address(actionTarget),
+            value: 0,
+            data: abi.encodeCall(ActionExecute.fail, ())
+        });
         bytes memory payload = abi.encode(actions);
 
         bytes32 messageId = bytes32(uint256(7));
@@ -230,7 +271,12 @@ contract CrossChainControllerTest is Test {
 
         // Redelivering the same (originChainId, messageId) while the first
         // attempt is still pending must revert, not overwrite/duplicate it.
-        vm.expectRevert(abi.encodeWithSelector(Errors.MESSAGE_ALREADY_PENDING.selector, callId));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.MESSAGE_ALREADY_PENDING.selector,
+                callId
+            )
+        );
         vm.prank(address(adapterA));
         controller.receiveMessage(messageId, payload, CHAIN_ID);
     }
@@ -240,65 +286,113 @@ contract CrossChainControllerTest is Test {
     // -------------------------------------------------------------------------
 
     function test_updateConfig_rotatingLocalAdapterRevokesOldAdapter() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         vm.prank(address(adapterA));
-        controller.receiveMessage(bytes32(uint256(1)), _emptyActionsPayload(), CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(1)),
+            _emptyActionsPayload(),
+            CHAIN_ID
+        );
 
         // Rotate the lane to adapterB.
-        _configureLane(CHAIN_ID, address(adapterB), remoteAdapterB, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterB), remoteAdapterB);
 
-        assertFalse(controller.isRegisteredLocalAdapter(address(adapterA)));
-        assertEq(controller.localAdapterLaneCount(address(adapterA)), 0);
+        assertFalse(
+            controller.isRegisteredLocalAdapter(address(adapterA), CHAIN_ID)
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.CALLER_NOT_LOCAL_ADAPTER.selector, address(adapterA)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.CALLER_NOT_LOCAL_ADAPTER.selector,
+                address(adapterA)
+            )
+        );
         vm.prank(address(adapterA));
-        controller.receiveMessage(bytes32(uint256(2)), _emptyActionsPayload(), CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(2)),
+            _emptyActionsPayload(),
+            CHAIN_ID
+        );
 
         // The new adapter works.
         vm.prank(address(adapterB));
-        controller.receiveMessage(bytes32(uint256(3)), _emptyActionsPayload(), CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(3)),
+            _emptyActionsPayload(),
+            CHAIN_ID
+        );
     }
 
-    function test_updateConfig_refcountKeepsAdapterAuthorizedUntilBothLanesCleared() public {
+    function test_updateConfig_refcountKeepsAdapterAuthorizedUntilBothLanesCleared()
+        public
+    {
         // adapterA serves two lanes.
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
-        _configureLane(OTHER_CHAIN_ID, address(adapterA), remoteAdapterB, OTHER_BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
+        _configureLane(OTHER_CHAIN_ID, address(adapterA), remoteAdapterB);
 
-        assertEq(controller.localAdapterLaneCount(address(adapterA)), 2);
-        assertTrue(controller.isRegisteredLocalAdapter(address(adapterA)));
+        assertTrue(
+            controller.isRegisteredLocalAdapter(address(adapterA), CHAIN_ID)
+        );
 
         // Clear the first lane only; adapterA must remain authorized.
-        _configureLane(CHAIN_ID, address(0), address(0), 0);
+        _configureLane(CHAIN_ID, address(0), address(0));
 
-        assertEq(controller.localAdapterLaneCount(address(adapterA)), 1);
-        assertTrue(controller.isRegisteredLocalAdapter(address(adapterA)));
+        assertTrue(
+            controller.isRegisteredLocalAdapter(
+                address(adapterA),
+                OTHER_CHAIN_ID
+            )
+        );
 
         vm.prank(address(adapterA));
-        controller.receiveMessage(bytes32(uint256(1)), _emptyActionsPayload(), OTHER_CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(1)),
+            _emptyActionsPayload(),
+            OTHER_CHAIN_ID
+        );
 
         // Clear the second (last) lane; adapterA now loses authorization.
-        _configureLane(OTHER_CHAIN_ID, address(0), address(0), 0);
+        _configureLane(OTHER_CHAIN_ID, address(0), address(0));
 
-        assertEq(controller.localAdapterLaneCount(address(adapterA)), 0);
-        assertFalse(controller.isRegisteredLocalAdapter(address(adapterA)));
+        assertFalse(
+            controller.isRegisteredLocalAdapter(
+                address(adapterA),
+                OTHER_CHAIN_ID
+            )
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.CALLER_NOT_LOCAL_ADAPTER.selector, address(adapterA)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.CALLER_NOT_LOCAL_ADAPTER.selector,
+                address(adapterA)
+            )
+        );
         vm.prank(address(adapterA));
-        controller.receiveMessage(bytes32(uint256(2)), _emptyActionsPayload(), OTHER_CHAIN_ID);
+        controller.receiveMessage(
+            bytes32(uint256(2)),
+            _emptyActionsPayload(),
+            OTHER_CHAIN_ID
+        );
     }
 
-    function test_updateConfig_clearingLaneWithAllZeroConfigResetsMapping() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
-        _configureLane(CHAIN_ID, address(0), address(0), 0);
+    function test_updateConfig_clearingLaneWithAllZeroConfigResetsMapping()
+        public
+    {
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
+        _configureLane(CHAIN_ID, address(0), address(0));
 
-        (address local, address remote, uint64 bridgeChainId) = controller.chainToAdapter(CHAIN_ID);
+        (address local, address remote) = controller.chainToAdapter(CHAIN_ID);
         assertEq(local, address(0));
         assertEq(remote, address(0));
-        assertEq(bridgeChainId, 0);
 
         // A cleared lane is "unconfigured" again for sends.
-        vm.expectRevert(abi.encodeWithSelector(Errors.ADAPTER_NOT_CONFIGURED.selector, CHAIN_ID));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.ADAPTER_NOT_CONFIGURED.selector,
+                CHAIN_ID
+            )
+        );
         vm.prank(alice);
         controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
     }
@@ -311,8 +405,9 @@ contract CrossChainControllerTest is Test {
         uint256[] memory chainIds = new uint256[](2);
         chainIds[0] = CHAIN_ID;
         chainIds[1] = OTHER_CHAIN_ID;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(address(adapterA), remoteAdapterA);
 
         vm.expectRevert(Errors.INVALID_LENGTH_MISMATCH.selector);
         vm.prank(alice);
@@ -322,49 +417,49 @@ contract CrossChainControllerTest is Test {
     function test_updateConfig_revertsOnZeroChainId() public {
         uint256[] memory chainIds = new uint256[](1);
         chainIds[0] = 0;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(address(adapterA), remoteAdapterA);
 
         vm.expectRevert(Errors.INVALID_CHAIN_ID.selector);
         vm.prank(alice);
         controller.updateConfig(chainIds, configs);
     }
 
-    function test_updateConfig_revertsOnHalfConfiguredLane_missingRemote() public {
+    function test_updateConfig_revertsOnHalfConfiguredLane_missingRemote()
+        public
+    {
         uint256[] memory chainIds = new uint256[](1);
         chainIds[0] = CHAIN_ID;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(adapterA), address(0), BRIDGE_CHAIN_ID);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(address(adapterA), address(0));
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.INCOMPLETE_ADAPTER_CONFIG.selector, CHAIN_ID));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.INCOMPLETE_ADAPTER_CONFIG.selector,
+                CHAIN_ID
+            )
+        );
         vm.prank(alice);
         controller.updateConfig(chainIds, configs);
     }
 
-    function test_updateConfig_revertsOnHalfConfiguredLane_missingLocal() public {
+    function test_updateConfig_revertsOnHalfConfiguredLane_missingLocal()
+        public
+    {
         uint256[] memory chainIds = new uint256[](1);
         chainIds[0] = CHAIN_ID;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(0), remoteAdapterA, BRIDGE_CHAIN_ID);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(address(0), remoteAdapterA);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.INCOMPLETE_ADAPTER_CONFIG.selector, CHAIN_ID));
-        vm.prank(alice);
-        controller.updateConfig(chainIds, configs);
-    }
-
-    /// @dev NEW dimension introduced by `ChainConfig` gaining `bridgeChainId`:
-    ///      adapters set but the bridge-native id left at `0` is just as much
-    ///      a half-configured lane as a missing address would be -- `0` is
-    ///      the "unset" marker and would otherwise silently address bridge
-    ///      lane `0`. See `m)` below for the complementary "already stored,
-    ///      then zeroed by hand" scenario.
-    function test_updateConfig_revertsOnHalfConfiguredLane_missingBridgeChainId() public {
-        uint256[] memory chainIds = new uint256[](1);
-        chainIds[0] = CHAIN_ID;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(adapterA), remoteAdapterA, 0);
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.INCOMPLETE_ADAPTER_CONFIG.selector, CHAIN_ID));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.INCOMPLETE_ADAPTER_CONFIG.selector,
+                CHAIN_ID
+            )
+        );
         vm.prank(alice);
         controller.updateConfig(chainIds, configs);
     }
@@ -372,12 +467,17 @@ contract CrossChainControllerTest is Test {
     function test_updateConfig_revertsIfCallerUnauthorized() public {
         uint256[] memory chainIds = new uint256[](1);
         chainIds[0] = CHAIN_ID;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(address(adapterA), remoteAdapterA);
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                DaoUnauthorized.selector, address(daoMock), address(controller), bob, UPDATE_CONFIG_PERMISSION_ID
+                DaoUnauthorized.selector,
+                address(daoMock),
+                address(controller),
+                bob,
+                UPDATE_CONFIG_PERMISSION_ID
             )
         );
         vm.prank(bob);
@@ -387,11 +487,12 @@ contract CrossChainControllerTest is Test {
     function test_updateConfig_emitsConfigUpdatedWithCorrectPayload() public {
         uint256[] memory chainIds = new uint256[](1);
         chainIds[0] = CHAIN_ID;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = _lane(address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
+        configs[0] = _lane(address(adapterA), remoteAdapterA);
 
         vm.expectEmit(true, false, false, true, address(controller));
-        emit ConfigUpdated(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        emit ConfigUpdated(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         vm.prank(alice);
         controller.updateConfig(chainIds, configs);
@@ -411,27 +512,27 @@ contract CrossChainControllerTest is Test {
     // `(bytes32, address, uint256)`.
 
     function test_forwardMessage_revertsIfChainNotConfigured() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.ADAPTER_NOT_CONFIGURED.selector, CHAIN_ID));
-        vm.prank(alice);
-        controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
-    }
-
-    function test_forwardMessage_revertsIfLocalAdapterHasNoCode() public {
-        address codelessAdapter = makeAddr("codelessAdapter");
-        address codelessRemote = makeAddr("codelessRemote");
-        _configureLane(CHAIN_ID, codelessAdapter, codelessRemote, BRIDGE_CHAIN_ID);
-
-        assertEq(codelessAdapter.code.length, 0);
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.ADAPTER_HAS_NO_CODE.selector, codelessAdapter));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.ADAPTER_NOT_CONFIGURED.selector,
+                CHAIN_ID
+            )
+        );
         vm.prank(alice);
         controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
     }
 
     function test_forwardMessage_bubblesAdapterRevertReasonVerbatim() public {
-        AdapterMock revertingAdapter =
-            new AdapterMock(address(controller), address(0), 0, bytes32(0), feeSinkA, true, false);
-        _configureLane(CHAIN_ID, address(revertingAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        AdapterMock revertingAdapter = new AdapterMock(
+            address(controller),
+            address(0),
+            0,
+            bytes32(0),
+            feeSinkA,
+            true,
+            false
+        );
+        _configureLane(CHAIN_ID, address(revertingAdapter), remoteAdapterA);
 
         // `AdapterMock` reverts with a plain string reason; `forwardMessage`
         // must bubble that exact reason rather than swallowing it.
@@ -440,9 +541,11 @@ contract CrossChainControllerTest is Test {
         controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
     }
 
-    function test_forwardMessage_revertsWithMessageSendFailed_whenAdapterFailsWithNoReturnData() public {
+    function test_forwardMessage_revertsWithMessageSendFailed_whenAdapterFailsWithNoReturnData()
+        public
+    {
         RevertNoReasonAdapterStub badAdapter = new RevertNoReasonAdapterStub();
-        _configureLane(CHAIN_ID, address(badAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(badAdapter), remoteAdapterA);
 
         vm.expectRevert(Errors.MESSAGE_SEND_FAILED.selector);
         vm.prank(alice);
@@ -453,9 +556,11 @@ contract CrossChainControllerTest is Test {
     ///      cannot possibly be a valid `(bytes32 messageId, address feeToken,
     ///      uint256 fee)` triple. `forwardMessage` must fail loudly here too,
     ///      not `abi.decode` garbage and emit `MessageForwarded` with junk.
-    function test_forwardMessage_revertsWithMessageSendFailed_whenAdapterReturnsMalformedData() public {
+    function test_forwardMessage_revertsWithMessageSendFailed_whenAdapterReturnsMalformedData()
+        public
+    {
         ShortReturnAdapterStub badAdapter = new ShortReturnAdapterStub();
-        _configureLane(CHAIN_ID, address(badAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(badAdapter), remoteAdapterA);
 
         vm.expectRevert(Errors.MESSAGE_SEND_FAILED.selector);
         vm.prank(alice);
@@ -467,36 +572,45 @@ contract CrossChainControllerTest is Test {
     // -------------------------------------------------------------------------
 
     function test_forwardMessage_revertsIfCallerUnauthorized() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                DaoUnauthorized.selector, address(daoMock), address(controller), bob, FORWARD_MESSAGE_PERMISSION_ID
+                DaoUnauthorized.selector,
+                address(daoMock),
+                address(controller),
+                bob,
+                FORWARD_MESSAGE_PERMISSION_ID
             )
         );
         vm.prank(bob);
         controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
     }
 
-    function test_forwardMessage_happyPathEmitsMessageForwardedAndReturnsMessageId() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+    function test_forwardMessage_happyPathEmitsMessageForwardedAndReturnsMessageId()
+        public
+    {
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
         bytes32 expectedMessageId = bytes32(uint256(1)); // adapterA's immutable messageId, set in setUp
 
         bytes memory message = abi.encode("hello");
 
-        // Emitted from inside the delegatecalled adapter code -- under
-        // delegatecall the log's address is the CONTROLLER (see the event
-        // redeclaration comment above), and `bridgeChainId`/`receiver` here
-        // are exactly what the controller supplied as arguments, proving
-        // they reached the adapter correctly.
         vm.expectEmit(true, true, true, true, address(controller));
-        emit SendMessageCalled(address(controller), remoteAdapterA, BRIDGE_CHAIN_ID, GAS_LIMIT, message, 0);
-
-        vm.expectEmit(true, true, true, true, address(controller));
-        emit MessageForwarded(CHAIN_ID, expectedMessageId, address(adapterA), remoteAdapterA, GAS_LIMIT, address(0), 0);
+        emit MessageForwarded(
+            CHAIN_ID,
+            expectedMessageId,
+            address(adapterA),
+            remoteAdapterA,
+            GAS_LIMIT,
+            0
+        );
 
         vm.prank(alice);
-        bytes32 messageId = controller.forwardMessage(CHAIN_ID, GAS_LIMIT, message);
+        bytes32 messageId = controller.forwardMessage(
+            CHAIN_ID,
+            GAS_LIMIT,
+            message
+        );
 
         assertEq(messageId, expectedMessageId);
     }
@@ -514,23 +628,47 @@ contract CrossChainControllerTest is Test {
     // own balance never moves at all -- there is nothing to hand over and
     // nothing that could be stranded on the adapter.
 
-    function test_forwardMessage_nativeFee_revertsIfControllerBalanceInsufficient() public {
-        AdapterMock nativeFeeAdapter =
-            new AdapterMock(address(controller), address(0), 1 ether, bytes32(uint256(3)), feeSinkA, false, false);
-        _configureLane(CHAIN_ID, address(nativeFeeAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+    function test_forwardMessage_nativeFee_revertsIfControllerBalanceInsufficient()
+        public
+    {
+        AdapterMock nativeFeeAdapter = new AdapterMock(
+            address(controller),
+            address(0),
+            1 ether,
+            bytes32(uint256(3)),
+            feeSinkA,
+            false,
+            false
+        );
+        _configureLane(CHAIN_ID, address(nativeFeeAdapter), remoteAdapterA);
         // Controller holds 0 native.
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.INSUFFICIENT_FEE_BALANCE.selector, address(0), 1 ether, 0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.INSUFFICIENT_FEE_BALANCE.selector,
+                address(0),
+                1 ether,
+                0
+            )
+        );
         vm.prank(alice);
         controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
     }
 
-    function test_forwardMessage_nativeFee_feeMovesDirectlyFromControllerToSink_adapterBalanceUntouched() public {
+    function test_forwardMessage_nativeFee_feeMovesDirectlyFromControllerToSink_adapterBalanceUntouched()
+        public
+    {
         uint256 requiredFee = 1 ether;
         AdapterMock nativeFeeAdapter = new AdapterMock(
-            address(controller), address(0), requiredFee, bytes32(uint256(3)), feeSinkA, false, false
+            address(controller),
+            address(0),
+            requiredFee,
+            bytes32(uint256(3)),
+            feeSinkA,
+            false,
+            false
         );
-        _configureLane(CHAIN_ID, address(nativeFeeAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(nativeFeeAdapter), remoteAdapterA);
         vm.deal(address(controller), requiredFee + 3 ether); // extra buffer left untouched
 
         vm.prank(alice);
@@ -543,26 +681,47 @@ contract CrossChainControllerTest is Test {
         assertEq(address(nativeFeeAdapter).balance, 0);
     }
 
-    function test_forwardMessage_erc20Fee_revertsIfControllerBalanceInsufficient() public {
+    function test_forwardMessage_erc20Fee_revertsIfControllerBalanceInsufficient()
+        public
+    {
         AdapterMock erc20FeeAdapter = new AdapterMock(
-            address(controller), address(feeToken), 100 ether, bytes32(uint256(4)), feeSinkB, false, false
+            address(controller),
+            address(feeToken),
+            100 ether,
+            bytes32(uint256(4)),
+            feeSinkB,
+            false,
+            false
         );
-        _configureLane(CHAIN_ID, address(erc20FeeAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(erc20FeeAdapter), remoteAdapterA);
         // Controller holds 0 of feeToken.
 
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.INSUFFICIENT_FEE_BALANCE.selector, address(feeToken), 100 ether, 0)
+            abi.encodeWithSelector(
+                Errors.INSUFFICIENT_FEE_BALANCE.selector,
+                address(feeToken),
+                100 ether,
+                0
+            )
         );
         vm.prank(alice);
         controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
     }
 
-    function test_forwardMessage_erc20Fee_feeMovesDirectlyFromControllerToSink_adapterBalanceUntouched() public {
+    function test_forwardMessage_erc20Fee_feeMovesDirectlyFromControllerToSink_adapterBalanceUntouched()
+        public
+    {
         uint256 requiredFee = 100 ether;
         AdapterMock erc20FeeAdapter = new AdapterMock(
-            address(controller), address(feeToken), requiredFee, bytes32(uint256(4)), feeSinkB, false, false
+            address(controller),
+            address(feeToken),
+            requiredFee,
+            bytes32(uint256(4)),
+            feeSinkB,
+            false,
+            false
         );
-        _configureLane(CHAIN_ID, address(erc20FeeAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(erc20FeeAdapter), remoteAdapterA);
         feeToken.setBalance(address(controller), requiredFee + 1 ether); // extra buffer left untouched
 
         vm.prank(alice);
@@ -579,11 +738,17 @@ contract CrossChainControllerTest is Test {
     // g) Defensive receive / retry
     // -------------------------------------------------------------------------
 
-    function test_receiveMessage_capturesRevertingPayloadInsteadOfReverting() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+    function test_receiveMessage_capturesRevertingPayloadInsteadOfReverting()
+        public
+    {
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         Action[] memory actions = new Action[](1);
-        actions[0] = Action({to: address(actionTarget), value: 0, data: abi.encodeCall(ActionExecute.fail, ())});
+        actions[0] = Action({
+            to: address(actionTarget),
+            value: 0,
+            data: abi.encodeCall(ActionExecute.fail, ())
+        });
         bytes memory payload = abi.encode(actions);
 
         bytes32 messageId = bytes32(uint256(55));
@@ -591,24 +756,39 @@ contract CrossChainControllerTest is Test {
         // `CrossChainControllerDAOMock.execute` bubbles the low-level call's
         // raw returndata on failure, which is `ActionExecute.fail`'s
         // `Error(string)`-encoded revert reason.
-        bytes memory expectedReason = abi.encodeWithSignature("Error(string)", "ActionExecute:Revert");
+        bytes memory expectedReason = abi.encodeWithSignature(
+            "Error(string)",
+            "ActionExecute:Revert"
+        );
 
         vm.expectEmit(true, true, true, true, address(controller));
-        emit MessageExecutionFailed(CHAIN_ID, messageId, expectedCallId, expectedReason);
+        emit MessageExecutionFailed(
+            CHAIN_ID,
+            messageId,
+            expectedCallId,
+            expectedReason
+        );
 
         vm.prank(address(adapterA));
-        bytes32 callId = controller.receiveMessage(messageId, payload, CHAIN_ID); // must NOT revert
+        bytes32 callId = controller.receiveMessage(
+            messageId,
+            payload,
+            CHAIN_ID
+        ); // must NOT revert
         assertEq(callId, expectedCallId);
 
-        CrossChainController.FailedMessage memory failed = controller.getFailedMessage(callId);
+        CrossChainController.FailedMessage memory failed = controller
+            .getFailedMessage(callId);
         assertTrue(failed.pending);
         assertEq(failed.originChainId, CHAIN_ID);
         assertEq(failed.messageId, messageId);
         assertEq(failed.payload, payload);
     }
 
-    function test_receiveMessage_capturesMalformedPayloadInsteadOfReverting() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+    function test_receiveMessage_capturesMalformedPayloadInsteadOfReverting()
+        public
+    {
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         // Not a valid ABI-encoding of `Action[]`.
         bytes memory garbage = hex"deadbeef";
@@ -623,18 +803,26 @@ contract CrossChainControllerTest is Test {
         emit MessageExecutionFailed(CHAIN_ID, messageId, expectedCallId, "");
 
         vm.prank(address(adapterA));
-        bytes32 callId = controller.receiveMessage(messageId, garbage, CHAIN_ID); // must NOT revert
+        bytes32 callId = controller.receiveMessage(
+            messageId,
+            garbage,
+            CHAIN_ID
+        ); // must NOT revert
         assertEq(callId, expectedCallId);
         assertTrue(controller.getFailedMessage(callId).pending);
     }
 
     function test_retryFailedMessage_revertsIfCallerUnauthorized() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
         bytes32 callId = _causeFailure(bytes32(uint256(60)));
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                DaoUnauthorized.selector, address(daoMock), address(controller), bob, RETRY_MESSAGE_PERMISSION_ID
+                DaoUnauthorized.selector,
+                address(daoMock),
+                address(controller),
+                bob,
+                RETRY_MESSAGE_PERMISSION_ID
             )
         );
         vm.prank(bob);
@@ -643,17 +831,28 @@ contract CrossChainControllerTest is Test {
 
     function test_retryFailedMessage_revertsForUnknownCallId() public {
         bytes32 unknownCallId = keccak256("nope");
-        vm.expectRevert(abi.encodeWithSelector(Errors.NO_FAILED_MESSAGE.selector, unknownCallId));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.NO_FAILED_MESSAGE.selector,
+                unknownCallId
+            )
+        );
         vm.prank(alice);
         controller.retryFailedMessage(unknownCallId);
     }
 
-    function test_retryFailedMessage_succeedsOnceFailureConditionRemoved() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+    function test_retryFailedMessage_succeedsOnceFailureConditionRemoved()
+        public
+    {
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         FlakyTarget flaky = new FlakyTarget();
         Action[] memory actions = new Action[](1);
-        actions[0] = Action({to: address(flaky), value: 0, data: abi.encodeCall(FlakyTarget.maybeRevert, ())});
+        actions[0] = Action({
+            to: address(flaky),
+            value: 0,
+            data: abi.encodeCall(FlakyTarget.maybeRevert, ())
+        });
         bytes memory payload = abi.encode(actions);
 
         bytes32 messageId = bytes32(uint256(61));
@@ -672,16 +871,23 @@ contract CrossChainControllerTest is Test {
         vm.prank(alice);
         controller.retryFailedMessage(callId);
 
-        CrossChainController.FailedMessage memory cleared = controller.getFailedMessage(callId);
+        CrossChainController.FailedMessage memory cleared = controller
+            .getFailedMessage(callId);
         assertFalse(cleared.pending);
         assertTrue(flaky.wasCalled());
     }
 
     /// @dev Delivers a message whose payload always fails, leaving a stored
     ///      `FailedMessage` at the returned call id.
-    function _causeFailure(bytes32 _messageId) internal returns (bytes32 callId) {
+    function _causeFailure(
+        bytes32 _messageId
+    ) internal returns (bytes32 callId) {
         Action[] memory actions = new Action[](1);
-        actions[0] = Action({to: address(actionTarget), value: 0, data: abi.encodeCall(ActionExecute.fail, ())});
+        actions[0] = Action({
+            to: address(actionTarget),
+            value: 0,
+            data: abi.encodeCall(ActionExecute.fail, ())
+        });
         bytes memory payload = abi.encode(actions);
 
         vm.prank(address(adapterA));
@@ -693,7 +899,12 @@ contract CrossChainControllerTest is Test {
     // -------------------------------------------------------------------------
 
     function test_executeActions_revertsIfCallerNotSelf() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.CALLER_NOT_SELF.selector, address(this)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.CALLER_NOT_SELF.selector,
+                address(this)
+            )
+        );
         controller.executeActions(bytes32(0), _emptyActionsPayload());
     }
 
@@ -703,7 +914,13 @@ contract CrossChainControllerTest is Test {
 
     function test_sweep_revertsIfCallerUnauthorized() public {
         vm.expectRevert(
-            abi.encodeWithSelector(DaoUnauthorized.selector, address(daoMock), address(controller), bob, SWEEP_PERMISSION_ID)
+            abi.encodeWithSelector(
+                DaoUnauthorized.selector,
+                address(daoMock),
+                address(controller),
+                bob,
+                SWEEP_PERMISSION_ID
+            )
         );
         vm.prank(bob);
         controller.sweep(address(0), bob, 1 ether);
@@ -755,10 +972,16 @@ contract CrossChainControllerTest is Test {
         assertEq(callId1, callId2);
         assertEq(callId1, keccak256(abi.encode(CHAIN_ID, messageId)));
 
-        bytes32 differentChain = controller.deriveCallId(OTHER_CHAIN_ID, messageId);
+        bytes32 differentChain = controller.deriveCallId(
+            OTHER_CHAIN_ID,
+            messageId
+        );
         assertTrue(callId1 != differentChain);
 
-        bytes32 differentMessage = controller.deriveCallId(CHAIN_ID, bytes32(uint256(124)));
+        bytes32 differentMessage = controller.deriveCallId(
+            CHAIN_ID,
+            bytes32(uint256(124))
+        );
         assertTrue(callId1 != differentMessage);
     }
 
@@ -776,18 +999,25 @@ contract CrossChainControllerTest is Test {
     // assert byte-for-byte equality, plus the equivalent public getters.
 
     function test_forwardMessage_doesNotCollideWithControllerStorage() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
         // Bundled into arrays / a single hash on purpose: enough distinct
         // named locals here (six raw slots, the three `ChainConfig` fields
         // twice over, plus lane-count/registration) trips solc 0.8.17's
         // "stack too deep" with the optimizer configuration this repo pins.
-        bytes32[] memory slots = _controllerSnapshotSlots(CHAIN_ID, address(adapterA));
+        bytes32[] memory slots = _controllerSnapshotSlots(
+            CHAIN_ID,
+            address(adapterA)
+        );
         bytes32[] memory valuesBefore = _loadAll(slots);
         bytes32 gettersHashBefore = _gettersHash(CHAIN_ID, address(adapterA));
 
         vm.prank(alice);
-        bytes32 messageId = controller.forwardMessage(CHAIN_ID, GAS_LIMIT, abi.encode("no collision"));
+        bytes32 messageId = controller.forwardMessage(
+            CHAIN_ID,
+            GAS_LIMIT,
+            abi.encode("no collision")
+        );
         // Sanity: the send actually happened, this isn't vacuously true.
         assertEq(messageId, bytes32(uint256(1)));
 
@@ -816,7 +1046,9 @@ contract CrossChainControllerTest is Test {
         slots[5] = _laneCountSlot(_adapter);
     }
 
-    function _loadAll(bytes32[] memory _slots) internal view returns (bytes32[] memory values) {
+    function _loadAll(
+        bytes32[] memory _slots
+    ) internal view returns (bytes32[] memory values) {
         values = new bytes32[](_slots.length);
         for (uint256 i = 0; i < _slots.length; i++) {
             values[i] = vm.load(address(controller), _slots[i]);
@@ -825,17 +1057,19 @@ contract CrossChainControllerTest is Test {
 
     /// @dev Collapses every public getter relevant to a lane/adapter into one
     ///      hash, so before/after comparisons need one local instead of five.
-    function _gettersHash(uint256 _chainId, address _adapter) internal view returns (bytes32) {
-        (address local, address remote, uint64 bridgeChainId) = controller.chainToAdapter(_chainId);
-        return keccak256(
-            abi.encode(
-                local,
-                remote,
-                bridgeChainId,
-                controller.localAdapterLaneCount(_adapter),
-                controller.isRegisteredLocalAdapter(_adapter)
-            )
-        );
+    function _gettersHash(
+        uint256 _chainId,
+        address _adapter
+    ) internal view returns (bytes32) {
+        (address local, address remote) = controller.chainToAdapter(_chainId);
+        return
+            keccak256(
+                abi.encode(
+                    local,
+                    remote,
+                    controller.isRegisteredLocalAdapter(_adapter, _chainId)
+                )
+            );
     }
 
     // -------------------------------------------------------------------------
@@ -843,7 +1077,9 @@ contract CrossChainControllerTest is Test {
     //    delegatecall, not the controller's storage
     // -------------------------------------------------------------------------
 
-    function test_forwardMessage_immutablesResolveToConfiguredAdapter_notTheOtherOne_notZero() public {
+    function test_forwardMessage_immutablesResolveToConfiguredAdapter_notTheOtherOne_notZero()
+        public
+    {
         address sinkX = makeAddr("sinkX");
         address sinkY = makeAddr("sinkY");
         bytes32 messageIdX = bytes32(uint256(111));
@@ -852,11 +1088,26 @@ contract CrossChainControllerTest is Test {
         // adapterX: native fee. adapterY: ERC20 fee, different amount,
         // different messageId, different sink. Only adapterX is ever wired
         // into a lane.
-        AdapterMock adapterX = new AdapterMock(address(controller), address(0), 1 ether, messageIdX, sinkX, false, false);
-        AdapterMock adapterY =
-            new AdapterMock(address(controller), address(feeToken), 2 ether, messageIdY, sinkY, false, false);
+        AdapterMock adapterX = new AdapterMock(
+            address(controller),
+            address(0),
+            1 ether,
+            messageIdX,
+            sinkX,
+            false,
+            false
+        );
+        AdapterMock adapterY = new AdapterMock(
+            address(controller),
+            address(feeToken),
+            2 ether,
+            messageIdY,
+            sinkY,
+            false,
+            false
+        );
 
-        _configureLane(CHAIN_ID, address(adapterX), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(adapterX), remoteAdapterA);
 
         // Fund the controller for BOTH adapters' fees, so a bug that read
         // adapterY's immutables (or the controller's own storage, which has
@@ -867,7 +1118,11 @@ contract CrossChainControllerTest is Test {
         feeToken.setBalance(address(controller), 2 ether);
 
         vm.prank(alice);
-        bytes32 messageId = controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
+        bytes32 messageId = controller.forwardMessage(
+            CHAIN_ID,
+            GAS_LIMIT,
+            _emptyActionsPayload()
+        );
 
         assertEq(messageId, messageIdX);
         assertTrue(messageId != messageIdY);
@@ -886,87 +1141,47 @@ contract CrossChainControllerTest is Test {
     }
 
     // -------------------------------------------------------------------------
-    // m) NEW -- an unconfigured/zeroed bridgeChainId can never silently send
-    //    to bridge lane 0
-    // -------------------------------------------------------------------------
-    //
-    // `test_updateConfig_revertsOnHalfConfiguredLane_missingBridgeChainId`
-    // above already proves `updateConfig` rejects `bridgeChainId == 0` with
-    // adapters set. This section proves the second half: even if a lane's
-    // packed word were force-corrupted to zero the `bridgeChainId` bits
-    // directly in storage (bypassing `updateConfig` entirely), the send path
-    // still refuses to dispatch rather than silently addressing selector `0`.
-
-    function test_forwardMessage_revertsIfBridgeChainIdZeroedDirectlyInStorage() public {
-        _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA, BRIDGE_CHAIN_ID);
-
-        bytes32 configWord1Slot = bytes32(uint256(_chainConfigSlot(CHAIN_ID)) + 1);
-        bytes32 packed = vm.load(address(controller), configWord1Slot);
-
-        // Word 1 is `remoteAdapter` (low 160 bits) | `bridgeChainId` (next 64
-        // bits) | padding. Keep the low 160 bits (remoteAdapter), zero
-        // everything above (bridgeChainId + padding).
-        bytes32 zeroedBridgeChainId = bytes32(uint256(packed) & ((uint256(1) << 160) - 1));
-        vm.store(address(controller), configWord1Slot, zeroedBridgeChainId);
-
-        (address local, address remote, uint64 bridgeChainId) = controller.chainToAdapter(CHAIN_ID);
-        assertEq(local, address(adapterA)); // untouched
-        assertEq(remote, remoteAdapterA); // untouched
-        assertEq(bridgeChainId, 0); // corrupted to the "unset" marker
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.ADAPTER_NOT_CONFIGURED.selector, CHAIN_ID));
-        vm.prank(alice);
-        controller.forwardMessage(CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
-    }
-
-    // -------------------------------------------------------------------------
     // n) NEW -- an adapter's send path refuses to run outside a delegatecall
     //    from its owning controller
     // -------------------------------------------------------------------------
 
-    function test_adapterSendMessage_revertsIfCalledDirectlyNotViaControllerDelegatecall() public {
+    function test_adapterSendMessage_revertsIfCalledDirectlyNotViaControllerDelegatecall()
+        public
+    {
         // Calling `adapterA.sendMessage(...)` directly (a normal `call`, not
         // a `delegatecall` from `controller`) means `address(this)` inside
         // the adapter's code is the ADAPTER itself, which the guard rejects:
         // using the adapter's own (empty) balance and having the bridge see
         // the adapter -- not the controller -- as sender would be wrong.
-        vm.expectRevert(abi.encodeWithSelector(Errors.SEND_PATH_NOT_DELEGATECALLED.selector, address(adapterA)));
-        adapterA.sendMessage(remoteAdapterA, BRIDGE_CHAIN_ID, GAS_LIMIT, _emptyActionsPayload());
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.SEND_PATH_NOT_DELEGATECALLED.selector,
+                address(adapterA)
+            )
+        );
+        adapterA.sendMessage(
+            remoteAdapterA,
+            BRIDGE_CHAIN_ID,
+            GAS_LIMIT,
+            _emptyActionsPayload()
+        );
     }
 
-    // -------------------------------------------------------------------------
-    // o) NEW -- residual risk (documentation, not mitigation)
-    // -------------------------------------------------------------------------
-
-    /// @notice DOCUMENTS security-review finding 7. This is EXPECTED,
-    ///         ACCEPTED behaviour of the `delegatecall` send design -- it is
-    ///         NOT a bug for the contract to fix, and this test is not
-    ///         supposed to ever start failing as a "regression". It exists so
-    ///         that:
-    ///          1. the blast radius of `UPDATE_CONFIG_PERMISSION` is provable
-    ///             rather than asserted in a comment, and
-    ///          2. nobody "fixes" this test by loosening it if a future
-    ///             change accidentally narrows the actual risk -- if this
-    ///             test starts failing because the takeover no longer works,
-    ///             that is a MEANINGFUL change to re-review, not noise.
-    ///
-    ///         See the NatSpec on `CrossChainController.UPDATE_CONFIG_PERMISSION_ID`:
-    ///         this permission is effectively root on the DAO precisely
-    ///         because `forwardMessage` executes the configured local
-    ///         adapter's code in the controller's own context. Whoever can
-    ///         set `localAdapter` can (a) overwrite ANY controller storage
-    ///         slot and (b) make the DAO execute ANY action, since the
-    ///         controller holds `EXECUTE_PERMISSION` on it. The only real
-    ///         mitigation is operational: grant `UPDATE_CONFIG_PERMISSION` to
-    ///         the DAO itself ONLY, reachable exclusively through a passed
-    ///         proposal.
-    function test_residualRisk_maliciousAdapterCanCorruptControllerAndExecuteOnDAO() public {
+    function test_residualRisk_maliciousAdapterCanCorruptControllerAndExecuteOnDAO()
+        public
+    {
         PwnTarget target = new PwnTarget();
-        bytes32 arbitrarySlot = keccak256("some arbitrary controller storage slot");
+        bytes32 arbitrarySlot = keccak256(
+            "some arbitrary controller storage slot"
+        );
         bytes32 arbitraryValue = bytes32(uint256(0xDEADBEEF));
 
         MaliciousAdapterMock evilAdapter = new MaliciousAdapterMock(
-            address(controller), address(daoMock), address(target), arbitrarySlot, arbitraryValue
+            address(controller),
+            address(daoMock),
+            address(target),
+            arbitrarySlot,
+            arbitraryValue
         );
 
         // `CrossChainControllerDAOMock.execute` in this suite performs the
@@ -975,13 +1190,18 @@ contract CrossChainControllerTest is Test {
         // for documentation parity with production, where the controller
         // holding `EXECUTE_PERMISSION` on its DAO is exactly what makes this
         // finding devastating rather than merely embarrassing.
-        daoMock.setHasPermission(address(daoMock), address(controller), keccak256("EXECUTE_PERMISSION"), true);
+        daoMock.setHasPermission(
+            address(daoMock),
+            address(controller),
+            keccak256("EXECUTE_PERMISSION"),
+            true
+        );
 
         // Anyone holding UPDATE_CONFIG_PERMISSION -- alice, per setUp --
         // points a lane at the malicious "adapter". In production this
         // permission must be DAO-only; the contract cannot and does not
         // enforce that itself.
-        _configureLane(CHAIN_ID, address(evilAdapter), remoteAdapterA, BRIDGE_CHAIN_ID);
+        _configureLane(CHAIN_ID, address(evilAdapter), remoteAdapterA);
 
         assertEq(vm.load(address(controller), arbitrarySlot), bytes32(0));
         assertFalse(target.pwned());
@@ -1025,9 +1245,9 @@ contract FlakyTarget {
 ///      real adapter.
 contract ShortReturnAdapterStub {
     function sendMessage(
-        address, /* receiver */
-        uint64, /* bridgeChainId */
-        uint256, /* gasLimit */
+        address /* receiver */,
+        uint64 /* bridgeChainId */,
+        uint256 /* gasLimit */,
         bytes calldata /* message */
     ) external payable returns (bool) {
         return true;
@@ -1040,9 +1260,9 @@ contract ShortReturnAdapterStub {
 ///      (as opposed to the "reason bubbled verbatim" branch).
 contract RevertNoReasonAdapterStub {
     function sendMessage(
-        address, /* receiver */
-        uint64, /* bridgeChainId */
-        uint256, /* gasLimit */
+        address /* receiver */,
+        uint64 /* bridgeChainId */,
+        uint256 /* gasLimit */,
         bytes calldata /* message */
     ) external payable returns (bytes32, address, uint256) {
         revert();

@@ -32,7 +32,7 @@ contract AdapterMock is IBaseAdapter {
     event SendMessageCalled(
         address context,
         address receiver,
-        uint64 bridgeChainId,
+        uint256 destinationChainId,
         uint256 gasLimit,
         bytes message,
         uint256 value
@@ -86,11 +86,11 @@ contract AdapterMock is IBaseAdapter {
 
     function quoteFee(
         address _receiver,
-        uint64 _bridgeChainId,
+        uint256 _destinationChainId,
         uint256 _gasLimit,
         bytes calldata _message
     ) external view override returns (address, uint256) {
-        (_receiver, _bridgeChainId, _gasLimit, _message);
+        (_receiver, _destinationChainId, _gasLimit, _message);
         // solhint-disable-next-line custom-errors, reason-string
         if (_revertOnQuote) revert("AdapterMock: quoteFee reverted");
         return (_feeToken, _fee);
@@ -101,22 +101,17 @@ contract AdapterMock is IBaseAdapter {
     ///      and moves the fee out of it.
     function sendMessage(
         address _receiver,
-        uint64 _bridgeChainId,
+        uint256 _destinationChainId,
         uint256 _gasLimit,
         bytes calldata _message
-    )
-        external
-        payable
-        override
-        returns (bytes32 messageId, address feeToken, uint256 fee)
-    {
+    ) external payable override returns (bytes32 messageId, uint256 fee) {
         if (address(this) != _controller) {
             revert Errors.SEND_PATH_NOT_DELEGATECALLED(address(this));
         }
         // solhint-disable-next-line custom-errors, reason-string
         if (_revertOnSend) revert("AdapterMock: sendMessage reverted");
 
-        feeToken = _feeToken;
+        address feeToken = _feeToken;
         fee = _fee;
 
         if (feeToken == address(0)) {
@@ -152,7 +147,7 @@ contract AdapterMock is IBaseAdapter {
         emit SendMessageCalled(
             address(this),
             _receiver,
-            _bridgeChainId,
+            _destinationChainId,
             _gasLimit,
             _message,
             msg.value

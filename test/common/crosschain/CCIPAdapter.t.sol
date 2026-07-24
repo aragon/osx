@@ -11,86 +11,60 @@ import {
 } from "@chainlink/contracts-ccip/contracts/interfaces/IAny2EVMMessageReceiver.sol";
 import {Client} from "@chainlink/contracts-ccip/contracts/libraries/Client.sol";
 
-import {CCIPAdapter} from "../../../src/common/crosschain/adapters/CCIP/CCIPAdapter.sol";
-import {IBaseAdapter} from "../../../src/common/crosschain/adapters/IBaseAdapter.sol";
-import {CrossChainController} from "../../../src/common/crosschain/CrossChainController.sol";
+import {
+    CCIPAdapter
+} from "../../../src/common/crosschain/adapters/CCIP/CCIPAdapter.sol";
+import {
+    BaseAdapter
+} from "../../../src/common/crosschain/adapters/BaseAdapter.sol";
+import {
+    IBaseAdapter
+} from "../../../src/common/crosschain/adapters/IBaseAdapter.sol";
+import {
+    CrossChainController
+} from "../../../src/common/crosschain/CrossChainController.sol";
 import {Errors} from "../../../src/common/crosschain/lib/Errors.sol";
+import {ChainIds} from "../../../src/common/crosschain/lib/ChainIds.sol";
 import {DaoUnauthorized} from "../../../src/common/permission/auth/auth.sol";
 import {Action} from "../../../src/common/executors/IExecutor.sol";
 import {IDAO} from "../../../src/common/dao/IDAO.sol";
 
 import {DAOMock} from "../../mocks/commons/dao/DAOMock.sol";
 import {ERC20Mock} from "../../mocks/commons/token/ERC20Mock.sol";
-import {CCIPRouterMock} from "../../mocks/commons/crosschain/CCIPRouterMock.sol";
-import {DelegateCallerMock} from "../../mocks/commons/crosschain/DelegateCallerMock.sol";
+import {
+    CCIPRouterMock
+} from "../../mocks/commons/crosschain/CCIPRouterMock.sol";
+import {
+    DelegateCallerMock
+} from "../../mocks/commons/crosschain/DelegateCallerMock.sol";
 
-/// @notice Regression suite for `CCIPAdapter` (`src/common/crosschain/adapters/CCIP/CCIPAdapter.sol`)
-///         written against "Option 1": SEND is now a `delegatecall` from
-///         `CrossChainController.forwardMessage` into the local adapter, while
-///         RECEIVE stays a normal call from the CCIP Router into the adapter.
-///
-/// TWO DIFFERENT KINDS OF "REMOTE" ADDRESS APPEAR THROUGHOUT THIS FILE. Naming
-/// is deliberately verbose to keep them apart:
-///   - `remoteController` -- the remote chain's `CrossChainController`. Because
-///     the local send is a `delegatecall`, the account CCIP sees calling
-///     `ccipSend` on the source chain is the source CONTROLLER, so THIS is what
-///     `_trustedRemotes[chainId]` must hold on the receiving adapter.
-///   - `remoteAdapter` -- the remote chain's `CCIPAdapter`, i.e. the bridge-level
-///     RECEIVER. This is what `CrossChainController.chainToAdapter[chainId].remoteAdapter`
-///     stores locally, as the destination `ccipSend` targets.
-///   Confusing the two -- trusting the remote ADAPTER instead of the remote
-///   CONTROLLER -- is a silent, total loss of inbound liveness, and is
-///   explicitly exercised below (`assertTrustedRemotesMatchControllers`,
-///   `TRUSTED_REMOTE_IS_REMOTE_ADAPTER`, and the plain `ccipReceive` misconfig
-///   test).
-///
-/// Setup mirrors production wiring: a `DAOMock` owns a real
-/// `CrossChainController`, and every `CCIPAdapter` adopts that controller's DAO
-/// in its constructor (`BaseAdapter` -> `DaoAuthorizable`).
-///
-/// Coverage:
-///  a) `_forwardMessage` is not externally callable.
-///  b) `ccipReceive` caller / trusted-remote checks and the success path.
-///  c) chain-id <-> CCIP-selector mapping, incl. re-pointing and clearing.
-///  d) `sendMessage` can ONLY be reached via `delegatecall` from the
-///     controller -- never directly, not even by the controller itself via a
-///     plain `call`.
-///  e) fee handling: the CONTROLLER pays and never hands custody to the
-///     adapter, for both native and ERC20 fees.
-///  f) config setters (receive-side only) are permissioned and emit events.
-///  g) `assertTrustedRemotesMatchControllers` / `assertChainSelectorsMatchController`
-///     deployment-time consistency helpers.
-///  h) ERC-165 `supportsInterface`.
-///  i) an end-to-end send through `CrossChainController.forwardMessage`.
-///  j) constructor validation.
-///  k) NEW, and the actual point of this redesign: immutables surviving
-///     `delegatecall`, no storage collision with the controller, the fee
-///     payer being the controller and not the adapter, and the operational
-///     consequences of the send/receive config living in two places
-///     (desync, and the fee-token-is-immutable trade-off).
 contract CCIPAdapterTest is Test {
     // -------------------------------------------------------------------------
     // Real CCIP chain selectors / standard chain ids used throughout.
     // -------------------------------------------------------------------------
+
     uint64 internal constant SEL_ETH_MAINNET = 5009297550715157269;
     uint64 internal constant SEL_BASE = 15971525489660198786;
     uint64 internal constant SEL_ARBITRUM_ONE = 4949039107694359620;
+    // A real CCIP selector the adapter does NOT map (Sepolia is intentionally
+    // absent from the production map), used to exercise the unmapped path.
     uint64 internal constant SEL_SEPOLIA = 16015286601757825753;
-    uint64 internal constant SEL_BASE_SEPOLIA = 10344971235874465080;
 
-    uint256 internal constant CHAIN_ETH_MAINNET = 1;
-    uint256 internal constant CHAIN_BASE = 8453;
-    uint256 internal constant CHAIN_ARBITRUM_ONE = 42161;
-    uint256 internal constant CHAIN_SEPOLIA = 11155111;
+    // Standard chain ids come from `ChainIds` (src/common/crosschain/lib).
+    uint256 internal constant CHAIN_ETH_MAINNET = ChainIds.ETHEREUM;
+    uint256 internal constant CHAIN_BASE = ChainIds.BASE;
+    uint256 internal constant CHAIN_ARBITRUM_ONE = ChainIds.ARBITRUM_ONE;
 
     // -------------------------------------------------------------------------
     // Events re-declared locally so `vm.expectEmit` can match by signature
     // (solc 0.8.17 cannot `emit Contract.Event(...)` for externally-defined
-    // events). `FeeTokenSet` is GONE: there is no setter any more.
+    // events).
     // -------------------------------------------------------------------------
-    event ChainSelectorSet(uint256 indexed chainId, uint64 chainSelector);
-    event TrustedRemoteSet(uint256 indexed chainId, address trustedRemote);
-    event MessageReceived(uint256 indexed originChainId, bytes32 indexed messageId, bytes32 indexed callId);
+    event MessageReceived(
+        uint256 indexed originChainId,
+        bytes32 indexed messageId,
+        bytes32 indexed callId
+    );
 
     DAOMock internal daoMock;
     CrossChainController internal controller;
@@ -131,38 +105,25 @@ contract CCIPAdapterTest is Test {
         router = new CCIPRouterMock();
         feeTokenErc20 = new ERC20Mock("Fee Token", "FEE");
 
-        uint256[] memory chainIds = new uint256[](1);
-        chainIds[0] = CHAIN_ETH_MAINNET;
-        address[] memory trustedRemoteControllers = new address[](1);
-        trustedRemoteControllers[0] = remoteController;
-
-        uint256[] memory selChainIds = new uint256[](3);
-        selChainIds[0] = CHAIN_ETH_MAINNET;
-        selChainIds[1] = CHAIN_BASE;
-        selChainIds[2] = CHAIN_ARBITRUM_ONE;
-        uint64[] memory selectors = new uint64[](3);
-        selectors[0] = SEL_ETH_MAINNET;
-        selectors[1] = SEL_BASE;
-        selectors[2] = SEL_ARBITRUM_ONE;
+        BaseAdapter.TrustedRemoteConfig[]
+            memory trustedRemotes = new BaseAdapter.TrustedRemoteConfig[](1);
+        trustedRemotes[0] = BaseAdapter.TrustedRemoteConfig({
+            standardChainId: CHAIN_ETH_MAINNET,
+            trustedRemote: remoteController
+        });
 
         adapter = new CCIPAdapter(
             address(controller),
             address(router),
             address(0), // native fee token
-            chainIds,
-            trustedRemoteControllers,
-            selChainIds,
-            selectors
+            trustedRemotes
         );
 
         erc20Adapter = new CCIPAdapter(
             address(controller),
             address(router),
             address(feeTokenErc20),
-            new uint256[](0),
-            new address[](0),
-            new uint256[](0),
-            new uint64[](0)
+            new BaseAdapter.TrustedRemoteConfig[](0)
         );
 
         delegateCallerMock = new DelegateCallerMock(IDAO(address(daoMock)));
@@ -170,10 +131,7 @@ contract CCIPAdapterTest is Test {
             address(delegateCallerMock),
             address(router),
             address(feeTokenErc20),
-            new uint256[](0),
-            new address[](0),
-            new uint256[](0),
-            new uint64[](0)
+            new BaseAdapter.TrustedRemoteConfig[](0)
         );
     }
 
@@ -193,17 +151,16 @@ contract CCIPAdapterTest is Test {
     function _registerLane(
         uint256 chainId,
         address localAdapter,
-        address remoteAdapterAddr,
-        uint64 bridgeChainId
+        address remoteAdapterAddr
     ) internal {
         _grantAllPermissions();
         uint256[] memory ids = new uint256[](1);
         ids[0] = chainId;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
         configs[0] = CrossChainController.ChainConfig({
             localAdapter: localAdapter,
-            remoteAdapter: remoteAdapterAddr,
-            bridgeChainId: bridgeChainId
+            remoteAdapter: remoteAdapterAddr
         });
         controller.updateConfig(ids, configs);
     }
@@ -213,7 +170,8 @@ contract CCIPAdapterTest is Test {
         _grantAllPermissions();
         uint256[] memory ids = new uint256[](1);
         ids[0] = chainId;
-        CrossChainController.ChainConfig[] memory configs = new CrossChainController.ChainConfig[](1);
+        CrossChainController.ChainConfig[]
+            memory configs = new CrossChainController.ChainConfig[](1);
         controller.updateConfig(ids, configs);
     }
 
@@ -237,28 +195,15 @@ contract CCIPAdapterTest is Test {
     }
 
     // =========================================================================
-    // a) `_forwardMessage` must not be externally callable.
-    // =========================================================================
-
-    /// @dev `_forwardMessage` is `internal` on `BaseAdapter`, reachable only
-    ///      after `ccipReceive`'s `onlyRouter` and trusted-remote checks. A raw
-    ///      call with the old signature must simply fail: the adapter has no
-    ///      fallback, so there is no selector for it to hit.
-    function test_forwardMessage_isNotExternallyCallable() public {
-        (bool success, bytes memory returndata) = address(adapter).call(
-            abi.encodeWithSignature("_forwardMessage(bytes32,bytes,uint256)", bytes32(0), bytes(""), CHAIN_ETH_MAINNET)
-        );
-
-        assertFalse(success, "_forwardMessage must not be externally callable");
-        assertEq(returndata.length, 0, "no fallback exists to handle the unmatched selector");
-    }
-
-    // =========================================================================
     // b) `ccipReceive`
     // =========================================================================
 
     function test_ccipReceive_revertsIfCallerNotRouter() public {
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_ETH_MAINNET, remoteController, "");
+        Client.Any2EVMMessage memory message = _buildInbound(
+            SEL_ETH_MAINNET,
+            remoteController,
+            ""
+        );
 
         vm.expectRevert(Errors.CALLER_NOT_CCIP_ROUTER.selector);
         vm.prank(alice);
@@ -266,29 +211,40 @@ contract CCIPAdapterTest is Test {
     }
 
     function test_ccipReceive_revertsIfDecodedSenderIsZero() public {
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_ETH_MAINNET, address(0), "");
+        Client.Any2EVMMessage memory message = _buildInbound(
+            SEL_ETH_MAINNET,
+            address(0),
+            ""
+        );
 
         vm.expectRevert(Errors.REMOTE_NOT_TRUSTED.selector);
         vm.prank(address(router));
         adapter.ccipReceive(message);
     }
 
-    function test_ccipReceive_revertsIfSenderIsAnArbitraryUntrustedAddress() public {
+    function test_ccipReceive_revertsIfSenderIsAnArbitraryUntrustedAddress()
+        public
+    {
         address untrusted = makeAddr("untrusted");
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_ETH_MAINNET, untrusted, "");
+        Client.Any2EVMMessage memory message = _buildInbound(
+            SEL_ETH_MAINNET,
+            untrusted,
+            ""
+        );
 
         vm.expectRevert(Errors.REMOTE_NOT_TRUSTED.selector);
         vm.prank(address(router));
         adapter.ccipReceive(message);
     }
 
-    /// @dev THE canonical misconfiguration this redesign invites: pointing
-    ///      `ccipReceive` at the remote ADAPTER instead of the remote
-    ///      CONTROLLER. `remoteAdapter` is a real, meaningful address in this
-    ///      suite's config (it's what `chainToAdapter[].remoteAdapter` holds),
-    ///      but it must NEVER be a valid `_trustedRemotes` entry.
-    function test_ccipReceive_revertsIfSenderIsRemoteAdapterInsteadOfRemoteController() public {
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_ETH_MAINNET, remoteAdapter, "");
+    function test_ccipReceive_revertsIfSenderIsRemoteAdapterInsteadOfRemoteController()
+        public
+    {
+        Client.Any2EVMMessage memory message = _buildInbound(
+            SEL_ETH_MAINNET,
+            remoteAdapter,
+            ""
+        );
 
         vm.expectRevert(Errors.REMOTE_NOT_TRUSTED.selector);
         vm.prank(address(router));
@@ -296,16 +252,25 @@ contract CCIPAdapterTest is Test {
     }
 
     /// @dev The success path: sender IS the remote CONTROLLER.
-    function test_ccipReceive_succeedsWhenSenderIsRemoteControllerAndForwardsToController() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_ccipReceive_succeedsWhenSenderIsRemoteControllerAndForwardsToController()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter);
 
         bytes memory payload = _emptyActionsPayload();
         bytes32 messageId = keccak256("msg-1");
 
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_ETH_MAINNET, remoteController, payload);
+        Client.Any2EVMMessage memory message = _buildInbound(
+            SEL_ETH_MAINNET,
+            remoteController,
+            payload
+        );
         message.messageId = messageId;
 
-        bytes32 expectedCallId = controller.deriveCallId(CHAIN_ETH_MAINNET, messageId);
+        bytes32 expectedCallId = controller.deriveCallId(
+            CHAIN_ETH_MAINNET,
+            messageId
+        );
 
         vm.expectEmit(true, true, true, true, address(controller));
         emit MessageReceived(CHAIN_ETH_MAINNET, messageId, expectedCallId);
@@ -319,73 +284,82 @@ contract CCIPAdapterTest is Test {
     // =========================================================================
 
     function test_toNativeChainId_returnsConfiguredSelector() public view {
-        assertEq(adapter.toNativeChainId(CHAIN_ETH_MAINNET), uint256(SEL_ETH_MAINNET));
+        assertEq(
+            adapter.toNativeChainId(CHAIN_ETH_MAINNET),
+            uint256(SEL_ETH_MAINNET)
+        );
     }
 
     function test_toNativeChainId_revertsForUnmappedChain() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_CHAIN_ID.selector, uint256(999)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.UNKNOWN_CHAIN_ID.selector,
+                uint256(999)
+            )
+        );
         adapter.toNativeChainId(999);
     }
 
-    function test_fromNativeChainId_isExactInverseOfToNativeChainId() public view {
-        assertEq(adapter.fromNativeChainId(uint256(SEL_ETH_MAINNET)), CHAIN_ETH_MAINNET);
+    function test_fromNativeChainId_isExactInverseOfToNativeChainId()
+        public
+        view
+    {
+        assertEq(
+            adapter.fromNativeChainId(uint256(SEL_ETH_MAINNET)),
+            CHAIN_ETH_MAINNET
+        );
         assertEq(adapter.fromNativeChainId(uint256(SEL_BASE)), CHAIN_BASE);
-        assertEq(adapter.fromNativeChainId(uint256(SEL_ARBITRUM_ONE)), CHAIN_ARBITRUM_ONE);
+        assertEq(
+            adapter.fromNativeChainId(uint256(SEL_ARBITRUM_ONE)),
+            CHAIN_ARBITRUM_ONE
+        );
     }
 
     function test_fromNativeChainId_revertsForUnmappedSelector() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_NATIVE_CHAIN_ID.selector, uint256(SEL_SEPOLIA)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.UNKNOWN_NATIVE_CHAIN_ID.selector,
+                uint256(SEL_SEPOLIA)
+            )
+        );
         adapter.fromNativeChainId(uint256(SEL_SEPOLIA));
     }
 
-    function test_chainIdMapping_roundTripsOverSeveralConfiguredChains() public view {
-        uint256[3] memory chains = [CHAIN_ETH_MAINNET, CHAIN_BASE, CHAIN_ARBITRUM_ONE];
+    function test_chainIdMapping_roundTripsOverSeveralConfiguredChains()
+        public
+        view
+    {
+        uint256[3] memory chains = [
+            CHAIN_ETH_MAINNET,
+            CHAIN_BASE,
+            CHAIN_ARBITRUM_ONE
+        ];
         for (uint256 i = 0; i < chains.length; i++) {
-            assertEq(adapter.fromNativeChainId(adapter.toNativeChainId(chains[i])), chains[i]);
+            assertEq(
+                adapter.fromNativeChainId(adapter.toNativeChainId(chains[i])),
+                chains[i]
+            );
         }
     }
 
     /// @dev A message arriving from a selector never mapped to a standard
     ///      chain id must revert, not be silently treated as chain `0`.
     function test_ccipReceive_revertsForUnmappedSourceSelector() public {
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_SEPOLIA, remoteController, "");
+        uint64 unmappedSelector = 1234567890; // not in the adapter's map
+        Client.Any2EVMMessage memory message = _buildInbound(
+            unmappedSelector,
+            remoteController,
+            ""
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_NATIVE_CHAIN_ID.selector, uint256(SEL_SEPOLIA)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.UNKNOWN_NATIVE_CHAIN_ID.selector,
+                uint256(unmappedSelector)
+            )
+        );
         vm.prank(address(router));
         adapter.ccipReceive(message);
-    }
-
-    function test_setChainSelectors_repointingChainClearsOldReverseMapping() public {
-        _grantAllPermissions();
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        uint64[] memory sels = new uint64[](1);
-        sels[0] = SEL_BASE_SEPOLIA;
-        adapter.setChainSelectors(ids, sels);
-
-        assertEq(adapter.toNativeChainId(CHAIN_ETH_MAINNET), uint256(SEL_BASE_SEPOLIA));
-        assertEq(adapter.fromNativeChainId(uint256(SEL_BASE_SEPOLIA)), CHAIN_ETH_MAINNET);
-
-        // The old selector's reverse entry must be cleared, not left dangling.
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_NATIVE_CHAIN_ID.selector, uint256(SEL_ETH_MAINNET)));
-        adapter.fromNativeChainId(uint256(SEL_ETH_MAINNET));
-    }
-
-    function test_setChainSelectors_zeroSelectorClearsLaneBothDirections() public {
-        _grantAllPermissions();
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        uint64[] memory sels = new uint64[](1);
-        sels[0] = 0;
-        adapter.setChainSelectors(ids, sels);
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_CHAIN_ID.selector, CHAIN_ETH_MAINNET));
-        adapter.toNativeChainId(CHAIN_ETH_MAINNET);
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_NATIVE_CHAIN_ID.selector, uint256(SEL_ETH_MAINNET)));
-        adapter.fromNativeChainId(uint256(SEL_ETH_MAINNET));
     }
 
     // =========================================================================
@@ -402,14 +376,26 @@ contract CCIPAdapterTest is Test {
     ///      side's `_trustedRemotes` does not trust (it trusts the
     ///      controller). Both failure modes are silent/expensive rather than
     ///      loud, so this must revert instead of degrading gracefully.
-    function test_sendMessage_revertsIfCalledDirectly_evenWhenCallerIsTheController() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.SEND_PATH_NOT_DELEGATECALLED.selector, address(adapter)));
+    function test_sendMessage_revertsIfCalledDirectly_evenWhenCallerIsTheController()
+        public
+    {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.SEND_PATH_NOT_DELEGATECALLED.selector,
+                address(adapter)
+            )
+        );
         vm.prank(address(controller));
         adapter.sendMessage(remoteAdapter, SEL_ETH_MAINNET, 200_000, "");
     }
 
     function test_sendMessage_revertsIfCalledDirectlyByAnybody() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.SEND_PATH_NOT_DELEGATECALLED.selector, address(adapter)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Errors.SEND_PATH_NOT_DELEGATECALLED.selector,
+                address(adapter)
+            )
+        );
         vm.prank(alice);
         adapter.sendMessage(remoteAdapter, SEL_ETH_MAINNET, 200_000, "");
     }
@@ -424,7 +410,10 @@ contract CCIPAdapterTest is Test {
     ///      CROSS_CHAIN_CONTROLLER` context directly, so the check itself is
     ///      still proven to work correctly in isolation.
     function test_sendMessage_isolated_revertsIfReceiverIsZero() public {
-        bytes memory data = abi.encodeCall(IBaseAdapter.sendMessage, (address(0), SEL_ETH_MAINNET, 200_000, bytes("")));
+        bytes memory data = abi.encodeCall(
+            IBaseAdapter.sendMessage,
+            (address(0), SEL_ETH_MAINNET, 200_000, bytes(""))
+        );
 
         vm.expectRevert(Errors.RECEIVER_ADDRESS_ZERO.selector);
         delegateCallerMock.delegateCall(address(isolationAdapter), data);
@@ -440,65 +429,104 @@ contract CCIPAdapterTest is Test {
     ///      the approval is actually made -- and, since the send is a
     ///      `delegatecall`, made on the CONTROLLER's allowance, which is what
     ///      the router pulls from.
-    function test_sendMessage_erc20Fee_approvesRouterAndRouterPullsExactFee() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_sendMessage_erc20Fee_approvesRouterAndRouterPullsExactFee()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter);
         uint256 feeAmount = 3 ether;
         router.setFee(feeAmount);
         feeTokenErc20.setBalance(address(controller), feeAmount);
 
-        bytes32 messageId = controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "hello");
+        bytes32 messageId = controller.forwardMessage(
+            CHAIN_ETH_MAINNET,
+            200_000,
+            "hello"
+        );
 
         assertEq(router.ccipSendCallCount(), 1);
-        assertEq(feeTokenErc20.balanceOf(address(router)), feeAmount, "router must have pulled the fee");
+        assertEq(
+            feeTokenErc20.balanceOf(address(router)),
+            feeAmount,
+            "router must have pulled the fee"
+        );
         assertEq(messageId, router.nextMessageId());
     }
 
-    function test_sendMessage_erc20Fee_leavesZeroStandingAllowanceOnControllerAfterSend() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_sendMessage_erc20Fee_leavesZeroStandingAllowanceOnControllerAfterSend()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter);
         uint256 feeAmount = 3 ether;
         router.setFee(feeAmount);
         feeTokenErc20.setBalance(address(controller), feeAmount);
 
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
 
-        assertEq(feeTokenErc20.allowance(address(controller), address(router)), 0);
+        assertEq(
+            feeTokenErc20.allowance(address(controller), address(router)),
+            0
+        );
     }
 
-    function test_sendMessage_erc20Fee_revertsIfControllerBalanceInsufficient() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_sendMessage_erc20Fee_revertsIfControllerBalanceInsufficient()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter);
         uint256 feeAmount = 1 ether;
         uint256 available = 0.4 ether;
         router.setFee(feeAmount);
         feeTokenErc20.setBalance(address(controller), available);
 
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.INSUFFICIENT_FEE_BALANCE.selector, address(feeTokenErc20), feeAmount, available)
+            abi.encodeWithSelector(
+                Errors.INSUFFICIENT_FEE_BALANCE.selector,
+                address(feeTokenErc20),
+                feeAmount,
+                available
+            )
         );
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
     }
 
-    function test_sendMessage_nativeFee_paysExactFeeFromControllerBalance() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_sendMessage_nativeFee_paysExactFeeFromControllerBalance()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter);
         uint256 feeAmount = 0.05 ether;
         router.setFee(feeAmount);
         vm.deal(address(controller), feeAmount);
 
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
 
-        assertEq(router.lastMsgValue(), feeAmount, "router must receive exactly the quoted fee");
+        assertEq(
+            router.lastMsgValue(),
+            feeAmount,
+            "router must receive exactly the quoted fee"
+        );
         assertEq(address(controller).balance, 0);
-        assertEq(address(adapter).balance, 0, "adapter must never hold native funds");
+        assertEq(
+            address(adapter).balance,
+            0,
+            "adapter must never hold native funds"
+        );
     }
 
-    function test_sendMessage_nativeFee_revertsIfControllerBalanceInsufficient() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_sendMessage_nativeFee_revertsIfControllerBalanceInsufficient()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter);
         uint256 feeAmount = 1 ether;
         uint256 available = 0.5 ether;
         router.setFee(feeAmount);
         vm.deal(address(controller), available);
 
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.INSUFFICIENT_FEE_BALANCE.selector, address(0), feeAmount, available)
+            abi.encodeWithSelector(
+                Errors.INSUFFICIENT_FEE_BALANCE.selector,
+                address(0),
+                feeAmount,
+                available
+            )
         );
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
     }
@@ -509,14 +537,19 @@ contract CCIPAdapterTest is Test {
     ///      because `forwardMessage` is not `payable`: `msg.value` inside the
     ///      delegatecalled `sendMessage` is always whatever `forwardMessage`'s
     ///      own call frame had, which can only be `0`. Exercised in isolation.
-    function test_sendMessage_isolated_revertsIfNativeValueSentWhileErc20FeeTokenConfigured() public {
+    function test_sendMessage_isolated_revertsIfNativeValueSentWhileErc20FeeTokenConfigured()
+        public
+    {
         bytes memory data = abi.encodeCall(
             IBaseAdapter.sendMessage,
-            (remoteAdapter, SEL_ETH_MAINNET, 200_000, bytes(""))
+            (remoteAdapter, CHAIN_ETH_MAINNET, 200_000, bytes(""))
         );
 
         vm.expectRevert(Errors.UNEXPECTED_NATIVE_VALUE.selector);
-        delegateCallerMock.delegateCall{value: 1 ether}(address(isolationAdapter), data);
+        delegateCallerMock.delegateCall{value: 1 ether}(
+            address(isolationAdapter),
+            data
+        );
     }
 
     function test_quoteFee_revertsIfReceiverIsZero() public {
@@ -525,14 +558,21 @@ contract CCIPAdapterTest is Test {
     }
 
     function test_quoteFee_revertsIfBridgeChainIdIsZero() public {
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_CHAIN_ID.selector, uint256(0)));
+        vm.expectRevert(
+            abi.encodeWithSelector(Errors.UNKNOWN_CHAIN_ID.selector, uint256(0))
+        );
         adapter.quoteFee(remoteAdapter, 0, 200_000, "");
     }
 
     function test_quoteFee_returnsRouterQuoteAndConfiguredFeeToken() public {
         router.setFee(7 ether);
 
-        (address feeToken, uint256 fee) = erc20Adapter.quoteFee(remoteAdapter, SEL_ETH_MAINNET, 200_000, "");
+        (address feeToken, uint256 fee) = erc20Adapter.quoteFee(
+            remoteAdapter,
+            CHAIN_ETH_MAINNET,
+            200_000,
+            ""
+        );
 
         assertEq(feeToken, address(feeTokenErc20));
         assertEq(fee, 7 ether);
@@ -543,223 +583,8 @@ contract CCIPAdapterTest is Test {
     //    NOTE: `setFeeToken` is GONE -- see the fee-token-immutability section.
     // =========================================================================
 
-    function test_setChainSelectors_revertsIfUnauthorized() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_SEPOLIA;
-        uint64[] memory sels = new uint64[](1);
-        sels[0] = SEL_SEPOLIA;
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DaoUnauthorized.selector,
-                address(daoMock),
-                address(adapter),
-                alice,
-                adapter.UPDATE_ADAPTER_CONFIG_PERMISSION_ID()
-            )
-        );
-        vm.prank(alice);
-        adapter.setChainSelectors(ids, sels);
-    }
-
-    function test_setChainSelectors_emitsEventAndUpdatesStorage() public {
-        _grantAllPermissions();
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_SEPOLIA;
-        uint64[] memory sels = new uint64[](1);
-        sels[0] = SEL_SEPOLIA;
-
-        vm.expectEmit(true, true, true, true, address(adapter));
-        emit ChainSelectorSet(CHAIN_SEPOLIA, SEL_SEPOLIA);
-        adapter.setChainSelectors(ids, sels);
-
-        assertEq(adapter.toNativeChainId(CHAIN_SEPOLIA), uint256(SEL_SEPOLIA));
-    }
-
-    function test_setTrustedRemotes_revertsIfUnauthorized() public {
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        address[] memory remotes = new address[](1);
-        remotes[0] = makeAddr("newRemoteController");
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DaoUnauthorized.selector,
-                address(daoMock),
-                address(adapter),
-                alice,
-                adapter.UPDATE_ADAPTER_CONFIG_PERMISSION_ID()
-            )
-        );
-        vm.prank(alice);
-        adapter.setTrustedRemotes(ids, remotes);
-    }
-
-    function test_setTrustedRemotes_emitsEventAndUpdatesStorage() public {
-        _grantAllPermissions();
-
-        address newRemoteController = makeAddr("newRemoteController");
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        address[] memory remotes = new address[](1);
-        remotes[0] = newRemoteController;
-
-        vm.expectEmit(true, true, true, true, address(adapter));
-        emit TrustedRemoteSet(CHAIN_ETH_MAINNET, newRemoteController);
-        adapter.setTrustedRemotes(ids, remotes);
-
-        assertEq(adapter.trustedRemote(CHAIN_ETH_MAINNET), newRemoteController);
-    }
-
     function test_trustedRemote_returnsZeroForUnsetChain() public view {
         assertEq(adapter.trustedRemote(CHAIN_BASE), address(0));
-    }
-
-    // =========================================================================
-    // g.1) `assertTrustedRemotesMatchControllers`
-    // =========================================================================
-
-    function test_assertTrustedRemotesMatchControllers_passesWhenTrustedRemoteMatchesExpectedController() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        address[] memory expected = new address[](1);
-        expected[0] = remoteController;
-
-        adapter.assertTrustedRemotesMatchControllers(ids, expected); // must not revert
-    }
-
-    function test_assertTrustedRemotesMatchControllers_revertsWhenExpectedControllerIsWrong() public {
-        address wrongExpected = makeAddr("wrongExpectedController");
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        address[] memory expected = new address[](1);
-        expected[0] = wrongExpected;
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.TRUSTED_REMOTE_MISMATCH.selector,
-                CHAIN_ETH_MAINNET,
-                remoteController,
-                wrongExpected
-            )
-        );
-        adapter.assertTrustedRemotesMatchControllers(ids, expected);
-    }
-
-    function test_assertTrustedRemotesMatchControllers_revertsWhenTrustedRemoteIsUnset() public {
-        // CHAIN_BASE has a selector mapping but no trusted remote configured.
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_BASE;
-        address[] memory expected = new address[](1);
-        expected[0] = makeAddr("anyExpectedController");
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.TRUSTED_REMOTE_MISMATCH.selector,
-                CHAIN_BASE,
-                address(0),
-                expected[0]
-            )
-        );
-        adapter.assertTrustedRemotesMatchControllers(ids, expected);
-    }
-
-    function test_assertTrustedRemotesMatchControllers_revertsOnLengthMismatch() public {
-        uint256[] memory ids = new uint256[](2);
-        ids[0] = CHAIN_ETH_MAINNET;
-        ids[1] = CHAIN_BASE;
-        address[] memory expected = new address[](1);
-        expected[0] = remoteController;
-
-        vm.expectRevert(Errors.INVALID_LENGTH_MISMATCH.selector);
-        adapter.assertTrustedRemotesMatchControllers(ids, expected);
-    }
-
-    /// @dev THE canonical misconfiguration, mechanically detected: the adapter
-    ///      was set up trusting the remote ADAPTER (copy-pasted from
-    ///      `chainToAdapter[].remoteAdapter`) instead of the remote
-    ///      CONTROLLER. `expected` is deliberately set equal to the (wrong)
-    ///      trusted value so the plain mismatch check does not fire first --
-    ///      isolating the `TRUSTED_REMOTE_IS_REMOTE_ADAPTER` branch.
-    function test_assertTrustedRemotesMatchControllers_revertsWhenTrustedRemoteIsRemoteAdapter() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
-
-        _grantAllPermissions();
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        address[] memory misconfiguredTrustedRemotes = new address[](1);
-        misconfiguredTrustedRemotes[0] = remoteAdapter; // WRONG: should be remoteController.
-        adapter.setTrustedRemotes(ids, misconfiguredTrustedRemotes);
-
-        address[] memory expected = new address[](1);
-        expected[0] = remoteAdapter; // matches the (wrong) trusted value.
-
-        vm.expectRevert(
-            abi.encodeWithSelector(Errors.TRUSTED_REMOTE_IS_REMOTE_ADAPTER.selector, CHAIN_ETH_MAINNET, remoteAdapter)
-        );
-        adapter.assertTrustedRemotesMatchControllers(ids, expected);
-    }
-
-    // =========================================================================
-    // g.2) `assertChainSelectorsMatchController`
-    // =========================================================================
-
-    function test_assertChainSelectorsMatchController_passesWhenInSync() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        adapter.assertChainSelectorsMatchController(ids); // must not revert
-    }
-
-    function test_assertChainSelectorsMatchController_revertsOnDesync() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
-
-        // Desync the RECEIVE-side map away from what the controller's
-        // SEND-side config still says, e.g. via an incomplete `setChainSelectors`
-        // rollout for a new CCIP lane version.
-        _grantAllPermissions();
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_ETH_MAINNET;
-        uint64[] memory sels = new uint64[](1);
-        sels[0] = SEL_BASE_SEPOLIA;
-        adapter.setChainSelectors(ids, sels);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.CHAIN_ID_DESYNC.selector,
-                CHAIN_ETH_MAINNET,
-                SEL_ETH_MAINNET,
-                SEL_BASE_SEPOLIA
-            )
-        );
-        adapter.assertChainSelectorsMatchController(ids);
-    }
-
-    function test_assertChainSelectorsMatchController_revertsWhenControllerHasNoLane() public {
-        // CHAIN_BASE has an adapter-side selector (from `setUp`) but no
-        // controller lane was ever registered for it.
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_BASE;
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.ADAPTER_NOT_CONFIGURED.selector, CHAIN_BASE));
-        adapter.assertChainSelectorsMatchController(ids);
-    }
-
-    function test_assertChainSelectorsMatchController_revertsWhenAdapterHasNoEntry() public {
-        // Controller lane registered for CHAIN_SEPOLIA, but the adapter's own
-        // selector map was never told about it.
-        _registerLane(CHAIN_SEPOLIA, address(adapter), remoteAdapter, SEL_SEPOLIA);
-
-        uint256[] memory ids = new uint256[](1);
-        ids[0] = CHAIN_SEPOLIA;
-
-        vm.expectRevert(abi.encodeWithSelector(Errors.UNKNOWN_CHAIN_ID.selector, CHAIN_SEPOLIA));
-        adapter.assertChainSelectorsMatchController(ids);
     }
 
     /// @dev Demonstrates what a desync actually DOES, not just that it is
@@ -768,36 +593,24 @@ contract CCIPAdapterTest is Test {
     ///      `SEL_ETH_MAINNET` for `CHAIN_ETH_MAINNET`, pointing the controller's
     ///      lane at a different selector sends there instead -- the adapter's
     ///      receive-side storage is not read at all on send.
-    function test_desyncedChainSelectors_sendGoesToControllersSelector_ignoringAdapterMap() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_BASE_SEPOLIA);
-
-        uint256 feeAmount = 0.01 ether;
-        router.setFee(feeAmount);
-        vm.deal(address(controller), feeAmount);
-
-        controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
-
-        assertEq(
-            router.lastDestChainSelector(),
-            SEL_BASE_SEPOLIA,
-            "send must use the controller's bridgeChainId, not the adapter's own selector map"
-        );
-        assertEq(adapter.toNativeChainId(CHAIN_ETH_MAINNET), uint256(SEL_ETH_MAINNET), "adapter's own map is untouched");
-    }
-
     // =========================================================================
     // h) ERC-165
     // =========================================================================
 
     function test_supportsInterface_IAny2EVMMessageReceiver() public view {
-        assertTrue(adapter.supportsInterface(type(IAny2EVMMessageReceiver).interfaceId));
+        assertTrue(
+            adapter.supportsInterface(type(IAny2EVMMessageReceiver).interfaceId)
+        );
     }
 
     function test_supportsInterface_IERC165() public view {
         assertTrue(adapter.supportsInterface(type(IERC165).interfaceId));
     }
 
-    function test_supportsInterface_returnsFalseForUnknownInterface() public view {
+    function test_supportsInterface_returnsFalseForUnknownInterface()
+        public
+        view
+    {
         assertFalse(adapter.supportsInterface(0xdeadbeef));
     }
 
@@ -805,8 +618,10 @@ contract CCIPAdapterTest is Test {
     // i) End-to-end: controller.forwardMessage -> [delegatecall] adapter -> router
     // =========================================================================
 
-    function test_forwardMessage_endToEnd_routesThroughAdapterToRouter() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_forwardMessage_endToEnd_routesThroughAdapterToRouter()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter);
 
         uint256 feeAmount = 0.02 ether;
         router.setFee(feeAmount);
@@ -818,22 +633,45 @@ contract CCIPAdapterTest is Test {
         bytes memory payload = _emptyActionsPayload();
         uint256 gasLimit = 300_000;
 
-        bytes32 messageId = controller.forwardMessage(CHAIN_ETH_MAINNET, gasLimit, payload);
+        bytes32 messageId = controller.forwardMessage(
+            CHAIN_ETH_MAINNET,
+            gasLimit,
+            payload
+        );
 
-        assertEq(messageId, expectedMessageId, "controller must surface the router's messageId");
+        assertEq(
+            messageId,
+            expectedMessageId,
+            "controller must surface the router's messageId"
+        );
 
         address decodedReceiver = abi.decode(router.lastReceiver(), (address));
-        assertEq(decodedReceiver, remoteAdapter, "router must target the remote adapter");
+        assertEq(
+            decodedReceiver,
+            remoteAdapter,
+            "router must target the remote adapter"
+        );
         assertEq(router.lastData(), payload);
         assertEq(router.lastFeeToken(), address(0));
         assertEq(router.lastDestChainSelector(), SEL_ETH_MAINNET);
         assertEq(router.lastMsgValue(), feeAmount);
-        assertEq(router.lastCaller(), address(controller), "CCIP must see the controller as the sender under delegatecall");
+        assertEq(
+            router.lastCaller(),
+            address(controller),
+            "CCIP must see the controller as the sender under delegatecall"
+        );
 
         bytes memory expectedExtraArgs = Client._argsToBytes(
-            Client.GenericExtraArgsV2({gasLimit: gasLimit, allowOutOfOrderExecution: true})
+            Client.GenericExtraArgsV2({
+                gasLimit: gasLimit,
+                allowOutOfOrderExecution: true
+            })
         );
-        assertEq(router.lastExtraArgs(), expectedExtraArgs, "extraArgs must encode the requested gas limit");
+        assertEq(
+            router.lastExtraArgs(),
+            expectedExtraArgs,
+            "extraArgs must encode the requested gas limit"
+        );
     }
 
     // =========================================================================
@@ -841,54 +679,24 @@ contract CCIPAdapterTest is Test {
     // =========================================================================
 
     function test_constructor_revertsIfRouterIsZeroAddress() public {
-        uint256[] memory empty;
-        address[] memory emptyAddr;
-
         vm.expectRevert(Errors.ZERO_ADDRESS.selector);
-        new CCIPAdapter(address(controller), address(0), address(0), empty, emptyAddr, empty, new uint64[](0));
-    }
-
-    function test_constructor_revertsOnTrustedRemoteLengthMismatch() public {
-        uint256[] memory chainIds = new uint256[](2);
-        chainIds[0] = CHAIN_ETH_MAINNET;
-        chainIds[1] = CHAIN_BASE;
-        address[] memory remotes = new address[](1);
-        remotes[0] = remoteController;
-
-        vm.expectRevert(Errors.INVALID_LENGTH_MISMATCH.selector);
         new CCIPAdapter(
             address(controller),
-            address(router),
             address(0),
-            chainIds,
-            remotes,
-            new uint256[](0),
-            new uint64[](0)
+            address(0),
+            new BaseAdapter.TrustedRemoteConfig[](0)
         );
     }
 
-    function test_constructor_revertsOnSelectorLengthMismatch() public {
-        uint256[] memory selChainIds = new uint256[](2);
-        selChainIds[0] = CHAIN_ETH_MAINNET;
-        selChainIds[1] = CHAIN_BASE;
-        uint64[] memory sels = new uint64[](1);
-        sels[0] = SEL_ETH_MAINNET;
-
-        vm.expectRevert(Errors.INVALID_LENGTH_MISMATCH.selector);
-        new CCIPAdapter(
-            address(controller),
-            address(router),
-            address(0),
-            new uint256[](0),
-            new address[](0),
-            selChainIds,
-            sels
-        );
-    }
-
-    function test_constructor_wiresUpConfiguredTrustedRemoteControllerAndSelector() public view {
+    function test_constructor_wiresUpConfiguredTrustedRemoteControllerAndSelector()
+        public
+        view
+    {
         assertEq(adapter.trustedRemote(CHAIN_ETH_MAINNET), remoteController);
-        assertEq(adapter.toNativeChainId(CHAIN_ETH_MAINNET), uint256(SEL_ETH_MAINNET));
+        assertEq(
+            adapter.toNativeChainId(CHAIN_ETH_MAINNET),
+            uint256(SEL_ETH_MAINNET)
+        );
     }
 
     // =========================================================================
@@ -904,8 +712,10 @@ contract CCIPAdapterTest is Test {
     ///      silent, wrong-currency bridge send. `FEE_TOKEN` being `immutable`
     ///      means it is baked into the adapter's bytecode and resolves
     ///      identically no matter whose storage is in scope.
-    function test_immutables_feeTokenAndRouterSurviveDelegatecall_notMisreadAsControllerStorage() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter, SEL_ETH_MAINNET);
+    function test_immutables_feeTokenAndRouterSurviveDelegatecall_notMisreadAsControllerStorage()
+        public
+    {
+        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter);
 
         uint256 feeAmount = 2 ether;
         router.setFee(feeAmount);
@@ -913,8 +723,16 @@ contract CCIPAdapterTest is Test {
 
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
 
-        assertEq(router.lastFeeToken(), address(feeTokenErc20), "immutable FEE_TOKEN must survive delegatecall");
-        assertEq(router.lastCaller(), address(controller), "CCIP_ROUTER must see the controller as caller");
+        assertEq(
+            router.lastFeeToken(),
+            address(feeTokenErc20),
+            "immutable FEE_TOKEN must survive delegatecall"
+        );
+        assertEq(
+            router.lastCaller(),
+            address(controller),
+            "CCIP_ROUTER must see the controller as caller"
+        );
     }
 
     /// @dev Two adapters, two ERC20 fee tokens, two routers: a send through
@@ -923,21 +741,20 @@ contract CCIPAdapterTest is Test {
     ///      controller's storage, this would either hit the wrong router or
     ///      silently agree by coincidence -- using two independent routers
     ///      rules the coincidence out.
-    function test_immutables_twoAdaptersRouteExclusivelyToTheirOwnRouterAndFeeToken() public {
+    function test_immutables_twoAdaptersRouteExclusivelyToTheirOwnRouterAndFeeToken()
+        public
+    {
         CCIPRouterMock routerB = new CCIPRouterMock();
         ERC20Mock feeTokenB = new ERC20Mock("Fee Token B", "FEEB");
         CCIPAdapter adapterB = new CCIPAdapter(
             address(controller),
             address(routerB),
             address(feeTokenB),
-            new uint256[](0),
-            new address[](0),
-            new uint256[](0),
-            new uint64[](0)
+            new BaseAdapter.TrustedRemoteConfig[](0)
         );
 
-        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter, SEL_ETH_MAINNET); // -> router (lane A)
-        _registerLane(CHAIN_BASE, address(adapterB), remoteAdapter, SEL_BASE); // -> routerB (lane B)
+        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter); // -> router (lane A)
+        _registerLane(CHAIN_BASE, address(adapterB), remoteAdapter); // -> routerB (lane B)
 
         router.setFee(1 ether);
         routerB.setFee(2 ether);
@@ -948,7 +765,11 @@ contract CCIPAdapterTest is Test {
 
         assertEq(router.ccipSendCallCount(), 1);
         assertEq(router.lastFeeToken(), address(feeTokenErc20));
-        assertEq(routerB.ccipSendCallCount(), 0, "lane A's send must not touch router B at all");
+        assertEq(
+            routerB.ccipSendCallCount(),
+            0,
+            "lane A's send must not touch router B at all"
+        );
     }
 
     // =========================================================================
@@ -967,31 +788,55 @@ contract CCIPAdapterTest is Test {
     ///      controller never issues a plain `call` into the adapter -- worth
     ///      asserting so a future refactor that broke this would be caught.
     function test_forwardMessage_doesNotCollideWithControllerStorage() public {
-        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter, SEL_ETH_MAINNET);
+        _registerLane(CHAIN_ETH_MAINNET, address(adapter), remoteAdapter);
 
         uint256 feeAmount = 0.02 ether;
         router.setFee(feeAmount);
         vm.deal(address(controller), feeAmount);
 
-        bytes32 chainConfigSlotA = keccak256(abi.encode(CHAIN_ETH_MAINNET, uint256(0)));
+        bytes32 chainConfigSlotA = keccak256(
+            abi.encode(CHAIN_ETH_MAINNET, uint256(0))
+        );
         bytes32 chainConfigSlotB = bytes32(uint256(chainConfigSlotA) + 1);
-        bytes32 laneCountSlot = keccak256(abi.encode(address(adapter), uint256(1)));
+        bytes32 laneCountSlot = keccak256(
+            abi.encode(address(adapter), uint256(1))
+        );
 
         bytes32 slot0Before = vm.load(address(controller), bytes32(uint256(0)));
         bytes32 slot1Before = vm.load(address(controller), bytes32(uint256(1)));
         bytes32 slot2Before = vm.load(address(controller), bytes32(uint256(2)));
-        bytes32 chainConfigABefore = vm.load(address(controller), chainConfigSlotA);
-        bytes32 chainConfigBBefore = vm.load(address(controller), chainConfigSlotB);
+        bytes32 chainConfigABefore = vm.load(
+            address(controller),
+            chainConfigSlotA
+        );
+        bytes32 chainConfigBBefore = vm.load(
+            address(controller),
+            chainConfigSlotB
+        );
         bytes32 laneCountBefore = vm.load(address(controller), laneCountSlot);
 
         address trustedRemoteBefore = adapter.trustedRemote(CHAIN_ETH_MAINNET);
-        uint256 nativeChainIdBefore = adapter.toNativeChainId(CHAIN_ETH_MAINNET);
+        uint256 nativeChainIdBefore = adapter.toNativeChainId(
+            CHAIN_ETH_MAINNET
+        );
 
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
 
-        assertEq(vm.load(address(controller), bytes32(uint256(0))), slot0Before, "slot 0 mutated by send");
-        assertEq(vm.load(address(controller), bytes32(uint256(1))), slot1Before, "slot 1 mutated by send");
-        assertEq(vm.load(address(controller), bytes32(uint256(2))), slot2Before, "slot 2 mutated by send");
+        assertEq(
+            vm.load(address(controller), bytes32(uint256(0))),
+            slot0Before,
+            "slot 0 mutated by send"
+        );
+        assertEq(
+            vm.load(address(controller), bytes32(uint256(1))),
+            slot1Before,
+            "slot 1 mutated by send"
+        );
+        assertEq(
+            vm.load(address(controller), bytes32(uint256(2))),
+            slot2Before,
+            "slot 2 mutated by send"
+        );
         assertEq(
             vm.load(address(controller), chainConfigSlotA),
             chainConfigABefore,
@@ -1008,7 +853,11 @@ contract CCIPAdapterTest is Test {
             "_localAdapterLaneCount[adapter] slot mutated by send"
         );
 
-        assertEq(adapter.trustedRemote(CHAIN_ETH_MAINNET), trustedRemoteBefore, "adapter's own storage touched by send");
+        assertEq(
+            adapter.trustedRemote(CHAIN_ETH_MAINNET),
+            trustedRemoteBefore,
+            "adapter's own storage touched by send"
+        );
         assertEq(
             adapter.toNativeChainId(CHAIN_ETH_MAINNET),
             nativeChainIdBefore,
@@ -1021,28 +870,40 @@ contract CCIPAdapterTest is Test {
     // =========================================================================
 
     /// @dev Proves that reaching the RECEIVE path under `delegatecall` reverts.
-    ///      `delegateCallerMock` has NO storage of its own for `_trustedRemotes`
-    ///      / `_selectorToChainId`, so those checks would revert first unless
-    ///      fake entries are planted at the exact slots
-    ///      `forge inspect .../CCIPAdapter.sol:CCIPAdapter storageLayout`
-    ///      reports (slot 0 `_trustedRemotes`, slot 2 `_selectorToChainId`) --
-    ///      done here via `vm.store` so execution genuinely reaches
-    ///      `_forwardMessage` and trips `DELEGATE_CALL_FORBIDDEN` specifically,
-    ///      rather than failing earlier for an unrelated reason.
-    function test_ccipReceive_delegatecalledIntoAdapter_revertsWithDelegateCallForbidden() public {
-        uint256 fakeOriginChainId = 777;
-        address fakeTrustedSender = makeAddr("fakeTrustedSenderForDelegatecallProbe");
+    ///      The native<->standard map is hardcoded pure logic, so no storage is
+    ///      needed for it -- `SEL_ETH_MAINNET` resolves to `ChainIds.ETHEREUM`
+    ///      on its own. The ONLY storage read on the way to `_forwardMessage` is
+    ///      `_trustedRemotes[originChainId]` (slot 0), which under `delegatecall`
+    ///      resolves against `delegateCallerMock`'s own (otherwise empty)
+    ///      storage. We plant a matching trusted-remote entry there via
+    ///      `vm.store` so the trusted-remote check passes and execution genuinely
+    ///      reaches `_forwardMessage`, tripping `DELEGATE_CALL_FORBIDDEN`
+    ///      specifically rather than `REMOTE_NOT_TRUSTED` first.
+    function test_ccipReceive_delegatecalledIntoAdapter_revertsWithDelegateCallForbidden()
+        public
+    {
+        // `fromNativeChainId(SEL_ETH_MAINNET)` is pure and returns this.
+        uint256 originChainId = ChainIds.ETHEREUM;
+        address fakeTrustedSender = makeAddr(
+            "fakeTrustedSenderForDelegatecallProbe"
+        );
 
-        // `_selectorToChainId[SEL_ETH_MAINNET] = fakeOriginChainId` at slot 2,
+        // `_trustedRemotes[originChainId] = fakeTrustedSender` at slot 0,
         // computed against `delegateCallerMock`'s own (otherwise empty) storage.
-        bytes32 selectorToChainIdSlot = keccak256(abi.encode(uint256(SEL_ETH_MAINNET), uint256(2)));
-        vm.store(address(delegateCallerMock), selectorToChainIdSlot, bytes32(fakeOriginChainId));
+        bytes32 trustedRemoteSlot = keccak256(
+            abi.encode(originChainId, uint256(0))
+        );
+        vm.store(
+            address(delegateCallerMock),
+            trustedRemoteSlot,
+            bytes32(uint256(uint160(fakeTrustedSender)))
+        );
 
-        // `_trustedRemotes[fakeOriginChainId] = fakeTrustedSender` at slot 0.
-        bytes32 trustedRemoteSlot = keccak256(abi.encode(fakeOriginChainId, uint256(0)));
-        vm.store(address(delegateCallerMock), trustedRemoteSlot, bytes32(uint256(uint160(fakeTrustedSender))));
-
-        Client.Any2EVMMessage memory message = _buildInbound(SEL_ETH_MAINNET, fakeTrustedSender, "");
+        Client.Any2EVMMessage memory message = _buildInbound(
+            SEL_ETH_MAINNET,
+            fakeTrustedSender,
+            ""
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1052,7 +913,10 @@ contract CCIPAdapterTest is Test {
             )
         );
         vm.prank(address(router)); // `onlyRouter` checks msg.sender, preserved across delegatecall.
-        delegateCallerMock.delegateCall(address(adapter), abi.encodeCall(CCIPAdapter.ccipReceive, (message)));
+        delegateCallerMock.delegateCall(
+            address(adapter),
+            abi.encodeCall(CCIPAdapter.ccipReceive, (message))
+        );
     }
 
     // =========================================================================
@@ -1065,21 +929,25 @@ contract CCIPAdapterTest is Test {
     ///      the new `FEE_TOKEN` and repointing the lane via
     ///      `CrossChainController.updateConfig`, which correctly de-registers
     ///      the old local adapter (refcounted) and registers the new one.
-    function test_feeTokenRotation_requiresDeployingANewAdapterAndRepointingTheLane() public {
+    function test_feeTokenRotation_requiresDeployingANewAdapterAndRepointingTheLane()
+        public
+    {
         ERC20Mock newFeeToken = new ERC20Mock("New Fee Token", "NEWFEE");
         CCIPAdapter newAdapter = new CCIPAdapter(
             address(controller),
             address(router),
             address(newFeeToken),
-            new uint256[](0),
-            new address[](0),
-            new uint256[](0),
-            new uint64[](0)
+            new BaseAdapter.TrustedRemoteConfig[](0)
         );
 
         // Old lane, old fee token: works today.
-        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter, SEL_ETH_MAINNET);
-        assertTrue(controller.isRegisteredLocalAdapter(address(erc20Adapter)));
+        _registerLane(CHAIN_ETH_MAINNET, address(erc20Adapter), remoteAdapter);
+        assertTrue(
+            controller.isRegisteredLocalAdapter(
+                address(erc20Adapter),
+                CHAIN_ETH_MAINNET
+            )
+        );
 
         router.setFee(1 ether);
         feeTokenErc20.setBalance(address(controller), 1 ether);
@@ -1087,17 +955,29 @@ contract CCIPAdapterTest is Test {
         assertEq(router.lastFeeToken(), address(feeTokenErc20));
 
         // Rotate: repoint the SAME chain id at the new adapter/fee token.
-        _registerLane(CHAIN_ETH_MAINNET, address(newAdapter), remoteAdapter, SEL_ETH_MAINNET);
+        _registerLane(CHAIN_ETH_MAINNET, address(newAdapter), remoteAdapter);
 
         assertFalse(
-            controller.isRegisteredLocalAdapter(address(erc20Adapter)),
+            controller.isRegisteredLocalAdapter(
+                address(erc20Adapter),
+                CHAIN_ETH_MAINNET
+            ),
             "old adapter must lose the right to call receiveMessage once its last lane is repointed"
         );
-        assertTrue(controller.isRegisteredLocalAdapter(address(newAdapter)));
+        assertTrue(
+            controller.isRegisteredLocalAdapter(
+                address(newAdapter),
+                CHAIN_ETH_MAINNET
+            )
+        );
 
         router.setFee(1 ether);
         newFeeToken.setBalance(address(controller), 1 ether);
         controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "");
-        assertEq(router.lastFeeToken(), address(newFeeToken), "send must now use the new adapter's fee token");
+        assertEq(
+            router.lastFeeToken(),
+            address(newFeeToken),
+            "send must now use the new adapter's fee token"
+        );
     }
 }
