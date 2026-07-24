@@ -274,16 +274,16 @@ contract CrossChainController is ICrossChainController, DaoAuthorizable {
     /// @notice Decodes and executes an authenticated payload on the DAO.
     /// @dev External only so it can be wrapped in `try/catch`; callable
     ///      exclusively by this contract.
-    /// @param _callId The call id passed to the executor.
+    /// @param _txId The tx Id passed to the executor.
     /// @param _payload The encoded Action[] message.
-    function executeActions(bytes32 _callId, bytes memory _payload) external {
+    function executeActions(bytes32 _txId, bytes memory _payload) external {
         if (msg.sender != address(this)) {
             revert Errors.CALLER_NOT_SELF(msg.sender);
         }
 
         Action[] memory actions = abi.decode(_payload, (Action[]));
 
-        IExecutor(address(dao())).execute(_callId, actions, 0);
+        IExecutor(address(dao())).execute(_txId, actions, 0);
     }
 
     /// @inheritdoc ICrossChainController
