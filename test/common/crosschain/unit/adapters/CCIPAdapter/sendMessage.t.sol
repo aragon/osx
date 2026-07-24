@@ -96,11 +96,22 @@ contract CCIPAdapterSendMessageTest is CCIPAdapterBase {
         router.setFee(feeAmount);
         feeTokenErc20.setBalance(address(controller), feeAmount);
 
-        bytes32 messageId = controller.forwardMessage(
+        // `forwardMessage` returns the txId; the router's messageId is surfaced
+        // via the `MessageForwarded` event. Pin messageId (topic 2), ignore the
+        // txId topic and the non-indexed data.
+        vm.expectEmit(true, true, false, false, address(controller));
+        emit MessageForwarded(
             CHAIN_ETH_MAINNET,
-            200_000,
-            "hello"
+            router.nextMessageId(),
+            bytes32(0),
+            "",
+            address(0),
+            address(0),
+            0,
+            0
         );
+
+        controller.forwardMessage(CHAIN_ETH_MAINNET, 200_000, "hello");
 
         assertEq(router.ccipSendCallCount(), 1);
         assertEq(
@@ -108,7 +119,6 @@ contract CCIPAdapterSendMessageTest is CCIPAdapterBase {
             feeAmount,
             "router must have pulled the fee"
         );
-        assertEq(messageId, router.nextMessageId());
     }
 
     function test_erc20Fee_leavesZeroStandingAllowanceOnControllerAfterSend()
@@ -201,17 +211,22 @@ contract CCIPAdapterSendMessageTest is CCIPAdapterBase {
         bytes memory payload = _emptyActionsPayload();
         uint256 gasLimit = 300_000;
 
-        bytes32 messageId = controller.forwardMessage(
+        // `forwardMessage` returns the txId; the router's messageId is surfaced
+        // via the `MessageForwarded` event. Pin messageId (topic 2), ignore the
+        // txId topic and the non-indexed data.
+        vm.expectEmit(true, true, false, false, address(controller));
+        emit MessageForwarded(
             CHAIN_ETH_MAINNET,
-            gasLimit,
-            payload
+            expectedMessageId,
+            bytes32(0),
+            "",
+            address(0),
+            address(0),
+            0,
+            0
         );
 
-        assertEq(
-            messageId,
-            expectedMessageId,
-            "controller must surface the router's messageId"
-        );
+        controller.forwardMessage(CHAIN_ETH_MAINNET, gasLimit, payload);
 
         address decodedReceiver = abi.decode(router.lastReceiver(), (address));
         assertEq(

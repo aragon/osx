@@ -132,13 +132,9 @@ contract CrossChainControllerForwardMessageTest is CrossChainControllerBase {
         );
 
         vm.prank(alice);
-        bytes32 messageId = controller.forwardMessage(
-            CHAIN_ID,
-            GAS_LIMIT,
-            message
-        );
+        bytes32 txId = controller.forwardMessage(CHAIN_ID, GAS_LIMIT, message);
 
-        assertEq(messageId, expectedMessageId);
+        assertEq(txId, expectedTxId);
     }
 
     // -------------------------------------------------------------------------
@@ -251,19 +247,33 @@ contract CrossChainControllerForwardMessageTest is CrossChainControllerBase {
     function test_doesNotCollideWithControllerStorage() public {
         _configureLane(CHAIN_ID, address(adapterA), remoteAdapterA);
 
+        bytes memory message = abi.encode("no collision");
+
+        // `forwardMessage` returns the txId of the envelope it builds: nonce 1
+        // (first send), origin alice, controller = the controller.
+        bytes32 expectedTxId = TransactionLib.id(
+            Transaction({
+                nonce: 1,
+                origin: alice,
+                controller: address(controller),
+                originChainId: block.chainid,
+                destinationChainId: CHAIN_ID,
+                message: message
+            })
+        );
+
         bytes32[] memory slots = _controllerSnapshotSlots(CHAIN_ID);
         bytes32[] memory valuesBefore = _loadAll(slots);
         bytes32 gettersHashBefore = _gettersHash(CHAIN_ID, address(adapterA));
-        bytes32 nonceBefore = vm.load(address(controller), bytes32(uint256(0)));
+        bytes32 nonceBefore = vm.load(
+            address(controller),
+            bytes32(NONCE_SLOT)
+        );
 
         vm.prank(alice);
-        bytes32 messageId = controller.forwardMessage(
-            CHAIN_ID,
-            GAS_LIMIT,
-            abi.encode("no collision")
-        );
+        bytes32 txId = controller.forwardMessage(CHAIN_ID, GAS_LIMIT, message);
         // Sanity: the send actually happened, this isn't vacuously true.
-        assertEq(messageId, bytes32(uint256(1)));
+        assertEq(txId, expectedTxId);
 
         bytes32[] memory valuesAfter = _loadAll(slots);
         for (uint256 i = 0; i < slots.length; i++) {
@@ -271,10 +281,10 @@ contract CrossChainControllerForwardMessageTest is CrossChainControllerBase {
         }
         assertEq(_gettersHash(CHAIN_ID, address(adapterA)), gettersHashBefore);
 
-        // Slot 0 (`_currentTxNonce`) is the ONE word `forwardMessage`
-        // legitimately mutates: it must have incremented by exactly one.
+        // `_currentTxNonce` is the ONE word `forwardMessage` legitimately
+        // mutates: it must have incremented by exactly one.
         assertEq(
-            vm.load(address(controller), bytes32(uint256(0))),
+            vm.load(address(controller), bytes32(NONCE_SLOT)),
             bytes32(uint256(nonceBefore) + 1),
             "nonce must increment by exactly one"
         );
@@ -316,16 +326,41 @@ contract CrossChainControllerForwardMessageTest is CrossChainControllerBase {
         vm.deal(address(controller), 1 ether);
         feeToken.setBalance(address(controller), 2 ether);
 
-        vm.prank(alice);
-        bytes32 messageId = controller.forwardMessage(
-            CHAIN_ID,
-            GAS_LIMIT,
-            _emptyActionsPayload()
+        bytes memory message = _emptyActionsPayload();
+
+        // `forwardMessage` now returns the txId; the adapter's messageId is
+        // surfaced only via the `MessageForwarded` event. Pin messageIdX there
+        // (indexed) to prove adapterX's immutable messageId resolved -- NOT
+        // adapterY's (222) or zero. `checkData` is false so only the indexed
+        // topics (incl. messageId) are matched.
+        bytes32 expectedTxId = TransactionLib.id(
+            Transaction({
+                nonce: 1,
+                origin: alice,
+                controller: address(controller),
+                originChainId: block.chainid,
+                destinationChainId: CHAIN_ID,
+                message: message
+            })
         );
 
-        assertEq(messageId, messageIdX);
-        assertTrue(messageId != messageIdY);
-        assertTrue(messageId != bytes32(0));
+        vm.expectEmit(true, true, true, false, address(controller));
+        emit MessageForwarded(
+            CHAIN_ID,
+            messageIdX,
+            expectedTxId,
+            "",
+            address(0),
+            address(0),
+            0,
+            0
+        );
+
+        vm.prank(alice);
+        bytes32 txId = controller.forwardMessage(CHAIN_ID, GAS_LIMIT, message);
+
+        assertEq(txId, expectedTxId);
+        assertTrue(messageIdX != messageIdY); // guards the test's own premise
 
         assertEq(sinkX.balance, 1 ether);
         assertEq(address(controller).balance, 0);
@@ -381,16 +416,16 @@ contract CrossChainControllerForwardMessageTest is CrossChainControllerBase {
     // Snapshot helpers (local to this file -- only forwardMessage needs them).
     // -------------------------------------------------------------------------
 
-    /// @dev EXCLUDES slot 0 (`_currentTxNonce`), which `forwardMessage`
-    ///      legitimately increments (checked separately). Slots 1/2 are the
-    ///      mapping bases (holding nothing themselves), plus the two concrete
-    ///      words `chainToAdapter[_chainId]` occupies.
+    /// @dev EXCLUDES `_currentTxNonce`, which `forwardMessage` legitimately
+    ///      increments (checked separately). Includes the two mapping bases
+    ///      (holding nothing themselves), plus the two concrete words
+    ///      `chainToAdapter[_chainId]` occupies.
     function _controllerSnapshotSlots(
         uint256 _chainId
     ) internal pure returns (bytes32[] memory slots) {
         slots = new bytes32[](4);
-        slots[0] = bytes32(uint256(1));
-        slots[1] = bytes32(uint256(2));
+        slots[0] = bytes32(TRANSACTION_STATE_SLOT);
+        slots[1] = bytes32(CHAIN_TO_ADAPTER_SLOT);
         bytes32 configWord0 = _chainConfigSlot(_chainId);
         slots[2] = configWord0;
         slots[3] = bytes32(uint256(configWord0) + 1);

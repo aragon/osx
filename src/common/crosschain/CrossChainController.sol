@@ -8,6 +8,7 @@ import {
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {IBaseAdapter} from "./adapters/IBaseAdapter.sol";
+import {ICrossChainController} from "./ICrossChainController.sol";
 import {DaoAuthorizable} from "../permission/auth/DaoAuthorizable.sol";
 import {Action, IExecutor} from "../executors/IExecutor.sol";
 
@@ -28,7 +29,7 @@ import {
 ///      bridge sees this controller (not the adapter) as the message sender on
 ///      the receiver side, and the send-side fee is paid by this controller.
 /// @custom:security-contact sirt@aragon.org
-contract CrossChainController is DaoAuthorizable {
+contract CrossChainController is ICrossChainController, DaoAuthorizable {
     using SafeERC20 for IERC20;
     using TransactionLib for Transaction;
     using TransactionLib for bytes;
@@ -50,75 +51,14 @@ contract CrossChainController is DaoAuthorizable {
     /// @notice Permission to move pre-funded fee assets out of this contract.
     bytes32 public constant SWEEP_PERMISSION_ID = keccak256("SWEEP_PERMISSION");
 
-    /// @param localAdapter The adapter where message will be forwarded to.
-    /// @param remoteAdapter The bridge-level RECEIVER on the remote chain.
-    struct ChainConfig {
-        address localAdapter;
-        address remoteAdapter;
-    }
-
-    /// @notice A message whose execution reverted on arrival, kept for retry.
-    /// @param pending Whether a retry is still outstanding.
-    /// @param originChainId The standard chain id the message came from.
-    /// @param messageId The bridge-level message identifier.
-    /// @param payload The encoded `Action[]`.
-    struct FailedMessage {
-        bool pending;
-        uint256 originChainId;
-        bytes32 messageId;
-        bytes payload;
-    }
-
-    /// @notice Emitted when a config is configured or cleared.
-    event ConfigUpdated(
-        uint256 indexed chainId,
-        address localAdapter,
-        address remoteAdapter
-    );
-
-    /// @notice Emitted when a message was handed to the local adapter.
-    event MessageForwarded(
-        uint256 indexed destinationChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction,
-        address localAdapter,
-        address remoteAdapter,
-        uint256 gasLimit,
-        uint256 fee
-    );
-
-    /// @notice Emitted when an inbound message executed successfully.
-    event MessageReceived(
-        uint256 indexed originChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction
-    );
-
-    /// @notice Emitted when an inbound message reverted and was stored.
-    event MessageExecutionFailed(
-        uint256 indexed originChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction,
-        bytes reason
-    );
-
-    /// @notice Emitted when a stored failed message was successfully retried.
-    event MessageRetried(bytes32 indexed callId);
-
-    /// @notice Emitted when fee assets are moved out of the contract.
-    event Swept(address indexed token, address indexed to, uint256 amount);
-
     // every message originator sends we put into an transaction and attach a nonce. It increments by one
     uint256 internal _currentTxNonce;
 
-    /// @notice standard chain id -> lane configuration.
-    mapping(uint256 => ChainConfig) public chainToAdapter;
-
     /// @notice txId -> stored message.
     mapping(bytes32 => TransactionState) private _transactionState;
+
+    /// @notice standard chain id -> lane configuration.
+    mapping(uint256 => ChainConfig) public chainToAdapter;
 
     /// @notice Restricts a function to local adapters registered via `updateConfig`.
     modifier onlyLocalAdapter(uint256 _srcChainId) {
@@ -149,7 +89,7 @@ contract CrossChainController is DaoAuthorizable {
     function updateConfig(
         uint256[] memory _chainIds,
         ChainConfig[] memory _configs
-    ) public auth(UPDATE_CONFIG_PERMISSION_ID) {
+    ) public virtual auth(UPDATE_CONFIG_PERMISSION_ID) {
         if (_chainIds.length != _configs.length) {
             revert Errors.INVALID_LENGTH_MISMATCH();
         }
@@ -198,7 +138,12 @@ contract CrossChainController is DaoAuthorizable {
         uint256 _destinationChainId,
         uint256 _gasLimit,
         bytes memory _message
-    ) public view returns (address feeToken, uint256 fee, uint256 available) {
+    )
+        public
+        view
+        virtual
+        returns (address feeToken, uint256 fee, uint256 available)
+    {
         ChainConfig memory config = _validatedConfig(_destinationChainId);
 
         // Quote the SAME bytes `forwardMessage` will send.
@@ -223,19 +168,21 @@ contract CrossChainController is DaoAuthorizable {
             : IERC20(feeToken).balanceOf(address(this));
     }
 
-    /// @notice Entry point to receive a message and send it to cross-chain.
+    /// @inheritdoc ICrossChainController
     /// @dev Executes the adapter's send code IN THIS CONTRACT'S CONTEXT. The
     ///      bridge fee is paid straight from this contract's balance, and the
     ///      bridge attributes the message to this contract's address.
-    /// @param _destinationChainId The standard chain id of remote chain.
-    /// @param _gasLimit The gas limit that will be used for crosschain message execution.
-    /// @param _message The encoded Action[] message.
-    /// @return messageId The bridge-level identifier of the sent message.
     function forwardMessage(
         uint256 _destinationChainId,
         uint256 _gasLimit,
         bytes memory _message
-    ) public auth(FORWARD_MESSAGE_PERMISSION_ID) returns (bytes32 messageId) {
+    )
+        public
+        virtual
+        override
+        auth(FORWARD_MESSAGE_PERMISSION_ID)
+        returns (bytes32)
+    {
         ChainConfig memory config = _validatedConfig(_destinationChainId);
 
         bytes memory encodedTx = Transaction({
@@ -247,8 +194,7 @@ contract CrossChainController is DaoAuthorizable {
             message: _message
         }).encode();
 
-        uint256 fee;
-        (messageId, fee) = _dispatch(
+        (bytes32 messageId, uint256 fee) = _dispatch(
             config,
             _destinationChainId,
             _gasLimit,
@@ -265,26 +211,30 @@ contract CrossChainController is DaoAuthorizable {
             _gasLimit,
             fee
         );
+
+        return encodedTx.id();
     }
 
     // -------------------------------------------------------------------------
     // Receiving
     // -------------------------------------------------------------------------
 
-    /// @notice The final destination for a message that arrives on remote chain.
+    /// @inheritdoc ICrossChainController
     /// @dev Only a registered local adapter may call this. The adapter is
     ///      responsible for having authenticated the remote sender.
     ///      CrossChainController is bridge agnostic, so _messageId is only used
     ///      for emit principles only and should not be fully trusted.
-    /// @param _messageId The bridge's own messageId for emit only.
-    /// @param _encodedTx The encoded transaction object(that contains message itself)
-    /// @param _originChainId The origin chain id from which cross-chain message originated.
-    /// @return txId The deterministic transaction id used for the DAO execution.
     function receiveMessage(
         bytes32 _messageId,
         bytes memory _encodedTx,
         uint256 _originChainId
-    ) public onlyLocalAdapter(_originChainId) returns (bytes32 txId) {
+    )
+        public
+        virtual
+        override
+        onlyLocalAdapter(_originChainId)
+        returns (bytes32 txId)
+    {
         // Decode tx and get its id.
         Transaction memory transaction = _encodedTx.decode();
         txId = transaction.id();
@@ -336,13 +286,12 @@ contract CrossChainController is DaoAuthorizable {
         IExecutor(address(dao())).execute(_callId, actions, 0);
     }
 
-    /// @notice Retries a previously failed inbound message.
+    /// @inheritdoc ICrossChainController
     /// @dev Reverts (bubbling the failure) if the retry fails again, so the
     ///      stored message stays pending.
-    /// @param _encodedTx The encoded tx that must be retried.
     function retryMessage(
         bytes memory _encodedTx
-    ) public auth(RETRY_MESSAGE_PERMISSION_ID) {
+    ) public virtual override auth(RETRY_MESSAGE_PERMISSION_ID) {
         bytes32 txId = _encodedTx.id();
 
         if (_transactionState[txId] != TransactionState.Delivered) {
@@ -361,7 +310,7 @@ contract CrossChainController is DaoAuthorizable {
     /// @return The state of the transaction(None, Delivered, Executed)
     function getTransactionState(
         bytes32 _txId
-    ) public view returns (TransactionState) {
+    ) public view virtual returns (TransactionState) {
         return _transactionState[_txId];
     }
 
@@ -370,7 +319,7 @@ contract CrossChainController is DaoAuthorizable {
     /// @return The state of the transaction(None, Delivered, Executed)
     function getTransactionState(
         Transaction memory _tx
-    ) public view returns (TransactionState) {
+    ) public view virtual returns (TransactionState) {
         return _transactionState[_tx.id()];
     }
 
@@ -386,7 +335,7 @@ contract CrossChainController is DaoAuthorizable {
         address _token,
         address _to,
         uint256 _amount
-    ) public auth(SWEEP_PERMISSION_ID) {
+    ) public virtual auth(SWEEP_PERMISSION_ID) {
         if (_to == address(0)) revert Errors.ZERO_ADDRESS();
 
         if (_token == address(0)) {
@@ -443,7 +392,7 @@ contract CrossChainController is DaoAuthorizable {
     ///      "execute" while nothing was ever bridged.
     function _validatedConfig(
         uint256 _destinationChainId
-    ) internal view returns (ChainConfig memory config) {
+    ) internal view virtual returns (ChainConfig memory config) {
         config = chainToAdapter[_destinationChainId];
 
         if (

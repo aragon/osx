@@ -7,61 +7,47 @@ import {Test} from "forge-std/Test.sol";
 import {
     CrossChainController
 } from "@aragon/osx-commons-contracts/src/crosschain/CrossChainController.sol";
-import {Errors} from "@aragon/osx-commons-contracts/src/crosschain/lib/Errors.sol";
+import {
+    ICrossChainControllerEvents,
+    ICrossChainController
+} from "@aragon/osx-commons-contracts/src/crosschain/ICrossChainController.sol";
+import {
+    Errors
+} from "@aragon/osx-commons-contracts/src/crosschain/lib/Errors.sol";
 import {
     Transaction,
     TransactionState,
     TransactionLib
 } from "@aragon/osx-commons-contracts/src/crosschain/lib/Transaction.sol";
-import {Action} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
-import {DaoUnauthorized} from "@aragon/osx-commons-contracts/src/permission/auth/auth.sol";
-import {AdapterMock} from "../../../../mocks/commons/crosschain/AdapterMock.sol";
+import {
+    Action
+} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
+import {
+    DaoUnauthorized
+} from "@aragon/osx-commons-contracts/src/permission/auth/auth.sol";
+import {
+    AdapterMock
+} from "../../../../mocks/commons/crosschain/AdapterMock.sol";
 import {
     CrossChainControllerDAOMock
 } from "../../../../mocks/commons/crosschain/CrossChainControllerDAOMock.sol";
 import {ERC20Mock} from "../../../../mocks/commons/token/ERC20Mock.sol";
-import {ActionExecute} from "../../../../mocks/commons/executors/ActionExecute.sol";
+import {
+    ActionExecute
+} from "../../../../mocks/commons/executors/ActionExecute.sol";
 
 /// @title CrossChainControllerBase
 /// @notice Shared fixture for the per-function `CrossChainController` unit
 ///         tests: deploys the controller + mocks, wires alice with every
 ///         permission, and provides the envelope / storage-slot helpers each
 ///         function's test file builds on.
-abstract contract CrossChainControllerBase is Test {
-    // -------------------------------------------------------------------------
-    // Events (re-declared locally so `vm.expectEmit` can match by signature).
-    // -------------------------------------------------------------------------
-
-    event ConfigUpdated(
-        uint256 indexed chainId,
-        address localAdapter,
-        address remoteAdapter
-    );
-    event MessageForwarded(
-        uint256 indexed destinationChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction,
-        address localAdapter,
-        address remoteAdapter,
-        uint256 gasLimit,
-        uint256 fee
-    );
-    event MessageReceived(
-        uint256 indexed originChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction
-    );
-    event MessageExecutionFailed(
-        uint256 indexed originChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction,
-        bytes reason
-    );
-    event MessageRetried(bytes32 indexed txId);
-    event Swept(address indexed token, address indexed to, uint256 amount);
+abstract contract CrossChainControllerBase is
+    Test,
+    ICrossChainControllerEvents
+{
+    // Events come from `ICrossChainControllerEvents` (inherited), so
+    // `vm.expectEmit` can `emit` them without a local redeclaration that could
+    // drift from the contract's definitions.
 
     // -------------------------------------------------------------------------
     // Constants.
@@ -177,9 +163,9 @@ abstract contract CrossChainControllerBase is Test {
     function _lane(
         address _local,
         address _remote
-    ) internal pure returns (CrossChainController.ChainConfig memory) {
+    ) internal pure returns (ICrossChainController.ChainConfig memory) {
         return
-            CrossChainController.ChainConfig({
+            ICrossChainController.ChainConfig({
                 localAdapter: _local,
                 remoteAdapter: _remote
             });
@@ -259,9 +245,13 @@ abstract contract CrossChainControllerBase is Test {
     // -------------------------------------------------------------------------
     // Storage-slot helpers (verified via
     // `forge inspect .../CrossChainController.sol:CrossChainController storageLayout`):
-    // slot 0 = `_currentTxNonce`, slot 1 = `chainToAdapter`,
-    // slot 2 = `_transactionState`.
+    // slot 0 = `_currentTxNonce`, slot 1 = `_transactionState`,
+    // slot 2 = `chainToAdapter`.
     // -------------------------------------------------------------------------
+
+    uint256 internal constant NONCE_SLOT = 0;
+    uint256 internal constant TRANSACTION_STATE_SLOT = 1;
+    uint256 internal constant CHAIN_TO_ADAPTER_SLOT = 2;
 
     /// @dev `chainToAdapter[_chainId]` occupies TWO words: word 0 holds
     ///      `localAdapter`; word 1 holds `remoteAdapter`. This returns word 0's
@@ -269,6 +259,6 @@ abstract contract CrossChainControllerBase is Test {
     function _chainConfigSlot(
         uint256 _chainId
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_chainId, uint256(1)));
+        return keccak256(abi.encode(_chainId, CHAIN_TO_ADAPTER_SLOT));
     }
 }

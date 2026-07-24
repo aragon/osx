@@ -23,13 +23,23 @@ import {
 import {
     CrossChainController
 } from "@aragon/osx-commons-contracts/src/crosschain/CrossChainController.sol";
-import {Errors} from "@aragon/osx-commons-contracts/src/crosschain/lib/Errors.sol";
-import {ChainIds} from "@aragon/osx-commons-contracts/src/crosschain/lib/ChainIds.sol";
+import {
+    ICrossChainControllerEvents,
+    ICrossChainController
+} from "@aragon/osx-commons-contracts/src/crosschain/ICrossChainController.sol";
+import {
+    Errors
+} from "@aragon/osx-commons-contracts/src/crosschain/lib/Errors.sol";
+import {
+    ChainIds
+} from "@aragon/osx-commons-contracts/src/crosschain/lib/ChainIds.sol";
 import {
     Transaction,
     TransactionLib
 } from "@aragon/osx-commons-contracts/src/crosschain/lib/Transaction.sol";
-import {Action} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
+import {
+    Action
+} from "@aragon/osx-commons-contracts/src/executors/IExecutor.sol";
 import {IDAO} from "@aragon/osx-commons-contracts/src/dao/IDAO.sol";
 
 import {DAOMock} from "../../../../../mocks/commons/dao/DAOMock.sol";
@@ -45,7 +55,7 @@ import {
 /// @notice Shared fixture for the per-function `CCIPAdapter` unit tests:
 ///         deploys the controller, router, fee token, and the several adapter
 ///         instances the suite needs, plus the inbound-message / lane helpers.
-abstract contract CCIPAdapterBase is Test {
+abstract contract CCIPAdapterBase is Test, ICrossChainControllerEvents {
     // -------------------------------------------------------------------------
     // Real CCIP chain selectors / standard chain ids used throughout.
     // -------------------------------------------------------------------------
@@ -62,17 +72,8 @@ abstract contract CCIPAdapterBase is Test {
     uint256 internal constant CHAIN_BASE = ChainIds.BASE;
     uint256 internal constant CHAIN_ARBITRUM_ONE = ChainIds.ARBITRUM_ONE;
 
-    // -------------------------------------------------------------------------
-    // Events re-declared locally so `vm.expectEmit` can match by signature
-    // (solc 0.8.17 cannot `emit Contract.Event(...)` for externally-defined
-    // events).
-    // -------------------------------------------------------------------------
-    event MessageReceived(
-        uint256 indexed originChainId,
-        bytes32 indexed messageId,
-        bytes32 indexed txId,
-        bytes transaction
-    );
+    // Events come from `ICrossChainControllerEvents` (inherited), so
+    // `vm.expectEmit` can `emit` them without a local redeclaration.
 
     DAOMock internal daoMock;
     CrossChainController internal controller;
@@ -163,9 +164,9 @@ abstract contract CCIPAdapterBase is Test {
         _grantAllPermissions();
         uint256[] memory ids = new uint256[](1);
         ids[0] = chainId;
-        CrossChainController.ChainConfig[]
-            memory configs = new CrossChainController.ChainConfig[](1);
-        configs[0] = CrossChainController.ChainConfig({
+        ICrossChainController.ChainConfig[]
+            memory configs = new ICrossChainController.ChainConfig[](1);
+        configs[0] = ICrossChainController.ChainConfig({
             localAdapter: localAdapter,
             remoteAdapter: remoteAdapterAddr
         });
@@ -177,8 +178,8 @@ abstract contract CCIPAdapterBase is Test {
         _grantAllPermissions();
         uint256[] memory ids = new uint256[](1);
         ids[0] = chainId;
-        CrossChainController.ChainConfig[]
-            memory configs = new CrossChainController.ChainConfig[](1);
+        ICrossChainController.ChainConfig[]
+            memory configs = new ICrossChainController.ChainConfig[](1);
         controller.updateConfig(ids, configs);
     }
 
