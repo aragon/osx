@@ -286,6 +286,17 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
     /// @dev `FORWARD_MESSAGE_PERMISSION` goes to the DAO itself, because a
     ///      cross-chain send is produced by a passed proposal: the DAO executes
     ///      an action that calls `forwardMessage`. See `_forwardViaProposal`.
+    ///
+    ///      `RETRY_MESSAGE_PERMISSION` is granted to the DAO here because that
+    ///      is what a first-pass deployment does -- and it is a TRAP. A DAO can
+    ///      only act by executing a proposal, and `retryMessage` re-enters
+    ///      `DAO.execute`, which the DAO's reentrancy guard refuses. A
+    ///      DAO-held retry permission is therefore unusable; it has to be held
+    ///      by an account that can call the controller directly. The grant is
+    ///      kept as-is so `RetryAndFailures.t.sol` can demonstrate exactly that
+    ///      (`test_retry_daoCannotRetryThroughAProposal`); tests that just need
+    ///      a retry to happen use `vm.prank(dao)`, which is a direct call and
+    ///      sidesteps the lock.
     function _grantStackPermissions(Stack memory _chain) internal {
         DAO dao = _chain.dao;
         address controller = address(_chain.controller);
@@ -514,6 +525,25 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
                 _data,
                 _gasLimit
             );
+    }
+
+    /// @notice Builds the CCIP message shape a destination adapter receives.
+    /// @dev For tests that call `ccipReceive` directly rather than going
+    ///      through a router.
+    function _any2Evm(
+        bytes32 _messageId,
+        uint64 _sourceSelector,
+        bytes memory _senderBytes,
+        bytes memory _data
+    ) internal pure returns (Client.Any2EVMMessage memory) {
+        return
+            Client.Any2EVMMessage({
+                messageId: _messageId,
+                sourceChainSelector: _sourceSelector,
+                sender: _senderBytes,
+                data: _data,
+                destTokenAmounts: new Client.EVMTokenAmount[](0)
+            });
     }
 
     /// @notice `_forgeDelivery` with arbitrary sender BYTES, so a test can send

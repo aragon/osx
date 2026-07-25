@@ -7,6 +7,9 @@ import {DAO} from "../../../src/core/dao/DAO.sol";
 import {Action} from "../../../src/common/executors/IExecutor.sol";
 import {Errors} from "../../../src/common/crosschain/lib/Errors.sol";
 import {
+    ICrossChainController
+} from "../../../src/common/crosschain/ICrossChainController.sol";
+import {
     DaoUnauthorized
 } from "../../../src/common/permission/auth/auth.sol";
 import {
@@ -118,6 +121,73 @@ contract CrossChainRetryAndFailuresTest is CrossChainE2EBase {
         _assertExecuted(destination, txId);
         assertEq(destination.target.cancellations(), 1, "retry should have run");
         assertEq(destination.target.lastCaller(), address(destination.dao));
+    }
+
+    /// @notice A DAO that holds `RETRY_MESSAGE_PERMISSION` CANNOT USE IT, because
+    ///         the only way a DAO acts is by executing a proposal -- and
+    ///         `retryMessage` has to re-enter `DAO.execute`, which the DAO's
+    ///         reentrancy guard forbids.
+    /// @dev Every other test in this file retries with `vm.prank(dao)`, i.e. a
+    ///      direct external call from the DAO's address. That is NOT a path
+    ///      that exists in production: a DAO only ever acts through
+    ///      `DAO.execute`. This test takes the production path and shows it
+    ///      fails.
+    ///
+    ///      The practical consequence is that `RETRY_MESSAGE_PERMISSION` must
+    ///      be held by an account that can call the controller DIRECTLY -- an
+    ///      ops multisig or an EOA. Granting it to the DAO, which is the
+    ///      natural-looking choice and what a first-pass deployment script
+    ///      would do, produces a stack where failed messages can never be
+    ///      retried at all.
+    ///
+    ///      See also `Reentrancy.t.sol`, where the same mechanic blocks a
+    ///      cross-chain proposal from clearing a stuck message.
+    function test_retry_daoCannotRetryThroughAProposal() public {
+        (bytes32 txId, bytes memory encodedTx) = _deliverFailingMessage();
+        destination.target.setLocked(false);
+
+        Action[] memory actions = new Action[](1);
+        actions[0] = Action({
+            to: address(destination.controller),
+            value: 0,
+            data: abi.encodeCall(
+                ICrossChainController.retryMessage,
+                (encodedTx)
+            )
+        });
+
+        _on(destination);
+        vm.prank(plugin);
+        vm.expectRevert(
+            abi.encodeWithSelector(DAO.ActionFailed.selector, uint256(0))
+        );
+        destination.dao.execute(keccak256("retry-proposal"), actions, 0);
+
+        _assertDelivered(destination, txId);
+        assertEq(destination.target.cancellations(), 0);
+    }
+
+    /// @notice The retry DOES work when the permission is held by an account
+    ///         that calls the controller directly.
+    /// @dev The counterpart to the test above: this is the wiring a production
+    ///      deployment needs.
+    function test_retry_opsAccountHoldingThePermissionCanRetry() public {
+        (bytes32 txId, bytes memory encodedTx) = _deliverFailingMessage();
+        destination.target.setLocked(false);
+
+        address opsMultisig = makeAddr("opsMultisig");
+        destination.dao.grant(
+            address(destination.controller),
+            opsMultisig,
+            RETRY_MESSAGE_PERMISSION_ID
+        );
+
+        _on(destination);
+        vm.prank(opsMultisig);
+        destination.controller.retryMessage(encodedTx);
+
+        _assertExecuted(destination, txId);
+        assertEq(destination.target.cancellations(), 1);
     }
 
     /// @notice Retrying needs the permission; the bridge already authenticated
