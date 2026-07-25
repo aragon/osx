@@ -87,11 +87,8 @@ interface IRouterFork {
 ///      better than pranking the Router into `adapter.ccipReceive` directly,
 ///      which skips the Router's own logic entirely.
 ///
-///      GATING. Excluded from CI by `--no-match-path '**/fork/**'`. Skips
-///      cleanly unless both endpoints are set:
-///        MAINNET_RPC_URL (or RPC_URL)  -- an Ethereum mainnet endpoint
-///        BASE_RPC_URL                  -- a Base mainnet endpoint
-///      Run with `just test-crosschain-fork`.
+///      Excluded from CI, and skips unless both RPC endpoints are set. See
+///      `src/common/crosschain/README.md` for how to run it.
 contract CCIPRealRouterForkTest is CrossChainE2EBase {
     // Verified on-chain via `typeAndVersion() == "Router 1.2.0"`; the
     // `test_fork_routerAddressesAreCurrent` test re-checks this every run.

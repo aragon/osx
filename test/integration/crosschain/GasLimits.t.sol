@@ -25,11 +25,9 @@ import {GasConsumer} from "../../mocks/commons/executors/GasConsumer.sol";
 ///         nothing is stored, and CCIP leaves the message manually executable
 ///         by anyone.
 ///
-///      Case 2 is the one worth internalising: an under-gassed message ends up
-///      in a state whose ONLY exit is a permissioned retry. That is the
-///      concrete argument for holding `RETRY_MESSAGE_PERMISSION` on an ops
-///      multisig and not solely on the DAO -- recovering otherwise needs a full
-///      governance cycle.
+///      Note that case 2 leaves the message in a state whose only exit is a
+///      permissioned retry, while case 3 is recoverable by anyone. See
+///      `src/common/crosschain/README.md`.
 ///
 ///      The gas numbers below are chosen with wide margins around the
 ///      boundaries, but they ARE compiler- and optimiser-sensitive. If one of

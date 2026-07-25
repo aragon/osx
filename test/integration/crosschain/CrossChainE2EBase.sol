@@ -287,16 +287,10 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
     ///      cross-chain send is produced by a passed proposal: the DAO executes
     ///      an action that calls `forwardMessage`. See `_forwardViaProposal`.
     ///
-    ///      `RETRY_MESSAGE_PERMISSION` is granted to the DAO here because that
-    ///      is what a first-pass deployment does -- and it is a TRAP. A DAO can
-    ///      only act by executing a proposal, and `retryMessage` re-enters
-    ///      `DAO.execute`, which the DAO's reentrancy guard refuses. A
-    ///      DAO-held retry permission is therefore unusable; it has to be held
-    ///      by an account that can call the controller directly. The grant is
-    ///      kept as-is so `RetryAndFailures.t.sol` can demonstrate exactly that
-    ///      (`test_retry_daoCannotRetryThroughAProposal`); tests that just need
-    ///      a retry to happen use `vm.prank(dao)`, which is a direct call and
-    ///      sidesteps the lock.
+    ///      `RETRY_MESSAGE_PERMISSION` is granted to the DAO, which is what a
+    ///      first-pass deployment does. `RetryAndFailures.t.sol` covers what
+    ///      that arrangement can and cannot do; tests that simply need a retry
+    ///      to happen use `vm.prank(dao)`, a direct call.
     function _grantStackPermissions(Stack memory _chain) internal {
         DAO dao = _chain.dao;
         address controller = address(_chain.controller);

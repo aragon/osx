@@ -145,15 +145,11 @@ contract CrossChainReentrancyTest is CrossChainE2EBase {
 
     /// @notice A delivered payload cannot drive a retry EVEN WITH the
     ///         permission -- the DAO's reentrancy guard forbids it.
-    /// @dev A consequence worth spelling out. `retryMessage` re-enters
-    ///      `DAO.execute`, and a delivered payload is already inside one. So
-    ///      "send a cross-chain proposal that clears a stuck message on the
-    ///      destination" does not work, however the permissions are arranged.
-    ///
-    ///      The same mechanic has a much sharper local consequence, pinned in
-    ///      `RetryAndFailures.t.sol`: granting `RETRY_MESSAGE_PERMISSION` to
-    ///      the DAO ITSELF makes retry unusable, because the DAO can only act
-    ///      by executing a proposal, which holds the same lock.
+    /// @dev `retryMessage` re-enters `DAO.execute`, and a delivered payload is
+    ///      already inside one. So "send a cross-chain proposal that clears a
+    ///      stuck message on the destination" does not work, however the
+    ///      permissions are arranged. `RetryAndFailures.t.sol` covers the same
+    ///      mechanic in its local form.
     function test_reentrancy_payloadCannotRetryEvenWithThePermission() public {
         (bytes32 parkedId, bytes memory parked) = _parkFailedTransaction();
 

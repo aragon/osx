@@ -299,9 +299,9 @@ contract CrossChainFeesAndOpsTest is CrossChainE2EBase {
     }
 
     /// @notice `forwardMessage` is not payable, so no caller can attach value.
-    /// @dev Documents why `Errors.UNEXPECTED_NATIVE_VALUE` is unreachable: the
-    ///      delegatecalled `sendMessage` always sees `msg.value == 0`. The
-    ///      controller is funded through its `receive`, not through the send.
+    /// @dev The delegatecalled `sendMessage` therefore always sees
+    ///      `msg.value == 0`. The controller is funded through its `receive`,
+    ///      not through the send.
     function test_e2e_forwardMessageRejectsAttachedValue() public {
         vm.deal(address(origin.dao), 1 ether);
 

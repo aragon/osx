@@ -127,21 +127,14 @@ contract CrossChainRetryAndFailuresTest is CrossChainE2EBase {
     ///         the only way a DAO acts is by executing a proposal -- and
     ///         `retryMessage` has to re-enter `DAO.execute`, which the DAO's
     ///         reentrancy guard forbids.
-    /// @dev Every other test in this file retries with `vm.prank(dao)`, i.e. a
-    ///      direct external call from the DAO's address. That is NOT a path
-    ///      that exists in production: a DAO only ever acts through
-    ///      `DAO.execute`. This test takes the production path and shows it
-    ///      fails.
+    /// @dev Every other test in this file retries with `vm.prank(dao)`, a
+    ///      direct external call from the DAO's address. That is not a path
+    ///      that exists in production, where a DAO only ever acts through
+    ///      `DAO.execute`. This test takes the production path.
     ///
-    ///      The practical consequence is that `RETRY_MESSAGE_PERMISSION` must
-    ///      be held by an account that can call the controller DIRECTLY -- an
-    ///      ops multisig or an EOA. Granting it to the DAO, which is the
-    ///      natural-looking choice and what a first-pass deployment script
-    ///      would do, produces a stack where failed messages can never be
-    ///      retried at all.
-    ///
-    ///      See also `Reentrancy.t.sol`, where the same mechanic blocks a
-    ///      cross-chain proposal from clearing a stuck message.
+    ///      `RETRY_MESSAGE_PERMISSION` therefore has to be held by an account
+    ///      that can call the controller directly. See
+    ///      `src/common/crosschain/README.md`.
     function test_retry_daoCannotRetryThroughAProposal() public {
         (bytes32 txId, bytes memory encodedTx) = _deliverFailingMessage();
         destination.target.setLocked(false);
@@ -430,8 +423,7 @@ contract CrossChainRetryAndFailuresTest is CrossChainE2EBase {
     /// @notice The same for an adapter rotation: an in-flight message arrives
     ///         through the OLD adapter, which the controller no longer knows.
     /// @dev The recovery here is to point the lane back. A permanent rotation
-    ///      strands in-flight messages until the new adapter can deliver them,
-    ///      which is worth knowing before rotating one in production.
+    ///      strands in-flight messages until the new adapter can deliver them.
     function test_bridgeRetry_rotatedAdapterRejectsThenRecovers() public {
         bytes32 txId = _forwardViaProposal(
             origin,
