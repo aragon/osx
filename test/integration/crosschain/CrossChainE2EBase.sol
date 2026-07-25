@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 
 import {Test} from "forge-std/Test.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Client} from "@chainlink/contracts-ccip/contracts/libraries/Client.sol";
 
 import {DAO} from "../../../src/core/dao/DAO.sol";
 import {Action} from "../../../src/common/executors/IExecutor.sol";
@@ -328,6 +329,33 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
         _chain.controller.updateConfig(chainIds, configs);
     }
 
+    /// @notice Configures a lane whose LOCAL adapter is something other than
+    ///         the stack's own -- a codeless address, a stale adapter, a
+    ///         deliberately broken one.
+    /// @param _stack The local stack.
+    /// @param _remoteChainId The standard chain id of the counterparty.
+    /// @param _localAdapter The address to register as the local adapter.
+    /// @param _remoteAdapter The counterparty's adapter.
+    function _configureLaneWithLocalAdapter(
+        Stack memory _stack,
+        uint256 _remoteChainId,
+        address _localAdapter,
+        address _remoteAdapter
+    ) internal {
+        uint256[] memory chainIds = new uint256[](1);
+        chainIds[0] = _remoteChainId;
+
+        ICrossChainController.ChainConfig[]
+            memory configs = new ICrossChainController.ChainConfig[](1);
+        configs[0] = ICrossChainController.ChainConfig({
+            localAdapter: _localAdapter,
+            remoteAdapter: _remoteAdapter
+        });
+
+        vm.prank(address(_stack.dao));
+        _stack.controller.updateConfig(chainIds, configs);
+    }
+
     /// @notice Clears a lane on a controller, acting as the DAO.
     function _clearLane(Stack memory _chain, uint256 _remoteChainId) internal {
         uint256[] memory chainIds = new uint256[](1);
@@ -423,9 +451,10 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
         Stack memory _from,
         Stack memory _to
     ) internal returns (bytes32 messageId, bool success) {
+        uint256 previous = block.chainid;
         _on(_to);
         (messageId, success) = _from.router.deliverNext();
-        _on(_from);
+        vm.chainId(previous);
     }
 
     /// @notice Delivers a specific queued message.
@@ -434,9 +463,10 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
         Stack memory _to,
         bytes32 _messageId
     ) internal returns (bool success) {
+        uint256 previous = block.chainid;
         _on(_to);
         success = _from.router.deliver(_messageId);
-        _on(_from);
+        vm.chainId(previous);
     }
 
     /// @notice Replays a failed message with a different gas limit, which is
@@ -447,9 +477,71 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
         bytes32 _messageId,
         uint256 _gasOverride
     ) internal returns (bool success) {
+        uint256 previous = block.chainid;
         _on(_to);
         success = _from.router.manualExecute(_messageId, _gasOverride);
-        _on(_from);
+        vm.chainId(previous);
+    }
+
+    /// @notice Hands a hand-built message straight to a destination adapter
+    ///         through its own router, bypassing any queue.
+    /// @dev This is how a test forges a delivery: a doctored sender, an
+    ///      unmapped source selector, a replayed or tampered payload. The
+    ///      destination router is the caller, so the adapter's `onlyRouter`
+    ///      check passes and the test is about what happens AFTER it.
+    /// @param _to The destination stack.
+    /// @param _messageId The bridge-level id to claim.
+    /// @param _sourceSelector The CCIP selector to claim as the origin.
+    /// @param _sender The address to claim as the origin-chain sender.
+    /// @param _data The payload bytes.
+    /// @param _gasLimit The exact gas to give the adapter.
+    /// @return success Whether `ccipReceive` succeeded.
+    /// @return returnData The revert data when it did not.
+    function _forgeDelivery(
+        Stack memory _to,
+        bytes32 _messageId,
+        uint64 _sourceSelector,
+        address _sender,
+        bytes memory _data,
+        uint256 _gasLimit
+    ) internal returns (bool success, bytes memory returnData) {
+        return
+            _forgeDeliveryRaw(
+                _to,
+                _messageId,
+                _sourceSelector,
+                abi.encode(_sender),
+                _data,
+                _gasLimit
+            );
+    }
+
+    /// @notice `_forgeDelivery` with arbitrary sender BYTES, so a test can send
+    ///         something that does not decode to an address at all.
+    function _forgeDeliveryRaw(
+        Stack memory _to,
+        bytes32 _messageId,
+        uint64 _sourceSelector,
+        bytes memory _senderBytes,
+        bytes memory _data,
+        uint256 _gasLimit
+    ) internal returns (bool success, bytes memory returnData) {
+        uint256 previous = block.chainid;
+        _on(_to);
+
+        (success, returnData) = _to.router.executeDelivery(
+            Client.Any2EVMMessage({
+                messageId: _messageId,
+                sourceChainSelector: _sourceSelector,
+                sender: _senderBytes,
+                data: _data,
+                destTokenAmounts: new Client.EVMTokenAmount[](0)
+            }),
+            address(_to.adapter),
+            _gasLimit
+        );
+
+        vm.chainId(previous);
     }
 
     // -------------------------------------------------------------------------

@@ -403,30 +403,4 @@ contract CrossChainFeesAndOpsTest is CrossChainE2EBase {
             _emptyPayload()
         );
     }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /// @dev `_configureLane` always points the lane at the stack's own adapter;
-    ///      these tests need to point it somewhere broken instead.
-    function _configureLaneWithLocalAdapter(
-        Stack memory _stack,
-        uint256 _remoteChainId,
-        address _localAdapter,
-        address _remoteAdapter
-    ) internal {
-        uint256[] memory chainIds = new uint256[](1);
-        chainIds[0] = _remoteChainId;
-
-        ICrossChainController.ChainConfig[]
-            memory configs = new ICrossChainController.ChainConfig[](1);
-        configs[0] = ICrossChainController.ChainConfig({
-            localAdapter: _localAdapter,
-            remoteAdapter: _remoteAdapter
-        });
-
-        vm.prank(address(_stack.dao));
-        _stack.controller.updateConfig(chainIds, configs);
-    }
 }
