@@ -28,6 +28,16 @@ build-docs ref="main":
     forge build --ast
     GITHUB_REF="{{ ref }}" python3 scripts/build-docs.py
 
+# Run the cross-chain E2E suite. See src/common/crosschain/README.md
+[group('test')]
+test-crosschain *args:
+    forge test --match-path 'test/integration/crosschain/*' -vvv {{ args }}
+
+# Run the cross-chain E2E suite against the real CCIP routers (needs RPC URLs)
+[group('test')]
+test-crosschain-fork *args:
+    forge test --match-path 'test/integration/crosschain/fork/*' -vvv {{ args }}
+
 # Run the DAO upgrade test (v1.0.0 → v1.3.0 → v1.4.0)
 [group('test')]
 test-upgrade *args: test-upgrade-setup
