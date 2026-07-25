@@ -253,6 +253,9 @@ contract CCIPRelayRouterMock is IRouterClient {
             )
         );
 
+        // Safe: the range check above already rejected anything wider than
+        // `uint160`, exactly as the real Router does.
+        // forge-lint: disable-next-line(unsafe-typecast)
         address receiver = address(uint160(decodedReceiver));
 
         _sent.push(
@@ -454,6 +457,9 @@ contract CCIPRelayRouterMock is IRouterClient {
     ) internal pure returns (uint256) {
         if (_extraArgs.length == 0) return 200_000;
 
+        // Truncation to the leading four bytes IS the tag read; this mirrors
+        // the real Router's `_fromBytes`.
+        // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 tag = bytes4(_extraArgs);
 
         if (tag == Client.GENERIC_EXTRA_ARGS_V2_TAG) {
