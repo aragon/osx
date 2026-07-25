@@ -146,6 +146,43 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
         // The origin controller is the fee payer; pre-fund it the way ops would.
         vm.deal(address(origin.controller), 100 ether);
         vm.deal(address(destination.controller), 100 ether);
+
+        // Tests start life on the origin chain.
+        _on(origin);
+    }
+
+    /// @notice Deploys a THIRD stack, reachable from the origin.
+    /// @dev One-directional on purpose: the origin can send to it, and it
+    ///      trusts the origin controller, but the origin adapter does not trust
+    ///      it back (trusted remotes are constructor-only). That is all the
+    ///      multi-lane and cross-chain-replay scenarios need, and keeping it
+    ///      one-directional makes the asymmetry explicit.
+    function _deployThirdStack() internal returns (Stack memory c) {
+        c.chainId = THIRD_CHAIN_ID;
+        c.selector = THIRD_SELECTOR;
+
+        c.router = new CCIPRelayRouterMock(THIRD_SELECTOR);
+        c.router.setFee(FEE);
+        origin.router.setPeer(THIRD_SELECTOR, c.router);
+        c.router.setPeer(ORIGIN_SELECTOR, origin.router);
+
+        c.dao = _deployDao("dao:C");
+        c.controller = new CrossChainController(address(c.dao));
+        c.adapter = new CCIPAdapter(
+            address(c.controller),
+            address(c.router),
+            address(0),
+            _trustedRemotes(ORIGIN_CHAIN_ID, address(origin.controller))
+        );
+        c.target = new GuardedTarget();
+
+        _label(c, "C");
+        _grantStackPermissions(c);
+
+        _configureLane(c, ORIGIN_CHAIN_ID, address(origin.adapter));
+        _configureLane(origin, THIRD_CHAIN_ID, address(c.adapter));
+
+        vm.deal(address(c.controller), 100 ether);
     }
 
     /// @notice Deploys and fully wires two stacks that can talk to each other.
@@ -222,8 +259,10 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
     /// @dev Mirrors `test/core/dao/DAO.t.sol`. The test contract keeps ROOT so
     ///      it can grant and revoke at will; in production that is the DAO
     ///      itself after the setup handover.
-    /// @param _label A `vm.label` for readable traces.
-    function _deployDao(string memory _label) internal returns (DAO dao_) {
+    /// @param _daoLabel A `vm.label` for readable traces.
+    function _deployDao(
+        string memory _daoLabel
+    ) internal returns (DAO dao_) {
         DAO impl = new DAO();
         dao_ = DAO(
             payable(
@@ -239,7 +278,7 @@ abstract contract CrossChainE2EBase is Test, ICrossChainControllerEvents {
             )
         );
 
-        vm.label(address(dao_), _label);
+        vm.label(address(dao_), _daoLabel);
     }
 
     /// @notice Grants the full permission set a production stack needs.

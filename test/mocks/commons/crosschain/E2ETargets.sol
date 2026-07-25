@@ -62,6 +62,25 @@ contract RejectingReceiver {
     }
 }
 
+/// @notice An adapter whose send path returns FEWER than the two words
+///         `CrossChainController._dispatch` expects.
+/// @dev DO NOT USE IN PRODUCTION!
+///      Stands in for a wrong or malicious adapter registered on a lane. The
+///      controller must reject the short return rather than `abi.decode` past
+///      the end of it.
+contract ShortReturnAdapterMock {
+    /// @notice Mirrors `IBaseAdapter.sendMessage`'s selector but returns a
+    ///         single word instead of `(bytes32, uint256)`.
+    function sendMessage(
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external payable returns (bytes32) {
+        return bytes32(uint256(1));
+    }
+}
+
 /// @notice Makes an arbitrary call and SWALLOWS its failure, recording the
 ///         outcome instead.
 /// @dev DO NOT USE IN PRODUCTION!
