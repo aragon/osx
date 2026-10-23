@@ -101,6 +101,8 @@ def load_all_contracts() -> dict[str, Contract]:
             for node in ast.get("nodes", []):
                 if node.get("nodeType") != "ContractDefinition":
                     continue
+                if node["name"] != jf.stem:
+                    continue
                 cid = node["id"]
                 by_id[cid] = {
                     "name": node["name"],
