@@ -22,12 +22,6 @@ deploy-member-registry *args:
 predeploy-member-registry:
     just dry-run scripts/DeployMemberRegistry.s.sol:DeployMemberRegistry
 
-# Build Asciidoc documentation. Override `ref` for tagged-release re-runs (e.g. `just build-docs v1.4.0`).
-[group('documentation')]
-build-docs ref="main":
-    forge build --ast
-    GITHUB_REF="{{ ref }}" python3 scripts/build-docs.py
-
 # Run the DAO upgrade test (v1.0.0 → v1.3.0 → v1.4.0)
 [group('test')]
 test-upgrade *args: test-upgrade-setup
