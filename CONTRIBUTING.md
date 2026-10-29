@@ -22,7 +22,6 @@ Use the [issue tracker](https://github.com/aragon/osx/issues). Include the netwo
 - Tests are required for any behavioral change. Storage layout changes additionally require regression tests and a fork-based integration test.
 - If a change affects downstream consumers (subgraph, SDK, App), coordinate or flag the dependency.
 - Bump the protocol version per the SemVer classification below when relevant.
-- API docs at `docs/modules/api/` are auto-generated from natspec. After changing a contract's public surface, run `just build-docs` and commit the regenerated `.adoc` files. CI fails if they're out of date.
 
 ---
 
