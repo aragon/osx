@@ -544,12 +544,17 @@ XREF_KIND_ORDER = ["modifier", "function", "state", "event", "error"]
 
 
 def render_template(
-    template_path: Path, contracts: dict[str, Contract], section: str
+    template_path: Path,
+    contracts: dict[str, Contract],
+    section: str,
+    contract_sections: dict[str, str],
 ) -> str:
     """Read a template, expand {{ContractName}} placeholders.
 
-    `section` is the output filename stem (e.g. "core" -> "core.adoc"); it's used
-    to qualify xref attribute values so cross-file references resolve correctly.
+    `section` is the output filename stem (e.g. "core" -> "core.adoc") and
+    provides a fallback when a member's declaring contract has no documented page.
+    `contract_sections` maps documented contracts to the page containing their
+    detail blocks so inherited members can link to their owning page.
     """
     text = template_path.read_text()
 
@@ -588,11 +593,31 @@ def render_template(
                 if sid in seen:
                     continue
                 seen.add(sid)
-                xrefs.append(f":xref-{sid}: xref:{section}.adoc#{sid}")
+                owner_section = contract_sections.get(m.declared_in, section)
+                xrefs.append(f":xref-{sid}: xref:{owner_section}.adoc#{sid}")
     header = ':github-icon: pass:[<svg class="icon"><use href="#github-icon"/></svg>]'
     if xrefs:
         return header + "\n" + "\n".join(xrefs) + "\n" + body
     return header + "\n" + body
+
+
+def build_contract_sections(
+    templates: list[tuple[Path, str]],
+) -> dict[str, str]:
+    """Map each documented contract to the page that owns its detail block."""
+    sections: dict[str, str] = {}
+    for template_path, section in templates:
+        if not template_path.exists():
+            continue
+        for name in re.findall(r"\{\{(\w+)\}\}", template_path.read_text()):
+            existing = sections.get(name)
+            if existing is not None and existing != section:
+                raise ValueError(
+                    f"Contract {name} is documented in both {existing}.adoc "
+                    f"and {section}.adoc"
+                )
+            sections[name] = section
+    return sections
 
 
 # ---------------------------------------------------------------------------
@@ -628,6 +653,7 @@ def main() -> int:
     sys.stderr.write("Loading artifacts...\n")
     contracts = load_all_contracts()
     sys.stderr.write(f"  {len(contracts)} contracts loaded\n")
+    contract_sections = build_contract_sections(TEMPLATES)
 
     DOCS_PAGES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -636,7 +662,7 @@ def main() -> int:
             sys.stderr.write(f"  skipping missing template {tmpl}\n")
             continue
         sys.stderr.write(f"  rendering {section}.adoc from {tmpl.name}...\n")
-        rendered = render_template(tmpl, contracts, section)
+        rendered = render_template(tmpl, contracts, section, contract_sections)
         target = DOCS_PAGES_DIR / f"{section}.adoc"
         target.write_text(rendered)
 
