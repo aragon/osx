@@ -1,3 +1,0 @@
-.API
-* xref:core.adoc[Core]
-* xref:framework.adoc[Framework]

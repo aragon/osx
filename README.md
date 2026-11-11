@@ -15,13 +15,7 @@
 The Aragon OSx protocol is the foundation layer of the new Aragon stack. It allows users to create, manage, and customize DAOs in a way that is lean, adaptable, and secure.
 
 - [Contracts](https://github.com/aragon/osx/tree/main/src): the protocol source code (solidity).
-- [Artifacts](https://github.com/aragon/osx/tree/main/npm-artifacts): the ABI and the contract addresses (per network)
-
-NPM packages:
-
-- `@aragon/osx-artifacts`: The deployed addresses, contract ABI's and bytecode
-
-For more information on the individual packages, please read the respective `README.md`.
+- [Artifacts Hub](https://github.com/aragon/artifacts-hub): the ABI and the contract addresses (per network)
 
 ## Audits
 
@@ -65,11 +59,7 @@ OSx smart contracts undergo regular audits.
 
 ## ABI and artifacts
 
-Check out the [artifacts folder](./npm-artifacts/README.md) to get the deployed addresses and the contract ABIs.
-
-## Releases
-
-The artifacts package is released by merging a PR that bumps `npm-artifacts/package.json#version`. CI tags and publishes automatically on merge — see [npm-artifacts/README.md](./npm-artifacts/README.md#releasing).
+The deployed addresses and the contract ABIs live in [aragon/artifacts-hub](https://github.com/aragon/artifacts-hub).
 
 ## Contributing
 
@@ -197,3 +187,7 @@ The split:
 - **Component-level deploys and upgrades** (e.g., `MemberRegistry`; future modernized registrars) live in this repo as `scripts/Deploy<Component>.s.sol` / `scripts/Upgrade<Component>.s.sol`. They run under `just deploy-<component>` / `just predeploy-<component>` (the `predeploy-` recipe dry-runs the same script without broadcasting), broadcast + verify via just-foundry, and print encoded governance actions for the Management DAO multisig.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for the component-deploy checklist (pre/post steps, ceremony coordination).
+
+## Deprecated networks
+
+Addresses on networks that are no longer supported remain available in [`npm-artifacts/src/addresses.json` at `2c60f125`](https://github.com/aragon/osx/blob/2c60f1252558d75fe99c414ccd2b1aedbde88f12/npm-artifacts/src/addresses.json).
